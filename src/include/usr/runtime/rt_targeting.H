@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,10 +67,12 @@ namespace RT_TARG
      * into new LID Structure data
      * @param[in] Pointer to current Reserved Memory targeting binary data
      * @param[in/out] Pointer to new LID Structure targeting binary data
+     * @param[out] Error log userdata2 value associated with non-zero rtn code
      * @return 0 on success, else return code
      */
     int saveRestoreAttrs(void *i_rsvdMemPtr,
-                         void *io_lidStructPtr);
+                         void *io_lidStructPtr,
+                         uint64_t& o_userdata2);
 
     /**
      * @brief Validate LID Structure against Reserved Memory.  Check that the
@@ -79,10 +81,12 @@ namespace RT_TARG
      * match.
      * @param[in] Pointer to new LID Structure targeting binary data
      * @param[in] Pointer to current Reserved Memory targeting binary data
+     * @param[out] Error log userdata2 value associated with non-zero rtn code
      * @return 0 on success, else return code
      */
     int validateData(void *i_lidStructPtr,
-                     void *i_rsvdMemPtr);
+                     void *i_rsvdMemPtr,
+                     uint64_t& o_userdata2);
 
     /**
      * @brief Apply ATTR_TMP overrides to be available for run time

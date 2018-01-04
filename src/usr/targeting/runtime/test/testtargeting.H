@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,10 @@
 #include <targeting/common/trace.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/attrPlatOverride.H>
+#include <util/runtime/util_rt.H>
+
+#define MEMCMPPTR(addr, offset) \
+        reinterpret_cast<void*>(reinterpret_cast<uint64_t>(addr) + offset)
 
 class TargetingTestSuite : public CxxTest::TestSuite
 {
@@ -279,6 +283,382 @@ class TargetingTestSuite : public CxxTest::TestSuite
             l_pTarget->setAttr<
               TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(
                 allow_attr_overrides);
+        }
+
+        // Test the two internal functions used during HBRT concurrent update.
+        // The first function validates the LID Structure against the Reserved
+        // Memory data.  The second function saves and restores attribute
+        // values from current Reserved Memory data into new LID Structure
+        // data.  This testcase uses Reserved Memory data to make its LID
+        // Structure, so it tests basic logic in the functions, but does not
+        // test more complex handling of special data conditions.
+        void testSaveRestoreAttrs()
+        {
+            using namespace TARGETING;
+            TRACFCOMP(g_trac_targeting,ENTER_MRK"testSaveRestoreAttrs");
+
+            int rc = 0;
+            uint64_t l_userdata2 = 0;
+            void *l_lidStruct = nullptr;
+
+            do
+            {
+                uint64_t l_attr_size = 0;
+                uint64_t l_rsvdMem =
+                    hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
+                                       0,
+                                       l_attr_size);
+                void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
+
+                // Allocate memory for new LID structure
+                l_lidStruct = malloc(l_attr_size);
+
+                // Make LID structure from current Reserved Memory data
+                memcpy(l_lidStruct,
+                       l_rsvdMemPtr,
+                       l_attr_size);
+
+                // Validate LID Structure against Reserved Memory
+                /* Check that the TargetingHeader eyecatchers are valid, that
+                   number of sections match, and that the types of each
+                   TargetingSection match. */
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != 0)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, received 0x%.16llx",
+                            l_userdata2);
+                    break;
+                }
+
+                // Save/Restore attribute values
+                /* Copy attribute values from current Reserved Memory data
+                   into new LID Structure data.  Leave attribute values in new
+                   LID Structure data as is, if there is no value from current
+                   Reserved Memory data. */
+                rc = RT_TARG::saveRestoreAttrs(l_rsvdMemPtr,
+                                               l_lidStruct,
+                                               l_userdata2);
+                if(rc)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "saveRestoreAttrs, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != 0)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "saveRestoreAttrs, received 0x%.8x",
+                            l_userdata2);
+                    break;
+                }
+
+                // Prepare to compare current attributes to new attributes
+                TRACFCOMP(g_trac_targeting,"testSaveRestoreAttrs> comparing "
+                          "data from new LID Structure at %p to current "
+                          "Reserved Memory at %p",
+                          MEMCMPPTR(l_lidStruct, 0),
+                          MEMCMPPTR(l_rsvdMemPtr, 0));
+                uint64_t l_memcmpOffset = 0;
+                uint64_t l_memcmpLimit = 0;
+                uint64_t l_memcmpSize = 8;
+                int l_memcmpRtn = 0;
+                uint32_t l_memcmpCount = 0;
+                uint32_t l_memcmpFailed = 0;
+
+                // Access TargetingHeader in current data
+                TargetingHeader* l_headerRsvd =
+                    reinterpret_cast<TargetingHeader*>(l_rsvdMemPtr);
+
+                // Verify TargetingHeader in current data
+                if (l_headerRsvd->eyeCatcher != PNOR_TARG_EYE_CATCHER)
+                {
+                    TS_FAIL("testSaveRestoreAttrs>  bad eyecatcher 0x%.8x "
+                            "found in Reserved Memory TargetingHeader",
+                            l_headerRsvd->eyeCatcher);
+
+                    break;
+                }
+
+                // First compare header and section data
+                l_memcmpLimit = l_headerRsvd->headerSize; // Total header size
+                for(;
+                    l_memcmpOffset < l_memcmpLimit;
+                    l_memcmpOffset += l_memcmpSize)
+                {
+                    // Increment compare count
+                    l_memcmpCount += 1;
+
+                    // Compare new LID Structure and current Reserved Memory
+                    l_memcmpRtn =
+                        memcmp(MEMCMPPTR(l_lidStruct, l_memcmpOffset),
+                               MEMCMPPTR(l_rsvdMemPtr, l_memcmpOffset),
+                               (l_memcmpOffset + l_memcmpSize <= l_memcmpLimit)
+                                   ? l_memcmpSize
+                                   : (l_memcmpLimit - l_memcmpOffset));
+                    if(0 != l_memcmpRtn)
+                    {
+                        TRACFCOMP(g_trac_targeting,"miscompare offset 0x%.8x "
+                                  "in header and section data, "
+                                  "LID 0x%0.16llx, Rsvd 0x%0.16llx, "
+                                  "memcmp return 0x%llx ",
+                                  l_memcmpOffset,
+                                  *static_cast<uint64_t *>(
+                                      MEMCMPPTR(l_lidStruct, l_memcmpOffset)),
+                                  *static_cast<uint64_t *>(
+                                      MEMCMPPTR(l_rsvdMemPtr, l_memcmpOffset)),
+                                  l_memcmpRtn);
+
+                        l_memcmpFailed += 1;
+                    }
+                }
+
+                // Count of attribute sections
+                size_t l_sectionCount = l_headerRsvd->numSections;
+
+                // Find start to the first section in current data:
+                //      (header address + size of header + offset in header)
+                TargetingSection* l_sectionRsvd =
+                    reinterpret_cast<TargetingSection*>(
+                        reinterpret_cast<uint64_t>(l_headerRsvd) +
+                        sizeof(TargetingHeader) +
+                        l_headerRsvd->offsetToSections);
+
+                // Then compare each section
+                for(size_t i = 0;
+                    i < l_sectionCount;
+                    ++i)
+                {
+                    // Compare a section
+                    TRACFCOMP(g_trac_targeting,"testSaveRestoreAttrs> "
+                          "comparing section type %d data from new LID "
+                          "Structure at %p to current Reserved Memory at %p",
+                          l_sectionRsvd[i].sectionType,
+                          MEMCMPPTR(l_lidStruct, l_memcmpOffset),
+                          MEMCMPPTR(l_rsvdMemPtr, l_memcmpOffset));
+                    l_memcmpLimit =
+                        std::min(l_memcmpOffset + l_sectionRsvd[i].sectionSize,
+                                 l_attr_size);
+                    for(;
+                        l_memcmpOffset < l_memcmpLimit;
+                        l_memcmpOffset += l_memcmpSize)
+                    {
+                        // Increment compare count
+                        l_memcmpCount += 1;
+
+                        // Compare new LID Structure and current Reserved Memory
+                        l_memcmpRtn =
+                            memcmp(MEMCMPPTR(l_lidStruct, l_memcmpOffset),
+                                   MEMCMPPTR(l_rsvdMemPtr, l_memcmpOffset),
+                                   (l_memcmpOffset + l_memcmpSize
+                                    <= l_memcmpLimit)
+                                       ? l_memcmpSize
+                                       : (l_memcmpLimit - l_memcmpOffset));
+                        if(0 != l_memcmpRtn)
+                        {
+                            TRACFCOMP(g_trac_targeting,"miscompare offset "
+                                      "0x%.8x in %d type section, "
+                                      "LID 0x%0.16llx, Rsvd 0x%0.16llx, "
+                                      "memcmp return 0x%llx ",
+                                      l_memcmpOffset,
+                                      l_sectionRsvd[i].sectionType,
+                                      *static_cast<uint64_t *>(
+                                          MEMCMPPTR(l_lidStruct,
+                                                    l_memcmpOffset)),
+                                      *static_cast<uint64_t *>(
+                                          MEMCMPPTR(l_rsvdMemPtr,
+                                                    l_memcmpOffset)),
+                                      l_memcmpRtn);
+
+                            l_memcmpFailed += 1;
+                        }
+                    }
+                }
+
+                TRACFCOMP(g_trac_targeting,"testSaveRestoreAttrs> Pointers "
+                          "after compare, new LID Structure %p, current "
+                          "Reserved Memory %p",
+                          MEMCMPPTR(l_lidStruct, l_memcmpOffset),
+                          MEMCMPPTR(l_rsvdMemPtr, l_memcmpOffset));
+
+                if(l_memcmpFailed != 0)
+                {
+                    TS_FAIL("testSaveRestoreAttrs FAILED memcmp %d "
+                              ERR_MRK"testSaveRestoreAttrs FAILED memcmp %d "
+                              "(0x%.8x) times out of %d (0x%.8x)",
+                              l_memcmpFailed,
+                              l_memcmpFailed,
+                              l_memcmpCount,
+                              l_memcmpCount);
+                    break;
+                }
+
+                // Detect invalid LID Structure TargetingHeader eyecatcher
+                TargetingHeader* l_headerLid =
+                    reinterpret_cast<TargetingHeader*>(l_lidStruct);
+                uint32_t *l_pEyeCatcher =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerLid->eyeCatcher));
+                *l_pEyeCatcher += 0x20202020;
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc != 0x11)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, expected 0x11, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != l_headerLid->eyeCatcher)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_headerLid->eyeCatcher,
+                            l_userdata2);
+                    break;
+                }
+                else
+                {
+                    *l_pEyeCatcher -= 0x20202020;
+                    l_userdata2 = 0;
+                }
+
+                // Detect invalid Reserved Memory TargetingHeader eyecatcher
+                l_pEyeCatcher =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerRsvd->eyeCatcher));
+                *l_pEyeCatcher += 0x00202020;
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc != 0x12)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, expected 0x12, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != l_headerRsvd->eyeCatcher)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_headerRsvd->eyeCatcher,
+                            l_userdata2);
+                    break;
+                }
+                else
+                {
+                    *l_pEyeCatcher -= 0x00202020;
+                    l_userdata2 = 0;
+                }
+
+                // Detect TargetingHeader number of sections mismatch
+                uint32_t *l_pNumSections =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerRsvd->numSections));
+                *l_pNumSections += 2;
+                uint64_t l_expected =
+                    TWO_UINT32_TO_UINT64(l_headerLid->numSections,
+                                         l_headerRsvd->numSections);
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc != 0x13)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, expected 0x13, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != l_expected)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_expected,
+                            l_userdata2);
+                    break;
+                }
+                else
+                {
+                    *l_pNumSections -= 2;
+                    l_userdata2 = 0;
+                }
+
+                // Detect TargetingSection type mismatch
+                TargetingSection* l_sectionLid =
+                    reinterpret_cast<TargetingSection*>(
+                        reinterpret_cast<uint64_t>(l_headerLid) +
+                        sizeof(TargetingHeader) +
+                        l_headerLid->offsetToSections);
+                uint8_t l_sectionType = l_sectionLid[0].sectionType;
+                uint8_t *l_pSectionType =
+                    reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(
+                        &l_sectionLid[0])); // sectionType is first field
+                *l_pSectionType = l_sectionType + 0xF0;
+                l_expected =
+                    TWO_UINT32_TO_UINT64(l_sectionLid[0].sectionType,
+                                         l_sectionRsvd[0].sectionType);
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc != 0x14)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, expected 0x14, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != l_expected)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_expected,
+                            l_userdata2);
+                    break;
+                }
+                else
+                {
+                    *l_pSectionType = l_sectionType;
+                    l_userdata2 = 0;
+                }
+
+                // Validate LID Structure against Reserved Memory
+                rc = RT_TARG::validateData(l_lidStruct,
+                                           l_rsvdMemPtr,
+                                           l_userdata2);
+                if(rc)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
+                            "validateData, received 0x%.2x",
+                            rc);
+                    break;
+                }
+                else if(l_userdata2 != 0)
+                {
+                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
+                            "validateData, received 0x%.16llx",
+                            l_userdata2);
+                    break;
+                }
+
+                TRACFCOMP(g_trac_targeting,"testSaveRestoreAttrs SUCCESS");
+            } while(false);
+
+            free(l_lidStruct);
+            l_lidStruct = nullptr;
+
+            TRACFCOMP(g_trac_targeting,EXIT_MRK"testSaveRestoreAttrs");
         }
 
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -954,6 +954,41 @@ void cmd_readHBRTversion( char*& o_output )
 
 
 /**
+ * @brief Execute function to prepare targeting data for an HBRT update
+ * @param[out] o_output  Output display buffer, memory allocated here
+ */
+void cmd_hbrt_update(char*& o_output)
+{
+    UTIL_FT( "cmd_hbrt_update>");
+    o_output = new char[100];
+
+    int rc = 0;
+
+    do
+    {
+        // Get the runtime interface object
+        runtimeInterfaces_t *l_rt_intf = getRuntimeInterfaces();
+        if(nullptr == l_rt_intf)
+        {
+            rc = -2;
+            sprintf( o_output, "Not able to get run time interface object");
+            return;
+        }
+
+        rc = l_rt_intf->prepare_hbrt_update();
+        if(0 != rc)
+        {
+            sprintf( o_output, "Unexpected return from RT prepare HBRT update. "
+                     "Return code: 0x%.8X", rc);
+            return;
+        }
+    }while (0);
+
+    sprintf( o_output, "Prepare HBRT update command returned rc 0x%.8X", rc );
+}
+
+
+/**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
  * @param[in]   Number of arguments (standard C args)
  * @param[in]   Array of argument values (standard C args)
@@ -1185,6 +1220,20 @@ int hbrtCommand( int argc,
                      "ERROR: readHBRTversion\n" );
         }
     }
+    else if( !strcmp( argv[0], "hbrt_update" ) )
+    {
+        // hbrt_update
+        if( argc == 1 )
+        {
+            cmd_hbrt_update( *l_output );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output,
+                     "ERROR: hbrt_update\n" );
+        }
+    }
     else
     {
         *l_output = new char[50+100*10];
@@ -1212,6 +1261,8 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "readHBRTversion\n");
         strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "hbrt_update\n");
+        strcat( *l_output, l_tmpstr );
     }
 
     if( l_traceOut && (*l_output != NULL) )
@@ -1234,5 +1285,6 @@ struct registerCmds
 };
 
 registerCmds g_registerCmds;
+
 
 
