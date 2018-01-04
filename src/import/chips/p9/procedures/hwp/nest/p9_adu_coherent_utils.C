@@ -398,8 +398,8 @@ extern "C"
                 {
                     var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_DMA_PR_WR;
 
-                    //Set scope to group scope
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_GROUP);
+                    //Set scope to system scope
+                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_SYSTEM);
 
                     // Set TSIZE
                     if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
