@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -353,7 +353,8 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 
     l_addr.set_dimm(l_dimm_idx).set_master_rank(l_rank_idx);
 
-    FAPI_DBG("Setting firmware symbol mark on rank:%d dq:%d galois:0x%02x", i_rank, i_dq, l_galois);
+    FAPI_INF("%s Setting firmware symbol mark on rank:%d dq:%d galois:0x%02x",
+             mss::c_str(i_target), i_rank, i_dq, l_galois);
     FAPI_TRY( mss::ecc::set_fwms(l_mca, i_rank, l_galois, mss::ecc::fwms::mark_type::SYMBOL,
                                  mss::ecc::fwms::mark_region::MRANK, l_addr) );
 
@@ -386,7 +387,7 @@ fapi2::ReturnCode place_chip_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     l_symbol = (l_symbol / BITS_PER_NIBBLE) * BITS_PER_NIBBLE;
     FAPI_TRY( mss::ecc::symbol_to_galois(l_symbol, l_galois) );
 
-    FAPI_DBG("Setting hardware (chip) mark on rank:%d galois:0x%02x", i_rank, l_galois);
+    FAPI_INF("%s Setting hardware (chip) mark on rank:%d galois:0x%02x", mss::c_str(i_target), i_rank, l_galois);
     FAPI_TRY( mss::ecc::set_hwms(l_mca, i_rank, l_galois) );
 
 fapi_try_exit:
@@ -410,7 +411,7 @@ fapi2::ReturnCode restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_D
     fapi2::buffer<uint8_t>& o_repairs_applied,
     fapi2::buffer<uint8_t>& o_repairs_exceeded)
 {
-    FAPI_INF("Restore repair marks from bad DQ data");
+    FAPI_INF("%s Restore repair marks from bad DQ data", mss::c_str(i_target));
 
     std::vector<uint64_t> l_ranks;
     const auto l_dimm_idx = mss::index(i_target);
@@ -430,8 +431,8 @@ fapi2::ReturnCode restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_D
             for (size_t l_nibble = 0; l_nibble < NIBBLES_PER_BYTE; ++l_nibble)
             {
                 const auto l_bad_dq_vector = bad_bit_helper(i_bad_bits[l_rank_idx][l_byte], l_nibble);
-                FAPI_DBG("Total bad bits on DIMM:%d rank:%d nibble%d: %d", l_dimm_idx, l_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble,
-                         l_bad_dq_vector.size());
+                FAPI_DBG("Total bad bits on DIMM:%d rank:%d nibble%d: %d",
+                         l_dimm_idx, l_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble, l_bad_dq_vector.size());
 
                 // apply repairs and update repair machine state
                 // if there are no bad bits (l_bad_dq_vector.size() == 0) no action is necessary
@@ -644,6 +645,8 @@ fapi2::ReturnCode symbol_mark_plus_unrepaired_dq<fapi2::TARGET_TYPE_DIMM>::one_b
     fapi2::buffer<uint8_t>& io_repairs_exceeded)
 {
     // repairs exceeded
+    FAPI_INF("%s Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad DQ) on rank:%d DQ:%d",
+             mss::c_str(i_target), i_rank, i_dq);
     io_repairs_exceeded.setBit(mss::index(i_target));
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -672,6 +675,8 @@ fapi2::ReturnCode symbol_mark_plus_unrepaired_dq<fapi2::TARGET_TYPE_DIMM>::multi
     FAPI_TRY( place_chip_mark(i_target, i_rank, i_dq) );
     io_repairs_applied.setBit(i_rank);
     io_repairs_exceeded.setBit(mss::index(i_target));
+    FAPI_INF("%s Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad nibble) on rank:%d DQ:%d",
+             mss::c_str(i_target), i_rank, i_dq);
     {
         const auto new_state = std::make_shared<chip_and_symbol_mark<fapi2::TARGET_TYPE_DIMM>>();
         set_state(io_machine, new_state);
@@ -734,6 +739,8 @@ fapi2::ReturnCode chip_mark_only<fapi2::TARGET_TYPE_DIMM>::multiple_bad_dq(
 {
     // repairs exceeded
     io_repairs_exceeded.setBit(mss::index(i_target));
+    FAPI_INF("%s Repairs exceeded (chip mark exists, plus bad nibble) on rank:%d DQ:%d",
+             mss::c_str(i_target), i_rank, i_dq);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
@@ -759,6 +766,8 @@ fapi2::ReturnCode chip_and_symbol_mark<fapi2::TARGET_TYPE_DIMM>::one_bad_dq(
 {
     // repairs exceeded
     io_repairs_exceeded.setBit(mss::index(i_target));
+    FAPI_INF("%s Repairs exceeded (chip mark and symbol mark exist, plus one bad DQ) on rank:%d DQ:%d",
+             mss::c_str(i_target), i_rank, i_dq);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
@@ -784,6 +793,8 @@ fapi2::ReturnCode chip_and_symbol_mark<fapi2::TARGET_TYPE_DIMM>::multiple_bad_dq
 {
     // repairs exceeded
     io_repairs_exceeded.setBit(mss::index(i_target));
+    FAPI_INF("%s Repairs exceeded (chip mark and symbol mark exist, plus one bad nibble) on rank:%d DQ:%d",
+             mss::c_str(i_target), i_rank, i_dq);
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
