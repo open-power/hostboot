@@ -68,6 +68,8 @@ enum MESSAGE_ID_IPI2HI
 // to using the new VFRT.  The original VFRT is still being used.
 #define PGPE_WOF_RC_VFRT_QUAD_MISMATCH  0x20
 #define PGPE_RC_REQ_WHILE_PENDING_ACK   0x21
+#define PGPE_RC_NULL_VFRT_POINTER       0x22
+#define PGPE_RC_INVALID_PMCR_OWNER         0x23
 
 //
 // PMCR Owner

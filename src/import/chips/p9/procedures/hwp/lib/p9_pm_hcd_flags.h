@@ -57,8 +57,8 @@ enum PM_GPE_OCCFLG_DEFS
     SGPE_IGNORE_STOP_ACTION                 = 10,
     SGPE_IGNORE_STOP_EXITS                  = 11,
     SGPE_IGNORE_STOP_ENTRIES                = 12,
-    SGPE_24_7_ACTIVATE                      = 14,
-    SGPE_24_7_ACTIVE                        = 15,
+    AUX_THREAD_ACTIVATE                     = 14,
+    AUX_THREAD_ACTIVE                       = 15,
     PIB_I2C_MASTER_ENGINE_1_LOCK_BIT0       = 16, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_1_LOCK_BIT1       = 17, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_2_LOCK_BIT0       = 18, //BIT0 ored BIT1 gives the field
@@ -75,8 +75,13 @@ enum PM_GPE_OCCFLG_DEFS
 //Enum form of OCC FLAG2.
 enum PM_GPE_OCCFLG2_DEFS
 {
+    OCCFLG2_DEAD_CORES_START                = 0,
+    OCCFLG2_DEAD_CORES_LENGTH               = 24,
+    OCCFLG2_PGPE_HCODE_FIT_ERR_INJ          = 27,
     PM_CALLOUT_ACTIVE                       = 28,
-    STOP_RECOVERY_TRIGGER_ENABLE            = 29
+    STOP_RECOVERY_TRIGGER_ENABLE            = 29,
+    OCCFLG2_SGPE_HCODE_STOP_REQ_ERR_INJ     = 30,
+    OCCFLG2_PGPE_HCODE_PSTATE_REQ_ERR_INJ   = 31
 };
 
 //
@@ -92,11 +97,12 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     CME_DEBUG_TRAP_ENABLE                   = 9,
     PGPE_DEBUG_TRAP_ENABLE                  = 10,
     L3_CONTAINED_MODE                       = 11,
-    PGPE_SAFE_MODE_ERROR                    = 12,
+    PGPE_SAFE_MODE_ERROR                    = 14,
     PM_DEBUG_HALT_ENABLE                    = 15,
     CORE_THROTTLE_CONTINUOUS_CHANGE_ENABLE  = 16,
     PGPE_OP_TRACE_DISABLE                   = 24,
     PGPE_OP_TRACE_MEM_MODE                  = 25
+
 };
 
 //
@@ -104,31 +110,32 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
 //
 enum PM_CME_FLAGS_DEFS
 {
-    CME_FLAGS_STOP_READY                    = 0,
-    CME_FLAGS_PMCR_READY                    = 1,
-    CME_FLAGS_QMGR_READY                    = 2,
-    CME_FLAGS_QMGR_MASTER                   = 3,
-    CME_FLAGS_RCLK_OPERABLE                 = 4,
-    CME_FLAGS_IVRM_OPERABLE                 = 5,
-    CME_FLAGS_VDM_OPERABLE                  = 6,
-    CME_FLAGS_OCC_HB_SAFE_MODE              = 7,
-    CME_FLAGS_STOP_BLOCK_EXIT_C0            = 8,
-    CME_FLAGS_STOP_BLOCK_EXIT_C1            = 9,
-    CME_FLAGS_STOP_BLOCK_ENTRY_C0           = 10,
-    CME_FLAGS_STOP_BLOCK_ENTRY_C1           = 11,
-    CME_FLAGS_CORE_QUIESCE_ACTIVE           = 12,
-    CME_FLAGS_PM_DEBUG_HALT_ENABLE          = 13,
-    CME_FLAGS_WAIT_ON_PSTATE_START          = 14,
-    CME_FLAGS_SPWU_CHECK_ENABLE             = 22,
-    CME_FLAGS_BLOCK_ENTRY_STOP11            = 23,
-    CME_FLAGS_PSTATES_ENABLED               = 24,
-    CME_FLAGS_FREQ_UPDT_DISABLE             = 25,
-    CME_FLAGS_EX_ID                         = 26,
-    CME_FLAGS_SIBLING_FUNCTIONAL            = 27,
-    CME_FLAGS_STOP_ENTRY_FIRST_C0           = 28,
-    CME_FLAGS_STOP_ENTRY_FIRST_C1           = 29,
-    CME_FLAGS_CORE0_GOOD                    = 30,
-    CME_FLAGS_CORE1_GOOD                    = 31
+    CME_FLAGS_STOP_READY                                = 0,
+    CME_FLAGS_PMCR_READY                                = 1,
+    CME_FLAGS_QMGR_READY                                = 2,
+    CME_FLAGS_QMGR_MASTER                               = 3,
+    CME_FLAGS_RCLK_OPERABLE                             = 4,
+    CME_FLAGS_IVRM_OPERABLE                             = 5,
+    CME_FLAGS_VDM_OPERABLE                              = 6,
+    CME_FLAGS_PGPE_HB_LOSS_SAFE_MODE                    = 7,
+    CME_FLAGS_STOP_BLOCK_EXIT_C0                        = 8,
+    CME_FLAGS_STOP_BLOCK_EXIT_C1                        = 9,
+    CME_FLAGS_STOP_BLOCK_ENTRY_C0                       = 10,
+    CME_FLAGS_STOP_BLOCK_ENTRY_C1                       = 11,
+    CME_FLAGS_CORE_QUIESCE_ACTIVE                       = 12,
+    CME_FLAGS_PM_DEBUG_HALT_ENABLE                      = 13,
+    CME_FLAGS_SAFE_MODE                                 = 16,
+    CME_FLAGS_PSTATES_SUSPENDED                         = 17,
+    CME_FLAGS_SPWU_CHECK_ENABLE                         = 22,
+    CME_FLAGS_BLOCK_ENTRY_STOP11                        = 23,
+    CME_FLAGS_PSTATES_ENABLED                           = 24,
+    CME_FLAGS_FREQ_UPDT_DISABLE                         = 25,
+    CME_FLAGS_EX_ID                                     = 26,
+    CME_FLAGS_SIBLING_FUNCTIONAL                        = 27,
+    CME_FLAGS_STOP_ENTRY_FIRST_C0                       = 28,
+    CME_FLAGS_STOP_ENTRY_FIRST_C1                       = 29,
+    CME_FLAGS_CORE0_GOOD                                = 30,
+    CME_FLAGS_CORE1_GOOD                                = 31
 };
 
 //
@@ -147,6 +154,8 @@ enum PM_CME_SCRATCH_DEFS
 //
 enum PM_CPPM_CSAR_DEFS
 {
+    CPPM_CSAR_FIT_HCODE_ERROR_INJECT                = 27,
+    CPPM_CSAR_ENABLE_PSTATE_REGISTRATION_INTERLOCK  = 28,
     CPPM_CSAR_DISABLE_CME_NACK_ON_PROLONGED_DROOP   = 29,
     CPPM_CSAR_PSTATE_HCODE_ERROR_INJECT             = 30,
     CPPM_CSAR_STOP_HCODE_ERROR_INJECT               = 31
