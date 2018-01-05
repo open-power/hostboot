@@ -285,10 +285,10 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
 int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                       RingId_t        i_ringId,          // Ring ID
                       uint8_t         i_ddLevel,         // DD level
-                      PpeType_t       i_ppeType,         // SBE, CME, SGPE
+                      PpeType_t       i_ppeType,         // SBE,CME,SGPE
                       RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
                       uint8_t&        io_instanceId,     // Instance ID
-                      RingBlockType_t i_ringBlockType,   // Single ring, Block
+                      RingBlockType_t i_ringBlockType,   // GET_SINGLE_RING,GET_PPE_LEVEL_RINGS,etc
                       void**          io_ringBlockPtr,   // Ring data buffer
                       uint32_t&       io_ringBlockSize,  // Size of ring data
                       char*           o_ringName,        // Ring name
@@ -315,6 +315,69 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
     torHeader = (TorHeader_t*)i_ringSection;
     torMagic = be32toh(torHeader->magic);
+
+    if (i_dbgl > 0)
+    {
+        MY_DBG("TOR header fields\n"
+               "  magic:         0x%08x\n"
+               "  version:       %d\n"
+               "  chipType:      %d\n"
+               "  ddLevel:       0x%x\n"
+#ifdef TORV3_SUPPORT
+               "  numDdLevels:   %d\n"
+#endif
+               "  size:          %d\n"
+               "API parms\n"
+               "  i_ddLevel:     0x%x\n"
+               "  i_ppeType:     %d\n"
+               "  i_ringVariant: %d\n",
+               torMagic, torHeader->version, torHeader->chipType,
+               torHeader->ddLevel,
+#ifdef TORV3_SUPPORT
+               torHeader->numDdLevels,
+#endif
+               be32toh(torHeader->size),
+               i_ddLevel, i_ppeType, i_ringVariant);
+
+        MY_DBG("Dump of first 12 quad-word lines in ring section\n");
+
+        for (uint8_t iLine = 0; iLine < 12; iLine++)
+        {
+            MY_DBG("%04x: %04x %04x %04x %04x %04x %04x %04x %04x\n",
+                   iLine * 16,
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 0)) >> 48),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 0)) >> 32),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 0)) >> 16),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 0)) >>  0),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 1)) >> 48),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 1)) >> 32),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 1)) >> 16),
+                   (uint16_t)( be64toh(*((uint64_t*)i_ringSection + 2 * iLine + 1)) >>  0));
+        }
+    }
+
+    if ( torMagic >> 8 != TOR_MAGIC ||
+         torHeader->version == 0 ||
+         torHeader->version > TOR_VERSION ||
+         torHeader->chipType >= NUM_CHIP_TYPES )
+    {
+        MY_ERR("Invalid TOR header:\n"
+               "  magic:       0x%08x\n"
+               "  version:     %d\n"
+               "  chipType:    %d\n"
+               "  ddLevel:     0x%x  (requested ddLevel=0x%x)\n"
+#ifdef TORV3_SUPPORT
+               "  numDdLevels: %d\n"
+#endif
+               "  size:        %d\n",
+               torMagic, torHeader->version, torHeader->chipType,
+               torHeader->ddLevel, i_ddLevel,
+#ifdef TORV3_SUPPORT
+               torHeader->numDdLevels,
+#endif
+               be32toh(torHeader->size));
+        return TOR_INVALID_MAGIC_NUMBER;
+    }
 
 #ifdef TORV3_SUPPORT
 
@@ -393,7 +456,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
 #endif
 
-    if ( ( i_ringBlockType == GET_SINGLE_RING ) ||   // All Magics supported for GET
+    if ( i_ringBlockType == GET_SINGLE_RING ||       // All Magics support GET
          ( i_ringBlockType == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
            ( torMagic == TOR_MAGIC_SBE ||
              torMagic == TOR_MAGIC_CME ||
