@@ -27,16 +27,6 @@
 
 #include <common_ringId.H>
 
-// Different options to extract data using tor_access_ring API
-typedef enum RingBlockType
-{
-    GET_SINGLE_RING     = 0x00,
-#ifdef TORV3_SUPPORT
-    GET_DD_LEVEL_RINGS  = 0x01,
-#endif
-    GET_PPE_LEVEL_RINGS = 0x02,
-    PUT_SINGLE_RING     = 0x03
-} RingBlockType_t;
 
 ///
 /// ****************************************************************************
@@ -120,14 +110,14 @@ typedef enum RingBlockType
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_access_ring( void*           i_ringSection,    // Ring section ptr
-                     RingId_t        i_ringId,         // Unique ring ID
+                     RingId_t        i_ringId,         // Ring ID
                      uint8_t         i_ddLevel,        // DD level info
-                     PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
-                     RingVariant_t   i_RingVariant,    // Base, Cache etc
-                     uint8_t&        io_instanceId,    // chiplet instance ID
-                     RingBlockType_t i_RingBlockType,  // 0: single ring,  1: ring block
+                     PpeType_t       i_PpeType,        // SBE,CME,SGPE
+                     RingVariant_t   i_RingVariant,    // BASE,CC,RL
+                     uint8_t&        io_instanceId,    // Chiplet instance ID
+                     RingBlockType_t i_RingBlockType,  // GET_SINGLE_RING,GET_PPE_LEVEL_RINGS,etc
                      void**          io_ringBlockPtr,  // Addr of ring buffer
-                     uint32_t&       io_ringBlockSize, // size of ring data
+                     uint32_t&       io_ringBlockSize, // Size of ring data
                      char*           o_ringName,       // Ring name
                      uint32_t        i_dbgl = 0 );     // Debug option
 
