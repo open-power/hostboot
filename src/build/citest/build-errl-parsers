@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -37,23 +37,29 @@ then
     exit -1
 fi
 
+# If return code is not 0 (indicating failure),
+# then perpetuate the return code up the call chain.
+# For sh/bash, should use 0 for success and 1 to 255 for failures, don't use
+# negative numbers (-1).  A negative number will be interpreted as a
+# positive number (-1 will become 255.)
+
 echo "----Creating directories"
-mkdir -p ${SANDBOXBASE}/src/srci || exit -1
-mkdir -p ${SANDBOXBASE}/src/errl || exit -1
+mkdir -p ${SANDBOXBASE}/src/srci || exit $?
+mkdir -p ${SANDBOXBASE}/src/errl || exit $?
 
 echo "----Building hbfw"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp"
-if [ $? -ne 0 ]; then exit -1; fi
+execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp" \
+        || exit $?
 
 echo "----Building srci"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp"
-if [ $? -ne 0 ]; then exit -1; fi
+execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp" \
+        || exit $?
 
 echo "----Building errl"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp"
-if [ $? -ne 0 ]; then exit -1; fi
+execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp" \
+        || exit $?
 
 echo "----Extracting errl tool"
-mkdir -p ${SANDBOXBASE}/simics || exit -1
+mkdir -p ${SANDBOXBASE}/simics || exit $?
 tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
-         -C ${SANDBOXBASE}/simics errl  || exit -1
+         -C ${SANDBOXBASE}/simics errl  || exit $?
