@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -71,12 +71,23 @@ execute_in_sandbox()
 
     ${WORKON_CMD} -c ./sandbox_execute_cmd
 
-    if [ $? -ne 0 ]; then
+    # capture the return code from previous command
+    rc=$?
+
+    # If return code is not 0 (indicating failure), do some
+    # cleanup and perpetuate the return code up the call chain.
+    # For sh/bash, should use 0 for success and 1 to 255 for failures, don't use
+    # negative numbers (-1).  The shell interprets the '-' as an option
+    # for the return command.  If you insist on using negative numbers
+    # do '-- -<n>' to use the negative number, however it will be interpreted
+    # as a positive number (-1 will become 255.)
+    if [ $rc -ne 0 ]; then
         rm ${SANDBOXBASE}/src/sandbox_execute_cmd
-        return -1
+        return $rc
     fi
 
     rm ${SANDBOXBASE}/src/sandbox_execute_cmd
+    return 0;
 }
 export -f execute_in_sandbox
 
