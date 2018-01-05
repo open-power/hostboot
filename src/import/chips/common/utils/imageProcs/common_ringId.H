@@ -49,6 +49,7 @@ typedef uint8_t   PpeType_t;        // Type for PpeType
 typedef uint8_t   ChipType_t;       // Type for ChipType enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
+typedef uint8_t   RingBlockType_t;  // Type for RingBlockType enum, e.g. GET_SINGLE_RING
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
 typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
@@ -57,6 +58,7 @@ typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  INVALID_CHIPLET_TYPE   (ChipletType_t)0xff
 #define  UNDEFINED_PPE_TYPE     (PpeType_t)0xff
 #define  UNDEFINED_CHIP_TYPE    (ChipType_t)0xff
+#define  UNDEFINED_RING_BLOCK_TYPE (RingBlockType_t)0xff;
 #define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
@@ -128,7 +130,8 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //#define TOR_VERSION  1  // Initial version. Large RS4 header.
 //#define TOR_VERSION  2  // Reduced RS4 header.
 //#define TOR_VERSION  3  // Added TOR magic header.
-#define TOR_VERSION  4  // TOR API code restructuring.
+//#define TOR_VERSION  4  // TOR API code restructuring.
+#define   TOR_VERSION  5  // Removed TOR-level DD handling.
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
@@ -240,6 +243,16 @@ enum RingType
     COMMON_RING = 0,
     INSTANCE_RING = 1,
     ALLRING = 2
+};
+
+enum RingBlockType
+{
+    GET_SINGLE_RING     = 0x00,
+#ifdef TORV3_SUPPORT
+    GET_DD_LEVEL_RINGS  = 0x01,
+#endif
+    GET_PPE_LEVEL_RINGS = 0x02,
+    PUT_SINGLE_RING     = 0x03
 };
 
 typedef struct
