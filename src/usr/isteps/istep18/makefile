@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -26,24 +26,35 @@ ROOTPATH = ../../../..
 
 MODULE = istep18
 
-PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/hwp
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${PROCEDURES_PATH}
+EXTRAINCDIR += ${PROCEDURES_PATH}/nest
+EXTRAINCDIR += ${PROCEDURES_PATH}/pm
+EXTRAINCDIR += ${PROCEDURES_PATH}/lib
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
+EXTRAINCDIR += ${ROOTPATH}/src/usr/include/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 
 ## pointer to common HWP files
 
 OBJS += call_tod_init.o
 OBJS += call_tod_setup.o
+OBJS += smp_unfencing_inter_enclosure_abus_links.o
+OBJS += establish_system_smp.o
 
 include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURES_PATH}/p9_tod_init.mk
-include ${PROCEDURES_PATH}/p9_tod_setup.mk
-include ${PROCEDURES_PATH}/p9_tod_save_config.mk
+include ${PROCEDURES_PATH}/nest/p9_tod_init.mk
+include ${PROCEDURES_PATH}/nest/p9_tod_setup.mk
+include ${PROCEDURES_PATH}/nest/p9_tod_save_config.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${PROCEDURES_PATH}
+VPATH += ${PROCEDURES_PATH}/pm/
+VPATH += ${PROCEDURES_PATH}/nest/
+VPATH += ${PROCEDURES_PATH}/lib/
+VPATH += ${ROOTPATH}/src/usr/include/isteps/

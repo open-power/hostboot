@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/initservice/istepdispatcher/makefile $
+# $Source: src/usr/isteps/p9_fab_iovalid/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,30 +22,24 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
 ROOTPATH = ../../../..
-MODULE = istepdisp
+MODULE = p9_fab_iovalid
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
-EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 
-VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 
-OBJS += istepdispatcher.o
-OBJS += initsvcudistep.o
-OBJS += sptask.o
-OBJS += splesscommon.o
-OBJS += bootconfig.o
-OBJS += bootconfigif.o
-OBJS += $(if $(CONFIG_BMC_AST2400),bootconfig_ast2400.o)
+#OBJS += p9_fab_iovalid.o
 
-## SUBDIRS += test.d
-
+include ${ROOTPATH}/procedure.rules.mk
+include $(PROCEDURES_PATH)/hwp/nest/p9_fab_iovalid.mk
 include ${ROOTPATH}/config.mk
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
