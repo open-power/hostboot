@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -143,6 +143,7 @@ foreach my $file (@memd_files)
     }
     close $in_file;
     $offset = $offset + ($max_file_size * ROUNDING_DIVISOR);
+    unlink $new_file;
 }
 
 
