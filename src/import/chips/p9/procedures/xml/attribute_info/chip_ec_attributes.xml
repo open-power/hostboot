@@ -5814,13 +5814,6 @@
           <test>LESS_THAN</test>
         </ec>
       </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x11</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
     </chipEcFeature>
   </attribute>
   <!-- ********************************************************************* -->
