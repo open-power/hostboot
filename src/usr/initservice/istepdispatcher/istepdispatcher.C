@@ -66,6 +66,8 @@
 #include <isteps/hwpisteperror.H>
 #include <pnor/pnorif.H>
 #include <lpc/lpcif.H>
+#include <istep18/establish_system_smp.H>
+
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
@@ -2066,10 +2068,9 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
 
         // Create child thread so that if there are problems, the istep
         //  dispatcher code continues
-        //  @TODO RTC:133831
-        //tid_t l_progTid = task_create(
-        //        ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
-        tid_t l_progTid = 1;
+        tid_t l_progTid = task_create(
+                ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
+
         assert( l_progTid > 0 );
         //  wait here for the task to end.
         //  status of the task ( OK or Crashed ) is returned in l_childsts
@@ -2124,9 +2125,8 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                    "Returned from cpu_all_winkle." );
             }
 
-            // Re-enable p8_cpu_special_wakeup
-            // @TODO RTC:133831
-            //err = ESTABLISH_SYSTEM_SMP::enableSpecialWakeup();
+            // Re-enable cpu special wakeup
+            err = ESTABLISH_SYSTEM_SMP::enableSpecialWakeup();
             if (err)
             {
                 TRACFCOMP( g_trac_initsvc,
@@ -2536,9 +2536,8 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
 
 
     // Ensure the library is loaded
-    //@TODO RTC:164474
-    //errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
-    errlHndl_t err = NULL;
+    errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
+
     if (err)
     {
         TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error loading module, PLID = 0x%x",
@@ -2546,8 +2545,7 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
     else
     {
-        //@TODO RTC:164474
-        //err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
+        err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
         if (err)
         {
             TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error with "

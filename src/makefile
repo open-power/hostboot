@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -203,6 +203,7 @@ EXTENDED_MODULES += p9_phbPerst
 EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
 EXTENDED_MODULES += tod
+EXTENDED_MODULES += p9_fab_iovalid
 
 #***************************************
 # Working test modules

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -74,9 +74,6 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_post_trainadv.mk
 
 # proc_smp_link_layer : Start SMP link layer
 include ${PROCEDURES_PATH}/hwp/nest/p9_smp_link_layer.mk
-
-# p9_fab_iovalid
-include ${PROCEDURES_PATH}/hwp/nest/p9_fab_iovalid.mk
 
 # p9_fbc_eff_config_aggregate
 include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_aggregate.mk

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -46,6 +46,7 @@ SUBDIRS+=cen.d
 SUBDIRS+=cpuWkup.d
 SUBDIRS+=p9_phbPerst.d
 SUBDIRS+=tod.d
+SUBDIRS+=p9_fab_iovalid.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
