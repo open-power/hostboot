@@ -382,6 +382,22 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FABRIC_PRESENT_GROUPS</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Bit mask of group IDs which will be present in the fully configured
+    CEC configuration.
+      Bit 0 -> group 0 present
+      Bit 1 -> group 1 present
+      ...
+      Bit 6 -> group 6 present
+      Bit 7 -> group 7 present
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
