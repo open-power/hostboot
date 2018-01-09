@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,11 +157,6 @@ fapi2::ReturnCode p9_pm_reset(
 
 
     //  ************************************************************************
-    //  Move PSAFE values to DPLL and Ext Voltage
-    //  ************************************************************************
-    FAPI_TRY(p9_pm_reset_psafe_update(i_target),
-             "Error from p9_pm_reset_psafe_update");
-    //  ************************************************************************
     // Clear the OCC Flag and Scratch2 registers
     // which contain runtime settings and modes for PM GPEs (Pstate and Stop functions)
     //  ************************************************************************
@@ -185,6 +180,13 @@ fapi2::ReturnCode p9_pm_reset(
                  );
     FAPI_TRY(l_rc, "ERROR: Failed to reset cores & quads");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of core quad"));
+
+    //  ************************************************************************
+    //  Move PSAFE values to DPLL and Ext Voltage
+    //  ************************************************************************
+    FAPI_TRY(p9_pm_reset_psafe_update(i_target),
+             "Error from p9_pm_reset_psafe_update");
+
 
     //  ************************************************************************
     //  Issue reset to OCC-SRAM
