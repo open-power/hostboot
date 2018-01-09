@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,20 +85,24 @@ bool pll_unlock( const fapi2::buffer<uint64_t>& i_local_fir,
 ///
 /// @brief Checks whether any PLL FIRs have been set on a target
 /// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode pll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, bool& o_fir_error );
+fapi2::ReturnCode pll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                           fapi2::ReturnCode& io_rc,
+                           bool& o_fir_error );
 
 ///
 /// @brief Checks whether any FIRs have lit up on a target
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode bad_fir_bits( const fapi2::Target<T>& i_target, bool& o_fir_error );
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc, bool& o_fir_error );
 
 ///
 /// @brief Checks whether the passed in FIRs have any un-masked errors set
@@ -145,15 +149,15 @@ fapi_try_exit:
 /// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target - the target on which to operate
-/// @param[in] i_rc - the return code for the function - cannot be const due to a HB compile issue
+/// @param[in,out] io_rc - the return code for the function
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note This is a helper function to enable unit testing
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::ReturnCode& i_rc)
+fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::ReturnCode& io_rc)
 {
     // We didn't have an error, so return success
-    if(i_rc == fapi2::FAPI2_RC_SUCCESS)
+    if(io_rc == fapi2::FAPI2_RC_SUCCESS)
     {
         FAPI_INF("%s has a good return code, returning success", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
@@ -164,7 +168,7 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fa
 
     FAPI_ERR("%s has a bad return code, time to check some firs!", mss::c_str(i_target));
 
-    l_fircheck_scom_err = bad_fir_bits(i_target, l_fir_error);
+    l_fircheck_scom_err = bad_fir_bits(i_target, io_rc, l_fir_error);
 
     FAPI_ERR("%s took a fail. FIR was %s", mss::c_str(i_target),
              l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");
@@ -173,12 +177,11 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fa
     // PRD will handle the original error
     if(l_fir_error)
     {
-        fapi2::log_related_error(i_target, i_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
     else
     {
-        fapi2::current_err = i_rc;
+        fapi2::current_err = io_rc;
     }
 
     return fapi2::current_err;
@@ -188,17 +191,18 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target, fa
 /// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure, if a check fir boolean is passed in
 /// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target - the target on which to operate
-/// @param[in] i_rc - the return code for the function - cannot be const due to a HB compile issue
+/// @param[in,out] io_rc - the return code for the function
 /// @param[in] i_check_fir - true IFF the FIR needs to be checked - defaults to true
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
-fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::ReturnCode& i_rc,
+fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
+                                   fapi2::ReturnCode& io_rc,
                                    const bool i_check_fir = true)
 {
 #ifdef __HOSTBOOT_MODULE
 
-    fapi2::ReturnCode l_rc(i_rc);
+    fapi2::ReturnCode l_rc(io_rc);
 
     // If need be, check the FIR below
     if(i_check_fir)
@@ -210,7 +214,7 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target, fapi2::Retu
     return l_rc;
 
 #else
-    return i_rc;
+    return io_rc;
 #endif
 }
 

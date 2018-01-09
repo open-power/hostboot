@@ -4208,7 +4208,11 @@ fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
     // PRD will handle the FIR and retrigger the procedure
 #ifdef __HOSTBOOT_MODULE
     bool l_fir_error = false;
-    FAPI_TRY(mss::check::bad_fir_bits(i_target, l_fir_error), "%s took an error while checking FIR's",
+
+    // Note: using success here will cause an RC to not be logged
+    // We can still see if we do have a FIR error though
+    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+    FAPI_TRY(mss::check::bad_fir_bits(i_target, l_rc, l_fir_error), "%s took an error while checking FIR's",
              mss::c_str(i_target));
 
     // Exit if we took a FIR error - PRD will handle bad bits
@@ -4359,7 +4363,7 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 fapi_try_exit:
 
     // If the FIR's are cal fails, then check to see if FIRs or PLL fails were the cause
-    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_cal_fail);
+    return mss::check::fir_or_pll_fail( l_mca, fapi2::current_err, l_cal_fail);
 }
 
 ///
@@ -4461,7 +4465,7 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 fapi_try_exit:
 
     // If the FIR's are cal fails, then check to see if FIR's were the cause
-    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_cal_fail);
+    return mss::check::fir_or_pll_fail( l_mca, fapi2::current_err, l_cal_fail);
 }
 
 ///
