@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,6 +182,7 @@ namespace INTR
                 //PSI Host Bridge ESB Constants
                 PSI_BRIDGE_ESB_BAR_VALID =     0x0000000000000001ULL,
                 PSI_BRIDGE_ESB_NOTIFY_VALID =  0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_QUERY_OFFSET = 0x800,
                 PSI_BRIDGE_ESB_OFF_OFFSET =    0xD00,
                 PSI_BRIDGE_ESB_RESET_OFFSET =  0XC00,
                 PSI_BRIDGE_PSU_DOORBELL_REG =  0x000D0063,
@@ -380,7 +381,7 @@ namespace INTR
             CpuList_t   iv_cpuList;     //!< Other CPU chips
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
-            MaskList_t  iv_maskList;    //!< List of interrput sources which
+            MaskList_t  iv_maskList;    //!< List of interrupt sources which
                                         //   are masked
             PendingIntrList_t iv_pendingIntr; //!< List of pending interrupts
                                               // That haven't been EOI'ed
@@ -525,7 +526,8 @@ namespace INTR
              * @return Errorlog from unmasking the source
              */
             errlHndl_t unmaskInterruptSource(uint8_t i_intr_source,
-                                             intr_hdlr_t *i_proc);
+                                             intr_hdlr_t *i_proc,
+                                             bool i_force_unmask=false);
 
             /**
              * Set all of the Interrupt BAR scom registers specific
@@ -558,9 +560,29 @@ namespace INTR
              * @param[in] i_intSource, interrupt source to perform EOI for
              * @param[in] i_pir, The PIR value for the proc where the
              *      interrupt condtion occurred
-             * @return Errorlog from DeviceWriste
+             * @return Errorlog from DeviceWrite
              */
             errlHndl_t sendEOI(uint64_t& i_intSource, PIR_t& i_pir);
+
+            /**
+             * Send the XIVE portion of the EOI (End of Interrupt) sequence
+             * @param[in] i_intSource, interrupt source to perform EOI for
+             * @param[in] i_pir, The PIR value for the proc where the
+             *     interrupt condtion occurred
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir);
+
+            /**
+             * Function completes interrupt processing
+             *   - Unmasks interrupt source
+             *   - Sends XIVE EOI
+             * @param[in] i_intSource, interrupt source to perform EOI for
+             * @param[in] i_pir, The PIR value for the proc where the
+             *     interrupt condtion occurred
+             **/
+            void completeInterruptProcessing(uint64_t& i_intSource,
+                                             PIR_t& i_pir);
 
             /**
              * Route Interrupt to correct listener

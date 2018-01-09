@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -970,7 +970,11 @@ void IntrRp::msgHandler()
                     {
                         uint64_t intSource = msg->data[0];
                         PIR_t l_pir = msg->data[1];
-                        sendEOI(intSource, l_pir);
+                        //The physical HW EOI is issued as the defect is
+                        // discovered. At this point we just need to remove
+                        // the pending interrupt obj and unmasking the
+                        // interrupt source to properly handle new ints
+                        completeInterruptProcessing(intSource, l_pir);
                     }
                     msg_free(msg);
                 }
@@ -1192,6 +1196,70 @@ void IntrRp::msgHandler()
     }
 }
 
+errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
+{
+    errlHndl_t l_err = NULL;
+
+    do {
+        //The XIVE HW is expecting these MMIO accesses to come from the
+        // core/thread they were setup (master core, thread 0)
+        // These functions will ensure this code executes there
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+
+        //LSI ESB Internal to the IVPE of the Master Proc
+        volatile uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
+        l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
+        uint64_t l_intPending = *l_lsiEoi;
+
+        //MMIO Complete, rest of code can run on any thread
+        task_affinity_unpin();
+
+        //If an interrupt is pending, HB userspace will send a message to
+        // trigger the handling of a 'new' interrupt. In this situation the
+        // interrupt will not be triggered via the kernel.
+        if (l_intPending == 1)
+        {
+            TRACFCOMP(g_trac_intr, "IntrRp::Need to acknowledge interrupt\n");
+            //First acknowledge the interrupt so it won't be re-presented
+            acknowledgeInterrupt();
+
+            uint64_t l_data0 = LSI_INTERRUPT << 32;
+            if (iv_msgQ)
+            {
+                msg_t * int_msg = msg_allocate();
+                int_msg->type = MSG_INTR_COALESCE;
+                int_msg->data[0] = reinterpret_cast<uint64_t>(l_data0);
+                int send_rc = msg_send(iv_msgQ, int_msg);
+                if (send_rc != 0)
+                {
+                    TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error "
+                            "sending coalesce message");
+                    /*@ errorlog tag
+                     * @errortype       ERRL_SEV_UNRECOVERABLE
+                     * @moduleid        INTR::MOD_INTRRP_XIVE_SENDEOI
+                     * @reasoncode      INTR::RC_MESSAGE_SEND_ERROR
+                     * @userdata1       RC from msg_send command
+                     * @devdesc         Error encountered sending coalesce
+                     *                  message to INTRP
+                     */
+                    l_err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+                         INTR::MOD_INTRRP_XIVE_SENDEOI,     // moduleid
+                         INTR::RC_MESSAGE_SEND_ERROR,       // reason code
+                         send_rc,
+                         0
+                        );
+                    break;
+                }
+            }
+        }
+    } while(0);
+
+    return l_err;
+}
+
 errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
 {
     intr_hdlr_t* l_proc = NULL;
@@ -1217,52 +1285,6 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
     }
 
     do {
-
-        //Check if we found a matching proc handler for the interrupt to EOI
-        if (l_proc == NULL)
-        {
-            TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI couldn't find proc"
-               " handler that matches pir: 0x%lx", i_pir);
-            break;
-        }
-        else
-        {
-            //Make object to search pending interrupt
-            //   list for
-            std::pair<PIR_t, ext_intr_t> l_intr = std::make_pair(
-                                          i_pir,
-                                          static_cast<ext_intr_t>(i_intSource));
-
-            //See if an interrupt with from Proc with
-            //  the same PIR + interrupt source are
-            //  still being processed
-            auto l_found = std::find_if(
-                                         iv_pendingIntr.begin(),
-                                         iv_pendingIntr.end(),
-                                         [&l_intr](auto k)->bool
-                {
-                    return (k.first == l_intr.first) &&
-                    (k.second == l_intr.second);
-                });
-
-            if (l_found == iv_pendingIntr.end())
-            {
-                TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::msgHandler() Pending"
-                                "Interrupt NOT found for pir: 0x%lx,"
-                                " interrupt type: %d. Ignoring.",
-                                i_pir, static_cast<ext_intr_t>(i_intSource));
-            }
-            else
-            {
-                //Delete pending interrupt for source type
-                TRACFCOMP(g_trac_intr, "IntrRp::sendEOI() Removing pending"
-                           " interrupt for pir: 0x%lx, interrupt type: %d",
-                           i_pir, static_cast<ext_intr_t>(i_intSource));
-                iv_pendingIntr.erase(l_found);
-            }
-        }
-
-
         //The XIVE HW is expecting these MMIO accesses to come from the
         // core/thread they were setup (master core, thread 0)
         // These functions will ensure this code executes there
@@ -1305,60 +1327,8 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
 
         TRACDCOMP(g_trac_intr, "IntrRp::sendEOI read response: %lx", eoiRead);
 
-        //The XIVE HW is expecting these MMIO accesses to come from the
-        // core/thread they were setup (master core, thread 0)
-        // These functions will ensure this code executes there
-        task_affinity_pin();
-        task_affinity_migrate_to_master();
+        l_err = sendXiveEOI(i_intSource, i_pir);
 
-        //EOI Part 2 - LSI ESB Internal to the IVPE of the Master Proc
-        volatile uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
-        l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
-        uint64_t l_intPending = *l_lsiEoi;
-
-        //MMIO Complete, rest of code can run on any thread
-        task_affinity_unpin();
-
-        //If an interrupt is pending, HB userspace will send a message to
-        // trigger the handling of a 'new' interrupt. In this situation the
-        // interrupt will not be triggered via the kernel.
-        if (l_intPending == 1)
-        {
-            TRACFCOMP(g_trac_intr, "IntrRp::Need to acknowledge interrupt\n");
-            //First acknowledge the interrupt so it won't be re-presented
-            acknowledgeInterrupt();
-
-            uint64_t l_data0 = LSI_INTERRUPT << 32;
-            if (iv_msgQ)
-            {
-                msg_t * int_msg = msg_allocate();
-                int_msg->type = MSG_INTR_COALESCE;
-                int_msg->data[0] = reinterpret_cast<uint64_t>(l_data0);
-                int send_rc = msg_send(iv_msgQ, int_msg);
-                if (send_rc != 0)
-                {
-                    TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error "
-                            "sending coalesce message");
-                    /*@ errorlog tag
-                     * @errortype       ERRL_SEV_UNRECOVERABLE
-                     * @moduleid        INTR::MOD_INTRRP_SENDEOI
-                     * @reasoncode      INTR::RC_MESSAGE_SEND_ERROR
-                     * @userdata1       RC from msg_send command
-                     * @devdesc         Error encountered sending coalesce
-                     *                  message to INTRP
-                     */
-                    l_err = new ERRORLOG::ErrlEntry
-                        (
-                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
-                         INTR::MOD_INTRRP_SENDEOI,          // moduleid
-                         INTR::RC_MESSAGE_SEND_ERROR,       // reason code
-                         send_rc,
-                         0
-                        );
-                    break;
-                }
-            }
-        }
     } while(0);
 
     return l_err;
@@ -1469,6 +1439,15 @@ void IntrRp::handleExternalInterrupt()
                     //Add to list of interrupts in flight
                     iv_pendingIntr.push_back(l_intr);
 
+                    uint64_t intSource = l_intr.second;
+
+                    //Mask off current interrupt source
+                    maskInterruptSource(intSource, *targ_itr);
+
+                    //Send EOI so other interrupt sources other than the one
+                    // masked previously can be presented
+                    sendXiveEOI(intSource, l_pir);
+
                     //Call function to route the interrupt
                     //to the appropriate handler
                     routeInterrupt((*targ_itr), static_cast<ext_intr_t>(i),
@@ -1510,8 +1489,10 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
     volatile uint64_t l_maskRead = *l_psiHbEsbptr;
     eieio();
 
-    //Perform 2nd read to verify in OFF state - the read returns the previous
-    // esb state, so a 2nd read is required to know it is in the off state
+    //Perform 2nd read to verify in OFF state using query offset
+    l_psiHbEsbptr = i_chip->psiHbEsbBaseAddr +
+                  (((i_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_QUERY_OFFSET)
+                  /sizeof(uint64_t));
     l_maskRead = *l_psiHbEsbptr;
 
     if (l_maskRead != ESB_STATE_OFF)
@@ -1570,7 +1551,8 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t l_intr_source)
 }
 
 errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
-                                         intr_hdlr_t *i_proc)
+                                         intr_hdlr_t *i_proc,
+                                         bool i_force_unmask)
 {
     bool l_masked = false;
     errlHndl_t l_err = NULL;
@@ -1588,7 +1570,7 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
         }
     }
 
-    if (l_masked == true)
+    if (l_masked == true || i_force_unmask == true)
     {
         for(ChipList_t::iterator targ_itr = iv_chipList.begin();
                 targ_itr != iv_chipList.end(); ++targ_itr)
@@ -1602,9 +1584,11 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
             volatile uint64_t l_unmaskRead = *l_psiHbEsbptr;
             eieio();
 
-            //Perform 2nd read to verify in RESET state - the read returns the
-            // previous esb state, so a 2nd read is required to know it is in
-            // the off state
+            //Perform 2nd read to verify in RESET state using query offset
+            l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr +
+                      (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_QUERY_OFFSET)
+                      /sizeof(uint64_t));
+
             l_unmaskRead = *l_psiHbEsbptr;
 
             if (l_unmaskRead != ESB_STATE_RESET)
@@ -1752,15 +1736,98 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type,
             break;
         }
 
-        //Issue standard EOI for the PSU Interupt
+        //Interrupt Processing is complete - re-enable
+        // this interrupt source
         uint64_t intSource = i_type;
-        TRACFCOMP(g_trac_intr, "Sending PSU EOI");
-
-        sendEOI(intSource, i_pir);
+        TRACFCOMP(g_trac_intr, "handlePsuInterrupt - Calling completeInterruptProcessing");
+        completeInterruptProcessing(intSource, i_pir);
 
     } while(0);
 
     return l_err;
+}
+
+void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
+
+{
+    intr_hdlr_t* l_proc = NULL;
+
+    //Find target handle for Proc to remove pending interrupt for
+    for (ChipList_t::iterator targ_itr = iv_chipList.begin();
+            targ_itr != iv_chipList.end(); ++targ_itr)
+    {
+        uint64_t l_groupId = (*targ_itr)->proc->getAttr
+                                        <TARGETING::ATTR_FABRIC_GROUP_ID>();
+        uint64_t l_chipId = (*targ_itr)->proc->getAttr
+                                        <TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+        //Core + Thread IDs not important so use 0's
+        PIR_t l_pir = PIR_t(l_groupId, l_chipId, 0, 0);
+
+        if (l_pir == i_pir)
+        {
+            l_proc = *targ_itr;
+            break;
+        }
+    }
+
+    do {
+
+        //Check if we found a matching proc handler for the interrupt to remove
+        //  This is needed so the iNTRRP will honor new interrupts from this
+        //  source
+        if (l_proc == NULL)
+        {
+            TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::completeInterruptProcessing:"
+               " couldn't find proc handler that matches pir: 0x%lx", i_pir);
+            break;
+        }
+        else
+        {
+            //Make object to search pending interrupt
+            //   list for
+            std::pair<PIR_t, ext_intr_t> l_intr = std::make_pair(
+                                          i_pir,
+                                          static_cast<ext_intr_t>(i_intSource));
+
+            //See if an interrupt with from Proc with
+            //  the same PIR + interrupt source are
+            //  still being processed
+            auto l_found = std::find_if( iv_pendingIntr.begin(),
+                                     iv_pendingIntr.end(),
+                                     [&l_intr](auto k)->bool
+                  {
+                        return (k.first == l_intr.first) &&
+                        (k.second == l_intr.second);
+                  });
+
+            //Remove Interrupt source from pending interrupt list
+            if (l_found == iv_pendingIntr.end())
+            {
+                TRACFCOMP(g_trac_intr,ERR_MRK"IntrRp::completeInterruptHandling()"
+                                    " Pending Interrupt NOT found for pir:"
+                                    " 0x%lx, interrupt type: %d. Ignoring.",
+                                   i_pir, static_cast<ext_intr_t>(i_intSource));
+            }
+            else
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::completeInterruptProcessing()"
+                                  " Removing pending interrupt for pir: 0x%lx,"
+                                  "interrupt type: %d", i_pir,
+                                  static_cast<ext_intr_t>(i_intSource));
+                iv_pendingIntr.erase(l_found);
+            }
+
+            //Enable this interrupt source again
+            unmaskInterruptSource(i_intSource, l_proc, true);
+
+            //Send final EOI to enable interrupts for this source again
+            sendEOI(i_intSource, i_pir);
+        }
+
+    } while(0);
+
+    return;
 }
 
 errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
@@ -3828,7 +3895,7 @@ errlHndl_t INTR::IntrRp::enableSlaveProcInterrupts(TARGETING::Target * i_target)
 
     } while(0);
 
-    TRACFCOMP(g_trac_intr, INFO_MRK"Slave Proc Interrupt Routing setup complete\n");
+    TRACFCOMP(g_trac_intr, INFO_MRK"Slave Proc Interrupt Routing setup complete");
     return l_err;
 }
 
