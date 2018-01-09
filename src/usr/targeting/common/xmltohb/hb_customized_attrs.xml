@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -132,11 +132,6 @@
     <attribute>
           <id>ATTR_MEMVPD_POS</id>
           <default>0xFF</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
-          <default>0xD</default>
      </attribute>
 
     <attribute>
@@ -549,11 +544,6 @@
 
     <attribute>
           <id>ATTR_EI_BUS_TX_LANE_INVERT</id>
-          <no_export/>
-    </attribute>
-
-    <attribute>
-          <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
           <no_export/>
     </attribute>
 
