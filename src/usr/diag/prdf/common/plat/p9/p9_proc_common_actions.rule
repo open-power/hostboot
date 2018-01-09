@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -101,5 +101,11 @@ actionclass pb_cent_hang_recovery_gte
 actionclass deadmanTimer
 {
     funccall("handleDeadmanTimer");
+};
+
+actionclass sbe_vital_attn
+{
+    threshold_and_mask_self;
+    funccall("handleSbeVital");
 };
 
