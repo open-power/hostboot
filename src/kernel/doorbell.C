@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,17 +79,14 @@ void send_doorbell_wakeup(uint64_t i_pir)
     doorbell_send(i_pir);
 }
 
-/*
-TODO RTC 150861
 void send_doorbell_ipc(uint64_t i_pir)
 {
-    cpu_t *l_cpu = getCpu(i_pir)
+    cpu_t *l_cpu = CpuManager::getCpu(i_pir);
 
-    printk("send_doorbell_ipc to pir: %lx\n", i_pir);
+    printkd("send_doorbell_ipc to pir: %lx\n", i_pir);
     //Create WorkItem and put on the stack to be executed during doorbell
-    // execution (if needed, otherwise can likely delete and just send doorbell)
-    KernelWorkItem* l_work = new IpcDoorbellWorkItem();
+    //   execution
+    KernelWorkItem* l_work = new IPCDoorbellWorkItem();
     l_cpu->doorbell_actions.push(l_work);
-    doorbell_send(i_pir)
+    doorbell_send(i_pir);
 }
-**/

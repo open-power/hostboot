@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,8 +73,11 @@ class InterruptMsgHdlr : public MessageHandler
             ACK_HYPERVISOR_INT_REG_OFFSET = 0x830,
 
             INTP_BAR_VALUE     = 0xFFFFE000,    // upper 32 bits of IPCBAR
-
             INTERPROC_XISR     = 2,     //IPI XISR is 2
+
+            MSG_KEY_THREAD_WKUP  = 0x8000000000000000ul,
+            MSG_KEY_ADD_CPU_CORE = 0x4000000000000000ul,
+            MSG_KEY_IPC_MSG      = 0x2000000000000000ul,
         };
 
         /**
@@ -154,6 +157,15 @@ class InterruptMsgHdlr : public MessageHandler
          * @param[in] i_pir - The PIR of the CPU to send doorbell to.
          */
         static void sendThreadWakeupMsg(uint64_t i_pir);
+
+        /**
+         * Send message to interrupt resource provider (intrrP) in userspace to
+         * indicate it was sent an IPC message. The intrrp will re-route the
+         * message to the appropriate handler.
+         *
+         * @param[in] i_pir - The PIR of the CPU to send doorbell to.
+         */
+        static void sendIpcMsg(uint64_t i_pir);
 
         /**
          * Issue the sbe/mailbox workaround (issue a mbox EOI to mailbox)

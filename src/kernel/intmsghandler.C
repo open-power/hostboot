@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,7 +165,7 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
     {
         // To avoid conflict with interrupts on thread i_pir, change the key
         // for the message to be an invalid PIR.
-        uint64_t pir_key = i_pir | 0x4000000000000000ul;
+        uint64_t pir_key = i_pir | MSG_KEY_ADD_CPU_CORE;
 
         cv_instance->iv_lock.lock();
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,
@@ -180,11 +180,26 @@ void InterruptMsgHdlr::sendThreadWakeupMsg(uint64_t i_pir)
     {
         // To avoid conflict with interrupts on thread i_pir, change the key
         // for the message to be an invalid PIR.
-        uint64_t pir_key = i_pir | 0x8000000000000000ul;
+        uint64_t pir_key = i_pir | MSG_KEY_THREAD_WKUP;
 
         cv_instance->iv_lock.lock();
         cv_instance->sendMessage(MSG_INTR_CPU_WAKEUP,
                                  (void*)pir_key,(void *)i_pir,NULL);
+        cv_instance->iv_lock.unlock();
+    }
+}
+
+void InterruptMsgHdlr::sendIpcMsg(uint64_t i_pir)
+{
+    if(cv_instance)
+    {
+        // To avoid conflict with interrupts on thread i_pir, change the key
+        // for the message to be an invalid PIR.
+        uint64_t pir_key = i_pir | MSG_KEY_IPC_MSG;
+
+        cv_instance->iv_lock.lock();
+        cv_instance->sendMessage(MSG_INTR_IPC,
+                                (void*)pir_key,(void *)i_pir,NULL);
         cv_instance->iv_lock.unlock();
     }
 }

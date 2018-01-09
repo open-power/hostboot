@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,6 @@ class CpuWakeupDoorbellWorkItem : public KernelWorkItem
 };
 
 
-/* TODO RTC 150861
 
 //A work item to be created/executed during an IPC scenario
 class IPCDoorbellWorkItem : public KernelWorkItem
@@ -62,7 +61,9 @@ class IPCDoorbellWorkItem : public KernelWorkItem
     public:
         //Implement operator() function
         void operator() (void);
+
+        //No data to clean up, use default destructor
+        ~IPCDoorbellWorkItem() = default;
 };
-**/
 #endif
 

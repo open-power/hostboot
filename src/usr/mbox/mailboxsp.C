@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -189,13 +189,10 @@ errlHndl_t MailboxSp::_init()
         }
     }
 
-    // @todo RTC:126643
-#if (0)
     // Register for IPC messages
     err = INTR::registerMsgQ(iv_msgQ,
                              MSG_IPC,
                              INTR::ISN_INTERPROC);
-#endif
 
     if(mbxComm)
     {
@@ -267,7 +264,6 @@ void MailboxSp::msgHandler()
                 {
                     printkd("MSG_INTR type - handling interrupt\n");
                     err = handleInterrupt();
-
 
                     printkd("MSG_INTR type - sending EOI\n");
                     // Respond to the interrupt handler regardless of err
@@ -447,10 +443,11 @@ void MailboxSp::msgHandler()
 
             case MSG_IPC: // Look for Interprocessor Messages
                 {
-
                     uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
                     if(msg_q_id == IPC_DATA_AREA_LOCKED)
                     {
+                        TRACFCOMP(g_trac_mbox, INFO_MRK
+                             "MBOXSP IPC data area locked");
                         // msg is being written, but not yet ready to handle
                         msg_q_id = IPC_DATA_AREA_CLEAR;
                     }
@@ -464,11 +461,38 @@ void MailboxSp::msgHandler()
                         isync();
                         *ipc_msg = KernelIpc::ipc_data_area.msg_payload;
                         lwsync();
-                        // EOI has already been sent by intrp. Simply clear
-                        // ipc area so another message can be sent
+                        // Clear ipc area so another message can be sent
                         KernelIpc::ipc_data_area.msg_queue_id =
                             IPC_DATA_AREA_CLEAR;
                         handleIPC(static_cast<queue_id_t>(msg_q_id), ipc_msg);
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_mbox, ERR_MRK
+                                "MBOXSP invalid data found in IPC data area: "
+                                " %0xlx", msg_q_id);
+
+                        TRACFBIN(g_trac_mbox, "IPC Data Area:",
+                              &KernelIpc::ipc_data_area,
+                              sizeof(KernelIpc::ipc_data_area));
+
+                        /*@ errorlog tag
+                         * @errortype       ERRL_SEV_PREDICTIVE
+                         * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
+                         * @reasoncode      MBOX::RC_IPC_INVALID_DATA
+                         * @userdata1       IPC Data Area MSG Queue ID
+                         * @devdesc         IPC Message data corrupted
+                         */
+                        err = new ERRORLOG::ErrlEntry
+                            (
+                             ERRORLOG::ERRL_SEV_PREDICTIVE,
+                             MBOX::MOD_MBOXSRV_HNDLR,
+                             MBOX::RC_IPC_INVALID_DATA,         // reason Code
+                             msg_q_id,                          // IPC Data
+                             0
+                            );
+
+                        errlCommit(err,MBOX_COMP_ID);
                     }
 
                     INTR::sendEOI(iv_msgQ,msg);
@@ -2088,8 +2112,8 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
 
             // node means Hb instance number in this context
             PIR_t my_pir (KernelIpc::ipc_data_area.pir);
-            if( (my_pir.groupId == i_node)
-                && (MBOX::HB_TEST_MSGQ != i_q_id) ) //use IPC for tests
+            if ( (my_pir.groupId == i_node)
+                && (MBOX::HB_TEST_MSGQ != i_q_id)) //use IPC for tests
             {
                 // Message is to this node - don't use IPC path
                 // MBOX sp can look up msgQ

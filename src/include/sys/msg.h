@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,8 @@ enum msg_sys_types_t
     MSG_INTR_CPU_WAKEUP, //!< Msg sent from kernel to user space on cpu wakeup
                          // data[0] = cpuid (PIR)
     MSG_INTR_ISSUE_SBE_MBOX_WA,   //!< Issue EOI to mailbox
+    MSG_INTR_IPC,       //!< Msg sent from kernel to user space for multi-node
+                        // communication
 
 };
 
