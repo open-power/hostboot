@@ -704,7 +704,7 @@ fapi_try_exit:
              mss::c_str(l_mca));
 
     // Checks the FIR's, if need be
-    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_check_firs);
+    return mss::check::fir_or_pll_fail( l_mca, fapi2::current_err, l_check_firs);
 }
 
 ///
