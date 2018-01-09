@@ -2172,7 +2172,7 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[26]
      *  FIR error from SBE
      */
-    (rTP_LFIR, bit(26)) ? defaultMaskedError;
+    (rTP_LFIR, bit(26)) ? sbe_vital_attn;
 
     /** TP_LFIR[27]
      *  FIR error from SBE

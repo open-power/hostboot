@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <prdfPlatServices_ipl.H>
+#include <prdfErrlUtil.H>
+#include <sbeio/sbeioif.H>
 #endif
 
 // Platform includes
@@ -373,6 +375,33 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleDeadmanTimer );
 PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleDeadmanTimer );
+
+//------------------------------------------------------------------------------
+
+/** Call hostboot to indicate SBE bad, extract FFDC and handle recovery */
+int32_t handleSbeVital( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // Hostboot code is suppose to handle all Vital attentions
+    // and initiate recovery with FSP,etc... if needed
+#ifdef __HOSTBOOT_MODULE
+    TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
+
+   PRDF_ERR("Invoking HB SBE vital routine");
+   errlHndl_t  l_elog = SBEIO::handleVitalAttn( l_target );
+
+    // commit any failures
+    if (nullptr != l_elog)
+    {
+        PRDF_ERR("handleVitalAttn failure");
+        PRDF_COMMIT_ERRL( l_elog, ERRL_ACTION_REPORT );
+    }
+#endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleSbeVital );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleSbeVital );
 
 //------------------------------------------------------------------------------
 
