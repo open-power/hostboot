@@ -930,14 +930,18 @@ void IntrRp::msgHandler()
                     }
                 }
                 break;
-/*TODO RTC 150861 -- I think a new IPC message type needs to be defined.
- *                   And the code below should be executed when this new message
- *                   type is received. The Kernel will send this message to
- *                   here (this intrrp code) during doorbell wakeup.
+            case MSG_INTR_IPC:
+                {
+                    errlHndl_t l_err = NULL;
+                    uint64_t l_xirr_pir = msg->data[0];
+
+                    TRACFCOMP(g_trac_intr,INFO_MRK
+                              "IntrRp::msgHandler Doorbell IPC msg received"
+                                  " for %d", l_xirr_pir);
 
                     // Now handle any IPC messages
-                    // If something is registered for IPIs
-                    // and msg is ready, then handle
+                    // If something is registered for the IPC msg
+                    Registry_t::iterator r = iv_registry.find(ISN_INTERPROC);
                     if(r != iv_registry.end() &&
                        (KernelIpc::ipc_data_area.msg_queue_id !=
                        IPC_DATA_AREA_CLEAR) &&
@@ -948,7 +952,7 @@ void IntrRp::msgHandler()
 
                         msg_t * rmsg = msg_allocate();
                         rmsg->type = r->second.msgType;
-                        rmsg->data[0] = type;  // interrupt type
+                        rmsg->data[0] = ISN_INTERPROC;
                         rmsg->data[1] = l_xirr_pir;
                         rmsg->extra_data = NULL;
 
@@ -956,17 +960,57 @@ void IntrRp::msgHandler()
                         if(rc)
                         {
                             TRACFCOMP(g_trac_intr,ERR_MRK
-                                      "IPI Interrupt received, but could "
+                                      "IPC message received, but could "
                                       "not send message to the registered "
                                       "handler. Ignoring it. rc = %d",
                                       rc);
                         }
                     }
-**/
+                    else if(KernelIpc::ipc_data_area.msg_queue_id ==
+                              IPC_DATA_AREA_CLEAR ||
+                            KernelIpc::ipc_data_area.msg_queue_id ==
+                              IPC_DATA_AREA_LOCKED)
+                    {
+                        TRACFCOMP(g_trac_intr,ERR_MRK
+                                   "IPC message received but data area is in"
+                                   " an invalid state. msg_queue_id = 0x%lx",
+                                   KernelIpc::ipc_data_area.msg_queue_id);
+                        /*@ errorlog tag
+                         * @errortype       ERRL_SEV_PREDICTIVE
+                         * @moduleid        INTR::MOD_INTRRP_IPC
+                         * @reasoncode      INTR::RC_IPC_DATA_INVALID
+                         * @userdata1       IPC Data Area MSG Queue ID
+                         * @userdata2       PIR
+                         * @devdesc         Error encountered routing IPC
+                         *                  message
+                         */
+                        l_err = new ERRORLOG::ErrlEntry
+                            (
+                             ERRORLOG::ERRL_SEV_PREDICTIVE,    // severity
+                             INTR::MOD_INTRRP_IPC,             // moduleid
+                             INTR::RC_IPC_DATA_INVALID,        // reason code
+                             KernelIpc::ipc_data_area.msg_queue_id,
+                             l_xirr_pir
+                            );
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_intr,ERR_MRK
+                           "IPC Message received type but nothing registered "
+                           "to handle it. Ignoring it.");
+                    }
+
+                    if (l_err)
+                    {
+                        l_err->collectTrace(INTR_COMP_NAME, 256);
+                        errlCommit(l_err, INTR_COMP_ID);
+                    }
+                }
+                break;
             case MSG_INTR_EOI:
                 {
                     // Use standrard EOI (End of Interrupt) sequence
-                    if(msg->data[0] != INTERPROC_XISR)
+                    if(msg->data[0] != ISN_INTERPROC)
                     {
                         uint64_t intSource = msg->data[0];
                         PIR_t l_pir = msg->data[1];
@@ -1342,7 +1386,7 @@ void IntrRp::routeInterrupt(intr_hdlr_t* i_proc,
     // interrupt source
     Registry_t::iterator r = iv_registry.find(i_type);
 
-    if(r != iv_registry.end() && i_type != INTERPROC_XISR)
+    if(r != iv_registry.end() && i_type != ISN_INTERPROC)
     {
         msg_q_t msgQ = r->second.msgQ;
 
@@ -1926,47 +1970,6 @@ msg_q_t IntrRp::unregisterInterruptXISR(ext_intr_t i_xisr)
     }
 
     return msgQ;
-}
-
-void IntrRp::sendIPI(const PIR_t i_pir) const
-{
-    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
-    volatile uint8_t * mfrr =
-        reinterpret_cast<uint8_t*>(baseAddr + MFRR_OFFSET);
-
-    eieio(); sync();
-    MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-    (*mfrr) = IPI_USR_PRIO;
-}
-
-
-errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
-{
-    errlHndl_t err = NULL;
-
-    if(i_addr < VMM_VADDR_DEVICE_SEGMENT_FIRST)
-    {
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR::MOD_INTRRP_CHECKADDRESS
-         * @reasoncode      INTR::RC_BAD_VIRTUAL_IO_ADDRESS
-         * @userdata1       The bad virtual address
-         * @userdata2       0
-         *
-         * @devdesc         The virtual address is not a valid IO address
-         *
-         */
-        err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-             INTR::MOD_INTRRP_CHECKADDRESS,
-             INTR::RC_BAD_VIRTUAL_IO_ADDRESS,
-             i_addr,
-             0
-            );
-    }
-
-    return err;
 }
 
 void IntrRp::shutDown(uint64_t i_status)
@@ -2671,7 +2674,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
                     volatile uint32_t xirr_rw = *xirrPtr;
 
                     //If IPI need to set mfrr to 0xFF
-                    if(INTERPROC_XISR == xirr)
+                    if(ISN_INTERPROC == xirr)
                     {
                         *mfrrPtr = 0xFF;
                     }

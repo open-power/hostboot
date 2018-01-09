@@ -35,7 +35,6 @@ namespace INTR
         MOD_INTR_ENABLE              = 0x01, /**< intrrp.C : INTR::enableExternalInterrupts */
         MOD_INTR_DISABLE             = 0x02, /**< intrrp.C : INTR::disableExternalInterrupts */
         MOD_INTR_REGISTER            = 0x03, /**< intrrp.C : INTR::registerMsgQ */
-        MOD_INTRRP_CHECKADDRESS      = 0x04, /**< intrrp.C : IntrRp::checkAddress */
         MOD_INTRRP_REGISTERINTERRUPT = 0x05, /**< intrrp.C : IntrRp::registerInterrupt */
         MOD_INTR_ENABLE_PSI_INTR     = 0x06, /**< intrrp.C : INTR::enablePsiIntr */
         MOD_INTR_INIT_XIVR           = 0x07, /**< intrrp.C : INTR::initXIVR */
@@ -50,6 +49,7 @@ namespace INTR
         MOD_INTRRP_HNDLPSUINTERRUPT  = 0x10, /**< intrrp.C : INTR::handlePsuInterrupt */
         MOD_INTRRP_RESETINTUNIT      = 0x11, /**< intrrp.C : IntrRp::resetIntUnit */
         MOD_INTRRP_XIVE_SENDEOI      = 0x12,
+        MOD_INTRRP_IPC               = 0x13,
     };
 
     enum IntrReasonCode
@@ -67,6 +67,7 @@ namespace INTR
         RC_PSU_DOORBELL_TIMEOUT       = INTR_COMP_ID | 0x0A,
         RC_XIVE_PBUS_QUIESCE_TIMEOUT  = INTR_COMP_ID | 0x0B,
         RC_MESSAGE_SEND_ERROR         = INTR_COMP_ID | 0x0C,
+        RC_IPC_DATA_INVALID           = INTR_COMP_ID | 0x0D,
     };
 };
 

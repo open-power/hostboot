@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,11 +50,11 @@ void doorbell_send(uint64_t i_pir);
  */
 void send_doorbell_wakeup(uint64_t i_pir);
 
-/* TODO RTC 150861
- * send_doorbell_ipc
+/** Send an IPC message using a doorbell
  *
- * void send_doorbell_ipc(cpu_t *i_cpu, uint64_t pir);
-**/
+ * @param i_pir - PIR to send IPC message to
+ */
+void send_doorbell_ipc(uint64_t i_pir);
 
 enum
 {

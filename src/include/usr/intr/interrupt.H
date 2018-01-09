@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,30 +35,9 @@ namespace TARGETING
 
 namespace INTR
 {
-    /**
-     * External Interrupt Types (XISR)
-     * This value is passed in message data[0] on interrupt or shutdown.
-     * @note The XISR is 24 bits:
-     * XISR[ 0: 4] NOT DEFINED
-     * XISR[ 5: 7] Node id
-     * XISR[ 8:10] chipId within Node
-     * XISR[11:12] Unit selection [GX='00', PHB0='01', PHB1='10', PHB2='11']
-     * XISR[13:19] BUID
-     * XISR[20:23] level
-     *
-     * extr_intr_t values are XISR right shifted, lsb = bit 23
-     */
-    enum XISRvalue_t
-    {
-        NO_INTERRUPT = 0,       //!< no interrupt present
-        //TODO RTC 137564
-        INTERPROC_XISR = 0xFF,  //!< XISR value for IPIs
-        MAX_XISR  = 0x00FFFFFF, //!< Max value of the XISR
-        SHUT_DOWN = 0x01000000, //!< INTR presenter sends this when shutting down
-    };
-
     typedef uint32_t ext_intr_t;
 
+    // Interrupt Source Number (ISN) Definition
     enum ISNvalue_t
     {
         ISN_PSI         = 0,
@@ -68,8 +47,8 @@ namespace INTR
         ISN_LPC         = 3,
         ISN_LCL_ERR     = 4,
         ISN_HOST        = 5,
-        ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
-                                //Converts to INTERPROC_XISR when registered
+        ISN_INTERPROC   = 0xF0, // Interproc (IPC) Message Type
+        SHUT_DOWN = 0x01000000, //!< INTR presenter sends this when shutting down
     };
 
     //These values are HW defined values from the LSI Interrupts status register
@@ -91,13 +70,7 @@ namespace INTR
         LSI_DIO         = 12,
         LSI_PSU         = 13,
         LSI_LAST_SOURCE,
-
-//TODO RTC 137564
-//        ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
-//                                //Converts to INTERPROC_XISR when registered
-//                                //
     };
-
 
     /**
      * The XISR value is the logical OR of the Interrup Requestor Source

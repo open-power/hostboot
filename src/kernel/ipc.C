@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <kernel/intmsghandler.H>
 #include <kernel/console.H>
 #include <errno.h>
+#include <kernel/doorbell.H>
 
 using namespace KernelIpc;
 
@@ -55,10 +56,10 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     // single node system with an alt-master could be designed such that the
     // alt-master were on a different logical (power bus numbering) node.
     // Since it's not in plan to use this IPC mechanism in a single node
-    // system, this case will ge ignored for now.
+    // system, this case will get ignored for now.
     uint64_t this_node = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
     uint64_t hrmor_offset = getHRMOR()-(this_node*(ipc_data_area.hrmor_base));
-    uint64_t dest_node = (i_q >> 32) & 0x07; 
+    uint64_t dest_node = (i_q >> 32) & 0x07;
     uint64_t dest_hrmor = (ipc_data_area.hrmor_base*dest_node) + hrmor_offset;
 
     uint64_t dest_addr = reinterpret_cast<uint64_t>(&ipc_data_area);
@@ -68,7 +69,7 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     printkd("IPC Dest addr %lx Q_id:%lx\n",dest_addr,i_q);
 
     // pointer to the ipc_data_area in the destination node
-    ipc_data_area_t * p_dest = 
+    ipc_data_area_t * p_dest =
         reinterpret_cast<ipc_data_area_t*>(dest_addr);
 
     // get lock on IPC data area in other node
@@ -87,11 +88,8 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 
     printkd("IPC send from PIR %lx to PIR %x\n",getPIR(),p_dest->pir);
 
-    /* TODO RTC 150861
-    // send IPI - use this_node + 10 as favor level of interrupt
-    //P8 Call: InterruptMsgHdlr::sendIPI(p_dest->pir,this_node + 0x10);
-    //P9 Call (likely): send_doorbell_ipc(p_dest->pir);
-    **/
+    // send doorbell to interrupt the other drawer
+    send_doorbell_ipc(p_dest->pir);
 
     // The message allocation is freed here to make msg_send for IPC
     // messages behave the same as non-IPC msg_send; that is, the message

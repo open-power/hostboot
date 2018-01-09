@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,12 @@ void CpuWakeupDoorbellWorkItem::operator() (void)
     return;
 }
 
-/*TODO RTC 150861
-void IpcDoorbellWorkItem::operator() (void)
+void IPCDoorbellWorkItem::operator() (void)
 {
-    //Decide what needs to be done when the Ipc Doorbell is received
-    // (if anything)
+    size_t pir = getPIR();
+    printk("IPC msg pir %ld done\n", pir);
+    //Send message tot he intrrp in userspace indicating it has a pending IPC
+    // message.
+    InterruptMsgHdlr::sendIpcMsg(pir);
+    return;
 }
-**/
