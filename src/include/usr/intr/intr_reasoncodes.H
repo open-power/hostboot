@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@ namespace INTR
         MOD_INTRRP_UNMASKINTERRUPT   = 0x0F, /**< intrrp.C : INTR::unmaskInterruptSource */
         MOD_INTRRP_HNDLPSUINTERRUPT  = 0x10, /**< intrrp.C : INTR::handlePsuInterrupt */
         MOD_INTRRP_RESETINTUNIT      = 0x11, /**< intrrp.C : IntrRp::resetIntUnit */
+        MOD_INTRRP_XIVE_SENDEOI      = 0x12,
     };
 
     enum IntrReasonCode
