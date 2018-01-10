@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,14 +63,15 @@ void* call_host_revert_sbe_mcs_setup( void *io_pArgs )
     // cast the target to a fapi2 target
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_master_proc( l_masterProc );
 
-    //Invode p9_revert_sbe_mcs_setup
+    //Invoke p9_revert_sbe_mcs_setup
     // Pass in boolean describing if we are using the FSP or not
     // If we are using the FSP then we will ask off the SBE fir
     // bits on the TP Local Fir register as the FSP with handle
     // SBE errors
-    FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup,
-                     l_fapi_master_proc,
-                     INITSERVICE::spBaseServicesEnabled());
+    // TODO: RTC 184860 Remove MCS acker workaround
+    //FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup,
+    //                 l_fapi_master_proc,
+    //                 INITSERVICE::spBaseServicesEnabled());
 
     if (l_err)
     {
