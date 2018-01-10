@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,7 +116,30 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
         return SUCCESS;
 
+    uint32_t l_rc = SUCCESS;
+
+    // If MCBISTFIR[3] is found to be on at the same time, mask it so it won't
+    // be logged as a separate event.
     ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
+
+    SCAN_COMM_REGISTER_CLASS * mcbistfir = mcbChip->getRegister( "MCBISTFIR" );
+    l_rc = mcbistfir->Read();
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR");
+    }
+    else if ( mcbistfir->IsBitSet(3) )
+    {
+        SCAN_COMM_REGISTER_CLASS * mcbistfir_mask_or =
+            mcbChip->getRegister( "MCBISTFIR_MASK_OR" );
+        mcbistfir_mask_or->SetBit(3);
+        l_rc = mcbistfir_mask_or->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on MCBIST_MASK_OR: "
+                      "mcbChip=0x%08x", mcbChip->getHuid() );
+        }
+    }
 
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
 
@@ -169,7 +192,6 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 
         if ( isInMdiaMode() )
         {
-            uint32_t l_rc = SUCCESS;
             SCAN_COMM_REGISTER_CLASS * mask = nullptr;
 
             // Stop any further commands on this MCBIST to avoid subsequent RCD
