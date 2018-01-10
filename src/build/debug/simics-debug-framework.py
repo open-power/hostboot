@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -632,10 +632,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
             # 0=base, 1=name, 4=size 5=mirrored target, 6=priority
             #print ">> %d:%s" % (entry[0], entry[1])
             #check if base == hrmor, or if memory space encompasses the
-            #entire base memory which is:  hrmor + 0x3000000 (48 MB)
+            #entire base memory which is:  hrmor + 0x4000000 (64 MB)
             if ((entry[0] == hb_hrmor) or
                 ((entry[0] < hb_hrmor) and
-                 (entry[0] + entry[4] >= hb_hrmor + 0x3000000) or
+                 (entry[0] + entry[4] >= hb_hrmor + 0x4000000) or
                  (entry[0] == 134217728) or
                  (entry[0] == 136314880))): #0x8000000 or 0x8200000
                 target = entry[5]

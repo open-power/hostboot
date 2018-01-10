@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ use constant    MEMSTATE_HALF_CACHE => 0x4;
 use constant    MEMSTATE_REDUCED_CACHE => 0x8;
 use constant    MEMSTATE_FULL_CACHE => 0xa;
 use constant    MEMSTATE_MS_48MEG => 0x30;
+use constant    MEMSTATE_MS_64MEG => 0x40;
 
 use constant    _KB => 1024;
 use constant    _MB => 1024 * 1024;
@@ -75,6 +76,10 @@ our %memory_maps = (
         # Add next 38MB after we expand to memory.
         [ 10 * _MB,                      38 * _MB
         ]
+    MEMSTATE_MS_64MEG() =>
+        # Add next 54MB after we expand to memory.
+        [ 10 * _MB,                      54 * _MB
+        ]
 );
 
 # Map the current state to the combined states available.
@@ -91,6 +96,9 @@ our %memory_states = (
     MEMSTATE_MS_48MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE, MEMSTATE_MS_48MEG ]
+    MEMSTATE_MS_64MEG() => [ MEMSTATE_NO_MEM,
+                             MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_64MEG ]
 );
 
 sub main

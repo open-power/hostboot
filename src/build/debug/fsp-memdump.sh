@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -85,7 +85,7 @@ discover()
 limit_memory()
 {
     case ${STATE} in
-        30)
+        40)
             STATE=08
             ;;
         *)
@@ -187,6 +187,25 @@ do
             dump 48234496 1048576
             dump 49283072 1048576
             STATE=0A
+            ;;
+        40)
+            dump 50331648 1048576
+            dump 51380224 1048576
+            dump 52428800 1048576
+            dump 53477376 1048576
+            dump 54525952 1048576
+            dump 55574528 1048576
+            dump 56623104 1048576
+            dump 57671680 1048576
+            dump 58720256 1048576
+            dump 59768832 1048576
+            dump 60817408 1048576
+            dump 61865984 1048576
+            dump 62914560 1048576
+            dump 63963136 1048576
+            dump 65011712 1048576
+            dump 66060288 1048576
+            STATE=30
             ;;
         discover)  # Call discover function to determine state.
             discover

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    //  extend the memory space from 8MEG to 48Meg
+    //  extend the memory space from cache out to VMM_MEMORY_SIZE of mainstore
 
     //if mirrored then check that there is going to be memory at that location.
     //For sapphire with mirrored location flipped and at zero,
@@ -326,7 +326,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 }
             }
 
-            // Call the function to extend VMM to 48MEG
+            // Call the function to extend VMM to mainstore
             int rc = mm_extend();
 
             if (rc!=0)
@@ -338,7 +338,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                  * @userdata1    rc from mm_extend
                  * @userdata2    <UNUSED>
                  *
-                 *   @devdesc  Failure extending memory to 48MEG after
+                 *   @devdesc  Failure extending memory to after
                  *        exiting cache contained mode.
                  */
                 l_errl = new ERRORLOG::ErrlEntry

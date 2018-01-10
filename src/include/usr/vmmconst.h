@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@
 #define VMM_ADDR_EXTEND_BLOCK (VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE)
 
 /** Maximize size of Base Segment Memory after expansion */
-#define VMM_MEMORY_SIZE (48*MEGABYTE)
+#define VMM_MEMORY_SIZE (64*MEGABYTE)
 
 /** Base Segment Extended Memory Block Size */
 #define VMM_EXTEND_BLOCK_SIZE (VMM_MEMORY_SIZE-VMM_BASE_BLOCK_SIZE)
@@ -141,13 +141,13 @@ enum BlockPriority
 #define SLBE_b 12
 
 /** Hostboot reserved memory */
-#define VMM_HRMOR_OFFSET 128*MEGABYTE
-#define VMM_HB_RSV_MEM_SIZE 256*MEGABYTE
+#define VMM_HRMOR_OFFSET (128*MEGABYTE)
+#define VMM_HB_RSV_MEM_SIZE (256*MEGABYTE)
 
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
-/**    <n0p0 HRMOR = 128MB> + <memory size = 48MB> = 176 MB */
-/** HOMER is 4 MB per proc, 8 procs = 32MB */
+/**    <n0p0 HRMOR = 128MB> + <memory size = 64MB> = 192 MB */
+/** HOMER is 4 MB per proc, 4 procs = 16MB */
 /** Each HOMER must start on a 4MB offset to meet OCC requirements */
 #define VMM_HOMER_REGION_START_OFFSET (VMM_MEMORY_SIZE)
 #define VMM_HOMER_INSTANCE_SIZE_IN_MB (4)
@@ -160,7 +160,6 @@ enum BlockPriority
 
 /** Physical Memory for OCC common space - 8MB total */
 /** OCC Common must be on an 8MB offset */
-/** Start = End of Homer, currently 208MB */
 #define VMM_OCC_COMMON_START_OFFSET VMM_HOMER_REGION_END_OFFSET
 #define VMM_OCC_COMMON_SIZE_IN_MB 8
 #define VMM_OCC_COMMON_SIZE \
@@ -178,15 +177,9 @@ enum BlockPriority
 #define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
 /** End of Attr Area = 217MB */
 
-/** Chunk of physical memory used for Dump Source Table */
-#define DUMP_TEST_MEMORY_ADDR \
- (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)  /* currently 217MB */
-#define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
-/** End of Dump Source Table = 221MB */
-
 /** Memory for hostboot data Table of Contents */
 #define VMM_HB_DATA_TOC_START_OFFSET \
-    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 221MB */
+    (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE) /* currently 217MB */
 
 /** Variable Attribute overrides and Attributes memory here **/
 
@@ -217,6 +210,13 @@ enum BlockPriority
 
 /** Block size used in remove pages test */
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
+
+/** Chunk of physical memory used for Dump Source Table */
+#define DUMP_TEST_MEMORY_ADDR (256*MEGABYTE)
+#define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
+/** End of Dump Test Area = 260MB */
+
+
 
 /**
  * Physical Memory Constants

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -924,7 +924,7 @@ namespace Systemcalls
      *
      * Depending on the syscall parameter, we will either switch from 4MB
      * to a cache-contained mode (either full 10MB or reduced 8MB) or will
-     * expand into 48MB of space using real system memory.
+     * expand into VMM_MEMORY_SIZE of space using real system memory.
 
      * @param[in] t: The task used to extend Memory
      */

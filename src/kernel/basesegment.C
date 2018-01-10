@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,16 +236,16 @@ int BaseSegment::mmExtend(void)
 
 /**
  * Allocates a block of virtual memory of the given size
- * to extend the VMM to 48MEG in size in mainstore
+ * to extend the VMM into Mainstore (up to VMM_MEMORY_SIZE)
  */
 int BaseSegment::_mmExtend(void)
 {
-    // The base address of the extended memory is 8Mg.. The first x pages is
-    // for the SPTE.. The remaining pages from 8MG + SPTE to 48MEG is added to
-    // the HEAP..
+    // The base address of the extended memory is the cache size.. The first x
+    // pages is for the SPTE.. The remaining pages from the end of cache + SPTE
+    // up to VMM_MEMORY_SIZE of mainstore is added to the HEAP.
 
-    uint64_t l_vaddr = VMM_ADDR_EXTEND_BLOCK; // 8MEG
-    uint64_t l_size = VMM_EXTEND_BLOCK_SIZE;  // 48MEG - 8MB (base block)
+    uint64_t l_vaddr = VMM_ADDR_EXTEND_BLOCK; // Cache size
+    uint64_t l_size = VMM_EXTEND_BLOCK_SIZE;  // VMM - 8MB (base block)
 
     // Call to allocate a block passing in the requested address of where the
     // SPTEs should be created
@@ -283,14 +283,14 @@ int BaseSegment::_mmExtend(void)
     PageManager::addMemory(l_vaddr + (spte_pages*PAGESIZE),
                            l_size/PAGESIZE - spte_pages);
 
-    // Update the physical Memory size to now be 48MEG. by adding the extended
-    // block size to the physical mem size.
+    // Update the physical Memory size to now include some mainstore by adding
+    // the extended block size to the physical mem size.
     iv_physMemSize += VMM_EXTEND_BLOCK_SIZE;
 
 
     // Call to set the Hostboot MemSize and location needed for DUMP.
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_MS,
-                                     KernelMemState::MS_48MEG);
+                                     KernelMemState::FULL_MEM);
 
     return 0;
 }

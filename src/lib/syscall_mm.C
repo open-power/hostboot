@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ uint64_t mm_virt_to_phys( void* i_vaddr )
 }
 
 /**
- * System call to extend Memory to 48Meg.
+ * System call to extend Memory to VMM_MEMORY_SIZE..
  */
 int mm_extend(MM_EXTEND_SIZE i_size)
 {
