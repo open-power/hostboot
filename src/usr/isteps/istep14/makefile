@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -59,6 +59,9 @@ OBJS += call_host_mpipl_service.o
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
+
+# TODO: RTC 184860 Remove MCS acker workaround
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/p9_revert_sbe_mcs_setup.mk
 
 # TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
 # same *.o file in their *.mk files

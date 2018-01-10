@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,10 @@
 #include <p9_setup_bars.H>
 #include <p9_mss_setup_bars.H>
 
+// TODO: RTC 184860 Remove MCS acker workaround
+#include <initservice/initserviceif.H>
+#include <p9_revert_sbe_mcs_setup.H>
+
 //HWP Invoker
 #include    <fapi2/plat_hwp_invoker.H>
 
@@ -55,6 +59,46 @@ void* call_proc_setup_bars (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_setup_bars entry" );
+
+
+    // *******************************
+    // Start MCS acker workaround
+    // TODO: RTC 184860 Remove MCS acker workaround
+    // *******************************
+    TARGETING::Target * l_masterProc;
+    TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "Running p9_revert_sbe_mcs_setup on "
+              "target HUID %.8X",
+              TARGETING::get_huid(l_masterProc));
+
+    // cast the target to a fapi2 target
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_master_proc( l_masterProc );
+
+    //Invoke p9_revert_sbe_mcs_setup
+    // Pass in boolean describing if we are using the FSP or not
+    // If we are using the FSP then we will ask off the SBE fir
+    // bits on the TP Local Fir register as the FSP with handle
+    // SBE errors
+    FAPI_INVOKE_HWP( l_errl, p9_revert_sbe_mcs_setup,
+                     l_fapi_master_proc,
+                     INITSERVICE::spBaseServicesEnabled());
+
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR 0x%.8X: p9_revert_sbe_mcs_setup",
+                  l_errl->reasonCode());
+        // Create IStep error log and cross reference error
+        l_stepError.addErrorDetails(l_errl);
+        // Commit error
+        errlCommit(l_errl,SBE_COMP_ID);
+    }
+    // *******************************
+    // End MCS acker workaround
+    // *******************************
+
 
     // Get all Centaur targets
     TARGETING::TargetHandleList l_cpuTargetList;
