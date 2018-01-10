@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,10 @@ fapi2::ReturnCode p9_fbc_cd_hp1_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG));
         uint64_t l_def_NUM_X_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
+        fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
+        uint64_t l_def_CHIP_IS_GROUP = (l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE ==
+                                        fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP);
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
         fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
@@ -170,7 +174,11 @@ fapi2::ReturnCode p9_fbc_cd_hp1_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01010 );
                 }
-                else if ((l_def_NUM_X_LINKS_CFG == literal_3))
+                else if (((l_def_NUM_X_LINKS_CFG == literal_3) && ( ! l_def_CHIP_IS_GROUP)))
+                {
+                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
+                }
+                else if (((l_def_NUM_X_LINKS_CFG == literal_3) && l_def_CHIP_IS_GROUP))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
                 }

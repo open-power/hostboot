@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,10 +61,10 @@ const uint32_t EPSILON_W_T1_LE[] = {    9,   10,   11,   13,   15,   27 };
 
 // HE epsilon (4 chips per-group)
 const uint32_t EPSILON_R_T0_HE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_HE[] = {   77,   78,   81,   84,   89,  113 };
-const uint32_t EPSILON_R_T2_HE[] = {  187,  189,  191,  194,  199,  223 };
-const uint32_t EPSILON_W_T0_HE[] = {   12,   13,   14,   16,   18,   30 };
-const uint32_t EPSILON_W_T1_HE[] = {   96,   97,   98,   99,  102,  114 };
+const uint32_t EPSILON_R_T1_HE[] = {   86,   88,   90,   93,   98,  122 };
+const uint32_t EPSILON_R_T2_HE[] = {  197,  198,  201,  204,  209,  233 };
+const uint32_t EPSILON_W_T0_HE[] = {   22,   23,   24,   26,   28,   40 };
+const uint32_t EPSILON_W_T1_HE[] = {  105,  106,  107,  109,  111,  123 };
 
 // HE epsilon (flat 4 Zeppelin)
 const uint32_t EPSILON_R_T0_F4[] = {    7,    7,    8,    8,   10,   22 };
