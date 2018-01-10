@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,7 +163,17 @@ enum SectionId
     RESERVED_MEM,         //< Hostboot's Reserved Mainstore Memory
     HRMOR_STASH,          //< Pointer to address in reserved memory
                           //  where PHYP can write HRMOR
-    LAST_SECTION = HRMOR_STASH   //< Placeholder for arrays
+    CPU_CTRL,             // Spira-H CPU controls area
+    LAST_SECTION = CPU_CTRL   //< Placeholder for arrays
+};
+
+/**
+ * Range of SBE unsecure memory region to open
+ */
+enum SbeUnsecureMemoryRegions
+{
+    SP_HOST_UNTRUSTED_COMM_AREA_ADDR = 0,
+    SP_HOST_UNTRUSTED_COMM_AREA_SIZE = 64*MEGABYTE,
 };
 
 /**
@@ -248,6 +258,16 @@ void setPayloadBaseAddress(uint64_t i_payloadAddress);
  *        of the HDAT memory
  */
 void rediscover_hdat( void );
+
+/**
+ * @brief  Open necessary unsecure SBE windows for SP -> host communication
+ *         Currently opens two windows
+ *             1. CPU controls SP ATTN areas
+ *             2. SP_HOST_UNTRUSTED_COMM_AREA_ADDR
+ *
+ * @return errlHndl_t Returns nullptr on success; otherwise errlog
+ */
+errlHndl_t openUntrustedSpCommArea();
 
 }
 

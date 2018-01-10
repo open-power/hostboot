@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@
 #include <util/utilmclmgr.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <runtime/common/runtime_utils.H>
+#include <limits.h>
 
 namespace RUNTIME
 {
@@ -2326,6 +2327,108 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
 
     return l_err;
 } // end persistent_rwAttrRuntimeCheck
+
+errlHndl_t openUntrustedSpCommArea()
+{
+    TRACFCOMP( g_trac_runtime, ENTER_MRK "openUntrustedSpCommArea()");
+    errlHndl_t l_err = nullptr;
+
+    do {
+    TARGETING::Target * l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert(l_sys != nullptr, "openUntrustedSpCommArea: top level target nullptr");
+
+    // Get Payload HRMOR
+    uint64_t l_hrmor = l_sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>() * MEGABYTE;
+
+    // pass 0 since there is only one record
+    const uint64_t l_instance = 0;
+    uint64_t l_cpuCtrlDataAddr = 0;
+    size_t l_cpuCtrlDataSizeMax = 0;
+
+    // Get the address of the Spira-H CPU control section
+    l_err = RUNTIME::get_host_data_section( RUNTIME::CPU_CTRL,
+                                            l_instance,
+                                            l_cpuCtrlDataAddr,
+                                            l_cpuCtrlDataSizeMax);
+    if(l_err != nullptr)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): get_host_data_section() failed for CPU_CTRL HDAT section");
+        break;
+    }
+
+    // Traverse CPU Controls Header Area pointer to find CPU Controls Structure
+    auto const l_pCpuCtrlHdr =
+        reinterpret_cast<hdatHDIF_t*>(l_cpuCtrlDataAddr);
+    auto const l_pCpuDataPointer =
+        reinterpret_cast<hdatHDIFDataHdr_t*>(l_cpuCtrlDataAddr +
+                                             l_pCpuCtrlHdr->hdatDataPtrOffset);
+    auto const l_pCpuCtrlInfo =
+        reinterpret_cast<hdatCpuCtrlInfo_t*>(l_cpuCtrlDataAddr +
+                                             l_pCpuDataPointer->hdatOffset);
+
+    // Get Address of First SP ATTN area and size of both SP ATTN areas
+    // Add HRMOR to address as it's relative to the HRMOR
+    uint64_t l_spAttnStartAddr = l_pCpuCtrlInfo->spAttnArea1.address + l_hrmor;
+    size_t l_spAttnCombinedSize = l_pCpuCtrlInfo->spAttnArea1.size +
+                                  l_pCpuCtrlInfo->spAttnArea2.size;
+
+    TRACFCOMP( g_trac_runtime, "openUntrustedSpCommArea() SP ATTN addr = 0x%016llx combined size 0x%X",
+               l_spAttnStartAddr,
+               l_spAttnCombinedSize);
+
+    // Open unsecure SBE memory regions
+    // Loop through all functional Procs
+    TARGETING::TargetHandleList l_procChips;
+    getAllChips(l_procChips, TARGETING::TYPE_PROC);
+    for (const auto & l_procChip : l_procChips)
+    {
+        // Get Instance ID of proc for trace
+        uint32_t l_id = l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+
+        // Open SP ATTN region
+        l_err = SBEIO::openUnsecureMemRegion(l_spAttnStartAddr,
+                                             l_spAttnCombinedSize,
+                                             true, //true=Read-Write
+                                             l_procChip);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() failed proc = 0x%X addr = 0x%016llx size = 0x%X",
+                      l_id,
+                      l_spAttnStartAddr,
+                      l_spAttnCombinedSize);
+            break;
+        }
+
+        // Only open additional SBE window in PHYP mode
+        if(TARGETING::is_phyp_load())
+        {
+            l_err = SBEIO::openUnsecureMemRegion(
+                                        RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_ADDR,
+                                        RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_SIZE,
+                                        true, //true=Read-Write
+                                        l_procChip);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() failed proc = 0x%X addr = 0x%016llx size = 0x%X",
+                          l_id,
+                          RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_ADDR,
+                          RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_SIZE);
+                break;
+            }
+        }
+    }
+    if(l_err)
+    {
+        break;
+    }
+
+    } while(0);
+
+    TRACFCOMP( g_trac_runtime, EXIT_MRK"openUntrustedSpCommArea()");
+
+    return l_err;
+}
 
 } //namespace RUNTIME
 
