@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -665,6 +665,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
         }
 
+
         // Fill in Hostboot runtime data for all nodes
         // (adjunct partition)
         // Write the HB runtime data into mainstore
@@ -675,6 +676,19 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "Failed hbRuntimeData setup" );
             // break from do loop if error occurred
             break;
+        }
+
+        // Open untrusted SP communication area if there is a PAYLOAD
+        // NOTE: Must be after all HDAT processing
+        if( !(TARGETING::is_no_load()) )
+        {
+            l_err = RUNTIME::openUntrustedSpCommArea();
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed openUntrustedSpCommArea" );
+                break;
+            }
         }
 
     } while(0);

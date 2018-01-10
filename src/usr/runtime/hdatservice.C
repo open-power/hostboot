@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -927,6 +927,31 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             o_dataSize = MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_SIZE; // 8 bytes
 
         }
+        // SPIRA-H CPU Controls
+        else if ( RUNTIME::CPU_CTRL == i_section )
+        {
+            // Find the right tuple and verify it makes sense
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl )
+            {
+                break;
+            }
+            TRACDCOMP( g_trac_runtime, "CPU_CTRL tuple=%p", tuple );
+
+            uint64_t base_addr = 0;
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl )
+            {
+                break;
+            }
+
+            TRACDCOMP( g_trac_runtime, "cpu_ctrl_data=%p", base_addr );
+
+            // set the base address and size for the section
+            record_size = tuple->hdatActualSize;
+            o_dataSize = record_size;
+            o_dataAddr = base_addr;
+        }
         // Not sure how we could get here...
         else
         {
@@ -1505,6 +1530,10 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
         case RUNTIME::HRMOR_STASH:
             l_spiraS = SPIRAS_MDT;
             l_spiraL = SPIRAL_MDT;
+            break;
+        case RUNTIME::CPU_CTRL:
+            l_spiraH = SPIRAH_CPU_CTRL;
+            l_spiraL = SPIRAL_CPU_CTRL;
             break;
         default:
             TRACFCOMP(g_trac_runtime, ERR_MRK"getAndCheckTuple> section %d not supported",

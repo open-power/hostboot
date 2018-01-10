@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,5 +417,25 @@ struct hbHypCommArea_t
     {
     }
 } PACKED;
+
+/** @brief The fields in the CPU Controls Legacy structure are a set of
+ *         address / length pairs as shown below
+ */
+struct hdatCpuCtrlPair_t
+{
+    uint64_t address;    // 0x0000 Absolute main store adress relative to HRMOR
+    uint64_t size;       // 0x0008 Data structure size in bytes
+}__attribute__ ((packed));
+
+/** @brief CPU Controls Legacy Structure pointed to by the CPU Controls Header
+ *         Area pointer in the CPU Controls
+ */
+struct hdatCpuCtrlInfo_t
+{
+    hdatCpuCtrlPair_t spAddrTable;       // SP Address Table (SPAT)
+    hdatCpuCtrlPair_t spAttnArea1;       // SP Attention Area 1
+    hdatCpuCtrlPair_t spAttnArea2;       // SP Attention Area 2
+    hdatCpuCtrlPair_t servRoutineData;   // Service Routines Data Area
+}  __attribute__ ((packed));
 
 #endif
