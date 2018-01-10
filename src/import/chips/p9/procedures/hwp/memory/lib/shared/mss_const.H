@@ -184,6 +184,13 @@ enum ffdc_function_codes
     READ_RD_VREF_VALUES_FOR_DRAM = 93,
     GET_DRAM_DISABLE_REG_AND_POS = 94,
     GET_STARTING_WR_DQ_DELAY_VALUE = 95,
+
+    GET_TAAMIN = 96,
+    GET_TCKMIN = 97,
+    GET_TCKMAX = 98,
+
+    SUPPORTED_FREQS = 99,
+    SELECT_SUPPORTED_FREQ = 100,
 };
 
 enum states
