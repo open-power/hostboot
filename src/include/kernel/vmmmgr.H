@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,7 +192,7 @@ class VmmManager
 
         /**
          * @brief Allocates a block of virtual memory that extends the VMM
-         *          space up to 48MEG of Mainstore.
+         *          snto Mainstore (up to VMM_MEMORY_SIZE).
          */
         static int mmExtend( void);
 

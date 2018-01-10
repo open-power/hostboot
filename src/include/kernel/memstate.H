@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,8 @@
 #ifndef __KERNEL_MEMSTATE_H
 #define __KERNEL_MEMSTATE_H
 
+#include <usr/vmmconst.h>
+
 namespace KernelMemState
 {
     // hb_Mem_Location struct values are defined below.
@@ -45,7 +47,7 @@ namespace KernelMemState
      - - 4 = Hostboot is using half a cache
      - - 8 = Hostboot is using reduced cache
      - - 10 = Hostboot is using the full cache
-     - - 48 = Hostboot is using 48 MB of mainstore*/
+     - - XX = Hostboot is using XX MB of mainstore*/
 
 
     enum MemLocation
@@ -62,7 +64,7 @@ namespace KernelMemState
           HALF_CACHE      =  0x00000004,
           REDUCED_CACHE   =  0x00000008,
           FULL_CACHE      =  0x0000000A,
-          MS_48MEG        =  0x00000030,
+          FULL_MEM        =  (VMM_MEMORY_SIZE/MEGABYTE),
     };
 
     struct mem_location
