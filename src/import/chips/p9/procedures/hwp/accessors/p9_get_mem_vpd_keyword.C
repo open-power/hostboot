@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -422,29 +422,39 @@ extern "C"
             }
         }
 
-        //Was a matching row found?
-        //Was a valid keyword name found?
-        FAPI_ASSERT( (0 != l_second) &&
-                     (static_cast<char>(MAPPING_LAYOUT_INVALID) != l_second),
-                     fapi2::GET_MEM_VPD_UNSUPPORTED_CONFIG().
-                     set_MCS(fapi2::ATTR_MEMVPD_POS_Type(l_mcsPos)).
-                     set_FREQ(uint32_t(i_vpd_info.iv_freq_mhz)).
-                     set_DIMM0RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
-                     set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
-                     set_HEADER(mappingHeader_t(*l_mappingHeader)).
-                     set_MCS_TARGET(i_target).
-                     set_VPDTYPE(i_vpd_info.iv_vpd_type).
-                     set_MAPROW0(l_ffdc_MAPROW[0]).
-                     set_MAPROW1(l_ffdc_MAPROW[1]).
-                     set_MAPROW2(l_ffdc_MAPROW[2]).
-                     set_MAPROW3(l_ffdc_MAPROW[3]).
-                     set_MAPROW4(l_ffdc_MAPROW[4]).
-                     set_MAPROW5(l_ffdc_MAPROW[5]).
-                     set_MAPROW6(l_ffdc_MAPROW[6]).
-                     set_MAPROW7(l_ffdc_MAPROW[7]).
-                     set_MAPROW8(l_ffdc_MAPROW[8]).
-                     set_MAPROW9(l_ffdc_MAPROW[9]),
-                     "Unsupported configuration, no match in memory vpd mapping table");
+        // Was a matching row found?
+        // Was a valid keyword name found?
+        if( (0 == l_second) || ((static_cast<char>(MAPPING_LAYOUT_INVALID) == l_second)) )
+        {
+            // If we are in this conditional then we have encountered a fail and must decide
+            // how to proceed further.  If iv_is_config_ffdc_enabled is true we will collect
+            // FFDC and assert out here.
+            FAPI_ASSERT( !i_vpd_info.iv_is_config_ffdc_enabled,
+                         fapi2::GET_MEM_VPD_UNSUPPORTED_CONFIG().
+                         set_MCS(fapi2::ATTR_MEMVPD_POS_Type(l_mcsPos)).
+                         set_FREQ(uint32_t(i_vpd_info.iv_freq_mhz)).
+                         set_DIMM0RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
+                         set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
+                         set_HEADER(mappingHeader_t(*l_mappingHeader)).
+                         set_MCS_TARGET(i_target).
+                         set_VPDTYPE(i_vpd_info.iv_vpd_type).
+                         set_MAPROW0(l_ffdc_MAPROW[0]).
+                         set_MAPROW1(l_ffdc_MAPROW[1]).
+                         set_MAPROW2(l_ffdc_MAPROW[2]).
+                         set_MAPROW3(l_ffdc_MAPROW[3]).
+                         set_MAPROW4(l_ffdc_MAPROW[4]).
+                         set_MAPROW5(l_ffdc_MAPROW[5]).
+                         set_MAPROW6(l_ffdc_MAPROW[6]).
+                         set_MAPROW7(l_ffdc_MAPROW[7]).
+                         set_MAPROW8(l_ffdc_MAPROW[8]).
+                         set_MAPROW9(l_ffdc_MAPROW[9]),
+                         "Unsupported configuration, no match in memory vpd mapping table");
+
+            // If iv_is_config_ffdc_enabled is false we will arrive here and exit with a bad ReturnCode
+            // but won't collect FFDC so we don't pollute users with false fails.
+            FAPI_INF("Unsupported configuration, no match in memory vpd mapping table");
+            return fapi2::FAPI2_RC_FALSE;
+        }
 
         // build the keyword name
         o_keywordInfo.kwName[0] = l_first;

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -35,6 +35,22 @@
 <!-- -->
 
 <hwpErrors>
+  <hwpError>
+    <rc>RC_MSS_EMPTY_VECTOR</rc>
+    <description>
+      Empty vector conditional failed.
+    </description>
+    <ffdc>RECEIVED</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
 
    <hwpError>
     <rc>RC_MSS_INVALID_DIMM_TYPE</rc>

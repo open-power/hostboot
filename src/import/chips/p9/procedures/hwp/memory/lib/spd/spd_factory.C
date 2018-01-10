@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/eff_config/timing.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -60,6 +61,135 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
+
+
+///
+/// @brief Helper function to retrieves medium and fine timebase values
+/// @param[in] i_pDecoder the SPD decoder
+/// @param[out] o_mtb the medium timebase (MTB) from SPD
+/// @param[out] o_ftb the fine timebase (FTB) from SPD
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+static fapi2::ReturnCode get_timebases( const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+                                        int64_t& o_mtb,
+                                        int64_t& o_ftb )
+{
+    // Retrieve timing parameters
+    const auto l_target = i_pDecoder->iv_target;
+
+    FAPI_TRY( i_pDecoder->medium_timebase(o_mtb),
+              "%s. Failed medium_timebase()", mss::c_str(l_target) );
+    FAPI_TRY( i_pDecoder->fine_timebase(o_ftb),
+              "%s. Failed fine_timebase()", mss::c_str(l_target) );
+
+    FAPI_INF("MTB: %d, FTB: %d for %s", o_mtb, o_ftb, mss::c_str(l_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
+/// @param[in] i_pDecoder the SPD decoder
+/// @param[out] o_value tCKmin value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode get_tckmin( const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+                              uint64_t& o_value )
+{
+    int64_t l_timing_ftb = 0;
+    int64_t l_timing_mtb = 0;
+    int64_t l_medium_timebase = 0;
+    int64_t l_fine_timebase = 0;
+    int64_t l_temp = 0;
+
+    // Retrieve timing parameters
+    const auto l_target = i_pDecoder->iv_target;
+
+    FAPI_TRY( get_timebases(i_pDecoder, l_medium_timebase, l_fine_timebase),
+              "%s. Failed get_timebases", mss::c_str(l_target) );
+    FAPI_TRY( i_pDecoder->min_tck(l_timing_mtb),
+              "%s. Failed min_tck()", mss::c_str(l_target) );
+    FAPI_TRY( i_pDecoder->fine_offset_min_tck(l_timing_ftb),
+              "%s. Failed fine_offset_min_tck()", mss::c_str(l_target) );
+
+    // Calculate timing value
+    l_temp = spd::calc_timing_from_timebase(l_timing_mtb,
+                                            l_medium_timebase,
+                                            l_timing_ftb,
+                                            l_fine_timebase);
+
+    // Sanity check
+    FAPI_ASSERT(l_temp > 0,
+                fapi2::MSS_INVALID_TIMING_VALUE().
+                set_VALUE(l_temp).
+                set_FUNCTION(GET_TCKMIN).
+                set_DIMM_TARGET(l_target),
+                "%s. tCKmin invalid (<= 0) : %d",
+                mss::c_str(l_target),
+                l_temp);
+
+    o_value = l_temp;
+
+    FAPI_INF("%s. tCKmin (ps): %d",
+             mss::c_str(l_target),
+             o_value );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
+/// @param[in] i_pDecoder SPD decoder
+/// @param[out] o_value tCKmax value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode get_tckmax( const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+                              uint64_t& o_value )
+{
+    int64_t l_timing_ftb = 0;
+    int64_t l_timing_mtb = 0;
+    int64_t l_medium_timebase = 0;
+    int64_t l_fine_timebase = 0;
+    int64_t l_temp = 0;
+
+    // Retrieve timing parameters
+    const auto l_target = i_pDecoder->iv_target;
+
+    FAPI_TRY( get_timebases(i_pDecoder, l_medium_timebase, l_fine_timebase),
+              "%s. Failed get_timebases", mss::c_str(l_target) );
+    FAPI_TRY( i_pDecoder->max_tck(l_timing_mtb),
+              "%s. Failed max_tck()", mss::c_str(l_target) );
+    FAPI_TRY( i_pDecoder->fine_offset_max_tck(l_timing_ftb),
+              "%s. Failed fine_offset_max_tck()", mss::c_str(l_target) );
+
+    // Calculate timing value
+    l_temp = spd::calc_timing_from_timebase(l_timing_mtb,
+                                            l_medium_timebase,
+                                            l_timing_ftb,
+                                            l_fine_timebase);
+
+    // Sanity check
+    FAPI_ASSERT(l_temp > 0,
+                fapi2::MSS_INVALID_TIMING_VALUE().
+                set_VALUE(l_temp).
+                set_FUNCTION(GET_TCKMAX).
+                set_DIMM_TARGET(l_target),
+                "%s. tCKmax invalid (<= 0) : %d",
+                mss::c_str(l_target),
+                l_temp);
+
+    o_value = l_temp;
+
+    FAPI_INF( "%s. tCKmax (ps): %d",
+              mss::c_str(l_target),
+              o_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace spd
 {
 

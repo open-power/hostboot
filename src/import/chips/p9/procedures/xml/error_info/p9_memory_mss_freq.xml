@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -81,7 +81,6 @@
     <ffdc>TAAMIN</ffdc>
     <ffdc>PROPOSED_TCK</ffdc>
     <ffdc>IS_3DS</ffdc>
-    <ffdc>FREQUENCY</ffdc>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
@@ -127,22 +126,12 @@
   <hwpError>
     <rc>RC_MSS_FAILED_TO_FIND_SUPPORTED_CL</rc>
     <description>
-        Desired frequency from MRW is not supported by the DIMMS installed
-        Checked via comparing Cas Latencies supported by DIMM and by CL calculated from MRW FREQ
+      Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
     </description>
     <ffdc>DESIRED_CAS_LATENCY</ffdc>
     <ffdc>COMMON_CLS</ffdc>
     <ffdc>TAA</ffdc>
     <ffdc>TCK</ffdc>
-    <ffdc>MSS_MRW_FREQ_0</ffdc>
-    <ffdc>MSS_MRW_FREQ_1</ffdc>
-    <ffdc>MSS_MRW_FREQ_2</ffdc>
-    <ffdc>MSS_MRW_FREQ_3</ffdc>
-    <ffdc>MSS_MAX_FREQ_0</ffdc>
-    <ffdc>MSS_MAX_FREQ_1</ffdc>
-    <ffdc>MSS_MAX_FREQ_2</ffdc>
-    <ffdc>MSS_MAX_FREQ_3</ffdc>
-    <ffdc>MSS_MAX_FREQ_4</ffdc>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
@@ -332,10 +321,10 @@
       remaining
       If sync mode required, frequencies have to match a nest frequency
     </description>
-    <ffdc>MSS_MRW_FREQ_0</ffdc>
-    <ffdc>MSS_MRW_FREQ_1</ffdc>
-    <ffdc>MSS_MRW_FREQ_2</ffdc>
-    <ffdc>MSS_MRW_FREQ_3</ffdc>
+    <ffdc>MSS_VPD_FREQ_0</ffdc>
+    <ffdc>MSS_VPD_FREQ_1</ffdc>
+    <ffdc>MSS_VPD_FREQ_2</ffdc>
+    <ffdc>MSS_VPD_FREQ_3</ffdc>
     <ffdc>MSS_MAX_FREQ_0</ffdc>
     <ffdc>MSS_MAX_FREQ_1</ffdc>
     <ffdc>MSS_MAX_FREQ_2</ffdc>
@@ -354,7 +343,7 @@
     </callout>
      <callout>
       <childTargets>
-          <parent>MCA_TARGET</parent>
+          <parent>MCBIST_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>

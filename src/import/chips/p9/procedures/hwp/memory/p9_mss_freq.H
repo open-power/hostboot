@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,6 +113,7 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_M
                                           fapi2::ENUM_ATTR_MSS_FREQ_MT2400,
                                           fapi2::ENUM_ATTR_MSS_FREQ_MT2666,
                                         };
+
     std::sort( l_supported.begin(), l_supported.end() );
 
     for (const auto l_vec : i_dimm_freq)
@@ -127,11 +128,11 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<fapi2::TARGET_TYPE_M
     }
 
     // If we saw all 0's, write a 0.
-    l_final_freq = l_final_freq == UINT64_MAX ? 0 : l_final_freq;
+    l_final_freq = (l_final_freq == UINT64_MAX) ? 0 : l_final_freq;
 
     // Shouldn't be getting 0 here. There have to be DIMMs installed for this code to be executed
-    // The code would have errored out before if a frequency wasn't found.:w
-    FAPI_ASSERT( std::binary_search(l_supported.begin(), l_supported.end(), l_final_freq) == true,
+    // The code would have errored out before if a frequency wasn't found.
+    FAPI_ASSERT( std::binary_search(l_supported.begin(), l_supported.end(), l_final_freq),
                  fapi2::MSS_BAD_FREQ_CALCULATED()
                  .set_MSS_FREQ(l_final_freq)
                  .set_MCBIST_TARGET(i_target)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -257,6 +257,25 @@ fapi_try_exit:
 }
 
 }// spd
+
+///
+/// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
+/// @param[in] i_pDecoder the SPD decoder
+/// @param[out] o_value tCKmin value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode get_tckmin(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+                             uint64_t& o_value);
+
+///
+/// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
+/// @param[in] i_pDecoder SPD decoder
+/// @param[out] o_value tCKmax value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode get_tckmax(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+                             uint64_t& o_value);
+
 }// mss
 
 #endif //_MSS_SPD_FACTORY_H_

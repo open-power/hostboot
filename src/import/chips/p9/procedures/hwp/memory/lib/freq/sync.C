@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,19 +28,21 @@
 /// @brief Synchronous function implementations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#include  <vector>
-#include <map>
-
 #include <fapi2.H>
+#include <vpd_access.H>
+#include <algorithm>
+#include <vector>
+#include <map>
 #include <mss.H>
 #include <lib/freq/sync.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
+#include <lib/spd/spd_factory.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
@@ -310,59 +312,231 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Create and sort a vector of supported MT/s (freq)
-/// @param[in] MCA target for which to get the DIMM configs
-/// @param[out] reference to a std::vector<uint32_t> space to put the sorted vector
-/// @return FAPI2_RC_SUCCESS iff ok
-/// @note Taken from ATTR_MSS_MRW_SUPPORTED_FREQ. The result is sorted so such that the min
-/// supported freq is std::vector<>.begin and the max is std::vector<>.end - 1. You can
-/// search the resulting vector for valid frequencies as it is sorted.
+/// @brief Return whether a given freq is supported
+/// @param[in] a freq to check for
+/// @param[in] reference to a std::vector of supported freqs (sorted)
+/// @return bool, true iff input freq is supported
 ///
-fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCA>& i_target, std::vector<uint32_t>& o_freqs)
+bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs)
 {
-    o_freqs.clear();
+    return std::binary_search(i_freqs.begin(), i_freqs.end(), i_freq);
+}
 
-    std::vector<uint32_t> l_mrw_freqs(NUM_MRW_FREQS, 0);
-    std::vector<uint32_t> l_max_freqs(NUM_MAX_FREQS, 0);
-    uint8_t l_req_sync_mode = 0;
+///
+/// @brief Create a vector of support freq based on VPD config
+/// @param[in] MCBIST target for which to get the DIMM configs
+/// @param[out] reference to a std::vector of supported VPD frequencies
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                       std::vector<uint32_t>& o_vpd_supported_freqs)
+{
+    uint8_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {};
+    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {};
+    bool is_first_supported_freq = true;
 
-    FAPI_TRY( mss::mrw_supported_freq(l_mrw_freqs.data()) );
-    FAPI_TRY( mss::max_allowed_dimm_freq(l_max_freqs.data()) );
-    FAPI_TRY( mss::required_synch_mode(l_req_sync_mode) );
+    // Clearing output Just.In.Case
+    o_vpd_supported_freqs.clear();
 
-    FAPI_INF("attribute supported freqs %d %d %d %d",
-             l_mrw_freqs[0], l_mrw_freqs[1], l_mrw_freqs[2], l_mrw_freqs[3]);
+    fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MR);
+    l_vpd_info.iv_is_config_ffdc_enabled = false;
 
-    FAPI_INF("attribute supported max freqs %d %d %d %d %d",
-             l_max_freqs[0], l_max_freqs[1], l_max_freqs[2], l_max_freqs[3], l_max_freqs[4]);
+    for( const auto& mcs : mss::find_targets<TARGET_TYPE_MCS>(i_target) )
+    {
+        for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(mcs) )
+        {
+            FAPI_TRY( mss::eff_num_master_ranks_per_dimm(p, &(l_rank_count_dimm[0])) );
 
-    FAPI_INF("attribute required sync mode %d", l_req_sync_mode);
+            l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
+            l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
 
-    FAPI_TRY( supported_freqs_helper( i_target,
-                                      l_mrw_freqs,
-                                      l_max_freqs,
-                                      l_req_sync_mode == fapi2::ENUM_ATTR_REQUIRED_SYNCH_MODE_ALWAYS,
-                                      o_freqs) );
+            // Iterate through all Nimbus supported freqs
+            for( const auto& freq : NIMBUS_SUPPORTED_FREQS )
+            {
+                l_vpd_info.iv_freq_mhz = freq;
+
+                FAPI_INF("%s. VPD info - frequency: %d MT/s, rank count for dimm_0: %d, dimm_1: %d",
+                         mss::c_str(p), l_vpd_info.iv_freq_mhz, l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
+
+                // In order to retrieve the VPD contents we first need the keyword size.
+                // If we are unable to retrieve the keyword size then this speed isn't supported in the VPD
+                // and we skip to the next possible speed bin.
+                if(  fapi2::getVPD(mcs, l_vpd_info, nullptr) != fapi2::FAPI2_RC_SUCCESS )
+                {
+                    FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
+
+                    // If we added a freq that was supported in one MCA, but isn't supported for
+                    // another MCA under the same MCBIST (such as one port running single drop and another dual drop),
+                    // we remove it from the VPD supported freq list.
+                    auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
+
+                    if( l_it != o_vpd_supported_freqs.end()  )
+                    {
+                        o_vpd_supported_freqs.erase(l_it);
+                    }
+
+                    continue;
+                }
+
+                FAPI_ASSERT( l_vpd_info.iv_size <= mss::VPD_KEYWORD_MAX,
+                             fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                             set_MAX(mss::VPD_KEYWORD_MAX).
+                             set_ACTUAL(l_vpd_info.iv_size).
+                             set_KEYWORD(fapi2::MemVpdData::MR).
+                             set_MCS_TARGET(i_target),
+                             "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
+                             l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
+
+                // If we are here then we should have a valid frequency selected from polling the VPD keyword size above.
+                // A hard-fail here means something is wrong and we want to return current_err instead of ignoring it.
+                FAPI_TRY( fapi2::getVPD(mcs, l_vpd_info, &(l_mr_blob[0])),
+                          "Failed to retrieve VPD data for %s", mss::c_str(mcs) );
+
+                // Add non-repeating supported freqs
+                auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
+
+                if( l_it == o_vpd_supported_freqs.end() || is_first_supported_freq )
+                {
+                    is_first_supported_freq = false;
+                    FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
+                    o_vpd_supported_freqs.push_back(freq);
+                }
+            }// freqs
+        }// mca
+    }//mcs
+
+    std::sort( o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end() );
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
+/// @brief Removes frequencies unsupported by SPD from a sorted list of supported freqs -- helper function for testing
+/// @param[in] i_target the MCBIST target
+/// @param[in] i_highest_freq largest SPD supported freq
+/// @param[in,out] io_freqs std::vector of VPD supported freqs (sorted)
+///
+void rm_unsupported_spd_freqs(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                              const uint32_t i_highest_freq,
+                              std::vector<uint32_t>& io_freqs)
+{
+
+    // Don't use 'auto' since I want a const iterator and HB compiler
+    // bombs out using 'const auto'...
+    // The idea here is that if SPD across and MC can only support 2133 MT/s,
+    // we remove any supported frequencies in the vector higher than that (e.g. 2400, 2666)
+    auto it = std::upper_bound(io_freqs.begin(), io_freqs.end(), i_highest_freq);
+
+    // Remove all frequencies higher than max supported SPD freq per MCBIST
+    // since we set freq at that level
+    if( it != io_freqs.end() )
+    {
+        io_freqs.erase(it, io_freqs.end());
+    }
+
+    return;
+}
+
+///
+/// @brief Retrieves largest supported frequency the MC supports due to DIMM SPD
+/// @param[in] i_target the MCBIST target
+/// @param[out] o_highest_freq the largest SPD supported freq
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode largest_spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+        uint32_t& o_highest_freq)
+{
+    uint64_t l_largest_tck = 0;
+
+    // Get cached decoder
+    std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+
+    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches),
+              "%s. Failed to populate decoder cache", mss::c_str(i_target) );
+
+    // Looking for the biggest application period on an MC.
+    // This will further reduce supported frequencies the system can run on.
+    for ( const auto& l_cache : l_factory_caches )
+    {
+        const auto l_dimm = l_cache->iv_target;
+        uint64_t l_tckmax_in_ps = 0;
+        uint64_t l_tck_min_in_ps = 0;
+
+        FAPI_TRY( get_tckmax(l_cache, l_tckmax_in_ps),
+                  "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
+        FAPI_TRY( get_tckmin(l_cache, l_tck_min_in_ps),
+                  "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
+
+        // Determine a proposed tCK value that is greater than or equal tCKmin
+        // But less than tCKmax
+        l_largest_tck = std::max(l_largest_tck, l_tck_min_in_ps);
+        l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
+    }
+
+    FAPI_TRY( mss::ps_to_freq(l_largest_tck, o_highest_freq) );
+    FAPI_INF("Biggest freq supported from SPD %d MT/s for %s",
+             o_highest_freq, mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Create and sort a vector of supported MT/s (freq)
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[out] o_freqs reference to a std::vector to put the sorted vector
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Taken from VPD supported freqs. The result is sorted so such that the min
+/// supported freq is std::vector<>.begin and the max is std::vector<>.end - 1. You can
+/// search the resulting vector for valid frequencies as it is sorted.
+///
+fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                  std::vector<uint32_t>& o_freqs)
+{
+    o_freqs.clear();
+
+    std::vector<uint32_t> l_vpd_supported_freqs;
+    uint32_t l_largest_spd_freq = 0;
+    uint8_t l_req_sync_mode = 0;
+
+    // Retrieve system MRW constraints
+    std::vector<uint32_t> l_max_freqs(NUM_MAX_FREQS, 0);
+    FAPI_TRY( mss::max_allowed_dimm_freq(l_max_freqs.data()) );
+
+    // Retrieve frequency constraints due to DIMM SPD and VPD per MCBIST
+    FAPI_TRY( largest_spd_supported_freq(i_target, l_largest_spd_freq) );
+    FAPI_TRY( vpd_supported_freqs(i_target, l_vpd_supported_freqs) );
+    rm_unsupported_spd_freqs(i_target, l_largest_spd_freq, l_vpd_supported_freqs);
+
+    FAPI_TRY( mss::required_synch_mode(l_req_sync_mode) );
+
+    FAPI_TRY( supported_freqs_helper( i_target,
+                                      l_vpd_supported_freqs,
+                                      l_max_freqs,
+                                      l_req_sync_mode == fapi2::ENUM_ATTR_REQUIRED_SYNCH_MODE_ALWAYS,
+                                      o_freqs) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Create and sort a vector of supported MT/s (freq) - helper for testing purposes
-/// @param[in] MCA target for which to get the DIMM configs
-/// @param[in] vector of MRW freqs
-/// @param[in] vector of max allowed freqs
-/// @param[in] bool whether or not we're forced into sync mode
-/// @param[out] reference to a std::vector<uint32_t> space to put the sorted vector
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_hw_freqs vector of hardware supported freqs -- from VPD and SPD
+/// @param[in] i_max_mrw_freqs vector of max allowed freqs
+/// @param[in] i_req_sync_mode bool whether or not we're forced into sync mode
+/// @param[out] o_freqs reference to a std::vector to put the sorted vector
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note the attributes which drive this are read-only so they're hard to change when
 /// testing. So this helper allows us to use the attributes for the main path but
 /// have a path for testing (DFT I think the cool kids call it.)
 ///
-fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        const std::vector<uint32_t>& i_mrw_freqs,
-        const std::vector<uint32_t>& i_max_freqs,
+fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+        const std::vector<uint32_t>& i_hw_freqs,
+        const std::vector<uint32_t>& i_max_mrw_freqs,
         const bool i_req_sync_mode,
         std::vector<uint32_t>& o_freqs)
 {
@@ -377,44 +551,46 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCA>& i
     // frequencies allowed by the DIMM. So, we start way off the charts so std::min can do the lifting for us.
     uint32_t l_our_max_freq = ~(0);
 
-    // This magic number isn't the number of frequencies supported by the hardware, it's the number
-    // of frequencies in the attribute or MRW. They may be different
-    FAPI_ASSERT( i_mrw_freqs.size() == NUM_MRW_FREQS,
-                 fapi2::MSS_MRW_FREQ_SIZE_CHANGED()
-                 .set_ACTUAL_SIZE(i_mrw_freqs.size())
-                 .set_SUPPOSED_SIZE(NUM_MRW_FREQS)
-                 .set_MCA_TARGET(i_target),
-                 "%s Incorrect number of frequencies (%d)",
-                 mss::c_str(i_target),
-                 i_mrw_freqs.size());
-
-    FAPI_INF("unsorted supported freqs %d %d %d %d",
-             i_mrw_freqs[0], i_mrw_freqs[1], i_mrw_freqs[2], i_mrw_freqs[3]);
-
     // This is the number of elements in the max_allowed_dimm_freq attribute, not the frequencies of
-    // the system. Hence the magic number.
-    FAPI_ASSERT( i_max_freqs.size() == NUM_MAX_FREQS,
+    // the system.
+    FAPI_ASSERT( i_max_mrw_freqs.size() == NUM_MAX_FREQS,
                  fapi2::MSS_MAX_FREQ_ATTR_SIZE_CHANGED()
-                 .set_ACTUAL_SIZE(i_max_freqs.size())
+                 .set_ACTUAL_SIZE(i_max_mrw_freqs.size())
                  .set_SUPPOSED_SIZE(NUM_MAX_FREQS)
                  .set_MCA_TARGET(i_target),
                  "%s Incorrect number of max frequencies in attribute for (%d)",
                  mss::c_str(i_target),
-                 i_max_freqs.size());
+                 i_max_mrw_freqs.size());
 
-    FAPI_INF("max supported freqs %d %d %d %d %d",
-             i_max_freqs[0], i_max_freqs[1], i_max_freqs[2], i_max_freqs[3], i_max_freqs[4]);
+    FAPI_INF("attribute supported max allowed dimm freqs %d %d %d %d %d for %s",
+             i_max_mrw_freqs[0], i_max_mrw_freqs[1], i_max_mrw_freqs[2], i_max_mrw_freqs[3], i_max_mrw_freqs[4],
+             mss::c_str(i_target));
+
+    // This is the list of supported frequencies for VPD and SPD
+    FAPI_ASSERT( !i_hw_freqs.empty(),
+                 fapi2::MSS_EMPTY_VECTOR().
+                 set_FUNCTION(SUPPORTED_FREQS).
+                 set_TARGET(i_target),
+                 "Supported system freqs from VPD and SPD are empty for %s",
+                 mss::c_str(i_target));
+
+    for( const auto& freq : i_hw_freqs )
     {
-        const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
-        uint64_t l_dimms_on_port = l_dimms.size();
+        FAPI_DBG("VPD supported freqs %d for %s", freq, mss::c_str(i_target) );
+    }
+
+    for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
+        const uint64_t l_dimms_on_port = l_dimms.size();
 
         FAPI_ASSERT( (l_dimms_on_port <= MAX_DIMM_PER_PORT),
                      fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
                      .set_DIMM_COUNT(l_dimms_on_port)
-                     .set_MCA_TARGET(i_target),
+                     .set_MCA_TARGET(p),
                      "Seeing %d DIMM on port %s",
                      l_dimms_on_port,
-                     mss::c_str(i_target));
+                     mss::c_str(p));
 
         for (const auto& d : l_dimms)
         {
@@ -447,87 +623,85 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCA>& i
             FAPI_INF("%s rank config %d drop %d yields max freq attribute index of %d (%d)",
                      mss::c_str(d), l_num_master_ranks, l_dimms_on_port,
                      l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1],
-                     i_max_freqs[l_index] );
+                     i_max_mrw_freqs[l_index] );
 
-            l_our_max_freq = std::min(l_our_max_freq, i_max_freqs[l_index]);
-        }
-    }
+            l_our_max_freq = std::min(l_our_max_freq, i_max_mrw_freqs[l_index]);
+        }// dimm
+    }// mca
+
     FAPI_INF("after processing DIMM, max freq is %d", l_our_max_freq);
 
     // We need to push things as the memcpy doesn't update the vector's count, etc. and we don't
     // create the vector, we get it passed in. It's not a big deal as we want to touch all the elements
     // to check for 0's anyway.
-    for (size_t i = 0; i < NUM_MRW_FREQS; ++i)
+    for (size_t i = 0; i < i_hw_freqs.size(); ++i)
     {
         // Funky if-tree makes things clearer than a combinatorialy explosive conditional
-        if (i_mrw_freqs[i] == 0)
+        if (i_hw_freqs[i] == 0)
         {
             // Skip 0's
             continue;
         }
 
-        if (i_mrw_freqs[i] > l_our_max_freq)
+        if (i_hw_freqs[i] > l_our_max_freq)
         {
             // Skip freqs larger than our max
             continue;
         }
 
         // Add this freq if we're not in sync mode, or, if we are, add it if it matches a nest freq
-        switch (i_req_sync_mode)
+        FAPI_INF("attribute required sync mode %d for %s", i_req_sync_mode, mss::c_str(i_target));
+
+        if( i_req_sync_mode && !is_nest_freq_valid(i_hw_freqs[i]) )
         {
-            case true :
-                if (is_nest_freq_valid(i_mrw_freqs[i]))
-                {
-                    o_freqs.push_back(i_mrw_freqs[i]);
-                }
-
-                break;
-
-            case false :
-                o_freqs.push_back(i_mrw_freqs[i]);
-                break;
+            continue;
         }
+
+        o_freqs.push_back(i_hw_freqs[i]);
+
+    }//end for
+
+    {
+        // Doing this because the HB compiler freaks out if we have it within the FAPI_ASSERT.
+        // Outputting the value and then incrementing the iterator, that's why it's a post increment
+        // We have at most 4 memory freqs (1866, 2133, 2400, & 2666), if we ever get a list with < 4 items
+        // a value of 0 is logged in FFDC once we hit i_hw_freqs.end()...which is better than no logging.
+        auto l_supported = i_hw_freqs.begin();
+
+        const auto l_freq0 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
+        const auto l_freq1 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
+        const auto l_freq2 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
+        const auto l_freq3 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
+
+        // If we have an empty set, we have a problem
+        FAPI_ASSERT(o_freqs.size() != 0,
+                    fapi2::MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
+                    .set_MSS_VPD_FREQ_0(l_freq0)
+                    .set_MSS_VPD_FREQ_1(l_freq1)
+                    .set_MSS_VPD_FREQ_2(l_freq2)
+                    .set_MSS_VPD_FREQ_3(l_freq3)
+                    .set_MSS_MAX_FREQ_0(i_max_mrw_freqs[0])
+                    .set_MSS_MAX_FREQ_1(i_max_mrw_freqs[1])
+                    .set_MSS_MAX_FREQ_2(i_max_mrw_freqs[2])
+                    .set_MSS_MAX_FREQ_3(i_max_mrw_freqs[3])
+                    .set_MSS_MAX_FREQ_4(i_max_mrw_freqs[4])
+                    .set_MSS_NEST_FREQ_0(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1600)
+                    .set_MSS_NEST_FREQ_1(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1866)
+                    .set_MSS_NEST_FREQ_2(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2000)
+                    .set_MSS_NEST_FREQ_3(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2133)
+                    .set_MSS_NEST_FREQ_4(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2400)
+                    .set_REQUIRED_SYNC_MODE(i_req_sync_mode)
+                    .set_MAX_FREQ_FROM_DIMM(l_our_max_freq)
+                    .set_MCBIST_TARGET(i_target),
+                    "%s didn't find a frequency which was in VPD and was allowable max", mss::c_str(i_target));
     }
 
     // We now know o_freqs contains valid frequencies for this DIMM config, system contraints, and sync mode.
     // Sort it so we know supported min is o_freq.begin and supported max is o_freq.end - 1
     std::sort(o_freqs.begin(), o_freqs.end());
 
-    // If we have an empty set, we have a problem
-    FAPI_ASSERT(o_freqs.size() != 0,
-                fapi2::MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
-                .set_MSS_MRW_FREQ_0(i_mrw_freqs[0])
-                .set_MSS_MRW_FREQ_1(i_mrw_freqs[1])
-                .set_MSS_MRW_FREQ_2(i_mrw_freqs[2])
-                .set_MSS_MRW_FREQ_3(i_mrw_freqs[3])
-                .set_MSS_MAX_FREQ_0(i_max_freqs[0])
-                .set_MSS_MAX_FREQ_1(i_max_freqs[1])
-                .set_MSS_MAX_FREQ_2(i_max_freqs[2])
-                .set_MSS_MAX_FREQ_3(i_max_freqs[3])
-                .set_MSS_MAX_FREQ_4(i_max_freqs[4])
-                .set_MSS_NEST_FREQ_0(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1600)
-                .set_MSS_NEST_FREQ_1(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1866)
-                .set_MSS_NEST_FREQ_2(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2000)
-                .set_MSS_NEST_FREQ_3(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2133)
-                .set_MSS_NEST_FREQ_4(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2400)
-                .set_REQUIRED_SYNC_MODE(i_req_sync_mode)
-                .set_MAX_FREQ_FROM_DIMM(l_our_max_freq)
-                .set_MCA_TARGET(i_target),
-                "%s didn't find a frequency which was in VPD and was allowable max", mss::c_str(i_target));
-
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-///
-/// @brief Return whether a given freq is supported
-/// @param[in] a freq to check for
-/// @param[in] reference to a std::vector<uint32_t> of freqs
-/// @return bool, true iff input freq is supported
-///
-bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs)
-{
-    return std::binary_search(i_freqs.begin(), i_freqs.end(), i_freq);
 }
 
 }// mss
