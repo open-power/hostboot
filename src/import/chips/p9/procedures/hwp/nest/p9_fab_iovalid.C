@@ -951,6 +951,26 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
 
+    // lock down secure ABUS mailboxes (even half link, mailbox 0), future
+    // read accessses will return 0
+    if (i_set_not_clear &&
+        i_manage_optical)
+    {
+        fapi2::buffer<uint64_t> l_security_switch;
+
+        FAPI_TRY(fapi2::getScom(i_target,
+                                PU_SECURITY_SWITCH_REGISTER_SCOM,
+                                l_security_switch),
+                 "Error from getScom (PU_SECURITY_SWITCH_REGISTER_SCOM)");
+
+        l_security_switch.setBit<PU_SECURITY_SWITCH_REGISTER_ABUS_LOCK>();
+
+        FAPI_TRY(fapi2::putScom(i_target,
+                                PU_SECURITY_SWITCH_REGISTER_SCOM,
+                                l_security_switch),
+                 "Error from getScom (PU_SECURITY_SWITCH_REGISTER_SCOM)");
+    }
+
 fapi_try_exit:
     FAPI_INF("End");
     return fapi2::current_err;
