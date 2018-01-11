@@ -69,8 +69,6 @@
 #include <p9_hcode_image_build.H>
 
 #include <p9_hcode_image_defines.H>
-#include <p9_xip_image.h>
-
 
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>

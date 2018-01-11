@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -57,9 +57,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${HWP_PATH}
 #EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/nest/
 
+XIPPATH = ${ROOTPATH}/src/import/chips/p9/xip
+
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
 VPATH += ${ROOTPATH}/src/usr/sbe
 VPATH += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/perv
+VPATH += ${XIPPATH}
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

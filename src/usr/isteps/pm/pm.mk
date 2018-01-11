@@ -31,24 +31,17 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registers/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
 
 HWP_LIB_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 EXTRAINCDIR += ${HWP_PM_PATH}
-HWP_CUST_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
-EXTRAINCDIR += ${HWP_CUST_PATH}
-HWP_ACC_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
-EXTRAINCDIR += ${HWP_ACC_PATH}
-HWP_XIP_PATH += ${ROOTPATH}/src/import/chips/p9/xip
-EXTRAINCDIR += ${HWP_XIP_PATH}
-HWP_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-HWP_CEN_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
-HWP_COMMON_IMAGEPROCS_PATH += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
@@ -74,8 +67,8 @@ OBJS += p9_setup_evid.o
 OBJS += p9_avsbus_lib.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH} ${HWP_LIB_PATH}
-VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_CEN_IMAGEPROCS_PATH} ${HWP_COMMON_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
+VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
+VPATH += ${HWP_LIB_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${NEST_UTIL_PATH}
 
 # TODO RTC: 164237
@@ -106,19 +99,8 @@ include ${HWP_PM_PATH}/p9_pm_occ_gpe_init.mk
 include ${HWP_PM_PATH}/p9_pm_ppm_firinit.mk
 include ${HWP_PM_PATH}/p9_pm_ocb_indir_setup_circular.mk
 include ${HWP_PM_PATH}/p9_scan_ring_util.mk
-include ${HWP_CUST_PATH}/p9_xip_customize.mk
-include ${HWP_ACC_PATH}/p9_get_mvpd_ring.mk
-include ${HWP_ACC_PATH}/p9_mvpd_ring_funcs.mk
-include ${HWP_XIP_PATH}/p9_xip_image.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_dd_container.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_tor.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_ring_identification.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_ringId.mk
-include ${HWP_CEN_IMAGEPROCS_PATH}/cen_ringId.mk
-include ${HWP_COMMON_IMAGEPROCS_PATH}/common_ringId.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_api.mk
-include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
 include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk

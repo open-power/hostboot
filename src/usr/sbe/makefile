@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ MODULE = sbe
 ##      support for fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
@@ -36,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 HWP_CUSTOMIZE_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/customize
 EXTRAINCDIR += ${HWP_CUSTOMIZE_PATH}/
 HWP_ACCESSORS_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors
@@ -50,23 +52,5 @@ OBJS += sbe_update.o
 
 SUBDIRS += test.d
 
-##  NOTE: add a new directory onto the vpaths when you add a new HWP
-VPATH += ${HWP_CUSTOMIZE_PATH} ${HWP_ACCESSORS_PATH} ${HWP_XIP_PATH}
-VPATH += ${UTILS_PATH} ${CEN_UTILS_PATH} ${COMMON_UTILS_PATH}
-
-include ${ROOTPATH}/procedure.rules.mk
-
-include ${UTILS_PATH}/p9_dd_container.mk
-include ${HWP_CUSTOMIZE_PATH}/p9_xip_customize.mk
-include ${HWP_CUSTOMIZE_PATH}/p9_xip_section_append.mk
-include ${HWP_ACCESSORS_PATH}/p9_get_mvpd_ring.mk
-include ${HWP_ACCESSORS_PATH}/p9_mvpd_ring_funcs.mk
-include ${HWP_XIP_PATH}/p9_xip_image.mk
-include ${UTILS_PATH}/p9_ring_identification.mk
-include ${UTILS_PATH}/p9_ringId.mk
-include ${CEN_UTILS_PATH}/cen_ringId.mk
-include ${COMMON_UTILS_PATH}/common_ringId.mk
-include ${UTILS_PATH}/p9_scan_compression.mk
-include ${UTILS_PATH}/p9_tor.mk
 
 include ${ROOTPATH}/config.mk
