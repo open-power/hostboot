@@ -42,12 +42,17 @@
 #include <errl/errlmanager.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <attributeenums.H>
-
-// $TODO RTC:171739 - get the ring from cen.hw_ref_image in pnor
-// remove when get_ring is using the hw image
-#include <ring_data.H>
+#include <pnor/pnorif.H>
+#include <p9_xip_image.h>
+#include <p9_tor.H>
+#include <common_ringId.H>
+#include <p9_scan_compression.H>
 
 #include "handleSpecialWakeup.H"
+
+namespace CEN_RID {
+#include <cen_ringId.H>
+}
 
 //******************************************************************************
 // Trace descriptors
@@ -75,33 +80,323 @@ namespace fapi2
 //thread_local ReturnCode current_err;
 ReturnCode current_err;
 
-// $TODO RTC:171739 - get the ring from cen.hw_ref_image in pnor
-// This temp verion of the function will return hardcoded
-// ring data for the ring ids required for step 11 BUP
+
+///
+/// @brief Retrieve the ring data from the centaur hw image
+///        for a given ring id
+///
+/// @param[in]  i_target - TARGET_TYPE_MEMBUF_CHIP
+/// @param[in]  i_ringId - Ring id to extract from hw image
+/// @param[out] o_ringdata - uncompressed ring data
+/// @param[out] o_ringLength - length of uncompressd ring in bits
+/// @param[out] o_ringAddress - scom address of ring
+///
+/// @return fapi2::ReturnCode
+///
+
 template<>
 ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
-        const uint16_t ringId,
+        const uint16_t i_ringId,
         unsigned char *&o_ringData,
         size_t  &o_ringLength,
         uint64_t &o_ringAddress)
 {
 
-    o_ringLength = 0;
-    o_ringData = nullptr;
+    FAPI_INF(">>>get_ring()");
+    fapi2::ReturnCode l_fapi2Rc;
+
+    errlHndl_t l_err = NULL;
+
+    PNOR::SectionInfo_t l_info;
+
+    P9XipSection l_ringSection;
+
+    o_ringLength  = 0;
     o_ringAddress = 0;
 
-    RING_MAP::iterator it;
-    // search for the ring id in the map
-    it = ringMap.find(ringId);
-    if (it != ringMap.end())
-    {
-        // found it
-        o_ringAddress = it->second.ringAddress;
-        o_ringLength  = it->second.ringLength;
-        o_ringData    = it->second.ringData;
-    }
+    // buffer as the max size
+    uint32_t l_ringBufSizeInBytes   = MAX_CENTAUR_RING_SIZE;
 
-    return ReturnCode();
+    // create some work spaces
+    // max ring size in centaur is 76490 bits - allocate 10k buffers
+    uint8_t * care  = (uint8_t*)malloc(l_ringBufSizeInBytes);
+
+    void    * l_rs4RingData = malloc(l_ringBufSizeInBytes);
+
+    do
+    {
+        // setup pointers to hw image data
+        // Get Centaur hw image PNOR section info from PNOR RP
+        l_err = PNOR::getSectionInfo( PNOR::CENTAUR_HW_IMG, l_info );
+
+        if( l_err )
+        {
+            FAPI_ERR("get_ring() - call to getSectionInfo("
+                    "PNOR::CENTAUR_HW_IMG failed");
+
+            l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+            break;
+        }
+
+        // local pointer to the centaur hw image
+        char * l_centaurHwImageAddr = reinterpret_cast<char*>(l_info.vaddr);
+
+        FAPI_DBG("CENTAUR_HW_IMG addr = 0x%.16llX ",
+                l_centaurHwImageAddr);
+
+         TRACDBIN(g_fapiImpTd,"Centaur Image Header: ",
+                  l_centaurHwImageAddr, sizeof(P9XipHeader));
+
+        if(((P9XipHeader*)l_centaurHwImageAddr)->iv_magic
+                                                == P9_XIP_MAGIC_CENTAUR)
+        {
+            uint8_t     l_ddLevel    = UNDEFINED_DD_LEVEL;
+            myBoolean_t l_bDdSupport = false;
+
+            int l_rc =  p9_xip_dd_section_support(l_centaurHwImageAddr,
+                                        P9_XIP_SECTION_HW_RINGS, &l_bDdSupport);
+
+            if( l_rc != INFRASTRUCT_RC_SUCCESS )
+            {
+                FAPI_INF("get_ring() - call to p9_xip_dd_section_support()"
+                        " call failed with rc = %d ",l_rc);
+                /*@
+                 * @errortype
+                 * @moduleid     fapi2::MOD_FAPI2_GET_RING
+                 * @reasoncode   fapi2::RC_DD_SUPPORT_CHECK_FAILED
+                 * @userdata1    requested section id
+                 * @userdata2    return code from p9_xip_dd_section_support
+                 * @devdesc      Call to p9_xip_dd_section_support failed.
+                 * @custdesc     Internal firmware error
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        fapi2::MOD_FAPI2_GET_RING,
+                        fapi2::RC_DD_SUPPORT_CHECK_FAILED,
+                        P9_XIP_SECTION_HW_RINGS,
+                        l_rc,
+                        true /*SW error*/);
+
+                l_err->collectTrace(FAPI_TRACE_NAME);
+
+                l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+
+                break;
+            }
+
+            // if there is ddcontainer support, then set dd level to 20
+            // since that is the only value centaur currently supports
+            if( l_bDdSupport == true )
+            {
+                l_ddLevel = 0x20;
+            }
+
+            // get the offset to the ring section for the tor_get_ring call
+            l_rc = p9_xip_get_section((const void*)l_centaurHwImageAddr,
+                    P9_XIP_SECTION_HW_RINGS, &l_ringSection, l_ddLevel);
+
+            if( l_rc != INFRASTRUCT_RC_SUCCESS )
+            {
+                FAPI_INF("get_ring() - call to p9_xip_get_section()"
+                        " call failed with rc = %d ",l_rc);
+                /*@
+                 * @errortype
+                 * @moduleid     fapi2::MOD_FAPI2_GET_RING
+                 * @reasoncode   fapi2::RC_GET_RING_SECTION_FAILED
+                 * @userdata1    requested section id
+                 * @userdata2    return code from p9_xip_get_section
+                 * @devdesc      Call to p9_xip_get_section to retrieve
+                 *               the hw rings section has failed. See
+                 *               userdata2 for the return code value.
+                 * @custdesc     Internal firmware error
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        fapi2::MOD_FAPI2_GET_RING,
+                        fapi2::RC_GET_RING_SECTION_FAILED,
+                        P9_XIP_SECTION_HW_RINGS,
+                        l_rc,
+                        true /*SW error*/);
+
+                l_err->collectTrace(FAPI_TRACE_NAME);
+
+                l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+
+                break;
+            }
+
+            FAPI_INF("get_ring() - got the ring section..");
+
+            char ringName[50] = {0};
+
+            // only a single instance for centaur
+            uint8_t instanceId = 1;
+
+            // only base rings in centaur image
+            RingVariant_t ringVariant = RV_BASE;
+
+            // default ppe type
+            PpeType_t ppeType = PT_SBE;
+
+            // extract rs4 ring info from the hw image - pass in a big buffer
+            // and skip the extra call to get the compressed ring size
+            int rc = tor_access_ring(l_ringSection.iv_offset +
+                    l_centaurHwImageAddr,
+                    i_ringId,
+                    l_ddLevel,
+                    ppeType,
+                    ringVariant,
+                    instanceId,
+                    GET_SINGLE_RING,
+                    &l_rs4RingData,
+                    l_ringBufSizeInBytes,  //compressed ring size here..
+                    ringName,
+                    0 );
+
+            if( rc != 0 )
+            {
+                FAPI_ERR("get_ring() - call to tor_access_ring()"
+                        " call failed with rc = %d ",rc);
+
+                if( rc != TOR_RING_NOT_FOUND )
+                {
+                    /*@
+                     * @errortype
+                     * @moduleid     fapi2::MOD_FAPI2_GET_RING
+                     * @reasoncode   fapi2::RC_ACCESS_RING_FAILED
+                     * @userdata1    requested ring id
+                     * @userdata2    return code from tor_access_ring
+                     * @devdesc      A call to the tor_access_ring function
+                     *               failed. There could be an issue with the
+                     *               centaur hardware image. See userdata2 for
+                     *               the return code value.
+                     *
+                     * @custdesc     Internal firmware error
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            fapi2::MOD_FAPI2_GET_RING,
+                            fapi2::RC_ACCESS_RING_FAILED,
+                            i_ringId,
+                            rc,
+                            true /*SW error*/);
+
+                    l_err->collectTrace(FAPI_TRACE_NAME);
+
+                    l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+                }
+                break;
+            };
+
+            FAPI_INF("Found the ring:" \
+                    "  Name: %s" \
+                    "  Compressed size: %d bytes",
+                    ringName, l_ringBufSizeInBytes);
+
+            CompressedScanData *rs4 = (CompressedScanData*)l_rs4RingData;
+
+            RingId_t l_ringId   = be16toh(rs4->iv_ringId);
+
+            if( l_ringId == i_ringId )
+            {
+                FAPI_DBG("get_ring() - its the correct ring....");
+
+                // reset to the buffer size, it was modified above
+                // in the tor call
+                l_ringBufSizeInBytes = MAX_CENTAUR_RING_SIZE;
+
+
+                uint32_t l_ringSizeInBits = 0;
+
+                // expand the ring
+                rc = _rs4_decompress(o_ringData, care, l_ringBufSizeInBytes,
+                        &l_ringSizeInBits, rs4);
+
+                if( rc != SCAN_COMPRESSION_OK )
+                {
+                    FAPI_ERR("get_ring() - call to _rs4_decompress()"
+                           " failed rc = %d",rc);
+                    /*@
+                     * @errortype
+                     * @moduleid     fapi2::MOD_FAPI2_GET_RING
+                     * @reasoncode   fapi2::RC_FAILED_TO_DECOMPRESS_RING
+                     * @userdata1    return code from scan compression
+                     * @devdesc      There was an error returned from the
+                     *               RS4 decompression routine see userdata1
+                     *               for return code value.
+                     * @custdesc     Internal firmware error
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            fapi2::MOD_FAPI2_GET_RING,
+                            fapi2::RC_FAILED_TO_DECOMPRESS_RING,
+                            rc,
+                            0,
+                            true /*SW error*/);
+
+                    l_err->collectTrace(FAPI_TRACE_NAME);
+
+                    l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+
+                    break;
+                }
+
+                FAPI_DBG("get_ring() - call to _rs4_decompress() worked.."
+                        " ring size in bits %d",l_ringSizeInBits );
+
+                // return the ring lenght in bits
+                o_ringLength    = l_ringSizeInBits;
+
+                // grab the address from the Generic ring id list
+                GenRingIdList* l_idList =
+                    CEN_RID::ringid_get_ring_list(l_ringId);
+
+                o_ringAddress = l_idList->scanScomAddress;
+
+            }
+            else
+            {
+                // didnt find the ring
+                FAPI_INF("get_ring() - Ring not found, ringId = %d ",i_ringId);
+
+            }
+        }
+        else
+        {
+            FAPI_INF("get_ring() - not a centaur hw image magic = 0x%llx ",
+                    ((P9XipHeader*)l_centaurHwImageAddr)->iv_magic);
+            /*@
+             * @errortype
+             * @moduleid     fapi2::MOD_FAPI2_GET_RING
+             * @reasoncode   fapi2::RC_INCORRECT_HW_IMAGE_TYPE
+             * @userdata1    expected HW image type
+             * @userdata2    actual HW image type
+             * @devdesc      The magic header for the hw image is not
+             *               correct - expected value is "XIP CNTR"
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    fapi2::MOD_FAPI2_GET_RING,
+                    fapi2::RC_INCORRECT_HW_IMAGE_TYPE,
+                    P9_XIP_MAGIC_CENTAUR,
+                    ((P9XipHeader*)l_centaurHwImageAddr)->iv_magic,
+                    true /*SW error*/);
+
+            l_err->collectTrace(FAPI_TRACE_NAME);
+
+            l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+        }
+
+    }while(0);
+
+    // free the compressed ring buffer and the care buffer,
+    // caller will need to free the actual ring data buffer.
+    free(l_rs4RingData);
+    free(care);
+
+    FAPI_INF("<<<get_ring()");
+
+    return l_fapi2Rc;
 }
 
 ///

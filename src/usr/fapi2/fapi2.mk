@@ -38,8 +38,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/memory/
@@ -159,6 +161,7 @@ include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucke
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
+include $(ROOTPATH)/src/import/chips/centaur/utils/imageProcs/cen_ringId.mk
 
 # We specifically removed this from the istep10.so and placed it here because
 # we have to reapply this init on the shutdown path after the interrupt resource
@@ -187,5 +190,6 @@ VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+VPATH += ${ROOTPATH}/src/import/chips/centaur/utils/imageProcs/
 VPATH += ${CENTAUR_VPD_PATH}/
 VPATH += ${GENPATH}

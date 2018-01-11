@@ -943,13 +943,15 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
     //       trace in common fapi2_hw_access.H
     bool l_traceit = platIsScanTraceEnabled();
 
-    unsigned char * l_ringData = nullptr;
+    // max ring size in centaur is 76490 bits - allocate a 10k byte
+    // buffer as the max size
+    uint8_t * l_ringData = (uint8_t*)malloc(MAX_CENTAUR_RING_SIZE);
+
     size_t   l_ringLength = 0;
     uint64_t l_ringAddress = 0;
 
     // grab the ring data from the cen.hw_image
-    l_rc = get_ring(i_target, i_ringID, l_ringData,
-            l_ringLength, l_ringAddress);
+    l_rc = get_ring(i_target, i_ringID, l_ringData,l_ringLength, l_ringAddress);
 
     if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
@@ -999,12 +1001,10 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
         }
         else
         {
-            // $TODO RTC:171739 - add error case, current procedure calls
-            // with ring ids for rings which currently do not have any known
-            // content but were scanned in p8 - Joe confirmed these rings do
-            // not currently have content - we will need to decide if procedure
-            // should be updated to remove the calls or we continue to ignore
-            FAPI_INF("platPutRing: called with unsupported ring ID %d!", i_ringID);
+            // Design decision was to add a trace but not error out for rings
+            // which did not exist in the hw image
+            FAPI_INF("platPutRing: ring ID %d not present in hw image",
+                    i_ringID);
         }
     }
     else
@@ -1012,6 +1012,9 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
         // get_ring() call failed
         FAPI_ERR("get_ring() returned error");
     }
+
+    free(l_ringData);
+    l_ringData = nullptr;
 
     FAPI_DBG(EXIT_MRK "platPutRing() with RingId_t");
     return l_rc;

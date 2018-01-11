@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,10 @@
 
 namespace fapi2
 {
+
+// max ring size in centaur is 76490 bits - allocate a 10k byte
+// buffer as the max size
+#define MAX_CENTAUR_RING_SIZE 10 * 1024
 
 ///
 ///  @brief This function answers the question, is scand tracing turned on?

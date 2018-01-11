@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ namespace fapi2
         MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION          = 0x14,
         MOD_FAPI2_GET_MB_VPD_ATTR                   = 0x15,
         MOD_FAPI2_GET_PLL_BUCKET                    = 0x16,
+        MOD_FAPI2_GET_RING                          = 0x17,
     };
 
     /**
@@ -135,6 +136,11 @@ namespace fapi2
         RC_INVALID_TARGET_TYPE         = FAPI2_COMP_ID | 0x37,
         RC_NO_PARENT_MEMBUF            = FAPI2_COMP_ID | 0x38,
         RC_INVALID_PARENT_TARGET_FOUND = FAPI2_COMP_ID | 0x39,
+        RC_GET_RING_SECTION_FAILED     = FAPI2_COMP_ID | 0x3A,
+        RC_ACCESS_RING_FAILED          = FAPI2_COMP_ID | 0x3B,
+        RC_FAILED_TO_DECOMPRESS_RING   = FAPI2_COMP_ID | 0x3C,
+        RC_INCORRECT_HW_IMAGE_TYPE     = FAPI2_COMP_ID | 0x3D,
+        RC_DD_SUPPORT_CHECK_FAILED     = FAPI2_COMP_ID | 0x3E,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,

@@ -3404,6 +3404,12 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>DMI_REFCLOCK_SWIZZLE</id>
+        <default>0x0E</default>
+    </attribute>
+
+
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.dmi:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -3482,6 +3488,12 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>DMI_REFCLOCK_SWIZZLE</id>
+        <default>0x0C</default>
+    </attribute>
+
+
+    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.dmi:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -3559,6 +3571,12 @@
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>DMI_REFCLOCK_SWIZZLE</id>
+        <default>0x0D</default>
+    </attribute>
+
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.dmi:k0:n0:s0:p00:c3</default>
@@ -5427,8 +5445,10 @@
         <id>ALTFSI_MASTER_PORT</id>
         <default>0xFF</default>
     </attribute>
-
-
+    <attribute>
+        <id>CEN_MSS_FREQ</id>
+        <default>1333</default>
+    </attribute>
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>MEM</default>
