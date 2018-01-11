@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -673,8 +673,9 @@ namespace SENSOR
 
         if( l_err == NULL )
         {
-            // this value is already byteswapped
-            if (l_data.event_status <= ENABLE_REBOOTS)
+            // Check that this value is a valid enum value
+            if ( l_data.event_status == ENABLE_REBOOTS ||
+                 l_data.event_status == DISABLE_REBOOTS )
             {
                 o_setting = static_cast<autoRebootSetting>(l_data.event_status);
             }
@@ -1697,7 +1698,7 @@ namespace SENSOR
 
     //
     // setHbVolatile - tell BMC to make hostboot volatile memory
-    //                 (volatile(1) or not(0))
+    //                 (volatile(2) or not(1))
     //
     errlHndl_t HbVolatileSensor::setHbVolatile( hbVolatileSetting i_setting )
     {
@@ -1728,7 +1729,8 @@ namespace SENSOR
         if( l_err == nullptr )
         {
             // check if in valid range of hbVolatileSetting enums
-            if (l_data.event_status <= ENABLE_VOLATILE)
+            if ( l_data.event_status == ENABLE_VOLATILE ||
+                 l_data.event_status == DISABLE_VOLATILE )
             {
                 o_setting = static_cast<hbVolatileSetting>(l_data.event_status);
             }
