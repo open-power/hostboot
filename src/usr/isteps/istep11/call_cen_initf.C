@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,8 @@
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
+
+#include    <pnor/pnorif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -60,48 +62,101 @@ void* call_cen_initf (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_initf entry" );
 
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
-
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_initf: %d membufs found",
-            l_membufTargetList.size());
-
-    for (const auto & l_membuf_target : l_membufTargetList)
+    do
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "cen_initf HWP target HUID %.8x",
-            TARGETING::get_huid(l_membuf_target));
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-        //  call the HWP with each target
-        fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
-                (l_membuf_target);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_cen_initf: %d membufs found",
+                l_membufTargetList.size());
 
-        FAPI_INVOKE_HWP(l_err, cen_initf, l_fapi_membuf_target);
-
-        //  process return code.
-        if ( l_err )
+#ifdef CONFIG_SECUREBOOT
+        // only load the hw image if there are membufs present
+        if( l_membufTargetList.size() )
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  cen_initf HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_membuf_target) );
+            l_err = loadSecureSection(PNOR::CENTAUR_HW_IMG);
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
+            if(l_err)
+            {
+                // Create IStep error log and cross reference to
+                // error that occurred
+                l_StepError.addErrorDetails( l_err );
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_err );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK "Failed in call to loadSecureSection "
+                        "for section PNOR:CENTAUR_HW_IMG");
 
-            // Commit Error
-            errlCommit( l_err, ISTEP_COMP_ID );
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+                break;
+            }
         }
         else
         {
+            // no membufs, just exit
+            break;
+        }
+#endif
+        for (const auto & l_membuf_target : l_membufTargetList)
+        {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "SUCCESS :  cen_initf HWP");
+                    "cen_initf HWP target HUID %.8x",
+                    TARGETING::get_huid(l_membuf_target));
+
+            //  call the HWP with each target
+            fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_membuf_target
+                (l_membuf_target);
+
+            FAPI_INVOKE_HWP(l_err, cen_initf, l_fapi_membuf_target);
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X:  cen_initf HWP on target HUID %.8x",
+                        l_err->reasonCode(),
+                        TARGETING::get_huid(l_membuf_target) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
+
+                // Create IStep error log and cross reference the original
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  cen_initf HWP");
+            }
         }
 
-    }
+#ifdef CONFIG_SECUREBOOT
+        if( l_membufTargetList.size() )
+        {
+            l_err = unloadSecureSection(PNOR::CENTAUR_HW_IMG);
 
+            if(l_err)
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_StepError.addErrorDetails( l_err );
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK "Failed in call to unloadSecureSection for "
+                        "section PNOR:CENTAUR_HW_IMG");
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+                break;
+            }
+        }
+#endif
+
+    }while(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_initf exit" );
 

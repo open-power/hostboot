@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,7 +255,6 @@ ReturnCode platPutRing(const Target<T>& i_target,
 
 }
 
-
 /// @brief Writes a ring to a chip. For MEMBUF targets the ring data will
 ///        be extracted from the centaur hw image using the ring id.
 ///
@@ -266,7 +265,6 @@ ReturnCode platPutRing(const Target<T>& i_target,
 ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
                        const RingId_t i_ringID,
                        const RingMode i_ringMode);
-
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions
