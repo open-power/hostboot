@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -655,12 +655,14 @@ namespace SENSOR
         public:
             /**
              * @enum autoRebootSetting
-             *      enum to define the contr
+             *      enum to define the control sensor state
+             *      Note: bit based setting: 0 -> 0x01
+             *                               1 -> 0x02
              */
             enum autoRebootSetting
             {
-                DISABLE_REBOOTS = 0x00, // keep current state
-                ENABLE_REBOOTS  = 0x01, // allow reboot for FIRDATA analysis
+                DISABLE_REBOOTS = 0x01, // keep current state
+                ENABLE_REBOOTS  = 0x02, // allow reboot for FIRDATA analysis
             };
 
             /**
@@ -931,12 +933,14 @@ namespace SENSOR
 
             /**
              * @enum hbVolatileSetting
-             *      enum to define the contr
+             *      enum to define the HB volatile sensor setting
+             *      Note: bit based setting: BMC 0 -> 0x01 (off)
+             *                               BMC 1 -> 0x02 (on)
              */
             enum hbVolatileSetting
             {
-                DISABLE_VOLATILE = 0x00, // (default)
-                ENABLE_VOLATILE  = 0x01, // allow volatile memory to be cleared
+                DISABLE_VOLATILE = 0x01, // (default)
+                ENABLE_VOLATILE  = 0x02, // allow volatile memory to be cleared
             };
 
             /**
