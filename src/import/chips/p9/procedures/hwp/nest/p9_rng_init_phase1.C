@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,40 +89,41 @@ const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD1              = 0xb332;
 const uint8_t  NX_RNG_ST0_REPTEST_MATCH_TH_DD2                   = 0x01;
 // adaptive proportion sample size (8b wide sample)
 const uint8_t  NX_RNG_ST0_ADAPTEST_SAMPLE_SIZE_DD2               = 0x02;
-// adaptive proportion window size (2K size) ###CHANGED
+// adaptive proportion window size (512 size)
 const uint8_t  NX_RNG_ST0_ADAPTEST_WINDOW_SIZE_DD2               = 0x01;
-// adaptive proportion RRN RNG0 match threshold (136; Assuming H = 6)
-const uint16_t NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD2         = 0x22;
-// adaptive proportion RRN RNG1 match threshold (136; Assuming H = 6)
-const uint16_t NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD2         = 0x22;
-// adaptive proportion CRN RNG0 match threshold (72; Assuming H = 8)
-const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD2         = 0x12;
-// adaptive proportion CRN RNG1 match threshold (72; Assuming H = 8)
-const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD2         = 0x12;
+// adaptive proportion RRN RNG0 match threshold (50; Assuming H = 5)
+const uint16_t NX_RNG_ST0_ADAPTEST_RRN_RNG0_MATCH_TH_DD2         = 0x32;
+// adaptive proportion RRN RNG1 match threshold (50; Assuming H = 5)
+const uint16_t NX_RNG_ST0_ADAPTEST_RRN_RNG1_MATCH_TH_DD2         = 0x32;
+// adaptive proportion CRN RNG0 match threshold (50; Assuming H = 5)
+const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG0_MATCH_TH_DD2         = 0x32;
+// adaptive proportion CRN RNG1 match threshold (50; Assuming H = 5)
+const uint16_t NX_RNG_ST0_ADAPTEST_CRN_RNG1_MATCH_TH_DD2         = 0x32;
 
 // RNG Self Test Register 1 constants
 // adaptive proportion soft fail threshold (Setting [0:6] to 0x02)
 const uint8_t NX_RNG_ST1_ADAPTEST_SOFT_FAIL_TH_DD2               = 0x02;
-// adaptive proportion 1bit match threshold min (648; Assuming H = 0.8)
-const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD2         = 0x00A2;
-// adaptive proportion 1bit match threshold max (1400; Assuming H = 0.8)
-const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD2         = 0x015E;
+// adaptive proportion 1bit match threshold min (100)
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MIN_DD2         = 0x0064;
+// adaptive proportion 1bit match threshold max (415)
+const uint16_t NX_RNG_ST1_ADAPTEST_1BIT_MATCH_TH_MAX_DD2         = 0x019F;
 
 // RNG Self Test Register 3 constants
 // sample rate RRN enable (Use RRNs)
 const bool     NX_RNG_ST3_SAMPTEST_RRN_ENABLE_DD2                = true;
 // sample rate window size (64k -1 size)
 const uint8_t  NX_RNG_ST3_SAMPTEST_WINDOW_SIZE_DD2               = 0x07;
-// sample rate match threshold minimum (64k * 0.45 = 29,491)
-const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2              = 0x7333;
-// sample rate match threshold maximum (64k * 0.55 = 36,044)
-const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2              = 0x8CCC;
+// sample rate match threshold minimum (28,000)
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MIN_DD2              = 0x6D60;
+// sample rate match threshold maximum (39,050)
+const uint16_t NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2              = 0x988A;
 
 // RNG Read Delay Parameters Register
 // Read Retry Ratio (0 = 31/32, 1 = 15/16, 2 = 29/32 ... 15 = 1/2 ...
 //                   31 = disabled)
 const uint8_t  NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD1               = 0x1F;
-const uint8_t  NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD2               = 0x1F;
+const uint8_t  NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD2               = 0x1D;
+const bool     NX_RNG_CQ_RDELAY_LFSR_RESEED_EN_DD2               = true;
 
 // RNG Status And Control Register constants (Applies to both)
 const bool     NX_RNG_CFG_CONDITIONER_MASK_TOGGLE                = false;
@@ -134,7 +135,7 @@ const bool     NX_RNG_CFG_REPTEST_ENABLE                         = true;
 const bool     NX_RNG_CFG_ADAPTEST_1BIT_ENABLE                   = true;
 // adaptive proportion test enable
 const bool     NX_RNG_CFG_ADAPTEST_ENABLE                        = true;
-// self test register 2 reset period (~59min/clear = 27)
+// self test register 2 reset period (~1.02 hr/clear = 27)
 const uint8_t  NX_RNG_CFG_ST2_RESET_PERIOD                       = 0x1B;
 // pace rate (2000)
 const uint16_t NX_RNG_CFG_PACE_RATE                              = 0x07d0;
@@ -309,9 +310,12 @@ p9_rng_init_phase1(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
                                        (NX_RNG_ST3_SAMPTEST_MATCH_TH_MAX_DD2);
 
         // configure RNG Read Delay Parameters Register
+        l_rng_rdelay_data.writeBit<PU_NX_RNG_RDELAY_CQ_LFSR_RESEED_EN>
+        (NX_RNG_CQ_RDELAY_LFSR_RESEED_EN_DD2);
         l_rng_rdelay_data.insertFromRight<PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO,
                                           PU_NX_RNG_RDELAY_CQ_READ_RTY_RATIO_LEN>
                                           (NX_RNG_CQ_RDELAY_READ_RTY_RATIO_DD2);
+
     }
 
     FAPI_TRY(fapi2::putScom(i_target, PU_NX_RNG_ST0, l_rng_st0_data),
