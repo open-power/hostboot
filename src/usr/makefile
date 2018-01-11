@@ -57,6 +57,7 @@ SUBDIRS += ibscom.d
 SUBDIRS += dump.d
 SUBDIRS += secureboot.d
 SUBDIRS += sbe.d
+SUBDIRS += imageprocs.d
 SUBDIRS += sbeio.d
 SUBDIRS += gpio.d
 SUBDIRS += lpc.d

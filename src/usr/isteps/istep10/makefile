@@ -29,7 +29,12 @@ NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 INITFILES_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles
 PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 PROCEDURES_PATH += ${ROOTPATH}/src/import/chips/p9/procedures
+XIP_CUSTOMIZE_PATH = ${PROCEDURES_PATH}/hwp/customize
+HWP_ACC_PATH += ${PROCEDURES_PATH}/hwp/accessors
 
+
+EXTRAINCDIR += ${HWP_ACC_PATH}
+EXTRAINCDIR += ${XIP_CUSTOMIZE_PATH}
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/lib/
@@ -40,9 +45,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
 EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${INITFILES_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
+
 
 OBJS += call_proc_build_smp.o
 OBJS += call_host_slave_sbe_update.o
@@ -72,9 +79,10 @@ OBJS+=p9_build_smp_adu.o
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
 VPATH += ${PERV_HWP_PATH}
-VPATH += ${PROCEDURES_PATH}/hwp/io/
-VPATH += ${PROCEDURES_PATH}/hwp/pm/
-VPATH += ${PROCEDURES_PATH}/hwp/lib/
+VPATH += ${PROCEDURES_PATH}/hwp/io
+VPATH += ${PROCEDURES_PATH}/hwp/pm
+VPATH += ${PROCEDURES_PATH}/hwp/lib
+VPATH+=  ${HWP_ACC_PATH}
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

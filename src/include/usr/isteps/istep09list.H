@@ -231,6 +231,7 @@ const DepModInfo  g_istep09Dependancies = {
         DEP_LIB(libpm.so),
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libfab_iovalid.so),
+        DEP_LIB(libimageprocs.so),
         NULL
     }
 };

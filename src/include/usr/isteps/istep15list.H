@@ -139,7 +139,7 @@ const DepModInfo g_istep15Dependancies = {
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libpm.so),
-        DEP_LIB(libsbe.so),
+        DEP_LIB(libimageprocs.so),
         NULL
     }
 };

@@ -162,6 +162,7 @@ const DepModInfo g_istep16Dependancies = {
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
+        DEP_LIB(libimageprocs.so),
         NULL
     }
 };

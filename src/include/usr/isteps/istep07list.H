@@ -165,6 +165,7 @@ const DepModInfo g_istep07Dependancies = {
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libsbe.so),
+        DEP_LIB(libimageprocs.so),
         DEP_LIB(libcen.so),
         NULL
     }
