@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,10 @@
 
 #include <stdint.h>
 #include <errl/errlentry.H>
-#include <vector>
+#include <list>
 #include <sbeio/sbeioif.H>
+#include <targeting/common/target.H>
+#include <map>
 
 namespace SBEIO
 {
@@ -52,10 +54,14 @@ struct regionData
 
     // Target associated with the SBE
     // - If tgt == nullptr it will eventually be updated to the Master Proc
-    TARGETING::Target* tgt;
+    TARGETING::TargetHandle_t tgt;
 
     regionData() : start_addr(0), size(0), flags(0), tgt(nullptr) {}
 };
+
+typedef std::list<regionData> RegionDataList;
+typedef std::pair<TARGETING::TargetHandle_t, RegionDataList>  MemRegionMapPair;
+typedef std::map<TARGETING::TargetHandle_t, RegionDataList> MemRegionMap;
 
 /** @class MemRegionMgr
  *  @brief   Responsible for managing the SBE Unsecure Memory Regions
@@ -66,11 +72,16 @@ class MemRegionMgr
 
   private:
 
-    /** Cache of Unsecure Memory Regions that are currently open */
-    std::list< regionData >  iv_memRegions;
+    /** Cache of Unsecure Memory Regions that are currently open
+     *  Key = Target Pointer, Value = List of Memory Regions
+     */
+    MemRegionMap iv_memRegionMap;
 
-    /* For Debug purposes: Pring Out Vector of iv_memRegions */
+    /* For Debug purposes: Print out memory region map */
     void printIvMemRegions() const;
+
+    /* Cache master proc */
+    TARGETING::TargetHandle_t iv_masterProc;
 
     /**
      * @brief Local Function To Open/Close Unsecure Memory Regions
@@ -93,6 +104,35 @@ class MemRegionMgr
      *                    the SBE Supports; otherwise, returns nullptr
      */
     errlHndl_t checkNumberOfMemRegions(uint8_t i_count) const;
+
+    /**
+     * @brief Append region data to region list of specified target
+     *
+     * @param[in] i_target Proc target to apply region data to
+     *            Note: nullptr assumed to be acting master proc
+     * @param[in] i_region Region data
+     *
+     * @return N/A
+     */
+    void addToTargetRegionList(TARGETING::TargetHandle_t i_target,
+                               const regionData& i_region);
+
+    /**
+     * @brief Get region data list of specified target
+     *
+     * @param[in] i_target Proc target to obtain region data list from
+     *            Note: nullptr assumed to be acting master proc
+     *
+     * @return N/A
+     */
+    RegionDataList* getTargetRegionList(TARGETING::TargetHandle_t i_target);
+
+    /**
+     * @brief Get number of all memory regions amongst all targets
+     *
+     * @return N/A
+     */
+    uint8_t getTotalNumOfRegions() const;
 
   public:
     /**

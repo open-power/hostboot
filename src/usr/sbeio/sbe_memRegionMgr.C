@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <vmmconst.h>
 #include <sys/misc.h>
 #include <secureboot/service.H>
+#include <initservice/initserviceif.H>
 
 #include "sbe_memRegionMgr.H"
 
@@ -90,20 +91,58 @@ errlHndl_t closeAllUnsecureMemRegions()
 /*
  * MemRegionMgr : Constructor : Setup Instance Variables
  */
-MemRegionMgr::MemRegionMgr()
+MemRegionMgr::MemRegionMgr(): iv_memRegionMap{}, iv_masterProc(nullptr)
 {
     SBE_TRACD(ENTER_MRK"MemRegionMgr Constructor");
 
+    errlHndl_t l_errl = nullptr;
+
+    do {
     // SBE opens Memory Region for HB DUMP before starting hostboot
-    // so just add it directly to iv_memRegions
+    // so just add it directly to master proc's memory regions
     regionData hb_dump_region;
     hb_dump_region.start_addr = cpu_spr_value(CPU_SPR_HRMOR);
     hb_dump_region.size = VMM_MEMORY_SIZE;
     hb_dump_region.flags = SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY;
-    iv_memRegions.push_back(hb_dump_region);
+
+    // Find master proc for target of PSU commdoand, if necessary
+    TARGETING::TargetHandle_t l_masterProc = nullptr;
+    TARGETING::TargetService& tS = TARGETING::targetService();
+
+    l_errl = tS.queryMasterProcChipTargetHandle(l_masterProc);
+    if (l_errl)
+    {
+        SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Failed to get Master "
+                  "Proc: err rc=0x%.4X plid=0x%.8X",
+                  ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl));
+
+        break;
+    }
+
+    // Store Master Proc for easy lookup
+    iv_masterProc = l_masterProc;
+
+    // Set target for future operations
+    hb_dump_region.tgt = iv_masterProc;
+
+    // Add Memory region for HB Dump to master proc's list
+    addToTargetRegionList(iv_masterProc, hb_dump_region);
 
     SBE_TRACD("MemRegionMgr Constructor: Initial region(s):");
     printIvMemRegions();
+
+    } while(0);
+
+    // doShutdown if error in constructor
+    if (l_errl)
+    {
+        uint64_t l_reasonCode = l_errl->reasonCode();
+        SBE_TRACF(ERR_MRK"MemRegionMgr Constructor: failed with rc=0x%08X",
+                  l_reasonCode);
+        l_errl->collectTrace(SBEIO_COMP_NAME);
+        errlCommit(l_errl, SBEIO_COMP_ID);
+        INITSERVICE::doShutdown(l_reasonCode);
+    }
 
     SBE_TRACD(EXIT_MRK"MemRegionMgr Constructor");
 };
@@ -113,8 +152,8 @@ MemRegionMgr::MemRegionMgr()
  */
 MemRegionMgr::~MemRegionMgr()
 {
-    // Clear Vector of Unsecure Memory Regions
-    iv_memRegions.clear();
+    // Clear map of Unsecure Memory Regions
+    iv_memRegionMap.clear();
 };
 
 /**
@@ -130,7 +169,9 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
 
     errlHndl_t errl = nullptr;
     regionData l_region;
-    uint8_t region_count = iv_memRegions.size();
+    // Get Region list based on target
+    auto l_memRegions = getTargetRegionList(i_target);
+    uint8_t region_count = l_memRegions->size();
     bool itr_region_closed = false;
     const uint8_t input_flags = i_isWritable ?
                                   SbePsu::SBE_MEM_REGION_OPEN_READ_WRITE :
@@ -152,8 +193,8 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
         // ---- If no overlap, open requested region
         // Throughout check that no more than 8 memory regions are opened
 
-        auto itr = iv_memRegions.begin();
-        while (itr != iv_memRegions.end())
+        auto itr = l_memRegions->begin();
+        while (itr != l_memRegions->end())
         {
             // reset for each loop
             itr_region_closed = false;
@@ -223,7 +264,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                         ++region_count;
 
                         // Add the region to the cache list
-                        iv_memRegions.push_front(l_region);
+                        l_memRegions->push_front(l_region);
                     }
                 }
             }
@@ -299,7 +340,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                     ++region_count;
 
                     // Add the region to the cache list
-                    iv_memRegions.push_front(l_region);
+                    l_memRegions->push_front(l_region);
                 }
             }
 
@@ -348,7 +389,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
             // Increment Iterator
             if (itr_region_closed == true)
             {
-                itr = iv_memRegions.erase(itr);
+                itr = l_memRegions->erase(itr);
             }
             else
             {
@@ -388,7 +429,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
         else
         {
             // Add region to cache on success
-            iv_memRegions.push_front(l_region);
+            l_memRegions->push_front(l_region);
         }
 
     }
@@ -432,11 +473,13 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
     SBE_TRACF(ENTER_MRK"closeUnsecureMemRegion: i_tgt=0x%X: "
               "i_start_addr=0x%.16llX",
               TARGETING::get_huid(i_target), i_start_addr);
-
     do
     {
-        auto itr = iv_memRegions.begin();
-        while (itr != iv_memRegions.end())
+        // Get Region list based on target
+        auto l_memRegions = getTargetRegionList(i_target);
+
+        auto itr = l_memRegions->begin();
+        while (itr != l_memRegions->end())
         {
             if (itr->start_addr == i_start_addr)
             {
@@ -457,7 +500,7 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
                 }
                 else
                 {
-                    itr = iv_memRegions.erase(itr);
+                    itr = l_memRegions->erase(itr);
                 }
 
                 // Quit walking through regions
@@ -494,7 +537,7 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
                          SBEIO_MEM_REGION,
                          SBEIO_MEM_REGION_DOES_NOT_EXIST,
                          i_start_addr,
-                         iv_memRegions.size(),
+                         l_memRegions->size(),
                          true /*Add HB SW Callout*/ );
 
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -536,16 +579,22 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
 
     regionData l_region;
 
-    SBE_TRACF(ENTER_MRK"closeAllUnsecureMemRegions: closing %d region(s)",
-              iv_memRegions.size());
+    SBE_TRACF(ENTER_MRK"closeAllUnsecureMemRegions: closing %d region(s) among all targets",
+              getTotalNumOfRegions());
 
     printIvMemRegions();
 
     do
     {
-        // Close every memory region saved in vector
-        auto itr = iv_memRegions.begin();
-        while (itr != iv_memRegions.end())
+    // Loop all targets
+    for (auto & l_memRegionPair : iv_memRegionMap)
+    {
+        // Get Region list based on target
+        auto l_memRegions = &l_memRegionPair.second;
+
+        // Close every memory region saved in list
+        auto itr = l_memRegions->begin();
+        while (itr != l_memRegions->end())
         {
             // Close Requested Region
             l_region.start_addr = itr->start_addr;
@@ -589,17 +638,17 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
             }
             else
             {
-                itr = iv_memRegions.erase(itr);
+                itr = l_memRegions->erase(itr);
             }
         }
     }
-    while (0);
+    } while (0);
 
     printIvMemRegions();
 
-    SBE_TRACF(EXIT_MRK "closeAllUnsecureMemRegions: regions left = %d, "
+    SBE_TRACF(EXIT_MRK "closeAllUnsecureMemRegions: regions left = %d among all targets, "
               "err_rc=0x%.4X",
-              iv_memRegions.size(),
+              getTotalNumOfRegions(),
               ERRL_GETRC_SAFE(errl_orig));
     if(errl_orig)
     {
@@ -751,27 +800,55 @@ errlHndl_t MemRegionMgr::checkNumberOfMemRegions(uint8_t i_count) const
  */
 void MemRegionMgr::printIvMemRegions(void) const
 {
-    const uint8_t size = iv_memRegions.size();
-
-    if ( size == 0 )
+    SBE_TRACF("printIvMemRegions");
+    for (const auto & l_memRegionPair : iv_memRegionMap)
     {
-        SBE_TRACD("MemRegionMgr::printIvMemRegions: number of entries=%d",
-                  iv_memRegions.size());
-    }
-    else
-    {
+        SBE_TRACF("Target HUID 0x%.8X",
+                  TARGETING::get_huid(l_memRegionPair.first));
+        // Get size of target specific memory region list
+        const uint8_t size = l_memRegionPair.second.size();
         uint8_t count = 1;
-        for ( const auto& itr : iv_memRegions )
+        for (const auto & l_memRegion : l_memRegionPair.second)
         {
-            SBE_TRACD("printIvMemRegions: %d/%d: tgt=0x%.8X: "
-                      "start_addr=0x%.16llX, size=0x%.8X, flags=0x%.2X (%s)",
-                      count, size, TARGETING::get_huid(itr.tgt),
-                      itr.start_addr, itr.size, itr.flags,
-                      itr.flags == SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY ?
-                        "Read-Only" : "Read-Write");
+            SBE_TRACF("- %d/%d: tgt=0x%.8X: start_addr=0x%.16llX, size=0x%.8X, flags=0x%.2X (%s)",
+                      count, size, TARGETING::get_huid(l_memRegion.tgt),
+                      l_memRegion.start_addr, l_memRegion.size,
+                      l_memRegion.flags,
+                      (l_memRegion.flags == SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY) ?
+                            "Read-Only" : "Read-Write");
             ++count;
         }
     }
+}
+
+void MemRegionMgr::addToTargetRegionList(TARGETING::TargetHandle_t i_target,
+                                         const regionData& i_region)
+{
+    if (i_target == nullptr)
+    {
+        i_target = iv_masterProc;
+    }
+    iv_memRegionMap[i_target].push_back(i_region);
+}
+
+RegionDataList* MemRegionMgr::getTargetRegionList(TARGETING::TargetHandle_t i_target)
+{
+    if (i_target == nullptr)
+    {
+        i_target = iv_masterProc;
+    }
+    return &iv_memRegionMap[i_target];
+}
+
+uint8_t MemRegionMgr::getTotalNumOfRegions() const
+{
+    uint8_t l_count = 0;
+    for (const auto & l_memRegionPair : iv_memRegionMap)
+    {
+        l_count += l_memRegionPair.second.size();
+    }
+
+    return l_count;
 }
 
 } // end namespace SBEIO
