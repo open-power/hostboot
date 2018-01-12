@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,10 +66,28 @@ class SbeRetryHandler
             START_CBS = 0,  // Use p9_start_cbs to restart the SBE
             HRESET    = 1,  // Use Hreset to restart the SBE
         };
+
         /**
          * @brief Constructor
+         *
+         * @param[in] i_sbeMode  Execute the SbeRetryHandler in either
+         *                       informational mode, attempt to reboot mode,
+         *                       or action set mode.
+         *                       (@see sbe_retry_handler.H)
          */
-        SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode);
+        explicit SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode);
+
+        /**
+         * @brief Constructor
+         *
+         * @param[in] i_sbeMode  Execute the SbeRetryHandler in either
+         *                       informational mode, attempt to reboot mode,
+         *                       or action set mode.
+         *                       (@see sbe_retry_handler.H)
+         * @param[in] i_plid     A PLID that is to be propagated down to any
+         *                       Error Log Entries that may be created
+         */
+        SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode, uint32_t i_plid);
 
         /**
          * @brief Destructor
@@ -90,6 +108,11 @@ class SbeRetryHandler
         inline uint32_t getPLID()
         {
             return this->iv_errorLogPLID;
+        }
+
+        inline uint32_t getCallerPLID()
+        {
+            return this->iv_callerErrorLogPLID;
         }
 
         inline uint8_t getSwitchCount()
@@ -225,10 +248,18 @@ class SbeRetryHandler
         uint8_t iv_sbeSide;
 
         /*
-         * @brief PLID of the error logged. NULL if no error
+         * @brief PLID of the error logged. 0 if no error
          *        was logged.
          */
         uint32_t iv_errorLogPLID;
+
+        /*
+         * @brief PLID of the caller. 0 if caller does not
+         *        provide one.  Not to be confused with the
+         *        PLID when error log is created in the usage
+         *        of this class.
+         */
+        uint32_t iv_callerErrorLogPLID;
 
         /*
          * @brief Number of times we switch SBE sides. Max is 2

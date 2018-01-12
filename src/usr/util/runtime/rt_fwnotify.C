@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,10 +131,10 @@ void sbeAttemptRecovery(uint64_t i_data)
             break;
         }
 
-        // Make the call to SbeExtractDD to attempt SBE recovery
-        // Get the SBE Retry Handler
+        // Get the SBE Retry Handler, propagating the supplied PLID
         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
-                        SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY);
+                        SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+                        l_hbrtFspData->plid);
 
         // Retry the recovery of the SBE
         l_SBEobj.main_sbe_handler(l_target);
