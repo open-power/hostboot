@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,9 +94,9 @@ const uint32_t OBUS_PLL_FREQ_LIST_P9N_21[OBUS_PLL_FREQ_BUCKETS] =
 
 const uint32_t OBUS_PLL_FREQ_LIST_P9N_22[OBUS_PLL_FREQ_BUCKETS] =
 {
-    1563,
+    1611,
     1250,
-    1611
+    1563
 };
 
 const uint32_t OBUS_PLL_FREQ_LIST_P9C_10[OBUS_PLL_FREQ_BUCKETS] =
@@ -106,14 +106,14 @@ const uint32_t OBUS_PLL_FREQ_LIST_P9C_10[OBUS_PLL_FREQ_BUCKETS] =
     1611
 };
 
-const uint32_t OBUS_PLL_FREQ_LIST_P9A_10[OBUS_PLL_FREQ_BUCKETS] =
+const uint32_t OBUS_PLL_FREQ_LIST_P9C_11[OBUS_PLL_FREQ_BUCKETS] =
 {
     1611,
     1250,
-    1611
+    1601
 };
 
-const uint32_t OBUS_PLL_FREQ_LIST_P9C_11[OBUS_PLL_FREQ_BUCKETS] =
+const uint32_t OBUS_PLL_FREQ_LIST_P9A_10[OBUS_PLL_FREQ_BUCKETS] =
 {
     1611,
     1250,
