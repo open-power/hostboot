@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@
 
 #include <devicefw/driverif.H>
 
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
@@ -80,16 +81,28 @@ namespace SBEIO
 {
 
 SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode)
+: SbeRetryHandler(i_sbeMode, 0)
+{
+}
+
+SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
+                                 uint32_t i_plid)
+
 : iv_sbeRestarted(false)
 , iv_sbeSide(0)
+, iv_errorLogPLID(0)
+, iv_callerErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
+, iv_currentAction(P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_FAILED_TO_BOOT)
 , iv_retriggeredMain(false)
+, iv_sbeMode(i_sbeMode)
 , iv_sbeRestartMethod(SBE_RESTART_METHOD::START_CBS)
 {
     SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
 
-    this->iv_sbeMode = i_sbeMode;
+    // Initialize members that have no default initialization
+    iv_sbeRegister.reg = 0;
 
     SBE_TRACF(EXIT_MRK "SbeRetryHandler::SbeRetryHandler()");
 }
@@ -159,6 +172,13 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
+                // Set the PLID of the error log to caller's PLID,
+                // if provided
+                if (iv_callerErrorLogPLID)
+                {
+                   l_errl->plid(iv_callerErrorLogPLID);
+                }
+
                 // Commit error and continue
                 errlCommit(l_errl, ISTEP_COMP_ID);
 
@@ -187,12 +207,22 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                           HWAS::SRCI_PRIORITY_HIGH,
                                           HWAS::DECONFIG,
                                           HWAS::GARD_NULL );
+
+                    // Cache PLID of error log
+                    iv_errorLogPLID = l_errl->plid();
+
+                    // Set the PLID of the error log to caller's PLID,
+                    // if provided
+                    if (iv_callerErrorLogPLID)
+                    {
+                       l_errl->plid(iv_callerErrorLogPLID);
+                    }
+
                     errlCommit(l_errl, ISTEP_COMP_ID);
 
                     SBE_TRACF("main_sbe_handler(): updating return value "
                           "to indicate that we have deconfigured the proc");
                     this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
-                    this->iv_errorLogPLID = l_errl->plid();
 
                     break;
                 }
@@ -226,6 +256,19 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                         SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x",
                                    l_errl->plid() );
                         l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+
+                        // Gard the target, when SBE Retry fails
+                        l_errl->addHwCallout(i_target,
+                                             HWAS::SRCI_PRIORITY_HIGH,
+                                             HWAS::NO_DECONFIG,
+                                             HWAS::GARD_Predictive);
+
+                        // Set the PLID of the error log to caller's PLID,
+                        // if provided
+                        if (iv_callerErrorLogPLID)
+                        {
+                           l_errl->plid(iv_callerErrorLogPLID);
+                        }
 
                         errlCommit( l_errl, ISTEP_COMP_ID);
                     }
@@ -275,6 +318,14 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                         SBEIO_BOOTED_UNEXPECTED_SIDE,
                         0,TARGETING::get_huid(i_target));
             l_errl->collectTrace("ISTEPS_TRACE",256);
+
+            // Set the PLID of the error log to caller's PLID,
+            // if provided
+            if (iv_callerErrorLogPLID)
+            {
+                l_errl->plid(iv_callerErrorLogPLID);
+            }
+
             errlCommit(l_errl, ISTEP_COMP_ID);
         }
 
@@ -377,6 +428,14 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
                     SBE_TRACF("Inside handle_sbe_reg_value before sbe_handler "
                               "Resetting watchdog");
                     l_errl->collectTrace("ISTEPS_TRACE",256);
+
+                    // Set the PLID of the error log to caller's PLID,
+                    // if provided
+                    if (iv_callerErrorLogPLID)
+                    {
+                       l_errl->plid(iv_callerErrorLogPLID);
+                    }
+
                     errlCommit(l_errl,ISTEP_COMP_ID);
                 }
 #endif
@@ -393,7 +452,8 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
             }
 
             // Failed to boot, setting the final action for debugging.
-            SBE_TRACF("Inside handle_sbe_reg_value, calling p9_extract_sbe_rc HWP");
+            SBE_TRACF("Inside handle_sbe_reg_value, calling "
+                      "p9_extract_sbe_rc HWP");
             // Get SBE extract rc
             P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
@@ -411,7 +471,16 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
 
                 // capture the target data in the elog
                 ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                this->iv_errorLogPLID = l_errl->plid();
+
+                // Cache PLID of error log
+                iv_errorLogPLID = l_errl->plid();
+
+                // Set the PLID of the error log to caller's PLID,
+                // if provided
+                if (iv_callerErrorLogPLID)
+                {
+                   l_errl->plid(iv_callerErrorLogPLID);
+                }
 
                 // Commit error log
                 errlCommit( l_errl, HWPF_COMP_ID );
@@ -439,6 +508,14 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
                             SBEIO_INCORRECT_FCN_CALL,
                             get_huid(i_target),this->iv_currentSBEState);
             l_errl->collectTrace("ISTEPS_TRACE",256);
+
+            // Set the PLID of the error log to caller's PLID,
+            // if provided
+            if (iv_callerErrorLogPLID)
+            {
+                l_errl->plid(iv_callerErrorLogPLID);
+            }
+
             errlCommit(l_errl, ISTEP_COMP_ID);
             this->iv_currentAction = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             break;
@@ -540,6 +617,13 @@ errlHndl_t SbeRetryHandler::sbe_timeout_handler(TARGETING::Target * i_target)
                   l_switches,
                   TARGETING::get_huid(i_target));
         i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+    }
+
+    // Set the PLID of the error log to caller's PLID,
+    // if provided
+    if (l_errl && iv_callerErrorLogPLID)
+    {
+        l_errl->plid(iv_callerErrorLogPLID);
     }
 
     SBE_TRACF(EXIT_MRK "sbe_timeout_handler()");
@@ -695,6 +779,13 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             l_errl->collectTrace( SBEIO_COMP_NAME, KILOBYTE/4);
             l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
 
+            // Set the PLID of the error log to caller's PLID,
+            // if provided
+            if (iv_callerErrorLogPLID)
+            {
+                l_errl->plid(iv_callerErrorLogPLID);
+            }
+
             errlCommit(l_errl, ISTEP_COMP_ID);
         }
 
@@ -741,6 +832,13 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
                                      (this->iv_sbeRegister).reg);
 
     l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
+
+    // Set the PLID of the error log to caller's PLID,
+    // if provided
+    if (iv_callerErrorLogPLID)
+    {
+        l_errl->plid(iv_callerErrorLogPLID);
+    }
 
     // Commit error and continue, this is not terminating since
     // we can still at least boot with master proc
@@ -790,6 +888,14 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
             SBE_TRACF("sbe_boot_fail_handler "
                       "Resetting watchdog before sbe_handler");
             l_errl->collectTrace("ISTEPS_TRACE",KILOBYTE/4);
+
+            // Set the PLID of the error log to caller's PLID,
+            // if provided
+            if (iv_callerErrorLogPLID)
+            {
+                l_errl->plid(iv_callerErrorLogPLID);
+            }
+
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 #endif
@@ -820,6 +926,13 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
 
         // Capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+        // Set the PLID of the error log to caller's PLID,
+        // if provided
+        if (iv_callerErrorLogPLID)
+        {
+           l_errl->plid(iv_callerErrorLogPLID);
+        }
 
         // Commit error log
         errlCommit( l_errl, HWPF_COMP_ID );
@@ -904,6 +1017,13 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             break;
         }
     }while(0);
+
+    // Set the PLID of the error log to caller's PLID,
+    // if provided
+    if (l_errl && iv_callerErrorLogPLID)
+    {
+       l_errl->plid(iv_callerErrorLogPLID);
+    }
 
     SBE_TRACF(EXIT_MRK "switch_sbe_sides()");
     return l_errl;

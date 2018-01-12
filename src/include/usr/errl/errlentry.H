@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -264,7 +264,9 @@ public:
     /**
      *  @brief Set the platform log id for this error log.
      *
-     *  @return The platform log ID of the error log.
+     *  @param[in]  i_plid  PLID for error log
+     *
+     *  @return void
      */
     void plid( uint32_t i_plid);
 
@@ -843,7 +845,7 @@ private:
     ErrlUH          iv_User;       // user header object
     ErrlSrc         iv_Src;        // primary SRC section
     std::vector<ErrlUD*> iv_SectionVector;  // list of user defined sections
-    std::vector<uint64_t> iv_btAddrs;       // list of addresses for the backtrace
+    std::vector<uint64_t> iv_btAddrs;    // list of addresses for the backtrace
     ErrlUserDetailsBackTrace * iv_pBackTrace; // Pointer to back trace
 
     // termstate will not be flattend into PEL, its only used by
