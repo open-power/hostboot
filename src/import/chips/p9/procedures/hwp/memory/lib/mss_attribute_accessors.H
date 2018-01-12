@@ -9381,7 +9381,7 @@ fapi_try_exit:
 /// pattern read There can be two patterns used here. This attribute is before
 /// swizzling for endianness of the registers. CODE WILL SWIZZLE FOR THE SYSTEM The
 /// first 0-15 bits are for PATTERN0, bits 16-32 are for PATTERN1. If this attribute
-/// is set to 0, using the default values of: 0x13EC for PATTERN0 0x02FD for
+/// is set to 0, using the default values of: 0x8E8E for PATTERN0 0x2BC6 for
 /// PATTERN1 Set to default in
 /// eff_config
 ///
@@ -9411,7 +9411,7 @@ fapi_try_exit:
 /// pattern read There can be two patterns used here. This attribute is before
 /// swizzling for endianness of the registers. CODE WILL SWIZZLE FOR THE SYSTEM The
 /// first 0-15 bits are for PATTERN0, bits 16-32 are for PATTERN1. If this attribute
-/// is set to 0, using the default values of: 0x13EC for PATTERN0 0x02FD for
+/// is set to 0, using the default values of: 0x8E8E for PATTERN0 0x2BC6 for
 /// PATTERN1 Set to default in
 /// eff_config
 ///
@@ -9442,7 +9442,7 @@ fapi_try_exit:
 /// pattern read There can be two patterns used here. This attribute is before
 /// swizzling for endianness of the registers. CODE WILL SWIZZLE FOR THE SYSTEM The
 /// first 0-15 bits are for PATTERN0, bits 16-32 are for PATTERN1. If this attribute
-/// is set to 0, using the default values of: 0x13EC for PATTERN0 0x02FD for
+/// is set to 0, using the default values of: 0x8E8E for PATTERN0 0x2BC6 for
 /// PATTERN1 Set to default in
 /// eff_config
 ///
