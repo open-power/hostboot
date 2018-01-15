@@ -454,4 +454,16 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_NEST_FREQ_EQ_ZERO</rc>
+    <description>The system attribute ATTR_FREQ_PB_MHZ has a zero
+    value.  This is fatal to Pstate functionality.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
