@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -448,6 +448,18 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>SAFE_FREQ</ffdc>
     <ffdc>UT_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_NEST_FREQ_EQ_ZERO</rc>
+    <description>The system attribute ATTR_FREQ_PB_MHZ has a zero
+    value.  This is fatal to Pstate functionality.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
