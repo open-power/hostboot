@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1771,6 +1771,21 @@
     <attribute>
         <id>MODEL</id>
         <default>CUMULUS</default>
+    </attribute>
+</targetType>
+
+<targetType>
+    <id>unit-obus-smpgroup</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>SMPGROUP</default>
+    </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
+    <attribute><id>HUID</id></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0</default> 
     </attribute>
 </targetType>
 
