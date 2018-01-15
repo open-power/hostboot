@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -469,6 +469,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "RTC";
         case TYPE_FANCTLR:
             return "FANCTLR";
+        case TYPE_SMPGROUP:
+            return "SMPGROUP";
 
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";

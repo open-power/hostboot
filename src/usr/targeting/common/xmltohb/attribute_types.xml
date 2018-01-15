@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -4840,8 +4840,12 @@
         <value>70</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>SMPGROUP</name>
         <value>71</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>72</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>
@@ -5864,7 +5868,6 @@
     </enumerator>
     <id>HDAT_I2C_DEVICE_PURPOSE</id>
   </enumerationType>
-
 
 <attribute>
     <id>FREQ_CORE_MAX</id>
