@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -42,12 +42,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/memory/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 EXTRAINCDIR += ${HWP_PATH}
+EXTRAINCDIR += ${HWP_PATH_1}/hwp/memory/lib/rosetta_map
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
@@ -90,6 +92,8 @@ OBJS += p9_collect_ppe_state.o
 OBJS += p9_ppe_state.o
 OBJS += p9_ppe_utils.o
 OBJS += p9_eq_clear_atomic_lock.o
+VPATH += $(HWP_PATH_1)/hwp/memory/lib/rosetta_map
+OBJS += rosetta_map.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
