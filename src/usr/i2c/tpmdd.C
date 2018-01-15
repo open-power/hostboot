@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,9 @@ namespace TPMDD
 {
 
 static const size_t MAX_BYTE_ADDR = 2;
-static const size_t TPM_MAX_NACK_RETRIES = 2;
+static const size_t TPM_MAX_RETRIES = 5;
+static const size_t TPM_MAX_RETRY_DELAY_NS = (250 * NS_PER_MSEC);
+
 
 // Register the perform Op with the routing code for TPM
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
@@ -526,7 +528,7 @@ errlHndl_t tpmRead ( void * o_buffer,
                      bool i_silent)
 {
     errlHndl_t err = NULL;
-    errlHndl_t err_NACK = NULL;
+    errlHndl_t err_RETRY = NULL;
     uint8_t byteAddr[MAX_BYTE_ADDR];
     size_t byteAddrSize = 0;
 
@@ -549,10 +551,10 @@ errlHndl_t tpmRead ( void * o_buffer,
         }
 
         /***********************************************************/
-        /* Attempt read multiple times ONLY on NACK fails         */
+        /* Attempt read multiple times on fails                    */
         /***********************************************************/
         for (size_t retry = 0;
-             retry <= TPM_MAX_NACK_RETRIES;
+             retry <= TPM_MAX_RETRIES;
              retry++)
         {
 
@@ -619,52 +621,36 @@ errlHndl_t tpmRead ( void * o_buffer,
                 // break from retry loop
                 break;
             }
-            else if ( err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
-            {
-                // Only retry on NACK failures: break from retry loop
-                TRACFCOMP( g_trac_tpmdd, ERR_MRK"tpmRead(): Non-Nack! "
-                           "p/e/dA=%d/%d/0x%X, OP=%d, "
-                           "Error: rc=0x%X, No Retry (retry=%d)",
-                           i_tpmInfo.port,
-                           i_tpmInfo.engine, i_tpmInfo.devAddr,
-                           i_tpmInfo.operation,
-                           err->reasonCode(), retry);
-
-                err->collectTrace(TPMDD_COMP_NAME);
-
-                // break from retry loop
-                break;
-            }
-            else // Handle NACK error
+            else // Handle error
             {
                 // If op will be attempted again: save log and continue
-                if ( retry < TPM_MAX_NACK_RETRIES )
+                if ( retry < TPM_MAX_RETRIES )
                 {
-                    // Only save original NACK error
-                    if ( err_NACK == NULL )
+                    // Only save original RETRY error
+                    if ( err_RETRY == NULL )
                     {
-                        // Save original NACK error
-                        err_NACK = err;
+                        // Save original RETRY error
+                        err_RETRY = err;
 
                         TRACFCOMP( g_trac_tpmdd,
-                                   ERR_MRK"tpmRead(): NACK Error! "
+                                   ERR_MRK"tpmRead(): Error! "
                                    "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
                                    i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
-                                   err_NACK->reasonCode(),
-                                   err_NACK->eid(),
-                                   retry, TPM_MAX_NACK_RETRIES);
+                                   err_RETRY->reasonCode(),
+                                   err_RETRY->eid(),
+                                   retry, TPM_MAX_RETRIES);
 
-                        err_NACK->collectTrace(TPMDD_COMP_NAME);
+                        err_RETRY->collectTrace(TPMDD_COMP_NAME);
                     }
                     else
                     {
-                        // Add data to original NACK error
+                        // Add data to original error
                         TRACFCOMP( g_trac_tpmdd,
-                                   ERR_MRK"tpmRead(): Another NACK Error! "
+                                   ERR_MRK"tpmRead(): Another Error! "
                                    "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "plid=0x%X, retry/MAX=%d/%d. "
@@ -673,16 +659,21 @@ errlHndl_t tpmRead ( void * o_buffer,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
-                                   retry, TPM_MAX_NACK_RETRIES);
+                                   retry, TPM_MAX_RETRIES);
 
                         ERRORLOG::ErrlUserDetailsString(
-                                  "Another NACK ERROR found")
-                                  .addToLog(err_NACK);
+                                  "Another ERROR found")
+                                  .addToLog(err_RETRY);
 
-                        // Delete this new NACK error
+                        // Delete this new error
                         delete err;
                         err = NULL;
                     }
+
+                    // Add 250ms delay before retry:
+                    TRACFCOMP( g_trac_tpmdd,
+                               "tpmRead(): sleep for 250ms before retry");
+                    nanosleep(0, TPM_MAX_RETRY_DELAY_NS);
 
                     // continue to retry
                     continue;
@@ -698,7 +689,7 @@ errlHndl_t tpmRead ( void * o_buffer,
                                i_tpmInfo.engine, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
-                               retry, TPM_MAX_NACK_RETRIES);
+                               retry, TPM_MAX_RETRIES);
 
                     err->collectTrace(TPMDD_COMP_NAME);
 
@@ -709,34 +700,34 @@ errlHndl_t tpmRead ( void * o_buffer,
 
         } // end of retry loop
 
-        // Handle saved NACK error, if any
-        if (err_NACK)
+        // Handle saved error, if any
+        if (err_RETRY)
         {
             if (err)
             {
                 if (!i_silent)
                 {
-                    // commit original NACK error with new err PLID
-                    err_NACK->plid(err->plid());
-                    TRACFCOMP(g_trac_tpmdd, "tpmRead(): Committing saved NACK "
+                    // commit original RETRY error with new err PLID
+                    err_RETRY->plid(err->plid());
+                    TRACFCOMP(g_trac_tpmdd, "tpmRead(): Committing saved RETRY "
                               "err eid=0x%X with plid of returned err: 0x%X",
-                              err_NACK->eid(), err_NACK->plid());
+                              err_RETRY->eid(), err_RETRY->plid());
 
                     ERRORLOG::ErrlUserDetailsTarget(i_tpmInfo.i2cTarget)
-                        .addToLog(err_NACK);
+                        .addToLog(err_RETRY);
 
-                    errlCommit(err_NACK, TPMDD_COMP_ID);
+                    errlCommit(err_RETRY, TPMDD_COMP_ID);
                 }
             }
             else
             {
-                // Since we eventually succeeded, delete original NACK error
+                // Since we eventually succeeded, delete original RETRY error
                 TRACFCOMP(g_trac_tpmdd, "tpmRead(): Op successful, "
-                          "deleting saved NACK err eid=0x%X, plid=0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                          "deleting saved RETRY err eid=0x%X, plid=0x%X",
+                          err_RETRY->eid(), err_RETRY->plid());
 
-                delete err_NACK;
-                err_NACK = NULL;
+                delete err_RETRY;
+                err_RETRY = NULL;
             }
         }
 
@@ -762,7 +753,7 @@ errlHndl_t tpmWrite ( void * i_buffer,
                       const tpm_info_t & i_tpmInfo )
 {
     errlHndl_t err = NULL;
-    errlHndl_t err_NACK = NULL;
+    errlHndl_t err_RETRY = NULL;
     uint8_t byteAddr[MAX_BYTE_ADDR];
     size_t byteAddrSize = 0;
 
@@ -787,10 +778,10 @@ errlHndl_t tpmWrite ( void * i_buffer,
         }
 
         /***********************************************************/
-        /* Attempt write multiple times ONLY on NACK fails         */
+        /* Attempt write multiple times ONLY fails                 */
         /***********************************************************/
         for (size_t retry = 0;
-             retry <= TPM_MAX_NACK_RETRIES;
+             retry <= TPM_MAX_RETRIES;
              retry++)
         {
 
@@ -857,52 +848,36 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 // break from retry loop
                 break;
             }
-            else if ( err->reasonCode() != I2C::I2C_NACK_ONLY_FOUND )
-            {
-                // Only retry on NACK failures: break from retry loop
-                TRACFCOMP( g_trac_tpmdd, ERR_MRK"tpmWrite(): Non-Nack "
-                           "p/e/dA=%d/%d/0x%X, OP=%d, "
-                           "Error: rc=0x%X, No Retry (retry=%d)",
-                           i_tpmInfo.port,
-                           i_tpmInfo.engine, i_tpmInfo.devAddr,
-                           i_tpmInfo.operation,
-                           err->reasonCode(), retry);
-
-                err->collectTrace(TPMDD_COMP_NAME);
-
-                // break from retry loop
-                break;
-            }
-            else // Handle NACK error
+            else // Handle error
             {
                 // If op will be attempted again: save log and continue
-                if ( retry < TPM_MAX_NACK_RETRIES )
+                if ( retry < TPM_MAX_RETRIES )
                 {
-                    // Only save original NACK error
-                    if ( err_NACK == NULL )
+                    // Only save original RETRY error
+                    if ( err_RETRY == NULL )
                     {
-                        // Save original NACK error
-                        err_NACK = err;
+                        // Save original RETRY error
+                        err_RETRY = err;
 
                         TRACFCOMP( g_trac_tpmdd,
-                                   ERR_MRK"tpmWrite(): NACK Error! "
+                                   ERR_MRK"tpmWrite(): RETRY Error! "
                                    "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
                                    i_tpmInfo.port,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
-                                   err_NACK->reasonCode(),
-                                   err_NACK->eid(),
-                                   retry, TPM_MAX_NACK_RETRIES);
+                                   err_RETRY->reasonCode(),
+                                   err_RETRY->eid(),
+                                   retry, TPM_MAX_RETRIES);
 
-                        err_NACK->collectTrace(TPMDD_COMP_NAME);
+                        err_RETRY->collectTrace(TPMDD_COMP_NAME);
                     }
                     else
                     {
-                        // Add data to original NACK error
+                        // Add data to original RETRY error
                         TRACFCOMP( g_trac_tpmdd,
-                                   ERR_MRK"tpmWrite(): Another NACK Error! "
+                                   ERR_MRK"tpmWrite(): Another RETRY Error! "
                                    "p/e/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X "
                                    "plid=0x%X, retry/MAX=%d/%d. "
@@ -911,16 +886,21 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                    i_tpmInfo.engine, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
-                                   retry, TPM_MAX_NACK_RETRIES);
+                                   retry, TPM_MAX_RETRIES);
 
                         ERRORLOG::ErrlUserDetailsString(
-                                  "Another NACK ERROR found")
-                                  .addToLog(err_NACK);
+                                  "Another ERROR found")
+                                  .addToLog(err_RETRY);
 
-                        // Delete this new NACK error
+                        // Delete this new error
                         delete err;
                         err = NULL;
                     }
+
+                    // Add 250ms delay before retry:
+                    TRACFCOMP( g_trac_tpmdd,
+                               "tpmWrite(): sleep for 250ms before retry");
+                    nanosleep(0, TPM_MAX_RETRY_DELAY_NS);
 
                     // continue to retry
                     continue;
@@ -936,7 +916,7 @@ errlHndl_t tpmWrite ( void * i_buffer,
                                i_tpmInfo.engine, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
-                               retry, TPM_MAX_NACK_RETRIES);
+                               retry, TPM_MAX_RETRIES);
 
                     err->collectTrace(TPMDD_COMP_NAME);
 
@@ -947,31 +927,31 @@ errlHndl_t tpmWrite ( void * i_buffer,
 
         } // end of retry loop
 
-        // Handle saved NACK error, if any
-        if (err_NACK)
+        // Handle saved RETRY error, if any
+        if (err_RETRY)
         {
             if (err)
             {
-                // commit original NACK error with new err PLID
-                err_NACK->plid(err->plid());
-                TRACFCOMP(g_trac_tpmdd, "tpmWrite(): Committing saved NACK "
+                // commit original RETRY error with new err PLID
+                err_RETRY->plid(err->plid());
+                TRACFCOMP(g_trac_tpmdd, "tpmWrite(): Committing saved RETRY "
                           "err eid=0x%X with plid of returned err: 0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                          err_RETRY->eid(), err_RETRY->plid());
 
                 ERRORLOG::ErrlUserDetailsTarget(i_tpmInfo.i2cTarget)
-                                               .addToLog(err_NACK);
+                                               .addToLog(err_RETRY);
 
-                errlCommit(err_NACK, TPMDD_COMP_ID);
+                errlCommit(err_RETRY, TPMDD_COMP_ID);
             }
             else
             {
-                // Since we eventually succeeded, delete original NACK error
+                // Since we eventually succeeded, delete original RETRY error
                 TRACFCOMP(g_trac_tpmdd, "tpmWrite(): Op successful, "
-                          "deleting saved NACK err eid=0x%X, plid=0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                          "deleting saved RETRY err eid=0x%X, plid=0x%X",
+                          err_RETRY->eid(), err_RETRY->plid());
 
-                delete err_NACK;
-                err_NACK = NULL;
+                delete err_RETRY;
+                err_RETRY = NULL;
             }
         }
 
