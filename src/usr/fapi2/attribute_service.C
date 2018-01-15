@@ -61,6 +61,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 #include <../memory/lib/shared/mss_const.H>
+#include <../memory/lib/rosetta_map/rosetta_map.H>
 #include <util/utilcommonattr.H>
 
 #include <secureboot/service.H>
@@ -950,6 +951,259 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
 }
 
 //******************************************************************************
+// fapi2::platAttrSvc::__mcLogicalToDimmDqHelper function
+//******************************************************************************
+ReturnCode __mcLogicalToDimmDqHelper(
+    const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
+    uint32_t i_ps, uint8_t i_mcPin, uint8_t o_dimm_dq )
+{
+    fapi2::ReturnCode l_rc;
+
+    do
+    {
+        uint64_t l_c4 = 0;
+
+        // determine whether this is a Nimbus or Cumulus chip
+        TARGETING::Target * masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+        TARGETING::ATTR_MODEL_type procType =
+            masterProc->getAttr<TARGETING::ATTR_MODEL>();
+
+        if ( TARGETING::MODEL_NIMBUS == procType )
+        {
+            Target<TARGET_TYPE_MCA> l_fapiMca =
+                i_fapiDimm.getParent<TARGET_TYPE_MCA>();
+
+            // For Nimbus, translate from MC Logical to C4 format
+            l_rc = mss::rosetta_map::mc_to_c4<mss::rosetta_type::DQ>( l_fapiMca,
+                                                                      i_mcPin,
+                                                                      l_c4 );
+            if ( l_rc )
+            {
+                FAPI_ERR( "__mcLogicalToDimmDqHelper: "
+                          "rosetta_map::mc_to_c4 failed." );
+                break;
+            }
+        }
+        else if ( TARGETING::MODEL_CUMULUS == procType )
+        {
+            // For Cumulus, MC to C4 is 1-to-1
+            l_c4 = i_mcPin;
+        }
+        else
+        {
+            FAPI_ERR( "__mcLogicalToDimmDqHelper: Invalid procType" );
+            assert(false);
+        }
+
+        // use wiring data to translate c4 pin to dimm dq format
+        o_dimm_dq = i_wiringData[i_ps][l_c4];
+
+    }while(0);
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__mcLogicalToDimmDq function
+//******************************************************************************
+ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    uint8_t i_mcLogical_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
+    uint8_t (&o_dimmDq_bitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
+    uint8_t i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
+    uint8_t i_spareByte[mss::MAX_RANK_PER_DIMM], uint32_t i_ps )
+{
+    fapi2::ReturnCode l_rc;
+
+    memset(o_dimmDq_bitmap, 0, sizeof(o_dimmDq_bitmap));
+
+    // We need to translate the bad dq bits from MC logical format to
+    // Connector/DIMM DQ format. This will require two translations.
+
+    // MC Logical/PHY-->Module/C4 Package-->Connector/DIMM DQ format
+
+    // Note: MC Logical (0-71) maps linearly to PHY DP0(lane 0-15),
+    // DP1(lane 0-15)...DP4(lane 0-15)
+
+    // loop through iv_bitmaps ranks
+    for ( uint8_t rank = 0; rank < mss::MAX_RANK_PER_DIMM; rank++ )
+    {
+        // loop through iv_bitmaps bytes
+        for ( uint8_t byte = 0; byte < mss::BAD_DQ_BYTE_COUNT; byte++ )
+        {
+            // if bit found on
+            if ( 0 != i_mcLogical_bitmap[rank][byte] )
+            {
+                // find the set bit
+                for ( uint8_t bit = 0; bit < mss::BITS_PER_BYTE; bit++ )
+                {
+                    if ( i_mcLogical_bitmap[rank][byte] & (0x80 >> bit) )
+                    {
+                        // Check the spares
+                        if ( byte == SPARE_DRAM_DQ_BYTE_NUMBER_INDEX &&
+                             i_spareByte[rank] & (0x80 >> bit) )
+                        {
+                            // The spareByte can be one of: 0x00 0x0F 0xF0
+                            // 0xFF If a bit is set, then that spare is
+                            // unconnected so continue to the next bit,
+                            // do not translate
+                            continue;
+                        }
+
+                        // get the pin/bit position in MC Logical format
+                        uint8_t l_mcPin = (byte*8) + bit; // pin 0-79
+                        uint8_t l_dimm_dq = 0;
+
+                        // translate the MC logical pin to DIMM DQ format
+                        l_rc = __mcLogicalToDimmDqHelper( i_fapiDimm,
+                                                          i_wiringData,
+                                                          i_ps, l_mcPin,
+                                                          l_dimm_dq );
+                        if ( l_rc )
+                        {
+                            FAPI_ERR( "__mcLogicalToDimmDq: failure from "
+                                      "__mcLogicalToDimmDqHelper." );
+                            continue;
+                        }
+
+                        // set bit in new o_dimmDq_bitmap
+                        uint8_t l_setByte = l_dimm_dq/8;
+                        uint8_t l_setBit  = 0x80 >> (l_dimm_dq%8);
+                        o_dimmDq_bitmap[rank][l_setByte] |= l_setBit;
+
+                    }
+                }
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__dimmDqToMcLogicalHelper function
+//******************************************************************************
+ReturnCode __dimmDqToMcLogicalHelper(
+    const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
+    uint32_t i_ps, uint8_t i_dimm_dq, uint64_t o_mcPin )
+{
+    fapi2::ReturnCode l_rc;
+    uint64_t l_c4 = 0;
+
+    // Translate from DIMM DQ format to C4 using wiring data
+    for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
+    {
+        // Check to see which bit in the wiring data corresponds to our DIMM DQ
+        // format pin.
+        if ( i_wiringData[i_ps][bit] == i_dimm_dq )
+        {
+            l_c4 = bit;
+            break;
+        }
+    }
+
+    // determine whether this is a Nimbus or Cumulus chip
+    TARGETING::Target * masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+    TARGETING::ATTR_MODEL_type procType =
+        masterProc->getAttr<TARGETING::ATTR_MODEL>();
+
+    if ( TARGETING::MODEL_NIMBUS == procType )
+    {
+        Target<TARGET_TYPE_MCA> l_fapiMca =
+            i_fapiDimm.getParent<TARGET_TYPE_MCA>();
+
+        // For Nimbus, translate from C4 to MC Logical format
+        l_rc = mss::rosetta_map::c4_to_mc<mss::rosetta_type::DQ>( l_fapiMca,
+                                                                  l_c4,
+                                                                  o_mcPin );
+        if ( l_rc )
+        {
+            FAPI_ERR( "__dimmDqToMcLogicalHelper: "
+                      "rosetta_map::c4_to_mc failed." );
+        }
+    }
+    else if ( TARGETING::MODEL_CUMULUS == procType )
+    {
+        // For Cumulus, C4 to MC Logical is 1-to-1
+        o_mcPin = l_c4;
+    }
+    else
+    {
+        FAPI_ERR( "__dimmDqToMcLogicalHelper: Invalid procType" );
+        assert(false);
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::__dimmDqToMcLogical function
+//******************************************************************************
+ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+    uint8_t i_dimmDq_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
+    uint8_t (&o_mcLogical_bitmap)[mss::MAX_RANK_PER_DIMM]
+                                 [mss::BAD_DQ_BYTE_COUNT],
+    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
+    uint32_t i_ps )
+{
+    fapi2::ReturnCode l_rc;
+
+    memset(o_mcLogical_bitmap, 0, sizeof(o_mcLogical_bitmap));
+
+    // We need to translate the bad dq bits back from DIMM DQ format to
+    // MC Logical format for the getter. This will require two translations.
+
+    // DIMM DQ-->Module/C4 Package-->MC Logical format
+
+    // loop through iv_bitmaps ranks
+    for ( uint8_t rank = 0; rank < mss::MAX_RANK_PER_DIMM; rank++ )
+    {
+        // loop through iv_bitmaps bytes
+        for ( uint8_t byte = 0; byte < mss::BAD_DQ_BYTE_COUNT; byte++ )
+        {
+            // if bit found on
+            if ( 0 != i_dimmDq_bitmap[rank][byte] )
+            {
+                // find the set bit
+                for ( uint8_t bit = 0; bit < mss::BITS_PER_BYTE; bit++ )
+                {
+                    if ( i_dimmDq_bitmap[rank][byte] & (0x80 >> bit) )
+                    {
+                        // get the pin/bit position in DIMM DQ format
+                        uint8_t l_dimm_dq = (byte*8) + bit; // pin 0-79
+                        uint8_t l_mcPin = 0;
+
+                        // translate the DIMM DQ pin to MC Logical format
+                        l_rc = __dimmDqToMcLogicalHelper( i_fapiDimm,
+                                                          i_wiringData,
+                                                          i_ps, l_dimm_dq,
+                                                          l_mcPin );
+                        if ( l_rc )
+                        {
+                            FAPI_ERR( "__dimmDqToMcLogical: failure from "
+                                      "__dimmDqToMcLogicalHelper." );
+                            continue;
+                        }
+
+                        // set bit in new o_dimmDq_bitmap
+                        uint8_t l_setByte = l_mcPin/8;
+                        uint8_t l_setBit  = 0x80 >> (l_mcPin%8);
+                        o_mcLogical_bitmap[rank][l_setByte] |= l_setBit;
+
+                    }
+                }
+            }
+        }
+    }
+
+    return l_rc;
+
+}
+
+//******************************************************************************
 // fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrGetBadDqBitmap(
@@ -1016,41 +1270,14 @@ ReturnCode fapiAttrGetBadDqBitmap(
         }
         else
         {
-            // Translate bitmap from DIMM DQ to Centaur DQ point of view
-            // for each rank
-            for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
+            // Translate bitmap from DIMM DQ to MC Logical format
+            l_rc = __dimmDqToMcLogical( i_dimmFapiTarget, l_spdData.iv_bitmaps,
+                                        o_data, l_wiringData, l_ps );
+            if ( l_rc )
             {
-                // Iterate through all the DQ bits in the rank
-                for (uint8_t j = 0; j < mss::MAX_DQ_BITS; j++)
-                {
-                    // There is a byte for each 8 DQs, j/8 gives the
-                    // byte number. The MSB in each byte is the lowest
-                    // DQ, (0x80 >> (j % 8)) gives the bit mask
-                    // corresponding to the DQ within the byte
-                    if ((l_spdData.iv_bitmaps[i][j/8]) &
-                            (0x80 >> (j % 8)))
-                    {
-                        // DIMM DQ bit is set in SPD data.
-                        // Set Centaur DQ bit in caller's data.
-                        // The wiring data maps Centaur DQ to DIMM DQ
-                        // Find the Centaur DQ that maps to this DIMM DQ
-                        uint8_t k = 0;
-                        for (; k < mss::MAX_DQ_BITS; k++)
-                        {
-                            if (l_wiringData[l_ps][k] == j)
-                            {
-                                o_data[i][k/8] |= (0x80 >> (k % 8));
-                                break;
-                            }
-                        }
-
-                        if (k == mss::MAX_DQ_BITS)
-                        {
-                            FAPI_INF( "fapiAttrGetBadDqBitmap: "
-                                      "Centaur DQ not found for %d!",j);
-                        }
-                    }
-                }
+                FAPI_ERR( "fapiAttrGetBadDqBitmap: Error from "
+                          "__dimmDqToMcLogical." );
+                break;
             }
 
             // Set bits for any unconnected DQs.
@@ -1267,33 +1494,15 @@ ReturnCode fapiAttrSetBadDqBitmap(
             break;
         }
 
-        // Translate bitmap from Centaur DQ to DIMM DQ point of view
-        // for each rank
-        for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
+        // Translate bitmap from MC Logical to DIMM DQ format
+        l_rc = __mcLogicalToDimmDq( i_dimmFapiTarget, i_data,
+                                    l_spdData.iv_bitmaps, l_wiringData,
+                                    spareByte, l_ps );
+        if ( l_rc )
         {
-            // Iterate through all the DQ bits in the rank
-            for (uint8_t j = 0; j < mss::MAX_DQ_BITS; j++)
-            {
-                if ((j/8) == SPARE_DRAM_DQ_BYTE_NUMBER_INDEX)
-                {
-                    // The spareByte can be one of: 0x00 0x0F 0xF0
-                    // 0xFF If a bit is set, then that spare is
-                    // unconnected so continue to the next num_dqs,
-                    // do not translate
-                    if (spareByte[i] & (0x80 >> (j % 8)))
-                    {
-                        continue;
-                    }
-                }
-                if ((i_data[i][j/8]) & (0x80 >> (j % 8)))
-                {
-                    // Centaur DQ bit set in callers data.
-                    // Set DIMM DQ bit in SPD data.
-                    // The wiring data maps Centaur DQ to DIMM DQ
-                    uint8_t dBit = l_wiringData[l_ps][j];
-                    l_spdData.iv_bitmaps[i][dBit/8] |= (0x80 >> (dBit % 8));
-                }
-            }
+            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error from "
+                      "__mcLogicalToDimmDq." );
+            break;
         }
 
         l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
