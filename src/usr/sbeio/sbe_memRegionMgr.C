@@ -600,6 +600,13 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
             l_region.start_addr = itr->start_addr;
             l_region.size = itr->size;
             l_region.flags = SbePsu::SBE_MEM_REGION_CLOSE;
+            l_region.tgt = itr->tgt;
+
+            // Trace out information of memory region to close
+            SBE_TRACF("closeAllUnsecureMemRegions: Closing Region - tgt=0x%.8X: start_addr=0x%.16llX, size=0x%.8X, flags=0x%.2X",
+                      TARGETING::get_huid(l_region.tgt),
+                      l_region.start_addr, l_region.size,
+                      l_region.flags);
 
             errl = doUnsecureMemRegionOp(l_region);
 

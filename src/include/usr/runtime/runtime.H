@@ -261,9 +261,10 @@ void rediscover_hdat( void );
 
 /**
  * @brief  Open necessary unsecure SBE windows for SP -> host communication
- *         Currently opens two windows
+ *         Currently opens three windows
  *             1. CPU controls SP ATTN areas
  *             2. SP_HOST_UNTRUSTED_COMM_AREA_ADDR
+ *             3. SBE FFDC
  *
  * @return errlHndl_t Returns nullptr on success; otherwise errlog
  */
