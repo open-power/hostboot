@@ -173,14 +173,26 @@ namespace mss
 
 static constexpr uint64_t CKE_HIGH = 0b1111;
 static constexpr uint64_t CKE_LOW  = 0b0000;
-// CKE setup for rank 0-7. Currently only support 0, 1, 4, 5
+
+// CKE setup for rank 0-7 to support
+// Currently only support 0, 1, 4, 5
 // Not supported ranks will always get 0
-static constexpr uint64_t CKE_ARY[]  =
+// For self_refresh_entry_command()
+static constexpr uint64_t CKE_ARY_SRE[]  =
 {
     //   0,      1, 2, 3,
     0b0111, 0b1011, 0, 0,
     //   4,      5, 6, 7
     0b0111, 0b1011, 0, 0
+};
+
+// For self_refresh_exit_command()
+static constexpr uint64_t CKE_ARY_SRX[]  =
+{
+    //   0,      1, 2, 3,
+    0b1000, 0b0100, 0, 0,
+    //   4,      5, 6, 7
+    0b1000, 0b0100, 0, 0
 };
 
 namespace ccs
@@ -750,7 +762,7 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Set all CKE to high except the rank passed in
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY[i_rank]);
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRE[i_rank]);
 
     // ACT is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
@@ -783,11 +795,8 @@ inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TA
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    // Bring all CKE to high
-    // This in theory will take all ranks out of self refresh
-    // The rank passed in will see NOP (CKE = high, CS = low)
-    // All the other ranks will see DES (CKE = high, CS = high)
-    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
+    // Set all CKE to low except the rank passed in
+    l_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_ARY_SRX[i_rank]);
 
     // ACT is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ACTN>();
