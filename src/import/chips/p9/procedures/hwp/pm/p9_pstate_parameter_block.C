@@ -3574,6 +3574,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_INF("   proc_get_mvpd_poundw: BOTH VDM and WOF are disabled.  Skipping remaining checks");
             o_state->iv_vdm_enabled = false;
             o_state->iv_wof_enabled = false;
+
             break;
         }
 
@@ -3738,7 +3739,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                .set_POWERSAVE_TDP_IDC(o_data->poundw[POWERSAVE].ivdd_tdp_dc_current_10ma)
                                .set_TURBO_TDP_IDC(o_data->poundw[TURBO].ivdd_tdp_dc_current_10ma)
                                .set_ULTRA_TDP_IDC(o_data->poundw[ULTRA].ivdd_tdp_dc_current_10ma),
-                               "Pstate Parameter Block #W : one or more Idd TDP DC values are zero");
+                               "o_dataPstate Parameter Block #W : one or more Idd TDP DC values are zero");
 
             // Set the return code to success to keep going.
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -3796,7 +3797,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
                                .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
                                "Pstate Parameter Block #W : one of the VID compare value is zero");
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             break;
         }
 
@@ -3819,7 +3819,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
                                .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
                                "Pstate Parameter Block #W VID compare data are not in increasing order");
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             break;
         }
 
@@ -3850,7 +3849,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                    .set_VDM_EXTREME((o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F)
                                    .set_VDM_LARGE((o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F),
                                    "Pstate Parameter Block #W VDM threshold data are invalid");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
         }
@@ -3866,10 +3864,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_INF("o_data->poundw[%d] VDM_FREQ_RETURN L_S = %d", p, ((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F));
             FAPI_INF("o_data->poundw[%d] VDM_FREQ_RETURN S_N = %d", p, ((o_data->poundw[p].vdm_normal_freq_return) & 0x0F));
 
-            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_normal_freq_drop) & 0x0F), //N_L
-                                           ((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F), // N_S
+            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_normal_freq_drop) & 0x0F),        // N_L
+                                           ((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F),   // N_S
                                            ((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F), // L_S
-                                           ((o_data->poundw[p].vdm_normal_freq_return) & 0x0F), //S_N
+                                           ((o_data->poundw[p].vdm_normal_freq_return) & 0x0F),      // S_N
                                            l_frequency_value_state);
 
             if (!l_frequency_value_state)
@@ -3884,7 +3882,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                    .set_VDM_LARGE_SMALL((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F)
                                    .set_VDM_SMALL_NORMAL((o_data->poundw[p].vdm_normal_freq_return) & 0x0F),
                                    "Pstate Parameter Block #W VDM frequency drop data are invalid");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 break;
             }
         }
@@ -3925,6 +3922,16 @@ fapi_try_exit:
     {
         o_state->iv_vdm_enabled = false;
         o_state->iv_wof_enabled = false;
+    }
+
+    if (!(o_state->iv_vdm_enabled))
+    {
+        // With VDMs disabled, we have to ensure that we have some Large
+        // Jump values to compute the safe mode frequency and voltage as some
+        // part sorts assume that uplift in their guardbands.  As systems are
+        // offered assuming VDM operability which elevates the floor, default
+        // values are needed.
+        large_jump_defaults(o_data);
     }
     FAPI_DBG("<< proc_get_mvpd_poundw");
     return fapi2::current_err;
@@ -4681,6 +4688,31 @@ large_jump_interpolate(const Pstate i_pstate,
             (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value *
                        (i_ps_pstate - i_pstate)) >> THRESH_SLOPE_FP_SHIFT));
    return l_vdm_jump_value;
+}
+
+//large_jump_defaults
+void
+large_jump_defaults(PoundW_data* io_data)
+{
+    const float DEFAULT_VDM_DROP_PERCENT = 12.5;
+    const float DEFAULT_VDM_DROP_DIVISOR = 32;
+    float poundw_freq_drop_float = (DEFAULT_VDM_DROP_PERCENT/100)*DEFAULT_VDM_DROP_DIVISOR;
+    uint8_t poundw_freq_drop_value = (uint8_t)poundw_freq_drop_float;
+    FAPI_DBG ("DEFAULT_VDM_DROP_PERCENT = %6.3f%%; DEFAULT_VDM_DROP_DIVISOR = %6.3f; poundw_freq_drop_value = %f %X",
+        DEFAULT_VDM_DROP_PERCENT,
+        DEFAULT_VDM_DROP_DIVISOR,
+        poundw_freq_drop_float,
+        poundw_freq_drop_value);
+
+    // N_S/N_L - each a nibble in a byte
+    io_data->poundw[POWERSAVE].vdm_normal_freq_drop = poundw_freq_drop_value;
+    io_data->poundw[NOMINAL].vdm_normal_freq_drop = poundw_freq_drop_value;
+
+    FAPI_INF ("Using default Large Jump percentage (%6.3f%%) for N_L (%X) for both POWERSAVE and NOMINAL due to #W access failure ",
+        DEFAULT_VDM_DROP_PERCENT,
+        io_data->poundw[POWERSAVE].vdm_normal_freq_drop);
+
+    return;
 }
 
 
