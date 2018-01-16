@@ -3311,8 +3311,10 @@
       </description>
       <default>0</default>
       <valueType>int8</valueType>
-      <writeable/>
       <platInit/>
+      <overrideOnly/>
+      <initToZero/>
+      <writeable/>
       <mssAccessorName>wr_vref_offset</mssAccessorName>
     </attribute>
 
