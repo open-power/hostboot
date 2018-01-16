@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -790,7 +790,7 @@ void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
 /// @param[in] i_step_frequency Step frequency
 /// @param[in] i_ps_pstate power save pstate
 /// @param[out] o_safe_mode_values safe mode values
-/// @paramgin] i_data  Pound W vpd data
+/// @param[in] i_poundw_data  Pound W vpd data
 /// @return FAPI2::SUCCESS
 fapi2::ReturnCode
 p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -800,6 +800,15 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                                 const Pstate i_ps_pstate,
                                 Safe_mode_parameters* o_safe_mode_values,
                                 const PoundW_data i_poundw_data);
+
+
+/// -------------------------------------------------------------------
+/// @brief This function provides ncessary #W data in the event of access failures
+/// @paramgin] o_poundw_data  Pound W vpd data
+/// @return None
+void
+large_jump_defaults(PoundW_data* o_poundw_data);
+
 
 /// -------------------------------------------------------------------
 /// @brief For a given pstate.. gets the vdd voltge value
