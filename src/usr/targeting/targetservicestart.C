@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,6 +40,7 @@
 
 // Other components
 #include <sys/misc.h>
+#include <sys/mm.h>
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <targeting/common/trace.H>
@@ -147,6 +148,12 @@ static void initTargeting(errlHndl_t& io_pError)
     if(l_scratch3.isMpipl)
     {
         TARG_INF("We are running MPIPL mode");
+        //Since we are in MPIPL we know that memory is up and running
+        //in order to avoid burning through all of our memory pages
+        //during the attrrp init, which is when we copy attributes from
+        //the prev IPL into PNOR, we expand out to full cache right now
+        //in activate_threads we will expand out to MM_EXTEND_REAL_MEMORY
+        mm_extend(MM_EXTEND_FULL_CACHE);
         l_isMpipl = true;
     }
     if(l_scratch3.istepMode)
