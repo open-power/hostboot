@@ -830,8 +830,11 @@ struct mrs00_data
     ///
     mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS00 default constructor
-    mrs00_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs00_data() = default;
 
     ///
     /// @brief Less than operator
@@ -918,8 +921,11 @@ struct mrs01_data
     ///
     mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS01 default constructor
-    mrs01_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs01_data() = default;
 
     ///
     /// @brief Less than operator
@@ -1017,8 +1023,11 @@ struct mrs02_data
     ///
     mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS02 default constructor
-    mrs02_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs02_data() = default;
 
     ///
     /// @brief Less than operator
@@ -1094,8 +1103,11 @@ struct mrs03_data
     ///
     mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS03 default constructor
-    mrs03_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs03_data() = default;
 
     ///
     /// @brief Less than operator
@@ -1196,8 +1208,11 @@ struct mrs04_data
     ///
     mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS04 default constructor
-    mrs04_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs04_data() = default;
 
     ///
     /// @brief Less than operator
@@ -1319,8 +1334,11 @@ struct mrs05_data
     ///
     mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS05 default constructor
-    mrs05_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs05_data() = default;
 
     ///
     /// @brief Less than operator
@@ -1430,8 +1448,11 @@ struct mrs06_data
     ///
     mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
-    // Delete MRS06 default constructor
-    mrs06_data() = delete;
+    ///
+    /// @brief Default constructor
+    /// @note Default constructor is defined to allow for the use of STL data structures
+    ///
+    mrs06_data() = default;
 
     ///
     /// @brief Less than operator
