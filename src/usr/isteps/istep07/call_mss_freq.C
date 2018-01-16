@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,14 +74,38 @@ void*    call_mss_freq( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = NULL;
+    bool l_isMemdLoaded = false;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
+
+    do
+    {
 
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq: %d membufs found",
             l_membufTargetList.size());
+
+    #ifdef CONFIG_SECUREBOOT
+    // Load MEMD so that vpd_supported_freqs can use it.
+    l_err = loadSecureSection(PNOR::MEMD);
+    if (l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            ERR_MRK "Failed in call to loadSecureSection for section "
+            "PNOR:MEMD");
+
+        // Create istep error and link it to PLID of original error
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, ISTEP_COMP_ID);
+        break;
+    }
+    else
+    {
+        l_isMemdLoaded = true;
+    }
+    #endif
 
     for (const auto & l_membuf_target : l_membufTargetList)
     {
@@ -298,6 +322,29 @@ void*    call_mss_freq( void *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "WARNING skipping SBE update checks due to previous errors" );
         }
     }
+
+    } while(0);
+
+    #ifdef CONFIG_SECUREBOOT
+    if(l_isMemdLoaded)
+    {
+        // Should not have any uncommitted errors at this point.
+        assert(l_err == NULL, "call_mss_freq - unexpected uncommitted"
+                                                                 "error found");
+
+        l_err = unloadSecureSection(PNOR::MEMD);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK "Failed in call to unloadSecureSection for section "
+                "PNOR:MEMD");
+
+            // Create istep error and link it to PLID of original error
+            l_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, ISTEP_COMP_ID);
+        }
+    }
+    #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 
