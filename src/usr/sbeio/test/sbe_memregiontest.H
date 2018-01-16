@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,15 @@ class SbeMemRegionTest : public CxxTest::TestSuite
 
           do
           {
+
+          // Tell SBE to Close All Unsecure Memory Regions before tests
+          errl = SBEIO::closeAllUnsecureMemRegions();
+          if (errl)
+          {
+              TS_FAIL("memRegionTest1: pre-test cleanup SBEIO::closeAllUnsecureMemRegions Failed: rc=0x%X, plid=0x%X",
+                      ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+              break;
+          }
 
           // Loop Test: Open MAX+1 to force a fail
           for (size_t i = 1; i<=SBEIO_MAX_UNSECURE_MEMORY_REGIONS+1 ; i++)

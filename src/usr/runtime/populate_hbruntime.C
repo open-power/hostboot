@@ -1064,6 +1064,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_prevDataAddr = l_sbeffdcAddr;
             l_prevDataSize = l_sbeffdcSizeAligned;
 
+            // Save SBE FFDC address to attribute
+            l_procChip->setAttr<TARGETING::ATTR_SBE_FFDC_ADDR>(l_sbeffdcAddr);
+
             // Open Unsecure Memory Region for SBE FFDC Section
             l_elog = SBEIO::openUnsecureMemRegion(l_sbeffdcAddr,
                                                   l_sbeffdcSize,
@@ -2383,8 +2386,8 @@ errlHndl_t openUntrustedSpCommArea()
     getAllChips(l_procChips, TARGETING::TYPE_PROC);
     for (const auto & l_procChip : l_procChips)
     {
-        // Get Instance ID of proc for trace
-        uint32_t l_id = l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+        // Get HUID of proc for trace
+        auto l_id = TARGETING::get_huid(l_procChip);
 
         // Open SP ATTN region
         l_err = SBEIO::openUnsecureMemRegion(l_spAttnStartAddr,
@@ -2416,6 +2419,27 @@ errlHndl_t openUntrustedSpCommArea()
                           RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_SIZE);
                 break;
             }
+        }
+
+        // Open Unsecure Memory Region for SBE FFDC Section
+        uint64_t l_sbeffdcAddr =
+            l_procChip->getAttr<TARGETING::ATTR_SBE_FFDC_ADDR>();
+        uint64_t l_sbeffdcSize =
+            SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize();
+
+        // Open Unsecure Memory Region for SBE FFDC Section
+        l_err = SBEIO::openUnsecureMemRegion(l_sbeffdcAddr,
+                                             l_sbeffdcSize,
+                                             false, //Read-Only
+                                             l_procChip);
+        if(l_err)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() failed proc = 0x%X addr = 0x%016llx size = 0x%X",
+                      l_id,
+                      l_sbeffdcAddr,
+                      l_sbeffdcSize);
+
+            break;
         }
     }
     if(l_err)

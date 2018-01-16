@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,6 +55,8 @@
 #include <config.h>
 #include <errno.h>
 #include <p9_int_scom.H>
+#include <sbeio/sbeioif.H>
+#include <runtime/runtime.H>
 
 #ifdef CONFIG_DRTM_TRIGGERING
 #include <secureboot/drtm.H>
@@ -318,6 +320,28 @@ void* call_host_start_payload (void *io_pArgs)
         if(l_errl)
         {
             break;
+        }
+
+        // Tell SBE to Close All Unsecure Memory Regions
+        l_errl = SBEIO::closeAllUnsecureMemRegions();
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK "call_host_start_payload: Failed SBEIO::closeAllUnsecureMemRegions" );
+            break;
+        }
+
+        // Open untrusted SP communication area if there is a PAYLOAD
+        // NOTE: Must be after all HDAT processing
+        if( !(TARGETING::is_no_load()) )
+        {
+            l_errl = RUNTIME::openUntrustedSpCommArea();
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"call_host_start_payload: Failed openUntrustedSpCommArea" );
+                break;
+            }
         }
 
         //  - Call shutdown using payload base, and payload entry.

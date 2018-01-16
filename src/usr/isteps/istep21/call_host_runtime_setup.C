@@ -463,18 +463,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "Successfully sent all system configs to procs via SBE chip op !!");
         }
 
-        // Tell SBE to Close All Unsecure Memory Regions
-        // @TODO RTC 168745 - Move to istep 21.3 (closer to shutdown)
-        l_err = SBEIO::closeAllUnsecureMemRegions();
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SBEIO::closeAllUnsecureMemRegions Failed" );
-            // break from do loop if error occured
-            break;
-        }
-
-
         // Need to load up the runtime module if it isn't already loaded
         if (  !VFS::module_is_loaded( "libruntime.so" ) )
         {
@@ -687,7 +675,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
         }
 
-
         // Fill in Hostboot runtime data for all nodes
         // (adjunct partition)
         // Write the HB runtime data into mainstore
@@ -699,20 +686,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             // break from do loop if error occurred
             break;
         }
-
-        // Open untrusted SP communication area if there is a PAYLOAD
-        // NOTE: Must be after all HDAT processing
-        if( !(TARGETING::is_no_load()) )
-        {
-            l_err = RUNTIME::openUntrustedSpCommArea();
-            if (l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Failed openUntrustedSpCommArea" );
-                break;
-            }
-        }
-
     } while(0);
 
     if( l_err )
