@@ -332,6 +332,32 @@ fapi_try_exit:
 }
 
 ///
+/// @brief DLL locking time *in clocks*
+/// @tparam T the fapi2::TargetType of i_target
+/// @param[in] i_target a target for attributes
+/// @return txsdll
+///
+// TK is there some way to handle this better? we want to use the below in CCS command creation
+template< fapi2::TargetType T >
+inline uint64_t txsdll( const fapi2::Target<T>& i_target )
+{
+    uint64_t l_tdllk = 0;
+
+    FAPI_TRY(tdllk(i_target, l_tdllk));
+    return l_tdllk;
+
+fapi_try_exit:
+    // We simply can't work if we can't get the frequency or
+    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
+    // ...so this should be ok
+    FAPI_ERR("Failed accessing tDLLK, exiting...");
+    fapi2::Assert(false);
+
+    // Keeps compiler happy
+    return 0;
+}
+
+///
 /// @brief Mode Register Set Command Cycle Time
 /// @return constexpr value of 8 clocks
 ///
@@ -1276,6 +1302,30 @@ constexpr uint64_t tccd_s()
 {
     // Per DDR4 Full spec update (79-4A) - timing requirements
     return 4;
+}
+
+///
+/// @brief Return the minimum allowable CKE pulse time
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @return tCKE timing in clocks (nck)
+///
+template< fapi2::TargetType T >
+uint64_t tcke( const fapi2::Target<T>& i_target )
+{
+    return std::max( 3, spd::ns_to_nck(i_target, 5) );
+}
+
+///
+/// @brief Return the minimum allowable CKE pulse time
+/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_target the fapi2 target
+/// @return tCKE timing in clocks (nck)
+///
+template< fapi2::TargetType T >
+uint64_t tckeser( const fapi2::Target<T>& i_target )
+{
+    return tcke(i_target) + 1;
 }
 
 } // mss

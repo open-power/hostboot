@@ -183,7 +183,7 @@ static constexpr uint64_t CKE_ARY_SRE[]  =
     //   0,      1, 2, 3,
     0b0111, 0b1011, 0, 0,
     //   4,      5, 6, 7
-    0b0111, 0b1011, 0, 0
+    0b1101, 0b1110, 0, 0
 };
 
 // For self_refresh_exit_command()
@@ -192,7 +192,7 @@ static constexpr uint64_t CKE_ARY_SRX[]  =
     //   0,      1, 2, 3,
     0b1000, 0b0100, 0, 0,
     //   4,      5, 6, 7
-    0b1000, 0b0100, 0, 0
+    0b0010, 0b0001, 0, 0
 };
 
 namespace ccs
@@ -346,7 +346,7 @@ class program
     public:
         // Setup our poll parameters so the CCS executer can see
         // whether to use the delays in the instruction stream or not
-        program(): iv_poll(0, 0)
+        program(): iv_poll(0, 0), iv_final_cke_value(CKE_HIGH)
         {}
 
         // Vector of instructions
@@ -355,6 +355,35 @@ class program
 
         // Vector of polling probes
         std::vector< poll_probe<P> >    iv_probes;
+
+        // Certain commands require different CKE values at the end of CCS
+        // These commands need a way to plop in those CKE values to be used with the final NOP
+        // The following variable allows for a custom CKE value to be passed in
+        fapi2::buffer<uint8_t> iv_final_cke_value;
+
+        ///
+        /// @brief Sets up the final CKE value to be latched by the final command in the instructions vector
+        ///
+        inline void set_last_cke_value()
+        {
+            // If we don't have any instructions, then just bail out
+            if(iv_instructions.empty())
+            {
+                FAPI_INF("An empty instruction was passed in. Last CKE value will be held the same: 0x%02x", iv_final_cke_value);
+                return;
+            }
+
+            // Get the last valid instruction
+            const auto& l_last = iv_instructions.back();
+
+            // Beautifying traits declaration
+            typedef ccsTraits<T> TT;
+
+            // Pulls out the final command's CKE value and stores it in the associated instance variable
+            l_last.arr0.template extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(iv_final_cke_value);
+
+            FAPI_DBG("new final CKE value for CCS instructions is 0x%02x", iv_final_cke_value);
+        }
 };
 
 ///
@@ -775,6 +804,9 @@ inline instruction_t<T> self_refresh_entry_command( const fapi2::Target<fapi2::T
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
+    // Sets up the default timing for SRE to be the minimum self time refresh time
+    l_boilerplate_arr1.insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( mss::tckeser(i_target) );
+
     return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
 
@@ -808,6 +840,9 @@ inline instruction_t<T> self_refresh_exit_command( const fapi2::Target<fapi2::TA
 
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
+
+    // Sets up the default timing for SRE to be the minimum self time refresh time
+    l_boilerplate_arr1.insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( mss::txsdll(i_target) );
 
     return instruction_t<T>(i_target, i_rank, l_boilerplate_arr0, l_boilerplate_arr1);
 }
