@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1885,11 +1885,9 @@ namespace SBE
             /*  Get SEEPROM 0 SBE Version Information  */
             /*******************************************/
 
-            // If the current seeprom is side 0 and is on master proc,
-            // then attempt read via chipOp
-            // TODO RTC: 182266 Remove is_master conditional once we figure out
-            //      how we can write to master cache from slave SBE
-            if (l_sideZeroIsActive && io_sbeState.target_is_master)
+            // If the current seeprom is side 0 then attempt read via chipOp
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
+            if (l_sideZeroIsActive && !Util::isSimicsRunning())
             {
                 err = getSeepromSideVersionViaChipOp(io_sbeState.target,
                                             io_sbeState.seeprom_0_ver,
@@ -1923,12 +1921,11 @@ namespace SBE
                 }
             }
 
-            //If side 0 is not active, or this is a slave proc, or there was
-            //an error trying to read the primary via chipOp, then try reading via I2C
-            // TODO RTC: 182266 Remove is_master conditional once we figure out
-            //      how we can write to master cache from slave SBE
+            //If side 0 is not active or there was an error trying to read
+            //the primary via chipOp, then try reading via I2C
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
             if(!l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
-                l_errFoundDuringChipOp|| !io_sbeState.target_is_master)
+                l_errFoundDuringChipOp || Util::isSimicsRunning())
             {
 
                 err = getSeepromSideVersionViaI2c(io_sbeState.target,
@@ -1956,13 +1953,12 @@ namespace SBE
             /*  Get SEEPROM 1 SBE Version Information  */
             /*******************************************/
 
-            //If side 1 is active and this is master, then attempt read via chipOp
+            //If side 1 is active, then attempt read via chipOp
             //Note that there is no reason to attempt chipOp on backup if it failed
             //on the primary.
-            // TODO RTC: 182266 Remove is_master conditional once we figure out
-            //      how we can write to master cache from slave SBE
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
             if (!l_sideZeroIsActive && l_sbeSupportedSeepromReadOp &&
-                !l_errFoundDuringChipOp && io_sbeState.target_is_master)
+                !l_errFoundDuringChipOp && !Util::isSimicsRunning() )
             {
                 err = getSeepromSideVersionViaChipOp(io_sbeState.target,
                                                   io_sbeState.seeprom_1_ver,
@@ -1996,12 +1992,11 @@ namespace SBE
                 }
             }
 
-            //If side 1 is not active, or this is a slave proc,  or there was
-            //an error trying to read the primary via chipOp, then try reading via I2C
-            // TODO RTC: 182266 Remove is_master conditional once we figure out
-            //      how we can write to master cache from slave SBE
+            //If side 1 is not active, or there was an error trying to read
+            //the primary via chipOp, then try reading via I2C
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
             if(l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
-                l_errFoundDuringChipOp || !io_sbeState.target_is_master)
+                l_errFoundDuringChipOp || Util::isSimicsRunning() )
             {
                 err = getSeepromSideVersionViaI2c(io_sbeState.target,
                                             EEPROM::SBE_BACKUP,
