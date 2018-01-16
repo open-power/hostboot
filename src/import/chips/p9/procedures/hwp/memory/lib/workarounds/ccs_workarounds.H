@@ -77,6 +77,62 @@ fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 fapi2::ReturnCode enable_pda_shadow_reg( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rank );
 
+///
+/// @brief Holds the given cke low in a CCS instruction
+/// @param[in,out] io_cke - the cke bit that needs to remain low
+/// @param[in,out] io_inst - the CCS instruction
+///
+inline void hold_cke_low_helper( fapi2::buffer<uint8_t>& io_cke,
+                                 ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+{
+    fapi2::buffer<uint8_t> l_cur_cke;
+    io_inst.arr0.extractToRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(l_cur_cke);
+    io_cke &= l_cur_cke;
+    io_inst.arr0.insertFromRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(io_cke);
+}
+
+///
+/// @brief Holds the lower order rank cke low in higher order rank instruction
+/// @param[in,out] io_program - CCS program with instructions on multi-rank DIMM
+///
+inline void hold_cke_low( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
+{
+    fapi2::buffer<uint8_t> l_cke(CKE_HIGH);
+
+    for ( auto& l_inst : io_program.iv_instructions )
+    {
+        hold_cke_low_helper( l_cke, l_inst );
+    }
+}
+
+///
+/// @brief Holds the given cke high in a CCS instruction
+/// @param[in,out] io_cke - the cke bit that needs to remain high
+/// @param[in,out] io_inst - the CCS instruction
+///
+inline void hold_cke_high_helper( fapi2::buffer<uint8_t>& io_cke,
+                                  ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>& io_inst )
+{
+    fapi2::buffer<uint8_t> l_cur_cke;
+    io_inst.arr0.extractToRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(l_cur_cke);
+    io_cke |= l_cur_cke;
+    io_inst.arr0.insertFromRight<MCBIST_CCS_INST_ARR0_00_DDR_CKE, MCBIST_CCS_INST_ARR0_00_DDR_CKE_LEN>(io_cke);
+}
+
+///
+/// @brief Holds the lower order rank cke high in higher order rank instruction
+/// @param[in,out] io_program - CCS program with instructions on multi-rank DIMM
+///
+inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
+{
+    fapi2::buffer<uint8_t> l_cke(CKE_LOW);
+
+    for ( auto& l_inst : io_program.iv_instructions )
+    {
+        hold_cke_high_helper( l_cke, l_inst );
+    }
+}
+
 namespace wr_lvl
 {
 
