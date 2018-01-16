@@ -208,8 +208,7 @@ class commands
     public:
         // Typdefs to make the code more readable
         typedef std::pair<fapi2::Target<fapi2::TARGET_TYPE_DIMM>, uint64_t> rank_target;
-        typedef std::pair<D, std::vector<uint64_t> > mrs_dram;
-        typedef std::vector<mrs_dram> mrs_drams_vect;
+        typedef std::map<D, std::vector<uint64_t> > mrs_drams;
 
         ///
         /// @brief Base constructor
@@ -269,56 +268,7 @@ class commands
                         "%s does not have rank %lu", mss::c_str(i_target), i_rank);
 
             // Does the compression
-            {
-                // If the rank/target pair does not exist simply insert a new pair
-                const rank_target RANK_TARGET = {i_target, i_rank};
-                // Note: technically this should be const auto to keep the iterator at the found position
-                // However, HB asumes that the const in front of the auto makes this a const_iterator
-                // Note: Find value from key prints an error if the key could not be found. We don't want that
-                // Rolling our own below
-                // TODO:RTC184689 Create find_iterator_from_value and find_iterator_from_key
-                auto l_it = std::find_if(iv_commands.begin(),
-                                         iv_commands.end(), [&RANK_TARGET](const std::pair<rank_target, mrs_drams_vect>& i_rhs)
-                {
-                    return RANK_TARGET == i_rhs.first;
-                });
-
-                if( l_it == iv_commands.end() )
-                {
-                    FAPI_INF("%s rank%lu NEW target rank info DRAM%lu", mss::c_str(i_target), i_rank, i_dram);
-                    mrs_drams_vect l_mrs_dram = {{ i_mrs, { i_dram } }};
-                    iv_commands.push_back( { RANK_TARGET, l_mrs_dram } );
-                }
-                // The rank/target exist
-                else
-                {
-                    // Does the MRS exist?
-                    auto& l_mrs_vect = l_it->second;
-                    // Note: technically this should be const auto to keep the iterator at the found position
-                    // However, HB asumes that the const in front of the auto makes this a const_iterator
-                    // Note: Find value from key prints an error if the key could not be found. We don't want that
-                    // Rolling our own below
-                    // TODO:RTC184689 Create find_iterator_from_value and find_iterator_from_key
-                    auto l_mrs_it = std::find_if(l_mrs_vect.begin(), l_mrs_vect.end(), [&i_mrs](const mrs_dram & i_rhs)
-                    {
-                        return i_mrs == i_rhs.first;
-                    });
-
-                    // No, add a new DRAM mapping
-                    if( l_mrs_it == l_mrs_vect.end() )
-                    {
-                        FAPI_INF("%s rank%lu inserting new DRAM + MRS info DRAM%lu", mss::c_str(i_target), i_rank, i_dram);
-                        const mrs_dram MRS_DRAM = { i_mrs, { i_dram } };
-                        l_mrs_vect.push_back( MRS_DRAM );
-                    }
-                    // Yes, add a DRAM onto the vector
-                    else
-                    {
-                        l_mrs_it->second.push_back( i_dram );
-                        FAPI_INF("%s rank%lu pushing back DRAM%lu size %lu", mss::c_str(i_target), i_rank, i_dram, l_mrs_it->second.size());
-                    }
-                }
-            }
+            iv_commands[ {i_target, i_rank}][i_mrs].push_back(i_dram);
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -345,24 +295,24 @@ class commands
         /// @brief Returns the command information
         /// @return iv_commands
         ///
-        inline const typename std::vector<std::pair<rank_target, mrs_drams_vect>>& get() const
+        inline const typename std::map<rank_target, mrs_drams>& get() const
         {
             return iv_commands;
         }
 
     private:
-        // The following is a vector of target/DIMM pairs as the key to a vector of
+        // The following is a map of target/DIMM pairs as the key to a map of
         // the MRS command as the key to the DRAM's to toggle. An explanation as to the data structure is included below
         // Note: due to HB compile, a vector is used instead of a map
 
         // PDA compression is a little complex, but is organized to allow us to minimize the number of commands run
-        // Each individual vector is designed to further minimize the number of commands run
-        // The compressed commands consist of a vector of pairs within a vector of pairs
-        // The outside vector, maps the DIMM/rank to the MRS command and DRAM's that need to be run
+        // Each individual map is designed to further minimize the number of commands run
+        // The compressed commands consist of a map of pairs within a map
+        // The outside map, maps the DIMM/rank to the MRS command and DRAM's that need to be run
         // Basically, it's a list of a specific rank target with all the commands that need to be run
         // The rank-specific target information allows us to just issue the enter/exit commands for PDA for each rank once
         // The MRS commands to the DRAM are then looped over in the inside loop
-        // The inside vector has a key of the MRS and a value of a vector of DRAM's to issue the MRS to
+        // The inside map has a key of the MRS and a value of a map of DRAM's to issue the MRS to
         // CCS does not allow the user to toggle the DQ during an MRS command
         // The DQ information is stored in separate registers in the PHY
         // What this means for issuing the commands is that we have to issue an invocation of CCS for each different MRS command we issue
@@ -370,7 +320,7 @@ class commands
         // Each invocation of CCS creates a noticable increase in time, as the registers need to be configured, CCS needs to be started, and we need to poll for done
         // By only entering into PDA on a DIMM-rank once and by issuing the PDA MRS's to multiple DRAM's at a time, we can save a lot of runtime
         // Note: in shmoo, adding the compression reduced runtime from about 13 minutes down to 3 minutes
-        typename std::vector<std::pair<rank_target, mrs_drams_vect>> iv_commands;
+        typename std::map<rank_target, mrs_drams> iv_commands;
 };
 
 ///
