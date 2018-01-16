@@ -37,6 +37,7 @@
 // STD
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 // Other components
 #include <sys/misc.h>
@@ -494,9 +495,13 @@ static void initializeAttributes(TargetService& i_targetService,
               // if the hrmor in the comm area is non-zero then set the payload base attribute
               if( l_hbHypComm_ptr->hrmorAddress)
               {
+                const uint64_t THREAD_STATE_RUNNING = 0x8000000000000000ULL;
                 TARG_INF("Setting ATTR_PAYLOAD_BASE to new hrmor given by hypervisor: 0x%lx",
                           l_hbHypComm_ptr->hrmorAddress);
-                 l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(l_hbHypComm_ptr->hrmorAddress);
+                //Mask off THREAD_STATE_RUNNING bit and then divide remaining address by 1 MB
+                uint64_t l_payloadBase_MB =  ((~(THREAD_STATE_RUNNING)) & l_hbHypComm_ptr->hrmorAddress) / MEGABYTE;
+                //ATTR_PAYLOAD_BASE's is MB
+                l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(l_payloadBase_MB);
               }
               else
               {
