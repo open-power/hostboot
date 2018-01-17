@@ -644,6 +644,11 @@
         <id>ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
         <no_export/>
     </attribute>
+
+    <attribute>
+        <id>ATTR_FABRIC_PRESENT_GROUPS</id>
+        <writeable/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
