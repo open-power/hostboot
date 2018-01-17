@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -736,6 +736,10 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                                           l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_0][literal_1]) +
                                          l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_0]) +
                                         l_TGT1_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM[literal_1][literal_1]);
+        fapi2::ATTR_IS_SIMULATION_Type l_TGT3_ATTR_IS_SIMULATION;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT3, l_TGT3_ATTR_IS_SIMULATION));
+        uint64_t l_def_mba01_dis_checkbit_inv = (l_def_mba01 && (l_TGT3_ATTR_IS_SIMULATION == literal_1));
+        uint64_t l_def_mba23_dis_checkbit_inv = (l_def_mba23 && (l_TGT3_ATTR_IS_SIMULATION == literal_1));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201080aull, l_scom_buffer ));
@@ -1421,6 +1425,11 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
                 l_scom_buffer.insert<16, 1, 63, uint64_t>(literal_0b1 );
             }
 
+            if ((l_def_mba01_dis_checkbit_inv == literal_1))
+            {
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x201144aull, l_scom_buffer));
         }
         {
@@ -1434,6 +1443,11 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
             if (literal_1)
             {
                 l_scom_buffer.insert<16, 1, 63, uint64_t>(literal_0b1 );
+            }
+
+            if ((l_def_mba23_dis_checkbit_inv == literal_1))
+            {
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(literal_0b0 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x201148aull, l_scom_buffer));
