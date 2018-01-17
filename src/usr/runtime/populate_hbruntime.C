@@ -640,6 +640,10 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
     errlHndl_t l_elog = nullptr;
 
+#ifdef CONFIG_SECUREBOOT
+        auto l_sectionSecurelyLoaded = false;
+#endif
+
     do {
 
         // Check for inhibited sections
@@ -673,6 +677,7 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
                            "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
                 break;
             }
+            l_sectionSecurelyLoaded = true;
         }
 #endif
 
@@ -704,8 +709,35 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         {
             break;
         }
-
     } while(0);
+
+
+#ifdef CONFIG_SECUREBOOT
+    // Skip unload if a section was not securely loaded in the first place
+    if (l_sectionSecurelyLoaded )
+    {
+        // Unload Secure PNOR section
+        auto l_unloadErrlog = unloadSecureSection(i_sec);
+        if (l_unloadErrlog)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"hbResvloadSecureSection() - Error from "
+                       "unloadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+            // Link unload error log to existing errorlog plid and commit error
+            if(l_elog)
+            {
+                l_unloadErrlog->plid(l_elog->plid());
+                ERRORLOG::errlCommit(l_unloadErrlog, RUNTIME_COMP_ID);
+            }
+            // This is the only error so return that.
+            else
+            {
+                l_elog = l_unloadErrlog;
+                l_unloadErrlog = nullptr;
+            }
+        }
+    }
+#endif
 
     return l_elog;
 }
@@ -721,6 +753,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
     bool l_preVerLidMgrLock = false;
+
+#ifdef CONFIG_SECUREBOOT
+    auto l_hbrtSecurelyLoaded = false;
+#endif
 
     do {
         // Wipe out our cache of the NACA/SPIRA pointers
@@ -918,13 +954,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         if(TARGETING::is_sapphire_load())
         {
             uint64_t l_hbrtImageAddr = 0x0;
-
 #ifdef CONFIG_SECUREBOOT
             l_elog = loadSecureSection(PNOR::HB_RUNTIME);
             if(l_elog)
             {
                 break;
             }
+            l_hbrtSecurelyLoaded = true;
 #endif
 
             PNOR::SectionInfo_t l_pnorInfo;
@@ -1195,6 +1231,33 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
         }
     } while(0);
+
+#ifdef CONFIG_SECUREBOOT
+    // Skip unload if a section was not securely loaded in the first place
+    if (l_hbrtSecurelyLoaded )
+    {
+        // Unload HBRT PNOR section
+        auto l_unloadErrlog = unloadSecureSection(PNOR::HB_RUNTIME);
+        if (l_unloadErrlog)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"hbResvloadSecureSection() - Error from "
+                       "unloadSecureSection(%s)", PNOR::SectionIdToString(PNOR::HB_RUNTIME));
+            // Link unload error log to existing errorlog plid and commit error
+            if(l_elog)
+            {
+                l_unloadErrlog->plid(l_elog->plid());
+                ERRORLOG::errlCommit(l_unloadErrlog, RUNTIME_COMP_ID);
+            }
+            // This is the only error so return that.
+            else
+            {
+                l_elog = l_unloadErrlog;
+                l_unloadErrlog = nullptr;
+            }
+        }
+    }
+#endif
 
     // If lock obtained, always unlock Pre verified lid manager
     if (l_preVerLidMgrLock)
