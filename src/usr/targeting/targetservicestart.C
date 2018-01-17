@@ -524,6 +524,28 @@ static void initializeAttributes(TargetService& i_targetService,
 
             // Compute any values that might change based on a remap of memory
             adjustMemoryMap(i_targetService);
+
+            if(!INITSERVICE::spBaseServicesEnabled())
+            {
+                TARGETING::Target* l_sys = NULL;
+                TARGETING::targetService().getTopLevelTarget(l_sys);
+                getAllChips(l_chips, TYPE_PROC, false);
+
+                ATTR_PROC_EFF_FABRIC_GROUP_ID_type l_eff_id;
+                ATTR_FABRIC_PRESENT_GROUPS_type l_fabric_groups = 0;
+
+                for(auto l_chip : l_chips)
+                {
+                    // Read the fabric group id
+                    l_eff_id = l_chip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+                    // Set the corresponding bit in fabric groups
+                    l_fabric_groups |= (1 <<
+                                       ((sizeof(ATTR_FABRIC_PRESENT_GROUPS_type)
+                                        * 8)
+                                        - l_eff_id - 1));
+                }
+                l_sys->setAttr<ATTR_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
+            }
         }
     }
     else // top level is NULL - never expected
