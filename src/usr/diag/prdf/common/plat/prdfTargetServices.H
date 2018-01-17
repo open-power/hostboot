@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@ namespace PRDF
 
 class ExtensibleChip;
 class MemRank;
+struct STEP_CODE_DATA_STRUCT;
 
 typedef std::vector<ExtensibleChip *> ExtensibleChipList;
 
@@ -157,6 +158,30 @@ uint8_t getChipLevel( TARGETING::TargetHandle_t i_trgt );
  *
  */
 void setHWStateChanged(TARGETING::TargetHandle_t i_target);
+
+//##############################################################################
+//##
+//##                         General Utility Functions
+//##
+//##############################################################################
+
+/**
+ * @brief   Gives the ability to link HWPs error logs with PRD error logs.
+ *
+ * During the IPL, a HWP may find a FIR attention that could cause the HWP to
+ * fail. The HWP will create/commit an error log and write the PLID in
+ * ATTR_PRD_HWP_PLID (all via FAPI interface). If PRD isolates to a target with
+ * a non-zero ATTR_PRD_HWP_PLID, it will link the two error logs together, clear
+ * the attribute, and override the thresholding to make the error log
+ * predictive.
+ *
+ * @note    It is a requirement for the HWP to set the attribute on the same
+ *          target as the active FIR attention.
+ *
+ * @param   i_chip Any chip.
+ * @param   i_sc   Step code data struct.
+ */
+void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc);
 
 //##############################################################################
 //##

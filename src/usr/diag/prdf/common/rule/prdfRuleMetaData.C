@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -486,6 +486,9 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
             ); //@pw01
     }
+
+    // Additional error isolation for HWPs, if needed.
+    PlatServices::hwpErrorIsolation( l_chipAnalyzed, i_serviceData );
 
     // Call postanalysis plugin.
     // @jl02 JL Adding PostAnalysis plugin call.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,12 +35,14 @@
 #include <prdfTargetServices.H>
 
 // Framework includes
+#include <iipServiceDataCollector.h>
 #include <iipSystem.h>
 #include <prdfAssert.h>
 #include <prdfErrlUtil.H>
 #include <prdfExtensibleChip.H>
 #include <prdfGlobal.H>
 #include <prdfTrace.H>
+#include <xspprdService.h>
 
 // External includes
 #include <algorithm>
@@ -116,6 +118,38 @@ bool isHyprRunning()
 bool hasRedundantClocks()
 {
     return ( 0 != getSystemTarget()->getAttr<ATTR_REDUNDANT_CLOCKS>() );
+}
+
+//##############################################################################
+//##
+//##                         General Utility Functions
+//##
+//##############################################################################
+
+void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #if defined (__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+    TargetHandle_t trgt = i_chip->getTrgt();
+    uint32_t plid = 0;
+
+    // Check for non-zero value in PLID attribute.
+    if ( trgt->tryGetAttr<ATTR_PRD_HWP_PLID>(plid) && (0 != plid) )
+    {
+        PRDF_INF( "ATTR_PRD_HWP_PLID found on 0x%08x with value 0x%08x",
+                  getHuid(trgt), plid );
+
+        // Link HWP PLID to PRD error log.
+        ServiceGeneratorClass::ThisServiceGenerator().getErrl()->plid( plid );
+
+        // Clear PRD_HWP_PLID attribute.
+        trgt->setAttr<ATTR_PRD_HWP_PLID>( 0 );
+
+        // Make the error log and callouts predictive.
+        io_sc.service_data->setServiceCall();
+    }
+
+    #endif
 }
 
 //##############################################################################
