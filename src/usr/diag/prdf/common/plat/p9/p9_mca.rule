@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -247,7 +247,7 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
     /** MCACALFIR[2]
      *  Excessive refreshes to a single rank.
      */
-    (rMCACALFIR, bit(2)) ? excessive_refreshes;
+    (rMCACALFIR, bit(2)) ? self_th_32perDay;
 
     /** MCACALFIR[3]
      *  Err detected in the MBA debug WAT logic
@@ -262,7 +262,7 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
     /** MCACALFIR[5]
      *  Calibration complete indication xout
      */
-    (rMCACALFIR, bit(5)) ? calibration_complete;
+    (rMCACALFIR, bit(5)) ? self_th_32perDay;
 
     /** MCACALFIR[6]
      *  Emergency Throttle
