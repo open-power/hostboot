@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,12 +253,15 @@ enum TargetFilter : uint64_t
 };
 
 
+// attributeOverride tool requires x86.nfp compile
+#ifndef CONTEXT_x86_nfp
 /// @cond
 constexpr TargetType operator|(TargetType x, TargetType y)
 {
     return static_cast<TargetType>(static_cast<int>(x) |
                                    static_cast<int>(y));
 }
+#endif
 
 template<uint64_t V>
 class bitCount

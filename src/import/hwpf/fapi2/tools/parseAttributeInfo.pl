@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -252,6 +252,7 @@ my %attrSyncData = ();
 #-------------------------------------------------------------------------------
 # Print header of getFapiAttrEnumData.C
 # ------------------------------------------------------------------------------
+print FEFILE "// Created via parseAttributeInfo.pl\n";
 print FEFILE "const AttributeEnum g_FapiEnums[] = {\n";
 my @attrOverrideEnums = ();
 
@@ -569,7 +570,18 @@ foreach my $argnum ( 0 .. $#ARGV )
                     $value =~ s/\s+$//;
                 }
 
-                push @attrOverrideEnums, "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
+                # Need to add LL/ULL extensions so this generated file
+                # will compile in x86.nfp context
+                my $number = $values[1];
+                if ( $attr->{valueType} eq 'uint64' )
+                {
+                    $number .= "ULL";
+                }
+                elsif ( $attr->{valueType} eq 'int64' )
+                {
+                    $number .= "LL";
+                }
+                push @attrOverrideEnums, "\t{ \"$attr->{id}_$values[0]\", $number },\n";
 
                 # Print the attribute enum to attribute_ids.H
                 print AIFILE "    ENUM_$attr->{id}_${val}";
