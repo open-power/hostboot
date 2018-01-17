@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,17 @@ public:
  */
 void tpmInitialize(TRUSTEDBOOT::TpmTarget* i_pTpm);
 
+
+
+/**
+ *  @brief Shutdown policy to invoke when system has no usable TPMs
+ */
+enum class NoTpmShutdownPolicy
+{
+    BACKGROUND_SHUTDOWN, // Shutdown Hostboot in background
+    SYNC_SHUTDOWN,       // Block waiting for Hostboot to shutdown
+};
+
 /**
  * @brief Verify a functional TPM still exists in the system
  *
@@ -94,8 +105,14 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* i_pTpm);
  *   If the system is running in secure mode an error log will be committed
  *   and if the TPMRequired attribute is true a system shutdown will be
  *   initiated
+ *
+ * @param[in] i_noTpmShutdownPolicy Shutdown policy to invoke if a functional
+ *     TPM is required to boot the system (TPM required policy is "required")
+ *     -and- no functional TPMs are available (or other critical error occurred)
 */
-void tpmVerifyFunctionalTpmExists();
+void tpmVerifyFunctionalTpmExists(
+    NoTpmShutdownPolicy i_noTpmShutdownPolicy =
+        NoTpmShutdownPolicy::SYNC_SHUTDOWN);
 
 /**
  *  @brief Replay the entries that exist in the log into the TPM as needed
