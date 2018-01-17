@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -50,8 +50,7 @@ actionclass mainline_ue_handling_UERE
 actionclass mem_port_failure_UERE
 {
     SueSource;
-    callout(connected(TYPE_DIMM,0), MRU_HIGH); # DIMM 0 HIGH
-    callout(connected(TYPE_DIMM,1), MRU_HIGH); # DIMM 1 HIGH
+    funccall("CalloutAttachedDimmsHigh");      # All attached DIMMs HIGH
     calloutSelfLowNoGard;                      # Self LOW
     threshold1;                                # Threshold 1
     funccall("MemPortFailure");                # Mask off the entire port
@@ -60,8 +59,7 @@ actionclass mem_port_failure_UERE
 /** Handle RCD parity error. */
 actionclass rcd_parity_error
 {
-    callout(connected(TYPE_DIMM,0), MRU_HIGH); # DIMM 0 HIGH
-    callout(connected(TYPE_DIMM,1), MRU_HIGH); # DIMM 1 HIGH
+    funccall("CalloutAttachedDimmsHigh");      # All attached DIMMs HIGH
     calloutSelfLowNoGard;                      # Self LOW
     # Thresholding done in plugin
     funccall("RcdParityError");                # Run TPS on TH for all MCA ranks
@@ -112,8 +110,7 @@ actionclass maintenance_aue_handling
 /** Handle Maintenance IAUEs */
 actionclass maintenance_iaue_handling
 {
-    callout(connected(TYPE_DIMM,0), MRU_HIGH);
-    callout(connected(TYPE_DIMM,1), MRU_HIGH);
+    funccall("CalloutAttachedDimmsHigh");
     calloutSelfLowNoGard;
     threshold1;
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,28 @@ int32_t Initialize( ExtensibleChip * i_chip )
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( p9_mca, Initialize );
+
+//##############################################################################
+//
+//                             Utility plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Adds all attached DIMMs at HIGH priority.
+ * @param  i_chip MCA chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
+                                  STEP_CODE_DATA_STRUCT & io_sc )
+{
+    for ( auto & dimm : getConnected(i_chip->getTrgt(), TYPE_DIMM) )
+        io_sc.service_data->SetCallout( dimm, MRU_HIGH );
+
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( p9_mca, CalloutAttachedDimmsHigh );
 
 //##############################################################################
 //
