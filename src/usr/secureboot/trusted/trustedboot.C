@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1110,10 +1110,13 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
     #endif
 }
 
-void tpmVerifyFunctionalTpmExists()
+void tpmVerifyFunctionalTpmExists(
+    const NoTpmShutdownPolicy i_noTpmShutdownPolicy)
 {
     errlHndl_t err = nullptr;
     bool foundFunctional = enabled();
+    const bool isBackgroundShutdown =
+        (i_noTpmShutdownPolicy == NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
 
     if (!foundFunctional && !systemData.failedTpmsPosted)
     {
@@ -1132,7 +1135,7 @@ void tpmVerifyFunctionalTpmExists()
             auto errPlid = err->plid();
 
             // we should not continue if we could not read the jumper state
-            INITSERVICE::doShutdown(errPlid);
+            INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
         }
         else if (l_state == SECUREBOOT::SecureJumperState::SECURITY_ASSERTED)
         {
@@ -1173,7 +1176,7 @@ void tpmVerifyFunctionalTpmExists()
                 errlCommit(err, TRBOOT_COMP_ID);
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
-                INITSERVICE::doShutdown(errPlid);
+                INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
             }
             else
             {
@@ -1261,7 +1264,8 @@ void* tpmDaemon(void* unused)
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
-                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
+                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists(
+                      NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
           case TRUSTEDBOOT::MSG_TYPE_SEPARATOR:
@@ -1281,7 +1285,8 @@ void* tpmDaemon(void* unused)
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
-                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
+                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists(
+                      NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
 
