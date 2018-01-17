@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ use Data::Dumper;
 use POSIX;
 use Env;
 use XML::LibXML;
+
 
 # Provides object deep copy capability to support virtual
 # attribute removal
@@ -2117,11 +2118,22 @@ sub writeEnumFileAttrEnums {
             $enumHexValue =
                           enumNameToValue($enumerationType,$enumerator->{name});
 
-            #If the enum is bigger than 0xFFFFFFFF, then we need to append 'ULL'
-            #to it to prevent compiler errors.
+
+            #If the enum is bigger than 0xFFFFFFFF, then we need to append 'LL'
+            #or 'ULL' to it to prevent compiler errors.
             if($enumHexValue > $MAX_4_BYTE_VALUE)
             {
-                $enumHex = sprintf "0x%08XULL", $enumHexValue;
+                # find type
+                my $simpleType = getAttributeType($enumerationType->{id},
+                                                  $attributes);
+                if (exists $simpleType->{'uint64_t'})
+                {
+                    $enumHex = sprintf "0x%08XULL", $enumHexValue;
+                }
+                else
+                {
+                    $enumHex = sprintf "0x%08XLL", $enumHexValue;
+                }
             }
             else
             {
@@ -4684,6 +4696,39 @@ sub simpleTypeProperties {
     $g_simpleTypeProperties_cache = \%typesHoH;
 
     return $g_simpleTypeProperties_cache;
+}
+
+################################################################################
+# Get attribute type
+################################################################################
+sub getAttributeType {
+    my($attributeId,$attributes) = @_;
+    my $attrType;
+
+    foreach my $attribute (@{$attributes->{attribute}})
+    {
+        if ($attribute->{id} eq $attributeId)
+        {
+            if(exists $attribute->{simpleType})
+            {
+                $attrType = $attribute->{simpleType};
+            }
+            elsif (exists $attribute->{complexType})
+            {
+                $attrType = $attribute->{complexType};
+            }
+            elsif (exists $attribute->{nativeType})
+            {
+                $attrType = $attribute->{nativeType};
+            }
+            else
+            {
+                $attrType = "unknown type";
+            }
+            last;
+        }
+    }
+    return $attrType;
 }
 
 ################################################################################
