@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -313,7 +313,16 @@ fsp.tar_CONTENTS = \
     obj/genfiles/targAttrInfo.csv\
     obj/genfiles/plugins/hbfwPlatHwpErrParser.H:plugins/ \
     obj/genfiles/plugins/hbfwPlatHwpErrParserFFDC.H:plugins \
-    src/include/runtime/generic_hbrt_fsp_message.H
+    src/include/runtime/generic_hbrt_fsp_message.H \
+    obj/genfiles/fapi2AttrOverrideEnums.H \
+    obj/genfiles/fapi2AttrOverrideData.H \
+    src/usr/pnor/ecc.C \
+    src/include/usr/pnor/ecc.H:pnor/ \
+    src/import/hwpf/fapi2/include/target_types.H \
+    src/include/usr/fapi2/plat_target_filter.H \
+    src/usr/targeting/attroverride/attrTextToBinaryBlob.C \
+    src/usr/targeting/attroverride/attrTextToBinaryBlob.H
+
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

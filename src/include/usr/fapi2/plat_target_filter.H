@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,11 @@ namespace fapi2
 {
   namespace PlatTargetFilter
   {
+
+// overrideAttribute x86.nfp requires this file to not be in C++11 format
+#ifndef CONTEXT_x86_nfp
     // These values must contain only 1 bit 'on' so that they can be ORed
     // together as composite filters
-
     constexpr uint64_t PLAT_TARGET_FILTER_TP          = 0x4000000000000000;  // Pervasive 1
     constexpr uint64_t PLAT_TARGET_FILTER_NEST_NORTH  = 0x2000000000000000;  // Pervasive 2
     constexpr uint64_t PLAT_TARGET_FILTER_NEST_EAST   = 0x1000000000000000;  // Pervasive 3
@@ -87,7 +89,53 @@ namespace fapi2
     constexpr uint64_t PLAT_TARGET_FILTER_CORE21      = 0x0000000000000400;  // Pervasive 53
     constexpr uint64_t PLAT_TARGET_FILTER_CORE22      = 0x0000000000000200;  // Pervasive 54
     constexpr uint64_t PLAT_TARGET_FILTER_CORE23      = 0x0000000000000100;  // Pervasive 55
-
+#else
+    const uint64_t PLAT_TARGET_FILTER_TP          = 0x4000000000000000ULL;  // Pervasive 1
+    const uint64_t PLAT_TARGET_FILTER_NEST_NORTH  = 0x2000000000000000ULL;  // Pervasive 2
+    const uint64_t PLAT_TARGET_FILTER_NEST_EAST   = 0x1000000000000000ULL;  // Pervasive 3
+    const uint64_t PLAT_TARGET_FILTER_NEST_SOUTH  = 0x0800000000000000ULL;  // Pervasive 4
+    const uint64_t PLAT_TARGET_FILTER_NEST_WEST   = 0x0400000000000000ULL;  // Pervasive 5
+    const uint64_t PLAT_TARGET_FILTER_XBUS        = 0x0200000000000000ULL;  // Pervasive 6
+    const uint64_t PLAT_TARGET_FILTER_MC_WEST     = 0x0100000000000000ULL;  // Pervasive 7
+    const uint64_t PLAT_TARGET_FILTER_MC_EAST     = 0x0080000000000000ULL;  // Pervasive 8
+    const uint64_t PLAT_TARGET_FILTER_OBUS0       = 0x0040000000000000ULL;  // Pervasive 9
+    const uint64_t PLAT_TARGET_FILTER_OBUS1       = 0x0020000000000000ULL;  // Pervasive 10
+    const uint64_t PLAT_TARGET_FILTER_OBUS2       = 0x0010000000000000ULL;  // Pervasive 11
+    const uint64_t PLAT_TARGET_FILTER_OBUS3       = 0x0008000000000000ULL;  // Pervasive 12
+    const uint64_t PLAT_TARGET_FILTER_PCI0        = 0x0004000000000000ULL;  // Pervasive 13
+    const uint64_t PLAT_TARGET_FILTER_PCI1        = 0x0002000000000000ULL;  // Pervasive 14
+    const uint64_t PLAT_TARGET_FILTER_PCI2        = 0x0001000000000000ULL;  // Pervasive 15
+    const uint64_t PLAT_TARGET_FILTER_CACHE0      = 0x0000800000000000ULL;  // Pervasive 16
+    const uint64_t PLAT_TARGET_FILTER_CACHE1      = 0x0000400000000000ULL;  // Pervasive 17
+    const uint64_t PLAT_TARGET_FILTER_CACHE2      = 0x0000200000000000ULL;  // Pervasive 18
+    const uint64_t PLAT_TARGET_FILTER_CACHE3      = 0x0000100000000000ULL;  // Pervasive 19
+    const uint64_t PLAT_TARGET_FILTER_CACHE4      = 0x0000080000000000ULL;  // Pervasive 20
+    const uint64_t PLAT_TARGET_FILTER_CACHE5      = 0x0000040000000000ULL;  // Pervasive 21
+    const uint64_t PLAT_TARGET_FILTER_CORE0       = 0x0000000080000000ULL;  // Pervasive 32
+    const uint64_t PLAT_TARGET_FILTER_CORE1       = 0x0000000040000000ULL;  // Pervasive 33
+    const uint64_t PLAT_TARGET_FILTER_CORE2       = 0x0000000020000000ULL;  // Pervasive 34
+    const uint64_t PLAT_TARGET_FILTER_CORE3       = 0x0000000010000000ULL;  // Pervasive 35
+    const uint64_t PLAT_TARGET_FILTER_CORE4       = 0x0000000008000000ULL;  // Pervasive 36
+    const uint64_t PLAT_TARGET_FILTER_CORE5       = 0x0000000004000000ULL;  // Pervasive 37
+    const uint64_t PLAT_TARGET_FILTER_CORE6       = 0x0000000002000000ULL;  // Pervasive 38
+    const uint64_t PLAT_TARGET_FILTER_CORE7       = 0x0000000001000000ULL;  // Pervasive 39
+    const uint64_t PLAT_TARGET_FILTER_CORE8       = 0x0000000000800000ULL;  // Pervasive 40
+    const uint64_t PLAT_TARGET_FILTER_CORE9       = 0x0000000000400000ULL;  // Pervasive 41
+    const uint64_t PLAT_TARGET_FILTER_CORE10      = 0x0000000000200000ULL;  // Pervasive 42
+    const uint64_t PLAT_TARGET_FILTER_CORE11      = 0x0000000000100000ULL;  // Pervasive 43
+    const uint64_t PLAT_TARGET_FILTER_CORE12      = 0x0000000000080000ULL;  // Pervasive 44
+    const uint64_t PLAT_TARGET_FILTER_CORE13      = 0x0000000000040000ULL;  // Pervasive 45
+    const uint64_t PLAT_TARGET_FILTER_CORE14      = 0x0000000000020000ULL;  // Pervasive 46
+    const uint64_t PLAT_TARGET_FILTER_CORE15      = 0x0000000000010000ULL;  // Pervasive 47
+    const uint64_t PLAT_TARGET_FILTER_CORE16      = 0x0000000000008000ULL;  // Pervasive 48
+    const uint64_t PLAT_TARGET_FILTER_CORE17      = 0x0000000000004000ULL;  // Pervasive 49
+    const uint64_t PLAT_TARGET_FILTER_CORE18      = 0x0000000000002000ULL;  // Pervasive 50
+    const uint64_t PLAT_TARGET_FILTER_CORE19      = 0x0000000000001000ULL;  // Pervasive 51
+    const uint64_t PLAT_TARGET_FILTER_CORE20      = 0x0000000000000800ULL;  // Pervasive 52
+    const uint64_t PLAT_TARGET_FILTER_CORE21      = 0x0000000000000400ULL;  // Pervasive 53
+    const uint64_t PLAT_TARGET_FILTER_CORE22      = 0x0000000000000200ULL;  // Pervasive 54
+    const uint64_t PLAT_TARGET_FILTER_CORE23      = 0x0000000000000100ULL;  // Pervasive 55
+#endif
   } // namespace PlatTargetFilter
 
 } // namespace fapi2
