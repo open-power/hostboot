@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <vpd/vpdreasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <devicefw/driverif.H>
-#include <i2c/eepromif.H>
 #include <runtime/interface.h>            // g_hostInterfaces
 #include <util/runtime/rt_fwreq_helper.H>      // firmware_request_helper
 #include <targeting/common/util.H>
@@ -60,9 +59,6 @@ extern trace_desc_t* g_trac_vpd;
 // function once as memory is allocated with every call.
 static uint64_t g_reserved_mem_addr = 0;
 
-// See i_operation of req_i2c_lock structure
-static const uint8_t LOCKOP_LOCK    = 1;
-static const uint8_t LOCKOP_UNLOCK  = 2;
 
 namespace VPD
 {
@@ -377,216 +373,6 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
     return err;
 }
 
-
-/**
- *  @brief Fill in the iic lock message to send to FSP
- *  @param[in] i_target target device
- *  @param[in] i_operation 1=lock, 2=unlock
- *  @param[in/out] io_i2cLockMsg - i2c lock msg (fills this in)
- *  @platform FSP
- *  @return errlHndl_t - NULL if successful,
- *                       otherwise a pointer to the error log.
- */
-errlHndl_t fillI2CLockMsg( TARGETING::Target * i_target, uint8_t i_operation,
-               hostInterfaces::hbrt_fw_msg * io_i2cLockMsg)
-{
-    errlHndl_t l_err = nullptr;
-    TRACFCOMP( g_trac_vpd, ENTER_MRK
-             "fillI2CLockMsg: %s i2cMaster of target huid 0x%llX",
-             (i_operation == LOCKOP_LOCK)?"lock":"unlock", get_huid(i_target) );
-
-    do {
-        io_i2cLockMsg->req_i2c_lock.i_operation = i_operation;
-
-        // find i2cMaster
-        TARGETING::EepromVpdPrimaryInfo l_eepromData;
-        // Using tryGetAttr as we want the code to continue
-        if(! (i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
-                    ( l_eepromData )) )
-        {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"fillI2CLockMsg() - "
-                "unable to get ATTR_EEPROM_VPD_PRIMARY_INFO from 0x%llX",
-                TARGETING::get_huid(i_target) );
-
-            /*@
-             * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
-             * @moduleid         VPD::VPD_FILL_I2C_LOCK_MSG
-             * @reasoncode       VPD::VPD_EEPROM_VPD_PRIMARY_INFO_MISSING
-             * @userdata1        HUID of target
-             * @userdata2        nothing
-             * @devdesc          Unable to find VPD info necessary
-             *                   for lock/unlock() request
-             * @custdesc         A problem was detected during runtime of
-             *                   the system while updating VPD
-             */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                    VPD::VPD_FILL_I2C_LOCK_MSG,
-                                    VPD::VPD_EEPROM_VPD_PRIMARY_INFO_MISSING,
-                                    TARGETING::get_huid(i_target),
-                                    0, true );
-            break;
-        }
-
-
-        io_i2cLockMsg->req_i2c_lock.i_i2cMaster = l_eepromData.engine;
-
-        // Since it exists, convert to a target
-        TARGETING::Target * l_pChipTarget =
-            TARGETING::targetService().toTarget(l_eepromData.i2cMasterPath);
-
-        if( nullptr == l_pChipTarget )
-        {
-            TRACFCOMP( g_trac_vpd,
-                       ERR_MRK"fillI2CLockMsg() - I2C Master "
-                              "Path target was NULL!" );
-
-            /*@
-             * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
-             * @moduleid         VPD::VPD_FILL_I2C_LOCK_MSG
-             * @reasoncode       VPD::VPD_TARGET_CHIP_NOT_FOUND
-             * @userdata1        HUID of target
-             * @userdata2        Nothing
-             * @devdesc          Unable to find chipId for lock/unlock() request
-             * @custdesc         A problem was detected during runtime of
-             *                   the system where locking is currently
-             *                   unavailable for sending vpd to the host
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                            VPD::VPD_FILL_I2C_LOCK_MSG,
-                                            VPD::VPD_TARGET_CHIP_NOT_FOUND,
-                                            TARGETING::get_huid(i_target),
-                                            0,true);
-            break;
-        }
-
-        // Get the Proc Chip Id
-        RT_TARG::rtChipId_t l_chipId = 0;
-        l_err = RT_TARG::getRtTarget(l_pChipTarget, l_chipId);
-        if(l_err)
-        {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"fillI2CLockMsg: getRtTarget ERROR" );
-            break;
-        }
-        io_i2cLockMsg->req_i2c_lock.i_chipId =
-                                        reinterpret_cast<uint64_t>(l_chipId);
-    }
-    while (0);
-
-    TRACFCOMP( g_trac_vpd, EXIT_MRK
-               "fillI2CLockMsg: target 0x%llX %s message "
-               "i_chipId: 0x%llX, i_i2cMaster: %d, i_operation: %d",
-               get_huid(i_target), (i_operation == LOCKOP_LOCK)?"lock":"unlock",
-               io_i2cLockMsg->req_i2c_lock.i_chipId,
-               io_i2cLockMsg->req_i2c_lock.i_i2cMaster,
-               io_i2cLockMsg->req_i2c_lock.i_operation );
-
-    return l_err;
-}
-
-/**
- *  @brief Send iic lock message to FSP
- *  @param[in] i_target target device
- *  @param[in] i_operation 1=lock, 2=unlock
- *  @platform FSP
- *  @return errlHndl_t - nullptr if successful,
- *                       otherwise a pointer to the error log.
- */
-errlHndl_t sendI2CLockMsg( TARGETING::Target * i_target,
-                           uint8_t i_operation )
-{
-    errlHndl_t l_err = nullptr;
-
-    TRACFCOMP( g_trac_vpd, INFO_MRK
-        "sendI2CLockMsg: %s i2cMaster of target huid 0x%llX",
-        (i_operation == LOCKOP_LOCK)?"lock":"unlock", get_huid(i_target) );
-
-    hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
-    hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
-
-    do
-    {
-        if ((nullptr == g_hostInterfaces) ||
-            (nullptr == g_hostInterfaces->firmware_request))
-        {
-            /*@
-             * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-             * @moduleid         VPD::VPD_SEND_I2C_LOCK_MSG
-             * @reasoncode       VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR
-             * @userdata1        HUID of target
-             * @userdata2        I2C Lock message type
-             * @devdesc          MBOX send not supported in HBRT
-             * @custdesc         A problem was detected during runtime of
-             *                   the system where locking is currently
-             *                   unavailable for sending vpd to the host
-             */
-             l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                      VPD::VPD_SEND_I2C_LOCK_MSG,
-                                      VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR,
-                                      TARGETING::get_huid(i_target),
-                                      hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK,
-                                      true);
-            break;
-        }
-
-        // Get an accurate size of memory actually needed to transport the data
-        size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                            sizeof(hostInterfaces::hbrt_fw_msg::req_i2c_lock);
-
-        //create the firmware_request structure to carry the i2c lock msg data
-        l_req_fw_msg =
-                  (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
-        memset(l_req_fw_msg, 0, l_req_fw_msg_size);
-
-        // populate the firmware_request structure with given data
-        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK;
-
-        // build up msg
-        l_err = fillI2CLockMsg(i_target, i_operation, l_req_fw_msg);
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_vpd, ERR_MRK"sendI2CLockMsg: "
-                "unable to fill in i2c %s msg",
-                (i_operation==LOCKOP_LOCK)?"lock":"unlock");
-            break;
-        }
-
-        // Create the firmware_request response struct to receive data
-        uint64_t l_resp_fw_msg_size = l_req_fw_msg_size;
-        l_resp_fw_msg =
-                  (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
-        memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
-
-        // Trace out the request structure
-        TRACFBIN( g_trac_vpd, INFO_MRK"sendI2CLockMsg: "
-                  "Sending firmware_request",
-                  l_req_fw_msg,
-                  l_req_fw_msg_size);
-
-        // Make the firmware_request call
-        l_err = firmware_request_helper(l_req_fw_msg_size,
-                                        l_req_fw_msg,
-                                        &l_resp_fw_msg_size,
-                                        l_resp_fw_msg);
-    }
-    while (0);
-
-    // release the memory created
-    free(l_req_fw_msg);
-    free(l_resp_fw_msg);
-    l_req_fw_msg = l_resp_fw_msg = nullptr;
-
-    // add VPD traces to all error logs
-    if (l_err)
-    {
-        l_err->collectTrace( "VPD", 256);
-    }
-
-    return l_err;
-}
-
 // ------------------------------------------------------------------
 // sendMboxWriteMsg
 // ------------------------------------------------------------------
@@ -597,7 +383,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               VpdWriteMsg_t& i_record )
 {
     errlHndl_t l_err = nullptr;
-    errlHndl_t l_lock_errl = nullptr;
 
     // Put the handle to the firmware messages out here
     // so it is easier to free later
@@ -644,9 +429,10 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             break;
         }
 
-        // Lock the I2C master for this target before sending VPD to
-        // prevent collisions
-        l_lock_errl = sendI2CLockMsg(i_target, LOCKOP_LOCK );
+
+        // Note - There is a potential collision on the I2C bus with
+        //  the OCC code.  On FSP systems this is handled by the HWSV
+        //  code.  On OP systems this is handled by OPAL.
 
 
         // Get an accurate size of memory needed to transport
@@ -729,31 +515,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     if( l_req_fw_msg ) { free(l_req_fw_msg); }
     if( l_resp_fw_msg ) { free(l_resp_fw_msg); }
     l_req_fw_msg = l_resp_fw_msg = nullptr;
-
-    // Commit previous lock error (if any)
-    if (l_lock_errl)
-    {
-        // Associate lock error with this error
-        if (l_err)
-        {
-            l_lock_errl->plid(l_err->plid());
-        }
-        l_lock_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        errlCommit( l_lock_errl, VPD_COMP_ID );
-    }
-
-    // Unlock i2cMaster for this target
-    l_lock_errl = sendI2CLockMsg( i_target, LOCKOP_UNLOCK );
-    if (l_lock_errl)
-    {
-        // Associate unlock error with this error
-        if (l_err)
-        {
-            l_lock_errl->plid(l_err->plid());
-        }
-        l_lock_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-        errlCommit( l_lock_errl, VPD_COMP_ID );
-    }
 
     if (l_err)
     {
