@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -226,9 +226,7 @@ bool AttrTextToBinaryBlob::writeDataToBuffer(
                             size_t & io_totalSize )
 {
     bool l_err = false;
-    FILE * l_data;
     uint64_t l_size;
-    int l_success;
     uint32_t * l_bytes;
     uint32_t l_padding = 0x00000000;
     uint32_t l_tankLayer;
@@ -514,19 +512,22 @@ void AttrTextToBinaryBlob::updateLabels(
                                     std::vector<target_label> & io_labels,
                                     const target_label & i_label_override)
 {
-    for (auto & l_label : io_labels)
+    // Using non-C++11 auto format so x86.nfp compiles
+    for (std::vector<target_label>::iterator it = io_labels.begin();
+        it != io_labels.end();
+        ++it)
     {
         if (i_label_override.node != AttributeTank::ATTR_NODE_NA)
         {
-            l_label.node = i_label_override.node;
+            it->node = i_label_override.node;
         }
         if (i_label_override.targetPos != AttributeTank::ATTR_POS_NA)
         {
-            l_label.targetPos = i_label_override.targetPos;
+            it->targetPos = i_label_override.targetPos;
         }
         if (i_label_override.unitPos != AttributeTank::ATTR_UNIT_POS_NA)
         {
-            l_label.unitPos = i_label_override.unitPos;
+            it->unitPos = i_label_override.unitPos;
         }
     }
 }
@@ -910,7 +911,7 @@ bool AttrTextToBinaryBlob::attrFileAttrLinesToData(
     bool & o_const,
     AttributeTank::TankLayer & o_tankLayer)
 {
-    bool l_pErr = false;
+    bool l_success = true;
     size_t l_numElements = 0;
     // Data for the attribute
     uint32_t l_attrElemSizeBytes = 0;
@@ -929,9 +930,8 @@ bool AttrTextToBinaryBlob::attrFileAttrLinesToData(
     for (l_itr = i_lines.begin(); l_itr != i_lines.end(); ++l_itr)
     {
         // Split the attribute line into fields
-        bool l_success = attrFileAttrLineToFields(*l_itr, l_attrString, td,
-            l_valString, o_const);
-
+        l_success = attrFileAttrLineToFields(*l_itr, l_attrString, td,
+                                            l_valString, o_const);
 
         if (!l_success)
         {
@@ -1033,7 +1033,8 @@ bool AttrTextToBinaryBlob::attrFileAttrLinesToData(
         }
 
     }
-    return l_pErr;
+
+    return (!l_success);
 }
 
 //******************************************************************************
@@ -1537,7 +1538,6 @@ AttrTextToBinaryBlob::TargetTypeRc
 
             // (check for comma separated list)
             size_t nValCurPosn = nValStartPosn;
-            size_t nValNextPosn = nValCurPosn;
 
             for // loop thru the potential comma separated list
               ( int i = nValStartPosn;
@@ -1701,7 +1701,7 @@ bool AttrTextToBinaryBlob::validateBinaryXlate( const uint8_t * i_buffer,
             }
             else
             {
-                printf("validateBinaryXlate: WARNING : Parm to large to format\n" );
+                printf("validateBinaryXlate: WARNING : Parm too large to format (valSize = %d)\n", valSize);
             }
         } // end parm value
     } // end walk thru output buffer
@@ -1889,8 +1889,13 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
                 break;
             }
 
-            for (const auto & l_label : l_targetLabels)
+            // Removed C++11 auto so CONTEXT_x86_nfp will compile
+            for (std::vector<target_label>::iterator it =
+                                                        l_targetLabels.begin();
+                it != l_targetLabels.end(); ++it)
             {
+                target_label l_label = *it;
+
                 l_pos = l_label.targetPos;
                 l_unitPos = l_label.unitPos;
                 l_node = l_label.node;
@@ -2144,7 +2149,6 @@ int main(int argc, char *argv[])
     std::ifstream l_attributeFile;
     bool err = false;
     bool l_injectECC = false;
-    char * l_option;
     const char * l_attributeString;
 
     int opt;
