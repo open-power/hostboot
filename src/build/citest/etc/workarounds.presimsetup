@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -35,3 +35,9 @@
 #echo "WSALIAS DEFAULT FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
+echo "+++ Need to alter where we look for pnor images so they will be picked up properly"
+mkdir -p  $sb/simu/data
+egrep -v "nimbus.pnor|cumulus.pnor" $BACKING_BUILD/src/simu/data/simicsInfo > $sb/simu/data/simicsInfo
+echo "IMGS:NIMBUS_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
+echo "IMGS:BOSTON_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
+echo "IMGS:CUMULUS_PNOR_IMG | FLASH:cumulus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
