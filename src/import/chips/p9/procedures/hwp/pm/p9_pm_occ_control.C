@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,7 @@ enum DELAY_VALUE
 
 // OCR Register Bits
 static const uint32_t OCB_PIB_OCR_CORE_RESET_BIT = 0;
-static const uint32_t OCB_PIB_OCR_OCR_DBG_HALT_BIT = 10;
+static const uint32_t OCB_PIB_OCR_OCR_DBG_HALT_BIT = 10;  // HW434437 this bit isn't connected
 
 // OCC JTAG Register Bits
 static const uint32_t JTG_PIB_OJCFG_DBG_HALT_BIT = 6;
@@ -331,13 +331,13 @@ fapi2::ReturnCode p9_pm_occ_control
         case p9occ_ctrl::PPC405_HALT_OFF:
             FAPI_TRY(fapi2::putScom(i_target,
                                     PU_JTG_PIB_OJCFG_AND,
-                                    ~BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+                                    ~BIT(JTG_PIB_OJCFG_DBG_HALT_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_HALT_ON:
             FAPI_TRY(fapi2::putScom(i_target,
                                     PU_JTG_PIB_OJCFG_OR,
-                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+                                    BIT(JTG_PIB_OJCFG_DBG_HALT_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_RESET_SEQUENCE:
@@ -379,8 +379,8 @@ fapi2::ReturnCode p9_pm_occ_control
 
             // Halt the 405 and verify that it is halted
             FAPI_TRY(fapi2::putScom(i_target,
-                                    PU_OCB_PIB_OCR_OR,
-                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+                                    PU_JTG_PIB_OJCFG_OR,
+                                    BIT(JTG_PIB_OJCFG_DBG_HALT_BIT)));
 
             FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
 
@@ -402,8 +402,8 @@ fapi2::ReturnCode p9_pm_occ_control
                                     PU_OCB_PIB_OCR_OR,
                                     BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
             FAPI_TRY(fapi2::putScom(i_target,
-                                    PU_OCB_PIB_OCR_CLEAR,
-                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+                                    PU_JTG_PIB_OJCFG_AND,
+                                    ~BIT(JTG_PIB_OJCFG_DBG_HALT_BIT)));
             FAPI_TRY(fapi2::putScom(i_target,
                                     PERV_TP_OCC_SCOM_OCCLFIR_AND,
                                     ~BIT(OCCLFIR_PPC405_DBGSTOPACK_BIT)));
@@ -415,21 +415,22 @@ fapi2::ReturnCode p9_pm_occ_control
 
         case p9occ_ctrl::PPC405_START:
 
-            // Check the JTAG Halt bit is off as the the PPC405 won't actually start
-            // if this bit is on (controlled by RiscWatch)
-            FAPI_TRY(fapi2::getScom(i_target, PU_JTG_PIB_OJCFG, l_jtagcfg));
-
-            FAPI_ASSERT (!(l_jtagcfg.getBit<JTG_PIB_OJCFG_DBG_HALT_BIT>()),
-                         fapi2::OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH()
-                         .set_JTAGCFG(l_jtagcfg)
-                         .set_TARGET(i_target),
-                         "OCC will not start as the JTAG halt from RiscWatch is currently set");
+            // Need to remove this due to HW434437
+            // // Check the JTAG Halt bit is off as the the PPC405 won't actually start
+            // // if this bit is on (controlled by RiscWatch)
+            // FAPI_TRY(fapi2::getScom(i_target, PU_JTG_PIB_OJCFG, l_jtagcfg));
+            //
+            // FAPI_ASSERT (!(l_jtagcfg.getBit<JTG_PIB_OJCFG_DBG_HALT_BIT>()),
+            //              fapi2::OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH()
+            //              .set_JTAGCFG(l_jtagcfg)
+            //              .set_TARGET(i_target),
+            //              "OCC will not start as the JTAG halt from RiscWatch is currently set");
 
             FAPI_INF("Starting the PPC405");
             // Clear the halt bit
             FAPI_TRY(fapi2::putScom(i_target,
-                                    PU_OCB_PIB_OCR_CLEAR,
-                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+                                    PU_JTG_PIB_OJCFG_AND,
+                                    ~BIT(JTG_PIB_OJCFG_DBG_HALT_BIT)));
             // Set the reset bit
             FAPI_TRY(fapi2::putScom(i_target,
                                     PU_OCB_PIB_OCR_OR,
