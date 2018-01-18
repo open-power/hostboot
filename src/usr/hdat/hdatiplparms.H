@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,6 +289,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_20[]=
 {"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
 {"fw-l1d-thread-split",                         0x8000000000000000},
 {"fw-bcctrl-serialized",                        0x0000000000000000},
+{"fw-count-cache-disabled",                     0x8000000000000000},
 {"speculation-policy-favor-security",           0x8000000000000000}};
 
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_21[]=
@@ -303,6 +304,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_21[]=
 {"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
 {"fw-l1d-thread-split",                         0x8000000000000000},
 {"fw-bcctrl-serialized",                        0x0000000000000000},
+{"fw-count-cache-disabled",                     0x8000000000000000},
 {"speculation-policy-favor-security",           0x8000000000000000}};
 
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_22[]=
@@ -317,6 +319,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_22[]=
 {"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
 {"fw-l1d-thread-split",                         0x8000000000000000},
 {"fw-bcctrl-serialized",                        0x8000000000000000},
+{"fw-count-cache-disabled",                     0x8000000000000000},
 {"speculation-policy-favor-security",           0x8000000000000000}};
 
 
