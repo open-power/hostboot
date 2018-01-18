@@ -58,23 +58,33 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW430733</id>
+    <id>ATTR_CHIP_EC_FEATURE_FORCE_PRIV_L1D</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-       Nimbus DD2.2 / Cumulus DD1.1 - Serialize bcctr[l]
+       Force Private L1D
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW430733</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Nimbus DD2.2 - MTTRIG2 setup to flush L1D
+    </description>
+    <chipEcFeature>
       <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x11</value>
+          <value>0x22</value>
           <test>EQUAL</test>
         </ec>
       </chip>
@@ -167,10 +177,58 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW433038</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW433038 - LSU clockgating bug
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NEW_TM_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Enable new TM handling for NDD2.2+ and CDD1.1+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW426420</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Enable new TM handling for NDD2.2
+      Additional workaround needed for TM - NDD2.2 only
     </description>
     <chipEcFeature>
       <chip>
@@ -3721,6 +3779,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SERIALIZE_INDIRECT_BRANCHES_TA</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Serialize indirect branches in TA=1
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW417630</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -3810,6 +3885,74 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SERIALIZE_INDIRECT_BRANCHES_RL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Serialize indirect branches using risklevel
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SERIALIZE_INDIRECT_BRANCHES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Serialize indirect branches
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x21</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SERIALIZE_LTPTR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Serialize LTPTR
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_IBMI_SEC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Enable IBMi-specific security enhancements
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
           <test>EQUAL</test>
         </ec>
       </chip>
