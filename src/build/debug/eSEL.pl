@@ -63,6 +63,7 @@ my $esel_record_count = 0;
 my @esel_timestamps = ();
 my $timestamp = "";
 my $txt_file_name = "";
+my $timestamp_found = 0;
 
 my %options_table = (
     get_ami_data => 0,
@@ -335,7 +336,14 @@ sub ReplaceHostbootTimestamps
             # Match the following pattern "dd/mm/yyyy hh:mm:ss"
             # Note that we can't match only numbers here since the broken hb
             # timestamp may contain hex letters
-            $line =~ s{(..)/(..)/(....) ..:..:..}{$esel_timestamps[$current_esel_number]}g;
+            if($timestamp_found)
+            {
+                $line =~ s{(..)/(..)/(....) ..:..:..}{$esel_timestamps[$current_esel_number]}g;
+            }
+            else # We didn't collect any timestamps - populate with fake data
+            {
+                $line =~ s{(..)/(..)/(....) ..:..:..}{DE/AD/BEEF DE:AD:FF}g;
+            }
             ($debug) && print "Made substitution: $line\n";
 
             # Only move to the next timestamp when we've seen the "Committed at"
@@ -553,35 +561,63 @@ sub DecodeObmcEselData
             next;
         }
         # only collect the timestamps if we're processing OBMC eSELs.
-        elsif($options_table{"decode_obmc_data"})
+        else
         {
-            # found PEL string, now find the datestamp associated with it
+            # found PEL string, now try to find the datestamp associated with it
             # (the next Timestamp in the log)
             my $next_line = "";
-            do
+            while(<LOG_FILE>)
             {
-                $next_line = <LOG_FILE>;
-            } while (!($next_line =~ /Timestamp/));
-            # strip the "Timestamp", commas, spaces, and the newline
-            $next_line =~ s/"Timestamp"://g;
-            $next_line =~ s/,//g;
-            $next_line =~ s/ //g;
-            chomp $next_line;
+                $next_line = $_;
+                $debug && print "Looking for timestamp.. line <$next_line>\n";
+                if($next_line =~ /Timestamp/)
+                {
+                    $timestamp_found = 1;
+                    last;
+                }
+                elsif($next_line =~ /ESEL/ or
+                      $next_line =~ /20 00 04/) # found the next ESEL
+                {
+                    $timestamp_found = 0;
+                    # Return the file pointer back to the ESEL line so we can
+                    # process it.
+                    seek(LOG_FILE, -length($next_line), 1);
+                    last;
+                }
+            }
 
-            # convert to date/time (we are given the timestamp in ms, so divide
-            # by 1000 to get s).
-            $timestamp = strftime("%m/%d/%Y %H:%M:%S", localtime($next_line/1000));
-            ($debug) && print "Timestamp for ESEL #$esel_record_count:$next_line\n";
-            ($debug) && print "Decoded timestamp for ESEL #$esel_record_count:$timestamp\n";
+            if($timestamp_found)
+            {
+                # strip the "Timestamp", commas, spaces, and the newline
+                $next_line =~ s/"Timestamp"://g;
+                $next_line =~ s/,//g;
+                $next_line =~ s/ //g;
+                chomp $next_line;
 
-            push @esel_timestamps, $timestamp;
-            ($debug) && $esel_record_count++;
+                # convert to date/time (we are given the timestamp in ms, so divide
+                # by 1000 to get s).
+                $timestamp =
+                      strftime("%m/%d/%Y %H:%M:%S", localtime($next_line/1000));
+                ($debug) && print "Timestamp for ESEL #$esel_record_count:$next_line\n";
+                ($debug) && print "Decoded timestamp for ESEL #$esel_record_count:$timestamp\n";
+
+                push @esel_timestamps, $timestamp;
+                ($debug) && $esel_record_count++;
+            }
         }
 
         $line_size = split / /, $pelString;
         print OUT_FILE HexPack($pelString, $line_size);
     }
     ($debug) && print "Timestamps: @esel_timestamps\n";
+
+    if(!$timestamp_found)
+    {
+        print "No timestamp data was found in the log provided.\n";
+        print "Timestamps will not be corrected in the resulting";
+        print " error log file.\n";
+    }
+
     close OUT_FILE;
     close LOG_FILE;
     # Make sure the file naming is consistent with what parsing function expects
