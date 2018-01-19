@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -326,6 +326,10 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         }
         else
         {
+            //Zero out the istep mode bit for slave chips to avoid hangs
+#ifdef __HOSTBOOT_MODULE
+            l_read_scratch_reg.clearBit<0>();
+#endif
             //Setting SCRATCH_REGISTER_3 register value
             //CFAM.SCRATCH_REGISTER_3 = l_read_scratch_reg
             FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_3_FSI,
