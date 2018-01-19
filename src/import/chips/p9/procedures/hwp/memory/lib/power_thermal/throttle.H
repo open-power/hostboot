@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,8 @@
 /// @brief throttle API
 ///
 
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -354,11 +354,13 @@ fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target
 /// @brief Equalize the throttles and estimated power at those throttle levels
 /// @param[in] i_targets vector of MCS targets all on the same VDDR domain
 /// @param[in] i_throttle_type denotes if this was done for POWER (VMEM) or THERMAL (VMEM+VPP) throttles
+/// @param[out] o_exceeded_power vector of MCA targets where the estimated power exceeded the maximum allowed
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note sets the throttles and power to the worst case
 ///
 fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets,
-                                      const throttle_type i_throttle_type);
+                                      const throttle_type i_throttle_type,
+                                      std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >& o_exceeded_power);
 
 }//power_thermal
 }// mss

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,8 +30,8 @@
 /// allowed within a window of M DRAM clocks given the minimum dram data bus utilization.
 ///
 
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -70,6 +70,8 @@ extern "C"
     fapi2::ReturnCode p9_mss_utils_to_throttle( const std::vector< fapi2::Target<TARGET_TYPE_MCS> >& i_targets )
     {
         FAPI_INF("Entering p9_mss_utils_to_throttle");
+
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_exceeded_power;
 
         for( const auto& l_mcs : i_targets )
         {
@@ -146,8 +148,9 @@ extern "C"
                                     l_n_port) );
         }
 
-        //equalize throttles to prevent variable performance
-        FAPI_TRY( mss::power_thermal::equalize_throttles (i_targets, mss::throttle_type::POWER));
+        // Equalize throttles to prevent variable performance
+        // Note that we don't do anything with any MCA that exceed the power limit here, as we don't have an input power limit to go from
+        FAPI_TRY( mss::power_thermal::equalize_throttles (i_targets, mss::throttle_type::POWER, l_exceeded_power));
 
     fapi_try_exit:
         return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,8 @@
 /// @file p9_mss_bulk_pwr_throttles.C
 /// @brief Set the throttle attributes based on a power limit for the dimms on the channel pair
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -63,6 +63,7 @@ extern "C"
         FAPI_INF("Start p9_mss_bulk_pwr_throttles for %s type throttling",
                  (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"));
 
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_exceeded_power;
 
         for ( const auto& l_mcs : i_targets)
         {
@@ -114,8 +115,16 @@ extern "C"
             FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_mcs, l_port));
         }
 
-        //Set all of the throttles to the lowest value per port for performance reasons
-        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, i_throttle_type));
+        // Set all of the throttles to the lowest value per port for performance reasons
+        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, i_throttle_type, l_exceeded_power));
+
+        // Report any MCA that exceeded the max power limit, and return a failing RC if we have any
+        for (const auto& l_mca : l_exceeded_power)
+        {
+            FAPI_ERR("MCA %s estimated power exceeded the maximum allowed", mss::c_str(l_mca) );
+            fapi2::current_err = fapi2::FAPI2_RC_FALSE;
+        }
+
         FAPI_INF("End bulk_pwr_throttles");
         return fapi2::current_err;
 

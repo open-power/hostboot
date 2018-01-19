@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,8 +26,8 @@
 /// @file throttle.C
 /// @brief Determine throttle settings for memory
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -788,13 +788,17 @@ fapi_try_exit:
 /// @brief Equalize the throttles and estimated power at those throttle levels
 /// @param[in] i_targets vector of MCS targets all on the same VDDR domain
 /// @param[in] i_throttle_type denotes if this was done for POWER (VMEM) or THERMAL (VMEM+VPP) throttles
+/// @param[out] o_exceeded_power vector of MCA targets where the estimated power exceeded the maximum allowed
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note sets the throttles and power to the worst case
 /// Called by p9_mss_bulk_pwr_throttles and by p9_mss_utils_to_throttle (so by IPL or by OCC)
 ///
 fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets,
-                                      const throttle_type i_throttle_type)
+                                      const throttle_type i_throttle_type,
+                                      std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >& o_exceeded_power)
 {
+    o_exceeded_power.clear();
+
     //Set to max values so every compare will change to min value
     uint16_t l_min_slot = ~(0);
     uint16_t l_min_port = ~(0);
@@ -900,6 +904,8 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
                                         mss::c_str(l_mca),
                                         l_fin_power[l_pos],
                                         l_power_limit);
+
+                    o_exceeded_power.push_back(l_mca);
                 }
             }
 
