@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@ namespace SECUREBOOT
         RC_PAGE_ALLOC_FAIL              = SECURE_COMP_ID | 0x04,
         RC_SET_PERMISSION_FAIL_EXE      = SECURE_COMP_ID | 0x05,
         RC_SET_PERMISSION_FAIL_WRITE    = SECURE_COMP_ID | 0x06,
+        //termination_rc
         RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
         RC_ROM_SHA512                   = SECURE_COMP_ID | 0x08,
         RC_SECURE_BAD_TARGET            = SECURE_COMP_ID | 0x09,
