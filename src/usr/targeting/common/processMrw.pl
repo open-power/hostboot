@@ -918,9 +918,7 @@ sub processProcessor
     $targetObj->setAttributeField($target,
         "EEPROM_SBE_BACKUP_INFO","i2cMasterPath",$path);
 
-    ## initialize master processor FSI's
-    $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "0");
-
+    ## need to initialize the master processor's FSI connections here 
     my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
 
     if ($proc_type eq "ACTING_MASTER" )
@@ -937,7 +935,6 @@ sub processProcessor
             "1");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
             "0");
-        $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "1");
     }
     else
     {
@@ -1359,28 +1356,54 @@ sub processFsi
         my $flip_port         = 0;
 
         # If this is a proc that can be a master, then we need to set flip_port
-        # attribute in FSI_OPTIONS. $flip_port tells us which FSI port to expect
-        # to recieve instructions on. The default setting ( with flip_port not set)
-        # is to recieve instructions on port A. In High End systems there are 2 master
-        # capable procs per node, If a processor is master capable then it will expect
-        # to recieve instructions from FSI port B instaed of A. The master processor
-        # will recieve from FSP A on the master proc's fsi port B. The alt-master will
-        # recieve from the master proc on the alt-master's port B.
-        # Note: On all systems we expect the master to have flip_port set.
+        # attribute in FSI_OPTIONS. $flip_port tells us which FSI port to write to.
+        # The default setting ( with flip_port not set) is to send instructions to port A.
+        # In High End systems there are 2 master capable procs per node.
+        # For the alt-master processor we need to set flip_port so that when it is master,
+        # it knows to send instructions to the B port. During processMrw
+        # we cannot determine which proc is master and which is the alt-master. 
+        # We will set flipPort on both and the later clear flipPort when we determine
+        # which is actually master during hwsv init.
 
+        #    FSP A is primary FSB B is backup
         #   |--------|        |--------|
         #   | FSP A  |        | FSP B  |
+        #   |  (M)   |        |    (M) |
         #   |--------|        |--------|
-        #       |                 |
+        #       |                   
+        #       V                   
         #   |--------|        |--------|
-        #   |  (b)   |        |   (a)  |
+        #   |  (A)(B)|------->|(B) (A) |
         #   | Master |        |Alt Mast|
-        #   |     (a)|------->|(b)     |
+        #   |     (M)|        |(M)     |
         #   |--------|\       |--------|
-        #          |   \        |
-        #          |    \       |
+        #          |   \        
+        #         /     \       
+        #        /       \ 
         #   |--------|    \   |---------|
-        #   |     (b)|     \->|(b)      |
+        #   | (A) (B)|     \->|(A)  (B) |
+        #   | Slave  |        |  Slave  |
+        #   |        |        |         |
+        #   |--------|        |---------|
+
+        #   FSP B is primary FSB A is backup
+        #
+        #   |--------|        |--------|
+        #   | FSP A  |        | FSP B  |
+        #   |  (M)   |        |    (M) |
+        #   |--------|        |--------|
+        #                           |
+        #                           V
+        #   |--------|        |--------|
+        #   |  (A)(B)|<-------|(M) (A) |
+        #   | Master |       /|Alt Mast|
+        #   |     (M)|      /||(B)     |
+        #   |--------|     / ||--------|
+        #                 /   \
+        #                /     \__ 
+        #               /         \
+        #   |--------| /      |---------|
+        #   |(A)  (B)|        |(A) (B)  |
         #   | Slave  |        |  Slave  |
         #   |        |        |         |
         #   |--------|        |---------|
