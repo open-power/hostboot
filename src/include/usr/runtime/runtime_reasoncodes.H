@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,6 +123,8 @@ namespace RUNTIME
         RC_FW_REQUEST_HWSV_ERR         = RUNTIME_COMP_ID | 0x37,
         RC_FW_REQUEST_RESET_RELOAD_ERR = RUNTIME_COMP_ID | 0x38,
         RC_FW_REQUEST_ERR              = RUNTIME_COMP_ID | 0x39,
+        RC_TPM_HDAT_VIRT_TO_PHYS_ERR   = RUNTIME_COMP_ID | 0x3A,
+        RC_TPM_HDAT_MAP_BLOCK_ERR      = RUNTIME_COMP_ID | 0x3B,
     };
 
     enum UserDetailsTypes

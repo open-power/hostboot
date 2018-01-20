@@ -76,6 +76,7 @@
 #include <pnor/pnor_reasoncodes.H>
 #include <runtime/common/runtime_utils.H>
 #include <limits.h>
+#include <errno.h>
 
 namespace RUNTIME
 {
@@ -1582,8 +1583,101 @@ errlHndl_t populate_TpmInfoByNode()
             //  grow beyond its current size
             logSize = TPM_SRTM_EVENT_LOG_MAX;
 
+            // Although the TPM log's physical memory is currently memory mapped
+            // to a virtual address range, said range will go out of scope when
+            // processing other HDAT sections.  Therefore, for every TPM log,
+            // open a secondary and persistent virtual memory window to it, so
+            // that the TPM log manager will have a consistent
+            // virtual-to-physical address mapping to write its log data to.
+            // Hostboot will keep this range open since TPM extensions
+            // happen up until invoking the payload.
+            const uint64_t tpmLogVirtAddr = l_baseAddr + l_currOffset;
+            const auto tpmLogPhysAddr =
+                mm_virt_to_phys(reinterpret_cast<void*>(tpmLogVirtAddr));
+            if(static_cast<int64_t>(tpmLogPhysAddr) == -EFAULT)
+            {
+                TRACFCOMP(g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                    "Failed in call to mm_virt_to_phys() with virtual address "
+                    "0x%016llX",
+                    tpmLogVirtAddr);
+                /*@
+                 * @errortype
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @reasoncode RUNTIME::RC_TPM_HDAT_VIRT_TO_PHYS_ERR
+                 * @userdata1  Requested virtual address to convert
+                 * @devdesc    Failed to convert virtual address to physical
+                 *             address
+                 * @custdesc   Firmware encountered an internal error
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_TPM_HDAT_VIRT_TO_PHYS_ERR,
+                    tpmLogVirtAddr,
+                    0,
+                    true);
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                break;
+            }
+
+            decltype(tpmLogPhysAddr) tpmLogAlignedPhysAddr
+                = ALIGN_PAGE_DOWN(tpmLogPhysAddr);
+            decltype(logSize) diff = tpmLogPhysAddr-tpmLogAlignedPhysAddr;
+            decltype(logSize) tpmLogAlignedSize
+                = ALIGN_PAGE(diff + logSize);
+
+            auto tpmLogNewVirtAddr =
+                mm_block_map(reinterpret_cast<void*>(tpmLogAlignedPhysAddr),
+                             tpmLogAlignedSize);
+            if(tpmLogNewVirtAddr == nullptr)
+            {
+                TRACFCOMP(g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                    "Failed in call to mm_block_map with aligned physical "
+                    "address 0x%016llX and aligned size 0x%016llX",
+                    tpmLogAlignedPhysAddr,tpmLogAlignedSize);
+
+                /*@
+                 * @errortype
+                 * @severity   ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+                 * @reasoncode RUNTIME::RC_TPM_HDAT_MAP_BLOCK_ERR
+                 * @userdata1  Aligned physical address to map
+                 * @userdata2  Aligned size or region to map
+                 * @devdesc    Failed to map physical memory to virtual memory
+                 * @custdesc   Firmware encountered an internal error
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_TPM_HDAT_MAP_BLOCK_ERR,
+                    tpmLogAlignedPhysAddr,
+                    tpmLogAlignedSize,
+                    true);
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                break;
+            }
+            tpmLogNewVirtAddr=
+                reinterpret_cast<void*>(
+                    diff+reinterpret_cast<uint8_t*>(tpmLogNewVirtAddr));
+
+            TRACFCOMP(g_trac_runtime, INFO_MRK "Moving TPM log; "
+                "Current virtual address = 0x%016llX, "
+                "Current log size = 0x%016llX, "
+                "Current physical address = 0x%016llX, "
+                "Aligned physical address = 0x%016llX, "
+                "Aligned log size = 0x%016llX, "
+                "New virtual address = 0x%016llX.",
+                tpmLogVirtAddr,
+                logSize,
+                tpmLogPhysAddr,
+                tpmLogAlignedPhysAddr,
+                tpmLogAlignedSize,
+                tpmLogNewVirtAddr);
+
+            // Move TPM log to the new virtual memory mapping
             TRUSTEDBOOT::TpmLogMgr_relocateTpmLog(pLogMgr,
-                          reinterpret_cast<uint8_t*>(l_baseAddr + l_currOffset),
+                          reinterpret_cast<uint8_t*>(tpmLogNewVirtAddr),
                           logSize);
             #endif
         }
