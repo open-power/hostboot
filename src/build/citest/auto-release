@@ -36,6 +36,259 @@ function setup {
     fi
 }
 
+# Overview of how must-fix release work:
+# These steps are used by releases requiring must-fix approvals
+# First, function "build-create-track" builds a release & creates a CMVC track
+# It sends approver(s) an email with fips-rel, feature/track and commits info.
+# We call another funtion "chk-n-wait-approval".
+# It allows them a time of 1 day (wait-time input taken from Jenkins)
+# It emails approvers and loops continually to check if track was approved.
+# Post approval, it exits the loop, calls next function "checkinBuildToTrack"
+# which locks files, adds them to track, and completes(not integrate) track.
+# Next, Jenkins job "fspCI-n-CMVCtrack-integrate" runs fsp-CI and if successful
+# integrates the track - this is the last step of the must-fix release
+
+function buildrel-create-track {
+
+    echo -e "\nInside \"function buildrel-create-track\"\n"
+    echo -e "RELEASE_NAME=$RELEASE_NAME\n"
+    echo -e "PREVIOUS_RELEASE=$PREVIOUS_RELEASE\n"
+    echo -e "FIPS_RELEASE=$FIPS_RELEASE\n"
+    echo -e "GIT_BRANCH=$GIT_BRANCH\n"
+    echo -e "BASE=$BASE\n"
+    echo -e "EXISTING_TRACK=$EXISTING_TRACK\n"
+    echo -e "RELEASENOTESTXT=$RELEASENOTESTXT\n"
+
+    ### Define and setup release branch
+    export PATH=${PATH}:$HOSTBOOT_WORKSPACE/src/build/tools
+
+    echo -e "[$(date)]\n#####-> hbRelease define --level $RELEASE_NAME\
+        --released $PREVIOUS_RELEASE --base $BASE --branch $GIT_BRANCH\n"
+    hbRelease define --level $RELEASE_NAME --released $PREVIOUS_RELEASE\
+        --base $BASE --branch $GIT_BRANCH || exit -1
+
+    echo -e "[$(date)]\n#####-> hbRelease release --level $RELEASE_NAME\n"
+    hbRelease release --level $RELEASE_NAME || exit -1
+
+    export SANDBOXROOT=$WORKSPACE
+    export SANDBOXNAME=$RELEASE_NAME
+    export SANDBOXBASE=$SANDBOXROOT/$SANDBOXNAME
+    mkdir -p $SANDBOXBASE || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw/nimbus || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw/cumulus || exit -1
+
+    ### Compile and provide binaries
+    setup
+    if echo $FIPS_RELEASE | grep -q fips9; then
+        # First bulid the standalone
+
+        echo -e "[$(date)]\n#####-> BUILD_MINIMAL=1 nice -+20 make -j16\n"
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+
+        # With PNOR env var not set, hb prime will make all of the pnor images
+        unset PNOR
+        # prime will put the files into expected locations
+
+        echo -e "[$(date)]\n#####-> hb simsetup || exit -1\n"
+        hb simsetup || exit -1
+        echo -e "[$(date)]\n#####-> hb prime || exit -1\n"
+        hb prime || exit -1
+        echo -e "[$(date)]\n#####-> cp \
+            $SANDBOXBASE/obj/ppc/hbfw/img/nimbus.pnor \
+            $CMVC_DIR/src/hbfw/nimbus || exit -1\n"
+        cp $SANDBOXBASE/obj/ppc/hbfw/img/nimbus.pnor \
+            $CMVC_DIR/src/hbfw/nimbus || exit -1
+        echo -e "[$(date)]\n#####-> cp $SANDBOXBASE/src/hbfw/simics.tar \
+            $CMVC_DIR/src/hbfw/nimbus || exit -1\n"
+        cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/nimbus \
+            || exit -1
+        echo -e "[$(date)]\n#####-> cp \
+            $SANDBOXBASE/obj/ppc/hbfw/img/cumulus.pnor \
+            $CMVC_DIR/src/hbfw/cumulus\n"
+        cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus.pnor \
+            $CMVC_DIR/src/hbfw/cumulus || exit -1
+        echo -e "[$(date)]\n#####-> cp $SANDBOXBASE/src/hbfw/simics.tar \
+            $CMVC_DIR/src/hbfw/cumulus || exit -1\n"
+        cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus \
+            || exit -1
+
+        echo -e "[$(date)]\n#####-> make clean\n"
+        #make clean
+        make clobber
+
+        # Now build the FSP-based images
+        export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
+
+        echo -e "[$(date)]\n#####-> BUILD_MINIMAL=1 nice -+20 make -j16 \n"
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+        #
+    else
+        #
+        echo -e "[$(date)]\n##### -> BUILD_MINIMAL=1 nice -+20 make -j16 \n"
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+    fi
+
+    # Run hb distribute to put binaries in cmvc checkout directory
+
+    echo -e "[$(date)]\n#####->  hb prime --release $SANDBOXBASE || exit -1\n"
+    hb prime --release $SANDBOXBASE || exit -1
+
+    echo -e "[$(date)]\n#####-> cp -rf $SANDBOXBASE/fsp/* $CMVC_DIR/src/hbfw\n"
+    cp -rf $SANDBOXBASE/fsp/* $CMVC_DIR/src/hbfw || exit -1
+
+    echo -e "[$(date)]\n#####-> rm -rf $SANDBOXBASE/fsp || exit -1\n"
+    rm -rf $SANDBOXBASE/fsp || exit -1
+
+    ### Push tag to gerrit, and create track
+    echo -e "[$(date)]\n##### -> \
+        git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME\n"
+    git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
+
+    #!--------Remove these lines of codes after merging hostboot commit,
+    #! this temporary adj is to reinstate the files---!#
+    cp src/build/citest/auto-release src/build/citest/auto-release.save
+    cp src/build/tools/hbRelease src/build/tools/hbRelease.save
+    #!--------------------------------------------------!#
+
+    echo -e "[$(date)]\n##### -> git checkout gerrit/master || exit -1\n"
+    git checkout gerrit/master || exit -1
+
+    #!--------Remove these lines of codes after merging hostboot commit,
+    #! this temporary adj is to reinstate the files---!#
+    cp src/build/citest/auto-release.save  src/build/citest/auto-release
+    cp src/build/tools/hbRelease.save  src/build/tools/hbRelease
+    #!--------------------------------------------------!#
+
+    echo -e "[$(date)]\n#####->  hbRelease create-track --level $RELEASE_NAME\
+        --release $FIPS_RELEASE --released $PREVIOUS_RELEASE --track \
+        $EXISTING_TRACK || exit -1\n"
+    hbRelease create-track --level $RELEASE_NAME --release $FIPS_RELEASE \
+        --released $PREVIOUS_RELEASE --track $EXISTING_TRACK || exit -1
+    # Check if feature was successfully created and if so set $FEATURE
+    if [ -f $CMVC_FEATURE_FILE ]; then
+        FEATURE=`cat $CMVC_FEATURE_FILE`;
+    else
+        echo "No feature created"
+        exit -1
+    fi
+
+    ### @todo RTC:171143
+    ### Sleep for 5 minutes to allow time for CMVC req's to take effect
+    echo "Waiting for fspCI requirements to take effect. 5 minutes..."
+    sleep 5m
+    echo -e "\nExiting \"function buildrel-create-track\"\n";
+}
+
+function chk-n-wait-approval {
+    echo -e "\nInside \"function chk-n-wait-approval\"\n"
+    echo -e "RELEASE_NAME=$RELEASE_NAME\n"
+    echo -e "FIPS_RELEASE=$FIPS_RELEASE\n"
+    echo -e "PREVIOUS_RELEASE=$PREVIOUS_RELEASE\n"
+    echo -e "EXISTING_TRACK=$EXISTING_TRACK\n"
+    #
+    local WAITED_TIME_SECS=0
+    local TMOUTSEC=$WAIT_TIME_SECS
+    local GOT_APPROVAL=""
+    local APPROVAL_STATUS=-1
+    local TRACK_APPROVED_YET="no"
+    local TRACK_APPROVAL_FILE=$WORKSPACE/track_approval_file
+    local EXPECTED_STATE="fix"
+    #
+    export NEXTJOB="https://hostboot-jenkins.swg-devops.com/job/Hostboot/job/Release/job/\
+    auto-release-HB/job/rel-fips/job/rel-fips-4-checkinBuildToTrack/\
+    build?delay=0sec"
+    echo -e "[$(date)]\nUse the information below  to manually perform next\
+        steps of the mustfix release:" >  $TRACK_APPROVAL_FILE
+    echo -e "\n 1. Point your browser to \n$NEXTJOB\n" >> $TRACK_APPROVAL_FILE
+    echo -e "\n 2. Copy artifacts by supplying information \
+        below:\n" >> $TRACK_APPROVAL_FILE
+    echo -e "\tFIPS_RELEASE=$FIPS_RELEASE\
+        \n\tFEATURE=$FEATURE" >> $TRACK_APPROVAL_FILE
+    echo -e "\tREL_FIPS_TRIGGER_PROJ=$REL_FIPS_TRIGGER_PROJ\
+        \n\tREL_FIPS_TRIGGER_BUILD_NUM=$REL_FIPS_TRIGGER_BUILD_NUM"\
+        >> $TRACK_APPROVAL_FILE
+    echo -e "\n\n\tOptionally supply the following" >> $TRACK_APPROVAL_FILE
+    echo -e "\tMUSTFIX_APPROVERS=$MUSTFIX_APPROVERS" >> $TRACK_APPROVAL_FILE
+    echo -e "\tRELEASE_ADMINS=$RELEASE_ADMINS" >> $TRACK_APPROVAL_FILE
+    echo -e "\n\nPeriodic polling status below:" >> $TRACK_APPROVAL_FILE
+
+    if [[ "$REL_NEEDS_APPR" == "no" ]]; then
+        echo -e "\n<E-O-F>\n" >> $TRACK_APPROVAL_FILE
+        APPROVAL_STATUS=0
+    else
+        #Get approval for must-fix release
+        while true
+        do
+            #Poll for approval - if it is 'approve', it is not approved yet.
+            #If it is 'fix' or 'build', then it is approved
+            GOT_APPROVAL=$(Report -g TrackView -where\
+                "releaseName='$FIPS_RELEASE' and defectName='$FEATURE'"\
+                -select state)
+            echo "{$(date)]: GOT_APPROVAL=\"$GOT_APPROVAL\" - \
+                [Waiting will quit for state: \"$EXPECTED_STATE\"]"\
+                >> $TRACK_APPROVAL_FILE
+            GOT_APPROVAL=$(grep "GOT_APPROVAL=\"$EXPECTED_STATE\"" \
+                $TRACK_APPROVAL_FILE)
+            if [[ -z "$GOT_APPROVAL" && $WAITED_TIME_SECS -lt \
+                "$WAIT_TIME_SECS" ]];then
+                echo -e "APPROVAL STATE=\"$GOT_APPROVAL\" \
+                [EXPECTED_STATE=$EXPECTED_STATE]\n CMVC track NOT approved yet \
+                - waiting for approval, will timeout in $TMOUTSEC seconds \
+                [WAIT_TIME_SECS=$WAIT_TIME_SECS; \
+                WAITED_TIME_SECS=$WAITED_TIME_SECS] ......"
+                /bin/sleep $POLL_AFTER_SECS
+                WAITED_TIME_SECS=$((WAITED_TIME_SECS+POLL_AFTER_SECS))
+                TMOUTSEC=$((WAIT_TIME_SECS-WAITED_TIME_SECS))
+            else
+                echo -e "\n<E-O-F>\n" >> $TRACK_APPROVAL_FILE
+                MAIL_MSG="Track $FIPS_RELEASE:$FEATURE approval status:\
+                \n\tAPPROVAL STATE:\n\t\"$GOT_APPROVAL\"\
+                \n\n\t[Expected state: \"$EXPECTED_STATE\"]"
+                export MAIL_MSG="$MAIL_MSG\n\n\nContent of approval file \
+                    below:\n$(cat $TRACK_APPROVAL_FILE)\n"
+                if [[ -n "$GOT_APPROVAL" ]];then
+                    export MAIL_SUB="Approval status of Track $FIPS_RELEASE \
+                    : $FEATURE [state = $EXPECTED_STATE, after \
+                    $WAITED_TIME_SECS/$WAIT_TIME_SECS secs]"
+                    APPROVAL_STATUS=0
+                else
+                    APPROVAL_STATUS=-1
+                    export MAIL_SUB="Failed approval of Track $FIPS_RELEASE \
+                    : $FEATURE [after $WAITED_TIME_SECS/$WAIT_TIME_SECS secs]"
+                fi
+                echo -e "$MAIL_SUB\n$MAIL_MSG\n"
+                echo -e "$MAIL_MSG" | \
+                    mail -s "$MAIL_SUB" $RELEASE_ADMINS $MUSTFIX_APPROVERS
+                break
+            fi
+        done
+    fi
+
+    echo -e "\nExiting \"function chk-n-wait-approval\"\n";
+    exit $APPROVAL_STATUS
+}
+
+function checkinBuildToTrack {
+    ### Define and setup release branch
+    export PATH=${PATH}:$HOSTBOOT_WORKSPACE/src/build/tools
+    #
+    echo "#####-> hbRelease define --level $RELEASE_NAME \
+        --released $PREVIOUS_RELEASE --base $BASE --branch $GIT_BRANCH"
+    hbRelease define --level $RELEASE_NAME --released $PREVIOUS_RELEASE \
+    --base $BASE --branch $GIT_BRANCH || exit -1
+    #
+    echo "#####-> hbRelease release --level $RELEASE_NAME || exit -1"
+    hbRelease release --level $RELEASE_NAME || exit -1
+
+    hbRelease checkinBuildToTrack --level $RELEASE_NAME \
+    --release $FIPS_RELEASE --checkInDir $CMVC_DIR \
+    --released $PREVIOUS_RELEASE || exit -1
+    ### @todo RTC:171143
+    ### Sleep for 5 minutes to allow time for CMVC req's to take effect
+    echo "Waiting for fspCI requirements to take effect. 5 minutes..."
+    sleep 5m
+}
+
 function build {
     ### Define and setup release branch
     export PATH=${PATH}:$HOSTBOOT_WORKSPACE/src/build/tools
@@ -67,7 +320,8 @@ function build {
         cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
 
-        make clean
+        #make clean
+        make clobber
         # Now build the FSP-based images
         export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
         BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
@@ -94,6 +348,7 @@ function build {
 
     ### @todo RTC:171143
     ### Sleep for 5 minutes to allow time for CMVC req's to take effect
+
     echo "Waiting for fspCI requirements to take effect. 5 minutes..."
     sleep 5m
 }
@@ -175,7 +430,9 @@ function run_fsp_ci {
     while true;
     do
         ((retries--))
-        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1 --force)";
+
+        # Call fsp-CI without force; omitting force allows fsp-CI to kill duplicate jobs
+        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1)"
 
         # Check if fsp-CI-jenkins failed to start
         if [ $? -eq 0 ]; then
@@ -219,7 +476,7 @@ then
     exit 1
 fi
 
-while getopts "btch" opt; do
+while getopts "btcmwfh" opt; do
     case $opt in
         b)
             build
@@ -231,6 +488,15 @@ while getopts "btch" opt; do
             ;;
         c)
             run_fsp_ci
+            ;;
+        m)
+            buildrel-create-track
+            ;;
+        w)
+            chk-n-wait-approval
+            ;;
+        f)
+            checkinBuildToTrack
             ;;
         h)
             usage
