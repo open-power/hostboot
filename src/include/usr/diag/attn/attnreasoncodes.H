@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,9 @@ enum ModuleId
 {
     ATTN_INVALID_MODULE             = 0x00,
     ATTN_TEST_FAKE_CALL_PRD         = 0x01, // this is used in test code only.
-    ATTN_CHK_IPL_ATTNS_MODULE       = 0x02
+    ATTN_CHK_IPL_ATTNS_MODULE       = 0x02,
+    ATTN_PRD_TASK_MODULE            = 0x03,
+    ATTN_INTR_TASK_MODULE           = 0x04
 };
 
 /**
@@ -61,8 +63,10 @@ enum ReasonCode
     ATTN_INVALID_REASONCODE     = ATTN_COMP_ID | 0x00,   // Invalid Reasoncode
     ATTN_TEST_ATTN_FAIL         = ATTN_COMP_ID | 0x01,   // this is used in
                                                          // test code only.
-    ATTN_SEE_HW_ERROR           = ATTN_COMP_ID | 0x02    // HW err with no gard
+    ATTN_SEE_HW_ERROR           = ATTN_COMP_ID | 0x02,   // HW err with no gard
                                                          // so PLID still set
+    ATTN_PRD_TASK_CRASHED       = ATTN_COMP_ID | 0x03,   // prd  thread crashed
+    ATTN_INTR_TASK_CRASHED      = ATTN_COMP_ID | 0x04    // intr thread crashed
 };
 
 }

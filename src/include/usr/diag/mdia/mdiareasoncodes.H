@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ enum ModuleId
 {
     INVALID_MODULE                  = 0x00,
     PROCESS_COMMAND_TIMEOUT         = 0x01,
+    MONITOR_MAIN_THREAD             = 0x02
 };
 
 /**
@@ -60,6 +61,7 @@ enum ReasonCode
     INVALID_REASONCODE           = MDIA_COMP_ID | 0x00,  // Invalid Reasoncode
     MAINT_COMMAND_HW_TIMED_OUT   = MDIA_COMP_ID | 0x01,  // timeout due to HW
     MAINT_COMMAND_SW_TIMED_OUT   = MDIA_COMP_ID | 0x02,  // timeout due to SW
+    MONITOR_THREAD_CRASHED       = MDIA_COMP_ID | 0x03   // thread crashed
 };
 
 }
