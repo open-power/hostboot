@@ -1255,12 +1255,22 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
                   skipChipPosn = chipPosn + l_searchString.size();
                 }
 
-                if // (chip string is in the target string) AND
-                   // (is not at the end of the target string) AND
-                   // (is not followed by ".")
-                  ( (chipPosn != std::string::npos) &&
-                    (skipChipPosn < l_line.size()) &&
-                    ((l_line.substr(skipChipPosn, 1)) != "." ) )
+                if // (chip string is not in the target string)
+                  ( chipPosn == std::string::npos )
+                {
+                    // (keep looking)
+                }
+
+                else if // (chip string is at the end of the target string) OR
+                        // (is followed by ".")
+                  ( (skipChipPosn >= l_line.size()) ||
+                    ((l_line.substr(skipChipPosn, 1)) == "." ) )
+                {
+                    // (done searching thru chip strings)
+                    break;
+                }
+
+                else
                 {
                     std::string l_trlParmLine =
                             l_line.substr(skipChipPosn, l_line.size());
@@ -1273,17 +1283,14 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
                         printf("validateTargLine : Error : "
                                 "Nonsense parm :c in processor or "
                                 "memory buffer target \n" );
-                        break;
                     }
                     else
                     {
-                        // keep looking
+                        // (done searching thru chip strings)
                     }
-                } // end chip string found
-                else
-                {
-                    // (keep looking)
-                }
+
+                    break;
+                } // end else
             } // end processor or memory buffer
             else
             {
