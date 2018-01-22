@@ -1214,8 +1214,27 @@ ReturnCode fapiAttrSetBadDqBitmap(
             uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
                                     [mss::BAD_DQ_BYTE_COUNT];
 
+            uint8_t l_tmpData[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+            memcpy( &l_tmpData, &i_data, sizeof(i_data) );
+
+            l_errl = __dimmUpdateDqBitmapEccByte( l_dimmTarget, l_tmpData );
+            if ( l_errl )
+            {
+                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting ECC data." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+            l_rc = __dimmUpdateDqBitmapSpareByte( l_dimmTarget, l_tmpData );
+            if ( l_rc )
+            {
+                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting spare DRAM "
+                          "data." );
+                break;
+            }
+
             l_rc = __compareEccAndSpare( l_dimmTarget, mfgModeBadBitsPresent,
-                                         i_data, l_eccSpareBitmap );
+                                         l_tmpData, l_eccSpareBitmap );
             if ( l_rc )
             {
                 FAPI_ERR( "fapiAttrSetBadDqBitmap: Error comparing "
