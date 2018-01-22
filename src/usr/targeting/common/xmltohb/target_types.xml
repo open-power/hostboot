@@ -122,6 +122,7 @@
   <attribute>
     <id>HDAT_EC</id>
   </attribute>
+  <attribute><id>PRD_HWP_PLID</id></attribute>
 </targetType>
 
 <targetType>
@@ -315,6 +316,7 @@
   <attribute>
     <id>REL_POS</id>
   </attribute>
+  <attribute><id>PRD_HWP_PLID</id></attribute>
 </targetType>
 
 <targetType>
@@ -1201,7 +1203,6 @@
   <attribute><id>SBE_IS_STARTED</id></attribute>
   <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
   <attribute><id>LPC_BUS_ADDR</id></attribute>
-  <attribute><id>PRD_HWP_PLID</id></attribute>
 </targetType>
 
 <targetType>
@@ -1373,9 +1374,6 @@
   <attribute>
     <default>MEM</default>
     <id>CDM_DOMAIN</id>
-  </attribute>
-  <attribute>
-    <id>PRD_HWP_PLID</id>
   </attribute>
   <attribute><id>RCD_PARITY_RECONFIG_LOOP_COUNT</id></attribute>
 </targetType>
