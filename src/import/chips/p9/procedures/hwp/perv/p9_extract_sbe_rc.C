@@ -166,6 +166,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     fapi2::buffer<uint32_t> l_data32_ir;
     fapi2::buffer<uint32_t> l_data32_edr;
     fapi2::buffer<uint32_t> l_data32_iar;
+    fapi2::buffer<uint32_t> l_data32_curr_iar;
     fapi2::buffer<uint32_t> l_data32_srr0 = 0xDEADDEAD;
     fapi2::buffer<uint32_t> l_data32_srr1;
     fapi2::buffer<uint32_t> l_data32_isr;
@@ -218,8 +219,21 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     else
     {
         FAPI_ERR("p9_extract_sbe_rc : Extract_sbe_rc is triggered in an invalid usecase.");
+        fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
         goto fapi_try_exit;
     }
+
+#ifndef __HOSTBOOT_MODULE
+    FAPI_DBG("p9_extract_sbe_rc: Reading CBS Status register");
+    FAPI_TRY(getCfamRegister(i_target_chip, PERV_CBS_ENVSTAT_FSI, l_data32));
+
+    if(!(l_data32.getBit<PERV_CBS_ENVSTAT_C4_VDN_GPOOD>()))
+    {
+        o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
+        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_POWERCHECK_FAIL() .set_TARGET_CHIP(i_target_chip), "VDN_PGOOD not set");
+    }
+
+#endif
 
     FAPI_DBG("p9_extract_sbe_rc: Reading chip ec attribute");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTRACT_SBE_RC_P9NDD1_CHIPS, i_target_chip, l_is_ndd1));
@@ -244,6 +258,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     {
         // Applying SDB setting required in usecase 1 & 3 only
         FAPI_DBG("p9_extract_sbe_rc: Setting chip in SDB mode");
+        l_data32.flush<0>();
         FAPI_TRY(getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
         l_data32.setBit<PERV_SB_CS_SECURE_DEBUG_MODE>();
         FAPI_TRY(putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
@@ -256,6 +271,8 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                                    (PU_PPE_XIDBGPRO_IAR_LEN + 2)); //To get 32 bits of address
     FAPI_DBG("p9_extract_sbe_rc : PPE_XIDBGPRO : %#018lX", l_data64_dbgpro);
     FAPI_DBG("p9_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
+
+    l_data32_curr_iar = l_data32_iar;
 
     if (l_data64_dbgpro.getBit<PU_PPE_XIDBGPRO_XSR_HS>())
     {
@@ -298,7 +315,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             // uint32_t  version:16;   // Structure versioning                              -- DBG[0]  0:15
             // uint32_t  magicbyte:8;  // Magic byte for address validation (0xA5) in SPRG0 -- DBG[0] 16:23
             // Valid Bit, if the Register below could be saved off
-            // uint32_t  validbit:8;   // One byte for all the registers below              -- DBG[0] 24:31
+            // uint32_t  validbit:8;   // One bit for all the registers below               -- DBG[0] 24:31
             // Registers to be saved off locations
             // uint32_t register_SRR0;                                                      -- DBG[0] 32:63
             // uint32_t register_SRR1;                                                      -- DBG[1]  0:31
@@ -392,7 +409,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_INF("p9_extract_sbe_rc : Rammed SBE Local FI2C Status   : %#018lX", l_data64_loc_fi2c_status);
         }
 
-        if(l_data32_srr0 != 0xDEADDEAD)
+        if(l_data32_srr0 != 0xDEADDEAD || l_data32_srr0 != 0x0)
         {
             FAPI_INF("p9_extract_sbe_rc : Use SRR0 as IAR");
             l_data32_iar = l_data32_srr0;
@@ -410,7 +427,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
                 FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_NEVER_STARTED()
                             .set_TARGET_CHIP(i_target_chip),
-                            "ERROR:Halt Condition is all Zero, SBE engine was probably never started");
+                            "ERROR:Halt Condition is all Zero, SBE engine was probably never started or SBE got halted by programming XCR to halt");
                 break;
 
             case 0x1 :
@@ -502,7 +519,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         //Program Interrupt
         if(MCS == 0x4 ||
            (l_data32_lr - 0x4) == PIBMEM_PROG_EXCEPTION_LOCATION ||
-           (l_data32_lr - 0x4) == OTPROM_PROG_EXCEPTION_LOCATION )
+           (l_data32_curr_iar == OTPROM_PROG_EXCEPTION_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -532,21 +549,6 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                                     "ERROR:Program Interrupt occured, probably MAGIC NUMBER MISMATCH");
 
                     }
-                    else if(l_sbe_code_state == 0x2)
-                    {
-                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL()
-                                    .set_TARGET_CHIP(i_target_chip),
-                                    "ERROR:Program Interrupt occured during base loader (l1)");
-
-                    }
-                    else if(l_sbe_code_state == 0x3)
-                    {
-                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
-                                    .set_TARGET_CHIP(i_target_chip),
-                                    "ERROR:Program Interrupt occured during pk loader")
-                    }
                     else
                     {
                         FAPI_ERR("p9_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
@@ -560,6 +562,43 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             else if((SEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= SEEPROM_MAX_RANGE))
             {
                 FAPI_ERR("p9_extract_sbe_rc : Program Interrupt occured in SEEPROM memory program");
+
+                if(!l_is_ndd1)
+                {
+                    fapi2::buffer<uint8_t> l_sbe_code_state;
+                    FAPI_DBG("p9_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+
+                    if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
+                    {
+                        FAPI_TRY(getScom(i_target_chip, PERV_SB_MSG_SCOM, l_data64));
+                        l_data64.extractToRight(l_sbe_code_state, 30, 2);
+                    }
+                    else
+                    {
+                        FAPI_TRY(getCfamRegister(i_target_chip, PERV_SB_MSG_FSI, l_data32));
+                        l_data32.extractToRight(l_sbe_code_state, 30, 2);
+                    }
+
+                    if(l_sbe_code_state == 0x2)
+                    {
+                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL()
+                                    .set_TARGET_CHIP(i_target_chip),
+                                    "ERROR:Program Interrupt occured during base loader (L1)");
+
+                    }
+                    else if(l_sbe_code_state == 0x3)
+                    {
+                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
+                                    .set_TARGET_CHIP(i_target_chip),
+                                    "ERROR:Program Interrupt occured during L2 loader or pk boot")
+                    }
+                    else
+                    {
+                        FAPI_ERR("p9_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
+                    }
+                }
             }
             else
             {
@@ -574,7 +613,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         // Instruction storage interrupt
         else if(MCS == 0x5 ||
                 (l_data32_lr - 0x4) == PIBMEM_INST_STORE_INTR_LOCATION ||
-                (l_data32_lr - 0x4) == OTPROM_INST_STORE_INTR_LOCATION )
+                (l_data32_curr_iar == OTPROM_INST_STORE_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -601,7 +640,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         // Alignment interrupt
         else if(MCS == 0x6 ||
                 (l_data32_lr - 0x4) == PIBMEM_ALIGN_INTR_LOCATION ||
-                (l_data32_lr - 0x4) == OTPROM_ALIGN_INTR_LOCATION )
+                (l_data32_curr_iar == OTPROM_ALIGN_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
@@ -628,7 +667,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         // Data storage interrupt
         else if(MCS == 0x7 ||
                 (l_data32_lr - 0x4) == PIBMEM_DATA_STORE_INTR_LOCATION ||
-                (l_data32_lr - 0x4) == OTPROM_DATA_STORE_INTR_LOCATION )
+                (l_data32_curr_iar == OTPROM_DATA_STORE_INTR_LOCATION )) //PIBMEM Saveoff can't be active when IVPR is having OTP offset
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
