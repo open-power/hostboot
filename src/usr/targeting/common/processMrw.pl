@@ -1057,73 +1057,27 @@ sub setupBars
     my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
     $targetObj->{TOPOLOGY}->{$group}->{$proc}++;
 
-    my @bars=(  "FSP_BASE_ADDR",
-                "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
-                "VAS_USER_WINDOW_CONTEXT_ADDR",
-                "NVIDIA_NPU_PRIVILEGED_ADDR",
-                "NVIDIA_NPU_USER_REG_ADDR",
-                "NVIDIA_PHY0_REG_ADDR",
-                "NVIDIA_PHY1_REG_ADDR",
-                "NX_RNG_ADDR");
+    #P9 has a defined memory map for all configurations,
+    #these are the base addresses for group0-chip0.
+    #Each chip in the group has its own 4TB space,
+    #which each group being 32TB of space.
+    my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
+                "LPC_BUS_ADDR"              => 0x0006030000000000,
+                "XSCOM_BASE_ADDRESS"        => 0x000603FC00000000,
+                "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000,
+                "INTP_BASE_ADDR"            => 0x0003FFFF80300000,
+                "PSI_HB_ESB_ADDR"           => 0x00060302031C0000,
+                "XIVE_CONTROLLER_BAR_ADDR"  => 0x0006030203100000);
 
-    # Attribute only valid in naples-based systems
-    if (!$targetObj->isBadAttribute($target,"NPU_MMIO_BAR_BASE_ADDR") ) {
-          push(@bars,"NPU_MMIO_BAR_BASE_ADDR");
-    }
+    my $groupOffset = 0x200000000000;
+    my $procOffset  = 0x40000000000;
 
-    #@fixme-RTC:174616-Remove deprecated support
-    if (!$targetObj->isBadAttribute($target,"LPC_BUS_ADDR") ) {
-          push(@bars,"LPC_BUS_ADDR");
-    }
-    if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") ) {
-          push(@bars,"XSCOM_BASE_ADDRESS");
-    }
-    if (!$targetObj->isBadAttribute($target,"PSI_BRIDGE_BASE_ADDR") ) {
-          push(@bars,"PSI_BRIDGE_BASE_ADDR");
-    }
-    if (!$targetObj->isBadAttribute($target,"INTP_BASE_ADDR") ) {
-          push(@bars,"INTP_BASE_ADDR");
-    }
-    if (!$targetObj->isBadAttribute($target,"PSI_HB_ESB_ADDR") ) {
-          push(@bars,"PSI_HB_ESB_ADDR");
-    }
-    if (!$targetObj->isBadAttribute($target,"XIVE_CONTROLLER_BAR_ADDR") ) {
-          push(@bars,"XIVE_CONTROLLER_BAR_ADDR");
-    }
-
-    foreach my $bar (@bars)
+    foreach my $bar (keys %bars)
     {
-        my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
-               $targetObj->getAttribute($target,$bar));
-        my $i_base = Math::BigInt->new($base);
-        my $i_node_offset = Math::BigInt->new($group_offset);
-        my $i_proc_offset = Math::BigInt->new($proc_offset);
-        my $i_offset = Math::BigInt->new($offset);
-
-        my $value="";
-        if ($num==0)
-        {
-            my $b=sprintf("0x%016s",substr((
-                        $i_base+$i_node_offset*$group+
-                        $i_proc_offset*$proc)->as_hex(),2));
-            $value=$b;
-        }
-        else
-        {
-            for (my $i=0;$i<$num;$i++)
-            {
-                #Note: Hex convert method avoids overflow on 32bit machine
-                my $b=sprintf("0x%016s",substr((
-                        $i_base+$i_node_offset*$group+
-                        $i_proc_offset*$proc+$i_offset*$i)->as_hex(),2));
-                my $sep=",";
-                if ($i==$num-1)
-                {
-                    $sep="";
-                }
-                $value=$value.$b.$sep;
-            }
-        }
+        my $i_base = Math::BigInt->new($bars{$bar});
+            my $value=sprintf("0x%016s",substr((
+                        $i_base+$groupOffset*$group+
+                        $procOffset*$proc)->as_hex(),2));
         $targetObj->setAttribute($target,$bar,$value);
     }
 }

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -936,75 +936,18 @@
         <id>L3_CACHE_SIZE</id>
         <default>10240</default>
     </attribute>
-
-
     <attribute>
         <id>MRU_ID</id>
         <default>0x00010000</default>
     </attribute>
-
-
-
-
-
-
-
-
-    <attribute>
-        <id>NVIDIA_NPU_PRIVILEGED_ADDR</id>
-        <default>0x0006030200000000</default>
-    </attribute>
-    <attribute>
-        <id>NVIDIA_NPU_USER_REG_ADDR</id>
-        <default>0x0006030201000000</default>
-    </attribute>
-    <attribute>
-        <id>NVIDIA_PHY0_REG_ADDR</id>
-        <default>0x0006030201200000</default>
-    </attribute>
-    <attribute>
-        <id>NVIDIA_PHY1_REG_ADDR</id>
-        <default>0x0006030201400000</default>
-    </attribute>
-    <attribute>
-        <id>NX_RNG_ADDR</id>
-        <default>0x00060302031d0000</default>
-    </attribute>
-
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0</default>
     </attribute>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>POSITION</id>
         <default>0</default>
@@ -1018,7 +961,6 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-
     <attribute>
         <id>PROC_EFF_FABRIC_CHIP_ID</id>
         <default>0</default>
@@ -1027,25 +969,10 @@
         <id>PROC_EFF_FABRIC_GROUP_ID</id>
         <default>0</default>
     </attribute>
-
-
-
-
     <attribute>
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
-
-
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PROC_R_DISTLOSS_VCS_UOHM</id>
         <default>0x640</default>
@@ -1126,14 +1053,6 @@
     <attribute>
         <id>TYPE</id>
         <default>PROC</default>
-    </attribute>
-    <attribute>
-        <id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>
-        <default>0x0006013000000000</default>
-    </attribute>
-    <attribute>
-        <id>VAS_USER_WINDOW_CONTEXT_ADDR</id>
-        <default>0x0006013100000000</default>
     </attribute>
 
 
