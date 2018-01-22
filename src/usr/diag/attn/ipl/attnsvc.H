@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,22 +130,38 @@ class Service : public ServiceCommon
                 ConfigureMode i_mode);
 
         /**
-         * @brief intrTask infinite wait-for-interrupt loop
-         *
-         * repeatedly call intrTaskWait and processIntrQMsg
+         * @brief intrTask will start the intrTaskWorker
+         * and monitor if it crashes.
          *
          * @param[in] i_svc service object associated with task
          */
         static void* intrTask(void * i_svc);
 
         /**
-         * @brief prdTask infinite wait-for-attention loop
+         * @brief prdTask will start the prdTaskWorker
+         * and monitor if it crashes.
+         *
+         * @param[in] i_svc service object associated with task
+         */
+        static void* prdTask(void * i_svc);
+
+        /**
+         * @brief intrTaskWorker infinite wait-for-interrupt loop
+         *
+         * repeatedly call intrTaskWait and processIntrQMsg
+         *
+         * @param[in] i_svc service object associated with task
+         */
+        static void* intrTaskWorker(void * i_svc);
+
+        /**
+         * @brief prdTaskWorker infinite wait-for-attention loop
          *
          * repeatedly call prdTaskWait and processAttentions
          *
          * @param[in] i_svc service object associated with task
          */
-        static void* prdTask(void * i_svc);
+        static void* prdTaskWorker(void * i_svc);
 
         /**
          * @brief startIntrTask start task helper function

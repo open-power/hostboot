@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,8 @@
 #include "common/attnmem.H"
 #include "common/attntarget.H"
 #include "arch/pirformat.H"
+#include "diag/attn/attnreasoncodes.H"
+#include <initservice/initserviceif.H>  // for hostboot TI
 
 // Custom compile configs
 #include <config.h>
@@ -97,7 +99,8 @@ errlHndl_t Service::configureInterrupts(
     return err;
 }
 
-void * Service::intrTask(void * i_svc)
+
+void* Service::intrTaskWorker(void * i_svc)
 {
     // interrupt task loop
     Service & svc = *static_cast<Service *>(i_svc);
@@ -118,10 +121,75 @@ void * Service::intrTask(void * i_svc)
         // got an interrupt.  process it
 
         svc.processIntrQMsg(*msg);
+
+
     }
 
     return NULL;
-}
+
+} // end intrTaskWorker
+
+
+void * Service::intrTask(void * i_svc)
+{
+    // We need to create the actual thread that will do the work
+    // and then monitor it for completion.
+    tid_t  l_tid = task_create(&intrTaskWorker, i_svc);
+    assert( l_tid > 0 );
+
+    int    l_status = 0;
+    void * l_Rc = NULL;
+
+    tid_t  l_tidRc = task_wait_tid( l_tid, &l_status, &l_Rc);
+
+    if (l_status == TASK_STATUS_CRASHED)
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        ATTN_INTR_TASK_MODULE
+         * @reasoncode      ATTN_INTR_TASK_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       Task Id that crashed
+         *
+         * @devdesc         PRD task crashed
+         * @custdesc  Task analyzing HW errors has failed.
+         */
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,     // severity
+             ATTN_INTR_TASK_MODULE,                    // moduleid
+             ATTN_INTR_TASK_CRASHED,                   // reason Code
+             (uint64_t)l_tidRc,                        // tid rc
+             (uint64_t)l_tid                           // task that crashed
+            );
+
+        l_err->collectTrace("ATTN_FAST" , 512 );
+        l_err->collectTrace("PRDF"      , 512 );
+        l_err->collectTrace("MDIA_FAST" , 512 );
+
+        // Ensure we are not on the interrupt service list.
+        // or we'll get hung during TI waiting for this code
+        // that crashed to shutdown.
+        INTR::unRegisterMsgQ(INTR::LSI_LCL_FIR);
+
+        // Save PLID for TI purposes
+        uint32_t l_fatalPlid = l_err->plid();
+
+        // Commit the elog
+        ATTN_ERR("Committing INTR task crash elog");
+        errlCommit(l_err, ATTN_COMP_ID);
+        // Crash now
+        INITSERVICE::doShutdown(l_fatalPlid, true);
+
+    } // end if crashed
+
+
+    // On Normal shutdown of thread, we will get here
+    // and exit normally
+    return NULL;
+
+} // end intrTask
+
 
 bool Service::intrTaskWait(msg_t * & o_msg)
 {
@@ -280,7 +348,8 @@ errlHndl_t Service::processCheckstop()
 
 #endif // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
-void* Service::prdTask(void * i_svc)
+
+void* Service::prdTaskWorker(void * i_svc)
 {
     // prd task loop
     Service & svc = *static_cast<Service *>(i_svc);
@@ -306,10 +375,69 @@ void* Service::prdTask(void * i_svc)
         // new attentions for prd to handle
 
         svc.processAttentions(procs);
+
     }
 
     return NULL;
-}
+
+} // end prdTaskWorker
+
+
+void* Service::prdTask(void * i_svc)
+{
+    // We need to create the actual thread that will do the work
+    // and then monitor it for completion.
+    tid_t  l_tid = task_create(&prdTaskWorker, i_svc);
+    assert( l_tid > 0 );
+
+    int    l_status = 0;
+    void * l_Rc = NULL;
+
+    tid_t  l_tidRc = task_wait_tid( l_tid, &l_status, &l_Rc);
+
+    if (l_status == TASK_STATUS_CRASHED)
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        ATTN_PRD_TASK_MODULE
+         * @reasoncode      ATTN_PRD_TASK_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       Task Id that crashed
+         *
+         * @devdesc         PRD task crashed
+         * @custdesc  Task analyzing HW errors has failed.
+         */
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,     // severity
+             ATTN_PRD_TASK_MODULE,                     // moduleid
+             ATTN_PRD_TASK_CRASHED,                    // reason Code
+             (uint64_t)l_tidRc,                        // tid rc
+             (uint64_t)l_tid                           // task that crashed
+            );
+
+        l_err->collectTrace("PRDF"      , 512 );
+        l_err->collectTrace("MDIA_FAST" , 512 );
+        l_err->collectTrace("ATTN_FAST" , 512 );
+
+        // Save PLID for TI purposes
+        uint32_t l_fatalPlid = l_err->plid();
+
+        // Commit the elog
+        ATTN_ERR("Committing PRD task crash elog");
+        errlCommit(l_err, ATTN_COMP_ID);
+        // Crash now
+        INITSERVICE::doShutdown(l_fatalPlid, true);
+
+    } // end if crashed
+
+
+    // On Normal shutdown of thread, we will get here
+    // and exit normally
+    return NULL;
+
+} // end prdTask
+
 
 bool Service::prdTaskWait()
 {

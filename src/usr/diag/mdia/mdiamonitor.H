@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,11 @@ class CommandMonitor
          * @brief main thread function
          */
         static void* staticMain(void *);
+
+        /**
+         * @brief Worker thread under main thread
+         */
+        static void* staticMainWorker(void *);
 
         /**
          * @brief main thread function

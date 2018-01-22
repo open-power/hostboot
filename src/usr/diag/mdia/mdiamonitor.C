@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,8 @@
 #include "mdiamonitor.H"
 #include "mdiasm.H"
 #include "mdiatrace.H"
+#include <errl/errlmanager.H>
+#include <initservice/initserviceif.H>
 
 using namespace TARGETING;
 
@@ -149,8 +151,7 @@ void CommandMonitor::threadMain(StateMachine & i_sm)
         }
 
         // istep finished...shutdown
-
-        if(shutdown)
+        if (shutdown)
         {
             MDIA_FAST("cm: CommandMonitor will be shutdown");
             break;
@@ -216,7 +217,8 @@ void CommandMonitor::shutdown()
         task_wait_tid(tid, 0, 0);
 }
 
-void* CommandMonitor::staticMain(void * i_args)
+
+void* CommandMonitor::staticMainWorker(void * i_args)
 {
     using namespace CommandMonitorImpl;
 
@@ -229,6 +231,59 @@ void* CommandMonitor::staticMain(void * i_args)
         delete args;
         args = NULL;
     }
+    return NULL;
+}
+
+
+void* CommandMonitor::staticMain(void * i_args)
+{
+    // We need to create the actual thread that will do the work
+    // and then monitor it for completion.
+    tid_t  l_tid = task_create(&staticMainWorker, i_args);
+    assert( l_tid > 0 );
+
+    int    l_status = 0;
+    void * l_Rc = NULL;
+
+    tid_t  l_tidRc = task_wait_tid( l_tid, &l_status, &l_Rc);
+
+    if (l_status == TASK_STATUS_CRASHED)
+    {
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MONITOR_MAIN_THREAD
+         * @reasoncode      MONITOR_THREAD_CRASHED
+         * @userdata1       tidRc
+         * @userdata2       Task Id that crashed
+         *
+         * @devdesc         MDIA monitor task crashed
+         * @custdesc  Task handling mainstore init crashed
+         */
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,     // severity
+             MONITOR_MAIN_THREAD,                      // moduleid
+             MONITOR_THREAD_CRASHED,                   // reason Code
+             (uint64_t)l_tidRc,                        // tid rc
+             (uint64_t)l_tid                           // task that crashed
+            );
+
+        l_err->collectTrace("MDIA_FAST" , 512 );
+        l_err->collectTrace("PRDF" , 512 );
+
+        // Save PLID for TI purposes
+        uint32_t l_fatalPlid = l_err->plid();
+
+        // Commit the elog
+        errlCommit(l_err, MDIA_COMP_ID);
+        MDIA_FAST("Committing task crash elog");
+        // Crash now
+        INITSERVICE::doShutdown(l_fatalPlid, true);
+    } // end if crashed
+
+
+    // On Normal shutdown of thread, we will get here
+    // and exit normally
     return NULL;
 }
 
