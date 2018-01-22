@@ -404,14 +404,15 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns true if the core trace arrays are not dumpable via SCOM.
-      Nimbus EC 0x10
+      Permanent erratum for all P9 chips, hence true for all.
     </description>
     <chipEcFeature>
+      <falseIfMatch/>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
+          <value>0xAF</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
