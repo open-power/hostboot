@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -628,6 +628,7 @@ namespace HBPM
                    (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
 
         errlHndl_t l_errl = nullptr;
+        void* l_homerVAddr = nullptr;
 
         do
         {
@@ -644,7 +645,7 @@ namespace HBPM
                 }
             }
 
-            void* l_homerVAddr = convertHomerPhysToVirt(i_target,
+            l_homerVAddr = convertHomerPhysToVirt(i_target,
                                                         i_homerPhysAddr);
             if(nullptr == l_homerVAddr)
             {
@@ -788,6 +789,16 @@ namespace HBPM
 
         } while(0);
 
+        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
+        {
+            int lRc = HBPM_UNMAP(l_homerVAddr);
+            uint64_t lZeroAddr = 0;
+            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "loadPMComplex:" "unmap, RC=0x%X." ,
+                       lRc);
+        }
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"loadPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
@@ -838,6 +849,16 @@ namespace HBPM
 
         } while (0);
 
+        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
+        {
+                int lRc = HBPM_UNMAP(l_homerVAddr);
+                uint64_t lZeroAddr = 0;
+                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "startPMComplex:" "unmap, RC=0x%X" ,
+                   lRc );
+        }
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"startPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
@@ -887,6 +908,16 @@ namespace HBPM
             }
 
         } while(0);
+
+        if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
+        {
+            int lRc = HBPM_UNMAP(l_homerVAddr);
+            uint64_t lZeroAddr = 0;
+            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "resetPMComplex:" "unmap, RC=0x%X" ,
+                           lRc );
+        }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"resetPMComplex: RC=0x%X, PLID=0x%lX",
