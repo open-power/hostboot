@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -5442,24 +5442,6 @@
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80100000</default>
     </attribute>
-    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>
-        <default>0x0006053000000000</default>
-    </attribute>
-    <attribute><id>VAS_USER_WINDOW_CONTEXT_ADDR</id>
-        <default>0x0006053100000000</default>
-    </attribute>
-    <attribute><id>NVIDIA_NPU_PRIVILEGED_ADDR</id>
-        <default>0x0006070200000000</default>
-    </attribute>
-    <attribute><id>NVIDIA_NPU_USER_REG_ADDR</id>
-        <default>0x0006070201000000</default>
-    </attribute>
-    <attribute><id>NVIDIA_PHY0_REG_ADDR</id>
-        <default>0x0006070201200000</default>
-    </attribute>
-    <attribute><id>NVIDIA_PHY1_REG_ADDR</id>
-        <default>0x0006070201400000</default>
-    </attribute>
     <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>
         <default>0x0006070201100000</default>
     </attribute>
@@ -5469,9 +5451,6 @@
 <!--    <attribute><id>PSI_HB_ESB_ADDR</id>
         <default>0x00060702031C0000</default>
     </attribute>-->
-    <attribute><id>NX_RNG_ADDR</id>
-        <default>0x00060702031D0000</default>
-    </attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id>
         <default>0x000607FC00000000</default>
     </attribute>

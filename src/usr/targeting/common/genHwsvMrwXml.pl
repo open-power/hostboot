@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -3898,51 +3898,6 @@ sub generate_proc
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n", $fspBase );
     printf( "    </attribute>\n" );
-
-
-    #VAS Hypervisor Window Contexts address
-    printf( "    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006013000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #VAS User Window Contexts address
-    printf( "    <attribute><id>VAS_USER_WINDOW_CONTEXT_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006013100000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #Nvidia Link - NPU Priviledged address
-    printf( "    <attribute><id>NVIDIA_NPU_PRIVILEGED_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030200000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #Nvidia Link - NPU User Regs address
-    printf( "    <attribute><id>NVIDIA_NPU_USER_REG_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030201000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #Nvidia Link - Phy 0 Regs address
-    printf( "    <attribute><id>NVIDIA_PHY0_REG_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030201200000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #Nvidia Link - Phy 1 Regs address
-    printf( "    <attribute><id>NVIDIA_PHY1_REG_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030201400000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-
-    #NX - RNG space address
-    printf( "    <attribute><id>NX_RNG_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x00060302031D0000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
     print "    <!-- End PHYP Memory Map -->\n\n";
     # end PHYP Memory Map
 
