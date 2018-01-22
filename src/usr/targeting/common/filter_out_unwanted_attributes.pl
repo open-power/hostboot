@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -40,11 +40,13 @@ use Getopt::Long qw(GetOptions);
 my @tgt_files;
 my $mrw_file;
 my $help;
+my $verbose;
 
 GetOptions(
     "tgt-xml=s"    => \@tgt_files,
     "mrw-xml=s"    => \$mrw_file,
     "help"         => \$help,
+    "verbose|v"      => \$verbose,
 );
 
 if ((scalar @tgt_files eq 0) || ($mrw_file eq ""))
@@ -52,7 +54,9 @@ if ((scalar @tgt_files eq 0) || ($mrw_file eq ""))
     print "ERROR: tgt-xml or mrw-xml is not specified\n";
     print "tgt-xml: \n";
     print Dumper @tgt_files;
+    print "\n";
     print "mrw-xml: $mrw_file\n";
+    print "\n";
     usage();
 }
 
@@ -70,7 +74,8 @@ sub usage
     print "Any attribute not referenced in hostboot's target_types.xml\n";
     print "are deleted from mrw xml.\n";
     print "Usage: ./filter_out_unwanted_attributes.pl --mrw-xml [mrw xml]\\\n";
-    print "     --tgt-xml [common target xml] <--tgt-xml [platform target xml]>\n";
+    print "     --tgt-xml [common target xml] (optional --tgt-xml [platform target xml])\n";
+    print "     --verbose (or -v)\n";
     exit (-1);
 }
 
@@ -233,8 +238,11 @@ $XML::LibXML::skipXMLDeclaration = 1;
 my $parser      = XML::LibXML->new();
 my $mrw_parsed  = $parser->parse_file($mrw_file);
 
-print "The following target and attribute pairs are being removed from";
-print " SYSTEM_hb.mrw.xml as they are not used by hostboot:\n";
+if($verbose)
+{
+  print "The following target and attribute pairs are being removed from";
+  print " SYSTEM_hb.mrw.xml as they are not used by hostboot:\n";
+}
 
 #foreach targetInstance in the MRW file
 foreach my $tgt
@@ -244,8 +252,11 @@ foreach my $tgt
 
     if(!defined $tgt_xmls->{'targetType'}->{$tgt_type})
     {
-        print "Target of type: $tgt_type not found in the merged target XML!\n";
-        print "Removing target $tgt\n";
+        if($verbose)
+        {
+            print "Target of type: $tgt_type not found in the merged target XML!\n";
+            print "Removing target $tgt\n";
+        }
         $tgt->unbindNode();
         next;
     }
@@ -261,12 +272,18 @@ foreach my $tgt
         {
             #if the attribute is not found in any of the target_type
             #xmls, then remove it from the mrw xml
-            print "Removing Attr: $attr_id from Target: $tgt_type \n";
+            if($verbose)
+            {
+                print "Removing Attr: $attr_id from Target: $tgt_type \n";
+            }
             $tgt->removeChild($attr);
         }
         else
         {
-            print "Found Attr $attr_id for Target Type $tgt_type\n";
+            if($verbose)
+            {
+                print "Found Attr $attr_id for Target Type $tgt_type\n";
+            }
         }
     }
 }
