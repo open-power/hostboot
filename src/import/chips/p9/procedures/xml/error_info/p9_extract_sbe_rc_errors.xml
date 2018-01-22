@@ -36,6 +36,20 @@
   <!-- Halt codes for PPE -->
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_POWERCHECK_FAIL</rc>
+    <description>
+    VDN_PGOOD C4 pin is not set high.
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_EXTRACT_SBE_RC_RUNNING</rc>
     <description>
     SBE engine is in running state, but an error was raised by external FW code.
@@ -57,7 +71,7 @@
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_NEVER_STARTED</rc>
     <description>
-    SBE engine was probably never started
+    SBE engine was probably never started or SBE got halted by programming XCR to halt
     Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -234,7 +248,7 @@
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL</rc>
     <description>
-    Program Interrupt occured during pk loader
+    Program Interrupt occured during L2 loader or pk boot
     Action:Switch seeprom [REIPL_BKP_SEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
