@@ -95,6 +95,8 @@ my %commands = ( "define" => \&execute_define,
                  "gerrit-commit" => \&execute_gerrit_commit,
                  "pre-release" => \&execute_pre_release,
                  "post-release" => \&execute_post_release,
+                 "create-track" => \&execute_create_track,
+                 "checkinBuildToTrack" => \&execute_checkinBuildToTrack,
                  "help" => \&execute_help,
                );
 
@@ -499,6 +501,198 @@ sub execute_pre_release
     print_debug_info($level, $feature, $cq_id, $released);
 }
 
+sub execute_create_track
+{
+    my $level = "";
+    my $release = "";
+    my $released = "";
+    my $track = "";
+
+    GetOptions("level:s" => \$level);
+    GetOptions("release:s" => \$release);
+    GetOptions("released:s" => \$released);
+    GetOptions("track:s" => \$track);
+
+    die "Missing level" if ($level eq "");
+    die "Missing release" if ($release eq "");
+    die "Missing released" if ($released eq "");
+
+    #
+    my $feature = "";
+    my $rel_needs_appr = "";
+    my $approval_flag = "yes";
+
+    if($track eq "")
+    {
+        # CMVC open feature
+        my $open_feature = "Feature -open -component $globals{component}";
+        $open_feature .= " -remarks \"Hostboot Release - $level\" -verbose";
+        # Get the Feature number from the output, should be the only numbers.
+        print "open_feature=> $open_feature\n";
+        $feature = run_system_command($open_feature);
+        $feature =~ s/[^0-9]//g;
+        #
+        print "\n\n--------------------------------------\n";
+        print "level (passed as \"RELEASE_NAME\") => $level\n";
+        print "release (passed as \"FIPS_RELEASE\") => $release\n";
+        print "released (passed as \"PREVIOUS_RELEASE\") => $released\n";
+        print "owner=> $globals{cmvcUser}\n";
+        print "feature=> $feature\n\n";
+        print "\n--------------------------------------\n\n";
+
+        # CMVC assign feature
+        print "#####-> run_system_command(\"Feature -assign $feature -owner $globals{cmvcUser} -verbose\")\n";
+        run_system_command("Feature -assign $feature -owner $globals{cmvcUser} -verbose");
+
+        # CMVC accept feature
+        print "#####-> run_system_command(\"Feature -accept $feature -verbose\");\n";
+        run_system_command("Feature -accept $feature -verbose");
+
+        # CMVC create track
+        print "#####-> run_system_command(\"Track -create -release $release -feature $feature -verbose\")\n";
+        run_system_command("Track -create -release $release -feature $feature -verbose");
+
+        # CMVC check track
+        print "#####-> $rel_needs_appr = run_system_command(\"Report -g ReleaseView -where \"name='$release'\" -select approve\")\n";
+        chomp($rel_needs_appr = run_system_command("Report -g ReleaseView -where \"name='$release'\" -select approve"));
+        print "\nrel_needs_appr=> \"$rel_needs_appr\"\n";
+        print "\napproval_flag=> \"$approval_flag\"\n";
+    }
+    else
+    {
+        $feature = $track;
+    }
+    #
+    my $featureFile = $ENV{CMVC_FEATURE_FILE};
+    open(CMVC_FEATURE,">",$featureFile)
+        or die("Cannot open: $featureFile: $!");
+    print CMVC_FEATURE "FEATURE=$feature";
+    close(CMVC_FEATURE);
+
+    my $rel_needs_appr_file = $ENV{REL_NEEDS_APPR_FILE};
+    open(REL_NEEDS_APPR,">",$rel_needs_appr_file)
+        or die("Cannot open: $rel_needs_appr_file: $!");
+    print REL_NEEDS_APPR "REL_NEEDS_APPR=$rel_needs_appr";
+    close(REL_NEEDS_APPR);
+
+    my $notify_email_file = $ENV{'NOTIFY_EMAIL_FILE'};
+    open(NOTIFY_EMAIL_TXT,">",$notify_email_file)
+        or die("Cannot open: $notify_email_file: $!");
+
+    chomp(my $datenow = run_system_command("date"));
+    #
+    open(TXTRELNOTE, "< ", $ENV{'RELEASENOTESTXT'});
+    my $txtrelnote = <TXTRELNOTE>;
+    close(TXTRELNOTE);
+    #
+    my $NEXTJOB=\
+    "https://hostboot-jenkins.swg-devops.com/job/Hostboot/job/Release/job/\
+    auto-release-HB/job/rel-fips/job/rel-fips-4-checkinBuildToTrack/\
+    build?delay=0sec";
+    if($rel_needs_appr eq $approval_flag)
+    {
+        print "(in IF loop)\nYes, found \$rel_needs_appr eq \$approval_flag: ($rel_needs_appr eq $approval_flag)\n";
+        print "MUSTFIX_APPROVERS=> $ENV{'MUSTFIX_APPROVERS'}\n";
+        print "RELEASE_ADMINS=> $ENV{'RELEASE_ADMINS'}\n";
+        my $MAIL_SUB = "Action Required: Your approval required for Track \
+        $ENV{'FIPS_RELEASE'}:$feature";
+        print NOTIFY_EMAIL_TXT "[$datenow]\n\n\nDear Approver(s) [$ENV{MUSTFIX_APPROVERS}],\n\tThere is a new track/feature opened pending your approval for a mustfix release.\n\tDetails are below, please approve it ASAP, thanks!\n";
+        print NOTIFY_EMAIL_TXT "\n\t(Note: Jenkins job will time-out if approval not obtained within a day of receiving this notice)\n\n";
+        print NOTIFY_EMAIL_TXT "\tFIPS_RELEASE=$ENV{FIPS_RELEASE}\n\tFEATURE=$feature\n";
+        print NOTIFY_EMAIL_TXT "\n\n$txtrelnote\n\n";
+        print NOTIFY_EMAIL_TXT "#--------------------------#";
+        print NOTIFY_EMAIL_TXT "\n\n\nDear Release_admin(s) [$ENV{'RELEASE_ADMINS'}],\n\tOnce this track is approved, please use following information if/as required to \tretrigger the release job (e.g. if it  had timed out beyond the wait-time of 1 day):\n\n";
+        print NOTIFY_EMAIL_TXT "\n\tNEXTJOB=$NEXTJOB";
+        print NOTIFY_EMAIL_TXT "\n\tREL_FIPS_TRIGGER_PROJ=$ENV{REL_FIPS_TRIGGER_PROJ}\n\tREL_FIPS_TRIGGER_BUILD_NUM=$ENV{REL_FIPS_TRIGGER_BUILD_NUM}\n";
+        print NOTIFY_EMAIL_TXT "\n\n\n(A copy of this email has been sent to:\n\t$ENV{'MUSTFIX_APPROVERS'}\n\t$ENV{'RELEASE_ADMINS'}\n\t)\n\n\n";
+        print NOTIFY_EMAIL_TXT "#-----------<E-O-F>---------------#\n";
+        close(NOTIFY_EMAIL_TXT);
+        run_system_command("cat $notify_email_file | mail -s \"$MAIL_SUB\" $ENV{'MUSTFIX_APPROVERS'} $ENV{'RELEASE_ADMINS'}");
+    }
+    else
+    {
+
+        print "(in ELSE loop)\nSorry, \$rel_needs_appr ne \$approval_flag: ($rel_needs_appr ne $approval_flag)\n";
+        print NOTIFY_EMAIL_TXT "#--------------------------#\n";
+        print NOTIFY_EMAIL_TXT "[$datenow]\n\n\nNo approval required for:\nFIPS_RELEASE=$ENV{FIPS_RELEASE}\nFEATURE=$feature\n";
+        print NOTIFY_EMAIL_TXT "\n\n$txtrelnote\n\n";
+        print NOTIFY_EMAIL_TXT "\nNEXTJOB=$NEXTJOB";
+        print NOTIFY_EMAIL_TXT "\nREL_FIPS_TRIGGER_PROJ=$ENV{REL_FIPS_TRIGGER_PROJ}\nREL_FIPS_TRIGGER_BUILD_NUM=$ENV{REL_FIPS_TRIGGER_BUILD_NUM}\n\n";
+        print NOTIFY_EMAIL_TXT "\n\n(Since, no approval required, no email or other notification sent out)\n\n";
+        print NOTIFY_EMAIL_TXT "#-----------<E-O-F>---------------#\n";
+        close(NOTIFY_EMAIL_TXT);
+    }
+
+    # Add in cmvc coReqs and cmvc preReqs
+    print "#####-> execute_cmvc_reqs($feature,$level,$released,$release)\n";
+    execute_cmvc_reqs($feature,$level,$released,$release);
+}
+
+sub execute_checkinBuildToTrack
+{
+    my $level = "";
+    my $release = "";
+    my $checkInDir = "";
+    my $released = "";
+
+    GetOptions("level:s" => \$level);
+    GetOptions("release:s" => \$release);
+    GetOptions("checkInDir:s" => \$checkInDir);
+    GetOptions("released:s" => \$released);
+
+    die "Missing level" if ($level eq "");
+    die "Missing release" if ($release eq "");
+    die "Missing check in directory" if ($checkInDir eq "");
+    die "Missing released" if ($released eq "");
+
+    my $featureFile = $ENV{CMVC_FEATURE_FILE};
+    open(CMVC_FEATURE,"<",$featureFile)
+        or die("Cannot open: $featureFile: $!");
+    #Read the feature from the file:
+    my $keyval = <CMVC_FEATURE>;
+    my ($key, $feature) = split /=/, $keyval ;
+    close(CMVC_FEATURE);
+
+    if($release =~ m/fips9/)
+    {
+        $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin ";
+        $CMVC_FILES .= "src/hbfw/img/hostboot_securerom.bin ";
+    }
+
+    print "\n\n--------------------------------------\n";
+    print "level (passed as \"RELEASE_NAME\") => $level\n";
+    print "release (passed as \"FIPS_RELEASE\") => $release\n";
+    print "checkInDir (passed as \"CMVC_DIR\") => $checkInDir\n";
+    print "released (passed as \"PREVIOUS_RELEASE\") => $released\n";
+    print "feature (read from the \"$ENV{CMVC_FEATURE_FILE}\" file => $feature\n";
+    print "CMVC_FILES =>  $CMVC_FILES\n";
+    print "\n--------------------------------------\n\n";
+
+    #Lock Files
+    print  "#####-> run_system_command(\"File -lock $CMVC_FILES -release $release -feature $feature -verbose\")\n";
+    run_system_command("File -lock $CMVC_FILES -release $release -feature $feature -verbose");
+    #Check In Files
+    print "Present working directory:\n";
+    run_system_command("pwd");
+    print "Switching directory to \"$checkInDir\" .....\n";
+    chdir ($checkInDir);
+    run_system_command("pwd");
+    print "#####-> run_system_command(\"File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose\")\n";
+    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose");
+
+    #Complete Fix Records
+    print "#####-> run_system_command(\"Fix -complete -feature $feature -release $release -component esw_hbfw -verbose\")\n";
+    run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
+
+    #Get ClearQuest ID
+    my $response = run_system_command("Feature -view $feature");
+    my ($cq_id) = $response =~ /CQID\s+(.*)/;
+    print $cq_id if $debug;
+
+    #Print out Debug information
+    print_debug_info($level, $feature, $cq_id, $released);
+}
+
 sub execute_post_release
 {
     my $feature = "";
@@ -757,6 +951,8 @@ sub create_release_notes
     my $commits = git_commit_history("HEAD", $level_info->{released});
 
     open RELNOTE, "> ".git_root()."/releaseNotes.html";
+    open TXTRELNOTE, "> ".$ENV{'RELEASENOTESTXT'};
+    print TXTRELNOTE "The list of commits included for approval are:\n";
     print RELNOTE "<html>\n";
     print RELNOTE "    <head><title>Release notes for $level</title></head>\n";
     print RELNOTE <<STYLESHEET;
@@ -826,6 +1022,7 @@ STYLESHEET
         print RELNOTE "        <td>$subject</td>\n";
         print RELNOTE "        <td>$commit</td>\n";
         print RELNOTE "    </tr>\n";
+        print TXTRELNOTE "$commit\n";
     }
     print RELNOTE "</table>\n";
 
@@ -833,8 +1030,10 @@ STYLESHEET
     print RELNOTE "</html>\n";
 
     close RELNOTE;
+    close TXTRELNOTE;
 
     system "git add ".git_root()."/releaseNotes.html";
+    #system "git add ".git_root()."/releaseNotes.txt";
     system "git commit -m \"Release notes for $level\"";
 
 }
@@ -2701,6 +2900,7 @@ sub run_system_command
 
     print "$cmd\n";
     my $output = `$cmd`;
+    #print "output=$output\n";
     die "failed running system command $cmd - $?" if ($?);
     print $output if $debug;
 
