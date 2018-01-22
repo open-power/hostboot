@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,102 +135,40 @@ errlHndl_t checkForIplAttentions()
     // NOTE: There could be multiple PLIDs set on different targets
     //       So we may need to commit some elogs and pass back one.
     // ====================================================================
-    ATTR_MODEL_type  l_model = l_MasterProcTarget->getAttr<ATTR_MODEL>();
-    errlHndl_t       l_plidElog = NULL;
-    uint32_t         l_plid  = 0;
-    TARGETING::TYPE  l_memType;
-    TargetHandleList l_allProcsList, l_memList;
 
+    errlHndl_t l_plidElog = nullptr;
 
-    // Setup appropriate memory type target
-    if ( MODEL_NIMBUS == l_model )
+    // Iterate all targets.
+    for ( TargetIterator trgt = TARGETING::targetService().begin();
+          trgt != TARGETING::targetService().end(); ++trgt )
     {
-        l_memType = TYPE_MCA;
-    } // if NIMBUS
-    else if ( MODEL_CUMULUS == l_model )
-    {
-        l_memType = TYPE_DMI;
-    } // if CUMULUS
-    else
-    {
-        ATTN_ERR("ChkForIplAttns Unknown PROC type - add support");
-        assert(0);
-    } // UNKNOWN proc type
+        uint32_t l_plid = 0;
 
-
-    // This gets all PROCs whether functional or not
-    getTargetService().getAllChips(l_allProcsList, TYPE_PROC, false);
-
-    // Loop thru all PROC targets
-    for ( auto  l_procTarg : l_allProcsList )
-    {
-        // check PROC target first for attribute
-        l_procTarg->tryGetAttr<ATTR_PRD_HWP_PLID>(l_plid);
-
-        if (0 != l_plid)
+        // Check for non-zero value in PLID attribute.
+        if ( (*trgt)->tryGetAttr<ATTR_PRD_HWP_PLID>(l_plid) && (0 != l_plid) )
         {
-            ATTN_SLOW("checkForIplAttentions PROC plid found");
+            ATTN_SLOW( "ATTR_PRD_HWP_PLID found on 0x%08x with value 0x%08x",
+                       get_huid(*trgt), l_plid );
 
-            // If we had a prior ELOG, we need to commit it
-            // since we will be creating another one here.
-            if (NULL != l_plidElog)
+            // In the case where there is more than one target with this
+            // attribute, commit the previous error log.
+            if ( nullptr != l_plidElog )
             {
-                errlCommit(l_plidElog, ATTN_COMP_ID);
+                errlCommit( l_plidElog, ATTN_COMP_ID );
             }
 
-            // Build elog with same PLID value
+            // Create a new error log and link the PLID.
             l_plidElog = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
                                         ATTN_CHK_IPL_ATTNS_MODULE,
                                         ATTN_SEE_HW_ERROR,
-                                        l_plid, TYPE_PROC
-                                      );
-
-            // Make sure PLID matches the HW error
+                                        get_huid(*trgt), l_plid );
             l_plidElog->plid(l_plid);
 
-            // clear attribute
-            l_plid = 0;
-            l_procTarg->trySetAttr<ATTR_PRD_HWP_PLID>(l_plid);
-        } // non-zero PLID in attribute
+            // Clear the attribute.
+            (*trgt)->setAttr<ATTR_PRD_HWP_PLID>( 0 );
+        }
+    }
 
-
-        // Get the list of MEMORY related units (functional or not)
-        getChildChiplets(l_memList, l_procTarg, l_memType, false);
-
-        for ( auto  l_memTarg : l_memList )
-        {
-            // check PROC target first for attribute
-            l_memTarg->tryGetAttr<ATTR_PRD_HWP_PLID>(l_plid);
-
-            if (0 != l_plid)
-            {
-                ATTN_SLOW("checkForIplAttentions MEM plid found");
-
-                // If we had a prior ELOG, we need to commit it
-                // since we will be creating another one here.
-                if (NULL != l_plidElog)
-                {
-                    errlCommit(l_plidElog, ATTN_COMP_ID);
-                }
-
-                // Build elog with same PLID value
-                l_plidElog = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
-                                            ATTN_CHK_IPL_ATTNS_MODULE,
-                                            ATTN_SEE_HW_ERROR,
-                                            l_plid, l_memType
-                                           );
-
-                // Make sure PLID matches the HW error
-                l_plidElog->plid(l_plid);
-
-                // clear attribute
-                l_plid = 0;
-                l_memTarg->trySetAttr<ATTR_PRD_HWP_PLID>(l_plid);
-            } // non-zero PLID in attribute
-
-        } // end for on mem target
-
-    } // end for loop on PROC targets
     // ====================================================================
 
     return l_plidElog;

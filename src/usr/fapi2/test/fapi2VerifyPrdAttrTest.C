@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,47 +136,6 @@ uint32_t verifyHwpPrdAssociaton()
         }
 
         FAPI_INF("...verifyHwpPrdAssociation MCA done: PLID %08X", l_plid);
-
-        // ==============================================================
-        // HW procedures might pass DIMM so verify that works
-        // ==============================================================
-        TargetHandleList  l_dimmList;
-        getChildAffinityTargets( l_dimmList, l_mcaList[0],
-                                 TARGETING::CLASS_NA,
-                                 TARGETING::TYPE_DIMM );
-
-        if (l_dimmList.size() >= 1)
-        {
-            FAPI_INF("...verifyHwpPrdAssociation DIMM:%d",
-                     l_dimmList.size() );
-
-            // Using masterProc target as FAPI core target for test
-            Target<fapi2::TARGET_TYPE_CORE> fapi2_dimmTarget(l_dimmList[0]);
-            // We have to pass a FAPI RC so make one up
-            l_fapiRc = verifyPrd_get_fapi2_error();
-
-            // Init the attribute so we know if it changes
-            l_mcaList[0]->setAttr<TARGETING::ATTR_PRD_HWP_PLID>( 0x33333333 );
-
-            // Create/commit elog associated with PRD PLID attribute
-            fapi2::log_related_error( fapi2_dimmTarget, l_fapiRc );
-
-            // Verify that PLID attribute changed
-            l_plid = l_mcaList[0]->getAttr<TARGETING::ATTR_PRD_HWP_PLID>();
-
-            if (0x33333333 == l_plid)
-            {   // PLID did not change so routine failed somehow
-                TS_FAIL(" verifyHwpPrdAssociation DIMM No PLID change:%08X",
-                         l_plid);
-                l_rc = 1;
-            }
-            else
-            {   // PLID was altered, so that is good
-                TS_TRACE(" verifyHwpPrdAssociation GOOD on DIMM");
-            }
-
-            FAPI_INF("...verifyHwpPrdAssociation DIMM done: PLID %08X", l_plid);
-        } // end if any DIMMs
 
     } // end if any MCAs
 
