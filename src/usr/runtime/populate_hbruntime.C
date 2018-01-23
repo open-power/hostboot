@@ -766,9 +766,10 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
  *  @brief Load the HDAT HB Reserved Memory
  *         address range structures on given node
  *  @param[in]  i_nodeId Node ID
+ *  @param[in]  i_master_node = true if we are the master hb instance
  *  @return Error handle if error
  */
-errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
+errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
@@ -782,36 +783,40 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // Wipe out our cache of the NACA/SPIRA pointers
         RUNTIME::rediscover_hdat();
 
-        // Wipe out all HB reserved memory sections
-        l_elog = RUNTIME::clear_host_data_section(RUNTIME::RESERVED_MEM);
-
-        if( l_elog )
+        if(i_master_node == true )
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK
-                    "populate_HbRsvMem> i_nodeId=%d"
-                    " call to clear_host_data_section() returned error",
-                    i_nodeId );
-            break;
+            // Wipe out all HB reserved memory sections
+            l_elog = RUNTIME::clear_host_data_section(RUNTIME::RESERVED_MEM);
+
+            if( l_elog )
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK
+                        "populate_HbRsvMem> i_nodeId=%d"
+                        " call to clear_host_data_section() returned error",
+                        i_nodeId );
+                break;
+            }
         }
+
         uint64_t l_topMemAddr = 0x0;
         uint64_t l_vAddr = 0x0;
 
         // Get list of processor chips
         TARGETING::TargetHandleList l_procChips;
         getAllChips( l_procChips,
-                     TARGETING::TYPE_PROC,
-                     true);
+                TARGETING::TYPE_PROC,
+                true);
 
         if(TARGETING::is_phyp_load())
         {
             // First phyp entry is for the entire 256M HB space
             uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                                                - VMM_HRMOR_OFFSET;
+                - VMM_HRMOR_OFFSET;
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
-                                          i_nodeId,
-                                          l_hbAddr,
-                                          VMM_HB_RSV_MEM_SIZE,
-                                          HBRT_RSVD_MEM__PRIMARY);
+                    i_nodeId,
+                    l_hbAddr,
+                    VMM_HB_RSV_MEM_SIZE,
+                    HBRT_RSVD_MEM__PRIMARY);
             if(l_elog != nullptr)
             {
                 break;
@@ -853,14 +858,14 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             {
 
                 l_homerAddr = l_procChip->getAttr
-                                <TARGETING::ATTR_HOMER_PHYS_ADDR>();
+                    <TARGETING::ATTR_HOMER_PHYS_ADDR>();
                 // Note: the instance we use to retrieve the data must
                 //   match the value we used to populate HDAT originally
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
-                            l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>(),
-                            l_homerAddr,
-                            VMM_HOMER_INSTANCE_SIZE,
-                            HBRT_RSVD_MEM__HOMER);
+                        l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>(),
+                        l_homerAddr,
+                        VMM_HOMER_INSTANCE_SIZE,
+                        HBRT_RSVD_MEM__HOMER);
                 if(l_elog)
                 {
                     break;
@@ -883,10 +888,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 uint64_t l_occCommonAddr = l_sys->getAttr
                     <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
-                                              i_nodeId,
-                                              l_occCommonAddr,
-                                              VMM_OCC_COMMON_SIZE,
-                                              HBRT_RSVD_MEM__OCC_COMMON);
+                        i_nodeId,
+                        l_occCommonAddr,
+                        VMM_OCC_COMMON_SIZE,
+                        HBRT_RSVD_MEM__OCC_COMMON);
                 if(l_elog)
                 {
                     break;
@@ -913,19 +918,19 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         if(TARGETING::is_phyp_load())
         {
             l_startAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                    + VMM_HB_DATA_TOC_START_OFFSET;
+                + VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
             l_endAddr = l_topMemAddr -
-                        VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+                VMM_ALL_HOMER_OCC_MEMORY_SIZE;
             startAddressValid = false;
         }
 
         // fills in the reserved memory with HB Data and
         // will update addresses and totalSize
         l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
-                                startAddressValid, l_totalSizeAligned);
+                startAddressValid, l_totalSizeAligned);
 
         if (l_elog)
         {
@@ -937,12 +942,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         {
             //Pass start address down to SBE via chipop
             l_elog = SBEIO::sendPsuStashKeyAddrRequest(SBEIO::RSV_MEM_ATTR_ADDR,
-                                            l_startAddr,
-                                            l_procChip);
+                    l_startAddr,
+                    l_procChip);
             if (l_elog)
             {
                 TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest failed for target: %x",
-                           TARGETING::get_huid(l_procChip) );
+                        TARGETING::get_huid(l_procChip) );
                 break;
             }
         }
@@ -953,10 +958,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         }
 
         l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                      i_nodeId,
-                                      l_startAddr,
-                                      l_totalSizeAligned,
-                                      HBRT_RSVD_MEM__DATA);
+                i_nodeId,
+                l_startAddr,
+                l_totalSizeAligned,
+                HBRT_RSVD_MEM__DATA);
         if(l_elog)
         {
             break;
@@ -968,7 +973,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // aligned
         uint64_t l_prevDataAddr = l_startAddr;
         uint64_t l_prevDataSize = l_totalSizeAligned;
-
 
         //////////////////////////////////////////////////////////
         // HBRT image entry
@@ -999,30 +1003,30 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // The "VFS_LAST_ADDRESS" variable is 2 pages in.
             uint64_t l_vfsLastAddress =
-                    *reinterpret_cast<uint64_t*>(l_imageStart + 2*PAGE_SIZE);
+                *reinterpret_cast<uint64_t*>(l_imageStart + 2*PAGE_SIZE);
 
             // At the end of the image are the relocations, get the number.
             uint64_t l_relocateCount =
-                    *reinterpret_cast<uint64_t*>
-                        (l_imageStart + l_vfsLastAddress);
+                *reinterpret_cast<uint64_t*>
+                (l_imageStart + l_vfsLastAddress);
 
             // Sum up the total size.
             uint64_t l_imageSize = l_vfsLastAddress +
-                                (l_relocateCount+1)*sizeof(uint64_t);
+                (l_relocateCount+1)*sizeof(uint64_t);
 
             // Set the image address, align down for OPAL
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_prevDataAddr);
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_hbrtImageAddr - l_imageSize);
             l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,
-                                           HBRT_RSVD_MEM_OPAL_ALIGN);
+                    HBRT_RSVD_MEM_OPAL_ALIGN);
             size_t l_hbrtImageSizeAligned = ALIGN_X( l_imageSize,
-                                                   HBRT_RSVD_MEM_OPAL_ALIGN);
+                    HBRT_RSVD_MEM_OPAL_ALIGN);
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          i_nodeId,
-                                          l_hbrtImageAddr,
-                                          l_hbrtImageSizeAligned,
-                                          HBRT_RSVD_MEM__CODE);
+                    i_nodeId,
+                    l_hbrtImageAddr,
+                    l_hbrtImageSizeAligned,
+                    HBRT_RSVD_MEM__CODE);
             if(l_elog)
             {
                 break;
@@ -1039,8 +1043,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             memcpy(reinterpret_cast<void*>(l_vAddr),
-                   reinterpret_cast<void*>(l_imageStart),
-                   l_imageSize);
+                    reinterpret_cast<void*>(l_imageStart),
+                    l_imageSize);
 
             l_elog = unmapVirtAddr(l_vAddr);
             if(l_elog)
@@ -1061,9 +1065,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         // Align size for OPAL
         size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize,
-                                              HBRT_RSVD_MEM_OPAL_ALIGN );
+                HBRT_RSVD_MEM_OPAL_ALIGN );
         size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize,
-                                              HBRT_RSVD_MEM_OPAL_ALIGN );
+                HBRT_RSVD_MEM_OPAL_ALIGN );
 
         // Loop through all functional Procs
         for (const auto & l_procChip: l_procChips)
@@ -1083,10 +1087,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          l_id,
-                                          l_sbeCommAddr,
-                                          l_sbeCommSizeAligned,
-                                          HBRT_RSVD_MEM__SBE_COMM);
+                    l_id,
+                    l_sbeCommAddr,
+                    l_sbeCommSizeAligned,
+                    HBRT_RSVD_MEM__SBE_COMM);
             if(l_elog)
             {
                 break;
@@ -1110,10 +1114,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          l_id,
-                                          l_sbeffdcAddr,
-                                          l_sbeffdcSizeAligned,
-                                          HBRT_RSVD_MEM__SBE_FFDC);
+                    l_id,
+                    l_sbeffdcAddr,
+                    l_sbeffdcSizeAligned,
+                    HBRT_RSVD_MEM__SBE_FFDC);
             if(l_elog)
             {
                 break;
@@ -1127,14 +1131,14 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Open Unsecure Memory Region for SBE FFDC Section
             l_elog = SBEIO::openUnsecureMemRegion(l_sbeffdcAddr,
-                                                  l_sbeffdcSize,
-                                                  false, //Read-Only
-                                                  l_procChip);
+                    l_sbeffdcSize,
+                    false, //Read-Only
+                    l_procChip);
 
             if(l_elog)
             {
                 TRACFCOMP( g_trac_runtime,
-                           "populate_HbRsvMem: openUnsecureMemRegion failed");
+                        "populate_HbRsvMem: openUnsecureMemRegion failed");
 
                 break;
             }
@@ -1142,113 +1146,119 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
             // Send Set FFDC Address, tell SBE where to write FFDC and messages
             l_elog = SBEIO::sendSetFFDCAddr(l_sbeffdcSize,
-                                            l_sbeCommSize,
-                                            l_sbeffdcAddr,
-                                            l_sbeCommAddr,
-                                            l_procChip);
+                    l_sbeCommSize,
+                    l_sbeffdcAddr,
+                    l_sbeCommAddr,
+                    l_procChip);
 
             if(l_elog)
             {
                 TRACFCOMP( g_trac_runtime,
-                           "populate_HbRsvMem: sendSetFFDCAddr failed");
+                        "populate_HbRsvMem: sendSetFFDCAddr failed");
 
                 break;
             }
         }
 
-        ///////////////////////////////////////////////////
-        // -- Secureboot cryptographic algorithms code
-        //    Only add if SecureROM is available and valid.
-        if (g_BlToHbDataManager.isValid())
+        // just load this stuff once
+        if( i_master_node == true )
         {
-            size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
-            // Align size for OPAL
-            size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize,
-                                                 HBRT_RSVD_MEM_OPAL_ALIGN);
-            // @TODO: RTC:183697 determine if OPAL can also use the actual size
-            //        and remove the need for l_hdatEntrySize
-            // Size to add to HDAT entry
-            size_t l_hdatEntrySize = l_secRomSizeAligned;
-
-            uint64_t l_secureRomAddr = 0x0;
-            if(TARGETING::is_phyp_load())
+            ///////////////////////////////////////////////////
+            // -- Secureboot cryptographic algorithms code
+            //    Only add if SecureROM is available and valid.
+            if (g_BlToHbDataManager.isValid())
             {
-                l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
-                // Specify actual size in HDAT entry for POWERVM
-                l_hdatEntrySize = l_secureRomSize;
-            }
-            else if(TARGETING::is_sapphire_load())
-            {
-                l_secureRomAddr = l_prevDataAddr - l_secRomSizeAligned;
-            }
+                size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
+                // Align size for OPAL
+                size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize,
+                        HBRT_RSVD_MEM_OPAL_ALIGN);
+                // @TODO: RTC:183697 determine if OPAL can also use the
+                // actual size and remove the need for l_hdatEntrySize
+                // Size to add to HDAT entry
+                size_t l_hdatEntrySize = l_secRomSizeAligned;
 
-            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
-                                          i_nodeId,
-                                          l_secureRomAddr,
-                                          l_hdatEntrySize,
-                                          HBRT_RSVD_MEM__SECUREBOOT);
-            if(l_elog)
-            {
-                break;
-            }
+                uint64_t l_secureRomAddr = 0x0;
+                if(TARGETING::is_phyp_load())
+                {
+                    l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
+                    // Specify actual size in HDAT entry for POWERVM
+                    l_hdatEntrySize = l_secureRomSize;
+                }
+                else if(TARGETING::is_sapphire_load())
+                {
+                    l_secureRomAddr = l_prevDataAddr - l_secRomSizeAligned;
+                }
 
-            l_prevDataAddr = l_secureRomAddr;
-            l_prevDataSize = l_secRomSizeAligned;
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
+                        i_nodeId,
+                        l_secureRomAddr,
+                        l_hdatEntrySize,
+                        HBRT_RSVD_MEM__SECUREBOOT);
+                if(l_elog)
+                {
+                    break;
+                }
 
-            // Load the Cached SecureROM into memory
-            l_elog = mapPhysAddr(l_secureRomAddr, l_secureRomSize, l_vAddr);
-            if(l_elog)
-            {
-                break;
-            }
+                l_prevDataAddr = l_secureRomAddr;
+                l_prevDataSize = l_secRomSizeAligned;
 
-            memcpy(reinterpret_cast<void*>(l_vAddr),
-                   g_BlToHbDataManager.getSecureRom(),
-                   l_secureRomSize);
+                // Load the Cached SecureROM into memory
+                l_elog = mapPhysAddr(l_secureRomAddr, l_secureRomSize, l_vAddr);
+                if(l_elog)
+                {
+                    break;
+                }
 
-            l_elog = unmapVirtAddr(l_vAddr);
-            if(l_elog)
-            {
-                break;
-            }
-        }
+                memcpy(reinterpret_cast<void*>(l_vAddr),
+                        g_BlToHbDataManager.getSecureRom(),
+                        l_secureRomSize);
 
-        // Initialize Pre-Verified Lid manager
-        PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize, i_nodeId);
-        l_preVerLidMgrLock = true;
-
-        // Handle all Pre verified PNOR sections
-        for (const auto & secIdPair : preVerifiedPnorSections)
-        {
-            // Skip RINGOVD section in POWERVM mode
-            if (secIdPair.first == PNOR::RINGOVD &&
-                INITSERVICE::spBaseServicesEnabled() &&
-                TARGETING::is_phyp_load())
-            {
-                continue;
+                l_elog = unmapVirtAddr(l_vAddr);
+                if(l_elog)
+                {
+                    break;
+                }
             }
 
-            l_elog = hbResvLoadSecureSection(secIdPair.first, secIdPair.second);
+            // Initialize Pre-Verified Lid manager
+            PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize,
+                                        i_nodeId);
+            l_preVerLidMgrLock = true;
+
+            // Handle all Pre verified PNOR sections
+            for (const auto & secIdPair : preVerifiedPnorSections)
+            {
+                // Skip RINGOVD section in POWERVM mode
+                if (secIdPair.first == PNOR::RINGOVD &&
+                        INITSERVICE::spBaseServicesEnabled() &&
+                        TARGETING::is_phyp_load())
+                {
+                    continue;
+                }
+
+                l_elog = hbResvLoadSecureSection(secIdPair.first,
+                                                 secIdPair.second);
+                if (l_elog)
+                {
+                    break;
+                }
+            }
             if (l_elog)
             {
                 break;
             }
-        }
-        if (l_elog)
-        {
-            break;
-        }
 
-        // Load lids from Master Container Lid Container provided by FSP and
-        // in POWERVM mode
-        if (INITSERVICE::spBaseServicesEnabled() &&
-            TARGETING::is_phyp_load())
-        {
-            MCL::MasterContainerLidMgr l_mcl;
-            l_elog = l_mcl.processComponents();
-            if(l_elog)
+            // Load lids from Master Container Lid Container provided by FSP and
+            // in POWERVM mode
+            if (INITSERVICE::spBaseServicesEnabled() &&
+                    TARGETING::is_phyp_load())
             {
-                break;
+                MCL::MasterContainerLidMgr l_mcl;
+                l_elog = l_mcl.processComponents();
+                if(l_elog)
+                {
+                    break;
+                }
             }
         }
     } while(0);
@@ -1297,78 +1307,78 @@ errlHndl_t populate_hbSecurebootData ( void )
     errlHndl_t l_elog = nullptr;
 
     do {
+        // pass 0 since sys parms has only one record
+        const uint64_t l_instance = 0;
+        uint64_t l_hbrtDataAddr = 0;
+        uint64_t l_hbrtDataSizeMax = 0;
+        l_elog = RUNTIME::get_host_data_section(RUNTIME::IPLPARMS_SYSTEM,
+                l_instance,
+                l_hbrtDataAddr,
+                l_hbrtDataSizeMax);
+        if(l_elog != nullptr)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
+                    "get_host_data_section() failed for system IPL parameters section");
+            break;
+        }
 
-    const uint64_t l_instance = 0; // pass 0 since sys parms has only one record
-    uint64_t l_hbrtDataAddr = 0;
-    uint64_t l_hbrtDataSizeMax = 0;
-    l_elog = RUNTIME::get_host_data_section(RUNTIME::IPLPARMS_SYSTEM,
-                                                l_instance,
-                                                l_hbrtDataAddr,
-                                                l_hbrtDataSizeMax);
-    if(l_elog != nullptr)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_hbSecurebootData: "
-            "get_host_data_section() failed for system IPL parameters section");
-        break;
-    }
+        hdatSysParms_t* const l_sysParmsPtr
+            = reinterpret_cast<hdatSysParms_t*>(l_hbrtDataAddr);
 
-    hdatSysParms_t* const l_sysParmsPtr
-                            = reinterpret_cast<hdatSysParms_t*>(l_hbrtDataAddr);
+        typedef struct sysSecSets
+        {
+            // bit 0: Code Container Digital Signature Checking
+            uint16_t secureboot : 1;
+            // bit 1: Measurements Extended to Secure Boot TPM
+            uint16_t trustedboot : 1;
+            uint16_t reserved : 14;
+        } SysSecSets;
 
-    typedef struct sysSecSets
-    {
-        // bit 0: Code Container Digital Signature Checking
-        uint16_t secureboot : 1;
-        // bit 1: Measurements Extended to Secure Boot TPM
-        uint16_t trustedboot : 1;
-        uint16_t reserved : 14;
-    } SysSecSets;
+        // populate system security settings in hdat
+        SysSecSets* const l_sysSecSets =
+            reinterpret_cast<SysSecSets*>(&l_sysParmsPtr->hdatSysSecuritySetting);
 
-    // populate system security settings in hdat
-    SysSecSets* const l_sysSecSets =
-        reinterpret_cast<SysSecSets*>(&l_sysParmsPtr->hdatSysSecuritySetting);
-
-    // populate secure setting for trusted boot
-    bool trusted = false;
-    #ifdef CONFIG_TPMDD
+        // populate secure setting for trusted boot
+        bool trusted = false;
+#ifdef CONFIG_TPMDD
         trusted = TRUSTEDBOOT::enabled();
-    #endif
-    l_sysSecSets->trustedboot = trusted? 1: 0;
+#endif
+        l_sysSecSets->trustedboot = trusted? 1: 0;
 
-    // populate secure setting for secureboot
-    bool secure = false;
-    #ifdef CONFIG_SECUREBOOT
+        // populate secure setting for secureboot
+        bool secure = false;
+#ifdef CONFIG_SECUREBOOT
         secure = SECUREBOOT::enabled();
-    #endif
-    l_sysSecSets->secureboot = secure? 1: 0;
+#endif
+        l_sysSecSets->secureboot = secure? 1: 0;
 
-    // populate TPM config bits in hdat
-    bool tpmRequired = false;
-    #ifdef CONFIG_TPMDD
+        // populate TPM config bits in hdat
+        bool tpmRequired = false;
+#ifdef CONFIG_TPMDD
         tpmRequired = TRUSTEDBOOT::isTpmRequired();
-    #endif
+#endif
 
-    l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
+        l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
 
-    // get max # of TPMs per drawer and populate hdat with it
-    auto l_maxTpms = HDAT::hdatTpmDataCalcMaxSize();
+        // get max # of TPMs per drawer and populate hdat with it
+        auto l_maxTpms = HDAT::hdatTpmDataCalcMaxSize();
 
-    l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
-    TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
+        l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
+        TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
 
-    // Populate HW Keys' Hash size + value in HDAT
-    l_sysParmsPtr->hdatHwKeyHashSize =
-        sizeof(l_sysParmsPtr->hdatHwKeyHashValue);
-    TRACFCOMP(g_trac_runtime,"HW Keys' Hash Size = %d",
-        l_sysParmsPtr->hdatHwKeyHashSize);
+        // Populate HW Keys' Hash size + value in HDAT
+        l_sysParmsPtr->hdatHwKeyHashSize =
+            sizeof(l_sysParmsPtr->hdatHwKeyHashValue);
+        TRACFCOMP(g_trac_runtime,"HW Keys' Hash Size = %d",
+                l_sysParmsPtr->hdatHwKeyHashSize);
 
-    #ifdef CONFIG_SECUREBOOT
-    auto hash = l_sysParmsPtr->hdatHwKeyHashValue;
-    SECUREBOOT::getHwKeyHash(hash);
-    #else
-    memset(l_sysParmsPtr->hdatHwKeyHashValue,0,
-                                 sizeof(l_sysParmsPtr->hdatHwKeyHashValue));
-    #endif
+#ifdef CONFIG_SECUREBOOT
+        auto hash = l_sysParmsPtr->hdatHwKeyHashValue;
+        SECUREBOOT::getHwKeyHash(hash);
+#else
+        memset(l_sysParmsPtr->hdatHwKeyHashValue,0,
+                sizeof(l_sysParmsPtr->hdatHwKeyHashValue));
+#endif
 
     } while(0);
 
@@ -1381,126 +1391,126 @@ errlHndl_t populate_TpmInfoByNode()
 
     do {
 
-    uint64_t l_baseAddr = 0;
-    uint64_t l_dataSizeMax = 0;
-    const uint64_t l_instance = 0; // pass 0 since there is only one record
+        uint64_t l_baseAddr = 0;
+        uint64_t l_dataSizeMax = 0;
+        const uint64_t l_instance = 0; // pass 0 since there is only one record
 
-    // TODO RTC 167290 - We will need to pass the appropriate instance value
-    // when we implement multinode support
+        // TODO RTC 167290 - We will need to pass the appropriate instance value
+        // when we implement multinode support
 
-    l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
-                                                l_instance,
-                                                l_baseAddr,
-                                                l_dataSizeMax);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
-            "get_host_data_section() failed for Node TPM-related Data section");
-        break;
-    }
+        l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
+                l_instance,
+                l_baseAddr,
+                l_dataSizeMax);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                    "get_host_data_section() failed for Node TPM-related Data section");
+            break;
+        }
 
-    // obtain the node target, used later to populate fields
-    TARGETING::Target* mproc = nullptr;
-    l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
-            "could not obtain the master processor from targeting");
-        break;
-    }
-    auto targetType = TARGETING::TYPE_NODE;
-    const TARGETING::Target* l_node = getParent(mproc, targetType);
-    assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
+        // obtain the node target, used later to populate fields
+        TARGETING::Target* mproc = nullptr;
+        l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                    "could not obtain the master processor from targeting");
+            break;
+        }
+        auto targetType = TARGETING::TYPE_NODE;
+        const TARGETING::Target* l_node = getParent(mproc, targetType);
+        assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
 
-    // this will additively keep track of the next available offset
-    // as we fill the section
-    uint32_t l_currOffset = 0;
+        // this will additively keep track of the next available offset
+        // as we fill the section
+        uint32_t l_currOffset = 0;
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Section Node Secure and Trusted boot Related Data
-    ////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////
+        // Section Node Secure and Trusted boot Related Data
+        ////////////////////////////////////////////////////////////////////////////
 
-    auto const l_hdatTpmData
-                    = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
+        auto const l_hdatTpmData
+            = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
 
-    // make sure we have enough room
-    auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcMaxSize();
-    if(l_dataSizeMax < l_tpmDataCalculatedMax)
-    {
+        // make sure we have enough room
+        auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcMaxSize();
+        if(l_dataSizeMax < l_tpmDataCalculatedMax)
+        {
 
-       TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat section doesn't have enough space");
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat section doesn't have enough space");
 
-        /*@
-         * @errortype
-         * @severity      ERRL_SEV_UNRECOVERABLE
-         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-         * @reasoncode    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE
-         * @userdata1     Size of hdat data struct
-         * @userdata2     Max size of hdat data struct
-         * @devdesc       The TPM data hdat section doesn't have enough space
-         * @custdesc      Platform security problem detected
-         */
-        l_elog = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-                        RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE,
-                        l_dataSizeMax,
-                        l_tpmDataCalculatedMax,
-                        true);
-        l_elog->collectTrace(RUNTIME_COMP_NAME);
-        break;
-    }
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE
+             * @userdata1     Size of hdat data struct
+             * @userdata2     Max size of hdat data struct
+             * @devdesc       The TPM data hdat section doesn't have enough space
+             * @custdesc      Platform security problem detected
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE,
+                    l_dataSizeMax,
+                    l_tpmDataCalculatedMax,
+                    true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
 
-    // check that hdat structure format and eye catch were filled out
-    if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct format value doesn't match");
+        // check that hdat structure format and eye catch were filled out
+        if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct format value doesn't match");
 
-        /*@
-         * @errortype
-         * @severity      ERRL_SEV_UNRECOVERABLE
-         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-         * @reasoncode    RUNTIME::RC_TPM_HDAT_ID_MISMATCH
-         * @userdata1     hdat struct format value
-         * @userdata2     Expected hdat struct format value
-         * @devdesc       TPM data hdat struct format value doesn't match
-         * @custdesc      Platform security problem detected
-         */
-        l_elog = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
-                        RUNTIME::RC_TPM_HDAT_ID_MISMATCH,
-                        l_hdatTpmData->hdatHdr.hdatStructId,
-                        HDAT::HDAT_HDIF_STRUCT_ID,
-                        true);
-        l_elog->collectTrace(RUNTIME_COMP_NAME);
-        break;
-    }
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_HDAT_ID_MISMATCH
+             * @userdata1     hdat struct format value
+             * @userdata2     Expected hdat struct format value
+             * @devdesc       TPM data hdat struct format value doesn't match
+             * @custdesc      Platform security problem detected
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                    RUNTIME::RC_TPM_HDAT_ID_MISMATCH,
+                    l_hdatTpmData->hdatHdr.hdatStructId,
+                    HDAT::HDAT_HDIF_STRUCT_ID,
+                    true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
 
-    auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
-    if(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
-              HDAT::g_hdatTpmDataEyeCatch,
-              l_eyeCatchLen) != 0)
-    {
+        auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
+        if(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
+                    HDAT::g_hdatTpmDataEyeCatch,
+                    l_eyeCatchLen) != 0)
+        {
 
-        // Convert char strings to uin64_t for errorlogs
-        uint64_t l_eyeCatch = 0;
-        memcpy(&l_eyeCatch,
-               l_hdatTpmData->hdatHdr.hdatStructName,
-               strnlen(l_hdatTpmData->hdatHdr.hdatStructName,sizeof(uint64_t)));
-        uint64_t l_expectedEyeCatch = 0;
-        memcpy(&l_expectedEyeCatch,
-               HDAT::g_hdatTpmDataEyeCatch,
-               strnlen(HDAT::g_hdatTpmDataEyeCatch, sizeof(uint64_t)));
+            // Convert char strings to uin64_t for errorlogs
+            uint64_t l_eyeCatch = 0;
+            memcpy(&l_eyeCatch,
+                    l_hdatTpmData->hdatHdr.hdatStructName,
+                    strnlen(l_hdatTpmData->hdatHdr.hdatStructName,sizeof(uint64_t)));
+            uint64_t l_expectedEyeCatch = 0;
+            memcpy(&l_expectedEyeCatch,
+                    HDAT::g_hdatTpmDataEyeCatch,
+                    strnlen(HDAT::g_hdatTpmDataEyeCatch, sizeof(uint64_t)));
 
-        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct name eye catcher (0x%X) doesn't match expected value (0x%X",
-                  l_eyeCatch, l_expectedEyeCatch);
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct name eye catcher (0x%X) doesn't match expected value (0x%X",
+                    l_eyeCatch, l_expectedEyeCatch);
 
-        /*@
-         * @errortype
-         * @severity      ERRL_SEV_UNRECOVERABLE
-         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
-         * @reasoncode    RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH
          * @userdata1     hdat struct name eye catcher
          * @userdata2     Expected hdat eye catch
          * @devdesc       TPM data hdat struct name eye catcher doesn't match
@@ -2350,7 +2360,7 @@ errlHndl_t populate_hbRuntimeData( void )
         {
             if( !TARGETING::is_no_load() )
             {
-                l_elog = populate_HbRsvMem(nodeid);
+                l_elog = populate_HbRsvMem(nodeid,true);
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "populate_HbRsvMem failed" );
@@ -2394,73 +2404,87 @@ errlHndl_t populate_hbRuntimeData( void )
                     }
                 }
             }
-            break;
         }
-
-        // continue only for multi-node system
-
-        // This msgQ catches the node responses from the commands
-        msg_q_t msgQ = msg_q_create();
-        l_elog = MBOX::msgq_register(MBOX::HB_POP_ATTR_MSGQ,msgQ);
-
-        if(l_elog)
+        else
         {
-            TRACFCOMP( g_trac_runtime, "MBOX::msgq_register failed!" );
-            break;
-        }
+            // multi-node system
 
-        // keep track of the number of messages we send so we
-        // know how many responses to expect
-        uint64_t msg_count = 0;
+            // populate our own node specific data + the common stuff
+            l_elog = populate_HbRsvMem(nodeid,true);
 
-        // loop thru rest all nodes -- sending msg to each
-        TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
-          ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
-
-        TRACFCOMP( g_trac_runtime, "HB_EXISTING_IMAGE (mask) = %#x",
-                mask);
-
-        for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
-        {
-            if( 0 != ((mask >> l_node) & hb_images ) )
+            if(l_elog != nullptr)
             {
-                TRACFCOMP( g_trac_runtime, "send IPC_POPULATE_ATTRIBUTES "
-                        "message to node %d",
-                        l_node );
+                TRACFCOMP( g_trac_runtime, "populate_HbRsvMem failed" );
+                break;
+            }
 
-                msg_t * msg = msg_allocate();
-                msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
-                msg->data[0] = l_node;      // destination node
-                msg->data[1] = nodeid;      // respond to this node
+            // This msgQ catches the node responses from the commands
+            msg_q_t msgQ = msg_q_create();
+            l_elog = MBOX::msgq_register(MBOX::HB_POP_ATTR_MSGQ,msgQ);
 
-                // send the message to the slave hb instance
-                l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime, "MBOX::msgq_register failed!" );
+                break;
+            }
 
-                if( l_elog )
+            // keep track of the number of messages we send so we
+            // know how many responses to expect
+            uint64_t msg_count = 0;
+
+            // loop thru rest all nodes -- sending msg to each
+            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+                ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+            TRACFCOMP( g_trac_runtime, "HB_EXISTING_IMAGE (mask) = %#x",
+                    mask);
+
+            for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
+            {
+                // skip sending to ourselves, we did our construction above
+                if(l_node == nodeid)
+                    continue;
+
+                if( 0 != ((mask >> l_node) & hb_images ) )
                 {
-                    TRACFCOMP( g_trac_runtime, "MBOX::send to node %d"
-                            " failed", l_node);
-                    break;
-                }
+                    TRACFCOMP( g_trac_runtime, "send IPC_POPULATE_ATTRIBUTES "
+                            "message to node %d",
+                            l_node );
 
-                ++msg_count;
+                    msg_t * msg = msg_allocate();
+                    msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
+                    msg->data[0] = l_node;      // destination node
+                    msg->data[1] = nodeid;      // respond to this node
 
-            } // end if node to process
-        } // end for loop on nodes
+                    // send the message to the slave hb instance
+                    l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
 
-        // wait for a response to each message we sent
-        if( l_elog == nullptr )
-        {
-            msg_t * response = msg_wait(msgQ);
-            TRACFCOMP(g_trac_runtime,
-                    "IPC_POPULATE_ATTRIBUTES : drawer %d completed",
-                    response->data[0]);
-            msg_free(response);
-            --msg_count;
+                    if( l_elog )
+                    {
+                        TRACFCOMP( g_trac_runtime, "MBOX::send to node %d"
+                                " failed", l_node);
+                        break;
+                    }
+
+                    ++msg_count;
+
+                } // end if node to process
+            } // end for loop on nodes
+
+            // wait for a response to each message we sent
+            if( l_elog == nullptr )
+            {
+                msg_t * response = msg_wait(msgQ);
+                TRACFCOMP(g_trac_runtime,
+                        "IPC_POPULATE_ATTRIBUTES : drawer %d completed",
+                        response->data[0]);
+                msg_free(response);
+                --msg_count;
+            }
+
+            MBOX::msgq_unregister(MBOX::HB_POP_ATTR_MSGQ);
+            msg_q_destroy(msgQ);
         }
-
-        MBOX::msgq_unregister(MBOX::HB_POP_ATTR_MSGQ);
-        msg_q_destroy(msgQ);
 
     } while(0);
 
