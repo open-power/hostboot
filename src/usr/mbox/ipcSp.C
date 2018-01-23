@@ -110,13 +110,11 @@ void IpcSp::msgHandler()
                         mod_loaded = true;
                     }
                 }
+
                 if(!err)
                 {
-                    //@TODO RTC:132750
-                    //RUNTIME::setPayloadBaseAddress
-                    //    (reinterpret_cast<uint64_t>(msg->extra_data));
-
-                    //err = RUNTIME::populate_node_attributes( msg->data[0] );
+                    // msg->data[0] contains the node number
+                    err = RUNTIME::populate_HbRsvMem( msg->data[0] );
                 }
 
                 if (err)
