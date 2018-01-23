@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,17 @@ uint64_t compIdToInt(const ComponentID i_compId)
     memcpy(&l_compId, i_compId.data(), sizeof(l_compId));
 
     return l_compId;
+}
+
+RomVerifyIds extractLidIds(const std::vector<LidInfo>& i_lidIds)
+{
+    RomVerifyIds l_ids {};
+    for (auto const& id : i_lidIds)
+    {
+        l_ids.push_back(id.id);
+    }
+
+    return l_ids;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,12 +328,15 @@ void MasterContainerLidMgr::parseMcl()
 
 void MasterContainerLidMgr::printCompInfoCache()
 {
+    // Use ifdef as we do not want CompInfo print to be debug only
+#ifdef HOSTBOOT_DEBUG
     UTIL_FT("> MCL Comp Info cache:");
     for (const auto &i : iv_compInfoCache)
     {
         UTIL_FBIN("- Comp Id:", &i.first, sizeof(ComponentID));
         i.second.print();
     }
+#endif
 }
 
 errlHndl_t MasterContainerLidMgr::processComponents()
@@ -595,7 +609,9 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         if (SECUREBOOT::enabled())
         {
             // Verify Container - some combination of Lids
-            l_errl = SECUREBOOT::verifyContainer(iv_pVaddr);
+
+            l_errl = SECUREBOOT::verifyContainer(iv_pVaddr,
+                                             extractLidIds(io_compInfo.lidIds));
             if (l_errl)
             {
                 UTIL_FT(ERR_MRK"MasterContainerLidMgr::verifyExtend - failed verifyContainer");

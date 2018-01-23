@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,10 @@
 #include <secureboot/secure_reasoncodes.H>
 #include "errlud_secure.H"
 #include <kernel/bltohbdatamgr.H>
+#include <util/utilmem.H>
+#include <securerom/ROM.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 namespace SECUREBOOT
 {
@@ -162,6 +166,51 @@ UdSecuritySettings::UdSecuritySettings()
 UdSecuritySettings::~UdSecuritySettings()
 {
 
+}
+
+//------------------------------------------------------------------------------
+//  SECURE Verify Info User Details
+//------------------------------------------------------------------------------
+UdVerifyInfo::UdVerifyInfo(const char* i_compId,
+                           const uint64_t i_protectedSize,
+                           const RomVerifyIds& i_ids,
+                           const SHA512_t& i_measuredHash,
+                           const SHA512_t& i_expectedHash)
+{
+    // Set up Ud instance variables
+    iv_CompId = SECURE_COMP_ID;
+    iv_Version = SECURE_UDT_VERSION_1;
+    iv_SubSection = SECURE_UDT_VERIFY_INFO;
+
+    //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
+    // 9 bytes Max : Component ID (8 byte string + NULL) use strlen
+    // 8 bytes     : Protected Payload Size
+    // 4 bytes   : Number of IDs
+    // 4*N bytes : IDs (PNOR id or LidID) multiplied by number of ids
+    // 64 bytes  : Measured Hash
+    // 64 bytes  : Expected Hash
+
+    UtilMem l_memBuf {};
+    l_memBuf.write(i_compId, strlen(i_compId)+1);
+    l_memBuf << i_protectedSize;
+    l_memBuf << static_cast<uint32_t>(i_ids.size());
+    for (auto id : i_ids)
+    {
+        l_memBuf << id;
+    }
+    l_memBuf.write(i_measuredHash, PARSER_SIZEOF_SHA512_t);
+    l_memBuf.write(i_expectedHash, PARSER_SIZEOF_SHA512_t);
+
+    auto l_memBufErr =  l_memBuf.getLastError();
+    if(l_memBufErr)
+    {
+        errlCommit(l_memBufErr,SECURE_COMP_ID);
+    }
+    else
+    {
+        char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(l_memBuf.size()));
+        memcpy(l_pBuf, l_memBuf.base(), l_memBuf.size());
+    }
 }
 
 } // end SECUREBOOT namespace

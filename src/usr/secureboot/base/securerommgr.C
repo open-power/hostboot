@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <config.h>
 #include <console/consoleif.H>
 #include <secureboot/containerheader.H>
+#include "../common/errlud_secure.H"
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -69,12 +70,15 @@ errlHndl_t initializeSecureRomManager(void)
 /**
  * @brief Verify Signed Container
  */
-errlHndl_t verifyContainer(void * i_container, const SHA512_t* i_hwKeyHash)
+errlHndl_t verifyContainer(void * i_container,  const RomVerifyIds& i_ids,
+                           const SHA512_t* i_hwKeyHash)
 {
     errlHndl_t l_errl = nullptr;
 
     l_errl = Singleton<SecureRomManager>::instance().
-                                       verifyContainer(i_container,i_hwKeyHash);
+                                       verifyContainer(i_container,
+                                                       i_ids,
+                                                       i_hwKeyHash);
 
     return l_errl;
 }
@@ -317,7 +321,8 @@ errlHndl_t SecureRomManager::initialize()
  * @brief Verify Container against system hash keys
  */
 errlHndl_t SecureRomManager::verifyContainer(void * i_container,
-                                      const SHA512_t* i_hwKeyHash)
+                                             const RomVerifyIds& i_ids,
+                                             const SHA512_t* i_hwKeyHash)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
@@ -407,10 +412,42 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                          l_rc,
                                          l_hw_parms.log,
                                          true /*Add HB Software Callout*/ );
-            // Callout code to force a rewrite of the contents
-            //@todo RTC:93870 - Define new callout for verification fail
-            l_errl->collectTrace(PNOR_COMP_NAME,ERROR_TRACE_SIZE);
-            l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
+            l_errl->collectTrace(PNOR_COMP_NAME);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            l_errl->collectTrace(UTIL_COMP_NAME);
+            l_errl->collectTrace(RUNTIME_COMP_NAME);
+
+            ContainerHeader l_conHdr;
+            auto l_hdrParseErr = l_conHdr.setHeader(i_container);
+            if (l_hdrParseErr)
+            {
+                TRACFCOMP(g_trac_secure, ERR_MRK"SecureRomManager::verifyContainer(): setheader failed");
+                // Link parse error log to existing errorlog plid and commit error
+                l_hdrParseErr->plid(l_errl->plid());
+                ERRORLOG::errlCommit(l_hdrParseErr, RUNTIME_COMP_ID);
+
+                // Add UD data without data needed from Container Header
+                UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}).addToLog(l_errl);
+            }
+            else
+            {
+                // Measure protected section. Note it starts one page after the
+                // vaddr passed in for verification
+                auto l_pProtectedSec =
+                    reinterpret_cast<const uint8_t*>(i_container) + PAGESIZE;
+                SHA512_t l_measuredHash = {0};
+                SECUREBOOT::hashBlob(l_pProtectedSec,
+                                     l_conHdr.payloadTextSize(),
+                                     l_measuredHash);
+                // Add UD data to errorlog
+                UdVerifyInfo(l_conHdr.componentId(),
+                             l_conHdr.payloadTextSize(),
+                             i_ids,
+                             l_measuredHash,
+                             *l_conHdr.payloadTextHash()
+                            ).addToLog(l_errl);
+            }
+
             break;
 
         }

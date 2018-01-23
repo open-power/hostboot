@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <securerom/ecverify.H>
 #include <string.h>
 #include <array>
+#include <vector>
 
 /**
  *  @brief Indicates container header section versions
@@ -344,5 +345,11 @@ enum SB_FUNC_VERS : sbFuncVer_t
  * @brief Array of current secure rom function types used
  */
 extern const std::array<sbFuncType_t, SB_FUNC_TYPES::MAX_TYPES> SecRomFuncTypes;
+
+/**
+ * @brief Vector of IDds (PNOR or Lid Id(s)) associated with the blob that is
+ *        being verified.
+ */
+typedef std::vector<uint32_t> RomVerifyIds;
 
 #endif

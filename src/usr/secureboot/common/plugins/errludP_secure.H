@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,12 +33,15 @@
 
 #include "errluserdetails.H"
 #include <string.h>
+#include <utilmem.H>
 
 /**
  * Some macros to manipulate data types cleanly
  */
 #define TO_UINT8(ptr)   (*(reinterpret_cast<uint8_t*>(ptr)))
+#define TO_UINT16(ptr)  (ntohs(*(reinterpret_cast<uint16_t*>(ptr))))
 #define TO_UINT32(ptr)  (ntohl(*(reinterpret_cast<uint32_t*>(ptr))))
+#define TO_UINT64(ptr)  (ntohll(*(reinterpret_cast<uint64_t*>(ptr))))
 
 namespace SECUREBOOT
 {
@@ -47,6 +50,7 @@ namespace SECUREBOOT
  */
 enum {
     UDPARSER_SIZEOF_SHA512_t           = 64,
+    UDPARSER_SIZEOF_MAX_VERIFY_IDS     = 50,
 };
 
 /**
@@ -229,6 +233,106 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
     };
 };
 
+/**
+ * @class UdParserVerifyInfo
+ *
+ * Parses UdSecureVerifyInfo
+ */
+class UdParserVerifyInfo : public ERRORLOG::ErrlUserDetailsParser
+{
+  public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserVerifyInfo() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserVerifyInfo() {}
+
+    /**
+     *  @brief Parses verify container user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        //***** Version 1 Memory Layout *****
+        // 9 bytes Max : Component ID (8 byte string + NULL) use strlen
+        // 8 bytes     : Protected Payload Size
+        // 4 bytes     : Number of IDs
+        // 4*N bytes   : IDs (PNOR id or LidID) multiplied by number of ids
+        // 64 bytes    : Measured Hash
+        // 64 bytes    : Expected Hash
+
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        bool l_parseError = false;
+
+        do {
+        i_parser.PrintHeading("Secure Verify Info");
+        if (i_version >= 1)
+        {
+            // Component ID
+            i_parser.PrintString("Component ID", l_databuf);
+            // Skip string plus 1 byte for null termination
+            l_databuf += strlen(l_databuf)+1;
+
+            // Number of IDs
+            uint64_t l_protectedSize = TO_UINT64(l_databuf);
+            i_parser.PrintNumberUint64("Protected Payload Size","0x%016llX",
+                                        l_protectedSize);
+            l_databuf += sizeof(l_protectedSize);
+
+            // Number of IDs
+            uint32_t l_numIds = TO_UINT32(l_databuf);
+            i_parser.PrintNumber("Number of IDs","%d", l_numIds);
+            l_databuf += sizeof(l_numIds);
+
+            // IDs
+            i_parser.PrintHeading("ID(s)");
+            for (uint32_t i = 0; i < l_numIds; ++i)
+            {
+                i_parser.PrintNumber("ID","0x%08lX", TO_UINT32(l_databuf));
+                l_databuf += sizeof(uint32_t);
+                // In case of bad format, don't go past max size
+                if(i >= UDPARSER_SIZEOF_MAX_VERIFY_IDS)
+                {
+                    l_parseError = true;
+                    break;
+                }
+            }
+            // In case of bad format, don't continue to parse section
+            if(l_parseError)
+            {
+                break;
+            }
+
+            // Measured Hash
+            i_parser.PrintHeading("Measured Hash");
+            i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
+            l_databuf += UDPARSER_SIZEOF_SHA512_t;
+
+            /// Expected Hash
+            i_parser.PrintHeading("Expected Hash");
+            i_parser.PrintHexDump(l_databuf, UDPARSER_SIZEOF_SHA512_t);
+            l_databuf += UDPARSER_SIZEOF_SHA512_t;
+        }
+        } while(0);
+
+    }
+
+  private:
+    // Disabled
+    UdParserVerifyInfo(const UdParserVerifyInfo&);
+    UdParserVerifyInfo & operator=(const UdParserVerifyInfo&);
+};
 
 
 } // end SECUREBOOT namespace

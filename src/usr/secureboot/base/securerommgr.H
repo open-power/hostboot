@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,12 +53,16 @@ class SecureRomManager
          *
          * @param[in] i_container  Void pointer to effective address
          *                          of container
+         * @param[in] i_ids  Vector of IDs (PNOR or Lid Id(s)) associated with
+         *                   the blob that is being verified.
+         *                   [default = empty vector]
          * @param[in] i_hwKeyHash  Custom hw keys' hash to test against
          *                         [default = nullptr, use current hw hash key
          *
          * @return errlHndl_t NULL on success
          */
         errlHndl_t verifyContainer(void * i_container,
+                                   const RomVerifyIds& i_ids = RomVerifyIds(),
                                    const SHA512_t* i_hwKeyHash = nullptr);
 
         /**

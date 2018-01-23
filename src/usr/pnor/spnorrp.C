@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -531,7 +531,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // verify while in temp space
         if (SECUREBOOT::enabled())
         {
-            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr);
+            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, {i_id});
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorrRP::verifySections - section "
@@ -1460,6 +1460,7 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
     }
 
     l_errl = SECUREBOOT::verifyContainer(l_nestedVaddr,
+                                         {PNOR::SBKT},
                                          l_nestedConHdr.hwKeyHash());
     if (l_errl)
     {

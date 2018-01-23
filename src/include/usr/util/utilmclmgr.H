@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <secureboot/containerheader.H>
 #include <errl/errlentry.H>
 #include <usr/vmmconst.h>
+#include <securerom/ROM.H>
 
 // Forward declarations
 class MasterContainerLidMgrTest;
@@ -221,6 +222,15 @@ void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr);
  * @return uint64_t - truncated Component ID
  */
 uint64_t compIdToInt(const ComponentID i_compId);
+
+/**
+ * @brief Extract list of lid ids from lid info vector
+ *
+ * @param[in] i_lidIds - Vector to pull lid ids out of
+ *
+ * @return RomVerifyIds - IDs associated with secure component
+ */
+RomVerifyIds extractLidIds(const std::vector<LidInfo>& i_lidIds);
 
 // @brief Class to manager the Master Container Lid provided by the FSP
 class MasterContainerLidMgr

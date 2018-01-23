@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         printkd("test_verify(): expect to see 'mfsr r2 to CFAR handled': ");
 
         l_errl = SECUREBOOT::verifyContainer(signedFile_pageAddr,
+                                             {},
                                              &hw_key_hash);
         if (l_errl)
         {
