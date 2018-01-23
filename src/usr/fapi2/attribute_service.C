@@ -550,7 +550,9 @@ struct dimmBadDqDataFormat
     uint8_t  iv_reserved2;
     uint8_t  iv_reserved3;
     uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
-    uint8_t  iv_unused[32];
+    uint8_t  iv_rowRepairData[mss::MAX_RANK_PER_DIMM]
+                             [mss::ROW_REPAIR_BYTE_COUNT];
+    uint8_t  iv_unused[16];
 };
 
 // constant definitions
@@ -1533,6 +1535,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         dimmBadDqDataFormat l_prevSpdData;
         memcpy( &l_prevSpdData, l_badDqData, sizeof(dimmBadDqDataFormat) );
+        memcpy( &l_spdData.iv_rowRepairData, l_prevSpdData.iv_rowRepairData,
+                sizeof(l_spdData.iv_rowRepairData) );
         memcpy( &l_spdData.iv_unused, l_prevSpdData.iv_unused,
                 sizeof(l_spdData.iv_unused) );
 
@@ -1574,6 +1578,138 @@ ReturnCode fapiAttrSetBadDqBitmap(
     {
         free( l_badDqData );
         l_badDqData = nullptr;
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::getRowRepairData function
+//******************************************************************************
+ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+                             ATTR_ROW_REPAIR_DATA_Type (&o_data) )
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    uint8_t * l_data =
+        static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
+    do
+    {
+        // Get targeting target for the dimm
+        TARGETING::TargetHandle_t l_dimm = nullptr;
+        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+        if ( l_errl )
+        {
+            FAPI_ERR( "getRowRepairData: Error from getTargetingTarget" );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Zero callers data.
+        memset(o_data, 0, sizeof(o_data));
+
+        // Read the data
+        l_errl = deviceRead( l_dimm, l_data, DIMM_BAD_DQ_SIZE_BYTES,
+                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+        if ( l_errl )
+        {
+            FAPI_ERR( "getRowRepairData: Failed to call deviceRead to get "
+                      "l_data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        dimmBadDqDataFormat l_spdData;
+        memcpy( &l_spdData, l_data, sizeof(dimmBadDqDataFormat) );
+
+        // Check the header for correct data.
+        if ( (be32toh(l_spdData.iv_magicNumber) != DIMM_BAD_DQ_MAGIC_NUMBER) ||
+             (l_spdData.iv_version != DIMM_BAD_DQ_VERSION) )
+        {
+            FAPI_INF( "getRowRepairData: DIMM VPD not initialized." );
+        }
+        else
+        {
+            // Get the row repair data.
+            memcpy( &o_data, &l_spdData.iv_rowRepairData,
+                    sizeof(ATTR_ROW_REPAIR_DATA_Type) );
+        }
+
+    }while(0);
+
+    if ( l_data != nullptr )
+    {
+        free( l_data );
+        l_data = nullptr;
+    }
+
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi2::platAttrSvc::setRowRepairData function
+//******************************************************************************
+ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+                             ATTR_ROW_REPAIR_DATA_Type (&i_data) )
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    uint8_t * l_data =
+        static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
+    do
+    {
+        // Get targeting target for the dimm
+        TARGETING::TargetHandle_t l_dimm = nullptr;
+        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
+        if ( l_errl )
+        {
+            FAPI_ERR( "setRowRepairData: Error from getTargetingTarget" );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        // Get the original data.
+        l_errl = deviceRead( l_dimm, l_data, DIMM_BAD_DQ_SIZE_BYTES,
+                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+        if ( l_errl )
+        {
+            FAPI_ERR( "setRowRepairData: Failed to call deviceRead to get "
+                      "l_data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        dimmBadDqDataFormat l_spdData;
+        memcpy( &l_spdData, l_data, sizeof(dimmBadDqDataFormat) );
+
+        // Update the header
+        l_spdData.iv_magicNumber = htobe32( DIMM_BAD_DQ_MAGIC_NUMBER );
+        l_spdData.iv_version = DIMM_BAD_DQ_VERSION;
+        l_spdData.iv_reserved1 = 0;
+        l_spdData.iv_reserved2 = 0;
+        l_spdData.iv_reserved3 = 0;
+
+        // Update the row repair data
+        memcpy( &l_spdData.iv_rowRepairData, i_data,
+                sizeof(ATTR_ROW_REPAIR_DATA_Type) );
+
+        // Write the data back to VPD.
+        l_errl = deviceWrite( l_dimm, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
+                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+        if ( l_errl )
+        {
+            FAPI_ERR( "setRowRepairData: Failed to call deviceWrite to set "
+                      "l_data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+    }while(0);
+
+    if ( l_data != nullptr )
+    {
+        free( l_data );
+        l_data = nullptr;
     }
 
     return l_rc;
