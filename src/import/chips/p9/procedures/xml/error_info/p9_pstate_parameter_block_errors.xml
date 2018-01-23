@@ -466,4 +466,19 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_VFRT_BIAS_ERROR</rc>
+    <description>The frequency biasing attributes do not match when WOF is
+    enabled.  This is a requirement for doing VFRT biasing that is consistent
+    with #V frequency biasing.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FREQ_BIAS_HP_ULTRATURBO</ffdc>
+    <ffdc>FREQ_BIAS_HP_TURBO</ffdc>
+    <ffdc>FREQ_BIAS_HP_NOMINAL</ffdc>
+    <ffdc>FREQ_BIAS_HP_POWERSAVE</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <!-- No callout occurs as this is a user error -->
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
