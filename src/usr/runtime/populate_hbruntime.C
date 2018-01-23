@@ -117,16 +117,35 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
         uint64_t l_rsvMemDataAddr = 0;
         uint64_t l_rsvMemDataSizeMax = 0;
 
+        // Figure out which node we are running on
+        TARGETING::Target* mproc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(mproc);
+
+        TARGETING::EntityPath epath =
+            mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+        const TARGETING::EntityPath::PathElement pe =
+            epath.pathElementOfType(TARGETING::TYPE_NODE);
+
+        uint64_t nodeid = pe.instance;
+
+        // there are 50 reserved memory spots per node,
+        // use the node number to index into the hb reserved mem pointers
+        // for this node. HB_RSV_MEM_NUM_PTRS is defined as the number
+        // of usable pointers - see runtime.H for some background
+        uint32_t instance = l_nextSection +
+            ((HB_RSV_MEM_NUM_PTRS + 1) * nodeid);
+
         // Get the address of the next section
         l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
-                                                 l_nextSection,
-                                                 l_rsvMemDataAddr,
-                                                 l_rsvMemDataSizeMax );
+                instance,
+                l_rsvMemDataAddr,
+                l_rsvMemDataSizeMax );
         if(l_elog != nullptr)
         {
             TRACFCOMP( g_trac_runtime,
-                       "getNextRhbAddrRange fail get_host_data_section %d",
-                       l_nextSection );
+                    "getNextRhbAddrRange fail get_host_data_section %d",
+                    l_nextSection );
             break;
         }
 
@@ -629,6 +648,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
 
     TRACFCOMP( g_trac_runtime,EXIT_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,size=%lld",
                 io_start_address, io_end_address, io_size );
+
     return l_elog;
 }
 
@@ -764,11 +784,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         // Wipe out all HB reserved memory sections
         l_elog = RUNTIME::clear_host_data_section(RUNTIME::RESERVED_MEM);
-        if(l_elog)
+
+        if( l_elog )
         {
+            TRACFCOMP( g_trac_runtime, ERR_MRK
+                    "populate_HbRsvMem> i_nodeId=%d"
+                    " call to clear_host_data_section() returned error",
+                    i_nodeId );
             break;
         }
-
         uint64_t l_topMemAddr = 0x0;
         uint64_t l_vAddr = 0x0;
 
@@ -848,7 +872,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
 
-
 #ifdef CONFIG_START_OCC_DURING_BOOT
             ///////////////////////////////////////////////////
             // OCC Common entry
@@ -899,7 +922,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             startAddressValid = false;
         }
 
-        // fills in the reserved memory with HD Data and
+        // fills in the reserved memory with HB Data and
         // will update addresses and totalSize
         l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
                                 startAddressValid, l_totalSizeAligned);
@@ -962,7 +985,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
             l_hbrtSecurelyLoaded = true;
 #endif
-
             PNOR::SectionInfo_t l_pnorInfo;
             l_elog = getSectionInfo( PNOR::HB_RUNTIME , l_pnorInfo);
             if (l_elog)
@@ -1026,7 +1048,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
         }
-
 
         ///////////////////////////////////////////////////
         // SBE Communications buffer entry
@@ -2287,6 +2308,8 @@ errlHndl_t populate_hbTpmInfo()
 } // end populate_hbTpmInfo
 
 
+// populate the hostboot runtime data section for the system
+// will send msg to slave nodes in multinode system
 errlHndl_t populate_hbRuntimeData( void )
 {
     errlHndl_t  l_elog = nullptr;
@@ -2301,6 +2324,9 @@ errlHndl_t populate_hbRuntimeData( void )
         TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
             sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
+        TRACFCOMP( g_trac_runtime, "ATTR_HB_EXISTING_IMAGE (hb_images) = %#x",
+                hb_images);
+
         // Figure out which node we are running on
         TARGETING::Target* mproc = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle(mproc);
@@ -2312,6 +2338,9 @@ errlHndl_t populate_hbRuntimeData( void )
             epath.pathElementOfType(TARGETING::TYPE_NODE);
 
         uint64_t nodeid = pe.instance;
+
+        TRACFCOMP( g_trac_runtime, "Master node nodid = %#x",
+                nodeid);
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
         // Currently set up in host_sys_fab_iovalid_processing() which only
@@ -2332,6 +2361,7 @@ errlHndl_t populate_hbRuntimeData( void )
                 // still fill in HB DATA for testing
                 uint64_t l_startAddr = cpu_spr_value(CPU_SPR_HRMOR) +
                             VMM_HB_DATA_TOC_START_OFFSET;
+
                 uint64_t l_endAddr = 0;
                 uint64_t l_totalSizeAligned = 0;
                 bool startAddressValid = true;
@@ -2369,27 +2399,70 @@ errlHndl_t populate_hbRuntimeData( void )
 
         // continue only for multi-node system
 
-        // loop thru rest of NODES -- sending msg to each
+        // This msgQ catches the node responses from the commands
+        msg_q_t msgQ = msg_q_create();
+        l_elog = MBOX::msgq_register(MBOX::HB_POP_ATTR_MSGQ,msgQ);
+
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, "MBOX::msgq_register failed!" );
+            break;
+        }
+
+        // keep track of the number of messages we send so we
+        // know how many responses to expect
+        uint64_t msg_count = 0;
+
+        // loop thru rest all nodes -- sending msg to each
         TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
           ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+        TRACFCOMP( g_trac_runtime, "HB_EXISTING_IMAGE (mask) = %#x",
+                mask);
 
         for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
         {
             if( 0 != ((mask >> l_node) & hb_images ) )
             {
-                // @TODO RTC 142908
+                TRACFCOMP( g_trac_runtime, "send IPC_POPULATE_ATTRIBUTES "
+                        "message to node %d",
+                        l_node );
 
-                // Need to send message to the node (l_node)
-                // When NODE receives the msg it should
-                // call populate_HbRsvMem(itsNodeId)
-                TRACFCOMP( g_trac_runtime, "MsgToNode %d for HBRT Data",
-                           l_node );
+                msg_t * msg = msg_allocate();
+                msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
+                msg->data[0] = l_node;      // destination node
+                msg->data[1] = nodeid;      // respond to this node
+
+                // send the message to the slave hb instance
+                l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+
+                if( l_elog )
+                {
+                    TRACFCOMP( g_trac_runtime, "MBOX::send to node %d"
+                            " failed", l_node);
+                    break;
+                }
+
+                ++msg_count;
 
             } // end if node to process
         } // end for loop on nodes
 
-    } while(0);
+        // wait for a response to each message we sent
+        if( l_elog == nullptr )
+        {
+            msg_t * response = msg_wait(msgQ);
+            TRACFCOMP(g_trac_runtime,
+                    "IPC_POPULATE_ATTRIBUTES : drawer %d completed",
+                    response->data[0]);
+            msg_free(response);
+            --msg_count;
+        }
 
+        MBOX::msgq_unregister(MBOX::HB_POP_ATTR_MSGQ);
+        msg_q_destroy(msgQ);
+
+    } while(0);
 
     return(l_elog);
 

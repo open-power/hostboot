@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,18 +129,24 @@ void* call_host_ipl_complete (void *io_pArgs)
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Initialize the runtime "
+                "data attributes for HDAT consumption");
 
         // Set number of pointer pairs for HDAT HB RESERVED MEM
-        //@TODO RTC:142908 Support multiple nodes in HBRT
-        const uint32_t NUM_NODES = 1;
-        uint32_t  l_numRsvMemSections = NUM_NODES * HB_RSV_MEM_NUM_PTRS;
+        uint32_t  l_numRsvMemSections = HB_RSV_MEM_NUM_PTRS;
         sys->setAttr<ATTR_HDAT_RSV_MEM_NUM_SECTIONS>(l_numRsvMemSections);
 
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "number of HB Reserved mem sections = %d",
+                           l_numRsvMemSections );
 
         // Set number of pointer pairs for HDAT HBRT
-        //@TODO RTC:142908 Support multiple nodes in HBRT
-        uint32_t  l_numHbrtSections = NUM_NODES * HBRT_NUM_PTRS;
+        uint32_t  l_numHbrtSections = HBRT_NUM_PTRS;
         sys->setAttr<ATTR_HDAT_HBRT_NUM_SECTIONS>(l_numHbrtSections);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "number of HBRT sections = %d",
+                           l_numHbrtSections );
 
         uint64_t  l_maxSecSize  = VMM_RT_VPD_SIZE;
 

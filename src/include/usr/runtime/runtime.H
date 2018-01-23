@@ -35,19 +35,6 @@
 namespace RUNTIME
 {
 
-/**
- * @brief Populate attributes in mainstore for HostServices
- *
- * @return errlHndl_t  NULL on success
- */
-errlHndl_t populate_attributes( void );
-
-/**
- * @brief Populate node attributes in mainstore for HostServices
- *
- * @return errlHndl_t NULL on Success
- */
-errlHndl_t populate_node_attributes( uint64_t i_nodeNum );
 
 /**
  * @brief  Add the host data mainstore location to VMM
@@ -69,6 +56,13 @@ errlHndl_t load_host_data( void );
  * @return errlHndl_t NULL on Success
  */
 errlHndl_t populate_hbRuntimeData( void );
+
+/**
+ * @brief Populate node attributes in mainstore for HostServices
+ *
+ * @return errlHndl_t NULL on Success
+ */
+errlHndl_t populate_HbRsvMem( uint64_t i_nodeNum );
 
 /**
  * @brief persistent read/write Attribute validity runtime check
