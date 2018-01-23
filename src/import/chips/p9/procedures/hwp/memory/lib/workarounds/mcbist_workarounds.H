@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,17 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 fapi2::ReturnCode wat_debug_attention( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief BROADCAST OUT OF SYNC workaround
+/// A UE noise window is triggered by UE/AUEs causing an out of sync error
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @param[in] i_value value to enable or disable workaround
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode broadcast_out_of_sync( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const mss::states i_value );
+
 
 } // close namespace mcbist
 } // close namespace workarounds

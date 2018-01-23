@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,6 +228,7 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             CAL3Q_ALL_PERIODIC_LENGTH_LEN = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH_LEN,
             CAL3Q_FREEZE_ON_PARITY_ERROR_DIS = MCA_MBA_CAL3Q_CFG_FREEZE_ON_PARITY_ERROR_DIS,
 
+            RECR_ENABLE_UE_NOISE_WINDOW = MCA_RECR_MBSECCQ_ENABLE_UE_NOISE_WINDOW,
             RECR_TCE_CORRECTION = MCA_RECR_MBSECCQ_ENABLE_TCE_CORRECTION,
             RECR_READ_POINTER_DLY = MCA_RECR_MBSECCQ_READ_POINTER_DELAY,
             RECR_READ_POINTER_DLY_LEN = MCA_RECR_MBSECCQ_READ_POINTER_DELAY_LEN,
@@ -367,6 +368,37 @@ void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_v
 
     io_data.template writeBit<TT::RECR_TCE_CORRECTION>(i_value);
 }
+
+///
+/// @brief Get the enable_ue_noise_window value from buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the RECR register
+/// @param[out] o_value ENABLE_UE_NOISE_WINDOW value (on or off)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_enable_ue_noise_window( const fapi2::buffer<uint64_t>& i_data, mss::states& o_value )
+{
+    o_value = (i_data.template getBit<TT::RECR_ENABLE_UE_NOISE_WINDOW>()) ? mss::states::ON : mss::states::OFF;
+
+    FAPI_INF( "ENABLE_UE_NOISE_WINDOW: %lu", o_value );
+}
+
+///
+/// @brief Sets enable_ue_noise_window in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in,out] io_data the target data buffer
+/// @param[in] i_value ENABLE_UE_NOISE_WINDOW value (on or off) to set
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_enable_ue_noise_window( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
+{
+    FAPI_INF( "Set ENABLE_UE_NOISE_WINDOW to %lu", i_value);
+
+    io_data.template writeBit<TT::RECR_ENABLE_UE_NOISE_WINDOW>(i_value);
+}
+
 
 ///
 /// @brief Setup read pointer delay and TCE correction

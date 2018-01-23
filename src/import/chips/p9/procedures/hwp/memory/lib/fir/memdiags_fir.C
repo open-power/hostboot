@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <lib/fir/fir.H>
 #include <lib/fir/memdiags_fir.H>
 #include <lib/mc/port.H>
+#include <lib/workarounds/mcbist_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -67,6 +68,9 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     uint64_t mnfg_flag = 0;
     fapi2::buffer<uint64_t> l_aue_buffer;
     fapi2::ATTR_CHIP_EC_FEATURE_HW414700_Type l_checkstop_flag;
+
+    // Broadcast mode workaround for UEs causing out of sync
+    FAPI_TRY(mss::workarounds::mcbist::broadcast_out_of_sync(i_target, mss::ON));
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {

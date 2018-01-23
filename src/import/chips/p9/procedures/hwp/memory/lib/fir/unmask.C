@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,10 +72,12 @@ fapi2::ReturnCode after_draminit_mc( const fapi2::Target<TARGET_TYPE_MCBIST>& i_
 
     // Setup mcbist fir. All mcbist attentions are already special attentions
     // Write this out before the work-around as it will read and write.
-    l_mcbist_fir_reg.attention<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
-    .checkstop<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>();
+    l_mcbist_fir_reg.attention<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>();
 
     FAPI_TRY(l_mcbist_fir_reg.write(), "unable to write fir::reg %d", MCBIST_MCBISTFIRQ);
+
+    // Broadcast mode workaround for UEs causing out of sync
+    FAPI_TRY(mss::workarounds::mcbist::broadcast_out_of_sync(i_target, mss::OFF));
 
     FAPI_TRY(mss::workarounds::mcbist::wat_debug_attention(i_target));
 
