@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,10 +216,15 @@ fapi2::ReturnCode p9_pcie_config(
 
         if (l_hw423589_option1)
         {
-            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_SCOPE_GROUP>();
-            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_SCOPE_GROUP>();
-            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_VG>();
-            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_VG>();
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_VG>();               // 41
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_SCOPE_GROUP>();      // 42
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_INTWR_VG>();            // 43
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_INTWR_SCOPE_GROUP>();   // 44
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_VG>();               // 54
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_SCOPE_GROUP>();      // 51
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_TCE_SCOPE_GROUP>();     // 56
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_TCE_VG>();              // 59
+
         }
 
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
