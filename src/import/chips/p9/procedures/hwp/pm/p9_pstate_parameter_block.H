@@ -662,16 +662,20 @@ int pState2freq (const GlobalPstateParmBlock* gppb,
 
 /// -------------------------------------------------------------------
 /// @brief Pstate VFRT initialization
+/// @param[in] i_target     proc chip target
 /// @param[in] i_gppb       The Global Pstate Parameter Block
 /// @param[in] i_pBuffer    VFRT data coming from HB
 /// @param[out] o_vfrt_data Homer VFRT version
 /// @param[in] i_reference_freq  Ultra frequency  @todo get this from the gppb
-///  @return void
+/// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// -------------------------------------------------------------------
-void p9_pstate_update_vfrt(const GlobalPstateParmBlock*  i_gppb,
-                           uint8_t* i_pBuffer,
-                           HomerVFRTLayout_t* o_vfrt_data,
-                           uint32_t i_reference_freq);
+fapi2::ReturnCode
+p9_pstate_update_vfrt(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const GlobalPstateParmBlock*  i_gppb,
+    uint8_t* i_pBuffer,
+    HomerVFRTLayout_t* o_vfrt_data,
+    uint32_t i_reference_freq);
 
 /**
 *
@@ -769,18 +773,22 @@ void p9_pstate_compute_PsVDMJumpSlopes(
 // p9_pstate_wof_initialization
 /// -------------------------------------------------------------------
 /// @brief  WOF table initialization
+/// @param[in]     i_target               => proc chip target
 /// @param[in]     i_gppb                 => pointer to GPPB strucure
 /// @param[out]    o_buf                  => wof data
 /// @param[in/out] io_size                => total wof data size
 /// @param[out]    o_state                => pstate attribute values
 /// @param[in]     i_base_state_frequency => base frequency value
-/// @return void
+/// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// -------------------------------------------------------------------
-void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
-                                   uint8_t* o_buf,
-                                   uint32_t& io_size,
-                                   PSTATE_attribute_state* o_state,
-                                   const uint32_t i_base_state_frequency);
+fapi2::ReturnCode
+p9_pstate_wof_initialization(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const GlobalPstateParmBlock* i_gppb,
+    uint8_t* o_buf,
+    uint32_t& io_size,
+    PSTATE_attribute_state* o_state,
+    const uint32_t i_base_state_frequency);
 
 /// -------------------------------------------------------------------
 /// @brief This function computes the safe mode frequency and voltage value
