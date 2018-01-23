@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,8 +58,8 @@ namespace TARGETING
 const TARGETING::Target *   getMasterCore( )
 {
     task_affinity_pin();
-    task_affinity_migrate_to_master();
-    uint64_t l_masterCoreID                     =   PIR_t::coreFromPir(task_getcpuid());
+    task_affinity_migrate_to_master();  //This gets us master core, thread 0
+    PIR_t l_masterPIR = PIR_t(task_getcpuid());
     task_affinity_unpin();
 
     const   TARGETING::Target * l_masterCore    =   NULL;
@@ -78,8 +78,9 @@ const TARGETING::Target *   getMasterCore( )
                       true );
 
     TRACFCOMP( g_trac_targeting,
-               "getMasterCore: found %d cores on master proc, l_mastreCoreID:0x%X",
-               l_cores.size(),l_masterCoreID   );
+               "getMasterCore: found %d cores on master proc,"
+               "l_masterCore PIR:0x%X",
+               l_cores.size(),l_masterPIR.word );
 
     for (TARGETING::TargetHandleList::const_iterator
             coreIter = l_cores.begin();
@@ -91,13 +92,13 @@ const TARGETING::Target *   getMasterCore( )
         CHIP_UNIT_ATTR l_coreId =
                     l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-        uint64_t pir =  PIR_t::createCoreId(l_logicalGroupId, l_chipId, l_coreId);
+        PIR_t l_corePIR = PIR_t(l_logicalGroupId, l_chipId, l_coreId);
 
-        if (pir == l_masterCoreID){
+        if (l_corePIR == l_masterPIR){
             TRACFCOMP( g_trac_targeting,
                        "found master core: 0x%x, PIR=0x%x :",
                        l_coreId,
-                       pir  );
+                       l_corePIR.word  );
             EntityPath l_path;
             l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
             l_path.dump();
