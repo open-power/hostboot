@@ -54,6 +54,10 @@ EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 EXTRAINCDIR += ${NEST_UTIL_PATH}
 
+# for attnsvc in pm_common.C
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
+
 ## pointer to already consumed procedures.
 
 ##  NOTE: add the base istep dir here.
@@ -69,10 +73,12 @@ OBJS += occCheckstop.o
 OBJS += p9_setup_evid.o
 OBJS += p9_avsbus_lib.o
 
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH} ${HWP_LIB_PATH}
 VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_CEN_IMAGEPROCS_PATH} ${HWP_COMMON_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${NEST_UTIL_PATH}
+
 
 # TODO RTC: 164237
 # Take another look at PM lib

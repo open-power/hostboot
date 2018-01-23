@@ -31,6 +31,10 @@
 #include    <errl/errlentry.H>
 #include    <errl/errlreasoncodes.H>
 
+// attn/prd call
+#include    <runtime/attnsvc.H>
+
+
 #include    <sys/misc.h>
 #include    <sys/mm.h>
 #include    <sys/time.h>
@@ -913,10 +917,26 @@ namespace HBPM
         {
             int lRc = HBPM_UNMAP(l_homerVAddr);
             uint64_t lZeroAddr = 0;
-            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(reinterpret_cast<uint64_t>(lZeroAddr));
+            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(
+                                        reinterpret_cast<uint64_t>(lZeroAddr));
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "resetPMComplex:" "unmap, RC=0x%X" ,
                            lRc );
+        }
+
+        if (!l_errl)
+        {
+            // Explicitly call ATTN before exiting to ensure PRD handles
+            // LFIR before TMGT triggers PM Complex Init
+            l_errl = Singleton<ATTN::Service>::instance().
+                        handleAttentions( i_target );
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"resetPmComplex: service::handleAttentions "
+                   "returned error for RtProc: 0x%08X", get_huid(i_target));
+            }
+
         }
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
