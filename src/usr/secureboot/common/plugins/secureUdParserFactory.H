@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,9 @@ namespace SECUREBOOT
 
                 registerParser<SECUREBOOT::UdParserSecuritySettings>
                   (SECURE_UDT_SECURITY_SETTINGS);
+
+                registerParser<SECUREBOOT::UdParserVerifyInfo>
+                  (SECURE_UDT_VERIFY_INFO);
             }
 
         private:

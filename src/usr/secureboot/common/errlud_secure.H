@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,6 +172,55 @@ class UdSecuritySettings : public ERRORLOG::ErrlUserDetails
             uint8_t allowAttrOverride;
         };
 
+};
+
+/**
+ * @class UdVerifyInfo
+ *
+ * Adds Secure verification info to an error log as user detail data
+ */
+class UdVerifyInfo : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *  @param[in] i_compId  Component ID associated with blob being verified
+     *  @param[in] i_protectedSize  Protected Payload Size
+     *  @param[in] i_ids  Vector of IDs (PNOR or Lid Id(s)) associated with
+     *                    the blob that is being verified.
+     *  @param[in] i_measuredHash  Measured SHA512 Hash
+     *  @param[in] i_expectedHash  Expected SHA512 Hash
+     */
+    UdVerifyInfo(const char* i_compId,
+                 const uint64_t i_protectedSize,
+                 const RomVerifyIds& i_ids,
+                 const SHA512_t& i_measuredHash,
+                 const SHA512_t& i_expectedHash);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdVerifyInfo() {}
+
+    /**
+     * Delete Copy Constructor
+     */
+    UdVerifyInfo(const UdVerifyInfo&) = delete;
+
+    /**
+     * Delete Copy Assignment
+     */
+    UdVerifyInfo& operator= (const UdVerifyInfo&) = delete;
+
+    /**
+     * Delete Move Constructor
+     */
+    UdVerifyInfo (UdVerifyInfo&&) = delete;
+
+    /**
+     * Delete Move Assignment
+     */
+    UdVerifyInfo& operator = (UdVerifyInfo&&) = delete;
 };
 
 } // end SECUREBOOT namespace

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -949,6 +949,17 @@ sub manipulateImages
                                 run_command("cat $tempImages{TEMP_BIN} >> $tempImages{PAD_PHASE}");
                             }
                         }
+                    }
+                    # Corrupt section if user specified to do so, before ECC injection.
+                    if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
+                    {
+                        # If no protected file ($tempImages{PAYLOAD_TEXT}) exists
+                        # for this partition, then that means there is no unprotected
+                        # section. A protected file is only created when there's a need
+                        # to split up the partition for signing purposes.
+                        corrupt_partition($eyeCatch, $protectedOffset,
+                                          $tempImages{PAYLOAD_TEXT},
+                                          $tempImages{PAD_PHASE});
                     }
                 }
                 if ($eyeCatch eq "SBKT" && $emitEccless)
