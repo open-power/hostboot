@@ -910,11 +910,14 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         io_size = 0;
         if (is_wof_enabled(i_target,&l_state))
         {
-            p9_pstate_wof_initialization(&l_globalppb,
-                                         o_buf,
-                                         io_size,
-                                         &l_state,
-                                         attr_mvpd_poundv_biased[VPD_PV_ULTRA][0]);
+            FAPI_TRY(p9_pstate_wof_initialization(
+                             i_target,
+                             &l_globalppb,
+                             o_buf,
+                             io_size,
+                             &l_state,
+                             attr_mvpd_poundv_biased[VPD_PV_ULTRA][0]),
+                          "WOF initialization failure");
         }
         else
         {
@@ -949,8 +952,9 @@ fapi_try_exit:
 // END OF PSTATE PARAMETER BLOCK function
 
 
-void
-p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
+fapi2::ReturnCode
+p9_pstate_wof_initialization (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              const GlobalPstateParmBlock* i_gppb,
                               uint8_t* o_buf,
                               uint32_t& io_size,
                               PSTATE_attribute_state* o_state,
@@ -1097,10 +1101,16 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
              ++vfrt_index)
         {
 
-            p9_pstate_update_vfrt (i_gppb,
-                                   ((*l_wof_table_data) + l_wof_table_index),
-                                   &l_vfrt,
-                                   i_base_state_frequency);
+            l_rc = p9_pstate_update_vfrt (i_target,
+                                          i_gppb,
+                                          ((*l_wof_table_data) + l_wof_table_index),
+                                          &l_vfrt,
+                                          i_base_state_frequency);
+            if (l_rc)
+            {
+                o_state->iv_wof_enabled = false;
+                FAPI_TRY(l_rc);  // Exit the function as a fail
+            }
 
             // Check for "VT" at the start of the magic number
             if (revle16(l_vfrt.vfrtHeader.magic_number) != 0x5654)
@@ -1124,15 +1134,18 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
 
     } while(0);
 
-    delete l_wof_table_data;
-
+    // This is for the case that the magic number didn't match and we don't
+    // want to fail;  rather, we just disable WOF.
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
+fapi_try_exit:
+    delete l_wof_table_data;
+
     FAPI_DBG("<< WOF initialization");
-    return;
+    return fapi2::current_err;
 
 }
-// START OF GET ATTRIBUTES functionfapi2/include/fapi2_error_scope.H
+// START OF GET ATTRIBUTES
 
 fapi2::ReturnCode
 proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -4043,10 +4056,12 @@ fapi_try_exit:
 }
 
 //@brief Initialize HOMER VFRT data
-void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
-                           uint8_t* i_pBuffer,
-                           HomerVFRTLayout_t* o_vfrt_data,
-                           uint32_t i_reference_freq)
+fapi2::ReturnCode
+p9_pstate_update_vfrt(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                      const GlobalPstateParmBlock* i_gppb,
+                      uint8_t* i_pBuffer,
+                      HomerVFRTLayout_t* o_vfrt_data,
+                      uint32_t i_reference_freq)
 {
     uint32_t l_index_0 = 0;
     uint32_t l_index_1 = 0;
@@ -4116,8 +4131,47 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
                   l_enable_vratio);
 
     bool b_fratio_set = true;
-
     bool b_first_vratio_set = true;
+
+    // Get the frequency biases in place and check that they all match
+    double f_freq_bias = 0;
+    int freq_bias_value_hp = 0;
+    int freq_bias_value_m1_hp = 0;
+    bool b_bias_error = false;
+    for (auto v = 0; v < NUM_OP_POINTS; ++v)
+    {
+        freq_bias_value_hp = i_gppb->ext_biases[v].frequency_hp;
+        if (v > 0)
+        {
+            if (freq_bias_value_hp != freq_bias_value_m1_hp)
+            {
+                b_bias_error = true;
+                FAPI_DBG("FATAL Bias mismatch error: v = %d; freq_bias_value_hp = %d; freq_bias_value_m1_hp = %d",
+                        v, freq_bias_value_hp, freq_bias_value_m1_hp );
+            }
+        }
+
+        freq_bias_value_m1_hp = freq_bias_value_hp;
+
+        if (v == ULTRA)
+        {
+            f_freq_bias = calc_bias(freq_bias_value_hp);
+        }
+    }
+
+    FAPI_ASSERT(!b_bias_error,
+            fapi2::PSTATE_PB_VFRT_BIAS_ERROR()
+            .set_CHIP_TARGET(i_target)
+            .set_FREQ_BIAS_HP_ULTRATURBO(i_gppb->ext_biases[ULTRA].frequency_hp)
+            .set_FREQ_BIAS_HP_TURBO(i_gppb->ext_biases[TURBO].frequency_hp)
+            .set_FREQ_BIAS_HP_NOMINAL(i_gppb->ext_biases[NOMINAL].frequency_hp)
+            .set_FREQ_BIAS_HP_POWERSAVE(i_gppb->ext_biases[POWERSAVE].frequency_hp)
+            .set_UT_FREQ(i_reference_freq),
+            "Frequency Biases do not match so VFRT biasing cannot occur");
+
+    if (f_freq_bias != 1)
+        FAPI_INF("A frequency bias multiplier of %f being applied to all VFRT entries",
+                    f_freq_bias);
 
     //Initialize VFRT data part
     for (l_index_0 = 0; l_index_0 < VFRT_FRATIO_SIZE; ++l_index_0)
@@ -4128,11 +4182,14 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
         {
             // Offset MHz*1000 (khz) + step (khz) * sysvalue
             float l_freq_raw_khz;
+            float l_freq_biased_khz;
             l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * (*i_pBuffer)));
 
+            l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
+
             // Round to nearest MHz as that is how the system tables are generated
-            float l_freq_raw_up_mhz = (l_freq_raw_khz + 500)/1000;
-            float l_freq_raw_dn_mhz = (l_freq_raw_khz)/1000;
+            float l_freq_raw_up_mhz = (l_freq_biased_khz + 500)/1000;
+            float l_freq_raw_dn_mhz = (l_freq_biased_khz)/1000;
             float l_freq_rounded_khz;
             if (l_freq_raw_up_mhz >= l_freq_raw_dn_mhz)
                 l_freq_rounded_khz = (uint32_t)(l_freq_raw_up_mhz * 1000);
@@ -4141,8 +4198,9 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
 
             l_freq_khz = (uint32_t)(l_freq_rounded_khz);
 
-            FAPI_DBG("l_step_freq_khz_raw  = %f; l_freq_rounded = 0x%X (%d); sysvalue = 0x%X (%d)",
-                        l_freq_raw_khz, l_freq_raw_khz,
+            FAPI_DBG("freq_raw_khz  = %f; freq_biased_khz = %f; freq_rounded = 0x%X (%d); sysvalue = 0x%X (%d)",
+                        l_freq_raw_khz,
+                        l_freq_biased_khz,
                         l_freq_khz, l_freq_khz,
                         *i_pBuffer, *i_pBuffer);
 
@@ -4194,6 +4252,8 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
     l_type = 1;
     o_vfrt_data->vfrtHeader.type_version |=  l_type << 4;
 
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 /// Get IAC VDN vlue
