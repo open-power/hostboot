@@ -62,7 +62,7 @@ errlHndl_t populate_hbRuntimeData( void );
  *
  * @return errlHndl_t NULL on Success
  */
-errlHndl_t populate_HbRsvMem( uint64_t i_nodeNum );
+errlHndl_t populate_HbRsvMem( uint64_t i_nodeNum, bool i_master_node = false );
 
 /**
  * @brief persistent read/write Attribute validity runtime check
