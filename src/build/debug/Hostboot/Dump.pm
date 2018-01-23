@@ -75,7 +75,7 @@ our %memory_maps = (
     MEMSTATE_MS_48MEG() =>
         # Add next 38MB after we expand to memory.
         [ 10 * _MB,                      38 * _MB
-        ]
+        ],
     MEMSTATE_MS_64MEG() =>
         # Add next 54MB after we expand to memory.
         [ 10 * _MB,                      54 * _MB
