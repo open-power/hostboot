@@ -276,6 +276,28 @@ ReturnCode fapiAttrGetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode fapiAttrSetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                    ATTR_BAD_DQ_BITMAP_Type (&i_data) );
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// the Row Repair Data attribute. It should not be called directly.
+///
+/// @param[in]  i_fapiDimm    DIMM target pointer
+/// @param[out] o_data        Row Repair Data
+/// @return     ReturnCode.   Zero on success, else platform specified error
+///
+ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+                             ATTR_ROW_REPAIR_DATA_Type (&o_data) );
+
+///
+/// @brief This function is called by the FAPI_ATTR_SET macro when setting
+/// the Row Repair Data attribute. It should not be called directly.
+///
+/// @param[in] i_fapiDimm    DIMM target pointer
+/// @param[in] i_data        Row Repair Data
+/// @return    ReturnCode.   Zero on success, else platform specified error
+///
+ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
+                             ATTR_ROW_REPAIR_DATA_Type (&i_data) );
+
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
 /// the SECURITY_MODE attribute. It should not be called directly.
 ///
@@ -602,6 +624,22 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::fapiAttrSetBadDqBitmap(TARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_ROW_REPAIR_DATA read access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_ROW_REPAIR_DATA_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::getRowRepairData(TARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_ROW_REPAIR_DATA write access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_ROW_REPAIR_DATA_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::setRowRepairData(TARGET, VAL)
 
 //------------------------------------------------------------------------------
 // MACRO to route ATTR_SECURITY_MODE access to the correct HB function
