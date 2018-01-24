@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ fapi2::ReturnCode collectCoreTimeoutFailInfo( const fapi2::Target < fapi2::TARGE
                  set_PROC_CHIP_TARGET( i_processing_info.procTgt ).
                  set_CME_BASE_ADDRESS( l_cmeBaseAddress ).
                  set_SGPE_BASE_ADDRESS( l_sgpeBaseAddress ).
-                 set_CME_STATE_MODE( SNAPSHOT ).
+                 set_CME_STATE_MODE( XIRS ).
                  set_SGPE_STATE_MODE( XIRS ),
                  "Timed Out In Setting Core Special Wakeup");
 fapi_try_exit:

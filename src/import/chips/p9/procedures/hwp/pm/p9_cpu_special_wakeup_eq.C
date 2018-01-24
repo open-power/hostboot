@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,7 +147,7 @@ fapi2::ReturnCode collectEqTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_
                  set_NUM_FUNC_EX( l_ex_vector.size() ).
                  set_PROC_CHIP_TARGET( i_processing_info.procTgt ).
                  set_PPE_BASE_ADDRESS_LIST( l_ppeBaseAddressList ).
-                 set_PPE_STATE_MODE( SNAPSHOT ),
+                 set_PPE_STATE_MODE( XIRS ),
                  "Timed Out In Setting The EQ Special Wakeup" );
 
 fapi_try_exit:
