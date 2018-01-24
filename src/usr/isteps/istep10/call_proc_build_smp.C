@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,9 @@
 
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
-
+#include <sys/misc.h>
+#include <sbeio/sbeioif.H>
+#include <usr/vmmconst.h>
 #include <p9_build_smp.H>
 
 using   namespace   ISTEP_ERROR;
@@ -159,6 +161,34 @@ void* call_proc_build_smp (void *io_pArgs)
                 {
                     // capture the target data in the elog
                     ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+                    l_StepError.addErrorDetails(l_errl);
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                    break;
+                }
+
+                // Now that the SMP is connected, it's possible to establish
+                // untrusted memory windows for non-master processor SBEs.  Open
+                // up the Hostboot read-only memory range for each one to allow
+                // Hostboot dumps / attention handling via any processor chip.
+                const auto hbHrmor = cpu_spr_value(CPU_SPR_HRMOR);
+                l_errl = SBEIO::openUnsecureMemRegion(
+                    hbHrmor,
+                    VMM_MEMORY_SIZE,
+                    false, // False = read-only
+                    l_proc_target);
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK "Failed attempting to open Hostboot's "
+                              "VMM region in SBE of non-master processor chip "
+                              "with HUID=0x%08X.  Requested address=0x%016llX, "
+                              "size=0x%08X",
+                              TARGETING::get_huid(l_proc_target),
+                              hbHrmor,VMM_MEMORY_SIZE);
+
+                    ErrlUserDetailsTarget(l_proc_target).addToLog(l_errl);
+                    l_StepError.addErrorDetails(l_errl);
+                    errlCommit(l_errl,HWPF_COMP_ID);
                     break;
                 }
             }
