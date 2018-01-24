@@ -302,7 +302,7 @@ fapi2::ReturnCode get_overlays_ring(
                i_ddLevel,
                i_ringId,
                UNDEFINED_PPE_TYPE,
-               OVERLAY,
+               UNDEFINED_RING_VARIANT,
                l_instanceId,
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
                l_ringBlockSize);
@@ -910,7 +910,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                    i_ringBufSize2,  // Max size.
                    i_ring.ringId,
                    l_ppeType,
-                   BASE,            // All VPD rings are Base ringVariant
+                   RV_BASE,         // All VPD rings are Base ringVariant
                    l_chipletTorId,  // Chiplet instance TOR Index
                    i_vpdRing );     // The VPD RS4 ring container
 
@@ -2576,7 +2576,7 @@ ReturnCode p9_xip_customize (
             l_rc = tor_get_block_of_rings( l_hwRingsSection,
                                            attrDdLevel,
                                            l_ppeType,
-                                           NOT_VALID,
+                                           UNDEFINED_RING_VARIANT,
                                            &io_ringSectionBuf,
                                            io_ringSectionBufSize );
 
