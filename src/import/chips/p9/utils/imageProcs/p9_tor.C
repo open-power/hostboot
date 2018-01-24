@@ -92,6 +92,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
     {
         rc = ringid_get_properties( chipType,
                                     torMagic,
+                                    torHeader->version,
                                     iCplt,
                                     &cpltData,
                                     &ringIdListCommon,
