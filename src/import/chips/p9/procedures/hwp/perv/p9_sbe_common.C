@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,7 @@ const uint64_t PERV_LFIR_ACTION0[15] =
 
 const uint64_t PERV_LFIR_ACTION1[15] =
 {
-    0xF00007C000000000ULL, // TP
+    0xF000042000000000ULL, // TP
     0xF000000000000000ULL, // N0
     0xF000000000000000ULL, // N1
     0xF000000000000000ULL, // N2
@@ -95,7 +95,7 @@ const uint64_t PERV_LFIR_ACTION1[15] =
 
 const uint64_t PERV_LFIR_MASK[15] =
 {
-    0x0FFFB82BFC400000ULL, // TP
+    0x0FFFBBDFFC400000ULL, // TP
     0x0FFFFFFFFFC00000ULL, // N0
     0x0FFFFFFFFFC00000ULL, // N1
     0x0FFFFFFFFFC00000ULL, // N2
