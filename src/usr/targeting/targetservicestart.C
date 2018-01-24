@@ -416,6 +416,9 @@ static void initializeAttributes(TargetService& i_targetService,
                 l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(l_hyp_hrmor);
             }
 
+
+            //Assemble list of functional procs and zero out virtual address values
+            //to ensure they get set again this IPL
             TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
             TARGETING::PredicateIsFunctional l_functional;
             TARGETING::PredicatePostfixExpr l_functionalChips;
@@ -431,23 +434,39 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
-                //TODO RTC:172534 Need to clear volatile attributes during MPIPL for cumulus
             }
 
-            TargetHandleList tpms;
+            //Assemble list of tpms and zero out some values
+            //to ensure they get set again this IPL
+            TargetHandleList l_tpms;
             TARGETING::PredicateCTM tpmFilter(CLASS_CHIP, TYPE_TPM);
             i_targetService.getAssociated(
-                tpms,
+                l_tpms,
                 l_pTopLevel,
                 TargetService::CHILD,
                 TARGETING::TargetService::ALL,
                 &tpmFilter);
-            for (auto & tpm : tpms)
+            for (auto & tpm : l_tpms)
             {
                 tpm->setAttr<ATTR_HB_TPM_INIT_ATTEMPTED>(0);
                 tpm->setAttr<ATTR_HB_TPM_LOG_MGR_PTR>(0);
                 auto tpmMutex=tpm->getHbMutexAttr<ATTR_HB_TPM_MUTEX>();
                 mutex_init(tpmMutex);
+            }
+
+            //Assemble list of membuf and zero out some virtual address attributes
+            //to ensure they get set again this IPL
+            TargetHandleList l_membufs;
+            TARGETING::PredicateCTM membufFilter(CLASS_CHIP, TYPE_MEMBUF);
+            i_targetService.getAssociated(
+                l_membufs,
+                l_pTopLevel,
+                TargetService::CHILD,
+                TARGETING::TargetService::ALL,
+                &membufFilter);
+            for (auto & membuf : l_membufs)
+            {
+                membuf->setAttr<ATTR_IBSCOM_VIRTUAL_ADDR>(0);
             }
 
             // Setup physical TOC address
