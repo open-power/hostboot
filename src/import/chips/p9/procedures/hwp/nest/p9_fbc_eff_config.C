@@ -55,16 +55,16 @@ const uint8_t NUM_EPSILON_WRITE_TIERS = 2;
 // LE epsilon (2 chips per-group)
 const uint32_t EPSILON_R_T0_LE[] = {    7,    7,    8,    8,   10,   22 };
 const uint32_t EPSILON_R_T1_LE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T2_LE[] = {   61,   63,   65,   68,   73,   97 };
+const uint32_t EPSILON_R_T2_LE[] = {   67,   69,   71,   74,   79,  103 };
 const uint32_t EPSILON_W_T0_LE[] = {    0,    0,    0,    0,    0,    5 };
-const uint32_t EPSILON_W_T1_LE[] = {    9,   10,   11,   13,   15,   27 };
+const uint32_t EPSILON_W_T1_LE[] = {   15,   16,   17,   19,   21,   33 };
 
 // HE epsilon (4 chips per-group)
 const uint32_t EPSILON_R_T0_HE[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T1_HE[] = {   86,   88,   90,   93,   98,  122 };
-const uint32_t EPSILON_R_T2_HE[] = {  197,  198,  201,  204,  209,  233 };
-const uint32_t EPSILON_W_T0_HE[] = {   22,   23,   24,   26,   28,   40 };
-const uint32_t EPSILON_W_T1_HE[] = {  105,  106,  107,  109,  111,  123 };
+const uint32_t EPSILON_R_T1_HE[] = {   92,   94,   96,   99,  104,  128 };
+const uint32_t EPSILON_R_T2_HE[] = {  209,  210,  213,  216,  221,  245 };
+const uint32_t EPSILON_W_T0_HE[] = {   28,   29,   30,   32,   34,   46 };
+const uint32_t EPSILON_W_T1_HE[] = {  117,  118,  119,  121,  123,  135 };
 
 // HE epsilon (flat 4 Zeppelin)
 const uint32_t EPSILON_R_T0_F4[] = {    7,    7,    8,    8,   10,   22 };
@@ -76,9 +76,9 @@ const uint32_t EPSILON_W_T1_F4[] = {   18,   19,   20,   22,   24,   36 };
 // HE epsilon (flat 8 configuration)
 const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
 const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
-const uint32_t EPSILON_R_T2_F8[] = {  145,  146,  149,  152,  157,  181 };
+const uint32_t EPSILON_R_T2_F8[] = {  148,  149,  152,  155,  160,  184 };
 const uint32_t EPSILON_W_T0_F8[] = {    0,    0,    0,    0,    0,    5 };
-const uint32_t EPSILON_W_T1_F8[] = {   73,   74,   75,   77,   79,   91 };
+const uint32_t EPSILON_W_T1_F8[] = {   76,   77,   78,   80,   82,   94 };
 
 
 //------------------------------------------------------------------------------
