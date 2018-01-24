@@ -6101,24 +6101,6 @@
   </attribute>
  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_USE_XIVE_HW_RESET</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-        HW reset for XIVE unit is not working in DD1 or DD2. Potentially
-        could be fixed in the future
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
- <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_POUNDV_VALIDATE_DISABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
