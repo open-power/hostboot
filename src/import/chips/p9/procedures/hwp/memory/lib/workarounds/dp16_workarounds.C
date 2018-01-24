@@ -1557,48 +1557,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks that the rank pair and DRAM are in bounds
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair on which to operate
-/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
-/// @param[in] i_function - the calling function to callout in FFDC
-///
-fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                     const uint64_t i_rp,
-                                     const uint64_t i_dram,
-                                     const ffdc_function_codes i_function )
-{
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-    // Checks inputs
-    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
-
-    // Checks for DRAM in bounds
-    {
-        const uint64_t MAX_NUM_DRAM = l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8 ? MAX_DRAMS_X8 : MAX_DRAMS_X4;
-        FAPI_ASSERT(i_dram < MAX_NUM_DRAM,
-                    fapi2::MSS_INVALID_INDEX_PASSED()
-                    .set_INDEX(i_dram)
-                    .set_FUNCTION(i_function),
-                    "%s Invalid DRAM index passed to check_for_dram_disabled (%d)",
-                    mss::c_str(i_target),
-                    i_dram);
-    }
-
-    // Checks for i_rp in bounds
-    FAPI_ASSERT(i_rp < MAX_RANK_PAIRS,
-                fapi2::MSS_INVALID_RANK().
-                set_MCA_TARGET(i_target).
-                set_RANK(i_rp).
-                set_FUNCTION(i_function),
-                "%s rank pair is out of bounds %lu", mss::c_str(i_target), i_rp);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Gets the disable register and bit position for the DRAM
 /// @param[in] i_target the fapi2 target type MCA of the port
 /// @param[in] i_rp - rank pair to check and modify
@@ -1620,10 +1578,10 @@ fapi2::ReturnCode get_disable_reg_and_pos_for_dram( const fapi2::Target<fapi2::T
     FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
 
     // Checks inputs
-    FAPI_TRY(check_rp_and_dram(i_target,
-                               i_rp,
-                               i_dram,
-                               ffdc_function_codes::GET_DRAM_DISABLE_REG_AND_POS));
+    FAPI_TRY(mss::dp16::wr_vref::check_rp_and_dram(i_target,
+             i_rp,
+             i_dram,
+             ffdc_function_codes::GET_DRAM_DISABLE_REG_AND_POS));
 
     // Get the register and bit positions
     {
@@ -1832,31 +1790,18 @@ fapi2::ReturnCode configure_wr_vref_to_nominal( const fapi2::Target<fapi2::TARGE
         const uint64_t i_dram)
 {
     typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
-    const std::vector<std::vector< std::pair<uint64_t, uint64_t> >> REGS =
-    {
-        TT::WR_VREF_VALUE_RP0_REG,
-        TT::WR_VREF_VALUE_RP1_REG,
-        TT::WR_VREF_VALUE_RP2_REG,
-        TT::WR_VREF_VALUE_RP3_REG,
-    };
-
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
-    uint8_t l_width = 0;
-    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
-    FAPI_TRY(check_rp_and_dram(l_mca, i_rp, i_dram, ffdc_function_codes::CONFIGURE_WR_VREF_TO_NOMINAL));
+    uint64_t l_reg = 0;
 
-    // First gets the address
+    // Get the WR VREF register
+    FAPI_TRY(mss::dp16::wr_vref::get_wr_vref_rp_reg(l_mca, i_rp, i_dram, l_reg));
+
     {
-        constexpr uint64_t NUM_DRAM_PER_REG = 2;
-        const auto l_dram_per_dp = (l_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? BYTES_PER_DP : NIBBLES_PER_DP;
-        const auto l_dp = i_dram / l_dram_per_dp;
-        const auto l_reg_num = (i_dram % l_dram_per_dp) / NUM_DRAM_PER_REG;
-        const auto l_dram_pos = i_dram % NUM_DRAM_PER_REG;
+
+        const auto l_dram_pos = i_dram % TT::NUM_DRAM_PER_REG;
         const auto l_range_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_RANGE_DRAM_EVEN : TT::WR_VREF_VALUE_RANGE_DRAM_ODD;
         const auto l_value_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_VALUE_DRAM_EVEN : TT::WR_VREF_VALUE_VALUE_DRAM_ODD;
-
-        const auto l_reg = (l_reg_num == 0) ? REGS[i_rp][l_dp].first : REGS[i_rp][l_dp].second;
 
         // Now for read modify write
         fapi2::buffer<uint64_t> l_data;
@@ -1955,7 +1900,7 @@ fapi2::ReturnCode reset_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
 
     // Checks inputs
-    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::RESET_WR_DQ_DELAY));
+    FAPI_TRY(mss::dp16::wr_vref::check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::RESET_WR_DQ_DELAY));
 
     // Restores the inputted delay values
     {
@@ -2003,7 +1948,8 @@ fapi2::ReturnCode read_rd_vref_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
 
     // Checks inputs
-    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::READ_RD_VREF_VALUES_FOR_DRAM));
+    FAPI_TRY(mss::dp16::wr_vref::check_rp_and_dram(i_target, i_rp, i_dram,
+             ffdc_function_codes::READ_RD_VREF_VALUES_FOR_DRAM));
 
     // Gets the RD VREF values
     {
@@ -2110,7 +2056,8 @@ fapi2::ReturnCode get_starting_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
 
     // Checks inputs
-    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::GET_STARTING_WR_DQ_DELAY_VALUE));
+    FAPI_TRY(mss::dp16::wr_vref::check_rp_and_dram(i_target, i_rp, i_dram,
+             ffdc_function_codes::GET_STARTING_WR_DQ_DELAY_VALUE));
 
     // Gets the data
     {

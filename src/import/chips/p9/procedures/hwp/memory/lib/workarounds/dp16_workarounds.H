@@ -720,18 +720,6 @@ fapi2::ReturnCode clear_dram_disable_bits( const fapi2::Target<fapi2::TARGET_TYP
         const uint64_t i_dram );
 
 ///
-/// @brief Checks that the rank pair and DRAM are in bounds
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair on which to operate
-/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
-/// @param[in] i_function - the calling function to callout in FFDC
-///
-fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                     const uint64_t i_rp,
-                                     const uint64_t i_dram,
-                                     const ffdc_function_codes i_function );
-
-///
 /// @brief Configures the WR VREF value of a DRAM to be the nominal values
 /// @param[in] i_target the fapi2 target type DIMM
 /// @param[in] i_rp - rank pair to check and modify

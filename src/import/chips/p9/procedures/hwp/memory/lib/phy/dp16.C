@@ -4629,6 +4629,118 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks that the rank pair and DRAM are in bounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_function - the calling function to callout in FFDC
+///
+fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const ffdc_function_codes i_function )
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Checks inputs
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks for DRAM in bounds
+    {
+        const uint64_t MAX_NUM_DRAM = l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8 ? MAX_DRAMS_X8 : MAX_DRAMS_X4;
+        FAPI_ASSERT(i_dram < MAX_NUM_DRAM,
+                    fapi2::MSS_INVALID_INDEX_PASSED()
+                    .set_INDEX(i_dram)
+                    .set_FUNCTION(i_function),
+                    "%s Invalid DRAM index passed to check_for_dram_disabled (%d)",
+                    mss::c_str(i_target),
+                    i_dram);
+    }
+
+    // Checks for i_rp in bounds
+    FAPI_ASSERT(i_rp < MAX_RANK_PAIRS,
+                fapi2::MSS_INVALID_RANK().
+                set_MCA_TARGET(i_target).
+                set_RANK(i_rp).
+                set_FUNCTION(i_function),
+                "%s rank pair is out of bounds %lu", mss::c_str(i_target), i_rp);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determine the dp and reg number to the give DRAM
+/// @param[in] i_target - the fapi2 target type MCA
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_dp - the dp number for the given DRAM
+/// @param[out] o_reg_num - the register number for the given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode dram_to_dp_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_dram,
+                                 uint64_t& o_dp,
+                                 uint64_t& o_reg_num)
+{
+    uint8_t l_widths[mss::PORTS_PER_MCS] = {0};
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    FAPI_TRY( mss::eff_dram_width(i_target, l_widths) );
+
+    // Calculate the address
+    // The assumption here is that the i_dram is within bound. Therefore, the calculated dp and reg_num should also be within bound.
+    {
+        const auto l_dram_per_dp = (l_widths[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? BYTES_PER_DP : NIBBLES_PER_DP;
+        o_dp = i_dram / l_dram_per_dp;
+        o_reg_num = (i_dram % l_dram_per_dp) / TT::NUM_DRAM_PER_REG;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the write vref register
+/// @param[in] i_target - the fapi2 target type MCA
+/// @param[in] i_rp - rank pair, to make sure the dram and rp are within bounds
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_reg - the dp16 wr_vref register for the rank pair and dram
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_wr_vref_rp_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     uint64_t& o_reg)
+{
+
+    uint64_t l_dp = 0;
+    uint64_t l_reg_num = 0;
+
+    // TODO: RTC187141 Clean up WR_VREF register traits
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    const std::vector<std::vector< std::pair<uint64_t, uint64_t> >> REGS =
+    {
+        TT::WR_VREF_VALUE_RP0_REG,
+        TT::WR_VREF_VALUE_RP1_REG,
+        TT::WR_VREF_VALUE_RP2_REG,
+        TT::WR_VREF_VALUE_RP3_REG,
+    };
+
+    // Make sure the rank pair and dram are within bounds
+    FAPI_TRY( check_rp_and_dram(i_target, i_rp, i_dram,
+                                ffdc_function_codes::DRAM_TO_RP_REG));
+
+    // If the dram is within bound, compute the vector address
+    FAPI_TRY(dram_to_dp_reg(i_target, i_dram, l_dp, l_reg_num));
+
+    o_reg = (l_reg_num == 0) ? REGS[i_rp][l_dp].first : REGS[i_rp][l_dp].second;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // close namespace wr_vref
 } // close namespace dp16
 } // close namespace mss
