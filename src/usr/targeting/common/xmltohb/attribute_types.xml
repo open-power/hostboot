@@ -7464,12 +7464,11 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
   </description>
   <simpleType>
       <uint8_t>
-        <default>0</default>
+        <default>1</default>
       </uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile</persistency>
   <readable/>
-  <writeable/>
 </attribute>
 
 <attribute>

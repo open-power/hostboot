@@ -213,9 +213,6 @@ errlHndl_t verifyAndMovePayload(void)
             payload_tmp_virt_addr,
             payload_size);
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "verifyAndMovePayload(): after PAYLOAD memcpy");
-
     // Move HDAT temporarily put into HDAT_TMP_ADDR (HDAT_TMP_SIZE) into
     // its proper place
     // @TODO RTC 168745 - Update hdatservices calls to return Spira-S offset
@@ -271,9 +268,6 @@ errlHndl_t verifyAndMovePayload(void)
     memcpy(hdat_final_virt_addr,
            hdat_tmp_virt_addr,
            HDAT_TMP_SIZE);
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "verifyAndMovePayload(): after HDAT memcpy");
 
     } while(0);
 
@@ -662,6 +656,18 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 #endif
 
+        // Fill in Hostboot runtime data for all nodes
+        // (adjunct partition)
+        // Write the HB runtime data into mainstore
+        l_err = RUNTIME::populate_hbRuntimeData();
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Failed hbRuntimeData setup" );
+            // break from do loop if error occurred
+            break;
+        }
+
         if (TCE::utilUseTcesForDmas())
         {
             // Disable all TCEs
@@ -675,17 +681,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
         }
 
-        // Fill in Hostboot runtime data for all nodes
-        // (adjunct partition)
-        // Write the HB runtime data into mainstore
-        l_err = RUNTIME::populate_hbRuntimeData();
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Failed hbRuntimeData setup" );
-            // break from do loop if error occurred
-            break;
-        }
     } while(0);
 
     if( l_err )
