@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"perv_repr"             , 0x13, 0x01, 0x01, VPD_RING    , 0x01034006},
     {"occ_repr"              , 0x14, 0x01, 0x01, VPD_RING    , 0x01030806},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -85,7 +85,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n0_nx_repr"          , 0x0a, 0x02, 0x02, VPD_RING    , 0x02032006},
     {"n0_cxa0_repr"        , 0x0b, 0x02, 0x02, VPD_RING    , 0x02031006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT};
 };
 
 
@@ -113,7 +113,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n1_ioo1_repr"        , 0x0e, 0x03, 0x03, VPD_RING    , 0x03030406},
     {"n1_mcs23_repr"       , 0x0f, 0x03, 0x03, VPD_RING    , 0x03030206},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID};
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT};
 };
 
 
@@ -137,7 +137,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n2_cxa1_repr"        , 0x0a, 0x04, 0x04, VPD_RING    , 0x04032006},
     {"n2_psi_repr"         , 0x0b, 0x04, 0x04, VPD_RING    , 0x04030206},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -162,7 +162,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"n3_mcs01_repr"       , 0x0b, 0x05, 0x05, VPD_RING    , 0x05030106},
     {"n3_np_repr"          , 0x0c, 0x05, 0x05, VPD_RING    , 0x05030806},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -193,7 +193,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"xb_io1_repr"         , 0x15, 0x06, 0x06, VPD_RING    , 0x06031106},
     {"xb_io2_repr"         , 0x16, 0x06, 0x06, VPD_RING    , 0x06030886},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -224,7 +224,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"mc_iom01_repr"       , 0x11, 0x07, 0x08, VPD_RING    , 0x07031006},
     {"mc_iom23_repr"       , 0x12, 0x07, 0x08, VPD_RING    , 0x07030806},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -244,7 +244,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob0_repr"              , 0x07, 0x09, 0x09, VPD_RING    , 0x09037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -264,7 +264,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob1_repr"              , 0x07, 0x0a, 0x0a, VPD_RING    , 0x0A037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -284,7 +284,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob2_repr"              , 0x07, 0x0b, 0x0b, VPD_RING    , 0x0B037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -304,7 +304,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"ob3_repr"              , 0x07, 0x0c, 0x0c, VPD_RING    , 0x0C037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -322,7 +322,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci0_repr"           , 0x05, 0x0d, 0x0d, VPD_RING    , 0x0D037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -340,7 +340,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci1_repr"           , 0x05, 0x0e, 0x0e, VPD_RING    , 0x0E037806},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -358,7 +358,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"pci2_repr"           , 0x05, 0x0F, 0x0F, VPD_RING    , 0x0F037C06},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
 
 
@@ -441,7 +441,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
     {"ex_l3_refr_repr"            , 0x45, 0x10, 0x1b, VPD_RING    , 0x10030046},
     {"ex_l3_refr_time"            , 0x46, 0x10, 0x1b, VPD_RING    , 0x10030047},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_CC, RV_RL, RV_RL2 };
 };
 
 
@@ -460,7 +460,7 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     { "ec_repr"            , 0x05, 0x20, 0x37, VPD_RING    , 0x20037006},
 };
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, CC, RL };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_CC, RV_RL, RV_RL2 };
 };
 
 
@@ -475,14 +475,14 @@ ChipletType_t P9_RID::ringid_get_chiplet(RingId_t i_ringId)
 }
 
 void P9_RID::ringid_get_chiplet_properties(
-    ChipletType_t      i_chiplet,
+    ChipletType_t      i_chipletType,
     ChipletData_t**    o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
     uint8_t*           o_varNumb)
 {
-    switch (i_chiplet)
+    switch (i_chipletType)
     {
         case PERV_TYPE :
             *o_cpltData = (ChipletData_t*)   &PERV::g_chipletData;

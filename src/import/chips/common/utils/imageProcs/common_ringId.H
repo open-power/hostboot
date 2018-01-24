@@ -54,14 +54,20 @@ typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or
 typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
 #define  UNDEFINED_RING_ID      (RingId_t)0xffff
-#define  INVALID_RING_TYPE      (RingType_t)0xff
-#define  INVALID_CHIPLET_TYPE   (ChipletType_t)0xff
+#define  UNDEFINED_CHIPLET_TYPE (ChipletType_t)0xff
 #define  UNDEFINED_PPE_TYPE     (PpeType_t)0xff
 #define  UNDEFINED_CHIP_TYPE    (ChipType_t)0xff
+#define  INVALID_RING_TYPE      (RingType_t)0xff
+#define  UNDEFINED_RING_VARIANT (RingVariant_t)0xff
 #define  UNDEFINED_RING_BLOCK_TYPE (RingBlockType_t)0xff;
-#define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
-#define  MAX_RING_NAME_LENGTH   (uint8_t)50
+
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
+
+#define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
+
+#define  MAX_RING_PATH_LENGTH   (uint8_t)500
+#define  MAX_RING_NAME_LENGTH   (uint8_t)50
+
 #define  UNDEFINED_BOOLEAN      (myBoolean_t)0xff
 
 //                                                                           //
@@ -132,6 +138,7 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //#define TOR_VERSION  3  // Added TOR magic header.
 //#define TOR_VERSION  4  // TOR API code restructuring.
 #define   TOR_VERSION  5  // Removed TOR-level DD handling.
+//#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
@@ -206,8 +213,9 @@ typedef struct
     uint32_t     scanScomAddress;
 } GenRingIdList;
 
-// PPE types supported. Note that this enum also reflects the
-//   order with which they appear in the HW image's .rings section.
+// P9 PPE types supported.
+// - This enum also reflects the order with which they appear in the HW image's .rings section.
+// - Do  NOT  make changes to the values or order of this enum.
 enum PpeType
 {
     PT_SBE        = 0x00,
@@ -216,17 +224,16 @@ enum PpeType
     NUM_PPE_TYPES = 0x03
 };
 
-// Do  NOT  make changes to the values or order of this enum. Some user
-// codes, like xip_tool, make assumptions about range and order.
+// P9 ring variants supported.
+// - This enum also reflects the order with which they appear in various images' .rings section.
+// - Do  NOT  make changes to the values or order of this enum.
 enum RingVariant
 {
-    BASE     = 0x00,
-    CC       = 0x01,
-    RL       = 0x02,
-    OVERRIDE = 0x03,
-    OVERLAY  = 0x04,
-    NUM_RING_VARIANTS = 0x05,
-    NOT_VALID = 0xff
+    RV_BASE     = 0x00,
+    RV_CC       = 0x01,
+    RV_RL       = 0x02,
+    RV_RL2      = 0x03,
+    NUM_RING_VARIANTS = 0x04,
 };
 
 extern const char* ppeTypeName[];
@@ -234,10 +241,13 @@ extern const char* ringVariantName[];
 
 typedef struct
 {
-    RingVariant_t  variant[3];
+    RingVariant_t  variant[4];
 } RingVariantOrder;
 
 
+// P9 ring types supported.
+// - This enum also reflects the order with which they appear in various images' .rings section.
+// - Do  NOT  make changes to the values or order of this enum.
 enum RingType
 {
     COMMON_RING = 0,
@@ -289,7 +299,7 @@ typedef struct
 {
     uint8_t       iv_torOffSet;
 #ifndef __PPE__
-    char          iv_name[50];
+    char          iv_name[MAX_RING_NAME_LENGTH];
 #endif
     ChipletType_t iv_type;
 } RingProperties_t;
@@ -302,6 +312,7 @@ typedef struct
 #define INFRASTRUCT_RC_FAILURE                1
 #define INFRASTRUCT_RC_CODE_BUG               2
 #define INFRASTRUCT_RC_USER_ERROR             3
+#define INFRASTRUCT_RC_ENV_ERROR              4
 #define INFRASTRUCT_RC_NOOF_CODES             5 // Do not use as RC code
 //
 // TOR specific error codes
@@ -332,7 +343,13 @@ typedef struct
 #define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_RC_NOOF_CODES + 21
 #define TOR_TOO_MANY_DD_LEVELS                INFRASTRUCT_RC_NOOF_CODES + 22
 #define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_RC_NOOF_CODES + 23
+#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_RC_NOOF_CODES + 24
 
+#ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
+int ringid_get_raw_ring_file_path( uint32_t       i_magic,
+                                   RingVariant_t  i_ringVariant,
+                                   char*          io_directory );
+#endif
 
 int ringid_get_noof_chiplets( ChipType_t  i_chipType,
                               uint32_t    i_torMagic,
@@ -340,7 +357,8 @@ int ringid_get_noof_chiplets( ChipType_t  i_chipType,
 
 int ringid_get_properties( ChipType_t         i_chipType,
                            uint32_t           i_torMagic,
-                           ChipletType_t      i_chiplet,
+                           uint8_t            i_torVersion,
+                           ChipletType_t      i_chipletType,
                            ChipletData_t**    o_chipletData,
                            GenRingIdList**    o_ringIdListCommon,
                            GenRingIdList**    o_ringIdListInstance,

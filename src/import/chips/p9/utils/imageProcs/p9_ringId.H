@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -686,7 +686,7 @@ static const ChipletData_t g_chipletData =
     66, // 66 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
     9,  // 9 different rings since 2 per EX ring and 1 per EQ
-    3,  // 3 ring variants: BASE, CC, RL
+    4,  // 4 ring variants: BASE, CC, RL, RL2
 };
 }; // end of namespace EQ
 
@@ -711,7 +711,7 @@ static const ChipletData_t g_chipletData =
     6,  // 6 common rings for Core chiplet
     1,  // 1 instance specific ring for each Core chiplet
     1,
-    3,  // 3 ring variants: BASE, CC, RL
+    4,  // 4 ring variants: BASE, CC, RL, RL2
 };
 }; // end of namespace EC
 
@@ -1252,7 +1252,7 @@ ringid_get_chiplet(RingId_t i_ringId);
 // as determined by ringId
 void
 ringid_get_chiplet_properties(
-    ChipletType_t      i_chiplet,
+    ChipletType_t      i_chipletType,
     ChipletData_t**    o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,

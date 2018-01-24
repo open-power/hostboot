@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"tp_pll_bndy_bucket_8", 0x6a, 0x01, 0x01, CEN_RING, 0x01030088},
 };
 
-const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 
 }; // namespace CEN
 
@@ -160,14 +160,14 @@ ChipletType_t CEN_RID::ringid_get_chiplet(RingId_t i_ringId)
 }
 
 void CEN_RID::ringid_get_chiplet_properties(
-    ChipletType_t      i_chiplet,
+    ChipletType_t      i_chipletType,
     ChipletData_t**    o_cpltData,
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
     uint8_t*           o_varNumb)
 {
-    switch (i_chiplet)
+    switch (i_chipletType)
     {
         case CEN_TYPE :
             *o_cpltData = (ChipletData_t*)   &CEN::g_chipletData;
