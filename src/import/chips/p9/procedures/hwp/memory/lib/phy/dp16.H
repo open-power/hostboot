@@ -154,6 +154,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static constexpr uint64_t RD_VREF_DVDD = 12;
         static constexpr uint64_t RD_VREF_DAC_STEP = 6500;
 
+        // Number of DRAM per register
+        static constexpr uint64_t NUM_DRAM_PER_REG = 2;
+
         // Vectors of DP16 registers. The pair represents the two DLL in per DP16
         static const std::vector< uint64_t > DLL_CNFG_REG;
         static const std::vector< uint64_t > RD_VREF_CAL_ENABLE_REG;
@@ -2404,6 +2407,106 @@ uint64_t compute_composite_value(const uint64_t i_range, const uint64_t i_value)
 fapi2::ReturnCode offset_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                  uint8_t& io_train_range,
                                  uint8_t& io_train_value );
+
+///
+/// @brief Checks that the rank pair and DRAM are in bounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_function - the calling function to callout in FFDC
+///
+fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const ffdc_function_codes i_function );
+
+///
+/// @brief Determine the dp and reg number to the give DRAM
+/// @param[in] i_target - the fapi2 target type MCA
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_dp - the dp number for the given DRAM
+/// @param[out] o_reg_num - the register number for the given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode dram_to_dp_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_dram,
+                                 uint64_t& o_dp,
+                                 uint64_t& o_reg_num);
+
+///
+/// @brief Gets the write vref register
+/// @param[in] i_target - the fapi2 target type MCA
+/// @param[in] i_rp - rank pair, to make sure the dram and rp are within bounds
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_reg - the dp16 wr_vref register for the rank pair and dram
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_wr_vref_rp_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     uint64_t& o_reg);
+
+///
+/// @brief Get the nominal WR VREF value and range of a dram
+/// @param[in] i_target - the fapi2 target type MCA
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_data - scom data containing wr vref value and range
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+inline fapi2::ReturnCode read_wr_vref_register( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        fapi2::buffer<uint64_t>& o_data )
+{
+    // TK: Create similar function for write
+    uint64_t l_reg = 0;
+    FAPI_TRY( get_wr_vref_rp_reg(i_target, i_rp, i_dram, l_reg));
+
+    // Get the vref value and range from scom
+    FAPI_TRY(mss::getScom(i_target, l_reg, o_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Extract the write vref range from scom data
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data - scom data containing the wr_vref data
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_range - wr_vref range extracted from scom data
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void get_wr_vref_range( const fapi2::buffer<uint64_t> i_data,
+                               const uint64_t i_dram,
+                               bool& o_range )
+{
+    const auto l_dram_pos = i_dram % TT::NUM_DRAM_PER_REG;
+    const auto l_range_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_RANGE_DRAM_EVEN : TT::WR_VREF_VALUE_RANGE_DRAM_ODD;
+
+    o_range = i_data.getBit(l_range_pos);
+}
+
+///
+/// @brief Extract the write vref value from scom data
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data - scom data containing the wr_vref data
+/// @param[in] i_dram - the DRAM
+/// @param[out] o_value - wr_vref value extracted from scom data
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void get_wr_vref_value( const fapi2::buffer<uint64_t> i_data,
+                               const uint64_t i_dram,
+                               uint64_t& o_value )
+{
+    const auto l_dram_pos = i_dram % TT::NUM_DRAM_PER_REG;
+    const auto l_value_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_VALUE_DRAM_EVEN : TT::WR_VREF_VALUE_VALUE_DRAM_ODD;
+    i_data.extractToRight(o_value, l_value_pos, TT::WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN);
+}
+
 } // close namespace wr_vref
 } // close namespace dp16
 } // close namespace mss
