@@ -668,7 +668,6 @@ errlHndl_t SbePsu::writeScom(TARGETING::Target * i_target,
 
 errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
 {
-
     static mutex_t l_alloMux = MUTEX_INITIALIZER;
 
     uint32_t l_bufSize = getSbeFFDCBufferSize();
@@ -684,12 +683,19 @@ errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
     {
         void * l_ffdcPtr = PageManager::allocatePage(ffdcPackageSize, true);
         memset(l_ffdcPtr, 0x00, l_bufSize);
+        uint64_t l_phyAddr_ffdcPtr = mm_virt_to_phys(l_ffdcPtr);
 
         errl = sendSetFFDCAddr(l_bufSize,
                           0,
-                          mm_virt_to_phys(l_ffdcPtr),
+                          l_phyAddr_ffdcPtr,
                           0,
                           i_target);
+
+        //Make the corresponding platform attribute match what we sent to SBE
+        //Things will work without setting these attributes, just to reduce
+        //confusion during debug in the future we will set them here.
+        i_target->setAttr<TARGETING::ATTR_SBE_FFDC_ADDR>(l_phyAddr_ffdcPtr);
+        i_target->setAttr<TARGETING::ATTR_SBE_COMM_ADDR>(0);
 
         if(errl)
         {
