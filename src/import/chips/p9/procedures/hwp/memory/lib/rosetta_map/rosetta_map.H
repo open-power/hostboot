@@ -369,6 +369,9 @@ fapi2::ReturnCode c4_to_phy( const fapi2::Target<T>& i_target,
     o_dp   = l_mapping[i_c4_pin].first;
     o_lane = l_mapping[i_c4_pin].second;
 
+    FAPI_INF("%s Module C4 pin type %s, index %d maps to PHY DP%d lane %d", mss::c_str(i_target), l_str_buffer, i_c4_pin,
+             o_dp, o_lane);
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -411,7 +414,90 @@ fapi2::ReturnCode phy_to_c4( const fapi2::Target<T>& i_target,
 
     o_c4_pin = l_it - l_mapping.begin();
 
+    FAPI_INF("%s PHY DP%d lane %d (type %s) maps to module C4 pin index %d", mss::c_str(i_target), i_dp, i_lane,
+             l_str_buffer, o_c4_pin);
+
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Given a memory controller pin index, return the PHY DP16 instance and lane
+/// @tparam R rosetta_type enumeration of signal/pin to map
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_mc_pin the index of the memory controller pin
+/// @param[out] o_dp the DP instance
+/// @param[out] o_lane the lane index
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< rosetta_type R, fapi2::TargetType T >
+fapi2::ReturnCode mc_to_phy( const fapi2::Target<T>& i_target,
+                             const uint64_t i_mc_pin,
+                             uint64_t& o_dp,
+                             uint64_t& o_lane );
+
+///
+/// @brief Given a PHY DP16 instance and lane, return the corresponding memory controller pin index
+/// @tparam R rosetta_type enumeration of signal/pin to map
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the DP instance
+/// @param[in] i_lane the lane index
+/// @param[out] o_mc_pin the index of the memory controller pin
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< rosetta_type R, fapi2::TargetType T >
+fapi2::ReturnCode phy_to_mc( const fapi2::Target<T>& i_target,
+                             const uint64_t i_dp,
+                             const uint64_t i_lane,
+                             uint64_t& o_mc_pin );
+
+///
+/// @brief Given a memory controller pin index, return the module C4 pin index
+/// @tparam R rosetta_type enumeration of signal/pin to map
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_mc_pin the index of the memory controller pin
+/// @param[out] o_c4_pin the index of the module C4 pin
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< rosetta_type R, fapi2::TargetType T >
+fapi2::ReturnCode mc_to_c4( const fapi2::Target<T>& i_target,
+                            const uint64_t i_mc_pin,
+                            uint64_t& o_c4_pin )
+{
+    uint64_t l_dp = 0;
+    uint64_t l_lane = 0;
+
+    FAPI_TRY(mc_to_phy<R>(i_target, i_mc_pin, l_dp, l_lane));
+    FAPI_TRY(phy_to_c4<R>(i_target, l_dp, l_lane, o_c4_pin));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Given a module C4 pin index, return the corresponding memory controller pin index
+/// @tparam R rosetta_type enumeration of signal/pin to map
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_c4_pin the index of the module C4 pin
+/// @param[out] o_mc_pin the index of the memory controller pin
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< rosetta_type R, fapi2::TargetType T >
+fapi2::ReturnCode c4_to_mc( const fapi2::Target<T>& i_target,
+                            const uint64_t i_c4_pin,
+                            uint64_t& o_mc_pin )
+{
+    uint64_t l_dp = 0;
+    uint64_t l_lane = 0;
+
+    FAPI_TRY(c4_to_phy<R>(i_target, i_c4_pin, l_dp, l_lane));
+    FAPI_TRY(phy_to_mc<R>(i_target, l_dp, l_lane, o_mc_pin));
 
 fapi_try_exit:
     return fapi2::current_err;
