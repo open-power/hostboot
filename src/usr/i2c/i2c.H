@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -359,7 +359,8 @@ union status_reg_t
         uint64_t stop_error : 1;
         uint64_t upper_threshold : 7;
         uint64_t any_i2c_interrupt : 1;
-        uint64_t reserved0 : 2;
+        uint64_t waiting_for_i2c_busy : 1;
+        uint64_t error_in : 1;
         uint64_t i2c_port_history_busy : 1;
         uint64_t scl_input_level : 1;
         uint64_t sda_inupt_level : 1;

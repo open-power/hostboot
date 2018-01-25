@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -80,6 +80,9 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
+#define I2C_RESET_POLL_DELAY_NS (500 * 1000)  // Sleep for 500usec per poll
+#define I2C_RESET_POLL_DELAY_TOTAL_NS (500 * NS_PER_MSEC) // Total time to poll
+
 #define P9_MASTER_PORTS 13          // Number of Ports used in P9
 #define CENTAUR_MASTER_ENGINES 1   // Number of Engines in a Centaur
 #define MAX_NACK_RETRIES 3
@@ -2791,6 +2794,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
     // Master Registers
     mode_reg_t mode;
     command_reg_t cmd;
+    status_reg_t status_reg;
     uint64_t l_speed = I2C_BUS_SPEED_FROM_MRW;
 
     // I2C Bus Speed Array
@@ -2895,6 +2899,55 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                 // on this I2C engine
                 errlCommit( err, I2C_COMP_ID );
                 continue;
+            }
+
+            // Look for Clock Line (SCL) High such that 'stop' cmd will work
+            status_reg.value = 0x0ull;
+            size_t delay_ns = 0;
+            for ( ;
+                  delay_ns <= I2C_RESET_POLL_DELAY_TOTAL_NS;
+                  delay_ns += I2C_RESET_POLL_DELAY_NS)
+            {
+                err = i2cRegisterOp( DeviceFW::READ,
+                                     i_target,
+                                     &status_reg.value,
+                                     I2C_REG_STATUS,
+                                     i_args );
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               ERR_MRK"Reading I2C Status Reg Failed!!" );
+                    break;
+                }
+
+                if ( status_reg.scl_input_level != 0 )
+                {
+                    break;
+                }
+
+                // Sleep before polling again
+                nanosleep( 0, I2C_RESET_POLL_DELAY_NS );
+
+            }
+
+            if ( err )
+            {
+                // We still need to send the slave stop to the other ports
+                // on this I2C engine
+                errlCommit( err, I2C_COMP_ID );
+                continue;
+            }
+
+            if ( delay_ns > I2C_RESET_POLL_DELAY_TOTAL_NS )
+            {
+                // Even though we don't see the Clock Line High, just
+                // trace a warning here and continue to send the 'stop' cmd
+                TRACFCOMP( g_trac_i2c, INFO_MRK"i2cSendSlaveStop(): "
+                           "Not seeing SCL High 0x%.16llX after 0x%X ns of "
+                           "polling (max=0x%X)",
+                           status_reg.value, delay_ns,
+                           I2C_RESET_POLL_DELAY_TOTAL_NS );
             }
 
             cmd.value = 0x0ull;
