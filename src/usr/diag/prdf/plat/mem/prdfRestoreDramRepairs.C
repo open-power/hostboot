@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -362,8 +362,10 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         uint8_t dimm = getTargetPosition( i ) % MAX_DIMM_PER_PORT;
 
         // i_badDimmMask is defined as a 2-bit mask where a bit set means that
-        // DIMM had more bad bits than could be repaired.
-        uint8_t mask = 0x2 >> dimm;
+        // DIMM had more bad bits than could be repaired. Note: the value is
+        // actually a 4-bit field for use with Centaur, but we only use the
+        // first 2 bits of that field here.
+        uint8_t mask = 0x80 >> dimm;
 
         if ( 0 != (i_badDimmMask & mask) )
         {
