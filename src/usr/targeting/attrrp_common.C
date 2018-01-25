@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,14 @@
 
 namespace TARGETING
 {
+    #define TARG_NAMESPACE "TARGETING"
+    #define TARG_CLASS "AttrRP"
+
+#ifdef __HOSTBOOT_RUNTIME
+    // It is defined here to limit the scope within this file
+    #define INVALID_NODE_ID iv_nodeContainer.size()
+#endif
+
     /** @struct AttrRP_Section
      *  @brief Contains parsed information about each attribute section.
      */
@@ -50,14 +58,23 @@ namespace TARGETING
 
     AttrRP::~AttrRP()
     {
-        if (iv_sections)
+        if (iv_sections) // @TODO RTC:186585 move if... to #ifndef clause
         {
             delete[] iv_sections;
-        }
+        } // @TODO RTC:186585 move if... to #ifndef clause
+
 #ifndef __HOSTBOOT_RUNTIME
         msg_q_destroy(iv_msgQ);
         TARG_ASSERT(false, "Assert to exit ~AttrRP");
 #else
+        for(uint32_t i = NODE0; i < INVALID_NODE_ID; ++i)
+        {
+            if (iv_nodeContainer[i].pSections)
+            {
+                delete[] iv_nodeContainer[i].pSections;
+            }
+        }
+
         // Only assert if this in not a temporary AttrRP instance
         if (!iv_isTempInstance)
         {

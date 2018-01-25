@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@
 
 
 trace_desc_t* g_trac_hbrt = NULL;
-TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
+TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
 
 
 class RuntimeLoaderTest : public CxxTest::TestSuite

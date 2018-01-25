@@ -36,6 +36,7 @@
 // Includes
 //******************************************************************************
 
+#include <vector>
 #include <initservice/taskargs.H>
 #include <sys/msg.h>
 #include <targeting/adapters/types.H>
@@ -47,6 +48,43 @@ namespace TARGETING
 
 // Forward declaration of attribute section parsed information structure.
 struct AttrRP_Section;
+
+#ifdef __HOSTBOOT_RUNTIME
+/**
+ *  @brief Structure used to store Node specific information
+ */
+struct NodeInfo
+{
+
+    NodeInfo() :
+        pTargetMap(nullptr),
+        pSections(nullptr),
+        sectionCount(0)
+    {
+    }
+
+    // Pointer to the targeting image
+    void*           pTargetMap;
+
+    // Parsed structures of the attribute sections.
+    AttrRP_Section* pSections;
+
+    // Count of attribute sections.
+    size_t          sectionCount;
+
+};
+
+/**
+ *  @brief enumeration of node instance status
+ */
+enum NodeInstanceStatus
+{
+    SINGLE_NODE,
+    MULTI_NODE,
+    MULTI_NODE_LT_MAX_INSTANCES,
+    MULTI_NODE_INSTANCE_GAP,
+};
+#endif
 
 /**
  *  @class AttrRP
@@ -89,18 +127,48 @@ class AttrRP
          */
         static uint64_t getHbDataTocAddr();
 
+#ifdef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Initialize node struct for a given node
+         *
+         *  @param[in/out] io_nodeCont
+         *      Node struct to be initialized
+         *
+         *  @param[in] i_header
+         *      Targeting image header for node
+         *
+         *  @param[in] i_nodeId
+         *      Node ID for which to initialize node struct
+         *
+         *  @return Error log
+         */
+        errlHndl_t nodeInfoInit(NodeInfo& io_nodeCont,
+                                TargetingHeader* i_header,
+                                const NODE_ID i_nodeId);
+
+        /**
+         *  @brief Returns address of targeting image in reserved memory
+         *
+         *  @param[in] i_nodeId
+         *      Node ID for which to get targeting image address
+         *
+         *  @return Address of targeting image as a void*
+         */
+        void* getTargetMapPtr(const NODE_ID i_nodeId);
+#endif
+
         /**
          *  @brief Returns base address of the RO section containing the
          *      targets
          *
-         *  @param[in] i_nodeIdUnused
+         *  @param[in] i_nodeId
          *      Node ID to get base address for, ignored by Hostboot, which
          *      always gets base address of local node
          *
          *  @return Base address of the RO section containing the targets as
          *      a void*
          */
-        void* getBaseAddress(const NODE_ID i_nodeIdUnused);
+        void* getBaseAddress(const NODE_ID i_nodeId);
 
         /**
          *  @brief Translates given address, according to the resource
@@ -231,6 +299,16 @@ class AttrRP
          *  @return void
          */
         void fillInAttrRP(TargetingHeader* i_header);
+
+        /**
+         *  @brief Get count of nodes handled by attribute resource provider.
+         *
+         *  @return Number of node containers
+         */
+        size_t getNodeCount()
+        {
+            return iv_nodeContainer.size();
+        }
 #endif
 
     protected:
@@ -246,8 +324,8 @@ class AttrRP
             : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0),
               iv_isMpipl(false)
 #else
-            : iv_isTempInstance(false), iv_sections(NULL), iv_sectionCount(0),
-              iv_isMpipl(false)
+            : iv_isTempInstance(false), iv_instanceStatus(SINGLE_NODE),
+              iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
 #endif
         {
         };
@@ -260,7 +338,8 @@ class AttrRP
          *      Ensures member variables are initialized to sane values.
          */
         AttrRP(TargetingHeader* i_header)
-            : iv_isTempInstance(true), iv_isMpipl(false)
+            : iv_isTempInstance(true), iv_instanceStatus(SINGLE_NODE),
+              iv_isMpipl(false)
         {
             // Fill in member variables
             fillInAttrRP(i_header);
@@ -424,12 +503,18 @@ class AttrRP
 #else
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;
+
+        // Node Container
+        std::vector<NodeInfo> iv_nodeContainer;
+
+        // Node instance status
+        NodeInstanceStatus iv_instanceStatus;
 #endif
         // Parsed structures of the attribute sections.
-        AttrRP_Section* iv_sections;
+        AttrRP_Section* iv_sections; // @TODO RTC:186585 move to #ifndef clause
 
         // Count of attribute sections.
-        size_t iv_sectionCount;
+        size_t iv_sectionCount; // @TODO RTC:186585 move to #ifndef clause
 
         bool iv_isMpipl;
 };
