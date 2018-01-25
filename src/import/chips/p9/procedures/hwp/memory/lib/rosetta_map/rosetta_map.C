@@ -37,6 +37,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <rosetta_map.H>
+#include <lib/phy/dp16.H>
 
 namespace mss
 {
@@ -399,5 +400,81 @@ const std::vector<std::pair<uint64_t, uint64_t>> rosettaTraits<fapi2::TARGET_TYP
     {0, 16}, {0, 20}, {1, 16}, {1, 20}, {2, 16}, {2, 20}, {3, 16}, {3, 20}, {4, 16}, {0, 18}, {0, 22}, {1, 18}, {1, 22}, {2, 18}, {2, 22}, {3, 18},
     {3, 22}, {4, 18},
 };
+
+namespace rosetta_map
+{
+
+///
+/// @brief Given a memory controller DQ pin index, return the PHY DP16 instance and lane
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_mc_pin the index of the memory controller pin
+/// @param[out] o_dp the DP instance
+/// @param[out] o_lane the lane index
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode mc_to_phy<DQ>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_mc_pin,
+                                 uint64_t& o_dp,
+                                 uint64_t& o_lane )
+{
+    FAPI_ASSERT(i_mc_pin < MAX_DQ_BITS,
+                fapi2::MSS_MC_PIN_OUT_OF_RANGE()
+                .set_MCA_TARGET(i_target)
+                .set_INDEX(i_mc_pin),
+                "%s Memory controller pin type DQ, index %d is beyond maximum value %d", mss::c_str(i_target), i_mc_pin,
+                (MAX_DQ_BITS - 1) );
+
+    o_dp   = i_mc_pin / BITS_PER_DP;
+    o_lane = i_mc_pin % BITS_PER_DP;
+
+    FAPI_INF("%s MC DQ pin %d maps to PHY DP%d lane %d", mss::c_str(i_target), i_mc_pin, o_dp, o_lane);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Given a PHY DP16 instance and lane, return the corresponding memory controller DQ pin index
+/// @tparam T fapi2 Target Type - derived
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the DP instance
+/// @param[in] i_lane the lane index
+/// @param[out] o_mc_pin the index of the memory controller pin
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode phy_to_mc<DQ>( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 const uint64_t i_dp,
+                                 const uint64_t i_lane,
+                                 uint64_t& o_mc_pin )
+{
+    typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // DP4 has fewer DQ than the others
+    constexpr uint64_t BITS_ON_DP4 = 8;
+    const uint64_t l_num_dq = (i_dp == TT::DP_COUNT - 1) ? BITS_ON_DP4 : BITS_PER_DP;
+
+    FAPI_ASSERT((i_dp < TT::DP_COUNT) && (i_lane < l_num_dq),
+                fapi2::MSS_NO_MC_PIN_MAPPING()
+                .set_MCA_TARGET(i_target)
+                .set_DP(i_dp)
+                .set_LANE(i_lane),
+                "%s No memory controller pin mapping found for type DQ, DP %d, lane %d", mss::c_str(i_target), i_dp, i_lane );
+
+    o_mc_pin = (i_dp * BITS_PER_DP) + i_lane;
+
+    FAPI_INF("%s PHY DP%d lane %d maps to MC DQ pin %d", mss::c_str(i_target), i_dp, i_lane, o_mc_pin);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ns rosetta_map
 
 } // ns mss
