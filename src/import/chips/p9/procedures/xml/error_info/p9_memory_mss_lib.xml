@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -512,6 +512,29 @@
     <description>Indicates a fail when attempting to get a module C4 pin mapping for a given PHY instance and lane</description>
     <ffdc>MCA_TARGET</ffdc>
     <ffdc>TYPE</ffdc>
+    <ffdc>DP</ffdc>
+    <ffdc>LANE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MC_PIN_OUT_OF_RANGE</rc>
+    <description>Indicates a fail when attempting to get a PHY mapping for an out-of-bounds module MC pin index</description>
+    <ffdc>MCA_TARGET</ffdc>
+    <ffdc>INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_MC_PIN_MAPPING</rc>
+    <description>Indicates a fail when attempting to get a module MC pin mapping for a given PHY instance and lane</description>
+    <ffdc>MCA_TARGET</ffdc>
     <ffdc>DP</ffdc>
     <ffdc>LANE</ffdc>
     <callout>
