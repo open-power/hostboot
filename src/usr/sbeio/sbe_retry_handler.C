@@ -59,6 +59,7 @@
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <secureboot/service.H>
 
 #include <devicefw/driverif.H>
 
@@ -88,7 +89,9 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode)
 SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
                                  uint32_t i_plid)
 
-: iv_sbeRestarted(false)
+: iv_useSDB(false)
+, iv_secureModeDisabled(!SECUREBOOT::enabled())
+, iv_sbeRestarted(false)
 , iv_sbeSide(0)
 , iv_errorLogPLID(0)
 , iv_callerErrorLogPLID(i_plid)
@@ -119,6 +122,11 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
     do
     {
         errlHndl_t l_errl = NULL;
+
+        if(!i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom)
+        {
+            this->iv_useSDB = true;
+        }
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                         const_cast<TARGETING::Target*> (i_target));
@@ -292,7 +300,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // In the informational only mode, we just need enough information
             // to get the SBE RC returned from the HWP.  We are running with
             // the knowledge that the SBE has failed already.
-            this->sbe_boot_fail_handler(i_target);
+            this->sbe_boot_fail_handler(i_target, true); // pass true to have log show up
             this->iv_currentSBEState = SBE_FAILED_TO_BOOT;
         }
 
@@ -803,11 +811,20 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
     return l_flowCtrl;
 }
 
+//By default we want to call the 2 param version of the func w/ "true"
+//passed in to tell the function we want to hide the mandatory errlog
 bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
+{
+    return SbeRetryHandler::sbe_boot_fail_handler(i_target, false);
+}
+
+bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
+                                            bool i_exposeLog)
 {
     SBE_TRACF(ENTER_MRK "sbe_boot_fail_handler()");
 
     errlHndl_t l_errl = nullptr;
+    fapi2::ReturnCode l_rc;
     bool o_needRetry = false;
 
     SBE_TRACF("SBE 0x%.8X never started, sbeReg=0x%.8X",
@@ -840,6 +857,12 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
         l_errl->plid(iv_callerErrorLogPLID);
     }
 
+    if(i_exposeLog)
+    {
+        l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+
+    }
+
     // Commit error and continue, this is not terminating since
     // we can still at least boot with master proc
     errlCommit(l_errl,ISTEP_COMP_ID);
@@ -852,8 +875,14 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
 
     P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
                      P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
-    FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
-                    l_fapi2ProcTarget, l_ret);
+
+    //Note that we are calling this while we are already inside
+    //of a FAPI_INVOKE_HWP call. This might cause issue w/ current_err
+    //but unsure how to get around it.
+    FAPI_EXEC_HWP(l_rc, p9_extract_sbe_rc, l_fapi2ProcTarget,
+                  l_ret, iv_useSDB, iv_secureModeDisabled);
+
+    l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     this->iv_currentAction = l_ret;
 
     if(this->iv_currentAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
