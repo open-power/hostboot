@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
 #include <xscom/piberror.H>
+#include <sbeio/sbe_retry_handler.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -132,7 +133,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
 
     mutex_unlock(&l_fifoOpMux);
 
-    if( errl && (SBEIO_COMP_ID == errl->moduleId()) )
+    if( errl && (SBEIO_FIFO == errl->moduleId()) )
     {
         SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
 
@@ -691,6 +692,32 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
 
+            //It is likely that the SBE is in a failed state so set up retry handler
+            SbeRetryHandler l_SBEobj = SbeRetryHandler(
+            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY);
+
+            // Look at the scomSwitch attribute to tell what types
+            // of scoms are going to be used. If the SMP is not yet up then we
+            // will still be using SbeScoms , this uses the fifo path which
+            // is currently blocked by the current hwp invoke we failed on.
+            // In this case we need to switch to use the FSI scom path.
+            // If SMP is up and xscoms are being used we can skip this step
+            TARGETING::ScomSwitches l_switches =
+                i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+            if(!l_switches.useXscom)
+            {
+                l_switches.useSbeScom = 0;
+                l_switches.useFsiScom = 1;
+                i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+            }
+
+            l_SBEobj.main_sbe_handler(i_target);
+
+            if(l_SBEobj.getPLID())
+            {
+                //tie the error from the sbe retry handler to this error
+                errl->plid(l_SBEobj.getPLID());
+            }
             errl->collectTrace(SBEIO_COMP_NAME);
             break;
         }

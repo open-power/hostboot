@@ -153,6 +153,26 @@ class SbeRetryHandler
             this->iv_sbeMode = i_sbeMode;
         }
 
+        inline bool getUseSDB()
+        {
+            return this->iv_useSDB;
+        }
+
+        inline void setUseSDB(bool i_useSDB)
+        {
+            this->iv_useSDB = i_useSDB;
+        }
+
+        inline bool getSecureModeDisabled()
+        {
+            return this->iv_secureModeDisabled;
+        }
+
+        inline void setSecureModeDisabled(bool i_secureModeDisabled)
+        {
+            this->iv_secureModeDisabled = i_secureModeDisabled;
+        }
+
         /**
          * @brief  This function is the main entry point for all of the
          *         SBE handler functions.
@@ -194,9 +214,27 @@ class SbeRetryHandler
          * @param[in]     i_target        - current proc target
          *
          * @return - bool: true if we need to retry
+         *
+         * Note: This will default to calling the 2 param version w/ i_hideLog
+         *       set to TRUE
          */
 
         bool sbe_boot_fail_handler(TARGETING::Target * i_target);
+
+        /**
+        * @brief  This function handles the SBE failed to boot error.
+        *
+        * @param[in]     i_target    - current proc target
+        * @param[in]     i_exposeLog - an error log is created at the top
+        *                              of this function, if we are doing retries
+        *                              we might not want to have this log show up
+        *                              i_exposeLog = true will make the elog PREDICTIVE
+        *
+        * @return - bool: true if we need to retry
+        */
+
+        bool sbe_boot_fail_handler(TARGETING::Target * i_target,
+                                   bool i_exposeLog);
 
         /**
          * @brief  This function deals with the mask needed to switch
@@ -236,6 +274,19 @@ class SbeRetryHandler
         void get_sbe_reg(TARGETING::Target * i_target);
 
         /************************** Class Elements **************************/
+
+        /*
+        * @brief Bit used to tell if we are in secure debug mode. This means
+        *        we are expecting a complete restart so it is safe to perform
+        *        some extra operations.
+        */
+        bool iv_useSDB;
+
+        /*
+        * @brief Bit used for testing in the lab with systems that have secure
+        *        mode disabled.
+        */
+        bool iv_secureModeDisabled;
 
         /*
          * @brief True if we successfully restarted the SBE
