@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,7 @@ enum ModuleId
     PRDF_SYNC_SVC                 = 0x0F,
     PRDF_CS_FIRDATA_READ          = 0x10,
     PRDF_CS_FIRDATA_WRITE         = 0x11,
+    PRDF_PM_RECOVERY_FFDC         = 0x12,
 };
 
 /******************************************************************************/
@@ -123,6 +124,9 @@ enum ReasonCode
     // general code for user error or unsupported configuration
     PRDF_INVALID_CONFIG                     = PRDF_COMP_ID | 0x82,
     PRDF_NULL_VALUE_RETURNED                = PRDF_COMP_ID | 0x83,
+
+    // Extra FFDC errorlog linked to a PRD log
+    PRDF_EXTRA_FFDC                         = PRDF_COMP_ID | 0x90,
 
     PRDF_LAST_REASONCODE                    = PRDF_COMP_ID | 0xFF,
 };

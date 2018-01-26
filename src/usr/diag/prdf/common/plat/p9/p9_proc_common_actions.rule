@@ -109,3 +109,8 @@ actionclass sbe_vital_attn
     funccall("handleSbeVital");
 };
 
+actionclass pmRecovery
+{
+    funccall("PmRecovery");
+    threshold1;
+};
