@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,7 @@ const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_OBUS             , EPUB_PROCESSOR_BUS_CTL    },
     { TARGETING::TYPE_PEC              , EPUB_IO_PHB               },
     { TARGETING::TYPE_PHB              , EPUB_IO_PHB               },
+    { TARGETING::TYPE_TPM              , EPUB_CEC_HDW_SUBSYS       },
 };
 
 struct epubBusTypeToSub_t
