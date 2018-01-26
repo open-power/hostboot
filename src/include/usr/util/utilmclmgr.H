@@ -48,6 +48,7 @@ typedef char CompIdString[17];
 // Constants to simplify checking for the MCL and POWERVM comp ids
 extern const ComponentID g_MclCompId;
 extern const ComponentID g_PowervmCompId;
+extern const ComponentID g_OpalCompId;
 
 // @enum Permission Types for MCL Component
 enum class CompFlags : uint16_t
@@ -255,6 +256,17 @@ class MasterContainerLidMgr
      */
     errlHndl_t processComponents();
 
+    /**
+     * @brief TPM extend information for secure components
+     *
+     * @param[in] i_compId - Component Id
+     * @param[in] i_conHdr - Container header with information to extend
+     *
+     * @return Error handle if error
+     */
+    static errlHndl_t tpmExtend(const ComponentID& i_compId,
+                                const SECUREBOOT::ContainerHeader& i_conHdr);
+
     protected:
 
     /**
@@ -357,17 +369,6 @@ class MasterContainerLidMgr
      */
     errlHndl_t verifyExtend(const ComponentID& i_compId,
                             CompInfo& io_compInfo);
-
-    /**
-     * @brief TPM extend information for secure components
-     *
-     * @param[in] i_compId - Component Id
-     * @param[in] i_conHdr - Container header with information to extend
-     *
-     * @return Error handle if error
-     */
-    errlHndl_t tpmExtend(const ComponentID& i_compId,
-                         const SECUREBOOT::ContainerHeader& i_conHdr) const;
 
     // Physical addresses reserved for the MCL itself
     uint64_t iv_mclAddr;

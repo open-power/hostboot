@@ -104,7 +104,7 @@ errlHndl_t verifyComponentId(
         TRACFCOMP(g_trac_secure,ERR_MRK"SECUREROM::verifyComponentId: "
             "Secure Boot verification failure; container's component ID of "
             "[%s] does not match expected component ID of [%s] (truncated "
-            "from [%s]",
+            "from [%s])",
             i_containerHeader.componentId(),
             pTruncatedComponentId,
             i_pComponentId);
