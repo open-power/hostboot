@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -389,7 +389,11 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
                                                cv_pResvMemInfo->rangeId,
                                                cv_pResvMemInfo->curAddr,
                                                i_size,
-                                               l_lidStr);
+                                               l_lidStr,
+                                               HDAT::RHB_READ_WRITE,
+                                               // Memory limit everything that
+                                               // is not a PHYP component
+                                               !(i_isPhypComp));
         if(l_errl)
         {
             TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - setNextHbRsvMemEntry Lid content failed");

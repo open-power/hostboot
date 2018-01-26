@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,17 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef POPULATE_HBRUNTIME_H
+#define POPULATE_HBRUNTIME_H
 #include <hdat/hdat.H>
 #include <vector>
 #include <utility>
 
 namespace RUNTIME
 {
+
+extern const uint64_t HB_RES_MEM_UPPER_LIMIT;
+extern const uint64_t HB_RES_MEM_LOWER_LIMIT;
 
 /**
  *  @brief Get the next Reserved HB memory range and set all member variables
@@ -38,16 +43,19 @@ namespace RUNTIME
  * @param[in] i_size, Size of address space to reserve
  * @param[in] i_label, Label String Ptr
  * @param[in] i_permission, HDAT permission type [default read/write]
+ * @param[in] i_checkMemoryLimit, check if we overflow the limit for hb reserved
+ *            memory. False for PHYP component
  *
  * @return errlHndl_t, nullptr on success; otherwise errlog
  */
-errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
-                                const uint16_t i_rangeId,
-                                const uint64_t i_startAddr,
-                                const uint64_t i_size,
+errlHndl_t setNextHbRsvMemEntry(HDAT::hdatMsVpdRhbAddrRangeType i_type,
+                                uint16_t i_rangeId,
+                                uint64_t i_startAddr,
+                                uint64_t i_size,
                                 const char* i_label,
-                                const HDAT::hdatRhbPermType i_permission =
-                                                            HDAT::RHB_READ_WRITE
+                                HDAT::hdatRhbPermType i_permission =
+                                                           HDAT::RHB_READ_WRITE,
+                                bool i_checkMemoryLimit = true
                                 );
 
 /**
@@ -76,7 +84,20 @@ errlHndl_t unmapVirtAddr(uint64_t i_addr);
  *
  *  @return Error handle if error
  */
-errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
-                                    const bool i_secHdrExpected);
+errlHndl_t hbResvLoadSecureSection (PNOR::SectionId i_sec,
+                                    bool i_secHdrExpected);
+
+/**
+ * @brief Check whether the given addr falls withing allowed hb reserved memory
+ *        range.
+ * @param[in] i_addr - phys address to check
+ * @param[in] i_size - the size of the section starting with i_addr (needed to
+ *                   verify the end limit of the section)
+ * @return Error handle if error
+ */
+errlHndl_t checkHbResMemLimit(uint64_t i_addr,
+                              uint64_t i_size);
 
 } // End of Namespace
+#endif
+

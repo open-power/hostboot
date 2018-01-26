@@ -77,6 +77,7 @@
 #include <runtime/common/runtime_utils.H>
 #include <limits.h>
 #include <errno.h>
+#include <vmmconst.h>
 
 namespace RUNTIME
 {
@@ -87,6 +88,15 @@ mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 const uint16_t TPM_REQUIRED_BIT = 0x8000; //leftmost bit of uint16_t set to 1
 
 const uint8_t BITS_PER_BYTE = 8;
+
+// The upper limit of the hostboot reserved memory. Only applies to PHYP.
+// The lower limit is Hostboot HRMOR + 64MB; 4KB is the PHYP component's
+// secure header.
+const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE - 4*KILOBYTE;
+
+// The lower limit of the hostboot reserved memory. Do not allow to reserve
+// any memory below this limit.
+const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
@@ -250,16 +260,68 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
               i_rngPtr->hdatRhbPermission);
 }
 
+errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
+{
+    errlHndl_t l_errl = nullptr;
+    // Only check if PHYP is running or if running in standalone.
+    if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
+    {
+        if((i_addr < HB_RES_MEM_LOWER_LIMIT) or
+           ((i_addr + i_size - 1) > HB_RES_MEM_UPPER_LIMIT))
+        {
+            TRACFCOMP(g_trac_runtime, "checkHbResMemLimit> Attempt to write"
+            " to hostboot reserved memory outside of allowed hostboot address"
+            " range. Start addresss - 0x%08x end address - 0x%08x;"
+            " bottom limit - 0x%08x top limit - 0x%08x.",
+            i_addr, i_addr + i_size - 1,
+            HB_RES_MEM_LOWER_LIMIT, HB_RES_MEM_UPPER_LIMIT);
+
+            /*@
+             * @errortype
+             * @moduleid     RUNTIME::MOD_CHECK_HB_RES_MEM_LIMIT
+             * @reasoncode   RUNTIME::RC_HB_RES_MEM_EXCEEDED
+             * @userdata1    Starting address
+             * @userdata2    Size of the section
+             * @devdesc      Hostboot attempted to reserve memory past allowed
+             *               range. Bottom limit = Hostboot HRMOR + 64M, top
+             *               limit = 256M - 4K.
+             * @custdesc     Hostboot attempted to reserve memory outside of
+             *               allowed range.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         RUNTIME::MOD_CHECK_HB_RES_MEM_LIMIT,
+                                         RUNTIME::RC_HB_RES_MEM_EXCEEDED,
+                                         i_addr,
+                                         i_size,
+                                         true /*Add HB Software Callout*/);
+            l_errl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
+        }
+    }
+    return l_errl;
+}
+
 errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
                                 const uint16_t i_rangeId,
                                 const uint64_t i_startAddr,
                                 const uint64_t i_size,
                                 const char* i_label,
-                                const HDAT::hdatRhbPermType i_permission)
+                                const HDAT::hdatRhbPermType i_permission,
+                                const bool i_checkMemoryLimit)
 {
     errlHndl_t l_elog = nullptr;
 
     do {
+
+    // Check whether hostboot is trying to access memory outside of its allowed
+    // range.
+    if(i_checkMemoryLimit)
+    {
+        l_elog = checkHbResMemLimit(i_startAddr, i_size);
+        if(l_elog)
+        {
+            break;
+        }
+    }
 
     // Get a pointer to the next available HDAT HB Rsv Mem entry
     hdatMsVpdRhbAddrRange_t* l_rngPtr = nullptr;
@@ -813,10 +875,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR)
                 - VMM_HRMOR_OFFSET;
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
-                    i_nodeId,
-                    l_hbAddr,
-                    VMM_HB_RSV_MEM_SIZE,
-                    HBRT_RSVD_MEM__PRIMARY);
+                                          i_nodeId,
+                                          l_hbAddr,
+                                          VMM_HB_RSV_MEM_SIZE,
+                                          HBRT_RSVD_MEM__PRIMARY,
+                                          HDAT::RHB_READ_WRITE,
+                                          false);
             if(l_elog != nullptr)
             {
                 break;
