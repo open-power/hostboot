@@ -2342,7 +2342,7 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[3]
      *  STOP_RECOVERY_NOTIFY_PRD
      */
-    (rOCCFIR, bit(3)) ? threshold_and_mask_self;
+    (rOCCFIR, bit(3)) ? pmRecovery;
 
     /** OCCFIR[4]
      *  OCC_HB_ERROR

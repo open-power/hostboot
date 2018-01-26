@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
+#include <p9_pm_callout.H>
 
 namespace PRDF
 {
@@ -134,6 +135,21 @@ int32_t extractL2Err( TARGETING::TargetHandle_t i_exTgt, bool i_ce,
  */
 int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data);
+
+
+/**
+ * @brief Calls p9_pm_callout HWP to collect FFDC and determine appropriate
+ *        callouts for a STOP recovery malfunction alert.
+ * @param i_tgt P9 chip target
+ * @param o_ra enum indicating which type of callout should be made
+ * @param o_deadCores bit vector of dead cores
+ * @param o_ffdcList points to a list of STOP FFDC summary sub-sections
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+ */
+int32_t pmCallout( TARGETING::TargetHandle_t i_tgt,
+                   RasAction& o_ra,
+                   uint32_t o_deadCores,
+                   std::vector < StopErrLogSectn >& o_ffdcList );
 
 
 } // end namespace PlatServices

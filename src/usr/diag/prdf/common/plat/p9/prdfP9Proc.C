@@ -40,6 +40,10 @@
 #include <sbeio/sbeioif.H>
 #endif
 
+#ifdef __HOSTBOOT_RUNTIME
+#include <prdfP9PmRecovery.H>
+#endif
+
 // Platform includes
 
 using namespace TARGETING;
@@ -436,6 +440,40 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForUnitCs );
 PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForUnitCs );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief Recovery actions for a power management STOP failure. Collects FFDC,
+ *        runtime deconfigures lost cores, and makes appropriate callouts as
+ *        determined by the p9_pm_callout procedure.
+ * @param  i_chip         A P9 chip.
+ * @param  io_sc          step code data struct
+ * @return SUCCESS
+ */
+int32_t PmRecovery( ExtensibleChip * i_chip,
+                    STEP_CODE_DATA_STRUCT & io_sc )
+{
+
+#ifdef __HOSTBOOT_RUNTIME
+
+    if ( pmRecovery(i_chip, io_sc) != SUCCESS )
+    {
+        PRDF_ERR("[PmRecovery] failed for 0x%08x", i_chip->GetId());
+    }
+
+#else
+
+    PRDF_ERR( "[PmRecovery] not expected outside of HB runtime" );
+    io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
+    io_sc.service_data->SetCallout(i_chip->getTrgt());
+
+#endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, PmRecovery );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 

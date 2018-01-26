@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -521,6 +521,40 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
 }
 
 
+int32_t pmCallout( TargetHandle_t i_tgt,
+                   RasAction& o_ra,
+                   uint32_t o_deadCores,
+                   std::vector < StopErrLogSectn >& o_ffdcList )
+{
+    errlHndl_t err = nullptr;
+    fapi2::buffer <uint32_t> deadCores;
+
+    //Get homer image buffer
+    uint64_t l_homerPhysAddr = 0x0;
+    l_homerPhysAddr = i_tgt->getAttr<ATTR_HOMER_PHYS_ADDR>();
+    void* l_homerVAddr = HBPM::convertHomerPhysToVirt(i_tgt,l_homerPhysAddr);
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiTrgt (i_tgt);
+
+    FAPI_INVOKE_HWP( err,
+                     p9_pm_callout,
+                     l_homerVAddr,
+                     fapiTrgt,
+                     deadCores,
+                     o_ffdcList,
+                     o_ra );
+
+    if(nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::pmCallout] HUID: 0x%08x failed",
+                  getHuid(i_tgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    o_deadCores = (uint32_t) deadCores;
+    return SUCCESS;
+}
 //------------------------------------------------------------------------------
 
 } // end namespace PlatServices

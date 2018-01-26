@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -69,6 +69,8 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
@@ -176,6 +178,7 @@ prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 ifeq (${HOSTBOOT_RUNTIME},1)
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 # This is really the only file we need, but all of the other files below are
 # required because of dependencies.
 prd_obj_no_sim += memdiags.o
@@ -184,6 +187,7 @@ prd_obj_no_sim += p9_l2err_extract.o
 prd_obj_no_sim += p9_l3err_linedelete.o
 prd_obj_no_sim += p9_l3err_extract.o
 prd_obj_no_sim += p9_l2_flush.o
+prd_obj_no_sim += p9_pm_callout.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 prd_obj_no_sim += p9c_mss_maint_cmds.o
