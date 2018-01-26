@@ -40,6 +40,8 @@
 #include <p9_cpu_special_wakeup_lib.H>
 #include <p9_ppe_defs.H>
 #include <p9_ppe_utils.H>
+#include <p9n2_quad_scom_addresses.H>
+#include <p9n2_quad_scom_addresses_fld.H>
 
 fapi2::ReturnCode collectExTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_TYPE_EX>& i_target,
         ProcessingValues_t i_processing_info );
@@ -60,7 +62,13 @@ fapi2::ReturnCode p9_cpu_special_wakeup_ex(
     fapi2::ReturnCode l_rc;
     ProcessingValues_t l_processing_info;
     uint8_t l_spWakeUpInProg = 0;
+    fapi2::buffer<uint64_t> l_cpmmrRegVal;
+    fapi2::buffer<uint64_t> l_lmcrRegVal;
+    uint8_t l_autoSplWkUpBitPos =   12; //EQ_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE
+    uint8_t l_corePos   =   0;
     auto l_eqTarget = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
+    auto l_coreList = i_target.getChildren<fapi2::TARGET_TYPE_CORE>( );
+    uint8_t l_lmcr_fail_state = 0;
 
     FAPI_ATTR_GET( fapi2::ATTR_EX_INSIDE_SPECIAL_WAKEUP,
                    i_target,
@@ -78,6 +86,56 @@ fapi2::ReturnCode p9_cpu_special_wakeup_ex(
     }
 
     p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::BLOCK );
+
+    //Not using  FAPI TRY to avoid chances of  RC corruption
+    l_rc = getScom( i_target, EX_CME_SCOM_LMCR_SCOM,  l_lmcrRegVal );
+
+
+    if( (l_rc) && (l_rc != (uint32_t)PIB_CHIPLET_OFFLINE_ERR ))
+    {
+        FAPI_ERR("Failed to SCOM LMCR Reg, EX Pos %d", (l_corePos >> 1 ) );
+        return l_rc;
+    }
+    else if ((l_rc) && (l_rc == (uint32_t)PIB_CHIPLET_OFFLINE_ERR ))
+    {
+        l_rc = fapi2::FAPI2_RC_SUCCESS;
+        l_lmcr_fail_state = 1;
+    }
+
+
+    if (!l_lmcr_fail_state)
+    {
+        for( auto l_core : l_coreList )
+        {
+            FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                           l_core,
+                           l_corePos );
+
+            l_autoSplWkUpBitPos  =  l_autoSplWkUpBitPos + ( l_corePos & 0x01) ;
+
+            l_rc = getScom( l_core,   P9N2_C_CPPM_CPMMR_SCOM, l_cpmmrRegVal );
+
+            if( l_rc )
+            {
+                FAPI_ERR("Failed to SCOM CPMMR Reg, Core Pos %d", l_corePos );
+                return l_rc;
+            }
+
+            if( !l_lmcrRegVal.getBit( l_autoSplWkUpBitPos ) )
+            {
+                if( l_cpmmrRegVal.getBit( P9N2_EX_CPPM_CPMMR_WKUP_NOTIFY_SELECT ) )
+                {
+                    //If auto special wakeup is enabled and Special wakeup signal is not
+                    //getting routed towards CME, let us route it towards CME so that
+                    //CME HW asserts DONE bit without CME Firmware's intervention.
+
+                    FAPI_DBG("Enabling Auto Special Wakeup For Core %d", l_corePos );
+                    l_cpmmrRegVal.clearBit( P9N2_EX_CPPM_CPMMR_WKUP_NOTIFY_SELECT );
+                    putScom( l_core, P9N2_C_CPPM_CPMMR_SCOM, l_cpmmrRegVal );
+                }
+            }
+        }
+    }
 
     l_rc = _special_wakeup( i_target,
                             i_operation,

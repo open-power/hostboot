@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,78 +60,78 @@ class PMTest : public CxxTest::TestSuite
 
     void test_hcode_update(void)
     {
-        errlHndl_t l_err;
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            ENTER_MRK "test_hcode_update Enter");
-
-        TARGETING::TargetHandleList l_coreList;
-        getAllChiplets(l_coreList, TYPE_CORE, true);
-
-        for (const auto & l_core: l_coreList)
-        {
-            const TARGETING::Target * l_parentChip =
-                getParentChip(const_cast<TARGETING::Target *>(l_core));
-
-            TARGETING::Target * l_parentTarget =
-                const_cast<TARGETING::Target *>(l_parentChip);
-
-            /*
-             * TODO RTC 177702
-             * We should be calling load_pm_complex here, but due to a
-             * simics issue, load_pm_complex will fail.  Instead, we'll
-             * just run these 2 tests which set the HOMER_HCODE_LOADED
-             * attribute and check for result.
-             */
-
-            // Set to not loaded, should get NULL for errl
-            TS_INFO("pm_runtime_test: hcode_update with"
-                    " HCODE_NOT_LOADED on target 0x%llx",
-                    get_huid(l_parentTarget));
-            l_parentTarget->setAttr<ATTR_HOMER_HCODE_LOADED>(
-                HCODE_NOT_LOADED);
-
-            l_err = RTPM::hcode_update(
-                        stopImageSection::P9_STOP_SECTION_CORE_SCOM,
-                        stopImageSection::P9_STOP_SCOM_APPEND,
-                        l_core,
-                        0x20010A43,
-                        0x0 );
-
-            if(l_err == NULL)
-            {
-                TS_INFO("hcode_update with HCODE_NOT_LOADED PASSED");
-            }
-            else
-            {
-                TS_FAIL("hcode_update with HCODE_NOT_LOADED FAILED");
-            }
-
-            // Set to loaded, should not get errl
-            TS_INFO("pm_runtime_test: hcode_update with"
-                    " HCODE_LOADED on target 0x%llx",
-                    get_huid(l_parentTarget));
-            l_parentTarget->setAttr<ATTR_HOMER_HCODE_LOADED>(
-                HCODE_LOADED);
-
-            l_err = RTPM::hcode_update(
-                        stopImageSection::P9_STOP_SECTION_CORE_SCOM,
-                        stopImageSection::P9_STOP_SCOM_APPEND,
-                        l_core,
-                        0x20010A43,
-                        0x0 );
-
-            if(l_err)
-            {
-                TS_FAIL("hcode_update with HCODE_LOADED FAILED");
-            }
-            else
-            {
-                TS_INFO("hcode_update with HCODE_LOADED PASSED");
-            }
-        }
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            EXIT_MRK "test_hcode_update Exit");
+//         errlHndl_t l_err;
+//
+//         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+//             ENTER_MRK "test_hcode_update Enter");
+//
+//         TARGETING::TargetHandleList l_coreList;
+//         getAllChiplets(l_coreList, TYPE_CORE, true);
+//
+//         for (const auto & l_core: l_coreList)
+//         {
+//             const TARGETING::Target * l_parentChip =
+//                 getParentChip(const_cast<TARGETING::Target *>(l_core));
+//
+//             TARGETING::Target * l_parentTarget =
+//                 const_cast<TARGETING::Target *>(l_parentChip);
+//
+//             /*
+//              * TODO RTC 177702
+//              * We should be calling load_pm_complex here, but due to a
+//              * simics issue, load_pm_complex will fail.  Instead, we'll
+//              * just run these 2 tests which set the HOMER_HCODE_LOADED
+//              * attribute and check for result.
+//              */
+//
+//             // Set to not loaded, should get NULL for errl
+//             TS_INFO("pm_runtime_test: hcode_update with"
+//                     " HCODE_NOT_LOADED on target 0x%llx",
+//                     get_huid(l_parentTarget));
+//             l_parentTarget->setAttr<ATTR_HOMER_HCODE_LOADED>(
+//                 HCODE_NOT_LOADED);
+//
+//             l_err = RTPM::hcode_update(
+//                         stopImageSection::P9_STOP_SECTION_CORE_SCOM,
+//                         stopImageSection::P9_STOP_SCOM_APPEND,
+//                         l_core,
+//                         0x20010A43,
+//                         0x0 );
+//
+//             if(l_err == NULL)
+//             {
+//                 TS_INFO("hcode_update with HCODE_NOT_LOADED PASSED");
+//             }
+//             else
+//             {
+//                 TS_FAIL("hcode_update with HCODE_NOT_LOADED FAILED");
+//             }
+//
+//             // Set to loaded, should not get errl
+//             TS_INFO("pm_runtime_test: hcode_update with"
+//                     " HCODE_LOADED on target 0x%llx",
+//                     get_huid(l_parentTarget));
+//             l_parentTarget->setAttr<ATTR_HOMER_HCODE_LOADED>(
+//                 HCODE_LOADED);
+//
+//             l_err = RTPM::hcode_update(
+//                         stopImageSection::P9_STOP_SECTION_CORE_SCOM,
+//                         stopImageSection::P9_STOP_SCOM_APPEND,
+//                         l_core,
+//                         0x20010A43,
+//                         0x0 );
+//
+//             if(l_err)
+//             {
+//                 TS_FAIL("hcode_update with HCODE_LOADED FAILED");
+//             }
+//             else
+//             {
+//                 TS_INFO("hcode_update with HCODE_LOADED PASSED");
+//             }
+//         }
+//         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+//             EXIT_MRK "test_hcode_update Exit");
     }
 };
 

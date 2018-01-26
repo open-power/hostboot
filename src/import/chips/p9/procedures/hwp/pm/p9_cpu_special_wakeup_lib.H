@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 
 static const uint32_t NUM_CHIPLET_TYPES = 2;
 static const uint32_t NUM_ENTITIES = 4;
+#define PIB_CHIPLET_OFFLINE_ERR  0x2
 
 
 /**
@@ -670,20 +671,6 @@ fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
         {
 
             case p9specialWakeup::SPCWKUP_ENABLE:
-                // Check if PM subsystem is ready for SPW
-                // Moved under wakeup enable, because always want to let
-                // SPW to be cleared
-                FAPI_TRY(fapi2::getScom(l_parentTarget,
-                                        PU_OCB_OCI_OCCFLG_SCOM,
-                                        occFlagReg),
-                         "GetScom of OCC Flag Register Failed");
-
-                if( !occFlagReg.getBit<SGPE_ACTIVE_BIT>() )
-                {
-                    FAPI_INF("SGPE not active. STOP Sub-System not ready for special wakeup" );
-                    break;
-                }
-
                 // Select the addresses to use based on the entity
                 FAPI_TRY(spwkup_setup_entity(i_chipletTarget, i_entity, io_processing_values),
                          "Error:  spwkup_setup_entity failed");

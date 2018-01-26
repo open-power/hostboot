@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,8 +88,23 @@ extern "C"
 /// @param[in] i_target Proc Chip target
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error code.
-    fapi2::ReturnCode p9_pm_reset_psafe_update
-    (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_pm_reset_psafe_update(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+//------------------------------------------------------------------------------
+///
+/// @brief Walk through each EX chiplet (and each core within an EX) to determine
+/// if special wake-up done is asserted.  If so, set auto special wake-up mode to
+/// protect the core(s) while the PM complex is being reset
+///
+/// @param[in] i_target Proc Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+    fapi2::ReturnCode p9_pm_set_auto_spwkup(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
+
 }
 
 #endif // _P9_PM_RESET_H

@@ -120,6 +120,11 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
 
     //  ************************************************************************
+    //  Enable the Auto Special Wake-up Function on all EXs
+    //  ************************************************************************
+    FAPI_TRY(p9_pm_set_auto_spwkup(i_target));
+
+    //  ************************************************************************
     //  Mask the PBA & CME FIRs as errors can occur in what follows
     //  ************************************************************************
     FAPI_DBG("Executing p9_pm_firinit for masking errors in reset operation.");
@@ -374,5 +379,66 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     while (0);
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+// Walk through each EX chiplet (and each core within an EX) to determine if
+// special wake-up done is asserted.  If so, set auto special wake-up mode to
+// protect the core(s) while the PM complex is being reset.
+
+fapi2::ReturnCode
+p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+
+    FAPI_INF(">> p9_set_auto_spwkup");
+
+    // For each EX target
+    for (auto& l_ex_chplt : i_target.getChildren<fapi2::TARGET_TYPE_EX>
+         (fapi2::TARGET_STATE_FUNCTIONAL))
+    {
+
+        fapi2::buffer<uint64_t> l_gpmmr;
+        fapi2::buffer<uint64_t> l_lmcr;
+        uint32_t l_bit;
+
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_ex_num;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_ex_chplt,
+                                l_ex_num));
+
+        for (auto& l_core : l_ex_chplt.getChildren<fapi2::TARGET_TYPE_CORE>
+             (fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
+            FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                    l_core,
+                                    l_core_num));
+            FAPI_DBG("Checking for special wakeup done on core %d in EX %d ",
+                     l_core_num, l_ex_num);
+
+            FAPI_TRY(fapi2::getScom(l_core, C_PPM_GPMMR_SCOM,  l_gpmmr),
+                     "GetScom of GPMMR failed");
+
+            if (l_gpmmr.getBit<EQ_PPM_GPMMR_SPECIAL_WKUP_DONE>())
+            {
+                // Clear the auto special wake-up disable (eg enable it) for the core
+                l_bit = EQ_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE + (l_core_num % 2);
+                l_lmcr.flush<0>().setBit(l_bit);
+                FAPI_TRY(fapi2::putScom(l_ex_chplt, EX_CME_SCOM_LMCR_SCOM1,  l_lmcr),
+                         "PutScom of LMCR failed");
+            }
+            else
+            {
+                FAPI_ASSERT (false,
+                             fapi2::PM_RESET_SPWKUP_DONE_ERROR()
+                             .set_CORE_TARGET(l_core)
+                             .set_GPMMR(l_gpmmr),
+                             "Core expected to be in special wake-up is not prior to setting auto special wake-up mode");
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< p9_set_auto_spwkup");
     return fapi2::current_err;
 }
