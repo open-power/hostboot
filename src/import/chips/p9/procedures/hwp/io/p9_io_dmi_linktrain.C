@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Master Common
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDIP_RX_CTL_CNTL1_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_WDERF_START (io::get(EDIP_RX_START_WDERF_ALIAS,  l_data));
+
+    uint64_t m_wderf_start = io::get(EDIP_RX_START_WDERF_ALIAS,  l_data);
+    ffdc.set_M_WDERF_START (m_wderf_start);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -142,8 +144,12 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_STAT1_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_WDERF_DONE  (io::get(EDIP_RX_WDERF_DONE_ALIAS,   l_data));
-    ffdc.set_M_WDERF_FAILED(io::get(EDIP_RX_WDERF_FAILED_ALIAS, l_data));
+
+    uint64_t m_wderf_done = io::get(EDIP_RX_WDERF_DONE_ALIAS, l_data);
+    ffdc.set_M_WDERF_DONE  (m_wderf_done);
+
+    uint64_t m_wderf_failed = io::get(EDIP_RX_WDERF_FAILED_ALIAS, l_data);
+    ffdc.set_M_WDERF_FAILED(m_wderf_failed);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -153,7 +159,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_STAT2_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_LANE_BAD_0_15(io::get(EDIP_RX_LANE_BAD_VEC_0_15, l_data));
+
+    uint64_t m_lane_bad_0_15 = io::get(EDIP_RX_LANE_BAD_VEC_0_15, l_data);
+    ffdc.set_M_LANE_BAD_0_15(m_lane_bad_0_15);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -161,9 +169,10 @@ fapi2::ReturnCode add_linktrain_ffdc(
         l_rc = fapi2::FAPI2_RC_SUCCESS;
     }
 
-
     l_rc = io::read(EDIP_RX_CTL_STAT4_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_LANE_BAD_16_23(io::get(EDIP_RX_LANE_BAD_VEC_16_23, l_data));
+
+    uint64_t m_lane_bad_16_23 = io::get(EDIP_RX_LANE_BAD_VEC_16_23, l_data);
+    ffdc.set_M_LANE_BAD_16_23(m_lane_bad_16_23);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -172,7 +181,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_MODE11_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_LANE_DISABLED_VEC_0_15(io::get(EDIP_RX_LANE_DISABLED_VEC_0_15, l_data));
+
+    uint64_t m_lane_disabled_0_15 = io::get(EDIP_RX_LANE_DISABLED_VEC_0_15, l_data);
+    ffdc.set_M_LANE_DISABLED_VEC_0_15(m_lane_disabled_0_15);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -181,7 +192,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_MODE12_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_LANE_DISABLED_VEC_16_23(io::get(EDIP_RX_LANE_DISABLED_VEC_16_23, l_data));
+
+    uint64_t  m_lane_disabled_16_23 = io::get(EDIP_RX_LANE_DISABLED_VEC_16_23, l_data);
+    ffdc.set_M_LANE_DISABLED_VEC_16_23(m_lane_disabled_16_23);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -190,7 +203,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_GLBSM_STAT1_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_MAIN_INIT_STATE(io::get(EDIP_RX_MAIN_INIT_STATE, l_data));
+
+    uint64_t m_main_init_state = io::get(EDIP_RX_MAIN_INIT_STATE, l_data);
+    ffdc.set_M_MAIN_INIT_STATE(m_main_init_state);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -202,8 +217,12 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Master Wiretest
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDIP_RX_GLBSM_STAT1_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_WIRETEST_WTM_STATE(io::get(EDIP_RX_WTM_STATE, l_data));
-    ffdc.set_M_WIRETEST_WTR_STATE(io::get(EDIP_RX_WTR_STATE, l_data));
+
+    uint64_t m_wiretest_wtm_state =  io::get( EDIP_RX_WTM_STATE, l_data );
+    ffdc.set_M_WIRETEST_WTM_STATE( m_wiretest_wtm_state );
+
+    uint64_t m_wiretest_wtr_state =  io::get( EDIP_RX_WTR_STATE, l_data );
+    ffdc.set_M_WIRETEST_WTR_STATE( m_wiretest_wtr_state );
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -213,7 +232,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_STAT3_EO_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_WIRETEST_WTL_SM_STATUS(io::get(EDIP_RX_WTL_SM_STATUS, l_data));
+
+    uint64_t m_wiretest_wtl_sm_status = io::get(EDIP_RX_WTL_SM_STATUS, l_data);
+    ffdc.set_M_WIRETEST_WTL_SM_STATUS(m_wiretest_wtl_sm_status);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -222,7 +243,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_GLBSM_STAT2_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_WTR_BAD_LANE_COUNT(io::get(EDIP_RX_WTR_BAD_LANE_COUNT, l_data));
+
+    uint64_t m_wtr_bad_lane_count = io::get(EDIP_RX_WTR_BAD_LANE_COUNT, l_data);
+    ffdc.set_M_WTR_BAD_LANE_COUNT(m_wtr_bad_lane_count);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -231,8 +254,12 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc =  io::read(EDIP_RX_CTL_STAT5_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_CLK_LANE_BAD_CODE   (io::get(EDIP_RX_WT_CLK_LANE_BAD_CODE, l_data));
-    ffdc.set_M_WT_CLK_LANE_INVERTED(io::get(EDIP_RX_WT_CLK_LANE_INVERTED, l_data));
+
+    uint64_t m_clk_lane_bad_code = io::get(EDIP_RX_WT_CLK_LANE_BAD_CODE, l_data);
+    ffdc.set_M_CLK_LANE_BAD_CODE   (m_clk_lane_bad_code);
+
+    uint64_t m_wk_clk_lane_inverted = io::get(EDIP_RX_WT_CLK_LANE_INVERTED, l_data);
+    ffdc.set_M_WT_CLK_LANE_INVERTED(m_wk_clk_lane_inverted);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -249,7 +276,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Master Eye Optimization
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDIP_RX_GLBSM_STAT1_EO_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_EYE_OPT_STATE(io::get(EDIP_RX_EYE_OPT_STATE, l_data));
+
+    uint64_t m_eye_obt_state = io::get(EDIP_RX_EYE_OPT_STATE, l_data);
+    ffdc.set_M_EYE_OPT_STATE(m_eye_obt_state);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -258,9 +287,15 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_CTL_CNTL13_EO_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_HIST_MIN_EYE_WIDTH(      io::get(EDIP_RX_HIST_MIN_EYE_WIDTH, l_data));
-    ffdc.set_M_HIST_MIN_EYE_WIDTH_LANE( io::get(EDIP_RX_HIST_MIN_EYE_WIDTH_LANE, l_data));
-    ffdc.set_M_HIST_MIN_EYE_WIDTH_VALID(io::get(EDIP_RX_HIST_MIN_EYE_WIDTH_VALID, l_data));
+
+    uint64_t m_hist_min_eye_witdh = io::get(EDIP_RX_HIST_MIN_EYE_WIDTH, l_data);
+    ffdc.set_M_HIST_MIN_EYE_WIDTH(m_hist_min_eye_witdh);
+
+    uint64_t m_hist_min_eye_witdh_lane = io::get(EDIP_RX_HIST_MIN_EYE_WIDTH, l_data);
+    ffdc.set_M_HIST_MIN_EYE_WIDTH_LANE(m_hist_min_eye_witdh_lane);
+
+    uint64_t m_hist_min_eye_width_valid = io::get(EDIP_RX_HIST_MIN_EYE_WIDTH, l_data);
+    ffdc.set_M_HIST_MIN_EYE_WIDTH_VALID(m_hist_min_eye_width_valid);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -274,7 +309,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Master Repair
     ///////////////////////////////////////////////////////////////////////////
     l_rc =  io::read(EDIP_RX_GLBSM_STAT4_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_RPR_STATE(io::get(EDIP_RX_RPR_STATE, l_data));
+
+    uint64_t m_rpr_state = io::get(EDIP_RX_RPR_STATE, l_data);
+    ffdc.set_M_RPR_STATE(m_rpr_state);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -283,9 +320,16 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDIP_RX_GLBSM_STAT9_E_PG, i_mtgt, GRP3, LN0, l_data);
-    ffdc.set_M_BAD_LANE1    (io::get(EDIP_RX_BAD_LANE1,     l_data));
-    ffdc.set_M_BAD_LANE2    (io::get(EDIP_RX_BAD_LANE2,     l_data));
-    ffdc.set_M_BAD_LANE_CODE(io::get(EDIP_RX_BAD_LANE_CODE, l_data));
+
+    uint64_t m_bad_lane1 = io::get(EDIP_RX_BAD_LANE1, l_data);
+    ffdc.set_M_BAD_LANE1    (m_bad_lane1);
+
+    uint64_t m_bad_lane2 = io::get(EDIP_RX_BAD_LANE2, l_data);
+    ffdc.set_M_BAD_LANE2    (m_bad_lane2);
+
+    uint64_t m_bad_lane_code = io::get(EDIP_RX_BAD_LANE_CODE, l_data);
+    ffdc.set_M_BAD_LANE2(m_bad_lane_code);
+
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -303,7 +347,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Slave Common
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDI_RX_TRAINING_START_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_WDERF_START (io::get(EDI_RX_START_WDERF_ALIAS,  l_data));
+
+    uint64_t s_wderf_start = io::get(EDI_RX_START_WDERF_ALIAS, l_data);
+    ffdc.set_S_WDERF_START (s_wderf_start);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -312,8 +358,12 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_TRAINING_STATUS_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_WDERF_DONE  (io::get(EDI_RX_WDERF_DONE_ALIAS,   l_data));
-    ffdc.set_S_WDERF_FAILED(io::get(EDI_RX_WDERF_FAILED_ALIAS, l_data));
+
+    uint64_t s_wderf_done = io::get(EDI_RX_WDERF_DONE_ALIAS, l_data);
+    ffdc.set_S_WDERF_DONE(s_wderf_done);
+
+    uint64_t s_wderf_failed = io::get(EDI_RX_WDERF_FAILED_ALIAS, l_data);
+    ffdc.set_S_WDERF_FAILED(s_wderf_failed);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -323,7 +373,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_LANE_BAD_VEC_0_15_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_LANE_BAD_0_15(io::get(EDI_RX_LANE_BAD_VEC_0_15, l_data));
+
+    uint64_t s_lane_bad_0_15 = io::get(EDI_RX_LANE_BAD_VEC_0_15, l_data);
+    ffdc.set_S_LANE_BAD_0_15(s_lane_bad_0_15);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -333,7 +385,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
 
 
     l_rc = io::read(EDI_RX_LANE_BAD_VEC_16_31_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_LANE_BAD_16_23(io::get(EDI_RX_LANE_BAD_VEC_16_31, l_data));
+
+    uint64_t s_lane_bad_16_23 = io::get(EDI_RX_LANE_BAD_VEC_16_31, l_data);
+    ffdc.set_S_LANE_BAD_16_23(s_lane_bad_16_23);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -342,7 +396,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_LANE_DISABLED_VEC_0_15_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_LANE_DISABLED_VEC_0_15(io::get(EDI_RX_LANE_DISABLED_VEC_0_15, l_data));
+
+    uint64_t s_lane_disabled_0_15 = io::get(EDI_RX_LANE_DISABLED_VEC_0_15, l_data);
+    ffdc.set_S_LANE_DISABLED_VEC_0_15(s_lane_disabled_0_15);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -351,7 +407,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_LANE_DISABLED_VEC_16_31_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_LANE_DISABLED_VEC_16_23(io::get(EDI_RX_LANE_DISABLED_VEC_16_31, l_data));
+
+    uint64_t s_lane_disabled_16_23 = io::get(EDI_RX_LANE_DISABLED_VEC_16_31, l_data);
+    ffdc.set_S_LANE_DISABLED_VEC_16_23(s_lane_disabled_16_23);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -365,9 +423,15 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Slave Wiretest
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDI_RX_WIRETEST_STATE_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_WIRETEST_WTM_STATE(io::get(EDI_RX_WTM_STATE, l_data));
-    ffdc.set_S_WIRETEST_WTR_STATE(io::get(EDI_RX_WTR_STATE, l_data));
-    ffdc.set_S_WIRETEST_WTL_SM_STATUS(io::get(EDI_RX_WTL_STATE, l_data));
+
+    uint64_t s_wiretest_wtm_state = io::get(EDI_RX_WTM_STATE, l_data);
+    ffdc.set_S_WIRETEST_WTM_STATE(s_wiretest_wtm_state);
+
+    uint64_t  s_wiretest_wtr_state = io::get(EDI_RX_WTR_STATE, l_data);
+    ffdc.set_S_WIRETEST_WTR_STATE(s_wiretest_wtr_state);
+
+    uint64_t s_wiretest_wtl_sm_statue = io::get(EDI_RX_WTL_STATE, l_data);
+    ffdc.set_S_WIRETEST_WTL_SM_STATUS(s_wiretest_wtl_sm_statue);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -378,7 +442,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_WIRETEST_LANEINFO_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_WTR_BAD_LANE_COUNT(io::get(EDI_RX_WTR_BAD_LANE_COUNT, l_data));
+
+    uint64_t s_wtr_bad_lane_count = io::get(EDI_RX_WTR_BAD_LANE_COUNT, l_data);
+    ffdc.set_S_WTR_BAD_LANE_COUNT(s_wtr_bad_lane_count);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -387,8 +453,12 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc =  io::read(EDI_RX_WT_CLK_STATUS_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_CLK_LANE_BAD_CODE   (io::get(EDI_RX_WT_CLK_LANE_BAD_CODE, l_data));
-    ffdc.set_S_WT_CLK_LANE_INVERTED(io::get(EDI_RX_WT_CLK_LANE_INVERTED, l_data));
+
+    uint64_t s_clk_lane_bad_code = io::get(EDI_RX_WT_CLK_LANE_BAD_CODE, l_data);
+    ffdc.set_S_CLK_LANE_BAD_CODE(s_clk_lane_bad_code);
+
+    uint64_t s_clk_lane_inverted = io::get(EDI_RX_WT_CLK_LANE_INVERTED, l_data);
+    ffdc.set_S_WT_CLK_LANE_INVERTED(s_clk_lane_inverted);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -405,7 +475,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Slave Eye Optimization
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDI_RX_EO_RECAL_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_EYE_OPT_STATE(io::get(EDI_RX_EYE_OPT_STATE, l_data));
+
+    uint64_t s_eye_opt_state = io::get(EDI_RX_EYE_OPT_STATE, l_data);
+    ffdc.set_S_EYE_OPT_STATE(s_eye_opt_state);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -421,7 +493,9 @@ fapi2::ReturnCode add_linktrain_ffdc(
     // Slave Repair
     ///////////////////////////////////////////////////////////////////////////
     l_rc = io::read(EDI_RX_STATIC_REPAIR_STATE_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_RPR_STATE(io::get(EDI_RX_RPR_STATE, l_data));
+
+    uint64_t s_rpr_state = io::get(EDI_RX_RPR_STATE, l_data);
+    ffdc.set_S_RPR_STATE(s_rpr_state);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -430,9 +504,15 @@ fapi2::ReturnCode add_linktrain_ffdc(
     }
 
     l_rc = io::read(EDI_RX_BAD_LANE_ENC_GCRMSG_PG, i_stgt, GRP0, LN0, l_data);
-    ffdc.set_S_BAD_LANE1    (io::get(EDI_RX_BAD_LANE1_GCRMSG,     l_data));
-    ffdc.set_S_BAD_LANE2    (io::get(EDI_RX_BAD_LANE2_GCRMSG,     l_data));
-    ffdc.set_S_BAD_LANE_CODE(io::get(EDI_RX_BAD_LANE_CODE_GCRMSG, l_data));
+
+    uint64_t s_bad_lane1 = io::get(EDI_RX_BAD_LANE1_GCRMSG, l_data);
+    ffdc.set_S_BAD_LANE1    (s_bad_lane1);
+
+    uint64_t s_bad_lane2 = io::get(EDI_RX_BAD_LANE2_GCRMSG, l_data);
+    ffdc.set_S_BAD_LANE2    (s_bad_lane2);
+
+    uint64_t s_bad_lane_code = io::get(EDI_RX_BAD_LANE_CODE_GCRMSG, l_data);
+    ffdc.set_S_BAD_LANE_CODE(s_bad_lane_code);
 
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
