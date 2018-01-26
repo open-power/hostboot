@@ -42,6 +42,7 @@ const size_t MclCompSectionPadSize = 16;
 
 const ComponentID g_MclCompId {"MSTCONT"};
 const ComponentID g_PowervmCompId {"POWERVM"};
+const ComponentID g_OpalCompId {"OPAL"};
 
 void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr)
 {
@@ -605,21 +606,6 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
     if( (io_compInfo.flags & CompFlags::SIGNED_PRE_VERIFY) ==
          CompFlags::SIGNED_PRE_VERIFY)
     {
-        // Only verify the lids if in secure mode
-        if (SECUREBOOT::enabled())
-        {
-            // Verify Container - some combination of Lids
-
-            l_errl = SECUREBOOT::verifyContainer(iv_pVaddr,
-                                             extractLidIds(io_compInfo.lidIds));
-            if (l_errl)
-            {
-                UTIL_FT(ERR_MRK"MasterContainerLidMgr::verifyExtend - failed verifyContainer");
-                SECUREBOOT::handleSecurebootFailure(l_errl);
-                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
-            }
-        }
-
         // Parse Container Header
         SECUREBOOT::ContainerHeader l_conHdr;
         l_errl = l_conHdr.setHeader(iv_pVaddr);
@@ -635,15 +621,34 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         io_compInfo.unprotectedSize = l_conHdr.totalContainerSize() -
                                       l_conHdr.payloadTextSize();
 
-        // Verify the component in the Secure Header matches the MCL
-        l_errl = SECUREBOOT::verifyComponentId(l_conHdr, iv_curCompIdStr);
+        // Only verify the lids if in secure mode
+        if (SECUREBOOT::enabled())
+        {
+            // Verify Container - some combination of Lids
+            l_errl = SECUREBOOT::verifyContainer(iv_pVaddr,
+                                             extractLidIds(io_compInfo.lidIds));
+            if (l_errl)
+            {
+                UTIL_FT(ERR_MRK"MasterContainerLidMgr::verifyExtend - failed verifyContainer");
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            }
+
+            // Verify the component in the Secure Header matches the MCL
+            l_errl = SECUREBOOT::verifyComponentId(l_conHdr, iv_curCompIdStr);
+            if (l_errl)
+            {
+                l_errl->collectTrace(UTIL_COMP_NAME);
+                break;
+            }
+        }
+
+        l_errl = tpmExtend(i_compId, l_conHdr);
         if (l_errl)
         {
             l_errl->collectTrace(UTIL_COMP_NAME);
             break;
         }
-
-        tpmExtend(i_compId, l_conHdr);
     }
     } while(0);
 
@@ -653,7 +658,7 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
 }
 
 errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
-                            const SECUREBOOT::ContainerHeader& i_conHdr) const
+                            const SECUREBOOT::ContainerHeader& i_conHdr)
 {
     UTIL_DT(ENTER_MRK"MasterContainerLidMgr::tpmExtend");
 
@@ -681,7 +686,7 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (payload text hash) failed for component %s",
-                  iv_curCompIdStr);
+                  i_conHdr.componentId());
         break;
     }
 
@@ -694,7 +699,7 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
     if (l_errl)
     {
         UTIL_FT(ERR_MRK "MasterContainerLidMgr::tpmExtend - pcrExtend() (FW key hash) failed for component %s",
-                iv_curCompIdStr);
+                i_conHdr.componentId());
         break;
     }
 

@@ -38,9 +38,11 @@
 #include <targeting/common/util.H>
 #include <vpd/vpd_if.H>
 #include <util/utiltce.H>
+#include <util/utilmclmgr.H>
 #include <map>
 
 #include <secureboot/service.H>
+#include <secureboot/containerheader.H>
 #include <sys/mm.h>
 //SBE interfacing
 #include    <sbeio/sbeioif.H>
@@ -115,6 +117,12 @@ errlHndl_t verifyAndMovePayload(void)
         break;
     }
 
+    // Setup componend IDs and strings
+    const MCL::ComponentID l_compId = is_phyp ? MCL::g_PowervmCompId
+                                              : MCL::g_OpalCompId;
+    MCL::CompIdString l_IdStr = {};
+    MCL::compIdToString(l_compId, l_IdStr);
+
     // Get Temporary Virtual Address To Payload
     uint64_t payload_tmp_phys_addr = MCL_TMP_ADDR;
     uint64_t payload_size          = MCL_TMP_SIZE;
@@ -136,9 +144,23 @@ errlHndl_t verifyAndMovePayload(void)
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"verifyAndMovePayload() "
-               "Processing PAYLOAD_KIND = %d (is_phyp=%d): "
+               "Processing PAYLOAD_KIND = %d (Id='%s') (is_phyp=%d): "
                "physAddr=0x%.16llX, virtAddr=0x%.16llX",
-               payload_kind, is_phyp, payload_tmp_phys_addr, payload_tmp_virt_addr );
+               payload_kind, l_IdStr, is_phyp, payload_tmp_phys_addr,
+               payload_tmp_virt_addr );
+
+
+    // Parse Container Header
+    SECUREBOOT::ContainerHeader l_conHdr;
+    l_err = l_conHdr.setHeader(payload_tmp_virt_addr);
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to parse container "
+                   "header at payload_tmp_virt_addr = 0x%.16llX",
+                   payload_tmp_virt_addr);
+        break;
+    }
 
     // If in Secure Mode Verify PHYP at Temporary TCE-related Memory Location
     if (SECUREBOOT::enabled() && is_phyp)
@@ -147,6 +169,7 @@ errlHndl_t verifyAndMovePayload(void)
                    "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
                    payload_tmp_phys_addr, payload_tmp_virt_addr );
 
+        // Verify Container
         l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
         if (l_err)
         {
@@ -156,12 +179,35 @@ errlHndl_t verifyAndMovePayload(void)
             SECUREBOOT::handleSecurebootFailure(l_err);
             assert(false,"Bug! handleSecurebootFailure shouldn't return!");
         }
+
+        // Get PAYLOAD size from verified Header
+        payload_size = l_conHdr.payloadTextSize() + PAGESIZE;
+        assert(payload_size <= MCL_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= MCL_TMP_SIZE (0x%X)", payload_size, MCL_TMP_SIZE );
+
+        // Verify ASCII Component Id in the Secure Header matches expected value
+        l_err = SECUREBOOT::verifyComponentId(l_conHdr, l_IdStr);
+        if (l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"verifyAndMovePayload(): Fail to verify component"
+                       "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                       l_IdStr, payload_tmp_virt_addr);
+            break;
+        }
     }
 
-    // @TODO RTC 168745 - Verify Component ID with ASCII
-    // @TODO RTC 168745 - Extend PAYLOAD
+    // Extend PAYLOAD
+    l_err = MCL::MasterContainerLidMgr::tpmExtend(l_compId, l_conHdr);
+    if (l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to tpmExend "
+                   "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                   l_IdStr, payload_tmp_virt_addr);
+        break;
+    }
 
-    // Move PHYP to Final Location
+    // Move PAYLOAD to Final Location
     // Get Target Service, and the system target.
     TargetService& tS = targetService();
     TARGETING::Target* sys = nullptr;
@@ -186,7 +232,6 @@ errlHndl_t verifyAndMovePayload(void)
         payload_size -= PAGESIZE;
     }
 
-    // @TODO RTC 168745 - Use ContainerHeader to get accurate payload size
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
                                payload_size);

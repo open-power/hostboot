@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -595,6 +595,7 @@ namespace TRUSTEDBOOT
         memset(i_val->eventLogInMem, 0, i_maxSize);
         memcpy(i_val->eventLogInMem, i_val->eventLog, i_val->logSize);
         i_val->newEventPtr = i_val->eventLogInMem + i_val->logSize;
+        i_val->logMaxSize = i_maxSize;
 
         mutex_unlock( &i_val->logMutex );
 
