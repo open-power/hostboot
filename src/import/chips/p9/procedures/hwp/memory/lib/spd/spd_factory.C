@@ -27,7 +27,7 @@
 /// @brief SPD factory and functions
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -212,15 +212,15 @@ enum factory_byte_extract
 };
 
 ///
-/// @brief       Decodes SPD Revision encoding level
-/// @param[in]   i_target dimm target
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_value encoding revision num
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Decodes SPD Byte 1 (3~0).
-/// @note        Item JC-45-2220.01x
-/// @note        Page 14-15
-/// @note        DDR4 SPD Document Release 3
+/// @brief Decodes SPD Revision encoding level
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_value encoding revision num
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 1 (3~0).
+/// @note Item JC-45-2220.01x
+/// @note Page 14-15
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode rev_encoding_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                      const std::vector<uint8_t>& i_spd_data,
@@ -254,15 +254,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Decodes SPD Revision additions level
-/// @param[in]   i_target dimm target
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_value additions revision num
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Decodes SPD Byte 1 (bits 7~4).
-/// @note        Item JC-45-2220.01x
-/// @note        Page 14-15
-/// @note        DDR4 SPD Document Release 3
+/// @brief Decodes SPD Revision additions level
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_value additions revision num
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 1 (bits 7~4).
+/// @note Item JC-45-2220.01x
+/// @note Page 14-15
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode rev_additions_level(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                       const std::vector<uint8_t>& i_spd_data,
@@ -297,15 +297,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief      Decodes hybrid type (whether or not the DIMM is a hybrid) from SPD
-/// @param[in]  i_target dimm target
-/// @param[in]  i_spd_data SPD data
+/// @brief Decodes hybrid type (whether or not the DIMM is a hybrid) from SPD
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
 /// @param[out] o_value hybrid
-/// @return     FAPI2_RC_SUCCESS if okay
-/// @note       Decodes SPD Byte 3 (bit 7)
-/// @note       Item JC-45-2220.01x
-/// @note       Page 17
-/// @note       DDR4 SPD Document Release 3
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 3 (bit 7)
+/// @note Item JC-45-2220.01x
+/// @note Page 17
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode hybrid(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                          const std::vector<uint8_t>& i_spd_data,
@@ -351,15 +351,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief      Decodes hybrid type (hybrid DIMM type) from SPD
-/// @param[in]  i_target dimm target
-/// @param[in]  i_spd_data SPD data
+/// @brief Decodes hybrid type (hybrid DIMM type) from SPD
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
 /// @param[out] o_value hybrid module type
-/// @return     FAPI2_RC_SUCCESS if okay
-/// @note       Decodes SPD Byte 3 (bits 6~4)
-/// @note       Item JC-45-2220.01x
-/// @note       Page 17
-/// @note       DDR4 SPD Document Release 3
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 3 (bits 6~4)
+/// @note Item JC-45-2220.01x
+/// @note Page 17
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode hybrid_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                               const std::vector<uint8_t>& i_spd_data,
@@ -405,15 +405,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief      Decodes base module type (DIMM type) from SPD
-/// @param[in]  i_target dimm target
-/// @param[in]  i_spd_data SPD data
+/// @brief Decodes base module type (DIMM type) from SPD
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
 /// @param[out] o_value base module type
-/// @return     FAPI2_RC_SUCCESS if okay
-/// @note       Decodes SPD Byte 3 (bits 3~0)
-/// @note       Item JC-45-2220.01x
-/// @note       Page 17
-/// @note       DDR4 SPD Document Release 3
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 3 (bits 3~0)
+/// @note Item JC-45-2220.01x
+/// @note Page 17
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                    const std::vector<uint8_t>& i_spd_data,
@@ -460,15 +460,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Decodes DRAM Device Type
-/// @param[in]   i_target dimm target
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_value dram device type enumeration
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Decodes SPD Byte 2
-/// @note        Item JC-45-2220.01x
-/// @note        Page 16
-/// @note        DDR4 SPD Document Release 3
+/// @brief Decodes DRAM Device Type
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_value dram device type enumeration
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Decodes SPD Byte 2
+/// @note Item JC-45-2220.01x
+/// @note Page 16
+/// @note DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                    const std::vector<uint8_t>& i_spd_data,
@@ -726,15 +726,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Helper function to return RDIMM decoder
-/// @param[in]   i_target dimm target
-/// @param[in]   i_encoding_rev encoding revision
-/// @param[in]   i_additions_rev additions revision
-/// @param[in]   i_raw_card raw card reference revision
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_fact_obj shared pointer to the factory object
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Factory dependent on SPD revision & dimm type
+/// @brief Helper function to return RDIMM decoder
+/// @param[in] i_target dimm target
+/// @param[in] i_encoding_rev encoding revision
+/// @param[in] i_additions_rev additions revision
+/// @param[in] i_raw_card raw card reference revision
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_fact_obj shared pointer to the factory object
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Factory dependent on SPD revision & dimm type
 ///
 static fapi2::ReturnCode rdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_encoding_rev,
@@ -814,15 +814,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Helper function to return LRDIMM decoder
-/// @param[in]   i_target dimm target
-/// @param[in]   i_encoding_rev encoding revision
-/// @param[in]   i_additions_rev additions revision
-/// @param[in]   i_raw_card raw card reference revision
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_fact_obj shared pointer to the factory object
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Factory dependent on SPD revision & dimm type
+/// @brief Helper function to return LRDIMM decoder
+/// @param[in] i_target dimm target
+/// @param[in] i_encoding_rev encoding revision
+/// @param[in] i_additions_rev additions revision
+/// @param[in] i_raw_card raw card reference revision
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_fact_obj shared pointer to the factory object
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Factory dependent on SPD revision & dimm type
 ///
 static fapi2::ReturnCode lrdimm_rev_helper(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_encoding_rev,
@@ -951,17 +951,19 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
                          l_ref_raw_card_rev);
             }
 
-            o_raw_card = find_raw_card( i_target,
-                                        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
-                                        l_ref_raw_card_rev,
-                                        mss::rdimm::RAW_CARDS);
+            FAPI_TRY( find_raw_card( i_target,
+                                     fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+                                     l_ref_raw_card_rev,
+                                     mss::rdimm::RAW_CARDS,
+                                     o_raw_card) );
             break;
 
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
-            o_raw_card = find_raw_card( i_target,
-                                        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
-                                        l_ref_raw_card_rev,
-                                        mss::lrdimm::RAW_CARDS);
+            FAPI_TRY( find_raw_card( i_target,
+                                     fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
+                                     l_ref_raw_card_rev,
+                                     mss::lrdimm::RAW_CARDS,
+                                     o_raw_card) );
             break;
 
         default:
@@ -979,12 +981,12 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Object factory to select correct decoder
-/// @param[in]   i_target dimm target
-/// @param[in]   i_spd_data SPD data
-/// @param[out]  o_fact_obj shared pointer to the factory object
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Factory dependent on SPD revision & dimm type
+/// @brief Object factory to select correct decoder
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_fact_obj shared pointer to the factory object
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note Factory dependent on SPD revision & dimm type
 ///
 fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                           const std::vector<uint8_t>& i_spd_data,
@@ -1073,50 +1075,94 @@ fapi_try_exit:
 }
 
 ///
-/// @brief       Wrapper function for finding the raw card
-/// @param[in]   i_target the dimm target
-/// @param[in]   i_dimm_type
-/// @param[in]   i_ref_raw_card_rev for FFDC
-/// @param[in]   i_map raw card map
-/// @return      rcw_settings vector of rcw settings
-/// @note        This specialization is suited for creating a cache with custom
-///              SPD data (e.g. testing custom SPD).
+/// @brief Wrapper function for finding the raw card -- helper for testing
+/// @param[in] i_target the dimm target
+/// @param[in] i_dimm_type
+/// @param[in] i_ref_raw_card_rev for FFDC
+/// @param[in] i_mrw_supported_rc
+/// @param[in] i_map raw card map
+/// @param[out] o_rcw raw card setting
+/// @return rcw_settings vector of rcw settings
+/// @note This specialization is suited for creating a cache with custom
+/// SPD data (e.g. testing custom SPD).
+/// @note MRW attributes are read-only, this function provides a mechanism to test
+/// different code paths.
 ///
-rcw_settings find_raw_card( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                            const uint64_t i_dimm_type,
-                            const uint8_t i_ref_raw_card_rev,
-                            const std::vector<std::pair<uint8_t, rcw_settings> > i_map)
+fapi2::ReturnCode find_raw_card_helper( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                        const uint64_t i_dimm_type,
+                                        const uint8_t i_ref_raw_card_rev,
+                                        const uint8_t i_mrw_supported_rc,
+                                        const std::vector<std::pair<uint8_t, rcw_settings> >& i_map,
+                                        rcw_settings& o_raw_card)
 {
-    rcw_settings l_raw_card;
+    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
 
-    FAPI_ASSERT( find_value_from_key( i_map, i_ref_raw_card_rev, l_raw_card),
-                 fapi2::MSS_INVALID_RAW_CARD()
-                 .set_DIMM_TYPE(i_dimm_type)
-                 .set_RAW_CARD_REV(i_ref_raw_card_rev)
-                 .set_DIMM_TARGET(i_target),
-                 "Invalid reference raw card received for %s: %d for %s",
-                 (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ? "RDIMM" : "LRDIMM",
-                 i_ref_raw_card_rev,
-                 mss::c_str(i_target) );
+    FAPI_INF("Unsupported raw cards %s allowed for %s",
+             i_mrw_supported_rc ? "are" : "are NOT",
+             mss::c_str(i_target));
 
-    return l_raw_card;
+    FAPI_ASSERT(find_value_from_key( i_map, i_ref_raw_card_rev, o_raw_card),
+                fapi2::MSS_INVALID_RAW_CARD(fapi2::FAPI2_ERRL_SEV_RECOVERED, l_rc)
+                .set_DIMM_TYPE(i_dimm_type)
+                .set_RAW_CARD_REV(i_ref_raw_card_rev)
+                .set_DIMM_TARGET(i_target),
+                "Invalid reference raw card received for %s: %d for %s",
+                (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ? "RDIMM" : "LRDIMM",
+                i_ref_raw_card_rev,
+                mss::c_str(i_target) );
 
-// If we got here there was a raw card we don't have values for, so putting the default
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
-    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    return (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
-           rdimm_rc_default : lrdimm_rc_default;
+
+    // If system owners or open power partners decide they want to allow unsupported RCWs,
+    // we'll create a hidden log for debugging purposes and continue on w/default settings.
+    // We want the log for debugging purposes because these settings can break
+    if( i_mrw_supported_rc == fapi2::ENUM_ATTR_MSS_MRW_ALLOW_UNSUPPORTED_RCW_ENABLE )
+    {
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        l_rc = fapi2::FAPI2_RC_SUCCESS;
+        o_raw_card = (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ? rdimm_rc_default : lrdimm_rc_default;
+    }
+
+    return l_rc;
 }
 
 ///
-/// @brief       Creates factory object & SPD data caches
-/// @param[in]   i_target the dimm target
-/// @param[out]  o_factory_caches vector of factory objects
-/// @param[in]   i_pDecoder custom decoder to populate cache (nullptr default)
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        This specialization is suited for creating a cache with custom
-///              SPD data (e.g. testing custom SPD).
+/// @brief Wrapper function for finding the raw card
+/// @param[in] i_target the dimm target
+/// @param[in] i_dimm_type
+/// @param[in] i_ref_raw_card_rev for FFDC
+/// @param[in] i_map raw card map
+/// @param[out] o_rcw raw card setting
+/// @return rcw_settings vector of rcw settings
+/// @note This specialization is suited for creating a cache with custom
+/// SPD data (e.g. testing custom SPD).
+///
+fapi2::ReturnCode find_raw_card( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                 const uint64_t i_dimm_type,
+                                 const uint8_t i_ref_raw_card_rev,
+                                 const std::vector<std::pair<uint8_t, rcw_settings> >& i_map,
+                                 rcw_settings& o_raw_card)
+{
+    uint8_t l_allow_unsupported_rcw = 0;
+    FAPI_TRY( mrw_allow_unsupported_rcw(l_allow_unsupported_rcw) );
+
+    FAPI_TRY( find_raw_card_helper(i_target, i_dimm_type, i_ref_raw_card_rev, l_allow_unsupported_rcw, i_map, o_raw_card),
+              "Failed find_raw_card_helper for %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Creates factory object & SPD data caches
+/// @param[in] i_target the dimm target
+/// @param[out] o_factory_caches vector of factory objects
+/// @param[in] i_pDecoder custom decoder to populate cache (nullptr default)
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note This specialization is suited for creating a cache with custom
+/// SPD data (e.g. testing custom SPD).
 ///
 template<>
 fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
