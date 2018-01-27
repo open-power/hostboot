@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,19 @@ namespace mc
 /// A little vector of translators. We have one of these for each DIMM we support
 static const std::vector<xlate_setup> xlate_map =
 {
+    // 1R 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_4GB),
+        xlate_dimm_1R1T4Gbx8
+    },
+
     // 1R 4Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -120,6 +133,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM18,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
         xlate_dimm_1R1T16Gbx4
+    },
+
+    // 2R 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_8GB),
+        xlate_dimm_2R2T4Gbx8
     },
 
     // 2R 4Gbx4 DDR4 RDIMM
@@ -213,6 +239,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_4R4T8Gbx8
     },
 
+    // 4R 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_4R4T4Gbx8
+    },
+
     // 4R 8Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_4R,
@@ -257,6 +296,19 @@ static const std::vector<xlate_setup> xlate_map =
     //
     // 3DS RDIMM
     //
+
+    // 1R 2H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_8GB),
+        xlate_dimm_1R2T4Gbx8
+    },
 
     // 1R 2H 3DS 4Gbx4 DDR4 RDIMM
     {
@@ -321,6 +373,19 @@ static const std::vector<xlate_setup> xlate_map =
         fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM18,
         fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
         xlate_dimm_1R2T16Gbx4
+    },
+
+    // 1R 4H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_1R4T4Gbx8
     },
 
     // 1R 4H 3DS 4Gbx4 DDR4 RDIMM
@@ -388,6 +453,19 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R4T16Gbx4
     },
 
+    // 1R 8H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_1R8T4Gbx8
+    },
+
     // 1R 8H 3DS 4Gbx4 DDR4 RDIMM
     {
         dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_1R,
@@ -453,6 +531,18 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_1R8T16Gbx4
     },
 
+    // 2R 2H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_4R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_16GB),
+        xlate_dimm_2R4T4Gbx8
+    },
 
     // 2R 2H 3DS 4Gbx4 DDR4 RDIMM
     {
@@ -519,6 +609,18 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R4T16Gbx4
     },
 
+    // 2R 4H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_8R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_32GB),
+        xlate_dimm_2R8T4Gbx8
+    },
 
     // 2R 4H 3DS 4Gbx4 DDR4 RDIMM
     {
@@ -585,6 +687,18 @@ static const std::vector<xlate_setup> xlate_map =
         xlate_dimm_2R8T16Gbx4
     },
 
+    // 2R 8H 3DS 4Gbx8 DDR4 RDIMM
+    {
+        dimm::kind(fapi2::ENUM_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_2R,
+        fapi2::ENUM_ATTR_EFF_NUM_RANKS_PER_DIMM_16R,
+        fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G,
+        fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8,
+        fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+        fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15,
+        fapi2::ENUM_ATTR_EFF_DIMM_SIZE_64GB),
+        xlate_dimm_2R16T4Gbx8
+    },
 
     // 2R 8H 3DS 4Gbx4 DDR4 RDIMM
     {
@@ -1167,8 +1281,8 @@ fapi2::ReturnCode xlate_dimm_2R8T16Gbx4( const dimm::kind& i_kind,
     constexpr uint64_t R17_MAP(PORT_ADDRESS_2);
     constexpr uint64_t DBIT_MAP(PORT_ADDRESS_1);
 
-    // We're just like a 2R 2H 3DS 8Gbx4 so lets start there and modify
-    FAPI_TRY( xlate_dimm_2R4T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    // We're just like a 2R 4H 3DS 8Gbx4 so lets start there and modify
+    FAPI_TRY( xlate_dimm_2R8T8Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
     // We're a 18 row DIMM, so ROW17 is valid.
     FAPI_TRY( set_xlate_row<ROW17>(R17_MAP, i_offset, io_xlate0) );
@@ -1307,7 +1421,7 @@ fapi2::ReturnCode xlate_dimm_1R1T4Gbx4( const dimm::kind& i_kind,
     // this DIMM in the vector, so this is always safe.
     FAPI_TRY(set_xlate_dimm_slot(i_offset, io_xlate0) );
 
-    // If we have all the slots filled in with 1R SDP DIMM, we build a very differnt mapping.
+    // If we have all the slots filled in with 1R SDP DIMM, we build a very different mapping.
     if (l_all_slots_1R)
     {
         constexpr uint64_t R15_MAP(PORT_ADDRESS_6);
@@ -1410,7 +1524,7 @@ fapi2::ReturnCode xlate_dimm_1R1T8Gbx4( const dimm::kind& i_kind,
     // We're more or less a 1R 4Gbx4 with an extra row. So lets setup like that and add our row in.
     FAPI_TRY( xlate_dimm_1R1T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
 
-    // If we have all the slots filled in with 1R SDP DIMM, we build a differnt mapping.
+    // If we have all the slots filled in with 1R SDP DIMM, we build a different mapping.
     // We're a 17 row DIMM, so ROW16 is valid.
     FAPI_TRY( set_xlate_row<ROW16>(R16_MAP, i_offset, io_xlate0) );
 
@@ -2455,6 +2569,283 @@ fapi2::ReturnCode xlate_dimm_4R4T16Gbx8( const dimm::kind& i_kind,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R1T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 1R 4Gbx4 or 1R 8Gbx8 except we don't have  R15
+    FAPI_TRY( xlate_dimm_1R1T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 2H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R2T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 1R 2H 4Gbx4 or 1R 2H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_1R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_6, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 4H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R4T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 1R 4H 4Gbx4 or 1R 4H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_1R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_5, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 1R 4H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_1R8T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 1R 8H 4Gbx4 or 1R 8H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_1R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_4, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R2T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 2R 4Gbx4 or 2R 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_6, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 2H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R4T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 2R 2H 4Gbx4 or 2R 2H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_2R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_5, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 4H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R8T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 2R 4H 4Gbx4 or 2R 4H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_2R8T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_4, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 2R 8H 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_2R16T4Gbx8( const dimm::kind& i_kind,
+        const uint64_t i_offset,
+        const bool i_largest,
+        fapi2::buffer<uint64_t>& io_xlate0,
+        fapi2::buffer<uint64_t>& io_xlate1,
+        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 2R 8H 4Gbx4 or 2R 8H 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_2R16T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_3, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations of the MC translation
+/// @param[in] i_kind the DIMM to map
+/// @param[in] i_offset the offset; whether the DIMM is in slot 0 or slot 1
+/// @param[in] i_largest whether or not we're the largest DIMM on the port.
+/// @param[in,out] io_xlate0 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate1 a buffer representing the xlate register to modify
+/// @param[in,out] io_xlate2 a buffer representing the xlate register to modify
+/// @note Called for 4R 4Gbx8 DDR4 RDIMM
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode xlate_dimm_4R4T4Gbx8( const dimm::kind& i_kind,
+                                        const uint64_t i_offset,
+                                        const bool i_largest,
+                                        fapi2::buffer<uint64_t>& io_xlate0,
+                                        fapi2::buffer<uint64_t>& io_xlate1,
+                                        fapi2::buffer<uint64_t>& io_xlate2 )
+{
+    // From the Nimbus MC workbook ver 0.4
+    // Chapter 5: Address Translation pg 148
+    // We're just like a 4R 4Gbx4 or 4R 8Gbx8 except we don't have R15
+    // And the D bit is shifted over
+    FAPI_TRY( xlate_dimm_4R4T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2) );
+    FAPI_TRY( clear_xlate_row<ROW15>(i_offset, io_xlate0) );
+
+    FAPI_TRY( d_bit_helper(i_kind.iv_target, i_largest, i_offset, PORT_ADDRESS_5, io_xlate0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 } // namespace mc
 } // namespace mss

@@ -648,4 +648,20 @@
     <enum> NO_NVDIMM = 0, NVDIMM_CAPABLE = 1 </enum>
     <mssAccessorName>mrw_nvdimm_plug_rules</mssAccessorName>
   </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_ALLOW_UNSUPPORTED_RCW</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Switch that allows unsupported raw card references by providing a
+      default raw card setting.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default> 1  </default>
+    <overrideOnly/>
+    <enum> DISABLE = 0, ENABLE = 1 </enum>
+    <mssAccessorName>mrw_allow_unsupported_rcw</mssAccessorName>
+  </attribute>
+
 </attributes>
