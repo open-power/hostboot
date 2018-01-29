@@ -1148,7 +1148,26 @@ void tpmVerifyFunctionalTpmExists(
                  * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
                  * @userdata1      0
                  * @userdata2      0
-                 * @devdesc        No functional TPMs exist in the system
+                 * @devdesc        The system is configured in the hardware
+                 *                 (via processor secure jumpers) to enable
+                 *                 Secure Boot, and the system's "TPM required"
+                 *                 policy is configured to require at least one
+                 *                 functional TPM in order to boot with Secure
+                 *                 Boot enabled. Therefore, the system will
+                 *                 terminate due to lack of functional TPMs.
+                 * @custdesc       The system is configured for Secure Boot and
+                 *                 trusted platform module required mode; at
+                 *                 least one functional trusted platform module
+                 *                 is required to boot the system, but none are
+                 *                 available.  Therefore, the system will
+                 *                 terminate.
+                 *                 Trusted platform module required mode may be
+                 *                 disabled via the appropriate systems
+                 *                 management interface to allow platform boot
+                 *                 without the remote trusted attestation
+                 *                 capability. Look for other errors which call
+                 *                 out the trusted platform module and follow
+                 *                 the repair actions for these errors.
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               MOD_TPM_VERIFYFUNCTIONAL,
