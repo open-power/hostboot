@@ -55,6 +55,7 @@ EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET

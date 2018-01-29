@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/runtime/handleSpecialWakeup.C $                  */
+/* $Source: src/usr/scom/handleSpecialWakeup.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,8 +35,11 @@
 
 #include <scom/scomreasoncodes.H>
 #include <initservice/initserviceif.H>
+
+#ifdef __HOSTBOOT_RUNTIME
 #include <runtime/rt_targeting.H>
 #include <runtime/interface.h>
+#endif // __HOSTBOOT_RUNTIME
 
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
@@ -60,9 +63,11 @@ using namespace SCOM;
 errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
 {
     errlHndl_t l_errl = NULL;
+    fapi2::ReturnCode l_rc;
 
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
+#ifdef __HOSTBOOT_RUNTIME
     // FSP
     if(INITSERVICE::spBaseServicesEnabled())
     {
@@ -171,6 +176,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
     // BMC
     else
     {
+#endif // __HOSTBOOT_RUNTIME
         if(l_type == TARGETING::TYPE_PROC)
         {
             // Call wakeup on all core targets
@@ -204,7 +210,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
             /*@
              * @errortype
              * @moduleid         SCOM_HANDLE_SPECIAL_WAKEUP
-             * @reasoncode       SCOM_RUNTIME_SPCWKUP_COUNT_ERR
+             * @reasoncode       SCOM_SPCWKUP_COUNT_ERR
              * @userdata1        Target HUID
              * @userdata2[0:31]  Wakeup Enable
              * @userdata2[32:63] Wakeup Count
@@ -212,7 +218,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                              SCOM_HANDLE_SPECIAL_WAKEUP,
-                                             SCOM_RUNTIME_SPCWKUP_COUNT_ERR,
+                                             SCOM_SPCWKUP_COUNT_ERR,
                                              get_huid(i_target),
                                              TWO_UINT32_TO_UINT64(
                                                         i_enable, l_count));
@@ -233,6 +239,16 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
             // bit because HOST/OCC are already in use.
 
             p9specialWakeup::PROC_SPCWKUP_OPS l_spcwkupType;
+            p9specialWakeup::PROC_SPCWKUP_ENTITY l_spcwkupSrc;
+            if(! INITSERVICE::spBaseServicesEnabled())
+            {
+                l_spcwkupSrc = p9specialWakeup::FSP;
+            }
+            else
+            {
+                l_spcwkupSrc = p9specialWakeup::HOST;
+            }
+
             if(i_enable)
             {
                 l_spcwkupType = p9specialWakeup::SPCWKUP_ENABLE;
@@ -247,33 +263,36 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
                 fapi2::Target<fapi2::TARGET_TYPE_EQ>
                     l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
-                FAPI_INVOKE_HWP( l_errl,
-                                p9_cpu_special_wakeup_eq,
-                                l_fapi_target,
-                                l_spcwkupType,
-                                p9specialWakeup::FSP );
+                FAPI_EXEC_HWP(l_rc,
+                              p9_cpu_special_wakeup_eq,
+                              l_fapi_target,
+                              l_spcwkupType,
+                              l_spcwkupSrc );
+                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             }
             else if(l_type == TARGETING::TYPE_EX)
             {
                 fapi2::Target<fapi2::TARGET_TYPE_EX_CHIPLET>
                     l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
-                FAPI_INVOKE_HWP( l_errl,
-                                p9_cpu_special_wakeup_ex,
-                                l_fapi_target,
-                                l_spcwkupType,
-                                p9specialWakeup::FSP );
+                FAPI_EXEC_HWP(l_rc,
+                              p9_cpu_special_wakeup_ex,
+                              l_fapi_target,
+                              l_spcwkupType,
+                              l_spcwkupSrc );
+                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             }
             else if(l_type == TARGETING::TYPE_CORE)
             {
                 fapi2::Target<fapi2::TARGET_TYPE_CORE>
                     l_fapi_target(const_cast<TARGETING::Target*>(i_target));
 
-                FAPI_INVOKE_HWP( l_errl,
-                                p9_cpu_special_wakeup_core,
-                                l_fapi_target,
-                                l_spcwkupType,
-                                p9specialWakeup::FSP );
+                FAPI_EXEC_HWP(l_rc,
+                              p9_cpu_special_wakeup_core,
+                              l_fapi_target,
+                              l_spcwkupType,
+                              l_spcwkupSrc );
+                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             }
 
             if(l_errl)
@@ -301,7 +320,9 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
             }
             i_target->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
         }
+#ifdef __HOSTBOOT_RUNTIME
     }
+#endif
 
     return l_errl;
 }

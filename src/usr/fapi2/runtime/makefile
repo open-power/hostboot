@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -32,8 +32,6 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 
 MODULE = fapi2_rt
-
-EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/runtime
 
 SUBDIRS += test.d
 
