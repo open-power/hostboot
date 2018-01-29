@@ -1521,13 +1521,23 @@ sub processPec
                         $pec_iop_swap |= 1 << $bitshift;
                     }
 
+                    my $pcie_bifurcated = "0";
+                    if ($targetObj->isBusAttributeDefined($phb_config_child, 0, "PCIE_BIFURCATED")) {
+                        $pcie_bifurcated = $targetObj->getBusAttribute
+                                ($phb_config_child, 0, "PCIE_BIFURCATED");
+                    }
                     # Set the lane swap for the PEC. If we find more swaps as
                     # we process the other PCI busses then we will overwrite
                     # the overall swap value with the newly computed one.
-                    $targetObj->setAttribute($target,
-                        "PEC_PCIE_IOP_SWAP_NON_BIFURCATED", $pec_iop_swap);
-                    $targetObj->setAttribute($target,
-                        "PROC_PCIE_IOP_SWAP", $pec_iop_swap);
+                    if ($pcie_bifurcated eq "1") {
+                        $targetObj->setAttribute($target,
+                            "PEC_PCIE_IOP_SWAP_BIFURCATED", $pec_iop_swap);
+                    } else {
+                        $targetObj->setAttribute($target,
+                            "PEC_PCIE_IOP_SWAP_NON_BIFURCATED", $pec_iop_swap);
+                        $targetObj->setAttribute($target,
+                            "PROC_PCIE_IOP_SWAP", $pec_iop_swap);
+                    }
 
                     $lane_mask[$lane_group][0] =
                         $targetObj->getAttribute
@@ -1537,10 +1547,15 @@ sub processPec
                         $lane_mask[0][0], $lane_mask[1][0],
                         $lane_mask[2][0], $lane_mask[3][0]);
 
-                    $targetObj->setAttribute($target, "PROC_PCIE_LANE_MASK",
-                        $lane_mask_attr);
-                    $targetObj->setAttribute($target,
-                        "PEC_PCIE_LANE_MASK_NON_BIFURCATED", $lane_mask_attr);
+                    if ($pcie_bifurcated eq "1") {
+                        $targetObj->setAttribute($target,
+                            "PEC_PCIE_LANE_MASK_BIFURCATED", $lane_mask_attr);
+                    } else {
+                        $targetObj->setAttribute($target, "PROC_PCIE_LANE_MASK",
+                            $lane_mask_attr);
+                        $targetObj->setAttribute($target,
+                            "PEC_PCIE_LANE_MASK_NON_BIFURCATED", $lane_mask_attr);
+                    }
 
                     # Only compute the HDAT attributes if they are available
                     # and have default values

@@ -902,12 +902,10 @@ sub iterateOverChiplets
                              }
                              else
                              {
-                                 # This is our "bug" scenerio. We have found a
-                                 # connection, but that PHB element is already
-                                 # filled in the array. We need to kill the
-                                 # program.
-                                 printf("Found a duplicate connection for PEC %s PHB %s.\n",$pec_num,$phb_num);
-                                 die "Duplicate PHB bus connection found\n";
+                                 # The dynamic bifurcation feature will make duplicate connection
+                                 # for single PEC. So just post warning message for the possible
+                                 # error in other scenario.
+                                 printf("Warning: Found a duplicate connection for PEC %s PHB %s.\n",$pec_num,$phb_num);
                              }
                         }
                     }

@@ -609,6 +609,10 @@
         <name>TPM_REQUIRED</name>
         <value>0xCC03</value>
     </enumerator>
+    <enumerator>
+        <name>BIFURCATED</name>
+        <value>0xCD03</value>
+    </enumerator>
 </enumerationType>
 
 <attribute>

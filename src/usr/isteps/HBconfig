@@ -35,3 +35,14 @@ config PRINT_SYSTEM_INFO
     defaults n
     help
         Enables code that prints out the HWAS information for each target found during discovery
+
+config DYNAMIC_BIFURCATION
+    default n
+    help
+        Enables code that detect PEC bifurcated config.
+
+config SENSOR_BASED_BIFURCATION
+    default n
+    depends on (DYNAMIC_BIFURCATION)
+    help
+        Enable bifurcation detection API to detect the bifurcation config is enable or not through BMC sensor

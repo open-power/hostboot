@@ -53,6 +53,10 @@ OBJS += call_proc_chiplet_scominit.o
 OBJS += call_proc_abus_scominit.o
 OBJS += call_proc_obus_scominit.o
 OBJS += call_proc_npu_scominit.o
+
+#Sensor Based Bifurcation implementation
+OBJS += $(if $(CONFIG_SENSOR_BASED_BIFURCATION),sensor_based_bifurcation.o)
+
 OBJS += call_proc_pcie_scominit.o
 OBJS += call_proc_scomoverride_chiplets.o
 OBJS += call_proc_chiplet_enable_ridi.o

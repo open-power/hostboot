@@ -649,6 +649,10 @@
         <id>ATTR_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
     </attribute>
+    <attribute>
+        <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+        <writeable/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
