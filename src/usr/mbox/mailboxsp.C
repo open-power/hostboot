@@ -50,6 +50,7 @@
 #include <arch/pirformat.H>
 #include <sbeio/sbeioif.H>
 #include <sys/time.h>
+#include <intr/interrupt.H>
 
 // Local functions
 namespace MBOX
@@ -443,58 +444,72 @@ void MailboxSp::msgHandler()
 
             case MSG_IPC: // Look for Interprocessor Messages
                 {
-                    uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
-                    if(msg_q_id == IPC_DATA_AREA_LOCKED)
+                    if (msg->data[0] == INTR::SHUT_DOWN)
                     {
-                        TRACFCOMP(g_trac_mbox, INFO_MRK
-                             "MBOXSP IPC data area locked");
-                        // msg is being written, but not yet ready to handle
-                        msg_q_id = IPC_DATA_AREA_CLEAR;
-                    }
-                    // desination message queue id is lower 32 bits
-                    msg_q_id &= 0x00000000FFFFFFFFull;
-
-                    if(IPC_DATA_AREA_CLEAR != msg_q_id)
-                    {
-                        // message is ready to handle
-                        msg_t * ipc_msg = msg_allocate();
-                        isync();
-                        *ipc_msg = KernelIpc::ipc_data_area.msg_payload;
-                        lwsync();
-                        // Clear ipc area so another message can be sent
-                        KernelIpc::ipc_data_area.msg_queue_id =
-                            IPC_DATA_AREA_CLEAR;
-                        handleIPC(static_cast<queue_id_t>(msg_q_id), ipc_msg);
+                        //Unregister for this message to prevent future
+                        // messages from INTRP during shut down
+                        msg_respond(iv_msgQ,msg);
+                        TRACFCOMP(g_trac_mbox,INFO_MRK
+                          "MSG_IPC SHUT_DOWN message received, unregistering for IPC messages");
+                        INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
                     }
                     else
                     {
-                        TRACFCOMP(g_trac_mbox, ERR_MRK
+                        uint64_t msg_q_id = KernelIpc::ipc_data_area.msg_queue_id;
+                        if(msg_q_id == IPC_DATA_AREA_LOCKED)
+                        {
+                            TRACFCOMP(g_trac_mbox, INFO_MRK
+                                 "MBOXSP IPC data area locked");
+                            // msg is being written, but not yet ready to handle
+                            msg_q_id = IPC_DATA_AREA_CLEAR;
+                        }
+                        // desination message queue id is lower 32 bits
+                        msg_q_id &= 0x00000000FFFFFFFFull;
+
+                        if(IPC_DATA_AREA_CLEAR != msg_q_id)
+                        {
+                            // message is ready to handle
+                            msg_t * ipc_msg = msg_allocate();
+                            isync();
+                            *ipc_msg = KernelIpc::ipc_data_area.msg_payload;
+                            lwsync();
+                            // Clear ipc area so another message can be sent
+                            KernelIpc::ipc_data_area.msg_queue_id =
+                                IPC_DATA_AREA_CLEAR;
+                            handleIPC(static_cast<queue_id_t>(msg_q_id), ipc_msg);
+                        }
+                        else
+                        {
+                            TRACFCOMP(g_trac_mbox, ERR_MRK
                                 "MBOXSP invalid data found in IPC data area: "
                                 " %0xlx", msg_q_id);
 
-                        TRACFBIN(g_trac_mbox, "IPC Data Area:",
-                              &KernelIpc::ipc_data_area,
-                              sizeof(KernelIpc::ipc_data_area));
+                            TRACFBIN(g_trac_mbox, "IPC Data Area:",
+                                  &KernelIpc::ipc_data_area,
+                                  sizeof(KernelIpc::ipc_data_area));
 
-                        /*@ errorlog tag
-                         * @errortype       ERRL_SEV_PREDICTIVE
-                         * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
-                         * @reasoncode      MBOX::RC_IPC_INVALID_DATA
-                         * @userdata1       IPC Data Area MSG Queue ID
-                         * @devdesc         IPC Message data corrupted
-                         */
-                        err = new ERRORLOG::ErrlEntry
-                            (
-                             ERRORLOG::ERRL_SEV_PREDICTIVE,
-                             MBOX::MOD_MBOXSRV_HNDLR,
-                             MBOX::RC_IPC_INVALID_DATA,         // reason Code
-                             msg_q_id,                          // IPC Data
-                             0
-                            );
+                            /*@ errorlog tag
+                             * @errortype       ERRL_SEV_PREDICTIVE
+                             * @moduleid        MBOX::MOD_MBOXSRV_HNDLR
+                             * @reasoncode      MBOX::RC_IPC_INVALID_DATA
+                             * @userdata1       IPC Data Area MSG Queue ID
+                             * @devdesc         IPC Message data corrupted
+                             */
+                            err = new ERRORLOG::ErrlEntry
+                                (
+                                 ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                 MBOX::MOD_MBOXSRV_HNDLR,
+                                 MBOX::RC_IPC_INVALID_DATA,         // reason Code
+                                 msg_q_id,                          // IPC Data
+                                 0
+                                );
 
-                        errlCommit(err,MBOX_COMP_ID);
+                            err->collectTrace(MBOX_COMP_NAME, 256);
+                            err->collectTrace(INTR_COMP_NAME, 256);
+
+                            errlCommit(err,MBOX_COMP_ID);
+                        }
                     }
-
                     INTR::sendEOI(iv_msgQ,msg);
                 }
 
@@ -1937,7 +1952,7 @@ void MailboxSp::handleShutdown()
     errlHndl_t err = mboxddShutDown(iv_trgt);
 
 #if (0) // @todo RTC:126643
-    INTR::unRegisterMsgQ(INTR::FSP_MAILBOX);
+    INTR::unRegisterMsgQ(INTR::LSI_FSIMBOX);
     INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
 #endif
 

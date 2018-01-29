@@ -592,7 +592,6 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
         }
 
         // continue - multi-node
-
         uint8_t node_map
             [sizeof(TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP_type)];
 
@@ -637,9 +636,10 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
                 if( 0 != ((mask >> node) & hb_images ) )
                 {
-                    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "start_payload-sending msg for drawer %d",
-                               drawer );
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "start_payload-sending msg for drawer %d,"
+                               "node %d, found existing HB images 0x%08x",
+                               drawer, node, hb_images );
                     msg_t * msg = msg_allocate();
                     msg->type = IPC::IPC_START_PAYLOAD;
                     msg->data[0] = i_hbInstance;
