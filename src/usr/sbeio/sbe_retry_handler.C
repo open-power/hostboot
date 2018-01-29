@@ -90,7 +90,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
                                  uint32_t i_plid)
 
 : iv_useSDB(false)
-, iv_secureModeDisabled(!SECUREBOOT::enabled())
+, iv_secureModeDisabled(false) //Per HW team this should always be 0
 , iv_sbeRestarted(false)
 , iv_sbeSide(0)
 , iv_errorLogPLID(0)

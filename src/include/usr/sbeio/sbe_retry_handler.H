@@ -285,6 +285,10 @@ class SbeRetryHandler
         /*
         * @brief Bit used for testing in the lab with systems that have secure
         *        mode disabled.
+        *    NOTE: This bit is only used in the lab when running this HWP with cronus.
+        *          We offered to have this bit set in FW based on the security settings of the
+        *          system HW people told us it would be safer for us to always assume this bit
+        *          is off in FW, so we will leave this bit as 0 until the HW devs tell us to use it.
         */
         bool iv_secureModeDisabled;
 
