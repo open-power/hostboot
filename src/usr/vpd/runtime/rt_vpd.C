@@ -516,11 +516,10 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     if( l_resp_fw_msg ) { free(l_resp_fw_msg); }
     l_req_fw_msg = l_resp_fw_msg = nullptr;
 
+    // Commit any errors we get in here because we'd like the main
+    //  function to complete even if we can't send the data out
     if (l_err)
     {
-        // @fixme-RTC:180490 - Temporarily commit until FSP code is implemented
-        // Just commit the log for now until FSP code is implemented
-        l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         errlCommit( l_err, VPD_COMP_ID );
     }
 
