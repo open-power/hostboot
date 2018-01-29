@@ -542,8 +542,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
             if(!(l_resp->primaryStatus & SBE_PRI_FFDC_ERROR))
             {
-                // Create an informational error
-
+                SBE_TRACF("Error: PSU Timeout and no FFDC present");
                 /*@
                  * @errortype
                  * @moduleid    SBEIO_PSU
@@ -565,8 +564,9 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                   TARGETING::get_huid(i_target)),
                                 i_pPsuRequest->mbxReg0);
 
-                // If the FFDC is empty, we need to check the state of the SBE
-                // and then, handle the SBE value, and potentionally try
+                // If the FFDC is empty, this error could be because the SBE
+                // isn't booted correctly. We need to check the state of the
+                // SBE, handle the SBE value, and potentionally try
                 // to restart the SBE
                 SbeRetryHandler l_SBEobj = SbeRetryHandler(
                             SbeRetryHandler::SBE_MODE_OF_OPERATION::
@@ -581,12 +581,63 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                     l_errl->plid(l_SBEobj.getPLID());
                     l_errl->setSev(ERRL_SEV_UNRECOVERABLE);
                 }
-
-                // log the failing proc as FFDC
-                ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-                l_respRegsFFDC.addToLog(l_errl);
-                l_errl->collectTrace(SBEIO_COMP_NAME);
             }
+            else
+            {
+                // If the FFDC is not empty, then this is correctly identified
+                // as a PSU error, and isn't related to the SBE.
+                SBE_TRACF("Error: Timeout waiting for PSU command");
+                /*@
+                 * @errortype
+                 * @moduleid    SBEIO_PSU
+                 * @reasoncode  SBEIO_PSU_RESPONSE_TIMEOUT
+                 * @userdata1[00:15]    Primary Status in mbox4
+                 * @userdata1[16:31]    Secondary Status
+                 * @userdata1[32:63]    Processor Target
+                 * @userdata2   Failing Request
+                 * @devdesc     Timeout waiting for PSU command to complete
+                 * @custdesc    Firmware error communicating with boot device
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                SBEIO_PSU,
+                                SBEIO_PSU_RESPONSE_TIMEOUT,
+                                TWO_UINT32_TO_UINT64(
+                                  TWO_UINT16_TO_UINT32(
+                                    l_resp->primaryStatus,
+                                    l_resp->secondaryStatus),
+                                  TARGETING::get_huid(i_target)),
+                                i_pPsuRequest->mbxReg0);
+
+                void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
+                if(l_ffdcPkg != NULL)
+                {
+                    SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+                    l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                    uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+                    for(uint8_t i=0; i < l_pkgs; i++)
+                    {
+                        l_errl->addFFDC( SBEIO_COMP_ID,
+                                         l_ffdc_parser->getFFDCPackage(i),
+                                         l_ffdc_parser->getPackageLength(i),
+                                         0,
+                                         SBEIO_UDT_PARAMETERS,
+                                         false );
+                    }
+                    delete l_ffdc_parser;
+                    l_ffdc_parser = nullptr;
+                }
+
+
+                l_errl->addHwCallout( i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL );
+            }
+
+            // log the failing proc as FFDC
+            ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+            l_respRegsFFDC.addToLog(l_errl);
+            l_errl->collectTrace(SBEIO_COMP_NAME);
 
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
