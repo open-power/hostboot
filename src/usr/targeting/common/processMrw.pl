@@ -778,11 +778,7 @@ sub processProcessor
         {
             $child_type = $targetObj->getMrwType($child);
         }
-        if ($child_type eq "ABUS")
-        {
-            processAbus($targetObj, $child);
-        }
-        elsif ($child_type eq "XBUS")
+        if ($child_type eq "XBUS")
         {
             processXbus($targetObj, $child);
         }
@@ -1188,64 +1184,87 @@ sub processObus
     my $targetObj = shift;
     my $target    = shift;
 
-        my $obus = $targetObj->findConnections($target,"OBUS", "");
+    my $obus = $targetObj->findConnections($target,"OBUS", "");
 
-        if ($obus eq "")
+    if ($obus eq "")
+    {
+        $obus = $targetObj->findConnections($target,"ABUS", "");
+        if ($obus ne "")
         {
-            #No connections mean, we need to set the OBUS_SLOT_INDEX to -1
-            #to mark that they are not connected
-            $targetObj->log($target,"no bus connection found");
-
-            foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
-            {
-                $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
-            }
+           if ($targetObj->isBadAttribute($target, "PEER_PATH"))
+           {
+              $targetObj->setAttribute($target, "PEER_PATH","physical:na");
+           }
+           foreach my $obusconn (@{$obus->{CONN}})
+           {
+              processAbus($targetObj, $target,$obusconn);
+           }
         }
         else
         {
-            #Loop through all the bricks and figure out if it connected to an
-            #obusslot. If it is connected, then store the slot information (position)
-            #in the obus_brick target as OBUS_SLOT_INDEX. If it is not connected,
-            #set the value to -1 to mark that they are not connected
-            my $match = 0;
-            foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
-            {
-                 foreach my $obrick_conn (@{$obus->{CONN}})
-                 {
-                    if ($targetObj->isBusAttributeDefined($obrick,
-                                        $obrick_conn->{BUS_NUM}, "OBUS_CONFIG"))
-                    {
-                        my $cfg = $targetObj->getBusAttribute($obrick,
-                                        $obrick_conn->{BUS_NUM}, "OBUS_CONFIG");
-                        my ($processor) =
-                            $obrick_conn->{SOURCE_PARENT} =~
-                                                        m#(^.*/proc_socket-\d)#;
-                        addObusCfgToGpuSensors($obrick_conn->{DEST_PARENT},
-                                            $processor, $cfg);
-                    }
+          #No connections mean, we need to set the OBUS_SLOT_INDEX to -1
+          #to mark that they are not connected
+          $targetObj->log($target,"no bus connection found");
 
-                    $match = ($obrick_conn->{SOURCE} eq $obrick);
-                    if ($match eq 1)
-                    {
-                        my $obus_slot    = $targetObj->getTargetParent(
-                            $obrick_conn->{DEST_PARENT});
-                        my $obus_slot_pos = $targetObj->getAttribute(
+          foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
+          {
+             $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
+          }
+        }
+     }
+     else
+     {
+        if ($targetObj->isBadAttribute($target, "PEER_PATH"))
+        {
+           $targetObj->setAttribute($target, "PEER_PATH","physical:na");
+        }
+        foreach my $obusconn (@{$obus->{CONN}})
+        {
+             #Loop through all the bricks and figure out if it connected to an
+             #obusslot. If it is connected, then store the slot information (position)
+             #in the obus_brick target as OBUS_SLOT_INDEX. If it is not connected,
+             #set the value to -1 to mark that they are not connected
+             my $match = 0;
+             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
+             {
+               foreach my $obrick_conn (@{$obus->{CONN}})
+               {
+                 if ($targetObj->isBusAttributeDefined($obrick,
+                                     $obrick_conn->{BUS_NUM}, "OBUS_CONFIG"))
+                 {
+                     my $cfg = $targetObj->getBusAttribute($obrick,
+                                     $obrick_conn->{BUS_NUM}, "OBUS_CONFIG");
+                     my $intarget = $obrick_conn->{SOURCE_PARENT};
+                     while($targetObj->getAttribute($intarget,"CLASS") ne "CONNECTOR")
+                     {
+                       $intarget = $targetObj->getTargetParent($intarget);
+                     } 
+                     addObusCfgToGpuSensors($obrick_conn->{DEST_PARENT},
+                                            $intarget, $cfg);
+                 }
+
+                 $match = ($obrick_conn->{SOURCE} eq $obrick);
+                 if ($match eq 1)
+                 {
+                     my $obus_slot    = $targetObj->getTargetParent(
+                         $obrick_conn->{DEST_PARENT});
+                     my $obus_slot_pos = $targetObj->getAttribute(
                             $obus_slot, "POSITION");
                         $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX",
                             $obus_slot_pos);
                         last;
-                    }
                  }
+               }
 
-                 #This brick is not connected to anything, set the value of OBUS_SLOT_INDEX to -1
-                 #to mark that they are not connected
-                 if ($match eq 0)
-                 {
-                    $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
+               #This brick is not connected to anything, set the value of OBUS_SLOT_INDEX to -1
+               #to mark that they are not connected
+               if ($match eq 0)
+               {
+                  $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
 
-                 }
+               }
             }
-        }
+     }
 }
 #--------------------------------------------------
 ## XBUS
@@ -1287,46 +1306,36 @@ sub processAbus
 {
     my $targetObj = shift;
     my $target    = shift;
+    my $aBus      = shift;
 
-    my $found_abus = 0;
-    if ($targetObj->isBadAttribute($target, "PEER_PATH"))
-    {
-        $targetObj->setAttribute($target, "PEER_PATH","physical:na");
-    }
-    $targetObj->setAttribute($target, "EI_BUS_TX_LANE_INVERT","0");
-    if ($targetObj->isBadAttribute($target, "EI_BUS_TX_MSBSWAP"))
-    {
-        $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP","0");
-    }
-    my $abus_child_conn = $targetObj->getFirstConnectionDestination($target);
-    if ($abus_child_conn ne "")
-    {
-        ## set attributes for both directions
-        my $aff1 = $targetObj->getAttribute($target, "AFFINITY_PATH");
-        my $aff2 = $targetObj->getAttribute($abus_child_conn, "AFFINITY_PATH");
+    my $abussource = $aBus->{SOURCE};
+    my $abus_dest_parent = $aBus->{DEST_PARENT};
+    my $bustype = $targetObj->getBusType($abussource);
+#       print"Found bus from $abussource to $abus_dest_parent and $bustype\n"; 
+    
+    ## set attributes for both directions
+    my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
+    my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
+#    print"Myside: $phys1\n";
+#    print"Other side: $phys2\n";
+    
+    $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1); 
+    $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
 
-        $targetObj->setAttribute($abus_child_conn, "PEER_TARGET",
-            $targetObj->getAttribute($target, "PHYS_PATH"));
-        $targetObj->setAttribute($target, "PEER_TARGET",
-            $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));
+    $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
+    $targetObj->setAttribute($target, "PEER_PATH", $phys2);
 
-        $targetObj->setAttribute($abus_child_conn, "PEER_PATH",
-            $targetObj->getAttribute($target, "PHYS_PATH"));
-        $targetObj->setAttribute($target, "PEER_PATH",
-            $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));
-
-        $targetObj->setAttribute($abus_child_conn, "PEER_HUID",
-            $targetObj->getAttribute($target, "HUID"));
-        $targetObj->setAttribute($target, "PEER_HUID",
-            $targetObj->getAttribute($abus_child_conn, "HUID"));
+    $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
+         $targetObj->getAttribute($target, "HUID"));
+    $targetObj->setAttribute($target, "PEER_HUID",
+         $targetObj->getAttribute($abus_dest_parent, "HUID"));
 
         # copy Abus attributes to proc
         my $abus = $targetObj->getFirstConnectionBus($target);
         $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
-        $targetObj->setAttribute($abus_child_conn, "EI_BUS_TX_MSBSWAP",
+        $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
-        $found_abus = 1;
     }
 }
 
