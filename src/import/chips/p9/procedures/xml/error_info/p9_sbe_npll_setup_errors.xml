@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -32,7 +32,7 @@
    <hwpError>
      <sbeError/>
      <rc>RC_SS_PLL_LOCK_ERR</rc>
-     <description>Spectrum pll not locked</description>
+     <description>Spread Spectrum pll not locked</description>
      <collectRegisterFfdc>
 	  <id>ROOT_CTRL_REGISTERS</id>
 	  <target>MASTER_CHIP</target>
@@ -44,6 +44,7 @@
 	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
      </collectRegisterFfdc>
      <ffdc>SS_PLL_READ</ffdc>
+     <ffdc>AFTER_SPREAD_ENABLE</ffdc>
      <callout>
        <target>MASTER_CHIP</target>
        <priority>HIGH</priority>
@@ -156,4 +157,34 @@
      </gard>
    </hwpError>
    <!-- ******************************************************************** -->
+   <hwpError>
+     <sbeError/>
+     <rc>RC_SPREAD_SPECTRUM_ENABLE_ERR</rc>
+     <description>Failed to enable Spread Spectrum</description>
+     <collectRegisterFfdc>
+	  <id>ROOT_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>PERV_CTRL_REGISTERS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <collectRegisterFfdc>
+	  <id>REG_FFDC_TOD_STATUS</id>
+	  <target>MASTER_CHIP</target>
+	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+     </collectRegisterFfdc>
+     <ffdc>TOD_TIMER_REG</ffdc>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <target>MASTER_CHIP</target>
+       <priority>MEDIUM</priority>
+     </callout>
+     <!-- No deconfig or gard as we can keep running without Spread Spectrum as long as the PLL doesn't unlock -->
+   </hwpError>
 </hwpErrors>
