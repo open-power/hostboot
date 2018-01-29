@@ -118,7 +118,7 @@ namespace   INITSERVICE
                 ISTEPNAME(15,02,"proc_set_pba_homer_bar"),
                 ISTEP_15::proc_set_pba_homer_bar,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },        
+        },
         {
                 ISTEPNAME(15,03,"host_establish_ex_chiplet"),
                 ISTEP_15::host_establish_ex_chiplet,
@@ -137,6 +137,7 @@ const DepModInfo g_istep15Dependancies = {
         DEP_LIB(libistep15.so),
         DEP_LIB(libp9_stop_util.so),
         DEP_LIB(libnestmemutils.so),
+        DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libsbe.so),
         NULL

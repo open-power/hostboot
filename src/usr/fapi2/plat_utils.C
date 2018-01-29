@@ -47,9 +47,7 @@
 // remove when get_ring is using the hw image
 #include <ring_data.H>
 
-#if __HOSTBOOT_RUNTIME
-  #include "handleSpecialWakeup.H"
-#endif
+#include "handleSpecialWakeup.H"
 
 //******************************************************************************
 // Trace descriptors
@@ -1135,7 +1133,6 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
     fapi2::ReturnCode fapi_rc = fapi2::FAPI2_RC_SUCCESS;
     FAPI_INF("platSpecialWakeup");
 
-#ifdef __HOSTBOOT_RUNTIME
     TARGETING::Target* l_target =
         reinterpret_cast<TARGETING::Target*>(i_target.get());
 
@@ -1144,7 +1141,6 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
     {
         fapi_rc.setPlatDataPtr(reinterpret_cast<void *>(err_SW));
     }
-#endif
 
     // On Hostboot, processor cores cannot sleep so return success to the
     // fapiSpecialWakeup enable/disable calls

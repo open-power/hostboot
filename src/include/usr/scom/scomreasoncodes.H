@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ namespace SCOM
         SCOM_FORM_1_READ_REQUEST       = SCOM_COMP_ID | 0x10,
         SCOM_RUNTIME_WAKEUP_ERR        = SCOM_COMP_ID | 0x11,
         SCOM_RUNTIME_INTERFACE_ERR     = SCOM_COMP_ID | 0x12,
-        SCOM_RUNTIME_SPCWKUP_COUNT_ERR = SCOM_COMP_ID | 0x13,
+        SCOM_SPCWKUP_COUNT_ERR         = SCOM_COMP_ID | 0x13,
         SCOM_CEN_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x14,
     };
 
