@@ -41,6 +41,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/mss_attribute_accessors.H>
 
 namespace mss
 {
