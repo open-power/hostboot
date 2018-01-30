@@ -163,6 +163,32 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_NVDIMM_PLUG_ERROR</rc>
+    <description>
+      An NVDIMM was plugged in a slot where NVDIMM's are not supported
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DIMM_POS</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_LRDIMM_UNSUPPORTED</rc>
     <description>
       The DIMM is an LRDIMM and that is currently not supported
