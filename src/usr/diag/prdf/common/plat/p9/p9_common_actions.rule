@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -254,5 +254,17 @@ actionclass TBDDefaultCallout
 {
     callout2ndLvlMed;
     threshold( field(32 / day), mfg(32 / day) );
+};
+
+################################################################################
+#                               Default callouts                               #
+################################################################################
+
+actionclass chip_to_chip
+{
+    # The description for this is vague and I can't seem to get any reliable
+    # information. For now we will just callout the chip on first occurrence.
+    calloutSelfMed;
+    threshold1;
 };
 

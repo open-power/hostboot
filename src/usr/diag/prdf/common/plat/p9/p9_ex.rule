@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -188,7 +188,6 @@ chip p9_ex
         capture     group default;
         capture     req nonzero("CMEFIR");
     };
-
 
 # Include registers not defined by the xml
 .include "p9_ex_regs.rule";

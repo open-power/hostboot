@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -139,322 +139,257 @@ rule rCHIFIR
 group gCHIFIR filter singlebit, cs_root_cause
 {
     /** CHIFIR[0]
-     *  
+     *  PE on internal register
      */
-    (rCHIFIR, bit(0)) ? defaultMaskedError;
+    (rCHIFIR, bit(0)) ? self_th_1;
 
     /** CHIFIR[1]
-     *  
+     *  PE on internal register
      */
-    (rCHIFIR, bit(1)) ? defaultMaskedError;
+    (rCHIFIR, bit(1)) ? self_th_1;
 
     /** CHIFIR[2]
-     *  
+     *  Too many EDI replays due to CRC error
      */
     (rCHIFIR, bit(2)) ? defaultMaskedError;
 
     /** CHIFIR[3]
-     *  
+     *  EDI bus performance degraded by 1%
      */
     (rCHIFIR, bit(3)) ? defaultMaskedError;
 
     /** CHIFIR[4]
-     *  
+     *  DMI entered failed state
      */
-    (rCHIFIR, bit(4)) ? defaultMaskedError;
+    (rCHIFIR, bit(4)) ? defaultMaskedError; # CUMULUS_10
 
     /** CHIFIR[5]
-     *  
+     *  Channel initialization timeout
      */
-    (rCHIFIR, bit(5)) ? defaultMaskedError;
+    (rCHIFIR, bit(5)) ? defaultMaskedError; # CUMULUS_10
 
     /** CHIFIR[6]
-     *  
+     *  Chn interlock err (crc,. No ack, etc)
      */
-    (rCHIFIR, bit(6)) ? defaultMaskedError;
+    (rCHIFIR, bit(6)) ? self_th_1; # CUMULUS_10
 
     /** CHIFIR[7]
-     *  
+     *  Round trip latency counter overflow
      */
     (rCHIFIR, bit(7)) ? defaultMaskedError;
 
     /** CHIFIR[8]
-     *  
+     *  CRC error detected
      */
     (rCHIFIR, bit(8)) ? defaultMaskedError;
 
     /** CHIFIR[9]
-     *  
+     *  No Ack error detected
      */
     (rCHIFIR, bit(9)) ? defaultMaskedError;
 
     /** CHIFIR[10]
-     *  
+     *  Sequence ID out of order error detected
      */
     (rCHIFIR, bit(10)) ? defaultMaskedError;
 
     /** CHIFIR[11]
-     *  
+     *  CE on replay buffer read
      */
-    (rCHIFIR, bit(11)) ? defaultMaskedError;
+    (rCHIFIR, bit(11)) ? self_th_32perDay;
 
     /** CHIFIR[12]
-     *  
+     *  UE on replay buffer read
      */
-    (rCHIFIR, bit(12)) ? defaultMaskedError;
+    (rCHIFIR, bit(12)) ? self_th_1;
 
     /** CHIFIR[13]
-     *  
+     *  Multiple replay
      */
     (rCHIFIR, bit(13)) ? defaultMaskedError;
 
     /** CHIFIR[14]
-     *  
+     *  Replay buffer overrun
      */
-    (rCHIFIR, bit(14)) ? defaultMaskedError;
+    (rCHIFIR, bit(14)) ? self_th_1; # CUMULUS_10
 
     /** CHIFIR[15]
-     *  
+     *  PE on MCI dataflow or state machine
      */
-    (rCHIFIR, bit(15)) ? defaultMaskedError;
+    (rCHIFIR, bit(15)) ? self_th_1;
 
     /** CHIFIR[16]
-     *  Checkstop attention from Centaur
+     *  Checkstop received from Centaur
      */
     (rCHIFIR, bit(16)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[17]
-     *  
+     *  Tracestop received from Centaur
      */
     (rCHIFIR, bit(17)) ? defaultMaskedError;
 
     /** CHIFIR[18]
-     *  
+     *  FPGA int received from Centaur
      */
     (rCHIFIR, bit(18)) ? defaultMaskedError;
 
     /** CHIFIR[19]
-     *  Recoverable attention from Centaur
+     *  Recoverable err received from Centaur
      */
     (rCHIFIR, bit(19)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[20]
-     *  Special attention from Centaur
+     *  Special attention received from Centaur
      */
     (rCHIFIR, bit(20)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[21]
-     *  
+     *  Maintenance complete from centuar
      */
     (rCHIFIR, bit(21)) ? defaultMaskedError;
 
-    /** CHIFIR[22]
-     *  
+    /** CHIFIR[22:30]
+     *  Fir bits from MCS
      */
-    (rCHIFIR, bit(22)) ? defaultMaskedError;
-
-    /** CHIFIR[23]
-     *  
-     */
-    (rCHIFIR, bit(23)) ? defaultMaskedError;
-
-    /** CHIFIR[24]
-     *  
-     */
-    (rCHIFIR, bit(24)) ? defaultMaskedError;
-
-    /** CHIFIR[25]
-     *  
-     */
-    (rCHIFIR, bit(25)) ? defaultMaskedError;
-
-    /** CHIFIR[26]
-     *  
-     */
-    (rCHIFIR, bit(26)) ? defaultMaskedError;
-
-    /** CHIFIR[27]
-     *  
-     */
-    (rCHIFIR, bit(27)) ? defaultMaskedError;
-
-    /** CHIFIR[28]
-     *  
-     */
-    (rCHIFIR, bit(28)) ? defaultMaskedError;
-
-    /** CHIFIR[29]
-     *  
-     */
-    (rCHIFIR, bit(29)) ? defaultMaskedError;
-
-    /** CHIFIR[30]
-     *  
-     */
-    (rCHIFIR, bit(30)) ? defaultMaskedError;
+    (rCHIFIR, bit(22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
 
     /** CHIFIR[31]
-     *  
+     *  Channel sequence error
      */
-    (rCHIFIR, bit(31)) ? defaultMaskedError;
+    (rCHIFIR, bit(31)) ? self_th_1;
 
     /** CHIFIR[32]
-     *  
+     *  Tag overrun in DSFF
      */
-    (rCHIFIR, bit(32)) ? defaultMaskedError;
+    (rCHIFIR, bit(32)) ? defaultMaskedError; # CUMULUS_10
 
     /** CHIFIR[33]
-     *  
+     *  DSFF DS Data Error(UE)
      */
-    (rCHIFIR, bit(33)) ? defaultMaskedError;
+    (rCHIFIR, bit(33)) ? self_th_1;
 
-    /** CHIFIR[34]
-     *  
+    /** CHIFIR[34:35]
+     *  spare
      */
-    (rCHIFIR, bit(34)) ? defaultMaskedError;
-
-    /** CHIFIR[35]
-     *  
-     */
-    (rCHIFIR, bit(35)) ? defaultMaskedError;
+    (rCHIFIR, bit(34|35)) ? defaultMaskedError;
 
     /** CHIFIR[36]
-     *  
+     *  Rdata Parity error
      */
-    (rCHIFIR, bit(36)) ? defaultMaskedError;
+    (rCHIFIR, bit(36)) ? self_th_1;
 
-    /** CHIFIR[37]
-     *  
+    /** CHIFIR[37:39]
+     *  spare
      */
-    (rCHIFIR, bit(37)) ? defaultMaskedError;
+    (rCHIFIR, bit(37|38|39)) ? defaultMaskedError;
 
-    /** CHIFIR[38]
-     *  
+    /** CHIFIR[40:41]
+     *  DSFF async crossing error
      */
-    (rCHIFIR, bit(38)) ? defaultMaskedError;
-
-    /** CHIFIR[39]
-     *  
-     */
-    (rCHIFIR, bit(39)) ? defaultMaskedError;
-
-    /** CHIFIR[40]
-     *  
-     */
-    (rCHIFIR, bit(40)) ? defaultMaskedError;
-
-    /** CHIFIR[41]
-     *  
-     */
-    (rCHIFIR, bit(41)) ? defaultMaskedError;
+    (rCHIFIR, bit(40|41)) ? self_th_1;
 
     /** CHIFIR[42]
-     *  
+     *  DSFF state machine error
      */
-    (rCHIFIR, bit(42)) ? defaultMaskedError;
+    (rCHIFIR, bit(42)) ? self_th_1;
 
     /** CHIFIR[43]
-     *  
+     *  Recoverable parity error on EICR
      */
-    (rCHIFIR, bit(43)) ? defaultMaskedError;
+    (rCHIFIR, bit(43)) ? self_th_32perDay;
 
     /** CHIFIR[44]
-     *  
+     *  Recoverable parity error on RECR
      */
-    (rCHIFIR, bit(44)) ? defaultMaskedError;
+    (rCHIFIR, bit(44)) ? self_th_32perDay;
 
     /** CHIFIR[45]
-     *  
+     *  CE on WRT or RMW buffer
      */
-    (rCHIFIR, bit(45)) ? defaultMaskedError;
+    (rCHIFIR, bit(45)) ? self_th_1;
 
     /** CHIFIR[46]
-     *  
+     *  UE on WRT or RMW buffer
      */
-    (rCHIFIR, bit(46)) ? defaultMaskedError;
+    (rCHIFIR, bit(46)) ? self_th_32perDay;
 
     /** CHIFIR[47]
-     *  
+     *  SUE on WRT or RMW buffer
      */
     (rCHIFIR, bit(47)) ? defaultMaskedError;
 
-    /** CHIFIR[48]
-     *  
+    /** CHIFIR[48:49]
+     *  WDF overrun error
      */
-    (rCHIFIR, bit(48)) ? defaultMaskedError;
-
-    /** CHIFIR[49]
-     *  
-     */
-    (rCHIFIR, bit(49)) ? defaultMaskedError;
+    (rCHIFIR, bit(48|49)) ? self_th_1;
 
     /** CHIFIR[50]
-     *  
+     *  WDF SCOM Sequence error
      */
-    (rCHIFIR, bit(50)) ? defaultMaskedError;
+    (rCHIFIR, bit(50)) ? self_th_1;
 
     /** CHIFIR[51]
-     *  
+     *  WDF State machine error
      */
-    (rCHIFIR, bit(51)) ? defaultMaskedError;
+    (rCHIFIR, bit(51)) ? self_th_1;
 
     /** CHIFIR[52]
-     *  
+     *  WDF Register parity error
      */
-    (rCHIFIR, bit(52)) ? defaultMaskedError;
+    (rCHIFIR, bit(52)) ? self_th_1;
 
     /** CHIFIR[53]
-     *  
+     *  WRT scom sequence error
      */
-    (rCHIFIR, bit(53)) ? defaultMaskedError;
+    (rCHIFIR, bit(53)) ? self_th_1;
 
     /** CHIFIR[54]
-     *  
+     *  WRT Register parity error.
      */
-    (rCHIFIR, bit(54)) ? defaultMaskedError;
+    (rCHIFIR, bit(54)) ? self_th_1;
 
     /** CHIFIR[55]
-     *  
+     *  spare
      */
     (rCHIFIR, bit(55)) ? defaultMaskedError;
 
     /** CHIFIR[56]
-     *  
+     *  Read buffer overrun
      */
-    (rCHIFIR, bit(56)) ? defaultMaskedError;
+    (rCHIFIR, bit(56)) ? self_th_1;
 
     /** CHIFIR[57]
-     *  
+     *  WDF Async error
      */
-    (rCHIFIR, bit(57)) ? defaultMaskedError;
+    (rCHIFIR, bit(57)) ? self_th_1;
 
     /** CHIFIR[58]
-     *  
+     *  Read MCA parity error.
      */
-    (rCHIFIR, bit(58)) ? defaultMaskedError;
+    (rCHIFIR, bit(58)) ? self_th_1;
 
     /** CHIFIR[59]
-     *  
+     *  Read MCA sequence error
      */
-    (rCHIFIR, bit(59)) ? defaultMaskedError;
+    (rCHIFIR, bit(59)) ? self_th_1;
 
     /** CHIFIR[60]
-     *  
+     *  Debug/WAT register parity error
      */
-    (rCHIFIR, bit(60)) ? defaultMaskedError;
+    (rCHIFIR, bit(60)) ? self_th_1;
 
     /** CHIFIR[61]
-     *  
+     *  DSFF channel timeout
      */
-    (rCHIFIR, bit(61)) ? defaultMaskedError;
+    (rCHIFIR, bit(61)) ? self_th_1;
 
     /** CHIFIR[62]
-     *  
+     *  SCOM error
      */
     (rCHIFIR, bit(62)) ? defaultMaskedError;
 
     /** CHIFIR[63]
-     *  
+     *  SCOM error
      */
     (rCHIFIR, bit(63)) ? defaultMaskedError;
 

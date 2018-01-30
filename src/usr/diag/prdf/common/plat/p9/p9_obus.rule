@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -762,7 +762,7 @@ group gIOOBFIR filter singlebit, cs_root_cause
     /** IOOBFIR[2]
      *  The per-bus GCR ring hang detector error
      */
-    (rIOOBFIR, bit(2)) ? defaultMaskedError;
+    (rIOOBFIR, bit(2)) ? chip_to_chip;
 
     /** IOOBFIR[3:47]
      *  spare
