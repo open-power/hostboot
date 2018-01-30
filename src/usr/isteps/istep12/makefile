@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -77,6 +77,9 @@ OBJS += call_host_startprd_dmi.o
 OBJS += call_host_attnlisten_memb.o
 OBJS += call_cen_set_inband_addr.o
 
+# HWP objects needed to set inband addr in istep 12
+OBJS+=p9c_set_inband_addr.o
+
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
@@ -93,7 +96,6 @@ include $(P9_IO_HWP_PATH)/p9_io_dmi_pre_trainadv.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_linktrain.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_post_trainadv.mk
 include $(P9_PERV_HWP_PATH)/p9_cen_framelock.mk
-include $(P9_NEST_HWP_PATH)/p9c_set_inband_addr.mk
 include $(P9_IO_HWP_PATH)/p9_io_common.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_pdwn_lanes.mk
 include $(CENT_IO_HWP_PATH)/p9_io_cen_pdwn_lanes.mk

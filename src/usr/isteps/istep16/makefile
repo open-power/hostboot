@@ -50,10 +50,12 @@ OBJS += call_mss_scrub.o
 OBJS += call_host_ipl_complete.o
 OBJS += call_host_load_io_ppe.o
 
+#HWP object file needed to run istep 16
+OBJS+=p9_rng_init_phase2.o
+
 include ${ROOTPATH}/procedure.rules.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
-include  ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase2.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_check_idle_stop_done.mk
@@ -64,7 +66,6 @@ include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_base.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_sgpe.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_cme.mk
 include ${ROOTPATH}/config.mk
-
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/

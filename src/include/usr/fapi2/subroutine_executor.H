@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,9 @@
 #include <secureboot/service.H>
 #include <plat_hw_access.H>
 
+// Debug trace
+#define  DEBUG_TRACE  0   // 0 = disable
+
 /**
 * @brief Given a hwp name, and its parameters, serialize the parmeters and pass the serialized
 *        data to the SBE via a FIFO chipop
@@ -59,25 +62,34 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
 {
     errlHndl_t l_errl = nullptr;
 
-    //Determine argument byte size
+    // Retrieve argument byte size
     size_t l_sizeOfArgInBytes =0;
     using expander = int[];
     (void) expander{ 0, (l_sizeOfArgInBytes+=sizeof(types), 0)... };
 
-    //Set up the buffer which will be passed to chip op send function
+    // Retrieve the remaining arguments
     uint8_t l_buffer[l_sizeOfArgInBytes];
-    uint8_t* l_bufferPtr = &l_buffer[0];
+    uint8_t* l_bufferPtr = &(l_buffer[0]);
     memset(l_bufferPtr, 0, l_sizeOfArgInBytes);
-
-    // Serialize the arguments into the buffer
     (void) expander{ 0, ((memcpy(l_bufferPtr,&types,sizeof(types)),l_bufferPtr+=sizeof(types)), 0)... };
 
+    FAPI_INF("requestHwpViaSbe - HWP name %s, Target 0x%.8X, Size of arguments %d bytes",
+            i_hwpName, TARGETING::get_huid(i_target), l_sizeOfArgInBytes);
+
+#if DEBUG_TRACE
+    for (uint32_t ii = 0; ii < l_sizeOfArgInBytes; ii++)
+    {
+         FAPI_INF("requestHwpViaSbe - l_buffer[%d] = 0x%.2X", ii, l_buffer[ii]);
+    }
+#endif
+
     //Call the chip op send function to request the SBE to call the HWP
-    l_errl = SBEIO::sendSecureHwpRequest(i_target, l_bufferPtr, l_sizeOfArgInBytes, i_hwpName);
+    l_bufferPtr = &(l_buffer[8]); // Advance past target argument value
+    l_errl = SBEIO::sendSecureHwpRequest(i_target, l_bufferPtr,
+                l_sizeOfArgInBytes - sizeof(i_target), i_hwpName);
 
     return l_errl;
 }
-
 
 //Macros that return the 1st argument
 #define _GET_1ST_ARG(N, ...) N
@@ -103,7 +115,7 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
         /*Check if secureboot is enabled and if the target exists on the master proc*/ \
         bool isSecure = SECUREBOOT::enabled(); \
         bool isMaster = false; \
-        l_errl = isOnMasterProc(l_target, isMaster); \
+        l_errl = fapi2::isOnMasterProc(l_target, isMaster); \
         if(l_errl) \
         { \
             FAPI_INF("subroutine_executor: Failed trying to determine is target was on master chip"); \
@@ -120,16 +132,22 @@ errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target
         /*Otherwise request the HWP via chipop to the SBE*/ \
         else \
         { \
-            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s on host", \
+            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s via SBE chip-op", \
                     isSecure, isMaster, l_function); \
             l_errl =  requestHwpViaSbe(l_function, l_target, _args); \
             /*For now until SBE support comes fallback to running on host if chipop fails*/ \
             if(l_errl) \
             { \
+                FAPI_INF("subroutine_executor: SBE HWP invoking returns error. " \
+                "Commit error and retry locally"); \
                 /*Commit the error as informational and attempt hwp */ \
                 l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL); \
                 errlCommit(l_errl, SBEIO_COMP_ID); \
                 RC = FUNC(_args);\
+            } \
+            else \
+            { \
+                FAPI_INF("subroutine_executor: SBE HWP invoking successful."); \
             } \
         } \
     } while(0); \

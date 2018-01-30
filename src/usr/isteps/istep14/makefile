@@ -60,9 +60,6 @@ include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
 
-# TODO: RTC 184860 Remove MCS acker workaround
-include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/p9_revert_sbe_mcs_setup.mk
-
 # TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
 # same *.o file in their *.mk files
 # ---- Workaround: Compile the HWP directly below
@@ -70,10 +67,8 @@ OBJS += p9_htm_setup.o
 OBJS += p9_htm_start.o
 OBJS += p9_htm_reset.o
 OBJS += p9_htm_adu_ctrl.o
-OBJS += p9_adu_coherent_utils.o
 OBJS += p9_pcie_config.o
 OBJS += p9_setup_bars.o
-OBJS += p9_fbc_utils.o
 OBJS += p9_fbc_smp_utils.o
 OBJS += p9_mpipl_chip_cleanup.o
 OBJS += p9c_mss_thermal_init.o
@@ -82,6 +77,8 @@ OBJS += p9c_mss_power_cleanup.o
 OBJS += p9c_cen_stopclocks.o
 OBJS += p9c_mss_maint_cmds.o
 OBJS += p9c_dimmBadDqBitmapFuncs.o
+# TODO: RTC 184860 Remove MCS acker workaround
+OBJS += p9_revert_sbe_mcs_setup.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk

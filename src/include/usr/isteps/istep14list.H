@@ -46,7 +46,7 @@
  * 14.7  proc_exit_cache_contained
  *       : Execution from memory
  * 14.8  host_mpipl_service
- *       : Perform MPIPL tasks
+ *       : Perform MPIPL tasks 
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -200,6 +200,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
         DEP_LIB(libcen.so),
+        DEP_LIB(libnestmemutils.so),
         NULL
     }
 };

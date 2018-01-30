@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -407,6 +407,7 @@ errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
             l_err->collectTrace(FAPI_TRACE_NAME);
         }
     }
+
     return l_err;
 }
 
@@ -1100,8 +1101,9 @@ errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
     TARGETING::targetService().masterProcChipTargetHandle( l_pMasterProcChip );
     assert(l_pMasterProcChip != nullptr, "isOnMasterProc:: Unable to find the system's master proc chip target handle");
     o_isMaster = false;
-    l_errl = getCfamChipTarget(i_target, l_pMasterProcChip);
 
+    // Target can be a chiplet or a proc, get the parent proc in case it's a chiplet
+    l_errl = getCfamChipTarget(i_target, l_pParentProcChip);
     if(l_errl == nullptr)
     {
         if(l_pMasterProcChip == l_pParentProcChip)
@@ -1113,4 +1115,3 @@ errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
 }
 
 } // End namespace
-

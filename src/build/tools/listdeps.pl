@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -278,6 +278,10 @@ foreach my $module_name  (@istep_modules )
         my $elem = $values[1];
 
         my $lib = $FunctionMap->{ $elem};
+
+        # if there is a dependency on another istep lib
+        # print out the mangled funtion name for debug
+        print "$lib : $elem\n" if($lib =~ /istep[0-9]/);
 
         # if we have this module in our "seen it" array, just skip it
         # otherwise we will add it as a new dependency

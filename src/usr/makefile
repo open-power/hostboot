@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -66,6 +66,7 @@ SUBDIRS += $(if $(CONFIG_BMC_BT_LPC_IPMI),ipmi.d)
 SUBDIRS += $(if $(CONFIG_HTMGT),htmgt.d)
 SUBDIRS += diag.d
 SUBDIRS += xz.d
+SUBDIRS += hwplibs.d
 SUBDIRS += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat.d,)
 
 #errldisplay relies on some generated files from PRD.

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -60,6 +60,16 @@ OBJS += call_host_rng_bist.o
 OBJS += call_host_update_redundant_tpm.o
 OBJS += host_proc_pcie_scominit.o
 
+# HWP objects needed to build smp in istep 10
+# instead of using HWP p9_build_smp.mk.
+# This is done to avoid inter-isteps dependencies
+# p9_build_smp.mk
+OBJS+=p9_build_smp.o
+OBJS+=p9_fbc_smp_utils.o
+OBJS+=p9_build_smp_fbc_ab.o
+OBJS+=p9_build_smp_fbc_cd.o
+OBJS+=p9_build_smp_adu.o
+
 VPATH += ${NEST_HWP_PATH}
 VPATH += ${INITFILES_HWP_PATH}
 VPATH += ${PERV_HWP_PATH}
@@ -71,7 +81,6 @@ VPATH += ${PROCEDURES_PATH}/hwp/lib/
 include ${ROOTPATH}/procedure.rules.mk
 
 #Include all the procedure makefiles
-include $(NEST_HWP_PATH)/p9_build_smp.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_ab_hp_scom.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp1_scom.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp2_scom.mk
