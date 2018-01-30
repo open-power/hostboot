@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,6 +270,27 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         // set the fused core mode attribute
         bool l_smt8 = false;
         PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+
+        //We need to read the CHIP_READOUT_SCOM_REG to tell if the fuse has
+        //been blown to force PHYP -> SMT 8 and force OPAL -> SMT 4
+        const uint64_t CHIP_READOUT_SCOM_REG   = 0xF000F;
+        const uint64_t IS_FUSED_BLOWN_BIT_MASK = 0x0000000000000040;
+        uint64_t l_chipIdReadout = 0;
+        size_t l_size = sizeof(l_chipIdReadout);
+        l_errl = deviceRead(l_masterProc,
+                            &l_chipIdReadout,
+                            l_size,
+                            DEVICE_SCOM_ADDRESS(CHIP_READOUT_SCOM_REG) );
+
+        if(l_errl)
+        {
+            TRACFCOMP( g_fapiTd,ERR_MRK"activate_threads: Failed reading fused bits!" );
+            // break from do loop if error occured
+            break;
+        }
+
+        uint8_t l_isFuseBlown = (l_chipIdReadout & IS_FUSED_BLOWN_BIT_MASK);
+
         if( l_pvr.isNimbusDD1() )
         {
             sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
@@ -281,12 +302,22 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             {
                 sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
                         (TARGETING::FUSED_CORE_MODE_HB_SMT4_ONLY);
+                if(l_isFuseBlown)
+                {
+                    sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>
+                            (TARGETING::PAYLOAD_KIND_SAPPHIRE);
+                }
             }
             else // SMT8_MODE
             {
                 sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
                         (TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY);
                 l_smt8 = true;
+                if(l_isFuseBlown)
+                {
+                    sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>
+                            (TARGETING::PAYLOAD_KIND_PHYP);
+                }
             }
         }
 
