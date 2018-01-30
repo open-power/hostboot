@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -239,7 +239,7 @@ def hb_get_objects_by_class(classname):
 
 def hb_getallregs(regname):
     proc_list=[]
-    proc_list=hb_get_objects_by_class("ppc-power9-mambo-core")
+    proc_list=hb_get_objects_by_class("ppc_power9_mambo_core")
     for proc in proc_list:
         output = run_command("%s.read-reg %s"%(proc.name,regname))
         print ">> %s : " %(proc.name) + "%x" %output
