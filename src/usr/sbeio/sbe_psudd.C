@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -597,7 +597,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
         // try later
         task_yield();
-        l_elapsed_time_ns += 100;
+        l_elapsed_time_ns += ONE_CTX_SWITCH_NS;
 
         // There will be many polls to check for the complete. If there
         // is a problem, then there will be hundreds before timing out
