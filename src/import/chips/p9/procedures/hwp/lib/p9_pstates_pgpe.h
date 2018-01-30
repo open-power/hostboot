@@ -55,6 +55,26 @@ extern "C" {
 #include <stdint.h>
 
 
+/// Pad repurpose structure
+typedef union
+{
+    uint32_t value;
+    struct
+    {
+        // Reserve 3 bytes
+        uint16_t reserved16;
+        uint8_t reserved8;
+
+        // The following is used by PGPE for the WOF algorithm that computes
+        // vratio.  The placement here is, frankly, a bit of a hack but is
+        // done to allievate cross-platform dependencies by not changing the
+        // overall size of the Global Paramter Block structure.  In the future,
+        // this field should be moved into the base Global Paramter Block
+        // structure.
+        uint8_t good_cores_in_sort;
+    } fields;
+} GPPBOptionsPadUse;
+
 /// Standard options controlling Pstate setup and installation procedures
 typedef struct
 {
