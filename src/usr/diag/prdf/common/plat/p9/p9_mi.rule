@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -136,7 +136,7 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
 
-group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
+group gMCFIR filter singlebit, cs_root_cause( 0, 8, 9 )
 {
     /** MCFIR[0]
      *  mc internal recoverable eror
@@ -163,20 +163,35 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
      */
     (rMCFIR, bit(4)) ? level2_M_self_L_th_1;
 
-    /** MCFIR[5:7]
-     *  reserved
+    /** MCFIR[5]
+     *  Invalid Address
      */
-    (rMCFIR, bit(5|6|7)) ? defaultMaskedError;
+    (rMCFIR, bit(5)) ? defaultMaskedError;
+
+    /** MCFIR[6]
+     *  Illegal consumer address
+     */
+    (rMCFIR, bit(6)) ? level2_th_1;
+
+    /** MCFIR[7]
+     *  Illegal producer address
+     */
+    (rMCFIR, bit(7)) ? level2_th_1;
 
     /** MCFIR[8]
      *  command list timeout
      */
     (rMCFIR, bit(8)) ? threshold_and_mask_level2;
 
-    /** MCFIR[9:10]
-     *  reserved
+    /** MCFIR[9]
+     *  channel 0 time out error
      */
-    (rMCFIR, bit(9|10)) ? defaultMaskedError;
+    (rMCFIR, bit(9)) ? threshold_and_mask;
+
+    /** MCFIR[10]
+     *  channel 1 time out error
+     */
+    (rMCFIR, bit(10)) ? level2_th_1;
 
     /** MCFIR[11]
      *  mcs wat0 event
@@ -204,7 +219,7 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
     (rMCFIR, bit(15)) ? defaultMaskedError;
 
     /** MCFIR[16]
-     *  reserved
+     *  centaur sync command occurred
      */
     (rMCFIR, bit(16)) ? defaultMaskedError;
 
@@ -214,12 +229,12 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
     (rMCFIR, bit(17)) ? defaultMaskedError;
 
     /** MCFIR[18]
-     *  
+     *  reserved
      */
     (rMCFIR, bit(18)) ? defaultMaskedError;
 
     /** MCFIR[19]
-     *  
+     *  reserved
      */
     (rMCFIR, bit(19)) ? defaultMaskedError;
 
@@ -229,12 +244,12 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
     (rMCFIR, bit(20)) ? defaultMaskedError;
 
     /** MCFIR[21]
-     *  
+     *  reserved
      */
     (rMCFIR, bit(21)) ? defaultMaskedError;
 
     /** MCFIR[22]
-     *  
+     *  Access to secure memory facility failed
      */
     (rMCFIR, bit(22)) ? defaultMaskedError;
 
@@ -244,7 +259,7 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8 )
     (rMCFIR, bit(23)) ? defaultMaskedError;
 
     /** MCFIR[24]
-     *  scom ERROR
+     *  scom error
      */
     (rMCFIR, bit(24)) ? defaultMaskedError;
 

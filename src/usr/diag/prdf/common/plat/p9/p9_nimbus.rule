@@ -2211,22 +2211,22 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[22]
      *  SBE Logic: PPE Internal State Error
      */
-    (rTP_LFIR, bit(22)) ? self_th_1;
+    (rTP_LFIR, bit(22)) ? defaultMaskedError;
 
     /** TP_LFIR[23]
      *  PPE interface invalid seq/protocol err
      */
-    (rTP_LFIR, bit(23)) ? self_th_1;
+    (rTP_LFIR, bit(23)) ? defaultMaskedError;
 
     /** TP_LFIR[24]
      *  SBE Logic: PPE Watchdog timeout
      */
-    (rTP_LFIR, bit(24)) ? self_th_1;
+    (rTP_LFIR, bit(24)) ? defaultMaskedError;
 
     /** TP_LFIR[25]
      *  PPE saw proc halt initiated by fw, etc.
      */
-    (rTP_LFIR, bit(25)) ? self_th_1;
+    (rTP_LFIR, bit(25)) ? defaultMaskedError;
 
     /** TP_LFIR[26]
      *  PPE in halt state driven by RAMDBG bit 0
@@ -2236,7 +2236,7 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[27]
      *  PPE debug: Watchdog timer proc rst/halt
      */
-    (rTP_LFIR, bit(27)) ? self_th_1;
+    (rTP_LFIR, bit(27)) ? defaultMaskedError;
 
     /** TP_LFIR[28]
      *  SBE Logic: SEEPROM Address err etc.
@@ -2246,7 +2246,7 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[29]
      *  SBE Logic: Any I2C Master Error
      */
-    (rTP_LFIR, bit(29)) ? self_th_1;
+    (rTP_LFIR, bit(29)) ? defaultMaskedError;
 
     /** TP_LFIR[30]
      *  SBE Logic: Programmable errors
@@ -3687,7 +3687,7 @@ group gVASFIR filter singlebit, cs_root_cause
     (rVASFIR, bit(6)) ? self_th_1;
 
     /** VASFIR[7]
-     *  PB (CQ) Address Error CRESP on Read
+     *  PB (CQ) Address Error CRESP on Write
      */
     (rVASFIR, bit(7)) ? self_th_1;
 
@@ -5365,9 +5365,9 @@ group gPBAFIR filter singlebit, cs_root_cause
     (rPBAFIR, bit(0)) ? self_th_1;
 
     /** PBAFIR[1]
-     *  PBA CRESP Addr Error
+     *  PBA CRESP Addr Error for Read
      */
-    (rPBAFIR, bit(1)) ? defaultMaskedError;
+    (rPBAFIR, bit(1)) ? level2_th_1;
 
     /** PBAFIR[2]
      *  PBA Read Data Timeout
@@ -5380,7 +5380,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     (rPBAFIR, bit(3)) ? defaultMaskedError;
 
     /** PBAFIR[4]
-     *  PBA Read Data UE Erro
+     *  PBA Read Data UE Error
      */
     (rPBAFIR, bit(4)) ? self_th_1;
 
@@ -5420,9 +5420,9 @@ group gPBAFIR filter singlebit, cs_root_cause
     (rPBAFIR, bit(11)) ? self_th_1;
 
     /** PBAFIR[12]
-     *  PBA CRESP Addr Error
+     *  PBA CRESP Addr Error for Write
      */
-    (rPBAFIR, bit(12)) ? self_th_1;
+    (rPBAFIR, bit(12)) ? level2_th_1;
 
     /** PBAFIR[13]
      *  PBA Invalid CRESP
@@ -5450,7 +5450,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     (rPBAFIR, bit(17)) ? defaultMaskedError;
 
     /** PBAFIR[18]
-     *  PBA CRESP Addr Error
+     *  PBA CRESP Addr Error for BC Write
      */
     (rPBAFIR, bit(18)) ? level2_th_1;
 
@@ -5470,9 +5470,9 @@ group gPBAFIR filter singlebit, cs_root_cause
     (rPBAFIR, bit(21)) ? defaultMaskedError;
 
     /** PBAFIR[22]
-     *  PBA CRESP Addr Error
+     *  PBA CRESP Addr Error for BC Read
      */
-    (rPBAFIR, bit(22)) ? self_th_1;
+    (rPBAFIR, bit(22)) ? level2_th_1;
 
     /** PBAFIR[23]
      *  PBA Read Data Timeout
@@ -6597,7 +6597,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[55:57]
      *  INT_CQ_FIR_PC_INFO_ERROR_0_2:
      */
-    (rINTCQFIR, bit(55|56|57)) ? level2_M_self_L_th_1; # NIMBUS_10
+    (rINTCQFIR, bit(55|56|57)) ? level2_M_self_L_th_32perDay; # NIMBUS_10
 
     /** INTCQFIR[58:59]
      *  INT_CQ_FIR_VC_FATAL_ERROR_0_1:
@@ -6612,7 +6612,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[62:63]
      *  INT_CQ_FIR_VC_INFO_ERROR_0_1:
      */
-    (rINTCQFIR, bit(62|63)) ? level2_M_self_L_th_1; # NIMBUS_10
+    (rINTCQFIR, bit(62|63)) ? level2_M_self_L_th_32perDay; # NIMBUS_10
 
 };
 
@@ -6673,7 +6673,7 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[9]
      *  d0b01 ce
      */
-    (rPBIOEFIR, bit(9)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(9)) ? self_th_32perDay;
 
     /** PBIOEFIR[10]
      *  dob01 sue
@@ -6688,7 +6688,7 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[12]
      *  dob23 ce
      */
-    (rPBIOEFIR, bit(12)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(12)) ? self_th_32perDay;
 
     /** PBIOEFIR[13]
      *  dob23 sue
@@ -6703,7 +6703,7 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[15]
      *  dob45 ce
      */
-    (rPBIOEFIR, bit(15)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(15)) ? self_th_32perDay;
 
     /** PBIOEFIR[16]
      *  dob45 sue
@@ -6711,12 +6711,12 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(16)) ? defaultMaskedError;
 
     /** PBIOEFIR[17]
-     *  dob67 ue
+     *  spare
      */
     (rPBIOEFIR, bit(17)) ? defaultMaskedError;
 
     /** PBIOEFIR[18]
-     *  dob67 ce
+     *  spare
      */
     (rPBIOEFIR, bit(18)) ? defaultMaskedError;
 
@@ -6863,17 +6863,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[52]
      *  data outbnd switch int. err-links 01
      */
-    (rPBIOEFIR, bit(52)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(52)) ? chip_to_chip;
 
     /** PBIOEFIR[53]
      *  data outbnd switch int. err-links 23
      */
-    (rPBIOEFIR, bit(53)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(53)) ? chip_to_chip;
 
     /** PBIOEFIR[54]
      *  data outbnd switch int. err-links 45
      */
-    (rPBIOEFIR, bit(54)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(54)) ? chip_to_chip;
 
     /** PBIOEFIR[55]
      *  spare
@@ -6883,17 +6883,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[56]
      *  data inbnd switch int. err-links 01
      */
-    (rPBIOEFIR, bit(56)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(56)) ? chip_to_chip;
 
     /** PBIOEFIR[57]
      *  data inbnd switch int. err-links 23
      */
-    (rPBIOEFIR, bit(57)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(57)) ? chip_to_chip;
 
     /** PBIOEFIR[58]
      *  data inbnd switch int. err-links 45
      */
-    (rPBIOEFIR, bit(58)) ? defaultMaskedError;
+    (rPBIOEFIR, bit(58)) ? chip_to_chip;
 
     /** PBIOEFIR[59:61]
      *  spare

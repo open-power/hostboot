@@ -166,7 +166,6 @@ chip p9_mca
         capture     group McbistCapture;
     };
 
-
 # Include registers not defined by the xml
 .include "p9_mca_regs.rule";
 
