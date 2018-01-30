@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -143,6 +143,32 @@
     </description>
     <ffdc>DIMM_SLOT_ZERO</ffdc>
     <ffdc>DIMM_SLOT_ONE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_NVDIMM_PLUG_ERROR</rc>
+    <description>
+      An NVDIMM was plugged in a slot where NVDIMM's are not supported
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DIMM_POS</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>

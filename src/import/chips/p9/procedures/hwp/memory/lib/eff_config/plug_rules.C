@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file plug_rules.C
 /// @brief Enforcement of rules for plugging in DIMM
 ///
-// *HWP HWP Owner: Jacob L Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -153,6 +153,63 @@ fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
                      .set_MCA_TARGET(i_target),
                      "%s has DIMM's with two different hybrid memory types installed (type %d and type %d). Cannot mix DIMM of different hybrid memory types on a single port",
                      mss::c_str(i_target), i_kinds[0].iv_hybrid_memory_type, i_kinds[1].iv_hybrid_memory_type );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to determine if a given DIMM slot can support an NVDIMM
+/// @param[in] const ref to the DIMM target
+/// @param[out] o_is_capable true if the DIMM slot is NVDIMM capable
+/// @return bool FAPI2_RC_SUCCESS iff we pass without errors
+///
+fapi2::ReturnCode dimm_slot_is_nv_capable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_is_capable)
+{
+    const auto l_pos = mss::pos(i_target);
+
+    fapi2::buffer<uint64_t> l_plug_rules_bitmap = 0;
+
+    FAPI_TRY( mss::mrw_nvdimm_plug_rules(l_plug_rules_bitmap) );
+
+    o_is_capable = l_plug_rules_bitmap.getBit(l_pos);
+
+    FAPI_INF("failed accessing ATTR_MSS_MRW_NVDIMM_PLUG_RULES: 0x%016lx %s capable (target: %s)",
+             l_plug_rules_bitmap, o_is_capable ? "is" : "isn't", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforces that NVDIMM are plugged in the proper location
+/// @note NVDIMM can only be plugged in locations where the MRW attribute bitmap is set
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const std::vector<dimm::kind>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Note: NVDIMM + non-NVDIMM mixing is checked in check hybrid
+    for(const auto& l_kind : i_kinds)
+    {
+        bool l_nvdimm_supported = true;
+        FAPI_TRY(dimm_slot_is_nv_capable(l_kind.iv_target, l_nvdimm_supported));
+
+        // We're always good if NVDIMM is supported OR we're not an NVDIMM, otherwise, throw an error
+        FAPI_ASSERT( (l_nvdimm_supported) || (l_kind.iv_hybrid_memory_type != fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM),
+                     fapi2::MSS_PLUG_RULES_NVDIMM_PLUG_ERROR()
+                     .set_DIMM_TARGET(l_kind.iv_target)
+                     .set_DIMM_POS(mss::pos(l_kind.iv_target))
+                     .set_MCA_TARGET(i_target),
+                     "%s is an NVDIMM plugged into a DIMM slot where NVDIMM are not supported",
+                     mss::c_str(l_kind.iv_target) );
     }
 
 fapi_try_exit:
@@ -657,6 +714,9 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
 
     // Ensures that the port has a valid combination of hybrid DIMM
     FAPI_TRY( plug_rule::check_hybrid(i_target, l_dimm_kinds) );
+
+    // Checks if NVDIMM are properly plugged for this system
+    FAPI_TRY( plug_rule::check_nvdimm(i_target, l_dimm_kinds) );
 
     // Checks to see if any DIMM are LRDIMM
     FAPI_TRY( plug_rule::code::check_lrdimm(l_dimm_kinds) );

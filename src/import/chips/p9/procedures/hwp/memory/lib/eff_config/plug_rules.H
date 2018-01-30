@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,15 @@ namespace mss
 
 namespace plug_rule
 {
+
+///
+/// @brief Helper function to determine if a given DIMM slot can support an NVDIMM
+/// @param[in] const ref to the DIMM target
+/// @param[out] o_is_capable true if the DIMM slot is NVDIMM capable
+/// @return bool FAPI2_RC_SUCCESS iff we pass without errors
+///
+fapi2::ReturnCode dimm_slot_is_nv_capable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool& o_is_capable);
 
 
 ///
@@ -180,6 +189,17 @@ fapi2::ReturnCode check_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 /// @note Expects the kind array to represent the DIMM on the port.
 ///
 fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const std::vector<dimm::kind>& i_kinds);
+
+///
+/// @brief Enforces that NVDIMM are plugged in the proper location
+/// @note NVDIMM can only be plugged in locations where the MRW attribute bitmap is set
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_nvdimm(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                const std::vector<dimm::kind>& i_kinds);
 
 // Adding in code based plug rules - as supporting code gets added, the following checks can be deleted

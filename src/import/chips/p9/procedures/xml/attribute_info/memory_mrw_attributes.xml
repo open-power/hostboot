@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -629,5 +629,23 @@
     <overrideOnly/>
     <enum> ENABLE = 0, DISABLE = 1 </enum>
     <mssAccessorName>mrw_memdiags_bcmode</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_NVDIMM_PLUG_RULES</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        A bitmap containing the plug rules for NVDIMM.
+        1 if a DIMM supports an NVDIMM being plugged in, 0 if it does not
+        DIMM slot 0 is the left most bit
+        The index to the bitmap is the position of the DIMM target
+        As such, a bitmap of 0b10010000, would allow NVDIMM plugged into DIMM0 and DIMM3
+        Note: this attribute is a 64 bit number to account for 16 DIMM per processor if there is ever a 4 processor system
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <default> 0 </default>
+    <enum> NO_NVDIMM = 0, NVDIMM_CAPABLE = 1 </enum>
+    <mssAccessorName>mrw_nvdimm_plug_rules</mssAccessorName>
   </attribute>
 </attributes>
