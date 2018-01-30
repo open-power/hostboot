@@ -259,6 +259,33 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             // we have made it this far so we know the target has changed
             // requiring its gard record to be cleared and eid stored
             // Clear the gard record
+
+            ATTR_HWAS_STATE_CHANGED_FLAG_type l_actual =
+              l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_FLAG>();
+
+            ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_subscriptionMask =
+              l_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
+
+            uint64_t * l_pPred =
+               reinterpret_cast<uint64_t *>(&l_predicateHwasChanged);
+            uint64_t * l_pPred_iv_desired = l_pPred + 1;
+            uint64_t * l_pPred_iv_valid = l_pPred + 2;
+
+            HWAS_INF( "clearGardRecordsForReplacedTargets() "
+                      "HUID :0x%08x "
+                      "\npredicate ATTR_HWAS_STATE_CHANGED_FLAG "
+                      "iv_valid : 0x%08x%08x "
+                      "predicate ATTR_HWAS_STATE_CHANGED_FLAG "
+                      "iv_desired : 0x%08x%08x "
+                      "\nTarget ATTR_HWAS_STATE_CHANGED_FLAG : 0x%08x%08x "
+                      "Target ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK "
+                      ": 0x%08x%08x ",
+                      get_huid(l_pTarget),
+                      (*l_pPred_iv_valid) >> 32, (*l_pPred_iv_valid),
+                      (*l_pPred_iv_desired) >> 32, (*l_pPred_iv_desired),
+                      l_actual >> 32, l_actual,
+                      l_subscriptionMask >> 32, l_subscriptionMask );
+
             HWAS_INF("clearing GARD for %.8X, recordId %d",
                         get_huid(l_pTarget),
                         l_gardRecord.iv_recordId);
