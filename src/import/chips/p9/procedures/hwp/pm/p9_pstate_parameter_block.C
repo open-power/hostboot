@@ -824,11 +824,11 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         //Power bus nest freq
         uint16_t l_pbus_nest_freq = revle16(l_poundv_data.pbFreq);
-        FAPI_INF("l_pbus_nest_freq %x", (l_pbus_nest_freq));
+        FAPI_INF("l_pbus_nest_freq 0x%x", (l_pbus_nest_freq));
 
         // I- VDN PB current
         uint16_t l_vpd_idn_100ma = revle16(l_poundv_data.IdnPbCurr);
-        FAPI_INF("l_vpd_idn_100ma %x", (l_vpd_idn_100ma));
+        FAPI_INF("l_vpd_idn_100ma 0x%x", (l_vpd_idn_100ma));
 
         if (is_wof_enabled(i_target,&l_state))
         {
@@ -836,18 +836,18 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             l_occppb.iddq = l_iddqt;
 
             l_occppb.wof.tdp_rdp_factor = revle32(attr.attr_tdp_rdp_current_factor);
-            FAPI_INF("l_occppb.wof.tdp_rdp_factor %x", revle32(l_occppb.wof.tdp_rdp_factor));
+            FAPI_INF("l_occppb.wof.tdp_rdp_factor 0x%x", revle32(l_occppb.wof.tdp_rdp_factor));
 
             // nest leakage percent
             l_occppb.nest_leakage_percent = attr.attr_nest_leakage_percent;
-            FAPI_INF("l_occppb.nest_leakage_percent %x", l_occppb.nest_leakage_percent);
+            FAPI_INF("l_occppb.nest_leakage_percent 0x%x", l_occppb.nest_leakage_percent);
 
             l_occppb.lac_tdp_vdd_turbo_10ma =
                     revle16(l_poundw_data.poundw[TURBO].ivdd_tdp_ac_current_10ma);
             l_occppb.lac_tdp_vdd_nominal_10ma =
                     revle16(l_poundw_data.poundw[NOMINAL].ivdd_tdp_ac_current_10ma);
-            FAPI_INF("l_occppb.lac_tdp_vdd_turbo_10ma %x", l_occppb.lac_tdp_vdd_turbo_10ma);
-            FAPI_INF("l_occppb.lac_tdp_vdd_nominal_10ma %x",l_occppb.lac_tdp_vdd_nominal_10ma);
+            FAPI_INF("l_occppb.lac_tdp_vdd_turbo_10ma 0x%x", l_occppb.lac_tdp_vdd_turbo_10ma);
+            FAPI_INF("l_occppb.lac_tdp_vdd_nominal_10ma 0x%x",l_occppb.lac_tdp_vdd_nominal_10ma);
 
             //Power bus vdn voltage
             uint16_t l_vpd_vdn_mv = revle16(l_poundv_data.VdnPbVltg);
@@ -871,8 +871,21 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                                                                l_pbus_nest_freq)
                      );
             }
-            FAPI_INF("l_iac_tdp_vdn %x", l_iac_tdp_vdn);
-            FAPI_INF("l_occppb.ceff_tdp_vdn %x", revle16(l_occppb.ceff_tdp_vdn));
+
+            FAPI_INF("l_iac_tdp_vdn 0x%x", l_iac_tdp_vdn);
+            FAPI_INF("l_occppb.ceff_tdp_vdn 0x%x", revle16(l_occppb.ceff_tdp_vdn));
+
+            // Put the good_normal_cores value into the GPPB for PGPE
+            // This is done as a union overlay so that the inter-platform headers
+            // are not touched.
+            GPPBOptionsPadUse pad;
+            pad.fields.good_cores_in_sort = l_iddqt.good_normal_cores_per_sort;
+            l_globalppb.options.pad = pad.value;
+            // Note:  the following is presently accurate as the first 3 bytes
+            // are reserved.
+            FAPI_INF("good normal cores per sort %d 0x%X",
+                            revle32(l_globalppb.options.pad),
+                            revle32(l_globalppb.options.pad));
         }
         else
         {
