@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -287,6 +287,7 @@ const   TaskInfo    g_istep12[]  =   {
 const DepModInfo g_istep12Dependancies = {
     {
         DEP_LIB(libistep12.so),
+        DEP_LIB(libnestmemutils.so),
         NULL
     }
 };

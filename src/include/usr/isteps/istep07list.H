@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libistep07.so),
+        DEP_LIB(libnestmemutils.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libcen.so),

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -123,6 +123,7 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libruntime.so),
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libpm.so),
+        DEP_LIB(libnestmemutils.so),
 #ifdef CONFIG_HTMGT
         DEP_LIB(libhtmgt.so),
         DEP_LIB(libisteps_mss.so),

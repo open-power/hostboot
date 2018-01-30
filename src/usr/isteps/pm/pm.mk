@@ -73,12 +73,10 @@ OBJS += occCheckstop.o
 OBJS += p9_setup_evid.o
 OBJS += p9_avsbus_lib.o
 
-
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH} ${HWP_LIB_PATH}
 VPATH += ${HWP_XIP_PATH} ${HWP_IMAGEPROCS_PATH} ${HWP_CEN_IMAGEPROCS_PATH} ${HWP_COMMON_IMAGEPROCS_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${NEST_UTIL_PATH}
-
 
 # TODO RTC: 164237
 # Take another look at PM lib
@@ -121,7 +119,6 @@ include ${HWP_COMMON_IMAGEPROCS_PATH}/common_ringId.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_util.mk
 include ${HWP_STOPUTIL_PATH}/p9_stop_api.mk
 include ${HWP_IMAGEPROCS_PATH}/p9_scan_compression.mk
-include ${NEST_UTIL_PATH}/p9_fbc_utils.mk
 include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk

@@ -204,6 +204,7 @@ EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
 EXTENDED_MODULES += tod
 EXTENDED_MODULES += p9_fab_iovalid
+EXTENDED_MODULES += nestmemutils
 
 #***************************************
 # Working test modules
@@ -288,6 +289,7 @@ RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += fsi_rt
 RUNTIME_MODULES += sbeio_rt
 RUNTIME_MODULES += tod_rt
+RUNTIME_MODULES += nestmemutils
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt

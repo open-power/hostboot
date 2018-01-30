@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -35,6 +35,8 @@ OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o
 OBJS += call_mss_attr_update.o
 OBJS += host_mss_attr_cleanup.o
+#mss_eff_config - Need in istep07 to group memory
+OBJS+=p9_mss_eff_grouping.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
@@ -77,9 +79,6 @@ include $(HWP_PATH_2)/p9c_mss_volt.mk
 include $(HWP_PATH_1)/p9_mss_freq.mk
 include $(HWP_PATH_1)/p9_mss_freq_system.mk
 include $(HWP_PATH_2)/p9c_mss_freq.mk
-
-#mss_eff_config : Determine effective config
-include $(PROCEDURES_PATH)/hwp/nest/p9_mss_eff_grouping.mk
 include $(HWP_PATH_1)/p9_mss_eff_config.mk
 include $(HWP_PATH_1)/p9_mss_eff_config_thermal.mk
 include $(HWP_PATH_1)/p9_mss_bulk_pwr_throttles.mk
