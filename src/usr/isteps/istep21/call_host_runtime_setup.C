@@ -141,7 +141,7 @@ errlHndl_t verifyAndMovePayload(void)
                payload_kind, is_phyp, payload_tmp_phys_addr, payload_tmp_virt_addr );
 
     // If in Secure Mode Verify PHYP at Temporary TCE-related Memory Location
-    if (SECUREBOOT::enabled())
+    if (SECUREBOOT::enabled() && is_phyp)
     {
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"verifyAndMovePayload() "
                    "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
