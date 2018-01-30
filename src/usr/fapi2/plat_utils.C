@@ -955,6 +955,10 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
         l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
         l_pError->collectTrace(FAPI_SCAN_TRACE_NAME, 256 );
         l_pError->collectTrace(FAPI_DBG_TRACE_NAME, 256 );
+
+        // Make sure the severity is set correctly for all errors.
+        // The severity of PLAT errors is not set above, so set it here.
+        l_pError->setSev(i_sev);
     }
 
     FAPI_DBG("Exiting rcToErrl");
