@@ -373,4 +373,44 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_DIFFERENT_XLATE</rc>
+    <description>
+      Two DIMM with different translation (xlate) configurations are installed on port
+    </description>
+    <ffdc>MASTER_RANKS_ON_DIMM0</ffdc>
+    <ffdc>MASTER_RANKS_ON_DIMM1</ffdc>
+    <ffdc>TOTAL_RANKS_ON_DIMM0</ffdc>
+    <ffdc>TOTAL_RANKS_ON_DIMM1</ffdc>
+    <ffdc>DRAM_DENSITY_ON_DIMM0</ffdc>
+    <ffdc>DRAM_DENSITY_ON_DIMM1</ffdc>
+    <ffdc>DRAM_WIDTH_ON_DIMM0</ffdc>
+    <ffdc>DRAM_WIDTH_ON_DIMM1</ffdc>
+    <ffdc>DRAM_GEN_ON_DIMM0</ffdc>
+    <ffdc>DRAM_GEN_ON_DIMM1</ffdc>
+    <ffdc>DIMM_TYPE_ON_DIMM0</ffdc>
+    <ffdc>DIMM_TYPE_ON_DIMM1</ffdc>
+    <ffdc>ROWS_ON_DIMM0</ffdc>
+    <ffdc>ROWS_ON_DIMM1</ffdc>
+    <ffdc>SIZE_ON_DIMM0</ffdc>
+    <ffdc>SIZE_ON_DIMM1</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+</hwpError>
+
 </hwpErrors>

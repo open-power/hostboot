@@ -82,6 +82,53 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Enforce equivalent rank and row configs
+/// Enforces configurations which will produce equivalent xlate register settings
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_xlate_config(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+                                     const std::vector<dimm::kind>& i_kinds)
+{
+    if (i_kinds.size() > 1)
+    {
+        FAPI_ASSERT( i_kinds[0].equal_config(i_kinds[1]) == true,
+                     fapi2::MSS_PLUG_RULES_DIFFERENT_XLATE()
+                     .set_MASTER_RANKS_ON_DIMM0(i_kinds[0].iv_master_ranks)
+                     .set_MASTER_RANKS_ON_DIMM1(i_kinds[1].iv_master_ranks)
+                     .set_TOTAL_RANKS_ON_DIMM0(i_kinds[0].iv_total_ranks)
+                     .set_TOTAL_RANKS_ON_DIMM1(i_kinds[1].iv_total_ranks)
+                     .set_DRAM_DENSITY_ON_DIMM0(i_kinds[0].iv_dram_density)
+                     .set_DRAM_DENSITY_ON_DIMM1(i_kinds[1].iv_dram_density)
+                     .set_DRAM_WIDTH_ON_DIMM0(i_kinds[0].iv_dram_width)
+                     .set_DRAM_WIDTH_ON_DIMM1(i_kinds[1].iv_dram_width)
+                     .set_DRAM_GEN_ON_DIMM0(i_kinds[0].iv_dram_generation)
+                     .set_DRAM_GEN_ON_DIMM1(i_kinds[1].iv_dram_generation)
+                     .set_DIMM_TYPE_ON_DIMM0(i_kinds[0].iv_dimm_type)
+                     .set_DIMM_TYPE_ON_DIMM1(i_kinds[1].iv_dimm_type)
+                     .set_ROWS_ON_DIMM0(i_kinds[0].iv_rows)
+                     .set_ROWS_ON_DIMM1(i_kinds[1].iv_rows)
+                     .set_SIZE_ON_DIMM0(i_kinds[0].iv_size)
+                     .set_SIZE_ON_DIMM1(i_kinds[1].iv_size)
+                     .set_MCA_TARGET(i_target),
+                     "%s has two different configurations of DIMM installed. mranks=%d,%d ranks=%d,%d density=%d,%d width=%d,%d gen=%d,%d type=%d,%d rows=%d,%d size=%d,%d  Cannot mix DIMM configurations on port",
+                     mss::c_str(i_target), i_kinds[0].iv_master_ranks, i_kinds[1].iv_master_ranks,
+                     i_kinds[0].iv_total_ranks, i_kinds[1].iv_total_ranks,
+                     i_kinds[0].iv_dram_density, i_kinds[1].iv_dram_density,
+                     i_kinds[0].iv_dram_width, i_kinds[1].iv_dram_width,
+                     i_kinds[0].iv_dram_generation, i_kinds[1].iv_dram_generation,
+                     i_kinds[0].iv_dimm_type, i_kinds[1].iv_dimm_type,
+                     i_kinds[0].iv_rows, i_kinds[1].iv_rows,
+                     i_kinds[0].iv_size, i_kinds[1].iv_size);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // code
 
 ///
@@ -720,6 +767,9 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
 
     // Checks to see if any DIMM are LRDIMM
     FAPI_TRY( plug_rule::code::check_lrdimm(l_dimm_kinds) );
+
+    // Temporary check that xlate settings will be the same if there are two DIMM in the port
+    FAPI_TRY( plug_rule::code::check_xlate_config(i_target, l_dimm_kinds) );
 
 fapi_try_exit:
     return fapi2::current_err;

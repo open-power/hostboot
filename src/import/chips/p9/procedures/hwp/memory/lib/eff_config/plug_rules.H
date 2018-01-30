@@ -214,6 +214,17 @@ namespace code
 ///
 fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds );
 
+///
+/// @brief Enforce equivalent rank and row configs
+/// Enforces configurations which will produce equivalent xlate register settings
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_xlate_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const std::vector<dimm::kind>& i_kinds);
+
 } // code
 
 } // plug_rule
