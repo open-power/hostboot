@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,6 +168,30 @@ namespace SBE_MSG
      * @return int    Return code.
      */
     int eraseProcessCmdFunction(enum passThruCmds i_command);
+
+    //------------------------------------------------------------------------
+    // Constants for setting/clearing bits in SCOM_ADDR_5003B
+    //------------------------------------------------------------------------
+    const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
+    const uint32_t SBE_MESSAGE_PROCESSING_IN_PROGRESS = 0x40000000;
+    const uint32_t SBE_MESSAGE_PROCESSING_COMPLETE = 0x80000000;
+
+    /**
+     *  @brief SBE message update bit(s) in CFAM register
+     *
+     *  @details  This is a call that will update bit(s) in CFAM register 0x283B
+     *            or SCOM_ADDR_5003B.
+     *
+     *  @param[in]  i_proc        HB processor target
+     *  @param[in]  i_set_mask    CFAM register mask (mark bits to set)
+     *  @param[in]  i_clear_mask  CFAM register mask (mark bits to clear)
+     *
+     *  @returns  errlHndl_t  NULL on success
+     */
+    errlHndl_t process_sbe_msg_update_cfam(TARGETING::TargetHandle_t i_proc,
+                                           const uint32_t i_set_mask,
+                                           const uint32_t i_clear_mask);
+
 } // namespace SBE_MSG
 
 

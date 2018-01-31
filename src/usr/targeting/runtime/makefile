@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,7 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrPlatOverride_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += errludattribute.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attributestrings.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrsync.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_startup.o
 
 OBJS += ${COMMON_TARGETING_OBJS}
 OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // apply temp overrides
     postInitCalls_t* rtPost = getPostInitCalls();
     rtPost->callApplyTempOverrides();
+
+    // check for possible missed in-flight messages/interrupts
+    rtPost->callClearPendingSbeMsgs();
 
     // do any version mismatch fixups
     rt_version_fixup();

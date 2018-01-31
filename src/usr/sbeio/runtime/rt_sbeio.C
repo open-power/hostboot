@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,80 +56,6 @@ namespace RT_SBEIO
 {
     // Map of process command functions for the pass-through commands
     ProcessCmdMap_t g_processCmdMap;
-
-    // Constants for setting bits in SCOM_ADDR_5003B
-    const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
-    const uint32_t SBE_MESSAGE_PROCESSING_IN_PROGRESS = 0x40000000;
-    const uint32_t SBE_MESSAGE_PROCESSING_COMPLETE = 0x80000000;
-
-    //------------------------------------------------------------------------
-
-    /**
-     *  @brief SBE message set bit(s) in CFAM register
-     *
-     *  @details  This is a call that will set bit(s) in CFAM register 0x283B
-     *            or SCOM_ADDR_5003B.
-     *
-     *  @param[in]  i_proc        HB processor target
-     *  @param[in]  i_set_mask    CFAM register mask
-     *
-     *  @returns  errlHndl_t  NULL on success
-     */
-    errlHndl_t process_sbe_msg_set_cfam(TargetHandle_t i_proc,
-                                        const uint32_t i_set_mask)
-    {
-        errlHndl_t errl = nullptr;
-
-        uint32_t l_read_reg = 0;
-        size_t l_size = sizeof(uint64_t);
-
-        do{
-            // Read SCOM_ADDR_5003B for target proc
-            errl = deviceRead(i_proc,
-                              &l_read_reg,
-                              l_size,
-                              DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
-
-            if(errl)
-            {
-                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: read CFAM "
-                          "failed for target 0x%llX SCOM addr 0x%llX",
-                          get_huid(i_proc),
-                          SCOM_ADDR_5003B);
-
-                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH);
-                errl->collectTrace(SBEIO_COMP_NAME);
-
-                break;
-            }
-
-            // Set bit(s) in CFAM reg SCOM_ADDR_5003B based on mask
-            l_read_reg |= i_set_mask;
-
-            // Write SCOM_ADDR_5003B for target proc
-            errl = deviceWrite(i_proc,
-                               &l_read_reg,
-                               l_size,
-                               DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
-
-            if(errl)
-            {
-                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: write CFAM "
-                          "failed for target 0x%llX SCOM addr 0x%llX",
-                          get_huid(i_proc),
-                          SCOM_ADDR_5003B);
-
-                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH);
-                errl->collectTrace(SBEIO_COMP_NAME);
-
-                break;
-            }
-        }while(0);
-
-        return errl;
-     }
 
     //------------------------------------------------------------------------
 
@@ -624,8 +550,9 @@ namespace RT_SBEIO
             // Set CFAM register - processing in progress
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
                                     "processing in progress");
-            errl = process_sbe_msg_set_cfam(l_proc,
-                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS);
+            errl = process_sbe_msg_update_cfam(l_proc,
+                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS,
+                                            SBE_MESSAGE_PROCESSING_COMPLETE);
             if(errl)
             {
                 break;
@@ -702,8 +629,9 @@ namespace RT_SBEIO
             // Set CFAM register - processing complete
             TRACFCOMP(g_trac_sbeio, "process_sbe_msg: set CFAM register - "
                                     "processing complete");
-            errl = process_sbe_msg_set_cfam(l_proc,
-                                            SBE_MESSAGE_PROCESSING_COMPLETE);
+            errl = process_sbe_msg_update_cfam(l_proc,
+                                            SBE_MESSAGE_PROCESSING_COMPLETE,
+                                            SBE_MESSAGE_PROCESSING_IN_PROGRESS);
             if(errl)
             {
                 break;
@@ -910,4 +838,85 @@ namespace SBE_MSG
 
         return rc;
     }
+
+
+    /**
+     *  @brief SBE message update bit(s) in CFAM register
+     *
+     *  @details  This is a call that will update bit(s) in CFAM register 0x283B
+     *            or SCOM_ADDR_5003B.
+     *
+     *  @param[in]  i_proc        HB processor target
+     *  @param[in]  i_set_mask    CFAM register mask (mark bits to set)
+     *  @param[in]  i_clear_mask  CFAM register mask (mark bits to clear)
+     *
+     *  @returns  errlHndl_t  NULL on success
+     */
+    errlHndl_t process_sbe_msg_update_cfam(TargetHandle_t i_proc,
+                                        const uint32_t i_set_mask,
+                                        const uint32_t i_clear_mask)
+    {
+        errlHndl_t errl = nullptr;
+
+
+        uint32_t l_read_reg = 0;
+        size_t l_size = sizeof(uint64_t);
+
+        do{
+            // Read SCOM_ADDR_5003B for target proc
+            errl = deviceRead(i_proc,
+                              &l_read_reg,
+                              l_size,
+                              DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+
+            if(errl)
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg_update_cfam: "
+                    "CFAM read failed for target 0x%llX SCOM addr 0x%llX",
+                    get_huid(i_proc),
+                    SCOM_ADDR_5003B);
+
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+
+                break;
+            }
+
+            TRACFCOMP(g_trac_sbeio, "process_sbe_msg_update_cfam: CFAM read "
+                "returned 0x%llX for target 0x%llX",
+                l_read_reg, get_huid(i_proc) );
+
+            // Set/clear bit(s) in CFAM reg SCOM_ADDR_5003B based on masks
+            l_read_reg |= i_set_mask;
+            l_read_reg &= (~i_clear_mask);
+
+            TRACFCOMP(g_trac_sbeio, "process_sbe_msg_update_cfam: "
+                "CFAM write 0x%llX to SCOM addr 0x%llX for target 0x%llX",
+                l_read_reg, SCOM_ADDR_5003B, get_huid(i_proc) );
+
+            // Write SCOM_ADDR_5003B for target proc
+            errl = deviceWrite(i_proc,
+                               &l_read_reg,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(SCOM_ADDR_5003B));
+
+            if(errl)
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg_update_cfam: "
+                    "write CFAM failed for target 0x%llX SCOM addr 0x%llX",
+                    get_huid(i_proc),
+                    SCOM_ADDR_5003B);
+
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+
+                break;
+            }
+        }while(0);
+
+        return errl;
+     }
+
 } // namespace SBE_MSG
