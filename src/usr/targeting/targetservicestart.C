@@ -387,9 +387,28 @@ static void initializeAttributes(TargetService& i_targetService,
             }
 
             //Set the RISK_LEVEL ATTR based off of master Scratch regs
+            // Risk Level is a 4 bit value that is treated as an integer, but
+            //  there is a legacy mode that we need to maintain support for
+            ATTR_RISK_LEVEL_type l_riskLevel = 0;
+
+            // Scratch5:bit2 is legacy risk level bit for backward compatibility
             INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;
-            l_scratch5.data32 = i_masterScratch[INITSERVICE::SPLESS::SCRATCH_5];
-            l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_scratch5.riskLevel);
+            l_scratch5.data32 =
+              i_masterScratch[INITSERVICE::SPLESS::SCRATCH_5];
+            if( l_scratch5.oldRiskLevel )
+            {
+                l_riskLevel = 1;
+            }
+            // Scratch3 has the real risk level
+            else
+            {
+                INITSERVICE::SPLESS::MboxScratch3_t l_scratch3;
+                l_scratch3.data32 =
+                  i_masterScratch[INITSERVICE::SPLESS::SCRATCH_3];
+                l_riskLevel = l_scratch3.riskLevel;
+            }
+            TARG_INF( "Setting RISK_LEVEL=%d", l_riskLevel );
+            l_pTopLevel->setAttr<ATTR_RISK_LEVEL>(l_riskLevel);
         }
 
         if(i_isMpipl)
