@@ -936,6 +936,12 @@ struct postInitCalls_t
      */
     void (*callApplyTempOverrides)();
 
+    /**
+     * @brief Clear pending SBE messages
+     *
+     */
+    void (*callClearPendingSbeMsgs)();
+
 };
 
 extern hostInterfaces_t* g_hostInterfaces;
