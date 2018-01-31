@@ -1951,7 +1951,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
         // In istep mode we cannot do a reconfigure of any sort, so create
         // an error.
         TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIStepRequestMsg: IStep success and deconfigs, creating error");
-        err = failedDueToDeconfig(istep, substep, newIstep, newSubstep);
+        err = failedDueToDeconfig(istep, substep, newIstep, newSubstep, true);
 
     }
 
@@ -2564,9 +2564,13 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::failedDueToDeconfig(
                                           uint8_t i_step, uint8_t i_substep,
-                                          uint8_t i_dStep, uint8_t i_dSubstep)
+                                          uint8_t i_dStep, uint8_t i_dSubstep,
+                                          const bool istepMode)
 {
     errlHndl_t err = NULL;
+
+    auto l_severity = istepMode? ERRORLOG::ERRL_SEV_UNRECOVERABLE:
+                                 ERRORLOG::ERRL_SEV_INFORMATIONAL;
 
     using namespace TARGETING;
     TARGETING::Target* l_pTopLevel = nullptr;
@@ -2598,7 +2602,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
     /*@
      * @errortype
      * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
-     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
      * @moduleid         ISTEP_INITSVC_MOD_ID
      * @userdata1[00:15] Istep that failed
      * @userdata1[16:31] SubStep that failed
@@ -2629,7 +2633,7 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      *              for details.
      */
     err = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_severity,
             ISTEP_INITSVC_MOD_ID,
             ISTEP_FAILED_DUE_TO_DECONFIG,
             FOUR_UINT16_TO_UINT64(i_step, i_substep,
