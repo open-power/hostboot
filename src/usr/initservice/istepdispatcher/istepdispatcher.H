@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -432,9 +432,11 @@ private:
      * @param[in] i_substep - Current substep.
      * @param[in] i_dStep - Desired istep if we could do a reconfig.
      * @param[in] i_dSubstep - Desired substep if we could do a reconfig.
+     * @param[in] i_istepMode - Pass true if in istep mode. Default is false.
      */
     static errlHndl_t failedDueToDeconfig(uint8_t i_step, uint8_t i_substep,
-                                          uint8_t i_dStep, uint8_t i_dSubstep);
+                                          uint8_t i_dStep, uint8_t i_dSubstep,
+                                          const bool i_istepMode = false);
 
     // Instance variables
 
