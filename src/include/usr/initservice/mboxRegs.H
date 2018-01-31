@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,12 +86,13 @@ namespace SPLESS
             uint32_t goToRuntime         :1;   //1
             uint32_t isMpipl             :1;   //2
             uint32_t fspAttached         :1;   //3
-            uint32_t reserved1           :1;   //4 -- do not repurpose
+            uint32_t reserved            :1;   //4 -- do not repurpose
             uint32_t sbeInternalFFDC     :1;   //5
             uint32_t overrideSecurity    :1;   //6
             uint32_t allowAttrOverrides  :1;   //7
             uint32_t smtMode             :2;   //8:9
-            uint32_t reserved2           :22;  //10:31 -- Available
+            uint32_t unused              :18;  //10:27 -- Available
+            uint32_t riskLevel           :4;   //28:31
         } PACKED;
         // NOTE: Used for debug tool communication during Hostboot IPL
     };
@@ -124,7 +125,7 @@ namespace SPLESS
         {
             uint32_t cacheContained      :1;    //0
             uint32_t initAllCores        :1;    //1
-            uint32_t riskLevel           :1;    //2
+            uint32_t oldRiskLevel        :1;    //2
             uint32_t noBLVectors         :1;    //3
             uint32_t mcSyncMode          :1;    //4
             uint32_t slowPci             :1;    //5
