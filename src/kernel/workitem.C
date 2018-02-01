@@ -33,20 +33,10 @@
 void CpuWakeupDoorbellWorkItem::operator() (void)
 {
     size_t pir = getPIR();
-    printk("Wkup pir %ld done\n", pir);
+    printkd("Wkup pir %ld done\n", pir);
     //Send message to the intrrp in userspace indicating this pir has woken up
     // There is a task associated with the intrrp that monitors that the proper
     // cores/threads have woken up
     InterruptMsgHdlr::sendThreadWakeupMsg(pir);
-    return;
-}
-
-void IPCDoorbellWorkItem::operator() (void)
-{
-    size_t pir = getPIR();
-    printk("IPC msg pir %ld done\n", pir);
-    //Send message tot he intrrp in userspace indicating it has a pending IPC
-    // message.
-    InterruptMsgHdlr::sendIpcMsg(pir);
     return;
 }

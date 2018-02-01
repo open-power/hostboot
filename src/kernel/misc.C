@@ -154,8 +154,9 @@ namespace KernelMisc
 
                 // Find the start_payload_data_area on the master node
                 uint64_t hrmor_base = KernelIpc::ipc_data_area.hrmor_base;
+
                 uint64_t this_hb_instance =
-                    l_lowestPIR/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+                  l_lowestPIR/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
 
                 uint64_t hrmor_offset =
                     getHRMOR() - (this_hb_instance * hrmor_base);
@@ -177,6 +178,9 @@ namespace KernelMisc
                 if (c->master)
                 {
                     local_master_pir = getPIR();
+
+                    printkd("Local master pir %lx, start_data_area %lx\n",
+                           local_master_pir, start_payload_data_area_address);
                     // Reset the memory state register so that the dump tools
                     // don't attempt to dump all of memory once payload runs.
                     KernelMemState::setMemScratchReg(

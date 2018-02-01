@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,11 @@
 #include <util/lockfree/stack.H>
 
 // See BookIV PIR definition.
-#define KERNEL_MAX_SUPPORTED_NODES 8
-#define KERNEL_MAX_SUPPORTED_CPUS_PER_NODE (8 * 16 * 8) // Chip, core, thread.
+#define KERNEL_MAX_SUPPORTED_NODES 4
+
+// This constant is coming from the PIR: GGGGPPPRCCCCCTT
+// 3-bits for chiP (P), 1-reserved bit, 5-Core bits (C), 2-for Thread (T)
+#define KERNEL_MAX_SUPPORTED_CPUS_PER_NODE (8 * 2 * 32 * 4) // ChipId, reserved bit, core, thread
 
 class Scheduler;
 

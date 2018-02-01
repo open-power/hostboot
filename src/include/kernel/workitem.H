@@ -54,16 +54,5 @@ class CpuWakeupDoorbellWorkItem : public KernelWorkItem
 };
 
 
-
-//A work item to be created/executed during an IPC scenario
-class IPCDoorbellWorkItem : public KernelWorkItem
-{
-    public:
-        //Implement operator() function
-        void operator() (void);
-
-        //No data to clean up, use default destructor
-        ~IPCDoorbellWorkItem() = default;
-};
 #endif
 

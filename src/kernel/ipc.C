@@ -86,7 +86,7 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     p_dest->msg_queue_id = i_q;    // set destination queue id
     lwsync();
 
-    printkd("IPC send from PIR %lx to PIR %x\n",getPIR(),p_dest->pir);
+    printk("IPC to PIR %x\n",p_dest->pir);
 
     // send doorbell to interrupt the other drawer
     send_doorbell_ipc(p_dest->pir);

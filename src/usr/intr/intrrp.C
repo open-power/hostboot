@@ -937,7 +937,7 @@ void IntrRp::msgHandler()
 
                     TRACFCOMP(g_trac_intr,INFO_MRK
                               "IntrRp::msgHandler Doorbell IPC msg received"
-                                  " for %d", l_xirr_pir);
+                                  " for %x", l_xirr_pir);
 
                     // Now handle any IPC messages
                     // If something is registered for the IPC msg
@@ -999,6 +999,12 @@ void IntrRp::msgHandler()
                            "IPC Message received type but nothing registered "
                            "to handle it. Ignoring it.");
                     }
+
+                    // Always acknowlege msg to kernel
+                    // kernel expects rc in data[1]
+                    // rc of 0 means a successful return
+                    msg->data[1] = 0;
+                    msg_respond(iv_msgQ, msg);
 
                     if (l_err)
                     {
@@ -1212,18 +1218,18 @@ void IntrRp::msgHandler()
 
                 }
                 break;
-#ifdef CONFIG_MPIPL_ENABLED //TODO RTC 134431
             case MSG_INTR_ADD_HBNODE:  // node info for mpipl
                 {
+#ifdef CONFIG_MPIPL_ENABLED //TODO RTC 134431
                     errlHndl_t err = addHbNodeToMpiplSyncArea(msg->data[0]);
                     if(err)
                     {
                         errlCommit(err,INTR_COMP_ID);
                     }
+#endif
                     msg_free(msg); // async message
                 }
                 break;
-#endif
             case MSG_INTR_DRAIN_QUEUE:
                 {
                     //The purpose of this message is allow the

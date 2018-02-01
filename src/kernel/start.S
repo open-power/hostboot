@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2018
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -319,7 +319,7 @@ _other_thread_spinlock_complete:
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
     mfspr r1, PIR               ;// Extract node id.
-    extrwi r1, r1, 3, 19
+    extrwi r1, r1, 3, 18        ;// Match PIR format(KERNEL_MAX_SUPPORTED_CPUS_PER_NODE)
     sldi r1, r1, 3
     ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
     cmpwi cr0, r2, 0            ;// Check for NULL node array.
@@ -610,7 +610,7 @@ intvect_system_reset:
     lis r2, _ZN10CpuManager7cv_cpusE@h
     ori r2, r2, _ZN10CpuManager7cv_cpusE@l
     mfspr r1, PIR               ;// Extract node id.
-    extrwi r1, r1, 3, 19
+    extrwi r1, r1, 3, 18        ;// Match PIR format(KERNEL_MAX_SUPPORTED_CPUS_PER_NODE)
     sldi r1, r1, 3
     ldx r2, r1, r2              ;// Dereference to get on-node CPUs array.
     cmpwi cr0, r2, 0            ;// Check for NULL node array.

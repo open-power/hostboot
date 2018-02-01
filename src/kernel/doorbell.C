@@ -81,12 +81,6 @@ void send_doorbell_wakeup(uint64_t i_pir)
 
 void send_doorbell_ipc(uint64_t i_pir)
 {
-    cpu_t *l_cpu = CpuManager::getCpu(i_pir);
-
-    printkd("send_doorbell_ipc to pir: %lx\n", i_pir);
-    //Create WorkItem and put on the stack to be executed during doorbell
-    //   execution
-    KernelWorkItem* l_work = new IPCDoorbellWorkItem();
-    l_cpu->doorbell_actions.push(l_work);
+    printk("send_doorbell_ipc to pir: %lx\n", i_pir);
     doorbell_send(i_pir);
 }
