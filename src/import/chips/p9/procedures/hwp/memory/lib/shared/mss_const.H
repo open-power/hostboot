@@ -77,6 +77,7 @@ enum sizes
 
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
     BAD_DQ_BYTE_COUNT = 10,        ///< Elements in a BAD_DQ_BITMAP attribute array
+    ROW_REPAIR_BYTE_COUNT = 4,     ///< Elements in a ROW_REPAIR_DATA attribute array.
 
     BYTES_PER_GB = 1000000000,      ///< Multiplier to go from GB to B
     T_PER_MT     = 1000000,         ///< Multiplier to go from MT/s to T/s
