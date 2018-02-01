@@ -63,42 +63,46 @@ fapi2::ReturnCode p9_putmemproc(
 
     FAPI_DBG("Start");
 
-    FAPI_ASSERT(((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TARGET_PROC) == SBE_MEM_ACCESS_FLAGS_TARGET_PROC) &&
-                ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TARGET_PBA)  == 0) &&
-                ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_LCO_MODE) == 0) &&
-                ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_CACHE_INJECT_MODE) == 0),
+    FAPI_ASSERT(((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC) == fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC) &&
+                ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PBA)  == 0) &&
+                ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_LCO_MODE) == 0) &&
+                ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_CACHE_INJECT_MODE) == 0),
                 fapi2::P9_PUTMEMPROC_INVALID_FLAGS().
                 set_TARGET(i_target).
                 set_ADDRESS(i_address).
                 set_BYTES(i_bytes).
                 set_FLAGS(i_mem_flags).
-                set_FLAG_CHECK_OP_TYPE(((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TARGET_PROC) == SBE_MEM_ACCESS_FLAGS_TARGET_PROC) &&
-                                       ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TARGET_PBA)  == 0)).
-                set_FLAG_CHECK_LCO_MODE((i_mem_flags & SBE_MEM_ACCESS_FLAGS_LCO_MODE) == 0).
-                set_FLAG_CHECK_CACHE_INJECT_MODE((i_mem_flags & SBE_MEM_ACCESS_FLAGS_CACHE_INJECT_MODE) == 0),
+                set_FLAG_CHECK_OP_TYPE(((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC) ==
+                                        fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC) &&
+                                       ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PBA)  == 0)).
+                set_FLAG_CHECK_LCO_MODE((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_LCO_MODE) == 0).
+                set_FLAG_CHECK_CACHE_INJECT_MODE((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_CACHE_INJECT_MODE) == 0),
                 "Invalid flag specified for ADU access");
 
-    FAPI_ASSERT(((i_mem_flags & SBE_MEM_ACCESS_FLAGS_ECC_OVERRIDE) == 0) &&
-                ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TAG) == 0) &&
-                ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH) == 0),
+    FAPI_ASSERT(((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_ECC_OVERRIDE) == 0) &&
+                ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TAG) == 0) &&
+                ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH) == 0),
                 fapi2::P9_PUTMEMPROC_UNSUPPORTED_FLAGS().
                 set_TARGET(i_target).
                 set_ADDRESS(i_address).
                 set_BYTES(i_bytes).
                 set_FLAGS(i_mem_flags).
-                set_FLAG_CHECK_ECC_OVERRIDE((i_mem_flags & SBE_MEM_ACCESS_FLAGS_ECC_OVERRIDE) == 0).
-                set_FLAG_CHECK_TAG((i_mem_flags & SBE_MEM_ACCESS_FLAGS_TAG) == 0).
-                set_FLAG_CHECK_HOST_PASS_THROUGH((i_mem_flags & SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH) == 0),
+                set_FLAG_CHECK_ECC_OVERRIDE((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_ECC_OVERRIDE) == 0).
+                set_FLAG_CHECK_TAG((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_TAG) == 0).
+                set_FLAG_CHECK_HOST_PASS_THROUGH((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH) == 0),
                 "Unsupported flag specified for ADU access");
 
     // set auto-increment
-    l_flags.setAutoIncrement((i_mem_flags & SBE_MEM_ACCESS_FLAGS_AUTO_INCR_ON) == SBE_MEM_ACCESS_FLAGS_AUTO_INCR_ON);
+    l_flags.setAutoIncrement((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_AUTO_INCR_ON) ==
+                             fapi2::SBE_MEM_ACCESS_FLAGS_AUTO_INCR_ON);
 
     // set fast mode
-    l_flags.setFastMode((i_mem_flags & SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON) == SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON);
+    l_flags.setFastMode((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON) ==
+                        fapi2::SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON);
 
     // set operation type and transaction size
-    if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_CACHE_INHIBITED_MODE) == SBE_MEM_ACCESS_FLAGS_CACHE_INHIBITED_MODE)
+    if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_CACHE_INHIBITED_MODE) ==
+        fapi2::SBE_MEM_ACCESS_FLAGS_CACHE_INHIBITED_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::CACHE_INHIBIT);
 
@@ -129,27 +133,29 @@ fapi2::ReturnCode p9_putmemproc(
                         "Invalid byte count specified for cache-inhibited access");
         }
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE) == SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::PB_DIS_OPER);
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_SWITCH_MODE) == SBE_MEM_ACCESS_FLAGS_SWITCH_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::PMISC_OPER);
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE) == SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_PB_INIT_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::PB_INIT_OPER);
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE) == SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE) ==
+             fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::PRE_SWITCH_CD);
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE) == SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE) ==
+             fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::PRE_SWITCH_AB);
     }
-    else if ((i_mem_flags & SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE) == SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE)
+    else if ((i_mem_flags & fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE) == fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE)
     {
         l_flags.setOperationType(p9_ADU_oper_flag::POST_SWITCH);
     }

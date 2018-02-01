@@ -194,20 +194,20 @@ fapi2::ReturnCode p9_build_smp_adu_set_switch_action(
     fapi2::ReturnCode l_rc;
     uint64_t l_addr = 0x0ULL;
     uint32_t l_bytes = 1;
-    uint32_t l_flags = SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
+    uint32_t l_flags = fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
     uint8_t l_data_unused[1];
 
     if (i_action == SWITCH_AB)
     {
-        l_flags |= SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE;
+        l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_AB_MODE;
     }
     else if (i_action == SWITCH_CD)
     {
-        l_flags |= SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE;
+        l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PRE_SWITCH_CD_MODE;
     }
     else
     {
-        l_flags |= SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE;
+        l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_POST_SWITCH_MODE;
     }
 
     // issue operation
@@ -237,7 +237,7 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
     fapi2::ReturnCode l_rc;
 
     // validate input action, set ADU operation parameters
-    uint32_t l_flags = SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
+    uint32_t l_flags = fapi2::SBE_MEM_ACCESS_FLAGS_TARGET_PROC;
     uint32_t l_bytes = 1;
     uint64_t l_addr = 0x0ULL;
     uint8_t l_data_unused[1];
@@ -246,11 +246,11 @@ fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
     {
         case SWITCH_AB:
         case SWITCH_CD:
-            l_flags |= SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
+            l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_SWITCH_MODE;
             break;
 
         case QUIESCE:
-            l_flags |= SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE;
+            l_flags |= fapi2::SBE_MEM_ACCESS_FLAGS_PB_DIS_MODE;
             break;
 
         default:
