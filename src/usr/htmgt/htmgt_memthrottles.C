@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -449,17 +449,19 @@ void calculate_system_power()
     //   calculates this as the CPU power at minimum frequency plus memory at
     //   minimum power (most throttled)
     const uint16_t freq_min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
-    uint16_t freq_turbo, freq_ultra;
-    check_wof_support(freq_turbo, freq_ultra);
+    // Minimum Frequency biasing (ATTR_FREQ_BIAS_POWERSAVE) will be ignored here
+    uint16_t freq_nominal, freq_turbo, freq_ultra;
+    check_wof_support(freq_nominal, freq_turbo, freq_ultra);
     if (freq_turbo == 0)
     {
         freq_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+        // Turbo Frequency biasing (ATTR_FREQ_BIAS_TURBO) will be ignored here
         if (freq_turbo == 0)
         {
             // If no turbo point, then use nominal...
             TMGT_ERR("calculate_system_power: No turbo frequency to calculate "
                      "power drop.  Using nominal");
-            freq_turbo = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
+            freq_turbo = freq_nominal;
         }
     }
     const uint16_t mhz_per_watt = sys->getAttr<ATTR_PROC_MHZ_PER_WATT>();

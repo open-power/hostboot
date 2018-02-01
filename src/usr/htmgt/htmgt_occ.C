@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1011,7 +1011,7 @@ namespace HTMGT
                     /*@
                      * @errortype
                      * @moduleid HTMGT_MOD_OCC_RESET
-                     * @reasoncode HTMGT_RC_OCC_RESET_THREHOLD
+                     * @reasoncode HTMGT_RC_OCC_CRIT_FAILURE
                      * @userdata1  return code triggering safe mode
                      * @userdata2  OCC instance
                      * @devdesc OCC reset threshold reached.
