@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,12 +56,17 @@ namespace TCE
  *                               FSP uses the token as a DMA Address.
  *                               Each TCE entry maps to a pagesize of memory.
  *
+ * @param[in] i_rwNotRO - TRUE to create TCEs in read-write mode;
+ *                        FALSE for read-only mode
+ *                        Default is TRUE (read-write mode)
+ *
  * @return errlHndl_t - Return Error Handle if failed
  *
  */
 errlHndl_t utilAllocateTces(uint64_t  i_startingAddress,
                             size_t    i_size,
-                            uint32_t& o_startingToken);
+                            uint32_t& o_startingToken,
+                            const bool i_rwNotRO = true);
 
 /**
  * @brief Responsible for deallocating TCEs

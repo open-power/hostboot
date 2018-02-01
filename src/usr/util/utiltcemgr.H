@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -254,9 +254,10 @@ class UtilTceMgr
      * - see utiltce.H for details
      *
      */
-    errlHndl_t allocateTces(uint64_t  i_startingAddress,
-                            size_t    i_size,
-                            uint32_t& o_startingToken);
+    errlHndl_t allocateTces(uint64_t   i_startingAddress,
+                            size_t     i_size,
+                            uint32_t&  o_startingToken,
+                            const bool i_rwNotRO);
 
     /**
      * @brief Responsible for deallocating TCEs

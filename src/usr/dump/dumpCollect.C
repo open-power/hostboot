@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,7 @@
 #include <util/align.H>
 #include <sys/mm.h>
 #include <dump/dumpif.H>
+#include <util/utiltce.H>
 
 #include    <sys/msg.h>                     //  message Q's
 #include    <mbox/mbox_queues.H>            //
@@ -833,7 +836,44 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     uint64_t l_mdrt_phys =
                       mm_virt_to_phys(
                           reinterpret_cast<void*>(resultsTableAddr));
-                    msg->data[0] = l_mdrt_phys;
+
+                    // If TCEs are enabled setup TCEs in TCE Table to allow
+                    // the FSP to read this memory
+                    if (TCE::utilUseTcesForDmas())
+                    {
+                        // Align Physical addr down for TCE requirement
+                        uint64_t mdrt_phyp_aligned =
+                                   ALIGN_PAGE_DOWN(l_mdrt_phys);
+
+                        uint64_t offset = l_mdrt_phys - mdrt_phyp_aligned;
+
+                        TRACFCOMP( g_trac_dump,"Setup TCEs for FSP to use for "
+                                   "l_mdrt_phys=0x%.16llX (virt=0x%.16llX, "
+                                   "aligned_phys=0x%.16llX, offset=0x%X)",
+                                   l_mdrt_phys, resultsTableAddr,
+                                   mdrt_phyp_aligned, offset);
+
+                        uint32_t token = 0;
+                        l_err = TCE::utilAllocateTces(mdrt_phyp_aligned,
+                                                      resultsTableSize+offset,
+                                                      token,
+                                                      false); //Read-Only
+
+                        if (l_err)
+                        {
+                            // Got an errorlog back from utilAllocateTces
+                            TRACFCOMP(g_trac_dump, "HBDumpGetHostData utilAllocateTces failed rc=0x%X", l_err->reasonCode());
+                        }
+                        else
+                        {
+                            // Put the token with the offset into the msg
+                            msg->data[0] = token + offset;
+                        }
+                    }
+                    else
+                    {
+                        msg->data[0] = l_mdrt_phys;
+                    }
 
                     // Number of bytes in the results table
                     msg->data[1] = resultsTableSize;
@@ -842,7 +882,8 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     msg->extra_data = NULL;
 
                 }
-                else
+
+                if (l_err)
                 {
                     TRACFCOMP( g_trac_dump,
                                INFO_MRK"Got an error trying to send msg. %.8X,",
