@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,7 +195,7 @@ void CpuManager::startCPU(ssize_t i)
     // Initialize CPU structure.
     if (NULL == cv_cpus[nodeId][cpuId])
     {
-        printk("Starting CPU with pir %ld...", i);
+        printkd("Start pir 0x%lx...", i);
         cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t();
 
         // Initialize CPU.
@@ -257,7 +257,7 @@ void CpuManager::startCPU(ssize_t i)
         // Call TimeManager setup for a CPU.
         TimeManager::init_cpu(cpu);
 
-        printk("done\n");
+        printkd("done\n");
     }
 
     if (currentCPU)
@@ -446,7 +446,7 @@ void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
         // Only wakeup the threads we were told to wakeup
         if( i_threads & (0x8000000000000000 >> i) )
         {
-            printk("Dbell wkup pir %ld\n", pir + i);
+            printk("Dbell pir 0x%lx\n", pir + i);
             //Initiate the Doorbell for this core/pir
             send_doorbell_wakeup(pir + i);
         }

@@ -67,6 +67,18 @@ void kernel_execute_hype_doorbell()
         l_work = t->cpu->doorbell_actions.pop();
     }
 
+    //IPC messages come in only on the master, so
+    //If this is a doorbell to the master -- check
+    cpu_t* master = CpuManager::getMasterCPU();
+    if(t->cpu == master)
+    {
+        size_t pir = getPIR();
+        printk("IPC msg pir %lx incoming\n", pir);
+        //Send message to the intrrp in userspace indicating it has
+        // potential a pending IPC message.
+        InterruptMsgHdlr::sendIpcMsg(pir);
+    }
+
     if (t->cpu->idle_task == t)
     {
         t->cpu->scheduler->returnRunnable();
