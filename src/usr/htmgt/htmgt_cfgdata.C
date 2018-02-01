@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1279,12 +1279,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     o_data[index++] = OCC_CFGDATA_FREQ_POINT;
     o_data[index++] = OCC_CFGDATA_FREQ_POINT_VERSION;
 
-    //Nominal Frequency in MHz
-    nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
-    memcpy(&o_data[index], &nominal, 2);
-    index += 2;
-
-    check_wof_support(turbo, ultra);
+    check_wof_support(nominal, turbo, ultra);
     if (turbo == 0)
     {
 
@@ -1294,13 +1289,32 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         ultra = WOF_UNSUPPORTED_FREQ;
     }
 
+    //Nominal Frequency in MHz
+    memcpy(&o_data[index], &nominal, 2);
+    index += 2;
+
     //Turbo Frequency in MHz
     memcpy(&o_data[index], &turbo, 2);
     index += 2;
 
     //Minimum Frequency in MHz
     min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
-
+    Target* proc = nullptr;
+    targetService().masterProcChipTargetHandle(proc);
+    if (proc != nullptr)
+    {
+        // Check if min frequency needs to be biased
+        int8_t bias = proc->getAttr<ATTR_FREQ_BIAS_POWERSAVE>();
+        if (bias != 0)
+        {
+            // Calculate biased Minimum frequency
+            // (bias values are signed integers in units of 0.5 percent steps)
+            min *= 1 + (bias/200.0);
+            TMGT_INF("getFrequencyPointMessageData: Minimum biased by %c%d"
+                     " * 0.5 percent: freq=%dMHz", (bias < 0) ? '-' : ' ',
+                     (bias < 0) ? -bias : bias, min);
+        }
+    }
     memcpy(&o_data[index], &min, 2);
     index += 2;
 
@@ -1316,8 +1330,16 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     memset(&o_data[index], 0, 2);
     index += 2;
 
-    TMGT_INF("Frequency Points: Min %d, Nominal %d, Turbo %d, Ultra %d MHz",
-             min, nominal, turbo, ultra);
+    if (ultra < 16)
+    {
+        TMGT_INF("Frequency Points: Min %dMHz, Nominal %dMHz, Turbo %dMHz, "
+                 "Ultra (disabled %d)", min, nominal, turbo, ultra);
+    }
+    else
+    {
+        TMGT_INF("Frequency Points: Min %dMHz, Nominal %dMHz, Turbo %dMHz, "
+                 "Ultra %dMHz", min, nominal, turbo, ultra);
+    }
 
     o_size = index;
 }
@@ -1424,37 +1446,73 @@ void getApssMessageData(uint8_t* o_data,
 
 
 // Determine if WOF is supported and what the turbo/ultra frequencies are
-bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
+bool check_wof_support(uint16_t & o_nominal,
+                       uint16_t & o_turbo,
+                       uint16_t & o_ultra)
 {
     o_turbo = 0;
-    o_ultra = 0;
+    o_ultra = WOF_UNSUPPORTED_FREQ;
 
     Target* sys = nullptr;
     targetService().getTopLevelTarget(sys);
     assert(sys != nullptr);
+
+    int8_t bias = 0;
+    Target* proc = nullptr;
+    targetService().masterProcChipTargetHandle(proc);
+
+    // Nominal Frequency
+    o_nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
+    if (proc != nullptr)
+    {
+        // Get bias attributes (use attributes from the first functional proc)
+        // (bias values are signed integers in units of 0.5 percent steps)
+        bias = proc->getAttr<ATTR_FREQ_BIAS_NOMINAL>();
+        if (bias != 0)
+        {
+            // Calculate biased Nominal frequency
+            o_nominal *= 1 + (bias/200.0);
+            TMGT_INF("check_wof_support: Nominal biased by %c%d"
+                     " * 0.5 percent: freq=%dMHz", (bias < 0) ? '-' : ' ',
+                     (bias < 0) ? -bias : bias, o_nominal);
+        }
+    }
 
     // Check if MRW allows turbo
     uint8_t turboAllowed =
         sys->getAttr<ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>();
     if (turboAllowed)
     {
-        const uint16_t nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
-
         // Check if BMC allows turbo
         if (bmcAllowsTurbo(sys))
         {
+            // Turbo Frequency
             o_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+            if (proc != nullptr)
+            {
+                bias = proc->getAttr< TARGETING::ATTR_FREQ_BIAS_TURBO >();
+                if (bias != 0)
+                {
+                    // Calculate biased Turbo frequency
+                    o_turbo *= 1 + (bias/200.0);
+                    TMGT_INF("check_wof_support: Turbo biased by %c%d * 0.5 "
+                             "percent: freq=%dMHz", (bias < 0) ? '-' : ' ',
+                             (bias < 0) ? -bias : bias, o_turbo);
+                }
+            }
 
-            //Ultra Turbo Frequency in MHz
+            // Check WOF support (Ultra-Turbo)
             ATTR_SYSTEM_WOF_DISABLE_type wofSupported;
             if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_DISABLE>(wofSupported))
             {
-                o_ultra = WOF_SYSTEM_DISABLED;
+                TMGT_INF("Unable to read system attribute to determine if WOF "
+                         "is supported");
                 G_wofSupported = false;
+                o_ultra = WOF_SYSTEM_DISABLED;
             }
             else
             {
-                // Loop through all functional OCCs
+                // Loop through all functional OCCs to find max reset count
                 uint8_t largest_wof_reset_count = 0;
                 uint8_t occ_instance = 0;
                 std::vector<Occ*> occList = OccManager::getOccArray();
@@ -1466,14 +1524,31 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
                         largest_wof_reset_count = occ->wofResetCount();
                     }
                 }
-                const uint16_t tempUt=sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+
+                // Ultra Turbo Frequency in MHz
+                uint16_t attrUt=sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+                if ((attrUt > 0) && (proc != nullptr))
+                {
+                    bias = proc->
+                        getAttr< TARGETING::ATTR_FREQ_BIAS_ULTRATURBO >();
+                    if (bias != 0)
+                    {
+                        // Calculate biased Ultra-Turbo frequency
+                        attrUt *= 1 + (bias/200.0);
+                        TMGT_INF("check_wof_support: Ultra-Turbo biased by %c%d"
+                                 " * 0.5 percent: freq=%dMHz",
+                                 (bias < 0) ? '-' : ' ',
+                                 (bias < 0) ? -bias : bias, attrUt);
+                    }
+                }
+
                 if( wofSupported == SYSTEM_WOF_DISABLE_ON )
                 {
                     TMGT_INF("System does not support WOF");
                     G_wofSupported = false;
                     o_ultra = WOF_SYSTEM_DISABLED;
                 }
-                else if( tempUt == 0 )
+                else if( attrUt == 0 )
                 {
                     TMGT_INF("Missing Ultra Turbo VPD point. WOF disabled.");
                     G_wofSupported = false;
@@ -1486,23 +1561,23 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
                     G_wofSupported = false;
                     o_ultra = WOF_RESET_COUNT_REACHED;
                 }
-                else if( o_turbo <= nominal )
+                else if( o_turbo <= o_nominal )
                 {
                     TMGT_INF("Turbo (%d) < nominal (%d). WOF disabled.",
-                             o_turbo, nominal);
+                             o_turbo, o_nominal);
                     G_wofSupported = false;
                     o_ultra = WOF_UNSUPPORTED_FREQ;
                 }
-                else if( tempUt <= o_turbo )
+                else if( attrUt <= o_turbo )
                 {
                     TMGT_INF("Ultra Turbo (%d) < Turbo (%d). WOF disabled.",
-                             tempUt, o_turbo);
+                             attrUt, o_turbo);
                     G_wofSupported = false;
                     o_ultra = WOF_UNSUPPORTED_FREQ;
                 }
                 else
                 {
-                    o_ultra = tempUt;
+                    o_ultra = attrUt;
                 }
             }
         }
@@ -1510,7 +1585,7 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
         {
             TMGT_INF("getFrequencyPoint: Turbo/WOF not allowed by BMC");
             TMGT_CONSOLE("Turbo frequency not allowed due to BMC limit");
-            o_turbo = nominal;
+            o_turbo = o_nominal;
             G_wofSupported = false;
         }
 
@@ -1526,6 +1601,7 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
     }
 
     return G_wofSupported;
+
 } // end check_wof_support()
 
 
