@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@ namespace TARGETING
     AttributeSync::~AttributeSync()
     {};
 
+#ifndef __HOSTBOOT_RUNTIME
     void AttributeSync::getSectionData()
     {
         // make sure we have a clean slate
@@ -61,7 +62,6 @@ namespace TARGETING
 
     }
 
-#ifndef __HOSTBOOT_RUNTIME
     ATTR_SYNC_RC AttributeSync::updateSectionData() const
     {
         TARG_INF( ENTER_MRK "AttributeSync::updateSectionData - "
@@ -91,23 +91,6 @@ namespace TARGETING
         return l_rc;
     }
 
-#else
-    std::vector<TARGETING::sectionRefData> AttributeSync::syncSectionFromAttrRP(
-                                      TARGETING::SECTION_TYPE i_section_to_sync)
-    {
-        iv_section_to_sync = i_section_to_sync;
-
-        do
-        {
-            // set up the pointers to the data area
-            getSectionData();
-        } while(0);
-
-        return iv_pages;
-    }
-#endif
-
-#ifndef __HOSTBOOT_RUNTIME
     errlHndl_t AttributeSync::syncSectionToFsp(
                                     TARGETING::SECTION_TYPE i_section_to_sync )
     {
@@ -115,7 +98,6 @@ namespace TARGETING
         msg_t   *  msg      = NULL;
 
         iv_section_to_sync = i_section_to_sync;
-
 
         do{
 

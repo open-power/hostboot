@@ -29,7 +29,6 @@
 #include <errl/errlentry.H>
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/targplatreasoncodes.H>
-#include <targeting/attrsync.H>
 #include <util/runtime/util_rt.H>
 #include <sys/internode.h>
 
@@ -45,9 +44,6 @@ namespace TARGETING
 
         do
         {
-            // Create AttributeSync
-            AttributeSync l_attributeSync = AttributeSync();
-
             // Allocate section structures based on section count in header.
             iv_sectionCount = i_header->numSections;
             iv_sections = new AttrRP_Section[iv_sectionCount]();

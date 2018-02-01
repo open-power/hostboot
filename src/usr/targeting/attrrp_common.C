@@ -90,6 +90,7 @@ namespace TARGETING
         Singleton<AttrRP>::instance().startup(io_taskRetErrl, i_isMpipl);
     }
 
+#ifndef __HOSTBOOT_RUNTIME
     bool AttrRP::writeSectionData(
         const std::vector<TARGETING::sectionRefData>& i_pages) const
     {
@@ -204,4 +205,5 @@ namespace TARGETING
             }
         }
     }
+#endif
 }

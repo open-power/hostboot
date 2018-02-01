@@ -549,6 +549,7 @@ class TargetService
          */
         void dump() const;
 
+#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Updates the targeting/attribute section data with the
          *  specified vector parameters.
@@ -597,6 +598,7 @@ class TargetService
         void readSectionData(std::vector<sectionRefData>& o_pages,
                 const SECTION_TYPE i_sectionId,
                 const NODE_ID i_nodeId = NODE0);
+#endif
 
         /**
          *  @brief Get the Next initialized node in the Target Service

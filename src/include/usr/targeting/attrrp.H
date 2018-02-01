@@ -102,6 +102,7 @@ class AttrRP
 {
 
     // add some friends for the attribute sync features
+#ifndef __HOSTBOOT_RUNTIME
     friend  bool TargetService::writeSectionData(
                            const std::vector<sectionRefData>& i_pages );
 
@@ -110,7 +111,7 @@ class AttrRP
                            const SECTION_TYPE i_sectionId,
                            const TARGETING::NODE_ID i_nodeId);
 
-#ifdef __HOSTBOOT_RUNTIME
+#else
     friend errlHndl_t RT_TARG::saveRestoreAttrs(void *,
                                                 void *,
                                                 uint64_t&);
@@ -373,6 +374,7 @@ class AttrRP
          */
         ~AttrRP();
 
+#ifndef __HOSTBOOT_RUNTIME
         /**
          *  @brief Copies the section data buffer from the vector to the
          *  appropriate section offset with respect to the node target ptr
@@ -402,6 +404,7 @@ class AttrRP
                   std::vector <sectionRefData>& o_pages,
             const SECTION_TYPE                  i_sectionType,
             const NODE_ID                       i_nodeId = 0) const;
+#endif
 
 
     private:

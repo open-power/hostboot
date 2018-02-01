@@ -1109,7 +1109,7 @@ void TargetService::dump() const
     #undef TARG_FN
 }
 
-
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 // TargetService::writeSectionData
 //******************************************************************************
@@ -1148,6 +1148,7 @@ void TargetService::readSectionData(
 
     #undef TARG_FN
 }
+#endif
 
 //******************************************************************************
 // TargetService::_configureTargetPool
