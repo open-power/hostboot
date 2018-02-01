@@ -184,6 +184,13 @@ void TargetService::init(const size_t i_maxNodes)
 
                 l_nodeInfo.initialized = true;
             }
+
+            Target* l_pFirstTarget = &(*(l_nodeInfo.targets))[0];
+            TARG_INF("TargetService::init: Pushing info for node %d with first "
+                     "target huid 0x%.8x and %d total targets",
+                      l_nodeInfo.nodeId,
+                      get_huid(l_pFirstTarget),
+                      l_nodeInfo.maxTargets);
             iv_nodeInfo.push_back(l_nodeInfo);
         }
 
@@ -256,6 +263,43 @@ void TargetService::_getFirstTargetForIterators(Target*& o_firstTargetPtr) const
     #undef TARG_FN
 }
 
+#ifdef __HOSTBOOT_RUNTIME
+//******************************************************************************
+// TargetService:: _getFirstTargetForIterators
+//******************************************************************************
+
+void TargetService::_getFirstTargetForIterators(Target*& o_firstTargetPtr,
+                                                NODE_ID i_nodeId) const
+{
+    #define TARG_FN "_getFirstTargetForIterators()"
+    TARG_ASSERT(iv_initialized, TARG_ERR_LOC
+               "USAGE: TargetService not initialized");
+
+    /* This will come inside for initialized node only.. Just for safety we
+     * are checking for maxTargets & whether it is initialized or not */
+    if( (i_nodeId < MAX_NODE_ID) &&
+        (iv_nodeInfo[i_nodeId].initialized == true) &&
+        (iv_nodeInfo[i_nodeId].maxTargets > 0))
+    {
+        /* Assumption -
+         * Here we are assuming that the first target of any binary is not
+         * the system target, to make sure this ithe binary compiler needs
+         * to compile the binary in this specific order.
+         */
+        o_firstTargetPtr = &(*(iv_nodeInfo[i_nodeId].targets))[0];
+
+        TARG_ASSERT(o_firstTargetPtr != NULL, TARG_ERR_LOC
+               "FATAL: Could not find any targets");
+    }
+    else
+    {
+        o_firstTargetPtr = nullptr;
+    }
+
+    #undef TARG_FN
+}
+#endif
+
 //******************************************************************************
 // TargetService::begin (non-const version)
 //******************************************************************************
@@ -273,6 +317,26 @@ TargetService::iterator TargetService::begin()
 
     #undef TARG_FN
 }
+
+#ifdef __HOSTBOOT_RUNTIME
+//******************************************************************************
+// TargetService::begin (non-const version)
+//******************************************************************************
+
+TargetService::iterator TargetService::begin(NODE_ID i_nodeId)
+{
+    #define TARG_FN "begin()"
+    Target* l_pFirstTarget = nullptr;
+
+    TARG_ASSERT(iv_initialized, TARG_ERR_LOC
+               "USAGE: TargetService not initialized");
+
+    _getFirstTargetForIterators(l_pFirstTarget, i_nodeId);
+    return iterator(l_pFirstTarget);
+
+    #undef TARG_FN
+}
+#endif
 
 //******************************************************************************
 // TargetService::raw_begin (non-const version)

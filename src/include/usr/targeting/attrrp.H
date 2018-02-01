@@ -171,13 +171,27 @@ class AttrRP
         void* getBaseAddress(const NODE_ID i_nodeId);
 
         /**
+         *  @brief Returns Node Id of the Target handle passed
+         *
+         *  @param[in] i_pTarget
+         *      Non-NULL Target handle for which node ID is required.
+         *  @param[out] o_nodeId
+         *      Node ID of the Target Handle requested. If Target not found
+         *      the invalid node will be return in here.
+         *
+         *  @return void
+         */
+        void getNodeId(const Target* i_pTarget,
+                       NODE_ID& o_nodeId) const;
+
+        /**
          *  @brief Translates given address, according to the resource
          *      provider's translation algorithm
          *
          * @param[in] i_pAddress
          *     Address to translate
          *
-         * @param[in] i_pUnused
+         * @param[in] i_pTarget
          *     Node target used by common code, unused in Hostboot
          *
          * @return void* Returns the translated address.  Common attribute
@@ -189,7 +203,7 @@ class AttrRP
          */
         void* translateAddr(
             void* i_pAddress,
-            const Target* i_pUnused)
+            const Target* i_pTarget)
 #ifndef __HOSTBOOT_RUNTIME
         {
             return i_pAddress;
@@ -205,7 +219,7 @@ class AttrRP
          * @param[in] i_pAddress
          *     Address to translate
          *
-         * @param[in] i_unused
+         * @param[in] i_nodeId
          *     Node ID used by common code, unused in Hostboot
          *
          * @return void* Returns the translated address.  Common attribute
@@ -217,7 +231,7 @@ class AttrRP
          */
         void* translateAddr(
             void* i_pAddress,
-            const TARGETING::NODE_ID i_unused)
+            const TARGETING::NODE_ID i_nodeId)
 #ifndef __HOSTBOOT_RUNTIME
         {
             return i_pAddress;
