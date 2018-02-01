@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,36 +109,6 @@ namespace   TARGETING
             errlHndl_t  syncSectionToFsp(
                                     TARGETING::SECTION_TYPE i_section_to_sync );
 
-#else
-            /**
-             *  @brief  Setup the internal variables to point to the correct
-             *          attribute section.
-             *
-             *  @par Detailed Description:
-             *          This function will call into the AttRP:: to have the
-             *          correct attribute section paged into accessible memory.
-             *          This function may be called multiple times with
-             *          different section names.
-             *
-             *  @pre None:
-             *
-             *  @post   The entire section from the HB attribute section
-             *          passed in has been synchronized to new AttrRP.
-             *
-             *  @param[in]  i_section_to_sync
-             *                  TARGETING::SECTION_TYPE is passed in to
-             *                  identify the section to be synced to the
-             *                  new AttrRP.
-             *
-             *  @return     std::vector <TARGETING::sectionRefData> with
-             *                  attribute section pages.
-             *
-             */
-            std::vector <TARGETING::sectionRefData> syncSectionFromAttrRP(
-                                TARGETING::SECTION_TYPE i_section_to_sync);
-#endif
-
-#ifndef __HOSTBOOT_RUNTIME
             /**
              *  @brief  Sends a request to the FSP to sync its data to Hostboot
              *          for a specific attribute section.  Write the data
@@ -187,7 +157,6 @@ namespace   TARGETING
                 ASYNCHRONOUS,
                 SYNCHRONOUS
             };
-#endif
 
             /**
              *  @brief  Setup the internal variables to point to the correct
@@ -200,7 +169,6 @@ namespace   TARGETING
              */
             void        getSectionData();
 
-#ifndef __HOSTBOOT_RUNTIME
             /**
              *  @brief  Write the attribute data received from the FSP to
              *          the attribute section.
