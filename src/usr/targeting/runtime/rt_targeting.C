@@ -45,6 +45,8 @@
 #include <util/memoize.H>
 #include <util/runtime/util_rt.H>
 #include <util/utillidmgr.H>
+#include <sys/internode.h>
+
 
 using namespace TARGETING;
 
@@ -123,17 +125,32 @@ errlHndl_t _getHbTarget(
         TARGETING::TargetHandle_t pTarget = NULL;
         if(i_rtTargetId != RUNTIME::HBRT_HYP_ID_UNKNOWN)
         {
-            for (TARGETING::TargetIterator pIt =
-                    TARGETING::targetService().begin();
-                 pIt != TARGETING::targetService().end();
-                 ++pIt)
+            uint8_t l_maxNodeId =
+                TARGETING::targetService().getNumInitializedNodes();
+            for(uint8_t l_nodeId=NODE0; l_nodeId<l_maxNodeId; ++l_nodeId)
             {
-                auto rtTargetId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
-                if(   ((*pIt)->tryGetAttr<
-                           TARGETING::ATTR_HBRT_HYP_ID>(rtTargetId))
-                   && (rtTargetId == i_rtTargetId))
+                TRACFCOMP( g_trac_targeting, "Node %d beginning target %p",
+                l_nodeId,
+                *(TARGETING::targetService().begin(l_nodeId)));
+
+                for (TARGETING::TargetIterator pIt =
+                        TARGETING::targetService().begin(l_nodeId);
+                     pIt != TARGETING::targetService().end();
+                     ++pIt)
                 {
-                    pTarget = (*pIt);
+                    auto rtTargetId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
+                    if( (*pIt != nullptr)
+                       &&  ((*pIt)->tryGetAttr<
+                               TARGETING::ATTR_HBRT_HYP_ID>(rtTargetId))
+                       && (rtTargetId == i_rtTargetId))
+                    {
+                        pTarget = (*pIt);
+                        break;
+                    }
+                }
+
+                if(pTarget)
+                {
                     break;
                 }
             }

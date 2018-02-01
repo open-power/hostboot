@@ -256,6 +256,18 @@ class TargetService
          */
         iterator begin();
 
+#ifdef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Return iterator which points to first target service target
+         *      (or end() if none) for a specific node
+         *
+         *  @param[in] i_nodeId, node Id
+         *
+         *  @return Iterator pointing to first target service target for node
+         */
+        iterator begin(NODE_ID i_nodeId);
+#endif
+
         /**
          *  @brief Return rawiterator which points to first target service
          *      target (or end() if none)
@@ -801,7 +813,7 @@ class TargetService
          *  @brief Returns the first Target from the first initialized node
          *  from the pool of targets.
          *
-         *  param[out] o_firstTargetPtr First Target handle
+         *  @param[out] o_firstTargetPtr First Target handle
          *
          *  @pre Target service must be initialized
          *
@@ -811,6 +823,26 @@ class TargetService
          *  @returns void
          */
         void _getFirstTargetForIterators (Target*& o_firstTargetPtr) const;
+
+#ifdef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Returns the first Target from the node's pool of targets if
+         *  node is initialized.
+         *
+         *  @param[out] o_firstTargetPtr First Target handle or nullptr
+         *
+         *  @param[in] i_nodeId, node Id
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target Service returns the first Target from the node if node
+         *  is initialized.
+         *
+         *  @returns void
+         */
+        void _getFirstTargetForIterators (Target*& o_firstTargetPtr,
+                                          NODE_ID i_nodeId) const;
+#endif
 
         /**
          *  @brief Configures the pool of targets

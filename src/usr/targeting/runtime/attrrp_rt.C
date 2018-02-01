@@ -488,20 +488,86 @@ namespace TARGETING
         #undef TARG_FN
     }
 
-    void* AttrRP::translateAddr(void* i_pAddress,
-                                const Target* i_pUnused)
+    void AttrRP::getNodeId(const Target* i_pTarget,
+                           NODE_ID& o_nodeId) const
     {
-        void* l_address = i_pAddress;
+        #define TARG_FN "getNodeId"
 
-        for (size_t i = 0; i < iv_sectionCount; ++i)
+        bool l_found = false;
+
+        // Initialize with invalid
+        o_nodeId = INVALID_NODE_ID;
+
+        //find the node to which this target belongs
+        for(uint8_t i=0; i<INVALID_NODE_ID; ++i)
         {
-            if ((iv_sections[i].vmmAddress + iv_sections[i].size) >=
+           for(uint32_t j=0; j<iv_nodeContainer[i].sectionCount; ++j)
+           {
+               if(  iv_nodeContainer[i].pSections[j].type ==
+                                  SECTION_TYPE_PNOR_RO)
+               {
+                 // This expects the pTarget to be always in range and !NULL.
+                 // If any invalid target is passed (which is still within the
+                 // RO Section scope) then behaviour is undefined.
+                 if( (i_pTarget >= iv_nodeContainer[i].pTargetMap) &&
+                     (i_pTarget < reinterpret_cast<Target*>((
+                        reinterpret_cast<uint8_t*>(
+                            iv_nodeContainer[i].pTargetMap) +
+                            iv_nodeContainer[i].pSections[j].size))) )
+                 {
+                     l_found = true;
+                     o_nodeId = i;
+                     break;
+                 }
+               }
+           }
+           if(l_found)
+           {
+              break;
+           }
+        }
+        #undef TARG_FN
+    }
+
+    void* AttrRP::translateAddr(void* i_pAddress,
+                                const Target* i_pTarget)
+    {
+        #define TARG_FN "translateAddr(..., Target*)"
+//        TARG_ENTER(); // Disabled due to number of traces created
+
+        NODE_ID l_nodeId = NODE0;
+
+        if(i_pTarget != NULL)
+        {
+            getNodeId(i_pTarget, l_nodeId);
+        }
+
+        void* l_address = translateAddr(i_pAddress, l_nodeId);
+
+//        TARG_EXIT(); // Disabled due to number of traces created
+        #undef TARG_FN
+
+        return l_address;
+    }
+
+    void* AttrRP::translateAddr(void* i_pAddress,
+                                const TARGETING::NODE_ID i_nodeId)
+    {
+        #define TARG_FN "translateAddr(..., NODE_ID)"
+//        TARG_ENTER(); // Disabled due to number of traces created
+
+        void* l_address = NULL;
+
+        for (size_t i = 0; i < iv_nodeContainer[i_nodeId].sectionCount; ++i)
+        {
+            if ((iv_nodeContainer[i_nodeId].pSections[i].vmmAddress +
+                 iv_nodeContainer[i_nodeId].pSections[i].size) >=
                 reinterpret_cast<uint64_t>(i_pAddress))
             {
                 l_address = reinterpret_cast<void*>(
-                        iv_sections[i].pnorAddress +
+                        iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
                         reinterpret_cast<uint64_t>(i_pAddress) -
-                        iv_sections[i].vmmAddress);
+                        iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
                 break;
             }
         }
@@ -509,12 +575,9 @@ namespace TARGETING
         TRACDCOMP(g_trac_targeting, "Translated 0x%p to 0x%p",
                   i_pAddress, l_address);
 
-        return l_address;
-    }
+//        TARG_EXIT(); // Disabled due to number of traces created
+        #undef TARG_FN
 
-    void* AttrRP::translateAddr(void* i_pAddress,
-                                const TARGETING::NODE_ID i_unused)
-    {
-        return translateAddr(i_pAddress, static_cast<Target*>(NULL));
+        return l_address;
     }
 }

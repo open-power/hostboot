@@ -48,7 +48,7 @@ namespace RT_TARG
         }
 
         TargetService& l_targetService = targetService();
-        (void)l_targetService.init();
+        l_targetService.init(Singleton<AttrRP>::instance().getNodeCount());
 
         adjustTargeting4Runtime();
 
@@ -78,45 +78,51 @@ namespace RT_TARG
         // error check that ATTR_PEER_TARGET is only readable, not writable.
         // adjustTargeting4Runtime has been included as a friend to allow
         // access to the private target class methods.
-        const Target* l_pUnused = NULL;
         size_t l_xlateCnt = 0;
-        for (TargetIterator target = targetService().begin();
-                target != targetService().end();
-                ++target)
+        uint8_t l_maxNodeId =
+            TARGETING::targetService().getNumInitializedNodes();
+        for(uint8_t l_nodeId = NODE0; l_nodeId < l_maxNodeId; ++l_nodeId)
         {
-            const TARGETING::Target * l_target = *target;
-            TARGETING::Target * l_peer =  static_cast<Target*>(NULL);
-            bool l_hasPeer = l_target->tryGetAttr<ATTR_PEER_TARGET>(l_peer);
-            if (l_hasPeer && (l_peer != nullptr))
+            for (TargetIterator target = targetService().begin(l_nodeId);
+                    target != targetService().end();
+                    ++target)
             {
-                TRACDCOMP(g_trac_targeting,
-                      "translate peer target for=%p %x",
-                      l_target, get_huid(l_target));
-
-                ATTR_PEER_TARGET_type l_xlated = (TARGETING::Target *)
-                                   Singleton<AttrRP>::instance().
-                                   AttrRP::translateAddr(l_peer,l_pUnused);
-                bool l_fixed = false;
-                l_fixed = l_target->_trySetAttr(ATTR_PEER_TARGET,
-                                      sizeof(l_xlated),
-                                      &l_xlated);
-                if (l_fixed)
-                {
-                    TRACDCOMP(g_trac_targeting, "   to=%p", l_xlated);
-                    l_xlateCnt++;
-                }
-                // Not good if could not be fixed. But might not be referenced.
-                // A segment fault will occur if used.
-                else
+                const TARGETING::Target * l_target = *target;
+                TARGETING::Target * l_peer =  static_cast<Target*>(NULL);
+                bool l_hasPeer = l_target->tryGetAttr<ATTR_PEER_TARGET>(l_peer);
+                if (l_hasPeer && (l_peer != nullptr))
                 {
                     TRACFCOMP(g_trac_targeting,
-                        "failed to translate peer target HUID=0x%x",
-                        get_huid(l_target));
+                          "translate peer target for=%p %x",
+                          l_target, get_huid(l_target));
+
+                    ATTR_PEER_TARGET_type l_xlated = (TARGETING::Target *)
+                                       Singleton<AttrRP>::instance().
+                                       AttrRP::translateAddr(l_peer,l_target);
+                    bool l_fixed = false;
+                    l_fixed = l_target->_trySetAttr(ATTR_PEER_TARGET,
+                                          sizeof(l_xlated),
+                                          &l_xlated);
+                    if (l_fixed)
+                    {
+                        TRACDCOMP(g_trac_targeting, "   to=%p", l_xlated);
+                        l_xlateCnt++;
+                    }
+                    // Not good if could not be fixed. But might not be
+                    // referenced. A segment fault will occur if used.
+                    else
+                    {
+                        TRACFCOMP(g_trac_targeting,
+                            "failed to translate peer target HUID=0x%x",
+                            get_huid(l_target));
+                    }
                 }
             }
         }
         TRACFCOMP(g_trac_targeting,
-              "adjustTargeting4Runtime: %d peer target addresses translated",
-               l_xlateCnt);
+                  "adjustTargeting4Runtime: %d peer target addresses "
+                  "translated on %d nodes",
+                  l_xlateCnt,
+                  l_maxNodeId);
     }
 }
