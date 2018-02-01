@@ -22,3 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file workarounds/freq_workarounds.H
+/// @brief Frequency related workarounds
+///
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#include <fapi2.H>
+
+#include <mss.H>
+
+namespace mss
+{
+
+namespace workarounds
+{
+
+///
+/// @brief Ensures the ratio between DIMM and NEST frequencies is within allowable limit
+/// @param[in] i_target - the MCBIST target to check
+/// @param[in] i_dimm_speed - dimm speed in MT/s
+/// @param[in] i_nest_freq - nest freq in MHz
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode check_dimm_nest_freq_ratio( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const uint64_t i_dimm_speed,
+        const uint32_t i_nest_freq );
+
+} // namespace workarounds
+
+} // namespace mss

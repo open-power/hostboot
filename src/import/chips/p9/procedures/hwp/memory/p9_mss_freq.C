@@ -28,7 +28,7 @@
 /// @brief Calculate and save off DIMM frequencies
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -49,6 +49,7 @@
 #include <lib/spd/spd_factory.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/sync.H>
+#include <lib/workarounds/freq_workarounds.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
@@ -81,6 +82,9 @@ extern "C"
         const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
         std::vector< std::vector<uint64_t> > l_min_dimm_freq(mss::MCS_PER_MC, std::vector<uint64_t> (mss::PORTS_PER_MCS,  0) );
         std::vector<uint32_t> l_supported_freqs;
+
+        uint64_t l_mss_freq = 0;
+        uint32_t l_nest_freq = 0;
 
         // If there are no DIMM, we can just get out.
         if (mss::count_dimm(l_mcbist) == 0)
@@ -161,6 +165,11 @@ extern "C"
 
         FAPI_TRY(mss::set_freq_attrs(l_mcbist, l_min_dimm_freq),
                  "%s. Failed set_freq_attrs()", mss::c_str(i_target) );
+
+        // Check MEM/NEST frequency ratio
+        FAPI_TRY( mss::freq_pb_mhz(l_nest_freq) );
+        FAPI_TRY( mss::freq(l_mcbist, l_mss_freq) );
+        FAPI_TRY( mss::workarounds::check_dimm_nest_freq_ratio(l_mcbist, l_mss_freq, l_nest_freq) );
 
     fapi_try_exit:
         return fapi2::current_err;

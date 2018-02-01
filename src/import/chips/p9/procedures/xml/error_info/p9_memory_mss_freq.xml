@@ -414,4 +414,43 @@
         <priority>MEDIUM</priority>
      </callout>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_TO_NEST_FREQ_RATIO_TOO_LARGE</rc>
+    <description>
+      Case when mss_freq to nest freq is above the maximum allowed.
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>NEST_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <childTargets>
+        <parent>MCS_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>MCS_TARGET</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_OR_NEST_FREQ_IS_ZERO</rc>
+    <description>
+      Case when mss_freq or nest_freq is zero.
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>NEST_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
