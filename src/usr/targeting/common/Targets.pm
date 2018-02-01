@@ -81,6 +81,7 @@ my %maxInstance = (
     "NV"            => 6,
     "NX"            => 1,
     "MEMBUF"        => 8,
+    "SMPGROUP"      => 8,
 );
 sub new
 {
@@ -996,6 +997,10 @@ sub setCommonAttrForChiplet
     elsif ($tgt_type eq "OBUS_BRICK")
     {
         $unit_pos = $pos%3;
+    }
+    elsif ($tgt_type eq "SMPGROUP")
+    {
+        $unit_pos = $pos%2;
     }
 
     my $parent_affinity = $self->getAttribute(
