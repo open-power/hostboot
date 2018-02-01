@@ -1191,6 +1191,7 @@ sub processObus
         $obus = $targetObj->findConnections($target,"ABUS", "");
         if ($obus ne "")
         {
+           $targetObj->setAttribute($target, "BUS_TYPE", "ABUS");
            if ($targetObj->isBadAttribute($target, "PEER_PATH"))
            {
               $targetObj->setAttribute($target, "PEER_PATH","physical:na");
@@ -1309,6 +1310,7 @@ sub processAbus
     my $aBus      = shift;
 
     my $abussource = $aBus->{SOURCE};
+    my $abusdest   = $aBus->{DEST};
     my $abus_dest_parent = $aBus->{DEST_PARENT};
     my $bustype = $targetObj->getBusType($abussource);
 #       print"Found bus from $abussource to $abus_dest_parent and $bustype\n"; 
@@ -1316,12 +1318,9 @@ sub processAbus
     ## set attributes for both directions
     my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
     my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
-#    print"Myside: $phys1\n";
-#    print"Other side: $phys2\n";
     
     $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1); 
     $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
-
     $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
     $targetObj->setAttribute($target, "PEER_PATH", $phys2);
 
@@ -1329,6 +1328,21 @@ sub processAbus
          $targetObj->getAttribute($target, "HUID"));
     $targetObj->setAttribute($target, "PEER_HUID",
          $targetObj->getAttribute($abus_dest_parent, "HUID"));
+
+    $targetObj->setAttribute($abussource, "PEER_TARGET",
+               $targetObj->getAttribute($abusdest, "PHYS_PATH"));
+    $targetObj->setAttribute($abusdest, "PEER_TARGET",
+               $targetObj->getAttribute($abussource, "PHYS_PATH"));
+
+    $targetObj->setAttribute($abussource, "PEER_PATH",
+               $targetObj->getAttribute($abusdest, "PHYS_PATH"));
+    $targetObj->setAttribute($abusdest, "PEER_PATH",
+               $targetObj->getAttribute($abussource, "PHYS_PATH"));
+
+    $targetObj->setAttribute($abussource, "PEER_HUID",
+         $targetObj->getAttribute($abusdest, "HUID"));
+    $targetObj->setAttribute($abusdest, "PEER_HUID",
+         $targetObj->getAttribute($abussource, "HUID"));
 
         # copy Abus attributes to proc
         my $abus = $targetObj->getFirstConnectionBus($target);
