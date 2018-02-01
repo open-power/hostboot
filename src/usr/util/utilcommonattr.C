@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
         {
             if(l_freqList[i] == l_freq_array[i_index])
             {
-                o_bucket_val = i;
+                o_bucket_val = i + 1; // bucket is "1" based
                 break;
             }
         }

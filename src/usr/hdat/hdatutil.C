@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2042,7 +2042,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                 break;
             }
 
-            if(l_obusPllFreqBucket >= OBUS_PLL_FREQ_BUCKETS)
+            if(l_obusPllFreqBucket > OBUS_PLL_FREQ_BUCKETS)
             {
                     HDAT_ERR(" Invalid obus Freq bucket ");
 
