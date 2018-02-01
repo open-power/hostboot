@@ -78,11 +78,13 @@ namespace TCE
 /************************************************************************/
 errlHndl_t utilAllocateTces(const uint64_t i_startingAddress,
                             const size_t   i_size,
-                            uint32_t&      o_startingToken)
+                            uint32_t&      o_startingToken,
+                            const bool     i_rwNotRO)
 {
     return Singleton<UtilTceMgr>::instance().allocateTces(i_startingAddress,
                                                           i_size,
-                                                          o_startingToken);
+                                                          o_startingToken,
+                                                          i_rwNotRO);
 };
 
 /************************************************************************/
@@ -583,7 +585,8 @@ errlHndl_t UtilTceMgr::initTceInHdw()
 /************************************************************************/
 errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
                                     const size_t   i_size,
-                                    uint32_t&      o_startingToken)
+                                    uint32_t&      o_startingToken,
+                                    const bool     i_rwNotRO)
 {
     errlHndl_t errl = nullptr;
     uint32_t numTcesNeeded = 0;
@@ -591,7 +594,7 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
 
     TceEntry_t *tablePtr = nullptr;
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"UtilTceMgr::allocateTces: start for addr = 0x%.16llX and size = 0x%X", i_startingAddress, i_size);
+    TRACFCOMP(g_trac_tce,ENTER_MRK"UtilTceMgr::allocateTces: start for addr = 0x%.16llX , size = 0x%X, rwNorRO=%d", i_startingAddress, i_size, i_rwNotRO);
 
     do
     {
@@ -811,7 +814,11 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
             {
                 tablePtr[index].realPageNumber = (i_startingAddress +
                                                   (i*PAGESIZE))/PAGESIZE;
-                tablePtr[index].writeAccess = 1;
+
+                if (i_rwNotRO)
+                {
+                    tablePtr[index].writeAccess = 1;
+                }
                 tablePtr[index].readAccess = 1;
 
                 TRACDCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::allocateTces: TCE Entry/Token[%d] (hex) = 0x%llX", index, tablePtr[index]);
