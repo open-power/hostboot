@@ -6118,7 +6118,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>LESS_THAN</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -6135,7 +6135,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>LESS_THAN</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
