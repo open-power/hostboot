@@ -63,11 +63,12 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
 {
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> dsm0_buffer;
+    fapi2::buffer<uint64_t> l_mnfg_buffer;
     uint64_t rd_tag_delay = 0;
     uint64_t wr_done_delay = 0;
-    uint64_t mnfg_flag = 0;
     fapi2::buffer<uint64_t> l_aue_buffer;
     fapi2::ATTR_CHIP_EC_FEATURE_HW414700_Type l_checkstop_flag;
+    constexpr uint64_t MNFG_THRESHOLDS_ATTR = 63;
 
     // Broadcast mode workaround for UEs causing out of sync
     FAPI_TRY(mss::workarounds::mcbist::broadcast_out_of_sync(i_target, mss::ON));
@@ -104,9 +105,9 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         }
 
         // If MNFG FLAG Threshhold is enabled skip IUE unflagging
-        FAPI_TRY (mss::mnfg_flags(mnfg_flag) );
+        FAPI_TRY ( mss::mnfg_flags(l_mnfg_buffer) );
 
-        if (mnfg_flag != fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS)
+        if ( !(l_mnfg_buffer.getBit<MNFG_THRESHOLDS_ATTR>()) )
         {
             l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_IUE>();
         }
