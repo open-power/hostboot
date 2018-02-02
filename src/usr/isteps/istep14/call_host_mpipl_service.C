@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -225,19 +225,6 @@ void* call_host_mpipl_service (void *io_pArgs)
                           "ERROR : returned from DUMP::sendMboxMsg" );
 
                 errlCommit( l_errMsg, HWPF_COMP_ID );
-            }
-
-
-            // Need to unload the runtime module regardless of whether we have
-            // an error or not.
-            errlHndl_t l_errUnLoad = VFS::module_unload( "libruntime.so" );
-
-            if (l_errUnLoad)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR : returned from VFS::module_unload (libruntime.so)" );
-
-                errlCommit( l_errUnLoad, HWPF_COMP_ID );
             }
 
         }
