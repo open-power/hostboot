@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <arch/pvrformat.H>
 #include <sys/mmio.h>
 #include <console/consoleif.H>
+#include <initservice/initserviceif.H>
 
 namespace ISTEP_06
 {
@@ -45,39 +46,43 @@ void* host_set_ipl_parms( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms entry" );
 
-    //Read out the semi persistent area.
-    Util::semiPersistData_t l_semiData;
-    Util::readSemiPersistData(l_semiData);
-
-    // If magic number set, then this is warm reboot:
-    //          1) increment boot count
-    if(l_semiData.magic == Util::PERSIST_MAGIC)
+    // only run on non-FSP systems
+    if( !INITSERVICE::spBaseServicesEnabled() )
     {
-        l_semiData.reboot_cnt++;
-    }
-    // else magic number is not set, then this is first, cold boot:
-    //          1) set magic num, boot count
-    //          2) clear all gard records of type GARD_Reconfig
-    else
-    {
-        l_semiData.magic = Util::PERSIST_MAGIC;
-        l_semiData.reboot_cnt = 0;
-        //Intentionally don't change mfg_term_reboot
+        //Read out the semi persistent area.
+        Util::semiPersistData_t l_semiData;
+        Util::readSemiPersistData(l_semiData);
 
-        l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
-        if (l_err)
+        // If magic number set, then this is warm reboot:
+        //          1) increment boot count
+        if(l_semiData.magic == Util::PERSIST_MAGIC)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: clearGardByType( )",
-                      l_err->reasonCode() );
-            // Create IStep error log and cross ref error that occurred
-            l_stepError.addErrorDetails( l_err );
-            errlCommit( l_err, ISTEP_COMP_ID );
+            l_semiData.reboot_cnt++;
         }
-    }
+        // else magic number is not set, then this is first, cold boot:
+        //          1) set magic num, boot count
+        //          2) clear all gard records of type GARD_Reconfig
+        else
+        {
+            l_semiData.magic = Util::PERSIST_MAGIC;
+            l_semiData.reboot_cnt = 0;
+            //Intentionally don't change mfg_term_reboot
 
-    //Write update data back out
-    Util::writeSemiPersistData(l_semiData);
+            l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: clearGardByType( )",
+                          l_err->reasonCode() );
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_err );
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+        }
+
+        //Write update data back out
+        Util::writeSemiPersistData(l_semiData);
+    }
 
 
     // Add a check to indicate that Nimbus DD1.0 is NOT supported
