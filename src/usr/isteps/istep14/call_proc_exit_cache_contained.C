@@ -308,21 +308,50 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
             if(Util::isSimicsRunning())
             {
+                //Value to indicate memory is valid
                 uint64_t l_memory_valid = 1;
-                // exit cache contained mode
-                l_errl = deviceWrite( l_masterProc,
+
+                //Predicate(s) to get functional dimm for each proc
+                PredicateHwas l_functional;
+                l_functional.functional(true);
+                TargetHandleList l_dimms;
+                PredicateCTM l_dimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+                PredicatePostfixExpr l_checkExprFunctional;
+                l_checkExprFunctional.push(&l_dimm).push(&l_functional).And();
+
+                // Loop through all procs to find ones with valid memory
+                for (const auto & l_procChip: l_procList)
+                {
+                    // Get the functional DIMMs for this proc
+                    targetService().getAssociated(l_dimms,
+                                          l_procChip,
+                                          TargetService::CHILD_BY_AFFINITY,
+                                          TargetService::ALL,
+                                          &l_checkExprFunctional);
+
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                       "%d functional dimms behind proc: %.8X",
+                       l_dimms.size(), get_huid(l_procChip) );
+
+                    // Check if this proc has memory
+                    if(l_dimms.size())
+                    {
+                        // exit cache contained mode
+                        l_errl = deviceWrite( l_procChip,
                                 &l_memory_valid,  //Memory is valid
                                 scom_size, //Size of Scom
                                 DEVICE_SCOM_ADDRESS(EXIT_CACHE_CONTAINED_SCOM_ADDR));
+                    }
+        
+                    if ( l_errl )
+                    {
+                        // Create IStep error log and cross reference to error
+                        // that occurred
+                        l_stepError.addErrorDetails( l_errl );
 
-                if ( l_errl )
-                {
-                    // Create IStep error log and cross reference to error that
-                    // occurred
-                    l_stepError.addErrorDetails( l_errl );
-
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
+                        // Commit Error
+                        errlCommit( l_errl, HWPF_COMP_ID );
+                   }
                 }
             }
 
