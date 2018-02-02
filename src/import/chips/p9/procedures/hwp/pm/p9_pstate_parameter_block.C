@@ -1060,7 +1060,7 @@ p9_pstate_wof_initialization (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 o_state->iv_wof_enabled = false;
 
                 // Write the returned error content to the error log
-                fapi2::logError(l_rc,fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                fapi2::logError(l_rc,fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
                 break;
             }
         }
