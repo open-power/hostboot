@@ -72,6 +72,8 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     // Scratch_reg_3
     ATTR_BOOT_FLAGS_STARTBIT           = 0,
     ATTR_BOOT_FLAGS_LENGTH             = 32,
+    ATTR_RISK_LEVEL_STARTBIT           = 28,
+    ATTR_RISK_LEVEL_LENGTH             = 4,
 
     // Scratch_reg_4
     ATTR_BOOT_FREQ_MULT_STARTBIT       = 0,
@@ -90,7 +92,7 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_PLL_MUX_LENGTH                = 20,
     ATTR_CC_IPL_BIT                    = 0,
     ATTR_INIT_ALL_CORES_BIT            = 1,
-    ATTR_RISK_LEVEL_BIT                = 2,
+    ATTR_RISK_LEVEL_BIT_DEPRECATED     = 2,
     ATTR_DISABLE_HBBL_VECTORS_BIT      = 3,
     ATTR_MC_SYNC_MODE_BIT              = 4,
     ATTR_SLOW_PCI_REF_CLOCK_BIT        = 5,
@@ -297,6 +299,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     //set_scratch3_reg
     {
         FAPI_DBG("Reading Scratch_reg3");
+        uint8_t l_risk_level;
 
         if ( l_accessViaScom )
         {
@@ -313,8 +316,10 @@ fapi2::ReturnCode p9_setup_sbe_config(const
 
         FAPI_DBG("Reading the BOOT_FLAGS");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BOOT_FLAGS, FAPI_SYSTEM, l_read_5));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, FAPI_SYSTEM, l_risk_level));
 
         l_read_scratch_reg.insertFromRight< ATTR_BOOT_FLAGS_STARTBIT, ATTR_BOOT_FLAGS_LENGTH >(l_read_5);
+        l_read_scratch_reg.insertFromRight< ATTR_RISK_LEVEL_STARTBIT, ATTR_RISK_LEVEL_LENGTH >(l_risk_level);
 
         FAPI_DBG("Setting up value of Scratch_reg3");
 
@@ -414,7 +419,6 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     {
         uint8_t l_system_ipl_phase;
         uint8_t l_force_all_cores;
-        uint8_t l_risk_level;
         uint8_t l_disable_hbbl_vectors;
         uint32_t l_pll_mux;
         uint8_t l_mc_sync_mode;
@@ -438,7 +442,6 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_DBG("Reading control flag attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, FAPI_SYSTEM, l_system_ipl_phase));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_FORCE_ALL_CORES, FAPI_SYSTEM, l_force_all_cores));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, FAPI_SYSTEM, l_risk_level));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DISABLE_HBBL_VECTORS, FAPI_SYSTEM, l_disable_hbbl_vectors));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_mc_sync_mode));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DD1_SLOW_PCI_REF_CLOCK, FAPI_SYSTEM, l_slow_pci_ref_clock));
@@ -463,15 +466,8 @@ fapi2::ReturnCode p9_setup_sbe_config(const
             l_read_scratch_reg.clearBit<ATTR_INIT_ALL_CORES_BIT>();
         }
 
-        // set risk level flag
-        if (l_risk_level == fapi2::ENUM_ATTR_RISK_LEVEL_TRUE)
-        {
-            l_read_scratch_reg.setBit<ATTR_RISK_LEVEL_BIT>();
-        }
-        else
-        {
-            l_read_scratch_reg.clearBit<ATTR_RISK_LEVEL_BIT>();
-        }
+        // risk level flag is deprecated here, moved to scratch3
+        l_read_scratch_reg.clearBit<ATTR_RISK_LEVEL_BIT_DEPRECATED>();
 
         // set disable of HBBL exception vector flag
         if (l_disable_hbbl_vectors == fapi2::ENUM_ATTR_DISABLE_HBBL_VECTORS_TRUE)

@@ -2904,9 +2904,13 @@ fapi2::ReturnCode layoutRingsForCME( Homerlayout_t*   i_pHomer,
                          i_debugMode );
 
     // get all the rings pertaining to CME in a work buffer first.
-    if( i_riskLevel )
+    if( i_riskLevel == 0x1 )
     {
         l_ringVariant = RV_RL;
+    }
+    else if ( i_riskLevel == 0x2 )
+    {
+        l_ringVariant = RV_RL2;
     }
 
     ringLength  =  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset) + SWIZZLE_4_BYTE(
@@ -3370,9 +3374,13 @@ fapi2::ReturnCode layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
     {
 
         // get all the rings pertaining to CME in a work buffer first.
-        if( i_riskLevel )
+        if( i_riskLevel == 0x1 )
         {
             l_ringVariant = RV_RL;
+        }
+        else if ( i_riskLevel == 0x2 )
+        {
+            l_ringVariant = RV_RL2;
         }
 
         //Manage the Quad Common rings in HOMER

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -210,7 +210,7 @@
   <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
       HWPs</description>
   <valueType>uint8</valueType>
-  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2</enum>
   <persistRuntime/>
   <platInit/>
 </attribute>
