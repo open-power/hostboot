@@ -137,8 +137,8 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //#define TOR_VERSION  2  // Reduced RS4 header.
 //#define TOR_VERSION  3  // Added TOR magic header.
 //#define TOR_VERSION  4  // TOR API code restructuring.
-#define   TOR_VERSION  5  // Removed TOR-level DD handling.
-//#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
+//#define TOR_VERSION  5  // Removed TOR-level DD handling.
+#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
