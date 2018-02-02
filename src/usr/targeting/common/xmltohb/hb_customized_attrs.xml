@@ -649,6 +649,12 @@
         <id>ATTR_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
     </attribute>
+
+    <attribute>
+        <id>CEN_MSS_CACHE_ENABLE</id>
+        <no_export/>
+        <default>0x1</default>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
