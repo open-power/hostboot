@@ -69,25 +69,29 @@ void* call_host_ipl_complete (void *io_pArgs)
                "call_host_ipl_complete entry" );
     do
     {
-        //No more reconfig loops are supported from this point
-        //forward.  Clean up the semi persistent area
-        //   1) clear magic number (so next boot thinks it is cold)
-        //      a) DON'T clear mfg term setting (so read-modify)
-        //   2) clear any reconfig specific gard records
-        Util::semiPersistData_t l_semiData;  //inits to 0s
-        Util::readSemiPersistData(l_semiData);
-        l_semiData.magic = 0x0;
-        Util::writeSemiPersistData(l_semiData);
-
-        l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
-        if (l_err)
+        // only run on non-FSP systems
+        if( !INITSERVICE::spBaseServicesEnabled() )
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: clearGardByType( )",
-                      l_err->reasonCode() );
-            // Create IStep error log and cross ref error that occurred
-            l_stepError.addErrorDetails( l_err );
-            errlCommit( l_err, ISTEP_COMP_ID );
+            //No more reconfig loops are supported from this point
+            //forward.  Clean up the semi persistent area
+            //   1) clear magic number (so next boot thinks it is cold)
+            //      a) DON'T clear mfg term setting (so read-modify)
+            //   2) clear any reconfig specific gard records
+            Util::semiPersistData_t l_semiData;  //inits to 0s
+            Util::readSemiPersistData(l_semiData);
+            l_semiData.magic = 0x0;
+            Util::writeSemiPersistData(l_semiData);
+
+            l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: clearGardByType( )",
+                          l_err->reasonCode() );
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_err );
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
         }
 
 #ifdef CONFIG_BMC_IPMI
