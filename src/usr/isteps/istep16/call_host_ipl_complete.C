@@ -107,9 +107,18 @@ void* call_host_ipl_complete (void *io_pArgs)
             l_err = nullptr;
         }
 #endif
+        //@TODO RTC:172767
+        //TCE setup is broken on multinode.  This is a quick hack to only do it
+        //on drawer 0 (and if you don't have a drawer 0 this is busted)
+        TARGETING::Target* mproc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(mproc);
+        TARGETING::EntityPath epath = mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        const TARGETING::EntityPath::PathElement pe =
+          epath.pathElementOfType(TARGETING::TYPE_NODE);
+        uint64_t nodeid = pe.instance;
 
         // Setup the TCEs needed for the FSP to DMA the PAYLOAD
-        if (TCE::utilUseTcesForDmas())
+        if (TCE::utilUseTcesForDmas() && (0 == nodeid))
         {
             l_err = TCE::utilSetupPayloadTces();
 
