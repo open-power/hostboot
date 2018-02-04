@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -807,6 +807,31 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
                                   "failed", iv_chip->getHuid(), getKey() );
                         break;
+                    }
+
+                    // Check if the current symbol mark is on the same DRAM as
+                    // this newly placed chip mark.
+                    if ( symMark.isValid() &&
+                         ( symMark.getSymbol().getDram() ==
+                           newChipMark.getSymbol().getDram() ) )
+                    {
+                        // Since we need to set a symbol mark in addition to
+                        // this chip mark, we need to clear the symbol mark now
+                        // instead of at the end of the function to make room
+                        // for the additional symbol mark.
+                        o_rc = MarkStore::clearSymbolMark<TYPE_MCA>( iv_chip,
+                                                                     iv_rank );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "MarkStore::clearSymbolMark("
+                                      "0x%08x,0x%02x) failed",
+                                      iv_chip->getHuid(), iv_rank.getKey() );
+                            break;
+                        }
+
+                        // Now refresh the symMark variable since the mark has
+                        // been removed.
+                        symMark = MemMark();
                     }
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
