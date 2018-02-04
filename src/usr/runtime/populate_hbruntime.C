@@ -2408,6 +2408,7 @@ errlHndl_t populate_hbRuntimeData( void )
         else
         {
             // multi-node system
+            uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
             // populate our own node specific data + the common stuff
             l_elog = populate_HbRsvMem(nodeid,true);
@@ -2455,6 +2456,7 @@ errlHndl_t populate_hbRuntimeData( void )
                     msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
                     msg->data[0] = l_node;      // destination node
                     msg->data[1] = nodeid;      // respond to this node
+                    msg->extra_data = reinterpret_cast<uint64_t*>(payloadBase);
 
                     // send the message to the slave hb instance
                     l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
@@ -2706,6 +2708,13 @@ errlHndl_t openUntrustedSpCommArea()
     TRACFCOMP( g_trac_runtime, EXIT_MRK"openUntrustedSpCommArea()");
 
     return l_err;
+}
+
+void setPayloadBaseAddress(uint64_t i_payloadAddress)
+{
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    sys->setAttr<TARGETING::ATTR_PAYLOAD_BASE>(i_payloadAddress);
 }
 
 } //namespace RUNTIME

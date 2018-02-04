@@ -316,34 +316,6 @@ void* call_host_start_payload (void *io_pArgs)
         }
 #endif
 
-        l_errl = disableSpecialWakeup();
-        if(l_errl)
-        {
-            break;
-        }
-
-        // Tell SBE to Close All Unsecure Memory Regions
-        l_errl = SBEIO::closeAllUnsecureMemRegions();
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK "call_host_start_payload: Failed SBEIO::closeAllUnsecureMemRegions" );
-            break;
-        }
-
-        // Open untrusted SP communication area if there is a PAYLOAD
-        // NOTE: Must be after all HDAT processing
-        if( !(TARGETING::is_no_load()) )
-        {
-            l_errl = RUNTIME::openUntrustedSpCommArea();
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"call_host_start_payload: Failed openUntrustedSpCommArea" );
-                break;
-            }
-        }
-
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
@@ -394,35 +366,45 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
     do
     {
-        if( i_isMaster == false )
+        err = disableSpecialWakeup();
+        if(err)
         {
+            break;
+        }
 
-            // Revert back to standard runtime mode where core checkstops
-            // do not escalate to system checkstops
-            // Workaround for HW286670
+        // Tell SBE to Close All Unsecure Memory Regions
+        err = SBEIO::closeAllUnsecureMemRegions();
+        if (err)
+        {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "calling enableCoreCheckstops() in node");
+                       ERR_MRK "call_host_start_payload: Failed SBEIO::closeAllUnsecureMemRegions" );
+            break;
+        }
 
-            err = enableCoreCheckstops();
+        // Revert back to standard runtime mode where core checkstops
+        // do not escalate to system checkstops
+        // Workaround for HW286670
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "calling enableCoreCheckstops() in node");
 
-            if ( err )
+        err = enableCoreCheckstops();
+
+        if ( err )
+        {
+            break;
+        }
+
+        if(is_phyp_load())
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "calling clearPoreBars() in node");
+
+            //If PHYP then clear out the PORE BARs
+            err = clearPoreBars();
+            if( err )
             {
                 break;
             }
-
-            if(is_phyp_load())
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "calling clearPoreBars() in node");
-
-                //If PHYP then clear out the PORE BARs
-                err = clearPoreBars();
-                if( err )
-                {
-                    break;
-                }
-            }
-
         }
 
         // Get Target Service, and the system target.
@@ -481,6 +463,19 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         if(i_isMaster)
         {
+            // Open untrusted SP communication area if there is a PAYLOAD
+            // NOTE: Must be after all HDAT processing
+            if( !(TARGETING::is_no_load()) )
+            {
+                err = RUNTIME::openUntrustedSpCommArea();
+                if (err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"call_host_start_payload: Failed openUntrustedSpCommArea" );
+                    break;
+                }
+            }
+
             // Notify Fsp with appropriate mailbox message.
             err = notifyFsp( istepModeFlag,
                              spFuncs );
