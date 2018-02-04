@@ -113,6 +113,10 @@ void IpcSp::msgHandler()
 
                 if(!err)
                 {
+                    // msg->extra_data contains PAYLOAD Base
+                    RUNTIME::setPayloadBaseAddress(
+                        reinterpret_cast<uint64_t>(msg->extra_data));
+
                     // msg->data[0] contains the node number
                     err = RUNTIME::populate_HbRsvMem( msg->data[0] );
                 }
@@ -170,21 +174,31 @@ void IpcSp::msgHandler()
                 break;
 
             case IPC_START_PAYLOAD:
-
-                if ( !VFS::module_is_loaded( "libstart_payload.so" ) )
+            {
+                const int NUM_MOD = 3;
+                const char * mods[NUM_MOD] =
+                   {"libp9_cpuWkup.so", "libistep21.so", "libpm.so"};
+                bool loaded_mods[NUM_MOD] = {false, false, false};
+                for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
                 {
-                    err = VFS::module_load( "libstart_payload.so" );
+                    if ( !VFS::module_is_loaded( mods[cnt] ) )
+                    {
+                        err = VFS::module_load( mods[cnt] );
 
-                    if ( err )
-                    {
-                        TRACFCOMP( g_trac_ipc,
-                                   "Could not load runtime module" );
-                    }
-                    else
-                    {
-                        mod_loaded = true;
+                        if ( err )
+                        {
+                            TRACFCOMP( g_trac_ipc,
+                                       "Could not load %s module", mods[cnt] );
+                            break;
+                        }
+                        else
+                        {
+                            loaded_mods[cnt] = true;
+                        }
                     }
                 }
+
+                if (err) break;
 
                 if(!err)
                 {
@@ -199,21 +213,25 @@ void IpcSp::msgHandler()
                     INITSERVICE::doShutdown(l_errPlid, true);
                 }
 
-                if(mod_loaded)
+                for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
                 {
-                    err = VFS::module_unload( "libstart_payload.so" );
-
-                    if (err)
+                    if ( loaded_mods[cnt] )
                     {
-                        errlCommit(err, IPC_COMP_ID);
+                        err = VFS::module_unload( mods[cnt] );
+
+                        if (err)
+                        {
+                            errlCommit(err, IPC_COMP_ID);
+                        }
+                        loaded_mods[cnt] = false;
                     }
-                    mod_loaded = false;
+
                 }
 
                 msg_free(msg);
 
                 break;
-
+            }
             default:
 
                 TRACFCOMP( g_trac_ipc,
