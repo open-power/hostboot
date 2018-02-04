@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -645,6 +645,9 @@ errlHndl_t PnorRP::findTOC(size_t & o_tocSize)
             l_ffs_hdr  = (ffs_hdr*)l_tmpTocBuffer;
             l_foundTOC = ((l_ffs_hdr->magic == FFS_MAGIC) &&
                         (PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE) == 0));
+
+            printk("Addr [%lx], magic[%x] checksum[%d]\n",
+                   l_toc,l_ffs_hdr->magic, PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE));
             if (!l_foundTOC)
             {
                 //If TOC not found at 0x0 or 0x2000000
@@ -663,6 +666,8 @@ errlHndl_t PnorRP::findTOC(size_t & o_tocSize)
                 l_foundTOC =
                     ((l_ffs_hdr->magic == FFS_MAGIC) &&
                      (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
+                printk("Addr [%lx], magic[%x] checksum[%d]\n",
+                       l_toc,l_ffs_hdr->magic, PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE));
             }
 
             if (!l_foundTOC)
@@ -685,6 +690,8 @@ errlHndl_t PnorRP::findTOC(size_t & o_tocSize)
                 l_foundTOC =
                     ((l_ffs_hdr->magic == FFS_MAGIC) &&
                      (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
+                printk("Addr [%lx], magic[%x] checksum[%d]\n",
+                       l_toc,l_ffs_hdr->magic, PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE));
             }
 
             //Setup for next time -- look for the other side

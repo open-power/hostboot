@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -584,11 +584,12 @@ errlHndl_t SfcIBM::hwInit( )
             1 << SFC_REG_SPICLK_CLKHI_SHFT |
             1 << SFC_REG_SPICLK_CLKLO_SHFT
             },
-            { PNOR::MICRON_NOR_ID, SFC_REG_CONF8,
-            6 << SFC_REG_CONF8_CSINACTIVEREAD_SHFT |
-            15 << SFC_REG_CONF8_DUMMY_SHFT |
-            SPI_JEDEC_FAST_READ << SFC_REG_CONF8_READOP_SHFT
-            },
+            //TODO RTC:187447 figure out why these break newer systems
+            //{ PNOR::MICRON_NOR_ID, SFC_REG_CONF8,
+            //6 << SFC_REG_CONF8_CSINACTIVEREAD_SHFT |
+            //15 << SFC_REG_CONF8_DUMMY_SHFT |
+            //SPI_JEDEC_FAST_READ << SFC_REG_CONF8_READOP_SHFT
+            //},
             { PNOR::MICRON_NOR_ID, SFC_REG_CONF4, SPI_JEDEC_SECTOR_ERASE },
             { PNOR::MICRON_NOR_ID, SFC_REG_CONF5, 4096 },
             //*** End Micron
