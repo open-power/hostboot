@@ -202,6 +202,15 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
              "Error getting ATTR_MSS_INTERLEAVE_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
+    if (l_hw423589_option2)
+    {
+        // Disallow 6-way/3-way interleave to prevent overflow of 512 GB
+        // footprint with 7 of 8 max-sized DIMMs present
+        FAPI_INF("Groups of 6 & 3 are not allowed with HW423589 option2");
+        iv_groupsAllowed &= ~GROUP_6;
+        iv_groupsAllowed &= ~GROUP_3;
+    }
+
     // Display attribute values
     FAPI_INF("EffGroupingSysAttrs: ");
     FAPI_INF("   ATTR_MEM_MIRROR_PLACEMENT_POLICY 0x%.8X", iv_selectiveMode);
