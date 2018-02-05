@@ -64,6 +64,7 @@ namespace fapi2
         MOD_FAPI2_GET_MB_VPD_ATTR                   = 0x15,
         MOD_FAPI2_GET_PLL_BUCKET                    = 0x16,
         MOD_FAPI2_GET_RING                          = 0x17,
+        MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ             = 0x18,
     };
 
     /**
@@ -141,6 +142,7 @@ namespace fapi2
         RC_FAILED_TO_DECOMPRESS_RING   = FAPI2_COMP_ID | 0x3C,
         RC_INCORRECT_HW_IMAGE_TYPE     = FAPI2_COMP_ID | 0x3D,
         RC_DD_SUPPORT_CHECK_FAILED     = FAPI2_COMP_ID | 0x3E,
+        RC_SET_ATTR_NOT_VALID          = FAPI2_COMP_ID | 0x3F,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
