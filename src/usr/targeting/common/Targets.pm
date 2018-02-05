@@ -651,7 +651,7 @@ sub buildAffinity
             $self->{membuf_inst_num} = 0;
             $node++;
 
-            if($pos > 0)
+            if($node > 0)
             {
                 $multiNode = 1;
                 #reset the dimm index number across nodes
@@ -669,7 +669,7 @@ sub buildAffinity
 
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
-            $self->setAttribute($target, "FAPI_POS",      $pos);
+            $self->setAttribute($target, "FAPI_POS",      $node);
             $self->setAttribute($target, "PHYS_PATH",     $node_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $node_aff);
 

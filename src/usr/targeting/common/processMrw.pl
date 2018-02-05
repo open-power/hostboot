@@ -2326,6 +2326,9 @@ sub get_max_compute_nodes
    ##
    #Proceeed only for sys targets
    ##
+   #For fabric_node_map, we store the node's position at the node
+   #position's index
+   my @fabric_node_map = (255, 255, 255, 255, 255, 255, 255, 255);
    if ($targetObj->getType($sysTarget) eq "SYS")
    {
       foreach my $child (@{$targetObj->getTargetChildren($sysTarget)})
@@ -2335,7 +2338,9 @@ sub get_max_compute_nodes
             my $attrVal =  $targetObj->getAttribute($child, "ENC_TYPE");
             if ($attrVal eq "CEC")
             {
-               $retVal++;
+                my $fapi_pos = $targetObj->getAttribute($child, "FAPI_POS");
+                $fabric_node_map[$fapi_pos] = $fapi_pos;
+                $retVal++;
             }
          }
       }
@@ -2348,6 +2353,17 @@ sub get_max_compute_nodes
       {
          $retVal = 1;
       }
+
+      #Convert array into a comma separated string
+      my $node_map = "";
+      foreach my $i (@fabric_node_map)
+      {
+            $node_map .= "$i,";
+      }
+
+      #remove the last comma
+      $node_map =~ s/.$//;
+      $targetObj->setAttribute($sysTarget, "FABRIC_TO_PHYSICAL_NODE_MAP", $node_map);
    }
    return $retVal;
 }
