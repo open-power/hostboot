@@ -469,6 +469,10 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
         #ifndef __HOSTBOOT_MODULE
         SyncAnalysis (i_sdc);  //mp01 Add call to Sync SDC
         #endif
+
+        // We're not allowed to clear black-listed FIRs from the FSP
+        #if defined(__HOSTBOOT_MODULE) || defined(ESW_SIM_COMPILE)
+
         // Call mask plugin.
         if (i_serviceData.service_data->IsAtThreshold())
         {
@@ -485,6 +489,7 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
         (*l_reset)( l_chipAnalyzed,
              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
             ); //@pw01
+        #endif
     }
 
     // Additional error isolation for HWPs, if needed.
