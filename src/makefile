@@ -203,8 +203,8 @@ EXTENDED_MODULES += p9_phbPerst
 EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
 EXTENDED_MODULES += tod
-EXTENDED_MODULES += p9_fab_iovalid
 EXTENDED_MODULES += nestmemutils
+EXTENDED_MODULES += fab_iovalid
 
 #***************************************
 # Working test modules

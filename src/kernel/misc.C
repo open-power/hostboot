@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -439,13 +439,11 @@ namespace KernelMisc
                                     KERNEL_MAX_SUPPORTED_NODES; i++)
             {
                 cpu_t* slave = CpuManager::getCpu(i);
-
                 if ((NULL != slave) && (slave != cpu))
                 {
-                    if (slave->winkled)
-                    {
-                        InterruptMsgHdlr::sendThreadWakeupMsg(i);
-                    }
+                    uint64_t l_pir = slave->cpu;
+                    printkd("Sending dbell to wakeup cpu:%d", (int)l_pir);
+                    doorbell_send(l_pir);
                 }
             }
         };

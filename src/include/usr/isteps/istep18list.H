@@ -145,7 +145,7 @@ const DepModInfo g_istep18Dependancies = {
             DEP_LIB(libtod.so),
             DEP_LIB(libistep18.so),
             DEP_LIB(libp9_cpuWkup.so),
-            DEP_LIB(libp9_fab_iovalid.so),
+            DEP_LIB(libfab_iovalid.so),
 #endif
             NULL
         }
