@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,8 @@ ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
       SyncAnalysis (sdc);  //Add call to Sync SDC
       #endif
 
+      // We're not allowed to clear black-listed FIRs from the FSP
+      #if defined(__HOSTBOOT_MODULE) || defined(ESW_SIM_COMPILE)
       rc = ErrorRegisterMask::Reset(bit_list,error); //undo filters
 
       // Mask registers as needed, if at threshold.
@@ -136,6 +138,7 @@ ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
       {
         rc |= i->op->Reset(bit_list, error, i->read, i->write);
       }
+      #endif
     }
 
     return rc;
