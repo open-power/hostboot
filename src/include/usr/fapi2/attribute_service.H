@@ -461,6 +461,22 @@ ReturnCode platGetMBvpdSlopeInterceptData(
                                    const uint32_t i_attr,
                                    uint32_t& o_val);
 
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  ATTR_FREQ_MCA_MHZ
+//  @param[in] i_fapiTarget    FAPI2 Target pointer
+//  @param[out] o_val          PB frequency from ATTR_FREQ_PB_MHZ
+//  @return ReturnCode Zero on success, else platform specified error.
+ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             uint32_t& o_val);
+
+/// @brief This function is called by the FAPI_ATTR_SET macro when getting
+//  ATTR_FREQ_MCA_MHZ
+//  @param[in] i_fapiTarget    FAPI2 Target pointer
+//  @param[in] i_val           New frequency
+//  @return ReturnCode Zero on success, else platform specified error.
+ReturnCode platSetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             uint32_t i_val);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -1567,6 +1583,23 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     fapi2::platAttrSvc::\
     platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
 
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_FREQ_MCA_MHZ_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetFreqMcaMhz(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_FREQ_MCA_MHZ_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platSetFreqMcaMhz(TARGET, VAL)
 
 
 #endif // ATTRIBUTESERVICE_H_

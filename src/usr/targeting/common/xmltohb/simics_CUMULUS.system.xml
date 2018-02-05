@@ -154,10 +154,6 @@
         <default>1</default>
     </attribute>
     <attribute>
-        <id>FREQ_MCA_MHZ</id>
-        <default>2000</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>k0</default>
     </attribute>

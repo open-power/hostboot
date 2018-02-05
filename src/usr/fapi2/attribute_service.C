@@ -2204,6 +2204,73 @@ ReturnCode platGetMBvpdSlopeInterceptData(
     return rc;
 }
 
+//******************************************************************************
+// fapi::platAttrSvc::platGetFreqMcaMhz function
+//******************************************************************************
+ReturnCode platGetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             uint32_t & o_val)
+{
+    // The POR config for Cumulus is to run the MC/DMI clocks directly
+    // off of the NEST PLL in 'sync' mode.  To support 'sync' mode FW
+    // can pin ATTR_FREQ_MCA_MHZ == ATTR_FREQ_PB_MHZ.
+
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+
+    TARGETING::Target * l_chipTarget = nullptr;
+    l_errl = getTargetingTarget(i_fapiTarget, l_chipTarget);
+    if(l_errl)
+    {
+        FAPI_ERR("platGetFreqMcaMhz: Error from getTargetingTarget");
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        o_val = l_chipTarget->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
+    }
+    return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platSetFreqMcaMhz function
+//******************************************************************************
+ReturnCode platSetFreqMcaMhz(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                             uint32_t i_val)
+{
+    fapi2::ReturnCode l_rc;
+
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+    if (l_errl)
+    {
+        FAPI_ERR("platSetFreqMcaMhz: Error from getTargetingTarget");
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        /*@
+        * @errortype
+        * @moduleid     fapi2::MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ
+        * @reasoncode   fapi2::RC_SET_ATTR_NOT_VALID
+        * @userdata1    HUID
+        * @userdata2    Requested attr value
+        * @devdesc      platSetFreqMcaMhz should never be called
+        */
+        l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            fapi2::MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ,
+                            fapi2::RC_SET_ATTR_NOT_VALID,
+                            TARGETING::get_huid(l_pTarget),
+                            i_val,
+                            true);
+
+        FAPI_ERR("platSetFreqMcaMhz: Function should never be called");
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+
+    return l_rc;
+}
+
 
 } // End platAttrSvc namespace
 
