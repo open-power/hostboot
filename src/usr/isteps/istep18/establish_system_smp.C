@@ -200,8 +200,7 @@ errlHndl_t call_host_coalesce_host( )
         uint8_t node_map[NUMBER_OF_POSSIBLE_DRAWERS];
         uint64_t msg_count = 0;
 
-        bool rc =
-            sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
+        bool rc = sys->tryGetAttr<TARGETING::ATTR_FABRIC_TO_PHYSICAL_NODE_MAP>
             (node_map);
         if (rc == false)
         {
@@ -225,7 +224,7 @@ errlHndl_t call_host_coalesce_host( )
         {
             uint16_t drawer = node_map[drawerCount];
 
-            if(drawerCount < NUMBER_OF_POSSIBLE_DRAWERS)
+            if(drawer < NUMBER_OF_POSSIBLE_DRAWERS)
             {
 
                 // set mask to msb
@@ -261,30 +260,8 @@ errlHndl_t call_host_coalesce_host( )
                 }
             } else{
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ATTR_FABRIC_TO_PHYSICAL_NODE_MAP is out of bounds");
-
-                //generate an errorlog
-                /*@
-                 *  @errortype      ERRL_SEV_PREDICTIVE
-                 *  @moduleid       fapi::MOD_HOST_COALESCE_HOST,
-                 *  @reasoncode     fapi::RC_INVALID_SIZE,
-                 *  @userdata1      drawer number
-                 *  @userdata2      NUMBER_OF_POSSIBLE_DRAWERS
-                 *  @devdesc        ATTR_FABRIC_TO_PHYSICAL_NODE_MAP is
-                 *                  out of bounds for the given drawer
-                 */
-                 l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_PREDICTIVE,
-                    fapi::MOD_HOST_COALESCE_HOST,
-                    fapi::RC_INVALID_SIZE ,
-                    drawer,
-                    NUMBER_OF_POSSIBLE_DRAWERS );
-
-                l_errl->collectTrace("ISTEPS_TRACE");
-                l_errl->collectTrace("IPC");
-                l_errl->collectTrace("MBOXMSG");
-
-                break;
+                "ATTR_FABRIC_TO_PHYSICAL_NODE_MAP is out of bounds, loop %d, drawer %x",
+                           drawerCount, drawer);
             }
         }
 
@@ -519,12 +496,16 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
         sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
 
         // after agreement, open a-busses as required
-        l_errl = EDI_EI_INITIALIZATION::smp_unfencing_inter_enclosure_abus_links();
-        if (l_errl)
-        {
-            io_pMsg->data[0] = l_errl->plid();
-            errlCommit(l_errl, HWPF_COMP_ID);
-        }
+        // @TODO RTC:187337 -- HB doesn't have the knowledge of attributes that
+        // p9_fab_iovalid requires at the moment. Currently, this is being called
+        // from the FSP. We need to figure out a way to gather that info from the
+        // FSP and re-enable this piece of code.
+//        l_errl = EDI_EI_INITIALIZATION::smp_unfencing_inter_enclosure_abus_links();
+//        if (l_errl)
+//        {
+//            io_pMsg->data[0] = l_errl->plid();
+//            errlCommit(l_errl, HWPF_COMP_ID);
+//        }
     }
     else
     {
@@ -538,49 +519,13 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
     // if there wasn't an error
     if (io_pMsg->data[0] == INITSERVICE::HWSVR_MSG_SUCCESS)
     {
-        uint32_t l_plid = 0;
-
         // Get all functional core units
         TARGETING::TargetHandleList l_coreList;
         getAllChiplets(l_coreList, TYPE_CORE);
 
         for (auto l_core : l_coreList)
         {
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_block_wakeup_intr(SET) on EX target HUID %.8X",
-                TARGETING::get_huid(l_core));
-
             fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_core_target(l_core);
-
-            FAPI_INVOKE_HWP(l_errl,
-                            p9_block_wakeup_intr,
-                            l_fapi2_core_target,
-                            p9pmblockwkup::SET);
-            if ( l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p9_block_wakeup_intr(SET)" );
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_core).addToLog( l_errl );
-                if (l_plid != 0)
-                {
-                    // use the same plid as the previous
-                    l_errl->plid(l_plid);
-                }
-                else
-                {
-                    // set this plid for the caller to see
-                    l_plid = l_errl->plid();
-                    io_pMsg->data[0] = l_errl->plid();
-                }
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS : p9_block_wakeup_intr(SET)" );
-            }
 
             // disable special wakeup
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -624,6 +569,47 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
     return NULL;
 }
 
+
+errlHndl_t blockInterrupts()
+{
+    errlHndl_t l_errl = NULL;
+
+    // Get all functional core units
+    TARGETING::TargetHandleList l_coreList;
+    getAllChiplets(l_coreList, TYPE_CORE);
+
+    for (auto l_core : l_coreList)
+    {
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_block_wakeup_intr(SET) on EX target HUID %.8X",
+            TARGETING::get_huid(l_core));
+
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_core_target(l_core);
+
+        FAPI_INVOKE_HWP(l_errl,
+                        p9_block_wakeup_intr,
+                        l_fapi2_core_target,
+                        p9pmblockwkup::SET);
+        if ( l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : p9_block_wakeup_intr(SET)" );
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_core).addToLog( l_errl );
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : p9_block_wakeup_intr(SET)" );
+        }
+    }
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "SUCCESS : p9_block_wakeup_intr(SET) on ALL cores" );
+
+    return l_errl;
+}
 
 errlHndl_t enableSpecialWakeup()
 {

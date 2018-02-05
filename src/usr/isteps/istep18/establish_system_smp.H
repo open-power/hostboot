@@ -118,6 +118,12 @@ namespace   ESTABLISH_SYSTEM_SMP
     */
     errlHndl_t enableSpecialWakeup();
 
+    /**
+    * @brief  block interrupts on all functional cores
+    *
+    * @return error log handle
+    */
+    errlHndl_t blockInterrupts();
 };   // end namespace
 
 #endif

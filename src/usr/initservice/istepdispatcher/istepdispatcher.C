@@ -2045,20 +2045,11 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
         }
 
         // Ensure the libraries needed are loaded
-        err = VFS::module_load("libestablish_system_smp.so");
+        err = VFS::module_load("libistep18.so");
         if (err)
         {
-            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libestablish_system_smp, PLID = 0x%x",
-                      err->plid());
-
-            io_pMsg->data[0] = err->plid();
-            errlCommit(err, INITSVC_COMP_ID);
-            break;
-        }
-        err = VFS::module_load("libedi_ei_initialization.so");
-        if (err)
-        {
-            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libedi_ei_initialization, PLID = 0x%x",
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libistep18,"
+                    " PLID = 0x%x",
                       err->plid());
 
             io_pMsg->data[0] = err->plid();
@@ -2066,6 +2057,28 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             break;
         }
 
+        err = VFS::module_load("libfab_iovalid.so");
+        if (err)
+        {
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libfab_iovalid.so,"
+                    " PLID = 0x%x",
+                      err->plid());
+
+            io_pMsg->data[0] = err->plid();
+            errlCommit(err, INITSVC_COMP_ID);
+            break;
+        }
+        err = VFS::module_load("libp9_cpuWkup.so");
+        if (err)
+        {
+            TRACFCOMP(g_trac_initsvc, "handleProcFabIovalidMsg: Error loading libp9_cpuWkup.so,"
+                    " PLID = 0x%x",
+                      err->plid());
+
+            io_pMsg->data[0] = err->plid();
+            errlCommit(err, INITSVC_COMP_ID);
+            break;
+        }
         // Create child thread so that if there are problems, the istep
         //  dispatcher code continues
         tid_t l_progTid = task_create(
@@ -2110,6 +2123,20 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             //the interrupt queue
             INTR::drainQueue();
 
+            //Before stopping all the cores, we need to disable interrupts
+            err = ESTABLISH_SYSTEM_SMP::blockInterrupts();
+            if (err)
+            {
+                TRACFCOMP( g_trac_initsvc,
+                           "ERROR: ESTABLISH_SYSTEM_SMP::blockInterrupts");
+                errlCommit(err, INITSVC_COMP_ID);
+            }
+
+            //cpu_all_winkle is a system call.. After the system call,
+            //the cpu are all hung at that instruction. After the fsp
+            //wake us up, we will resume execution from the next instruction
+            //in this function as the PC will be pointing to the next
+            //instruction after the cpu_all_winkle function.
             TRACFCOMP( g_trac_initsvc, "winkle all cores");
             uint32_t l_rc = cpu_all_winkle();
             if ( l_rc )
@@ -2536,7 +2563,7 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
 
 
     // Ensure the library is loaded
-    errlHndl_t err = VFS::module_load("libestablish_system_smp.so");
+    errlHndl_t err = VFS::module_load("libistep18.so");
 
     if (err)
     {
