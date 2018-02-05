@@ -1923,13 +1923,49 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                                                    i_target),
                                                I2C_SET_USER_DATA_2(i_args));
 
+                // Attempt to find a target representing the device that
+                // failed to respond, and call it out as the most likely
+                // problem. For now, we only support TPM reverse lookup;
+                // TODO RTC 94872 will implement generic support for other
+                // devices.
 
-                // For now limited in what we can call out:
-                // Could be an issue with Processor or its bus
+                // Loop thru TPMs in the system and match physical path,
+                // engine, and port to the i2c master
+                auto l_devFound = false;
+                const auto l_physPath = i_target->getAttr<
+                                                 TARGETING::ATTR_PHYS_PATH>();
+                TARGETING::TargetHandleList allTpms;
+                TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
+                for(const auto &tpm: allTpms)
+                {
+                    const auto l_tpmInfo = tpm->getAttr<
+                                                  TARGETING::ATTR_TPM_INFO>();
+
+                    if (l_tpmInfo.i2cMasterPath == l_physPath &&
+                        l_tpmInfo.engine == i_args.engine &&
+                        l_tpmInfo.port == i_args.port)
+                    {
+                        TRACFCOMP(g_trac_i2c,
+                            "Unresponsive TPM found: "
+                            "Engine=%d, masterPort=%d "
+                            "huid for its i2c master is 0x%.8X",
+                            l_tpmInfo.engine,
+                            l_tpmInfo.port,
+                            TARGETING::get_huid(i_target));
+                        err->addHwCallout(tpm,
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::NO_DECONFIG,
+                                          HWAS::GARD_NULL);
+                        l_devFound = true;
+                        break;
+                    }
+                }
+
+                // Could also be an issue with Processor or its bus
                 // -- both on the same FRU
-                // @todo RTC 94872 - update this callout
                 err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   l_devFound? HWAS::SRCI_PRIORITY_MED:
+                                               HWAS::SRCI_PRIORITY_HIGH,
                                    HWAS::NO_DECONFIG,
                                    HWAS::GARD_NULL );
 
