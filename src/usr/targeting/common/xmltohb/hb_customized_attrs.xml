@@ -658,6 +658,10 @@
         <no_export/>
         <default>0x1</default>
     </attribute>
+    <attribute>
+        <id>LINK_TRAIN</id>
+        <writeable/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
