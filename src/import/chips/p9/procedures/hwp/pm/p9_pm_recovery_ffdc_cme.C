@@ -230,6 +230,7 @@
         }
 
     fapi_try_exit:
+        logPmResetPhase (i_pHomerBuf);
         FAPI_DBG("<< PlatCme::collectFfdc");
         return fapi2::current_err;
     }
