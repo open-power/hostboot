@@ -104,4 +104,17 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_RESET_FFDC_ERROR</rc>
+    <description>Error collecting PM FFDC in one of the PM Reset Phase
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PM_RESET_PHASE</ffdc>
+    <ffdc>PM_FFDC_PLAT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
