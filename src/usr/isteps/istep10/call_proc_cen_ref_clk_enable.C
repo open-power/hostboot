@@ -832,10 +832,8 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                 "target HUID %.8X",
                 TARGETING::get_huid( *l_proc_iter ));
 
-        //Perform a workaround for GA1 to raise fences on centaurs
-        //to prevent FSP from analyzing if HB TIs for recoverable
-        //errors
-        //RTC 106276
+        //Raise fences on centaurs to prevent FSP from analyzing
+        // if HB TIs for recoverable errors
         fenceAttachedMembufs( *l_proc_iter );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
