@@ -31,7 +31,6 @@
 #include <secureboot/secure_reasoncodes.H>
 #include "errlud_secure.H"
 #include <kernel/bltohbdatamgr.H>
-#include <util/utilmem.H>
 #include <securerom/ROM.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -190,27 +189,34 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     // 64 bytes  : Measured Hash
     // 64 bytes  : Expected Hash
 
-    UtilMem l_memBuf {};
-    l_memBuf.write(i_compId, strlen(i_compId)+1);
-    l_memBuf << i_protectedSize;
-    l_memBuf << static_cast<uint32_t>(i_ids.size());
-    for (auto id : i_ids)
-    {
-        l_memBuf << id;
-    }
-    l_memBuf.write(i_measuredHash, PARSER_SIZEOF_SHA512_t);
-    l_memBuf.write(i_expectedHash, PARSER_SIZEOF_SHA512_t);
+    const size_t compSize=strlen(i_compId)+1;
+    uint64_t protectedSize=i_protectedSize;
+    uint32_t ids=i_ids.size();
+    uint32_t idType=0;
+    const size_t totalSize=
+          compSize
+        + sizeof(protectedSize)
+        + sizeof(ids)
+        + sizeof(idType)*ids
+        + PARSER_SIZEOF_SHA512_t
+        + PARSER_SIZEOF_SHA512_t;
 
-    auto l_memBufErr =  l_memBuf.getLastError();
-    if(l_memBufErr)
+    auto l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(totalSize));
+    memcpy(l_pBuf,i_compId,compSize);
+    l_pBuf+=compSize;
+    *reinterpret_cast<decltype(protectedSize)*>(l_pBuf)=i_protectedSize;
+    l_pBuf+=sizeof(protectedSize);
+    *reinterpret_cast<decltype(ids)*>(l_pBuf)=ids;
+    l_pBuf+=sizeof(ids);
+    for(const auto id : i_ids)
     {
-        errlCommit(l_memBufErr,SECURE_COMP_ID);
+        *reinterpret_cast<decltype(idType)*>(l_pBuf)=id;
+        l_pBuf+=sizeof(idType);
     }
-    else
-    {
-        char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(l_memBuf.size()));
-        memcpy(l_pBuf, l_memBuf.base(), l_memBuf.size());
-    }
+    memcpy(l_pBuf,i_measuredHash, PARSER_SIZEOF_SHA512_t);
+    l_pBuf+=PARSER_SIZEOF_SHA512_t;
+    memcpy(l_pBuf,i_expectedHash, PARSER_SIZEOF_SHA512_t);
+    l_pBuf+=PARSER_SIZEOF_SHA512_t;
 }
 
 } // end SECUREBOOT namespace
