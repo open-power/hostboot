@@ -165,6 +165,7 @@
         }
 
     fapi_try_exit:
+        logPmResetPhase (i_pHomerBuf);
         FAPI_DBG("<< PlatSgpe::collectFfdc: 0x%02X", l_ffdcValdityVect);
         return fapi2::current_err;
     }

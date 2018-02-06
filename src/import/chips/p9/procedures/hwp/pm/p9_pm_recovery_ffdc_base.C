@@ -335,6 +335,23 @@ namespace p9_stop_recov_ffdc
 
 //------------------------------------------------------------------------------
 
+    void PlatPmComplex::logPmResetPhase (const void* i_pHomerBuf)
+    {
+        FAPI_DBG ( ">> PlatPmComplex::logPmResetPhase" );
+        HomerFfdcRegion* l_pHomerFfdc = ( HomerFfdcRegion* )
+             ((uint8_t*) i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
+        uint8_t* l_pResetPhase = &l_pHomerFfdc->iv_pmFfdcHdrRegion.iv_pmFfdcHdr.iv_phase;
+
+        fapi2::ATTR_PM_RESET_PHASE_Type l_phase;
+        FAPI_ATTR_GET (fapi2::ATTR_PM_RESET_PHASE, iv_procChip, l_phase);
+        *l_pResetPhase = l_phase;
+
+        FAPI_DBG ( "<<  PlatPmComplex::logPmResetPhase PM Reset Phase: %d",
+                   l_phase );
+    }
+
+//------------------------------------------------------------------------------
+
     fapi2::ReturnCode PlatPmComplex::readPpeHaltState (
                       const uint64_t  i_xirBaseAddress,
                        const uint8_t* i_pHomerOffset )
@@ -665,8 +682,12 @@ extern "C"
     {
         FAPI_IMP(">> p9_pm_recovery_ffdc_base" );
         std::vector<PlatPmComplex*> l_pPlatList;
+        fapi2::ATTR_PM_RESET_PHASE_Type l_phase = PM_RESET_FFDC_SEC_INIT;
 
         // init all the platform FFDC headers
+        FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_procChipTarget,
+                       l_phase);
+
         l_pPlatList.push_back (new PlatPmComplex(i_procChipTarget));
         l_pPlatList.push_back (new PlatCme(i_procChipTarget));
         l_pPlatList.push_back (new PlatSgpe(i_procChipTarget));
@@ -684,11 +705,16 @@ extern "C"
         }
 
         // Grab FIRs and PPE Halt State in FFDC, before entering Reset Flow
+        // PPE_HALT_STATE and FIRS are collected together, mark step as FIRS
+        l_phase = PM_RESET_FFDC_GET_FIRS;
+        FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_procChipTarget,
+                                 l_phase);
         FAPI_INF ("p9_pm_recovery_ffdc_base: Collecting FIR & PPE Halt States");
+
         for ( auto& it : l_pPlatList )
         {
             FAPI_TRY ( it->collectFfdc (i_pHomerImage, (PPE_HALT_STATE | FIR_STATE)),
-            "p9_pm_recovery_ffdc_base: Failed to collect FOR & PPE Halt State. Plat %d",
+            "p9_pm_recovery_ffdc_base: Failed to collect FIR & PPE Halt State. Plat %d",
             it->getPlatId () );
         }
 
@@ -697,7 +723,20 @@ extern "C"
             delete it;
 
         FAPI_IMP("<< p9_pm_recovery_ffdc_base" );
-        return  fapi2::FAPI2_RC_SUCCESS;
+        return  fapi2::current_err;
+    }
+
+    fapi2::ReturnCode p9_pm_recovery_ffdc_misc (
+                      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+                      void* i_pHomerImage )
+    {
+        FAPI_DBG (">> p9_pm_recovery_ffdc_misc" );
+        PlatPmComplex l_pmFfdc (i_procChipTarget, PLAT_MISC);
+
+        l_pmFfdc.logPmResetPhase (i_pHomerImage);
+
+        FAPI_DBG ("<< p9_pm_recovery_ffdc_misc" );
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 }
 

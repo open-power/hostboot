@@ -43,13 +43,15 @@ namespace p9_stop_recov_ffdc
  */
 enum PmResetStep
 {
-    PM_RESET_UNKNOWN = 0,
+    PM_RESET_UNKNOWN = 0x00,
+    PM_RESET_INIT,
     PM_RESET_FFDC_SEC_INIT,
     PM_RESET_FFDC_CHK_PPE_HALT,
     PM_RESET_FFDC_GET_FIRS,
     PM_RESET_FIR_OCC,
     PM_RESET_OCC_CTRL,
     PM_RESET_SPL_WKUP_EX_ALL,
+    PM_RESET_SET_AUTO_SPL_WKUP,
     PM_RESET_FIR_PBA,
     PM_RESET_FIR_PPM,
     PM_RESET_FIR_CME,
@@ -57,11 +59,12 @@ enum PmResetStep
     PM_RESET_PGPE,
     PM_RESET_SGPE,
     PM_RESET_EC_EQ,
-    PM_RESET_DISABLE_RES_CLKS,
+    PM_RESET_PSAFE_UPDATE,
     PM_RESET_OCC_SRAM,
     PM_RESET_OCB,
     PM_RESET_PSS,
-    PM_RESET_MAX
+    PM_RESET_NOTIFY_PRD,
+    PM_RESET_DONE = 0xFF  // Always the last
 };
 
 /**
@@ -69,13 +72,14 @@ enum PmResetStep
  */
 enum PmComplexPlatId
 {
-    PLAT_NONE   =   0x00,
+    PLAT_INIT   =   0x00,
     PLAT_CME    =   0x01,
     PLAT_SGPE   =   0x02,
     PLAT_PGPE   =   0x03,
     PLAT_OCC    =   0x04,
     PLAT_CPPM   =   0x05,
     PLAT_QPPM   =   0x06,
+    PLAT_MISC   =   0x07,
 };
 
 /**

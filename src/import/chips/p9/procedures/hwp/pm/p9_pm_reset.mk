@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,7 @@
 PROCEDURE=p9_pm_reset
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_utils
 lib$(PROCEDURE)_DEPLIBS+=p9_setup_evid
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_base
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_control
@@ -35,6 +36,12 @@ lib$(PROCEDURE)_EXTRALIBS+=p9_pm_corequad_init
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_sram_init
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_ocb_init
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_pss_init
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_sgpe
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_pgpe
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_cme
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_occ
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_qppm
+lib$(PROCEDURE)_EXTRALIBS+= p9_pm_recovery_ffdc_cppm
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)

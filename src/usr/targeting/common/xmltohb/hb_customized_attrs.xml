@@ -594,6 +594,20 @@
           <id>ATTR_EQ_GARD</id>
           <writeable/>
     </attribute>
+
+    <attribute>
+          <id>ATTR_PM_MALF_ALERT_ENABLE</id>
+          <writeable/>
+          <no_export/>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_PM_RESET_FFDC_ENABLE</id>
+          <writeable/>
+          <no_export/>
+    </attribute>
+
+
     <attribute><id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id><default>FALSE</default></attribute>
     <attribute><id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id><default>0x01,0x00,0x01,0x00</default></attribute>
 

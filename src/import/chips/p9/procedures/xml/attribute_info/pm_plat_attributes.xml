@@ -2229,4 +2229,39 @@
     <default>0</default>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_MALF_ALERT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Switch to enable or disable Power Management Malfunction Alert Handling
+    based on the platform support. e.g. True for PHYP based systems and False
+    for KVM based systems depending on support available.
+
+    Producer: Initialized by Hostboot firmware based on platform support
+    Consumers: Read by p9_pm_reset.C p9_pm_stop_gpe_init.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <platInit/>
+    <default>FALSE</default>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESET_FFDC_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Switch to enable or disable Power Management Complex FFDC collection to HOMER.
+    When set, the PM Complex Reset flow will collect PM Complex data to the chip
+    HOMER region to assist with failure analysis and recovery.
+
+    Producer: HB must set or reset this based on the platform use-case and state.
+    Consumer: p9_pm_reset.C, p9_pm_callout.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <writeable/>
+    <platInit/>
+    <default>FALSE</default>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

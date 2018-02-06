@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,7 @@
 #include <p9_quad_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
+#include <p9n2_misc_scom_addresses.H>
 
 //#include <p9_ppe_state.H>  @todo RTC 147996 to incorporate PPE state removing strings.
 
@@ -130,6 +131,8 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
     const char* PM_MODE_NAME_VAR; //Defines storage for PM_MODE_NAME
     FAPI_INF("Executing p9_stop_gpe_init in mode %s", PM_MODE_NAME(i_mode));
 
+    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type malfAlertEnable =
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
     uint8_t                 fusedModeState = 0;
     uint8_t                 coreQuiesceDis = 0;
     uint8_t                 l_core_number  = 0;
@@ -150,6 +153,12 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
                                FAPI_SYSTEM,
                                coreQuiesceDis),
                  "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_CORE_PERIODIC_QUIESCE_DISABLE");
+
+        FAPI_IMP ("reading ATTR_PM_MALF_ALERT_ENABLE");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_MALF_ALERT_ENABLE,
+                               FAPI_SYSTEM,
+                               malfAlertEnable),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_PM_MALF_ALERT_ENABLE");
 
         // Check each core has a functional EX and EQ
         auto l_functional_core_vector =
@@ -307,6 +316,26 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
         .insertFromRight<0, 4>(0x1)     // Watchdog
         .insertFromRight<4, 4>(0xA);    // FIT
         FAPI_TRY(fapi2::putScom(i_target, PU_GPE3_GPETSEL_SCOM, l_data64));
+
+        // @TODO via CQ SW417195: Renable this once FW Simics support is in.
+        //       Writing OCC FLG2 breaks HB CIs
+#if 0
+        // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
+        FAPI_IMP ("Malf Alert Policy Enabled: %d", malfAlertEnable);
+
+        l_data64.flush<0>().setBit<p9hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+
+        if (malfAlertEnable == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
+        {
+            FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM2, l_data64));
+        }
+        else
+        {
+            FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM1, l_data64));
+        }
+
+        FAPI_IMP ("Malf Alert Policy Set to OCC FLAG2 .. now init SGPE");
+#endif
 
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");

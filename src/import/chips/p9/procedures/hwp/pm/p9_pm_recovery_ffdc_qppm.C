@@ -135,6 +135,7 @@
         }
 
     fapi_try_exit:
+        logPmResetPhase (i_pHomerBuf);
         FAPI_DBG("<< QppmRegs::collectFfdc");
         return fapi2::current_err;
     }

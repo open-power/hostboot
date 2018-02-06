@@ -29,7 +29,7 @@
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
 // *HWP HWP Backup Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>
-// *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP FW Owner         : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team             : PM
 // *HWP Level            : 3
 // *HWP Consumed by      : HS
@@ -103,8 +103,21 @@ extern "C"
     fapi2::ReturnCode p9_pm_set_auto_spwkup(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
-
-
+//------------------------------------------------------------------------------
+///
+/// @brief Call utilities to collect PM complex FFDC to FFDC section in HOMER
+///
+/// @param[in] i_target Proc Chip target
+/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
+/// @param[in] i_plat Platform Id indicating which part of the PM Complex to collect.
+///                   See p9_stop_recov_ffdc::PmComplexPlatId for details
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+///
+    fapi2::ReturnCode p9_pm_collect_ffdc (
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        void* i_pHomerImage,
+        const uint8_t i_plat );
 }
 
 #endif // _P9_PM_RESET_H

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -522,7 +522,7 @@
     <id>ATTR_INITIATED_PM_RESET</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-    Attribute is set by platform before initiating PM reset.
+    Attribute is set at the start of PM reset and reset at the end.
     It act as a signal for FFDC collection utility to behave
     differently during PM reset flow.
     </description>
@@ -530,6 +530,20 @@
     <enum>INACTIVE = 0x00, ACTIVE = 0x01</enum>
     <writeable/>
     <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_RESET_PHASE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute to indicate the progress in the PM Complex Reset flow.
+
+    Producer: p9_pm_reset.C
+    Consumers: p9_pm_reset.C p9_pm_recovery_ffdc_*.C
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
