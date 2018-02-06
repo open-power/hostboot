@@ -107,8 +107,6 @@ namespace p9_stop_recov_ffdc
 
             ///@brief initializes a list of register for generation of FFDC summary.
             void initRegList();
-        private:
-            std::vector<uint32_t> iv_occSummaryReg;
     };
 
     //---------------------------------------------------------------------------------------------
