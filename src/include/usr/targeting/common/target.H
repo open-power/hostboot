@@ -373,6 +373,43 @@ class Target
         void getAttrTankTargetPosData(uint16_t & o_pos,
                                       uint8_t & o_unitPos,
                                       uint8_t & o_node) const;
+
+
+        /**
+         *  @brief Tries to set the target's specified attribute value
+         *         Only use if template attribute system can't be used
+         *         Relies on assumptions instead of enforcing them.
+         *         Assumes it is a writeable attribute
+         *         Assumes i_size matches the size of the attribute
+         *
+         *  Tries to set the target's specified attribute value
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_size Size of the attribute
+         *  @param[in] i_pAttrData Location holding the attribute data to set
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post If attribute exists for the associated target, attribute value
+         *      updated and success (true) returned.  Otherwise, attribute value
+         *      not updated and failure (false) returned.
+         *
+         *  @return bool indicating if attribute update succeeded or not
+         *
+         *  @retval true Attribute update succeeded
+         *  @retval false Attribute update failed
+         */
+        bool unsafeTrySetAttr(
+            ATTRIBUTE_ID i_attr,
+            uint32_t     i_size,
+            const void*  i_pAttrData) const
+        {
+            // no check for size or if attribute is writable
+            return _trySetAttr(i_attr, i_size, i_pAttrData);
+        }
+
+
+
    private: // Private helper interfaces
 
         /**

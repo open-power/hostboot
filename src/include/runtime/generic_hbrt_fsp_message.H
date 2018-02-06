@@ -26,6 +26,8 @@
 #define __RUNTIME__GENERIC_HBRT_FSP_MESSAGE_H
 
 #include <targeting/common/attributes.H>   // TARGETING::HwasState
+#include <attributeenums.H>                // ATTRIBUTE_ID
+
 
 /** @file generic_hbrt_fsp_message.H
  *  @brief A generic structure for passing data
@@ -69,6 +71,23 @@ struct HbrtFspData_t
 {
    uint32_t plid;
    uint32_t userData;
+} PACKED ;
+
+
+/**
+  * A useful struct to access the HUID, attribute ID and attribute data
+  * from the GenericFspMboxMessage_t.data
+  *
+  * The HUID will be the first 4 bytes followed by a 4-byte attribute ID,
+  * then a 4-byte size of attribute data, and finally the attribute's data
+  *
+  */
+struct HbrtAttrSyncData_t
+{
+    uint32_t huid;
+    TARGETING::ATTRIBUTE_ID attrID;
+    uint32_t sizeOfAttrData;
+    uint8_t attrDataStart;
 } PACKED ;
 
 /**
@@ -119,6 +138,7 @@ struct GenericFspMboxMessage_t
         MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
         MSG_TOD_TOPOLOGY_DATA            = 0x0003,
         MSG_DECONFIG_TARGET              = 0x0004,
+        MSG_ATTR_SYNC_REQUEST            = 0x000000A5,
         MSG_SBE_ERROR                    = 0x000000E1,
         MSG_SBE_RECOVERY_SUCCESS         = 0x000000E2,
         MSG_SBE_RECOVERY_FAILED          = 0x000000E3,

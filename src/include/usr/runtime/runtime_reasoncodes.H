@@ -61,6 +61,7 @@ namespace RUNTIME
         MOD_ATTR_RUNTIME_CHECK_PREP_FAIL = 0x21,  /**< populate_hbruntime.C */
         MOD_RT_FIRMWARE_NOTIFY           = 0x23,  /**< rt_fwnotify.C */
         MOD_RT_FIRMWARE_REQUEST          = 0x24,  /**< rt_fwreq_helper.C */
+        MOD_RT_ATTR_SYNC_REQUEST         = 0x25,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -125,6 +126,7 @@ namespace RUNTIME
         RC_FW_REQUEST_ERR              = RUNTIME_COMP_ID | 0x39,
         RC_TPM_HDAT_VIRT_TO_PHYS_ERR   = RUNTIME_COMP_ID | 0x3A,
         RC_TPM_HDAT_MAP_BLOCK_ERR      = RUNTIME_COMP_ID | 0x3B,
+        RC_ATTR_UPDATE_FAILED          = RUNTIME_COMP_ID | 0x3C,
     };
 
     enum UserDetailsTypes
