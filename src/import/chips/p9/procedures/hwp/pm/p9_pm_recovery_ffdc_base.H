@@ -59,7 +59,7 @@ namespace p9_stop_recov_ffdc
             /// @param[in]  i_globalBaseAddr        sram address of start of global variables
             PlatPmComplex( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP >
                                     i_procChipTgt,
-                           PmComplexPlatId i_plat = PLAT_NONE,
+                           PmComplexPlatId i_plat = PLAT_INIT,
                            uint32_t i_imageHdrBaseAddr = 0,
                            uint32_t i_traceBufBaseAddress = 0,
                            uint32_t i_globalBaseAddr = 0 );
@@ -121,6 +121,11 @@ namespace p9_stop_recov_ffdc
 
             ///@brief initializes a list of register for generation of FFDC summary.
             void initRegList();
+
+           ///@brief logs the current PM Reset Phase in the PmFfdcHeader
+           ///@param[in]  i_pHomerBuf Base address of PM FFDC in HOMER
+           ///@return     N.A.
+           void logPmResetPhase ( const void*    i_pHomerBuf );
 
         protected:
 
@@ -292,7 +297,7 @@ namespace p9_stop_recov_ffdc
     // function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode (*p9_pm_recovery_ffdc_base_FP_t)
             ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-              const void* );
+              void* );
 
     extern "C"
     {
@@ -309,6 +314,18 @@ namespace p9_stop_recov_ffdc
     /// @return FAPI2_RC_SUCCESS on success or error return code
     ///
         fapi2::ReturnCode p9_pm_recovery_ffdc_base
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
+
+    /// @brief Updates the PM FFDC section in HOMER with miscellaneous, platform
+    ///        agnostic FFDC
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_misc
         ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
           void* i_pHomerImage );
     }
