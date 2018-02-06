@@ -24,13 +24,14 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
-#include <util/runtime/rt_fwreq_helper.H>       // firmware_request_helper
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/runtime_reasoncodes.H>   // MOD_RT_FIRMWARE_NOTIFY, etc
 #include <errl/errlentry.H>                // ErrlEntry
 #include <errl/errlmanager.H>              // errlCommit
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
 #include <targeting/common/target.H>       // TargetHandle_t, getTargetFromHuid
+#include <attributeenums.H>                // ATTRIBUTE_ID
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -227,6 +228,80 @@ void sbeAttemptRecovery(uint64_t i_data)
     TRACFCOMP(g_trac_runtime, EXIT_MRK"sbeAttemptRecovery");
 }
 
+
+/**
+ *  @brief Attempt to sync attribute setting with the FSP
+ *  @param[in] void * i_data - contains a target huid, attribute id,
+ *                             attribute data length, and attribute data
+ *  @platform FSP
+ **/
+void attrSyncRequest( void * i_data)
+{
+    HbrtAttrSyncData_t * l_hbrtAttrData =
+                                reinterpret_cast<HbrtAttrSyncData_t*>(i_data);
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"attrSyncRequest: Target HUID 0x%0X "
+            "for AttrID: 0x%0X with AttrSize: %lld", l_hbrtAttrData->huid,
+            l_hbrtAttrData->attrID, l_hbrtAttrData->sizeOfAttrData);
+
+    TRACFBIN(g_trac_runtime, "Attribute data: ",
+            &(l_hbrtAttrData->attrDataStart),
+            l_hbrtAttrData->sizeOfAttrData);
+
+    // extract the target from the given HUID
+    TargetHandle_t l_target = Target::getTargetFromHuid(l_hbrtAttrData->huid);
+
+    // Assumes the attribute is writeable
+    bool attr_updated = l_target->unsafeTrySetAttr(
+                                               l_hbrtAttrData->attrID,
+                                               l_hbrtAttrData->sizeOfAttrData,
+               reinterpret_cast<const void*>(&(l_hbrtAttrData->attrDataStart)));
+
+    if (!attr_updated)
+    {
+        TRACFCOMP(g_trac_runtime,ERR_MRK"attrSyncRequest: "
+                    "Unable to update attribute");
+
+        // Copy the first couple bytes of new attribute data (up to 4 bytes)
+        uint32_t l_attrData = 0;
+        uint32_t l_attrSize = l_hbrtAttrData->sizeOfAttrData;
+        if (l_attrSize > sizeof(l_attrData))
+        {
+            l_attrSize = sizeof(l_attrData);
+        }
+        memcpy(&l_attrData, &(l_hbrtAttrData->attrDataStart), l_attrSize);
+
+        /*@
+        * @errortype
+        * @severity     ERRL_SEV_PREDICTIVE
+        * @moduleid     MOD_RT_ATTR_SYNC_REQUEST
+        * @reasoncode   RC_ATTR_UPDATE_FAILED
+        * @userdata1[0:31]  Target HUID
+        * @userdata1[32:63] Attribute ID
+        * @userdata2[0:31]  Data Size
+        * @userdata2[32:63] Up to 4 bytes of attribute data
+        * @devdesc      Attribute failed to update on HBRT side
+        */
+       errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                        MOD_RT_ATTR_SYNC_REQUEST,
+                                        RC_ATTR_UPDATE_FAILED,
+                                        TWO_UINT32_TO_UINT64(
+                                            l_hbrtAttrData->huid,
+                                            l_hbrtAttrData->attrID),
+                                        TWO_UINT32_TO_UINT64(
+                                            l_hbrtAttrData->sizeOfAttrData,
+                                            l_attrData),
+                                        true);
+
+       l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+
+       //Commit the error
+       errlCommit(l_err, RUNTIME_COMP_ID);
+    }
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"attrSyncRequest");
+}
+
+
 /**
  * @see  src/include/runtime/interface.h for definition of call
  *
@@ -268,42 +343,41 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
            case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
            {
-
-              // Extract the message type
-              switch(l_hbrt_fw_msg->generic_msg.msgType)
+              // Distinguish based on msgType and msgq
+              if (l_hbrt_fw_msg->generic_msg.msgType ==
+                  GenericFspMboxMessage_t::MSG_SBE_ERROR)
               {
+                sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
+              }
+              else if ( (l_hbrt_fw_msg->generic_msg.msgType ==
+                         GenericFspMboxMessage_t::MSG_ATTR_SYNC_REQUEST) &&
+                        (l_hbrt_fw_msg->generic_msg.msgq ==
+                         MBOX::HB_ATTR_SYNC_MSGQ) )
+              {
+                attrSyncRequest((void*)&(l_hbrt_fw_msg->generic_msg.data));
+              }
+              else
+              {
+                l_badMessage = true;
 
-                 case GenericFspMboxMessage_t::MSG_SBE_ERROR:
-                      sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
+                TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
+                    "Unknown FSP message type:0x%.8X, "
+                    "message queue id:0x%.8X, seqNum:%d ",
+                    l_hbrt_fw_msg->generic_msg.msgq,
+                    l_hbrt_fw_msg->generic_msg.msgType,
+                    l_hbrt_fw_msg->generic_msg.seqnum);
 
-                 break;
+                // Pack user data 1 with message input type and
+                // firmware request message sequence number
+                l_userData1 = TWO_UINT32_TO_UINT64(
+                                l_hbrt_fw_msg->io_type,
+                                l_hbrt_fw_msg->generic_msg.seqnum);
 
-                 default:
-                    {
-                       l_badMessage = true;
-
-                       TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
-                              "Unknown FSP message type:0x%.8X, "
-                              "message queue id:0x%.8X, seqNum:%d ",
-                              l_hbrt_fw_msg->generic_msg.msgq,
-                              l_hbrt_fw_msg->generic_msg.msgType,
-                              l_hbrt_fw_msg->generic_msg.seqnum);
-
-                       // Pack user data 1 with message input type and
-                       // firmware request message sequence number
-                       l_userData1 = TWO_UINT32_TO_UINT64(
-                                           l_hbrt_fw_msg->io_type,
-                                           l_hbrt_fw_msg->generic_msg.seqnum);
-
-                       // Pack user data 2 with message queue and message type
-                       l_userData2 = TWO_UINT32_TO_UINT64(
-                                            l_hbrt_fw_msg->generic_msg.msgq,
-                                            l_hbrt_fw_msg->generic_msg.msgType);
-                    }
-
-                 break;  // END default
-
-              }  // END switch(l_genericMsg->msgType)
+                // Pack user data 2 with message queue and message type
+                l_userData2 = TWO_UINT32_TO_UINT64(
+                                l_hbrt_fw_msg->generic_msg.msgq,
+                                l_hbrt_fw_msg->generic_msg.msgType);
+              }
            } // END case HBRT_FW_MSG_HBRT_FSP_REQ:
 
            break;
