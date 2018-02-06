@@ -36,8 +36,8 @@
  *           : Integrate P9 Islands into SMP
  *    10.02    host_slave_sbe_update
  *           : Update slave SBE
- *    10.03    host_set_voltages
- *           : Set correct chip voltages
+ *    10.03    <empty>
+ *           :
  *    10.04    proc_cen_ref_clk_enable
  *           : Setup centaur ref clocks
  *    10.05    proc_enable_osclite
@@ -92,16 +92,6 @@ void*    call_proc_build_smp( void    *io_pArgs );
  *
  */
 void*    call_host_slave_sbe_update( void    *io_pArgs );
-
-/**
- *  @brief host_set_voltages
- *
- *  param[in,out]   -  pointer to any arguments, usually NULL
- *
- *  return  any error logs to istep
- *
- */
-void*    call_host_set_voltages( void   *io_pArgs );
 
 /**
  *  @brief  proc_cen_ref_clk_enable
@@ -245,9 +235,9 @@ const   TaskInfo    g_istep10[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(10,03,"host_set_voltages"),
-                ISTEP_10::call_host_set_voltages,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+                "", // empty istep
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(10,04,"proc_cen_ref_clk_enable"),
