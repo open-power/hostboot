@@ -572,9 +572,12 @@
           <writeable/>
     </attribute>
 
+    <!-- FSP always reads a registry key and set this on each boot,
+         HB always reads the data from the scratch reg and sets it -->
     <attribute>
           <id>ATTR_RISK_LEVEL</id>
           <writeable/>
+          <persistency>volatile-zeroed</persistency>
     </attribute>
 
     <attribute>
