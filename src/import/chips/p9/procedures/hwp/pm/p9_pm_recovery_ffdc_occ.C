@@ -76,10 +76,10 @@ namespace p9_stop_recov_ffdc
     {
         FAPI_DBG (">> PlatOcc::initRegList" );
         std::vector < uint32_t> l_scomRegList;
-        iv_occSummaryReg.push_back( PU_OCB_OCI_CCSR_SCOM );
-        iv_occSummaryReg.push_back( PU_OCB_OCI_QSSR_SCOM );
-        iv_occSummaryReg.push_back( P9N2_PU_OCB_OCI_OCCFLG_SCOM );
-        iv_occSummaryReg.push_back( P9N2_PU_OCB_OCI_OCCFLG2_SCOM );
+        l_scomRegList.push_back( PU_OCB_OCI_CCSR_SCOM );
+        l_scomRegList.push_back( PU_OCB_OCI_QSSR_SCOM );
+        l_scomRegList.push_back( P9N2_PU_OCB_OCI_OCCFLG_SCOM );
+        l_scomRegList.push_back( P9N2_PU_OCB_OCI_OCCFLG2_SCOM );
         PlatPmComplex::updateSummaryList( l_scomRegList );
         FAPI_DBG ("<< PlatOcc::initRegList" );
     }
@@ -221,6 +221,7 @@ namespace p9_stop_recov_ffdc
         }
 
     fapi_try_exit:
+        logPmResetPhase (i_pHomerBuf);
         FAPI_DBG("<< PlatOcc::collectFfdc");
         return fapi2::current_err;
     }
