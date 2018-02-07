@@ -55,7 +55,7 @@ use constant
 };
 
 my %maxInstance = (
-    "PROC"          => 8,
+    "PROC"          => 4,
     "CORE"          => 24,
     "EX"            => 12,
     "EQ"            => 6,
@@ -579,6 +579,32 @@ sub prune
     }
 }
 
+## This function returns the position of the Node corresponding to the 
+## incoming target
+##
+sub getParentNodePos
+{
+    my $self = shift;
+    my $target = shift;
+    my $pos    = 0;
+
+    my $parent = $target;
+    while($self->getType($parent) ne "NODE")
+    {
+       $parent = $self->getTargetParent($parent);
+    }
+    if($parent ne "")
+    {
+      $pos = $self->{data}->{TARGETS}{$parent}{TARGET}{position};
+      #Reducing one to account for control node
+      if($pos > 0)
+      {
+        $pos = $pos - 1;
+      }
+    }
+    return $pos;
+}
+
 ##########################################################
 ## traces busses and builds affinity hierarchy
 ## HOSTBOOT expected hierarchy: sys/node/proc/<unit>
@@ -725,7 +751,19 @@ sub buildAffinity
 
         elsif ($type eq "PROC")
         {
-            $proc++;
+            my $socket = $target;
+            while($self->getAttribute($socket,"CLASS") ne "CONNECTOR")
+            {
+               $socket = $self->getTargetParent($socket);
+            }
+            if($socket ne "")
+            {
+              $proc = $self->getAttribute($socket,"POSITION");
+            }
+            else
+            {
+              die "Cannot find socket connector for $target\n";
+            }
             my $num_mcs = 0;
             my $num_mi = 0;
             my $num_dmi  = 0;
@@ -761,18 +799,22 @@ sub buildAffinity
                 $self->{MAX_DMI} = $num_dmi;
             }
 
-            $self->{NUM_PROCS_PER_NODE} = $proc + 1;
+            if($self->{NUM_PROCS_PER_NODE} < ($proc + 1))
+            {
+                $self->{NUM_PROCS_PER_NODE} = $proc + 1;
+            }
 
             $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY} =
                 $target;
 
-            my $socket=$self->getTargetParent($self->getTargetParent($target));
+            #my $socket=$self->getTargetParent($self->getTargetParent($target));
             my $parent_affinity = $node_aff  . "/proc-$proc";
             my $parent_physical = $node_phys . "/proc-$proc";
 
             my $fapi_name = $self->getFapiName($type, $node, $proc);
             #unique offset per system
-            my $proc_ordinal_id = ($node * $maxInstance{$type}) + $proc;
+            my $nodepos = $self->getParentNodePos($target) ;
+            my $proc_ordinal_id = ($nodepos * $maxInstance{$type}) + $proc;
 
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
