@@ -43,6 +43,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
 #include <lib/spd/spd_factory.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
@@ -339,16 +340,22 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
     o_vpd_supported_freqs.clear();
 
     fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MR);
-    l_vpd_info.iv_is_config_ffdc_enabled = false;
 
     for( const auto& mcs : mss::find_targets<TARGET_TYPE_MCS>(i_target) )
     {
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(mcs) )
         {
+            if( mss::count_dimm(p) == 0 )
+            {
+                // Cronus lets you have an MCA w/no DIMMs...
+                continue;
+            }
+
             FAPI_TRY( mss::eff_num_master_ranks_per_dimm(p, &(l_rank_count_dimm[0])) );
 
             l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
             l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
+            l_vpd_info.iv_is_config_ffdc_enabled = false;
 
             // Iterate through all Nimbus supported freqs
             for( const auto& freq : NIMBUS_SUPPORTED_FREQS )
@@ -389,6 +396,9 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
 
                 // If we are here then we should have a valid frequency selected from polling the VPD keyword size above.
                 // A hard-fail here means something is wrong and we want to return current_err instead of ignoring it.
+                // We turn on FFDC logging here because this is a real fail if we can't read valid VPD, we don't want
+                // to return a useless FAPI2_RC_FALSE that FW doesn't know what to do with.
+                l_vpd_info.iv_is_config_ffdc_enabled = true;
                 FAPI_TRY( fapi2::getVPD(mcs, l_vpd_info, &(l_mr_blob[0])),
                           "Failed to retrieve VPD data for %s", mss::c_str(mcs) );
 
