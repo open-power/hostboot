@@ -456,6 +456,16 @@ else
     push @systemAttr, ['DPLL_VDM_RESPONSE', 0 ];
 }
 
+if ( exists $reqPol->{'mss_mrw_allow_unsupported_rcw'} )
+{
+    push @systemAttr, ['MSS_MRW_ALLOW_UNSUPPORTED_RCW',
+        $reqPol->{'mss_mrw_allow_unsupported_rcw'}];
+}
+else
+{
+    push @systemAttr, ['MSS_MRW_ALLOW_UNSUPPORTED_RCW', 0 ];
+}
+
 my $xBusWidth = $reqPol->{'proc_x_bus_width'};
 if( $xBusWidth == 1 )
 {
