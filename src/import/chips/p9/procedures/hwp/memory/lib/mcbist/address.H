@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,7 +309,7 @@ class address
         ///
         inline uint64_t get_dimm() const
         {
-            return (get_field<DIMM>() == true ? 1 : 0);
+            return get_field<DIMM>();
         }
 
         ///
@@ -336,7 +336,7 @@ class address
             fapi2::buffer<uint64_t> l_value;
 
             l_value.insertFromRight<PORT_START, PORT_LEN>(get_port());
-            l_value.writeBit<DIMM_BIT>(get_field<DIMM>());
+            l_value.writeBit<DIMM_BIT>(get_dimm());
 
             return l_value;
         }

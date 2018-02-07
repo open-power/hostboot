@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ enum end_boundary : uint64_t
     // We're gonna get a little hacky here. The pause on error mode field
     // is two bits, with another bit representing slave/master. So we craft
     // the enum so that we can insertFromRight and get the proper vaules, and
-    // leave on bit out of that two-bit range to represent master or slave
+    // leave one bit out of that two-bit range to represent master or slave
     NONE                      = 0b000,
     STOP_AFTER_ADDRESS        = 0b001,
     STOP_AFTER_MASTER_RANK    = 0b010,
@@ -111,7 +111,7 @@ class stop_conditions
             // Find the first bit set. This represents the largest power of 2 this input can represent
             // The subtraction from 63 switches from a left-count to a right-count (e.g., 0 (left most
             // bit) is really bit 63 if you start on the right.)
-            uint64_t l_largest = 63 - first_bit_set(i_value);
+            const uint64_t l_largest = 63 - first_bit_set(i_value);
 
             // If the first bit set is off in space and greater than 2^14, we just return 0b1110
             // Otherwise, l_largest is the droid we're looking for
@@ -706,7 +706,7 @@ class stop_conditions
 struct constraints
 {
     ///
-    /// @brief constraints constructor
+    /// @brief constraints default constructor
     ///
     constraints():
         iv_stop(),
@@ -771,6 +771,7 @@ struct constraints
         iv_end_boundary = i_end_boundary;
         iv_speed = i_speed;
         iv_end_address = i_end_address;
+
         FAPI_INF("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
 
         // If our end address is 'before' our start address, make the end address the same as the start.
@@ -780,6 +781,7 @@ struct constraints
         }
     }
 
+    // Member variable declaration
     stop_conditions iv_stop;
     uint64_t iv_pattern;
     end_boundary iv_end_boundary;

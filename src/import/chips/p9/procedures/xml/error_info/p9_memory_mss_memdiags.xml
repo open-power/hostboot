@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -372,12 +372,23 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_START_ADDR_BIGGER_THAN_END_ADDR</rc>
+    <description> Invalid address input. Starting address is larger than end address</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>START_ADDRESS</ffdc>
+    <ffdc>END_ADDRESS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MEMDIAGS_BCMODE_INVALID_ADDRESS</rc>
     <description>An limited address scope was passed into memdiags that is not on the first port in broadcast mode</description>
     <ffdc>MCA_TARGET</ffdc>
     <ffdc>START_ADDRESS</ffdc>
     <ffdc>MCA_START_ADDRESS</ffdc>
-    <ffdc>PATTERN</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

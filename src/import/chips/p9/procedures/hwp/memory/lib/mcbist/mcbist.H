@@ -674,10 +674,11 @@ inline subtest_t<T> write_subtest()
     // - Don't need to set up anything for LFSRs
     // 9:11  = 000  - Fixed data mode
 
-    // 14:15 = 0 address select config registers 0
-
+    // 12    = 1    - ecc
     // By default we want to turn on ECC. Caller can turn it off.
     l_subtest.change_ecc_mode(mss::ON);
+
+    // 14:15 = 0 address select config registers 0
 
     return l_subtest;
 }

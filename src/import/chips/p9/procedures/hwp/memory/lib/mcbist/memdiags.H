@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,7 +111,7 @@ class operation
             iv_subtest(i_subtest),
             iv_const(i_const)
         {
-            FAPI_TRY( mss::is_simulation (iv_l_sim) );
+            FAPI_TRY( mss::is_simulation (iv_sim) );
             return;
 
         fapi_try_exit:
@@ -197,7 +197,7 @@ class operation
         mss::mcbist::subtest_t<T> iv_subtest;
         constraints               iv_const;
         mss::mcbist::program<T>   iv_program;
-        uint8_t                   iv_l_sim;
+        uint8_t                   iv_sim;
 };
 
 ///
@@ -216,7 +216,7 @@ struct sf_init_operation : public operation<T>
     ///
     sf_init_operation( const fapi2::Target<T>& i_target,
                        const constraints i_const,
-                       fapi2::ReturnCode& o_rc ):
+                       fapi2::ReturnCode& o_rc):
         operation<T>(i_target, mss::mcbist::init_subtest<T>(), i_const)
     {
         // If sf_init was passed the random data pattern, then modify the subtest to use the true random data
@@ -248,7 +248,7 @@ struct sf_read_operation : public operation<T>
     ///
     sf_read_operation( const fapi2::Target<T>& i_target,
                        const constraints i_const,
-                       fapi2::ReturnCode& o_rc ):
+                       fapi2::ReturnCode& o_rc):
         operation<T>(i_target, mss::mcbist::read_subtest<T>(), i_const)
     {
         // We're a multi-port operation
@@ -348,6 +348,27 @@ struct targeted_scrub_operation : public operation<T>
 template< fapi2::TargetType T >
 fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
                            const uint64_t i_pattern = PATTERN_0 );
+
+///
+/// @brief Start address port dimm check - helper for testing
+/// @param[in] i_targets a vector of MCA targets
+/// @param[in] i_start_addr the starting port_dimm seelct address
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode broadcast_mode_start_address_check_helper(
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> >& i_targets,
+    const uint64_t i_start_addr);
+
+///
+/// @brief Start address port dimm check
+/// @param[in] i_target the MCBIST target
+/// @param[in] i_start_addr the starting address
+/// @param[out] o_dimms DIMM(s) associated with the first valid MCA
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode broadcast_mode_start_address_check(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const uint64_t i_start_addr,
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >& o_dimms);
 
 ///
 /// @brief Super Fast Read - used to run superfast read on all memory behind the target
