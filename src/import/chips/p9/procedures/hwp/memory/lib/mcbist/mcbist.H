@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3091,6 +3091,19 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
     std::vector< fapi2::buffer<uint64_t> > l_temp;
     return read_rb_array(i_target, i_start_addr, i_num_entries, o_data, l_temp);
 }
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this target
+/// @param[in] i_target the target to effect
+/// @param[in] i_bc_force attribute's value to force off broadcast mode
+/// @param[in] i_bc_enable attribute's value to enable or disable broadcast mode
+/// @param[in] i_chip_bc_capable true if the chip is BC capable
+/// @return o_capable - yes iff these vector of targets are broadcast capable
+///
+const mss::states is_broadcast_capable_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const uint8_t i_bc_force,
+        const uint8_t i_bc_enable,
+        const bool i_chip_bc_capable);
 
 ///
 /// @brief Checks if broadcast mode is capable of being enabled on this target

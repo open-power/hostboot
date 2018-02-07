@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -700,7 +700,8 @@ const mss::states is_broadcast_capable(const std::vector<fapi2::Target<fapi2::TA
     const uint64_t l_first_mca_num_dimm = mss::count_dimm(i_targets[0]);
 
     // Now, find if we have any MCA's that have a different number of DIMM's
-    const auto l_mca_it = std::find_if(i_targets.begin(),
+    // Note: starts on the next MCA target due to the fact that something always equals itself
+    const auto l_mca_it = std::find_if(i_targets.begin() + 1,
                                        i_targets.end(),
                                        [l_first_mca_num_dimm]( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_rhs) -> bool
     {
@@ -728,32 +729,74 @@ const mss::states is_broadcast_capable(const std::vector<fapi2::Target<fapi2::TA
 
 ///
 /// @brief Checks if broadcast mode is capable of being enabled on this target
+/// @param[in] i_target the target to effect
+/// @param[in] i_bc_force attribute's value to force off broadcast mode
+/// @param[in] i_bc_enable attribute's value to enable or disable broadcast mode
+/// @param[in] i_chip_bc_capable true if the chip is BC capable
+/// @return o_capable - yes iff these vector of targets are broadcast capable
+///
+const mss::states is_broadcast_capable_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const uint8_t i_bc_force,
+        const uint8_t i_bc_enable,
+        const bool i_chip_bc_capable)
+{
+    // First off, check if we need to disable broadcast mode due to a chip size bug
+    // Note: the bug check is decidedly more complicated than the EC check, but we'll just disable BC mode out of safety concerns
+    // Better to go slow and steady and initialize the chip properly than to go fast and leave the memory initialized poorly
+    if( !i_chip_bc_capable )
+    {
+        FAPI_INF("%s A chip bug prevents broadcast mode. Chip is not brodcast capable", mss::c_str(i_target));
+        return mss::states::NO;
+    }
+
+    // If BC mode is forced off, then we're done
+    if( i_bc_force == fapi2::ENUM_ATTR_MSS_MRW_FORCE_BCMODE_OFF_YES )
+    {
+        FAPI_INF("%s MRW attribute has broadcast mode forced off", mss::c_str(i_target));
+        return mss::states::NO;
+    }
+
+    // Now check the override broadcast mode capable attribute
+    if( i_bc_enable == fapi2::ENUM_ATTR_MSS_OVERRIDE_MEMDIAGS_BCMODE_DISABLE )
+    {
+        FAPI_INF("%s attribute has broadcast mode disabled", mss::c_str(i_target));
+        return mss::states::NO;
+    }
+
+    // Otherwise, our chip and attributes allow us to be BC capable
+    FAPI_INF("%s chip and attributes allow for BC mode", mss::c_str(i_target));
+    return mss::states::YES;
+}
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this target
 /// @param[in] i_target the target to effect - specialization for MCBIST target type
 /// @return l_capable - yes iff these vector of targets are broadcast capable
 ///
 template< >
 const mss::states is_broadcast_capable(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
 {
-    // First off, check if we need to disable broadcast mode due to a chip size bug
-    // Note: the bug check is decidedly more complicated than the EC check, but we'll just disable BC mode out of safety concerns
-    // Better to go slow and steady and initialize the chip properly than to go fast and leave the memory initialized poorly
-    if( mss::chip_ec_feature_mcbist_end_of_rank(i_target) )
-    {
-        FAPI_INF("%s A chip bug prevents broadcast mode. Chip is not brodcast capable", mss::c_str(i_target));
-        return mss::states::NO;
-    }
+    // Chip is BC capable IFF the MCBIST end of rank bug is not present
+    const auto l_chip_bc_capable = !mss::chip_ec_feature_mcbist_end_of_rank(i_target);
 
     // If BC mode is disabled in the MRW, then it's disabled here
     uint8_t l_bc_mode_enable = 0;
-    FAPI_TRY(mss::mrw_memdiags_bcmode(l_bc_mode_enable));
+    uint8_t l_bc_mode_force_off = 0;
+    FAPI_TRY(mss::override_memdiags_bcmode(l_bc_mode_enable));
+    FAPI_TRY(mss::mrw_force_bcmode_off(l_bc_mode_force_off));
 
-    if( l_bc_mode_enable == fapi2::ENUM_ATTR_MSS_MRW_MEMDIAGS_BCMODE_DISABLE )
+    // Check if the chip and attributes allows memdiags/mcbist to be in broadcast mode
     {
-        FAPI_INF("%s MRW attribute has broadcast mode disabled", mss::c_str(i_target));
-        return mss::states::NO;
+        const auto l_state = is_broadcast_capable_helper(i_target, l_bc_mode_force_off, l_bc_mode_enable, l_chip_bc_capable);
+
+        if(l_state == mss::states::NO)
+        {
+            return l_state;
+        }
     }
 
-    // Now that we are guaranteed to have a chip that could run broadcast mode, do the following steps to check whether our config is broadcast capable:
+    // Now that we are guaranteed to have a chip that could run broadcast mode and the system is allowed to do so,
+    // do the following steps to check whether our config is broadcast capable:
     {
         // Steps to determine if this MCBIST is broadcastable
         // 1) Check the number of DIMM's on each MCA - true only if they all match
@@ -801,7 +844,8 @@ const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kin
     const auto l_expected_kind = i_kinds[0];
 
     // Now, find if we have any kinds that differ from our first kind
-    const auto l_kind_it = std::find_if(i_kinds.begin(),
+    // Note: starts on the next DIMM kind due to the fact that something always equals itself
+    const auto l_kind_it = std::find_if(i_kinds.begin() + 1,
                                         i_kinds.end(), [&l_expected_kind]( const mss::dimm::kind & i_rhs) -> bool
     {
         // If they're different, we found a DIMM that is differs
