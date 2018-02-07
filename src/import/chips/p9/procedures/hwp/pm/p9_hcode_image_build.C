@@ -2362,10 +2362,10 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         FAPI_DBG("Copying Global P-State Parameter Block" );
         sizePStateBlock = sizeof(GlobalPstateParmBlock);
 
-        FAPI_ASSERT( ( sizePStateBlock <= OCC_PSTATE_PARAM_BLOCK_SIZE ),
+        FAPI_ASSERT( ( sizePStateBlock <= PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE),
                      fapi2::PSTATE_SUP_STRUCT_SIZE_ERR()
                      .set_SUPER_STRUCT_SIZE(sizeof(PstateSuperStructure))
-                     .set_MAX_SIZE_ALLOCATED(PGPE_PSTATE_OUTPUT_TABLES_SIZE)
+                     .set_MAX_SIZE_ALLOCATED(PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE)
                      .set_ACTUAL_SIZE( sizePStateBlock ),
                      "Size of Global Parameter Block Exceeds Max Size Allowed" );
 
