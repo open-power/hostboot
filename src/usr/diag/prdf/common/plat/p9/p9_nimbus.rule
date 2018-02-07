@@ -7257,7 +7257,7 @@ rule rNPU0FIR
     NPU0FIR & ~NPU0FIR_MASK &  NPU0FIR_ACT0 &  NPU0FIR_ACT1;
 };
 
-group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 18, 19, 25, 29, 31, 40, 42, 44, 45, 46 )
+group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 18, 19, 25, 29, 31, 40, 42, 44, 45 )
 {
     /** NPU0FIR[0]
      *  NTL array CE
@@ -7487,7 +7487,7 @@ group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 
     /** NPU0FIR[46]
      *  XTS Translate Request Fail
      */
-    (rNPU0FIR, bit(46)) ? self_th_1;
+    (rNPU0FIR, bit(46)) ? defaultMaskedError;
 
     /** NPU0FIR[47:59]
      *  spare
@@ -7530,7 +7530,7 @@ rule rNPU1FIR
     NPU1FIR & ~NPU1FIR_MASK &  NPU1FIR_ACT0 &  NPU1FIR_ACT1;
 };
 
-group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 20, 22, 25, 27, 28, 29, 31, 32, 33, 34, 35 )
+group gNPU1FIR filter singlebit, cs_root_cause( 0, 2, 4, 6, 8, 10, 13, 14, 15, 20, 22, 25, 27, 28, 29, 31, 32, 33, 34, 35 )
 {
     /** NPU1FIR[0]
      *  NDL Brick0 stall
@@ -7540,7 +7540,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[1]
      *  NDL Brick0 nostall
      */
-    (rNPU1FIR, bit(1)) ? self_th_1;
+    (rNPU1FIR, bit(1)) ? defaultMaskedError;
 
     /** NPU1FIR[2]
      *  NDL Brick1 stall
@@ -7550,7 +7550,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[3]
      *  NDL Brick1 nostall
      */
-    (rNPU1FIR, bit(3)) ? self_th_1;
+    (rNPU1FIR, bit(3)) ? defaultMaskedError;
 
     /** NPU1FIR[4]
      *  NDL Brick2 stall
@@ -7560,7 +7560,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[5]
      *  NDL Brick2 nostall
      */
-    (rNPU1FIR, bit(5)) ? self_th_1;
+    (rNPU1FIR, bit(5)) ? defaultMaskedError;
 
     /** NPU1FIR[6]
      *  NDL Brick3 stall
@@ -7570,7 +7570,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[7]
      *  NDL Brick3 nostall
      */
-    (rNPU1FIR, bit(7)) ? self_th_1;
+    (rNPU1FIR, bit(7)) ? defaultMaskedError;
 
     /** NPU1FIR[8]
      *  NDL Brick4 stall
@@ -7580,7 +7580,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[9]
      *  NDL Brick4 nostall
      */
-    (rNPU1FIR, bit(9)) ? self_th_1;
+    (rNPU1FIR, bit(9)) ? defaultMaskedError;
 
     /** NPU1FIR[10]
      *  NDL Brick5 stall
@@ -7590,7 +7590,7 @@ group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
     /** NPU1FIR[11]
      *  NDL Brick5 nostall
      */
-    (rNPU1FIR, bit(11)) ? self_th_1;
+    (rNPU1FIR, bit(11)) ? defaultMaskedError;
 
     /** NPU1FIR[12]
      *  MISC Register ring error (ie noack)
