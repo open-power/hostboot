@@ -618,17 +618,20 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
+    <id>ATTR_MSS_MRW_FORCE_BCMODE_OFF</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-        A switch for memdiags broadcast mode
+        An override switch to shut off broadcast mode
+        Enum values:
+        YES: broadcast mode is forced off
+        NO:  broadcast mode uses the default value
     </description>
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
     <overrideOnly/>
-    <enum> ENABLE = 0, DISABLE = 1 </enum>
-    <mssAccessorName>mrw_memdiags_bcmode</mssAccessorName>
+    <enum> NO = 0, YES = 1 </enum>
+    <mssAccessorName>mrw_force_bcmode_off</mssAccessorName>
   </attribute>
 
   <attribute>
