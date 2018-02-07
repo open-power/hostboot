@@ -182,4 +182,18 @@
         <overrideOnly/>
     </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_OVERRIDE_MEMDIAGS_BCMODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        A switch for memdiags broadcast mode
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <enum> ENABLE = 0, DISABLE = 1 </enum>
+    <mssAccessorName>override_memdiags_bcmode</mssAccessorName>
+  </attribute>
+
 </attributes>
