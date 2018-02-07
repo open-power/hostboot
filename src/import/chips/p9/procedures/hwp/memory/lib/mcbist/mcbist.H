@@ -1742,6 +1742,79 @@ class program
         }
 
         ///
+        /// @brief Calculate minimum command gap for BG_SCRUB
+        /// @param[in] i_target the target behind which the memory sits
+        /// @param[in] i_freq the DRAM frequency
+        /// @param[in] i_size the sum of all DIMM sizes
+        /// @param[out] o_min_cmd_gap the setting for MCBPARMQ_CFG_MIN_CMD_GAP
+        /// @param[out] o_timebase the setting for MCBPARMQ_CFG_MIN_GAP_TIMEBASE
+        ///
+        inline void calculate_min_cmd_gap( const fapi2::Target<T>& i_target,
+                                           const uint64_t i_freq,
+                                           const uint64_t i_size,
+                                           uint64_t& o_min_cmd_gap,
+                                           mss::states& o_timebase )
+        {
+            constexpr uint64_t l_seconds = SEC_IN_HOUR * BG_SCRUB_IN_HOURS;
+            constexpr uint64_t MIN_CMD_GAP = 0x001;
+
+            // Sanity check our inputs, just assert if bad since they come directly from eff_config
+            // this will prevent us from any divide by zero problems
+            if ((i_freq == 0) || (i_size == 0))
+            {
+                FAPI_ERR("received zero memory freq or size in calculate_min_cmd_gap");
+                fapi2::Assert(false);
+            }
+
+            // MIN CMD GAP = TOTAL CYCLES / TOTAL ADDRESSES
+            // TOTAL CYCLES = 12 hours x 60 min/hr x 60 sec/min x [DRAM freq] cycles/sec x
+            //    1/2 (MEM logic runs half DRAM freq)
+            const uint64_t l_mem_cycles_per_sec = (i_freq * T_PER_MT) / 2;
+            const uint64_t l_total_cycles = l_seconds * l_mem_cycles_per_sec;
+
+            // TOTAL ADDRESSES = sum over all dimms of ( [DIMM CAPACITY]/128B )
+            const uint64_t l_total_addresses = i_size * BYTES_PER_GB / 128;
+
+            const auto l_min_cmd_gap = l_total_cycles / l_total_addresses;
+
+            // If we're greater than the timebase, set the multiplier and divide down to get the gap setting
+            if (CMD_TIMEBASE < l_min_cmd_gap)
+            {
+                o_min_cmd_gap = l_min_cmd_gap / CMD_TIMEBASE;
+                o_timebase = mss::ON;
+                return;
+            }
+
+            // If we're greater than the max gap setting, get as close to 12 hours as we can instead of just truncating
+            if (l_min_cmd_gap > MAX_CMD_GAP)
+            {
+                // work backwards to calculate what the total scrub time would be with the highest cmd gap with no multiplier...
+                const uint64_t l_scrub_time_fff = (l_total_addresses * MAX_CMD_GAP) / l_mem_cycles_per_sec;
+                // and with the lowest cmd gap with the multiplier
+                const uint64_t l_scrub_time_001 = (l_total_addresses * CMD_TIMEBASE) / l_mem_cycles_per_sec;
+
+                if ((l_seconds - l_scrub_time_fff) > (l_scrub_time_001 - l_seconds))
+                {
+                    FAPI_INF("%s gap is greater than the field will allow. Setting to: %03x", mss::c_str(i_target), MIN_CMD_GAP);
+                    o_min_cmd_gap = MIN_CMD_GAP;
+                    o_timebase = mss::ON;
+                }
+                else
+                {
+                    FAPI_INF("%s gap is greater than the field will allow. Setting to: %03x", mss::c_str(i_target), MAX_CMD_GAP);
+                    o_min_cmd_gap = MAX_CMD_GAP;
+                    o_timebase = mss::OFF;
+                }
+
+                return;
+            }
+
+            // Else, we're good to just set the calculated gap value directly
+            o_min_cmd_gap = l_min_cmd_gap;
+            o_timebase = mss::OFF;
+        }
+
+        ///
         /// @brief Change MCBIST Speed
         /// @param[in] i_target the target behind which the memory sits
         /// @param[in] i_speed the speed eunmeration
@@ -1762,31 +1835,20 @@ class program
                         uint64_t l_freq = 0;
                         uint64_t l_size = 0;
                         uint64_t l_min_cmd_gap = 0;
+                        mss::states l_timebase = mss::OFF;
 
                         constexpr uint64_t l_seconds = SEC_IN_HOUR * BG_SCRUB_IN_HOURS;
 
                         FAPI_TRY( mss::freq(i_target, l_freq) );
                         FAPI_TRY( mss::eff_memory_size(i_target, l_size) );
 
-                        // MIN CMD GAP = TOTAL CYCLES / TOTAL ADDRESSES
-                        // TOTAL CYCLES = 12 hours x 60 min/hr x 60 sec/min x [DRAM freq] cycles/sec x
-                        //    1/2 (MEM logic runs half DRAM freq)
-                        // TOTAL ADDRESSES = sum over all dimms of ( [DIMM CAPACITY]/128B )
-                        l_min_cmd_gap = ((l_seconds * (l_freq * T_PER_MT)) / 2) / ((l_size * BYTES_PER_GB) / 128);
+                        calculate_min_cmd_gap(i_target, l_freq, l_size, l_min_cmd_gap, l_timebase);
 
-                        FAPI_INF("setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds, gap: %d",
-                                 l_freq, l_size, l_seconds, l_min_cmd_gap);
+                        FAPI_INF("%s setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds, gap: %d",
+                                 mss::c_str(i_target), l_freq, l_size, l_seconds, l_min_cmd_gap);
 
-                        if (CMD_TIMEBASE < l_min_cmd_gap)
-                        {
-                            change_min_cmd_gap(l_min_cmd_gap / CMD_TIMEBASE);
-                            change_min_gap_timebase(mss::ON);
-                        }
-                        else
-                        {
-                            change_min_cmd_gap(l_min_cmd_gap);
-                            change_min_gap_timebase(mss::OFF);
-                        }
+                        change_min_cmd_gap(l_min_cmd_gap);
+                        change_min_gap_timebase(l_timebase);
 
                         return fapi2::FAPI2_RC_SUCCESS;
                     }
