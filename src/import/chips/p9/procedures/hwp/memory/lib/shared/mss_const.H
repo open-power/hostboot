@@ -140,6 +140,7 @@ enum times
     BG_SCRUB_IN_HOURS       = 12,
 
     CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap
+    MAX_CMD_GAP             = 4095,     ///< Represents the maximum (non-multplied) time for MCBIST inter cmd gap
     FULL_DLL_CAL_DELAY      = 37382,    ///< Full DLL calibration (in ddphy_nck cycles)
 };
 
