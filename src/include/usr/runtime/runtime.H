@@ -264,6 +264,18 @@ void rediscover_hdat( void );
  */
 errlHndl_t openUntrustedSpCommArea();
 
+/**
+ * @brief Locates the offset of the HDAT structure as directed by the PAYLOAD
+ *
+ * Walks the NACA in the PAYLOAD to find the SpiraH structure.  The SpiraH
+ * structure contains the offset to the SpiraS structure which is where the
+ * PAYLOAD expects the HDAT structure to be placed.
+ *
+ * @param[in] payloadBase_va - Virtual Address pointing to start of PAYLOAD
+ * @param[out] o_hdat_offset - Offset of HDAT Location from start of PAYLOAD
+ */
+void findHdatLocation(uint64_t payloadBase_va, uint64_t& o_hdat_offset);
+
 }
 
 #endif
