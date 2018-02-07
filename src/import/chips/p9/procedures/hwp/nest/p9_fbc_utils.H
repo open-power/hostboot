@@ -70,9 +70,9 @@ const uint64_t P9_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
 // chip address extension mask, for HW423589_OPTION2
-// repurposes chip ID(2) as address bits
+// repurposes chip ID(0:2) as address bits
 const uint8_t CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_HW423589_OPTION2 = 0x0;
-const uint8_t CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2 = 0x1;
+const uint8_t CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2 = 0x7;
 
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE                  = 0x40000000000ULL; // 4_TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2 = 0x8000000000ULL;  // 512_GB

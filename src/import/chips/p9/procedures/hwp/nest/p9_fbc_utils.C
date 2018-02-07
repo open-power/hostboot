@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -294,6 +294,9 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
                                FAPI_SYSTEM,
                                l_addr_extension_chip_id),
                  "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID");
+
+        // mask all but LSB, prevent regions above RA bit 21 from being exposed to callers
+        l_addr_extension_chip_id &= 0x01;
 
         // align to RA
         l_addr_extension_enable.insertFromRight < FABRIC_ADDR_LS_GROUP_ID_START_BIT,
