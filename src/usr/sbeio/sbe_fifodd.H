@@ -616,7 +616,7 @@ class SbeFifo
             FSB_DNFIFO_ACK_EOT =0x80000000,
         };
 
-        enum { MAX_UP_FIFO_TIMEOUT_NS = 10*NS_PER_MSEC }; //=10ms
+        enum { MAX_UP_FIFO_TIMEOUT_NS = 90000*NS_PER_MSEC }; //=90s
 
 }; // End of classSbeFifo
 
