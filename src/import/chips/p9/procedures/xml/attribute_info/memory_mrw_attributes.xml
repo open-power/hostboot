@@ -662,7 +662,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <default> 1  </default>
-    <overrideOnly/>
     <enum> DISABLE = 0, ENABLE = 1 </enum>
     <mssAccessorName>mrw_allow_unsupported_rcw</mssAccessorName>
   </attribute>
