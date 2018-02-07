@@ -1096,6 +1096,7 @@ fapi2::ReturnCode find_raw_card_helper( const fapi2::Target<TARGET_TYPE_DIMM>& i
                                         rcw_settings& o_raw_card)
 {
     fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+    const auto l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     FAPI_INF("Unsupported raw cards %s allowed for %s",
              i_mrw_supported_rc ? "are" : "are NOT",
@@ -1105,11 +1106,12 @@ fapi2::ReturnCode find_raw_card_helper( const fapi2::Target<TARGET_TYPE_DIMM>& i
                 fapi2::MSS_INVALID_RAW_CARD(fapi2::FAPI2_ERRL_SEV_RECOVERED, l_rc)
                 .set_DIMM_TYPE(i_dimm_type)
                 .set_RAW_CARD_REV(i_ref_raw_card_rev)
-                .set_DIMM_TARGET(i_target),
+                .set_DIMM_TARGET(i_target)
+                .set_MCA_TARGET(l_mca),
                 "Invalid reference raw card received for %s: %d for %s",
                 (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ? "RDIMM" : "LRDIMM",
                 i_ref_raw_card_rev,
-                mss::c_str(i_target) );
+                mss::c_str(i_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
