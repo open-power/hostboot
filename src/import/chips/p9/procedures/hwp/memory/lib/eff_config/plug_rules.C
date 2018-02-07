@@ -477,6 +477,7 @@ fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         // Otherwise, we swap because our first guess was wrong
         l_dead_dimm = ( l_found == l_functional_dimms.end() ) ? l_dead_dimm : l_plugged_dimms[1];
         l_live_dimm = ( l_found == l_functional_dimms.end() ) ? l_live_dimm : l_plugged_dimms[0];
+
         FAPI_ASSERT( false,
                      fapi2::MSS_DEAD_LOAD_ON_PORT()
                      .set_FUNCTIONAL_DIMM(l_live_dimm),
@@ -496,8 +497,6 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
-    fapi2::ReturnCode l_rc(fapi2::current_err);
-
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
         FAPI_TRY( check_dead_load( p ) );
