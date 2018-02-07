@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_retry_handler.C $                           */
+/* $Source: src/usr/sbeio/common/sbe_retry_handler.C $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -300,7 +300,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // In the informational only mode, we just need enough information
             // to get the SBE RC returned from the HWP.  We are running with
             // the knowledge that the SBE has failed already.
-            this->sbe_boot_fail_handler(i_target, true); // pass true to have log show up
+
+            // pass true to have log show up
+            this->sbe_boot_fail_handler(i_target, true);
             this->iv_currentSBEState = SBE_FAILED_TO_BOOT;
         }
 

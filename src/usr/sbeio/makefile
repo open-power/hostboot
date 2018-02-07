@@ -25,6 +25,7 @@
 ROOTPATH = ../../..
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 MODULE = sbeio
+include common/common.mk
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -55,11 +56,11 @@ OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
-OBJS += sbe_attn.o
-OBJS += sbe_retry_handler.o
+OBJS += ${SBEIO_COMMON_OBJS}
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+VPATH += ${ROOTPATH}/src/usr/sbeio/common
 
 include ${ROOTPATH}/procedure.rules.mk
 
