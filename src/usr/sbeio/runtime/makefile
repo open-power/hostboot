@@ -31,7 +31,7 @@ PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 MODULE = sbeio_rt
 
-
+include ../common/common.mk
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -47,13 +47,13 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
-OBJS += sbe_attn.o
-OBJS += sbe_retry_handler.o
-#@todo - RTC:180241 - Add in error handlers by creating common mk
+OBJS += ${SBEIO_COMMON_OBJS}
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
+VPATH += ../common
+
 include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/p9_get_sbe_msg_register.mk
 include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_start_cbs.mk
