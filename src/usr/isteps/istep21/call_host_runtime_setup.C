@@ -258,18 +258,9 @@ errlHndl_t verifyAndMovePayload(void)
             payload_tmp_virt_addr,
             payload_size);
 
-    // Move HDAT temporarily put into HDAT_TMP_ADDR (HDAT_TMP_SIZE) into
-    // its proper place
-    // @TODO RTC 168745 - Update hdatservices calls to return Spira-S offset
-    // Currently just using this known offset 80MB=0x5000000 used in current
-    // PHYP images and then adding 1 PAGESIZE since our virtual address starts
-    // at the secure header of PAYLOAD before PAYLOAD_BASE
-    size_t hdat_cpy_offset = 0x5001000;
-    if (!is_phyp)
-    {
-        hdat_cpy_offset = 0x31200000;
-    }
 
+    // Move HDAT into its proper place after it was temporarily put into
+    // HDAT_TMP_ADDR (HDAT_TMP_SIZE) by the FSP via TCEs
     hdat_tmp_virt_addr = mm_block_map(
                             reinterpret_cast<void*>(HDAT_TMP_ADDR),
                             HDAT_TMP_SIZE);
@@ -285,6 +276,26 @@ errlHndl_t verifyAndMovePayload(void)
         // Error log created outside of do-while loop
         break;
     }
+
+    // Determine location of HDAT from NACA section of PAYLOAD
+    uint64_t hdat_cpy_offset = 0;
+
+    // Convert the move payloadBase_va to after secure header for PHYP
+    uint64_t payloadBase_va = reinterpret_cast<uint64_t>(payloadBase_virt_addr);
+    payloadBase_va += (is_phyp ? PAGESIZE : 0 );
+
+    RUNTIME::findHdatLocation(payloadBase_va, hdat_cpy_offset);
+
+    // PHYP images require adding 1 PAGESIZE since our virtual address starts
+    // at the secure header of PAYLOAD before PAYLOAD_BASE
+    if (is_phyp)
+    {
+        hdat_cpy_offset += PAGESIZE;
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "verifyAndMovePayload(): hdat_copy_offset = 0x%X",
+               hdat_cpy_offset);
 
     hdat_final_virt_addr = mm_block_map(
                               reinterpret_cast<void*>(payloadBase +
