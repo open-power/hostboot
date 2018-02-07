@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <vpd/vpdreasoncodes.H>
+#include <vpd/pvpdenums.H>
 #include <initservice/initserviceif.H>
 #include <devicefw/driverif.H>
 #include <hwas/hwasPlat.H>
@@ -696,6 +697,81 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         {
             TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error checking for PNOR/SEEPROM SN match");
             break;
+        }
+
+        //Check the serial number and part number of the system if the previous
+        //record/key pair matched. Note that this time the record/key pairs
+        //are OSYS/SS and OSYS/MM for serial number and part number,respectively
+        if(l_type == TARGETING::TYPE_NODE &&
+           (l_matchSN && l_matchPN))
+        {
+
+            bool l_zeroPN = false;
+            bool l_zeroSN = false;
+            l_err = l_ipvpd->cmpSeepromToZero(i_target,
+                                              PVPD::OSYS,
+                                              PVPD::MM,
+                                              l_zeroPN);
+            if(l_err)
+            {
+                TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: "
+                "cmpSeepromToZero returned an error. Assuming this error is "
+                "related to OSYS/MM not being present in SEEPROM. Skipping "
+                "this error. HUID: 0x%.8X",
+                TARGETING::get_huid(i_target));
+                delete l_err;
+                l_err = nullptr;
+                l_zeroPN = true;
+
+            }
+
+            l_err = l_ipvpd->cmpSeepromToZero(i_target,
+                                              PVPD::OSYS,
+                                              PVPD::SS,
+                                              l_zeroSN);
+            if(l_err)
+            {
+                TRACDCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: "
+                "cmpSeepromToZero returned an error. Assuming this error is "
+                "related to OSYS/SS not being present in SEEPROM. Skipping "
+                "this error. HUID: 0x%.8X",
+                TARGETING::get_huid(i_target));
+                delete l_err;
+                l_err = nullptr;
+                l_zeroSN = true;
+            }
+
+            //Only compare the SN/PN between SEEPROM and PNOR if they are
+            //nonzero.
+            if(!l_zeroPN)
+            {
+                l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
+                                                  PVPD::OSYS,
+                                                  PVPD::MM,
+                                                  l_matchPN);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error"
+                    " checking for PNOR/SEEPROM PN match for NODE target 0x%.8X",
+                    TARGETING::get_huid(i_target));
+                    break;
+                }
+            }
+
+            if(!l_zeroSN)
+            {
+                l_err = l_ipvpd->cmpPnorToSeeprom(i_target,
+                                                  PVPD::OSYS,
+                                                  PVPD::SS,
+                                                  l_matchSN);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::ensureCacheIsInSync: Error"
+                    " checking for PNOR/SEEPROM SN match for NODE target 0x%.8X",
+                    TARGETING::get_huid(i_target));
+                    break;
+                }
+            }
         }
 
         // If we did not match, we need to load SEEPROM VPD data into PNOR
