@@ -6422,6 +6422,24 @@
       </chip>
     </chipEcFeature>
    </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW437173</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Limit NPU DCP0 credits advertised to an OpenCAPI AFU to 126.
+    </description>
+    <chipEcFeature>
+      <falseIfMatch/>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+   </attribute>
  <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW419021</id>>
