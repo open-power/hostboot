@@ -2195,8 +2195,8 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handlePerstMsg");
 
-    // assume the HWP will succeed
-    io_pMsg->data[1] = true;
+    // assume the HWP will succeed (0=success)
+    io_pMsg->data[1] = 0;
 
     errlHndl_t l_errl = NULL;
 
@@ -2215,7 +2215,7 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
                            "PLID = 0x%x",
                            l_errl->plid() );
 
-                io_pMsg->data[1] = false;
+                io_pMsg->data[1] = ERRL_GETRC_SAFE(l_errl);
                 errlCommit( l_errl, INITSVC_COMP_ID );
                 break;
             }
@@ -2253,7 +2253,7 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
             l_errl->collectTrace("FAPI",256);
             errlCommit(l_errl, HWPF_COMP_ID);
 
-            io_pMsg->data[1] = false;
+            io_pMsg->data[1] = ERRL_GETRC_SAFE(l_errl);
         }
     } while(0);
 
