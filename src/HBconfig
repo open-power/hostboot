@@ -47,3 +47,9 @@ config FSP_BUILD
     default n
     help
         Indicates that this is an FSP build
+
+config SUPPORT_PARTIAL_CACHE
+    default n
+    help
+        Support chips that do not have full cache --
+        intended for early bringup of hardware

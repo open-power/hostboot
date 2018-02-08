@@ -149,13 +149,17 @@ static void initTargeting(errlHndl_t& io_pError)
     if(l_scratch3.isMpipl)
     {
         TARG_INF("We are running MPIPL mode");
+        l_isMpipl = true;
+
+#ifdef CONFIG_SUPPORT_PARTIAL_CACHE
+        //If in partial cache mode need to extend to full mem
         //Since we are in MPIPL we know that memory is up and running
         //in order to avoid burning through all of our memory pages
         //during the attrrp init, which is when we copy attributes from
         //the prev IPL into PNOR, we expand out to full cache right now
         //in activate_threads we will expand out to MM_EXTEND_REAL_MEMORY
         mm_extend(MM_EXTEND_FULL_CACHE);
-        l_isMpipl = true;
+#endif
     }
     if(l_scratch3.istepMode)
     {
@@ -171,6 +175,13 @@ static void initTargeting(errlHndl_t& io_pError)
         TARG_INF("WARNING: External tool asked master proc to allow "
             "attribute overrides even in secure mode.");
     }
+
+#ifndef CONFIG_SUPPORT_PARTIAL_CACHE
+    //To prevent thrashing or "out of memory' errors on richly
+    //configured systems, always extend into full cache prior
+    //to loading ATTRs
+    mm_extend(MM_EXTEND_FULL_CACHE);
+#endif
 
     AttrRP::init(io_pError, l_isMpipl);
 
