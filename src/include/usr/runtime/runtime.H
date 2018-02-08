@@ -35,7 +35,28 @@
 namespace RUNTIME
 {
 
+    /******************************************************************************/
+    // Globals/Constants
+    /******************************************************************************/
+    constexpr uint8_t HB_SBE_WAITING_FOR_MSG = 0x0;
+    constexpr uint8_t HB_SBE_MSG_DONE = 0x1;
+    constexpr uint32_t MAX_TIME_ALLOWED_MS = 10000;
+    // NUMBER_OF_POSSIBLE_DRAWERS definition here should be in sync with
+    // src/usr/isteps/istep18/establish_system_smp.H's definition of the same constant.
+    constexpr uint8_t NUMBER_OF_POSSIBLE_DRAWERS = 8;
+    constexpr uint8_t MAX_PROCS_PER_NODE = 8;
+    constexpr uint8_t CONTINUE_WAIT_FOR_MSGS = 0x2;
+    constexpr uint8_t TIME_EXPIRED=0x3;
 
+
+
+/**
+    *  enum used for sending messages within sendSBEsystemConfig
+    */
+    enum
+    {
+        HB_SBE_SYSCONFIG_TIMER_MSG =   0xA2,
+    };
 /**
  * @brief  Add the host data mainstore location to VMM
  *
@@ -105,6 +126,42 @@ errlHndl_t populate_hbTpmInfo( void );
  * @return errlHndl_t nullptr on success else pointer to error log
  */
 errlHndl_t populate_TpmInfoByNode();
+
+/**
+ * @brief Timer function for safe error handling in sendSBESystemConfig
+ *
+ * @description Used inside the sendSBEsystemConfig() to wait for
+ *  responses from other nodes
+ * @param[in]  i_msgQPtr -- Pointer to the Message Queue to wait for messages
+ *
+ * @return void
+ */
+void* sendSBEsystemConfig_timer(void* i_msgQPtr);
+
+/**
+ * @brief Waits and Collects responses from all drawers
+ *
+ * @description Used inside the sendSBEsystemConfig() to wait and
+ * collect responses from other nodes
+ * @param[in]  i_msgQPtr -- Pointer to the Message Queue to wait for messages
+ * @param[in]  i_msgCount -- Number of messages to wait for
+ * @param[in]  i_msgType -- Type of the message to wait for
+ * @param[in, out]  i_systemFabricConfigurationMap -- to consolidate node info from all nodes
+ *
+ * @return void
+ */
+errlHndl_t collectRespFromAllDrawers( void* i_msgQPtr, uint64_t i_msgCount, uint32_t i_msgType, uint64_t& i_systemFabricConfigurationMap );
+
+/**
+ * @brief Sends the chip config down to the SBEs
+ *
+ * @description Determines the system wide chip information to send to
+ *  the SBE so it knows which chips are present for syncing with in MPIPL.
+ *  Uses IPC to communication between HB instances if multinode
+ *
+ * @return errlHndl_t nullptr on success else pointer to error log
+ */
+errlHndl_t sendSBESystemConfig();
 
 
 // How many pointers/sections there are in HB runtime data

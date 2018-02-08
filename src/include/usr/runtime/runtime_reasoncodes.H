@@ -59,6 +59,7 @@ namespace RUNTIME
         MOD_POPULATE_TPMINFOBYNODE       = 0x19,  /**< populate_hbruntime.C */
         MOD_FILL_RSVMEM_HBDATA           = 0x20,  /**< populate_hbruntime.C */
         MOD_ATTR_RUNTIME_CHECK_PREP_FAIL = 0x21,  /**< populate_hbruntime.C */
+        MOD_SEND_SBE_SYSCONFIG           = 0x22,  /**< populate_hbruntime.C */
         MOD_RT_FIRMWARE_NOTIFY           = 0x23,  /**< rt_fwnotify.C */
         MOD_RT_FIRMWARE_REQUEST          = 0x24,  /**< rt_fwreq_helper.C */
         MOD_RT_ATTR_SYNC_REQUEST         = 0x25,  /**< rt_fwnotify.C */
@@ -129,6 +130,8 @@ namespace RUNTIME
         RC_TPM_HDAT_MAP_BLOCK_ERR      = RUNTIME_COMP_ID | 0x3B,
         RC_ATTR_UPDATE_FAILED          = RUNTIME_COMP_ID | 0x3C,
         RC_HB_RES_MEM_EXCEEDED         = RUNTIME_COMP_ID | 0x3D,
+        RC_SEND_SBE_TIMER_EXPIRED      = RUNTIME_COMP_ID | 0x3E,
+        RC_HOST_TIMER_THREAD_FAIL      = RUNTIME_COMP_ID | 0x3F,
     };
 
     enum UserDetailsTypes

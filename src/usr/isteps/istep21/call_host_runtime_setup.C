@@ -457,62 +457,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
         }
 
-        //Need to send System Configuration down to SBE
-        //Use targeting code to get a list of all processors
-        TARGETING::TargetHandleList l_procChips;
-        getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
-        uint64_t l_systemFabricConfigurationMap = 0x0;
-
-
-        for(auto l_proc : l_procChips)
-        {
-            //Get fabric info from proc
-            uint8_t l_fabricChipId =
-                            l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-            uint8_t l_fabricGroupId =
-                            l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
-            //Calculate what bit position this will be
-            uint8_t l_bitPos = l_fabricChipId + (8 * l_fabricGroupId);
-
-            //Set the bit @ l_bitPos to be 1 because this is a functional proc
-            l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
-        }
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Setting sending systemConfig to all Procs...");
-
-        for(auto l_proc : l_procChips)
-        {
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "calling sendSystemConfig on proc 0x%x",
-                       l_proc->getAttr<TARGETING::ATTR_POSITION>());
-            l_err = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
-                                            l_proc);
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "sendSystemConfig ERROR : Error sending sbe chip-op to proc 0x%.8X. Returning errorlog, reason=0x%x",
-                            TARGETING::get_huid(l_proc),
-                            l_err->reasonCode() );
-                break;
-            }
-            else
-            {
-                TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "sendSystemConfig SUCCESS"  );
-            }
-        }
-
-        if(l_err)
-        {
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Successfully sent all system configs to procs via SBE chip op !!");
-        }
-
         // Need to load up the runtime module if it isn't already loaded
         if (  !VFS::module_is_loaded( "libruntime.so" ) )
         {
@@ -526,6 +470,14 @@ void* call_host_runtime_setup (void *io_pArgs)
                 // break from do loop if error occured
                 break;
             }
+        }
+
+        //Need to send System Configuration down to SBE for all HB
+        //instances
+        l_err = RUNTIME::sendSBESystemConfig();
+        if(l_err)
+        {
+            break;
         }
 
         // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
