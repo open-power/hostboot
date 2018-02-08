@@ -69,6 +69,7 @@
 namespace   THREAD_ACTIVATE
 {
 
+#ifdef CONFIG_SUPPORT_PARTIAL_CACHE
 /**
  * @brief This function will query MVPD and figure out if the master
  *        core has a fully configured cache or not..
@@ -233,7 +234,7 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                cacheDeconfig);
     return cacheDeconfig;
 }
-
+#endif
 
 void activate_threads( errlHndl_t& io_rtaskRetErrl )
 {
@@ -641,6 +642,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                     "activate_threads: We are in MPIPL, extending cache to be real memory" );
             mm_extend(MM_EXTEND_REAL_MEMORY);
         }
+#ifdef CONFIG_SUPPORT_PARTIAL_CACHE
         // Reclaim remainder of L3 cache if available.
         else if ((!PNOR::usingL3Cache()) &&
             (!getCacheDeconfig(l_masterCoreID)))
@@ -685,6 +687,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             }
 
         }
+#endif
 
     } while(0);
 
