@@ -62,4 +62,7 @@ extern "C"
                                    const bool i_sbe_start = 0);
 }
 
+fapi2::ReturnCode p9_start_cbs_switch_to_pib2pcb_path_cfam(const
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
+
 #endif
