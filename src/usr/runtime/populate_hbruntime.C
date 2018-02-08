@@ -1254,11 +1254,17 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 // Align size for OPAL
                 size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize,
                         HBRT_RSVD_MEM_OPAL_ALIGN);
+                // @TODO: RTC:183697 determine if OPAL can also use the
+                // actual size and remove the need for l_hdatEntrySize
+                // Size to add to HDAT entry
+                size_t l_hdatEntrySize = l_secRomSizeAligned;
 
                 uint64_t l_secureRomAddr = 0x0;
                 if(TARGETING::is_phyp_load())
                 {
                     l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
+                    // Specify actual size in HDAT entry for POWERVM
+                    l_hdatEntrySize = l_secureRomSize;
                 }
                 else if(TARGETING::is_sapphire_load())
                 {
@@ -1268,7 +1274,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
                         i_nodeId,
                         l_secureRomAddr,
-                        l_secureRomSize,
+                        l_hdatEntrySize,
                         HBRT_RSVD_MEM__SECUREBOOT);
                 if(l_elog)
                 {
@@ -1276,7 +1282,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
 
                 l_prevDataAddr = l_secureRomAddr;
-                l_prevDataSize = l_secureRomSize;
+                l_prevDataSize = l_secRomSizeAligned;
 
                 // Load the Cached SecureROM into memory
                 l_elog = mapPhysAddr(l_secureRomAddr, l_secureRomSize, l_vAddr);
@@ -2393,6 +2399,419 @@ errlHndl_t populate_hbTpmInfo()
     return (l_elog);
 } // end populate_hbTpmInfo
 
+//******************************************************************************
+//sendSBEsystemConfig_timer function
+//Used inside the sendSBEsystemConfig() to wait for responses from other nodes
+//******************************************************************************
+void* sendSBEsystemConfig_timer(void* i_msgQPtr)
+
+{
+    int rc=0;
+
+    msg_t* msg = msg_allocate();
+    msg->type = HB_SBE_SYSCONFIG_TIMER_MSG;
+    uint32_t l_time_ms =0;
+
+    msg_q_t* msgQ = static_cast<msg_q_t*>(i_msgQPtr);
+
+
+    //this loop will be broken when the main thread receives
+    //all the messages and the timer thread receives the
+    //HB_SBE_MSG_DONE message
+
+    do
+    {
+        if (l_time_ms < MAX_TIME_ALLOWED_MS)
+        {
+            msg->data[1] = CONTINUE_WAIT_FOR_MSGS;
+        }
+        else
+        {
+            // HB_SBE_SYSCONFIG_TIMER_MSG is sent to the main thread indicating
+            // timer expired so the main thread responds back with HB_SBE_MSG_DONE
+            // indicating the timer is not needed and exit the loop
+            msg->data[1]=TIME_EXPIRED;
+        }
+
+        rc= msg_sendrecv(*msgQ, msg);
+        if (rc)
+        {
+            TRACFCOMP( g_trac_runtime,
+                        "sendSBEsystemConfig timer failed msg sendrecv %d",rc);
+        }
+        if (msg->data[1] == HB_SBE_MSG_DONE)
+        {
+            TRACFCOMP( g_trac_runtime,
+                        "sendSBEsystemConfig timer not needed.");
+            break;
+        }
+
+        nanosleep(0,NS_PER_MSEC);
+        l_time_ms++;
+
+    }while(1);
+
+    msg_free(msg);
+
+    return NULL;
+}
+
+//******************************************************************************
+//collectRespFromAllDrawers function
+//Used inside the sendSBEsystemConfig() to wait and collect responses from
+//all other drawers
+//******************************************************************************
+errlHndl_t collectRespFromAllDrawers( void* i_msgQPtr, uint64_t i_msgCount,
+                                      uint32_t i_msgType,
+                                      uint64_t& i_systemFabricConfigurationMap )
+{
+    errlHndl_t  l_elog = nullptr;
+    uint64_t msg_count = i_msgCount;
+    msg_q_t* msgQ = static_cast<msg_q_t*>(i_msgQPtr);
+
+    //wait for all hb images to respond
+    //want to spawn a timer thread
+    tid_t l_progTid = task_create(
+               RUNTIME::sendSBEsystemConfig_timer,msgQ);
+    assert( l_progTid > 0 ,"sendSBEsystemConfig_timer failed");
+    while(msg_count)
+    {
+        msg_t* response = msg_wait(*msgQ);
+
+        if (response->type == HB_SBE_SYSCONFIG_TIMER_MSG)
+        {
+            if (response->data[1] == TIME_EXPIRED)
+            {
+                //timer has expired
+                TRACFCOMP( g_trac_runtime,
+                        "collectRespFromAllDrawers failed to "
+                        "receive messages from all hb images in time" );
+                //tell the timer thread to exit
+                response->data[1] = HB_SBE_MSG_DONE;
+                msg_respond(*msgQ,response);
+
+                //generate an errorlog
+                /*@
+                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                 *  @moduleid       RUNTIME::MOD_SEND_SBE_SYSCONFIG,
+                 *  @reasoncode     RUNTIME::RC_SEND_SBE_TIMER_EXPIRED,
+                 *  @userdata1      Message Type IPC_QUERY_CHIPINFO or
+                 *                               IPC_SET_SBE_CHIPINFO
+                 *  @userdata2      Number of nodes that have not
+                 *                  responded
+                 *
+                 *  @devdesc        messages from other nodes have
+                 *                  not returned in time
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                RUNTIME::MOD_SEND_SBE_SYSCONFIG,
+                                RUNTIME::RC_SEND_SBE_TIMER_EXPIRED,
+                                i_msgType,
+                                msg_count   );
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                l_elog->collectTrace("IPC");
+                l_elog->collectTrace("MBOXMSG");
+                //Commit the Error log
+                errlCommit(l_elog,RUNTIME_COMP_ID);
+                // Break the While loop and wait for the child thread to exit
+                break;
+
+            }
+            else if( response->data[1] == CONTINUE_WAIT_FOR_MSGS)
+            {
+                TRACFCOMP( g_trac_runtime,
+                    "collectRespFromAllDrawers timer continue waiting message.");
+                response->data[1] =HB_SBE_WAITING_FOR_MSG;
+                msg_respond(*msgQ,response);
+            }
+        }
+        else if (response->type == IPC::IPC_QUERY_CHIPINFO)
+        {
+            uint64_t l_nodeInfo =
+                  reinterpret_cast<uint64_t>(response->extra_data);
+
+
+            //Process msg, if we are waiting for IPC_QUERY_CHIPINFO response.
+            if (i_msgType == IPC::IPC_QUERY_CHIPINFO)
+            {
+                TRACFCOMP(g_trac_runtime,
+                    "IPC_QUERY_CHIPINFO : drawer %d completed info 0x%lx",
+                    response->data[0], l_nodeInfo);
+                //Apend the nodeInfo to be used in sendSBESystemConfig
+                i_systemFabricConfigurationMap |= l_nodeInfo;
+                --msg_count;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime,
+                    "IPC_QUERY_CHIPINFO : unexpected message from drawer %d ",
+                    response->data[0]);
+            }
+
+            msg_free(response);
+
+        }
+        else if (response->type == IPC::IPC_SET_SBE_CHIPINFO)
+        {
+            //Process msg, if we are waiting for IPC_SET_SBE_CHIPINFO response.
+            if (i_msgType == IPC::IPC_SET_SBE_CHIPINFO)
+            {
+                TRACFCOMP(g_trac_runtime,
+                  "IPC_SET_SBE_CHIPINFO : drawer %d completed",
+                  response->data[0]);
+                --msg_count;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_runtime,
+                    "IPC_SET_SBE_CHIPINFO : unexpected message from drawer %d ",
+                    response->data[0]);
+            }
+
+            msg_free(response);
+        }
+    }
+
+    //the msg_count should be 0 at this point to have
+    //exited from the loop above.  If the msg count
+    //is not zero then the timer must have expired
+    //and the code would have asserted
+    //Now need to tell the child timer thread to exit
+
+    //tell the child timer thread to exit if didn't
+    //already timeout
+    if (msg_count ==0)
+    {
+        msg_t* response = msg_wait(*msgQ);
+        if (response->type == HB_SBE_SYSCONFIG_TIMER_MSG)
+        {
+            TRACFCOMP( g_trac_runtime,
+                    "collectRespFromAllDrawers received all hb "
+                    "images in time for message type %d",i_msgType);
+
+            response->data[1] = HB_SBE_MSG_DONE;
+            msg_respond(*msgQ,response);
+        }
+    }
+
+    //wait for the child thread to end
+    int l_childsts =0;
+    void* l_childrc = NULL;
+    tid_t l_tidretrc = task_wait_tid(l_progTid,&l_childsts,&l_childrc);
+    if ((static_cast<int16_t>(l_tidretrc) < 0)
+        || (l_childsts != TASK_STATUS_EXITED_CLEAN ))
+    {
+        // the launched task failed or crashed,
+        TRACFCOMP( g_trac_runtime,
+            "task_wait_tid failed; l_tidretrc=0x%x, l_childsts=0x%x",
+            l_tidretrc, l_childsts);
+
+                //generate an errorlog
+                /*@
+                 *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
+                 *  @moduleid       RUNTIME::MOD_SEND_SBE_SYSCONFIG,
+                 *  @reasoncode     RUNTIME::RC_HOST_TIMER_THREAD_FAIL,,
+                 *  @userdata1      l_tidretrc,
+                 *  @userdata2      l_childsts,
+                 *
+                 *  @devdesc        sendSBESystemConfig timer thread
+                 *                  failed
+                 */
+                l_elog = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                RUNTIME::MOD_SEND_SBE_SYSCONFIG,
+                                RUNTIME::RC_HOST_TIMER_THREAD_FAIL,
+                                l_tidretrc,
+                                l_childsts);
+
+                l_elog->collectTrace(RUNTIME_COMP_NAME);
+                return l_elog;
+    }
+
+    return(l_elog);
+
+}
+// Sends the chip config down to the SBEs
+// Determines the system wide chip information to send to
+// the SBE so it knows which chips are present for syncing with in MPIPL.
+// Uses IPC to communication between HB instances if multinode
+errlHndl_t sendSBESystemConfig( void )
+{
+    errlHndl_t  l_elog = nullptr;
+    uint64_t l_systemFabricConfigurationMap = 0x0;
+
+
+    do {
+
+
+        TARGETING::Target * sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != nullptr);
+
+        // Figure out which node we are running on
+        TARGETING::Target* mproc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(mproc);
+        TARGETING::EntityPath epath = mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        const TARGETING::EntityPath::PathElement pe =
+          epath.pathElementOfType(TARGETING::TYPE_NODE);
+        uint64_t nodeid = pe.instance;
+
+
+        //Determine this HB Instance SBE config.
+        TARGETING::TargetHandleList l_procChips;
+        getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+        for(auto l_proc : l_procChips)
+        {
+            //Get fabric info from proc
+            uint8_t l_fabricChipId =
+              l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+            uint8_t l_fabricGroupId =
+              l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            //Calculate what bit position this will be
+            uint8_t l_bitPos = l_fabricChipId + (MAX_PROCS_PER_NODE * l_fabricGroupId);
+
+            //Set the bit @ l_bitPos to be 1 because this is a functional proc
+            l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
+        }
+
+        // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
+        // Currently set up in host_sys_fab_iovalid_processing() which only
+        // gets called if there are multiple physical nodes.   It eventually
+        // needs to be setup by a hb routine that snoops for multiple nodes.
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+          sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+        TRACFCOMP( g_trac_runtime, "hb_images = 0x%x, nodeid = 0x%x", hb_images, nodeid);
+        if (0 != hb_images)  //Multi-node
+        {
+            // multi-node system
+            // This msgQ catches the node responses from the commands
+            msg_q_t msgQ = msg_q_create();
+            l_elog = MBOX::msgq_register(MBOX::HB_SBE_SYSCONFIG_MSGQ,msgQ);
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime, "MBOX::msgq_register failed!" );
+                break;
+            }
+
+            // keep track of the number of messages we send so we
+            // know how many responses to expect
+            uint64_t msg_count = 0;
+
+            // loop thru rest all nodes -- sending msg to each
+            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+              ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+            for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
+            {
+                // skip sending to ourselves, we did our construction above
+                if(l_node == nodeid)
+                    continue;
+
+                if( 0 != ((mask >> l_node) & hb_images ) )
+                {
+                    TRACFCOMP( g_trac_runtime, "send IPC_QUERY_CHIPINFO "
+                               "message to node %d",l_node );
+
+                    msg_t * msg = msg_allocate();
+                    msg->type = IPC::IPC_QUERY_CHIPINFO;
+                    msg->data[0] = l_node;      // destination node
+                    msg->data[1] = nodeid;      // respond to this node
+
+                    // send the message to the slave hb instance
+                    l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+                    if( l_elog )
+                    {
+                        TRACFCOMP( g_trac_runtime, "MBOX::send to node %d"
+                                   " failed", l_node);
+                        break;
+                    }
+
+                    ++msg_count;
+
+                } // end if node to process
+            } // end for loop on nodes
+
+            // wait for a response to each message we sent
+            if( l_elog == nullptr )
+            {
+                l_elog = collectRespFromAllDrawers( &msgQ, msg_count, IPC::IPC_QUERY_CHIPINFO, l_systemFabricConfigurationMap);
+            }
+
+            //////////////////////////////////////////////////////////////////////
+            // Now send each HB instance the full info to write to the SBEs
+            ////////////////////////////
+            if( l_elog == nullptr )
+            {
+                msg_count = 0;
+                for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
+                {
+                    // skip sending to ourselves, we will do our set below
+                    if(l_node == nodeid)
+                        continue;
+
+                    if( 0 != ((mask >> l_node) & hb_images ) )
+                    {
+                        TRACFCOMP( g_trac_runtime, "send IPC_SET_SBE_CHIPINFO "
+                                   "message to node %d",l_node );
+
+                        msg_t * msg = msg_allocate();
+                        msg->type = IPC::IPC_SET_SBE_CHIPINFO;
+                        msg->data[0] = l_node;      // destination node
+                        msg->data[1] = nodeid;      // respond to this node
+                        msg->extra_data = reinterpret_cast<uint64_t*>(l_systemFabricConfigurationMap);
+
+                        // send the message to the slave hb instance
+                        l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+                        if( l_elog )
+                        {
+                            TRACFCOMP( g_trac_runtime, "MBOX::send to node %d"
+                                       " failed", l_node);
+                            break;
+                        }
+
+                        ++msg_count;
+
+                    } // end if node to process
+                } // end for loop on nodes
+            }
+
+            // wait for a response to each message we sent
+            if( l_elog == nullptr )
+            {
+                l_elog = collectRespFromAllDrawers( &msgQ, msg_count, IPC::IPC_SET_SBE_CHIPINFO, l_systemFabricConfigurationMap);
+            }
+
+            MBOX::msgq_unregister(MBOX::HB_SBE_SYSCONFIG_MSGQ);
+            msg_q_destroy(msgQ);
+        }
+
+        //Now do this HB instance
+        if( l_elog == nullptr )
+        {
+            for(auto l_proc : l_procChips)
+            {
+                TRACDCOMP( g_trac_runtime,
+                           "calling sendSystemConfig on proc 0x%x",
+                           TARGETING::get_huid(l_proc));
+                l_elog = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
+                                                l_proc);
+                if ( l_elog )
+                {
+                    TRACFCOMP( g_trac_runtime,
+                               "sendSystemConfig ERROR : Error sending sbe chip-op to proc 0x%.8X. Returning errorlog, reason=0x%x",
+                               TARGETING::get_huid(l_proc),
+                               l_elog->reasonCode() );
+                    break;
+                }
+            }
+        }
+
+    } while(0);
+
+    return(l_elog);
+
+} // end sendSBESystemConfig
+
 
 // populate the hostboot runtime data section for the system
 // will send msg to slave nodes in multinode system
@@ -2569,6 +2988,7 @@ errlHndl_t populate_hbRuntimeData( void )
     return(l_elog);
 
 } // end populate_hbRuntimeData
+
 
 errlHndl_t persistent_rwAttrRuntimeCheck( void )
 {

@@ -53,6 +53,7 @@ namespace MBOX
         HB_IPC_MSGQ             = 9, //For inter-drawer HB messages
         HB_POP_ATTR_MSGQ        = 10, // populate Attribute response
         HB_COALESCE_MSGQ        = 11, //host_coalesce response
+        HB_SBE_SYSCONFIG_MSGQ   = 12, //For SBE System Config response
 
         // Add HB mbox msg queue ids (services) before this line
         HB_LAST_VALID_MSGQ,          // end of valid HB mbox msgQ ids

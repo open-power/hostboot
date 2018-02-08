@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,8 @@ namespace IPC
         IPC_POPULATE_ATTRIBUTES = MBOX::FIRST_SECURE_MSG + 1,
         IPC_TEST_CONNECTION = MBOX::FIRST_SECURE_MSG + 2,
         IPC_START_PAYLOAD,
+        IPC_QUERY_CHIPINFO,
+        IPC_SET_SBE_CHIPINFO,
     };
 
 }; // namespace IPC

@@ -32,6 +32,8 @@
 #include <mbox/mbox_reasoncodes.H>
 #include <intr/interrupt.H>
 #include <initservice/initserviceif.H>
+#include    <sbeio/sbeioif.H>
+
 
 namespace ISTEP_21
 {
@@ -173,7 +175,94 @@ void IpcSp::msgHandler()
                 }
                 break;
 
-            case IPC_START_PAYLOAD:
+            case IPC_QUERY_CHIPINFO:
+            {
+                TARGETING::TargetHandleList l_procChips;
+                getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+                uint64_t l_systemFabricConfigurationMap = 0x0;
+                for(auto l_proc : l_procChips)
+                {
+                    //Get fabric info from proc
+                    uint8_t l_fabricChipId =
+                      l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                    uint8_t l_fabricGroupId =
+                      l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+                    //Calculate what bit position this will be
+                    uint8_t l_bitPos = l_fabricChipId + (RUNTIME::MAX_PROCS_PER_NODE * l_fabricGroupId);
+
+                    //Set the bit @ l_bitPos to be 1 because this is a functional proc
+                    l_systemFabricConfigurationMap |= (0x8000000000000000 >> l_bitPos);
+                }
+
+                TRACFCOMP( g_trac_ipc,
+                           "IPC Query ChipInfo 0x%lx", l_systemFabricConfigurationMap);
+
+                //Send a response with this HB instances chip info
+                msg->extra_data = reinterpret_cast<uint64_t*>(l_systemFabricConfigurationMap);
+                err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
+                if (err)
+                {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+                break;
+             }
+             case IPC_SET_SBE_CHIPINFO:
+             {
+                //Need to send System Configuration down to SBE
+                //Master sends info to set into SBE via msg->extra_data
+                uint64_t l_systemFabricConfigurationMap =
+                        reinterpret_cast<uint64_t>(msg->extra_data);
+
+                TRACFCOMP( g_trac_ipc,
+                           "sending systemConfig[0x%lx] to SBEs",
+                           l_systemFabricConfigurationMap);
+
+                TARGETING::TargetHandleList l_procChips;
+                getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+                for(auto l_proc : l_procChips)
+                {
+                    TRACDCOMP( g_trac_ipc,
+                               "calling sendSystemConfig on proc 0x%x",
+                               TARGETING::get_huid(l_proc));
+                    err = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
+                                                    l_proc);
+                    if ( err )
+                    {
+                        TRACFCOMP( g_trac_ipc,
+                                   "sendSystemConfig ERROR : Error sending sbe chip-op to proc 0x%.8X. Returning errorlog, reason=0x%x",
+                                   TARGETING::get_huid(l_proc),
+                                   err->reasonCode() );
+                        break;
+                    }
+                }
+
+                //If error terminate here
+                if(err)
+                {
+                    TRACFCOMP( g_trac_ipc, "In ipcSp: SBEIO::sendSystemConfig errored - must shutdown now!!!");
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_ipc,
+                               "Successfully sent all system configs to procs via SBE chip op !!");
+                }
+
+                //Send response back to the master HB to indicate successful configuration down to SBE
+                err = MBOX::send(MBOX::HB_SBE_SYSCONFIG_MSGQ, msg, msg->data[1] );
+                if (err)
+                {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+                break;
+             }
+             case IPC_START_PAYLOAD:
             {
                 const int NUM_MOD = 3;
                 const char * mods[NUM_MOD] =
