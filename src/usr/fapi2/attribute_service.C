@@ -549,6 +549,7 @@ struct dimmBadDqDataFormat
     uint8_t  iv_reserved2;
     uint8_t  iv_reserved3;
     uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+    uint8_t  iv_unused[32];
 };
 
 // constant definitions
@@ -956,7 +957,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
 ReturnCode __mcLogicalToDimmDqHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint32_t i_ps, uint8_t i_mcPin, uint8_t o_dimm_dq )
+    uint32_t i_ps, uint8_t i_mcPin, uint8_t &o_dimm_dq )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1087,7 +1088,7 @@ ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 ReturnCode __dimmDqToMcLogicalHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint32_t i_ps, uint8_t i_dimm_dq, uint64_t o_mcPin )
+    uint32_t i_ps, uint8_t i_dimm_dq, uint64_t &o_mcPin )
 {
     fapi2::ReturnCode l_rc;
     uint64_t l_c4 = 0;
@@ -1174,7 +1175,7 @@ ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
                     {
                         // get the pin/bit position in DIMM DQ format
                         uint8_t l_dimm_dq = (byte*8) + bit; // pin 0-79
-                        uint8_t l_mcPin = 0;
+                        uint64_t l_mcPin = 0;
 
                         // translate the DIMM DQ pin to MC Logical format
                         l_rc = __dimmDqToMcLogicalHelper( i_fapiDimm,
@@ -1482,6 +1483,27 @@ ReturnCode fapiAttrSetBadDqBitmap(
         l_spdData.iv_reserved2 = 0;
         l_spdData.iv_reserved3 = 0;
         memset( l_spdData.iv_bitmaps, 0, sizeof(l_spdData.iv_bitmaps) );
+
+        // We need to make sure the rest of the data in VPD beyond the bad dq
+        // bitmap is unchanged.
+        uint8_t * l_badDqData =
+            static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
+
+        l_errl = deviceRead(l_dimmTarget, l_badDqData,
+                            DIMM_BAD_DQ_SIZE_BYTES,
+                            DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA));
+        if ( l_errl )
+        {
+            FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to read DIMM Bad DQ "
+                      "data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        dimmBadDqDataFormat l_prevSpdData;
+        memcpy( &l_prevSpdData, l_badDqData, sizeof(dimmBadDqDataFormat) );
+        memcpy( &l_spdData.iv_unused, l_prevSpdData.iv_unused,
+                sizeof(l_spdData.iv_unused) );
 
         // Get the spare byte
         uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
