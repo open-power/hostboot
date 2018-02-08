@@ -892,19 +892,24 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                     tgtType    = TYPE_MEMBUF;
                 }
 
-                if ( (TYPE_MEMBUF == tgtType) ||
-                     (TYPE_MBA    == tgtType) ||
-                     (TYPE_MCS    == tgtType) ||
-                     (TYPE_MCA    == tgtType) )
+                switch ( tgtType )
                 {
-                    TargetHandleList dimms = getConnected( calloutTgt,
-                                                           TYPE_DIMM );
-                    dimmList.insert( dimmList.end(), dimms.begin(),
-                                     dimms.end() );
-                }
-                else if ( TYPE_DIMM == tgtType )
-                {
-                    dimmList.push_back( calloutTgt );
+                    case TYPE_MCBIST: case TYPE_MCS: case TYPE_MCA: // Nimbus
+                    case TYPE_MC:     case TYPE_MI:  case TYPE_DMI: // Cumulus
+                    case TYPE_MEMBUF: case TYPE_MBA:                // Centaur
+                    {
+                        TargetHandleList dimms = getConnected( calloutTgt,
+                                                               TYPE_DIMM );
+                        dimmList.insert( dimmList.end(), dimms.begin(),
+                                         dimms.end() );
+                        break;
+                    }
+
+                    case TYPE_DIMM:
+                        dimmList.push_back( calloutTgt );
+                        break;
+
+                    default: ; // nothing to do
                 }
             }
             else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )

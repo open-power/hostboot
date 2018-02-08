@@ -540,10 +540,12 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MCBIST, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCBIST, TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MCBIST, TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCBIST, TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCS,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCS,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCS,    TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MCS,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
@@ -553,21 +555,25 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MC,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MC,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MI,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MI,     TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MI,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MI,     TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_DMI,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_DMI,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MEMBUF, TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_DMI,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MEMBUF, TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_L4,     TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
 
