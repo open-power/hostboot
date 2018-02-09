@@ -5977,6 +5977,24 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Program MCU to support standard MDI behavior for Cumulus DD1.1
+      allowing for MDI to be 0 in the system for local operations.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

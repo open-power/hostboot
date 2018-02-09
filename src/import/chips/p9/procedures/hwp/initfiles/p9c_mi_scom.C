@@ -74,6 +74,9 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         uint64_t l_def_ENABLE_DYNAMIC_64_128B_READS = literal_0;
         fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI, TGT2,
+                               l_TGT2_ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
         uint64_t l_def_ENABLE_HWFM = literal_1;
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
@@ -235,6 +238,12 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010813ull, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI == literal_0))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON );
+            }
 
             if ((l_def_ENABLE_AMO_CACHING == literal_1))
             {
