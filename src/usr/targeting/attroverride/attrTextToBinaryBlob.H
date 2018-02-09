@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,38 +47,129 @@ namespace AttrTextToBinaryBlob
     /**
      * FAPI/TARG Attribute Text files are used by an engineer to specify
      * attribute overrides and used to communicate attribute syncs between
-     * Firmware and Cronus. The format of a line in this file is:
-     *   <FAPI-ATTR-ID-STR>[<ARRAY-DIMS>] [<ATTR-TYPE>] <ATTR-VAL> [CONST]
-     *   <FAPI-ATTR-ID-STR>
-     *     The FAPI Attr ID string for the attribute
-     *   <ARRAY-DIMS>
-     *     The array dimension (if any) within the attribute for this value
-     *   <ATTR-TYPE>
-     *     The type of the attribute, uint8/16/32/64 and the array dimensions
-     *     if any, this is optional
-     *   <ATTR-VAL>
-     *     Attribute value, literal or enumerator
-     *   CONST
-     *     If the attribute override is constant
+     * Firmware and Cronus.
      *
+     * These files contain :
+     *  1) Target lines
+     *     a) System Target line - associated attribute applies to
+     *                              entire system
+     *     b) Unit Target line - associated attribute applies only to
+     *                            explicitly identified Unit
+     *  2) Attribute Lines  (associated with the most recent target line)
+     *
+     * ---------------------------------------
+     * The format of a System Target Line is :
+     *
+     *   target = <system string>
+     *
+     *      <system string>
+     *          kx:sy[:]          note: x=0, y=0
+     *
+     *          Note : some additional obsolete forms have been
+     *                  grandfathered in:
+     *
+     *          blank             note: interpreted as k0:s0
+     *          kx:nz:sy[:]       note: x=0, y=0, z=0 or all
+     *
+     * ---------------------------------------
+     * The format of a Unit Target Line is :
+     *
+     *   <system string> || [:nz] || :<chip type> || [.<chip unit type>] ||
+     *     :<target position> || [:<unit position>]
+     *
+     *     note : x = 0
+     *     note : Y = 0
+     *     note : z may be :
+     *             - single digit 0-9
+     *             - comma separated list of digits 0-9
+     *                -- 2 or more items in list
+     *                -- no ordering dependencies
+     *                e.g. 0,4
+     *                e.g. 5,3,9
+     *             - all
+     *
+     *
+     *      <chip type>
+     *         definitions :
+     *           src/usr/targeting/attroverride/attrTextToBinaryBlob.C
+     *           AttrOverrideSyncConstants::CHIP_TYPE_TARG_STR_TO_TYPE
+     *           e.g.  p9n, pu, dimm
+     *
+     *      <chip unit type>
+     *         definitions :
+     *           src/usr/targeting/attroverride/attrTextToBinaryBlob.C
+     *           AttrOverrideSyncConstants::CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
+     *           e.g.  ex, mca, obus
+     *
+     *      <target position>
+     *         pw
+     *            note : w may be :
+     *             - single number 0 - 65,534
+     *             - comma separated list of digits 0 - 65,534
+     *                -- 2 or more items in list
+     *                -- no ordering dependencies
+     *                e.g. 0,4
+     *                e.g. 5,3,9
+     *             - all
+     *
+     *      <unit position>
+     *         cv
+     *            note : v may be :
+     *             - single number 0 - 254
+     *             - comma separated list of digits 0 - 254
+     *                -- 2 or more items in list
+     *                -- no ordering dependencies
+     *                e.g. 0,4
+     *                e.g. 5,3,9
+     *             - all
+     *
+     *
+     * ---------------------------------------
+     * The format of an Attribute Line is:
+     *
+     *   <FAPI-ATTR-ID-STR>[<ARRAY-DIMS>] [<ATTR-TYPE>] <ATTR-VAL> [CONST]
+     *
+     *     <FAPI-ATTR-ID-STR>
+     *       The FAPI Attr ID string for the attribute.
+     *       defined in obj/genfiles/attributeenums.H
+     *
+     *     <ARRAY-DIMS>
+     *       The array dimension (if any) within the attribute for this value
+     *
+     *     <ATTR-TYPE>
+     *       The type of the attribute, uint8/16/32/64 and the array dimensions
+     *       if any, this is optional
+     *
+     *     <ATTR-VAL>
+     *       Attribute value, literal or enumerator
+     *
+     *     CONST
+     *       If the attribute override is constant
+     *
+     * ---------------------------------------
      * Example:
-     *   target = k0:n0:s0:
+     *   CLEAR
+     *   # This is a comment
+     *   target = k0:s0
      *   ATTR_SCRATCH_UINT8_1 u8 0x12
      *   ATTR_SCRATCH_UINT32_1 u32 0x12345678
      *   ATTR_SCRATCH_UINT64_1 u64 0x8000000000000001 CONST
      *
-     *   target = k0:n0:s0:centaur.mba:p00:c0
+     *   target = k0:s0:n0:centaur.mba:p00:c0
      *   ATTR_MSS_FREQ 0x00000640 u32 CONST
      *   ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 u32 CONST
-     *   ATTR_EFF_CEN_DRV_IMP_CNTL[0] u8[2] OHM15 CONST
-     *   ATTR_EFF_CEN_DRV_IMP_CNTL[1] u8[2] OHM15 CONST
      *
-     *   target = k0:n0:s0:centaur.mba:pall:call
-     *   ATTR_MSS_DIMM_MFG_ID_CODE[0][0] u32[2][2] 0x12345678
-     *   ATTR_MSS_DIMM_MFG_ID_CODE[0][1] u32[2][2] 0x12345678
-     *   ATTR_MSS_DIMM_MFG_ID_CODE[1][0] u32[2][2] 0x12345678
-     *   ATTR_MSS_DIMM_MFG_ID_CODE[1][1] u32[2][2] 0x12345678
+     *   target = k0:s0:nall:p9:pall
+     *   ATTR_VOLTAGE_EXT_VDD_BIAS_ULTRATURBO -5 CONST
+     *
+     *   target = k0:s0:n4:centaur:p06
+     *   ATTR_MSS_FREQ 0x00000345 CONST
+     *
+     *   target = k0:s0:n0,6,9:centaur.mba:p06:c1
+     *   ATTR_MSS_FREQ 0x00000640 CONST
+     *
      */
+
 
     /**
      * @brief This function writes the data from the attribute into a binary
@@ -135,6 +226,20 @@ namespace AttrTextToBinaryBlob
      */
     static bool attrFileIsTargLine(
         const std::string & i_line);
+
+
+    /**
+     * @brief This function converts obsolete format target line to
+     *         current format.
+     *        Will not change current format target line.
+     *
+     * @param[in] i_line Reference to string containing line
+     * @param[out] o_convertedLine - Filled in with converted string
+     *
+     * @return bool True if there was an error, False otherwise
+     */
+    static bool convertTargLine( const std::string & i_line,
+                                 std::string & o_convertedLine );
 
     /**
      * @brief Checks if a Target line in an Attribute text file is
