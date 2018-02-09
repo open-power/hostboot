@@ -62,7 +62,7 @@ fapi2::ReturnCode p9_cpu_special_wakeup_core(
     FAPI_INF(">> p9_cpu_special_wakeup_core");
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_cpmmrRegVal;
-    fapi2::buffer<uint64_t> l_lmcrRegVal;
+    fapi2::buffer<uint64_t> l_lmcrRegVal = 0;
     uint8_t l_spWakeUpInProg    =   0;
     uint8_t l_corePos           =   0;
     uint8_t l_autoSplWkUpBitPos =   12; //EQ_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE
@@ -106,13 +106,9 @@ fapi2::ReturnCode p9_cpu_special_wakeup_core(
 
     l_rc = getScom( l_exTarget, EX_CME_SCOM_LMCR_SCOM,  l_lmcrRegVal );
 
-
-    if( (l_rc) && (l_rc != (uint32_t)PIB_CHIPLET_OFFLINE_ERR ))
-    {
-        FAPI_ERR("Failed to SCOM LMCR Reg, EX Pos %d", (l_corePos >> 1 ) );
-        return l_rc;
-    }
-    else if ((l_rc) && (l_rc == (uint32_t)PIB_CHIPLET_OFFLINE_ERR ))
+    // Treating any SCOM error as "offline" for the purposes of determining
+    // that auto special wake-up is active.
+    if( l_rc )
     {
         l_rc = fapi2::FAPI2_RC_SUCCESS;
         l_lmcr_fail_state = 1;
