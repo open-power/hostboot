@@ -907,7 +907,7 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
              *               extra bad bits set for DIMM
              */
             l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    ERRORLOG::ERRL_SEV_PREDICTIVE,
                     MOD_FAPI2_BAD_DQ_BITMAP,
                     RC_BAD_DQ_MFG_MODE_BITS,
                     TARGETING::get_huid(i_dimm) );
@@ -943,6 +943,9 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
             l_errl->addFFDC( HWPF_COMP_ID, &i_callersData[3],
                              sizeof(i_callersData[3]), 1,
                              CURRENT_BAD_DQ_BITMAP_RANK3 );
+
+            l_errl->addHwCallout(i_dimm, HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::DELAYED_DECONFIG, HWAS::GARD_Predictive);
 
             errlCommit( l_errl, HWPF_COMP_ID );
         }
