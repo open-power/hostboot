@@ -60,12 +60,8 @@ int32_t getRowsAndIntrlv( ExtensibleChip * i_chip, uint8_t i_dslct,
     o_rows = 0;
     o_interleaved = false;
 
-    uint32_t mcaPos = i_chip->getPos() % MAX_MCA_PER_MCS;
-
-    ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
-
-    SCAN_COMM_REGISTER_CLASS * addrTransReg = mcs_chip->getRegister(
-        (mcaPos == 0) ? "MC_ADDR_TRANS_0" : "MC_ADDR_TRANS_1");
+    SCAN_COMM_REGISTER_CLASS * addrTransReg =
+        i_chip->getRegister( "MC_ADDR_TRANS" );
 
     o_rc = addrTransReg->Read();
     if ( SUCCESS != o_rc )
