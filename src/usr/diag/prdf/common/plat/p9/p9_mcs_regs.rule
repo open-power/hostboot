@@ -28,23 +28,6 @@
 ################################################################################
 
     ############################################################################
-    # Address Translation Registers
-    ############################################################################
-    register MC_ADDR_TRANS_0
-    {
-        name        "P9 MCS target address translation register 0";
-        scomaddr    0x05010820;
-        capture     group default;
-    };
-
-    register MC_ADDR_TRANS_1
-    {
-        name        "P9 MCS target address translation register 1";
-        scomaddr    0x05010830;
-        capture     group default;
-    };
-
-    ############################################################################
     # P9 MCS target HDCT additions (open power chkstop analysis)
     ############################################################################
 
