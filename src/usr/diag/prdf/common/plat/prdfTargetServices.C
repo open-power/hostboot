@@ -1268,20 +1268,21 @@ int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port )
 //------------------------------------------------------------------------------
 
 template<>
-int32_t getDimmSlct<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTarget,
-                               uint8_t & o_dimm )
+uint32_t getDimmSlct<TYPE_MBA>( TargetHandle_t i_trgt )
 {
-    o_dimm = i_dimmTarget->getAttr<ATTR_MBA_DIMM>();
-    return SUCCESS;
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
+
+    return i_trgt->getAttr<ATTR_MBA_DIMM>();
 }
 
 template<>
-int32_t getDimmSlct<TYPE_MCA>( TARGETING::TargetHandle_t i_dimmTarget,
-                               uint8_t & o_dimm )
+uint32_t getDimmSlct<TYPE_MCA>( TargetHandle_t i_trgt )
 {
-    o_dimm = i_dimmTarget->getAttr<TARGETING::ATTR_FAPI_POS>() %
-                                             MAX_DIMM_PER_PORT;
-    return SUCCESS;
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
+
+    return getTargetPosition(i_trgt) % MAX_DIMM_PER_PORT;
 }
 
 //------------------------------------------------------------------------------

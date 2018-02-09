@@ -627,14 +627,7 @@ int32_t dimmSlct( TargetHandle_t  i_dimm )
         uint64_t largestAddr  = 0;
         MemAddr startAddr, endAddr;
         std::vector<MemRank> masterRanks;
-        uint8_t dimmSlct = 0;
-
-        o_rc = getDimmSlct<T>( i_dimm, dimmSlct );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getDimmSlct failed" );
-            break;
-        }
+        uint8_t dimmSlct = getDimmSlct<T>( i_dimm );
 
         getMasterRanks<T>( tgt, masterRanks, dimmSlct );
 
@@ -690,17 +683,9 @@ bool isDimmPair( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
     bool isDimmPair = false;
     do
     {
-        uint8_t dimm1Slct = 0;
-        uint8_t dimm2Slct = 0;
+        uint8_t dimm1Slct = getDimmSlct<T>( i_dimm1 );
+        uint8_t dimm2Slct = getDimmSlct<T>( i_dimm2 );
 
-        int32_t rc = getDimmSlct<T>( i_dimm1, dimm1Slct );
-        rc        |= getDimmSlct<T>( i_dimm2, dimm2Slct );
-
-        if( SUCCESS != rc )
-        {
-            PRDF_ERR( PRDF_FUNC " getDimmSlct() failed" );
-            break;
-        }
         isDimmPair = ( ( dimm1Slct == dimm2Slct ) &&
                        ( getConnectedParent( i_dimm1, T ) ==
                                  getConnectedParent( i_dimm2, T )));
@@ -717,17 +702,9 @@ bool compareDimms( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
     bool isSmall = false;
     do
     {
-        uint8_t dimm1Slct = 0;
-        uint8_t dimm2Slct = 0;
+        uint8_t dimm1Slct = getDimmSlct<T>( i_dimm1 );
+        uint8_t dimm2Slct = getDimmSlct<T>( i_dimm2 );
 
-        int32_t rc = getDimmSlct<T>( i_dimm1, dimm1Slct );
-        rc        |= getDimmSlct<T>( i_dimm2, dimm2Slct );
-
-        if( SUCCESS != rc )
-        {
-            PRDF_ERR( PRDF_FUNC " getDimmSlct() failed" );
-            break;
-        }
         TargetHandle_t tgt1 = getConnectedParent( i_dimm1, T );
         TargetHandle_t tgt2 = getConnectedParent( i_dimm2, T );
 
