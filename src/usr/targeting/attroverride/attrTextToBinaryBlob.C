@@ -540,17 +540,23 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
     std::vector<target_label> & o_targetLabels)
 {
     /*
-     * e.g. "target = k0:n0:s0:centaur.mba:p02:c1"
+     * e.g. "target = k0:s0:n0:centaur.mba:p02:c1"
      * - o_targetType = 0x00000001
      * - 1 target specified:
      *     node: 0, targetPos: 2, unitPos: 1
      *
      *
-     * e.g. "target = k0:n0:s0:centaur.mba:p0,3:c1"
+     * e.g. "target = k0:s0:n0:centaur.mba:p0,3:c1"
      * - o_targetType = 0x00000001
      * - 2 targets specified:
      *     node: 0, targetPos: 0, unitPos: 1
      *     node: 0, targetPos: 3, unitPos: 1
+     *
+     *
+     * e.g. "target = k0:s0[:]"
+     * - o_targetType = 0x00000001
+     * - 1 target specified:
+     *     node: F, targetPos: FFFF, unitPos: F
      */
 
     // create a generic label
@@ -579,57 +585,242 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
             o_targetType = TARGETING::TYPE_SYS;
         }
 
-        // Find the node, target type, pos and unit-pos
-        int l_cageIndex = i_line.find(ATTR_CAGE_NUMBER);
-        if(l_cageIndex != std::string::npos )
+        // remove the "target = k0:s0" string
+        int l_endSysStr = i_line.find(":s0") + 3;
+        std::string l_line = i_line.substr(l_endSysStr, i_line.size() );
+
+        // strip off trailing white space
+        int l_nextWhiteSpacePos = l_line.find_first_of(" \t");
+        if ( l_nextWhiteSpacePos != std::string::npos )
         {
-            // Create a local string and remove the target header
-            std::string l_line =
-                i_line.substr(l_cageIndex + strlen(ATTR_CAGE_NUMBER));
+            l_line = l_line.substr(0, l_nextWhiteSpacePos);
+        }
 
-            // Figure out the node number
-            if (0 == l_line.find(TARGET_NODE_HEADER_STR))
+        // remove the single trailing colon
+        if ( (l_line.size() == 1) &&
+             (l_line.substr(0, 1) == ":") )
+        {
+            l_line = l_line.substr(1, l_line.size());
+        }
+
+        // Figure out the node number
+        if (0 == l_line.find(TARGET_NODE_HEADER_STR))
+        {
+            l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
+
+            if (0 == l_line.find(TARGET_NODE_ALL_STR))
             {
-                l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
+                // add a new target label node number
+                o_targetLabels.push_back(l_label);
+                l_line = l_line.substr(strlen(TARGET_NODE_ALL_STR));
+            }
+            else
+            {
+                l_colon_pos = l_line.find(':');
+                l_comma_pos = l_line.find(',');
 
-                if (0 == l_line.find(TARGET_NODE_ALL_STR))
+                // make sure comma comes before ending colon
+                while ((l_comma_pos != std::string::npos) &&
+                        (l_comma_pos < l_colon_pos))
                 {
-                    // add a new target label node number
-                    o_targetLabels.push_back(l_label);
-                    l_line = l_line.substr(strlen(TARGET_NODE_ALL_STR));
-                }
-                else
-                {
-                    l_colon_pos = l_line.find(':');
-                    l_comma_pos = l_line.find(',');
-
-                    // make sure comma comes before ending colon
-                    while ((l_comma_pos != std::string::npos) &&
-                           (l_comma_pos < l_colon_pos))
-                    {
-                        // grab number (stops at first non-numerical character)
-                        l_label.node = strtoul(l_line.c_str(), NULL, 10);
-
-                        // add a new target label node number
-                        o_targetLabels.push_back(l_label);
-
-                        // increment line past the comma
-                        l_line = l_line.substr(l_comma_pos+1);
-
-                        // search for next potential comma
-                        l_comma_pos = l_line.find(',');
-                    }
                     // grab number (stops at first non-numerical character)
                     l_label.node = strtoul(l_line.c_str(), NULL, 10);
 
-                    // add the last target label node number
+                    // add a new target label node number
                     o_targetLabels.push_back(l_label);
 
-                    // turn off overriding node
-                    l_label.node = AttributeTank::ATTR_NODE_NA;
+                    // increment line past the comma
+                    l_line = l_line.substr(l_comma_pos+1);
+
+                    // search for next potential comma
+                    l_comma_pos = l_line.find(',');
+                }
+                // grab number (stops at first non-numerical character)
+                l_label.node = strtoul(l_line.c_str(), NULL, 10);
+
+                // add the last target label node number
+                o_targetLabels.push_back(l_label);
+
+                // turn off overriding node
+                l_label.node = AttributeTank::ATTR_NODE_NA;
+
+                // line may have changed size so refind the ending colon
+                // for the node part
+                l_colon_pos = l_line.find(':');
+                if (l_colon_pos != std::string::npos)
+                {
+                    l_line = l_line.substr(l_colon_pos);
+                }
+                else
+                {
+                    l_line.clear();
+                }
+            }
+        } // end figure out target node
+
+        // remove the ":" that trails n value
+        if (l_line.size() != 0)
+        {
+            l_line = l_line.substr(1, l_line.size() );
+        }
+
+        // Figure out the target type
+        // Remove the end of the target string (position and unitpos) before
+        // using the line to search for target types
+        l_colon_pos = l_line.find(":");
+
+        std::string l_targetType;
+        std::string l_origTargetType;
+
+        TargStrToType* chip_type_first = NULL;
+        TargStrToType* chip_type_last = NULL;
+
+
+        TargStrToType* item = NULL;
+        if( l_colon_pos != std::string::npos)
+        {
+            // save the full target type name
+            l_origTargetType = l_line.substr(0, l_colon_pos);
+
+            // put it into an alterable target type
+            l_targetType = l_origTargetType;
+
+            auto l_dotIndex = l_targetType.find(".");
+
+            if(l_dotIndex != std::string::npos)
+            {
+                // "." found, meaning both chip type and chip unit are specified
+                // Isolate the chip unit type
+                l_targetType = l_targetType.substr(l_dotIndex + 1);
+
+                // Save range to search in correct target type array
+                chip_type_first = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE[0];
+                chip_type_last = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
+                  [(sizeof(CHIP_UNIT_TYPE_TARG_STR_TO_TYPE) /
+                          sizeof(TargStrToType))-1];
+            }
+            else
+            {
+                // Only chip type specified
+                // Save range to search in correct target type array
+                chip_type_first = &CHIP_TYPE_TARG_STR_TO_TYPE[0];
+                chip_type_last = &CHIP_TYPE_TARG_STR_TO_TYPE
+                        [(sizeof(CHIP_TYPE_TARG_STR_TO_TYPE) /
+                                sizeof(TargStrToType))-1];
+
+            }
+
+            //Search for target type
+            item = std::find( chip_type_first,
+                    chip_type_last, l_targetType.c_str());
+
+            if( item != chip_type_last )
+            {
+                // Target type found
+                // choose fapi2 or targeting type
+                o_targetType = ( i_tankLayer == AttributeTank::TANK_LAYER_TARG ?
+                        item->iv_targType : item->iv_fapiType);
+
+                // skip past the full target type name
+                l_line = l_line.substr(l_origTargetType.length());
+                l_sysTarget = false;
+            }
+            else
+            {
+                printf("Error: Could not find matching target type for given target string(%s)\n",
+                        l_targetType.c_str());
+                l_err = true;
+                break;
+            }
+        }
+        else
+        {
+            // no target type specified, so default to sys target
+            l_sysTarget = true;
+        }
+
+
+        // For a non-system target,
+        // figure out the position and unit position
+        if (l_sysTarget == false)
+        {
+            // Figure out the target's position
+            if (0 == l_line.find(TARGET_POS_HEADER_STR))
+            {
+                l_line = l_line.substr(strlen(TARGET_POS_HEADER_STR));
+
+                if (0 == l_line.find(TARGET_POS_ALL_STR))
+                {
+                    l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
+                }
+                else
+                {
+                    bool firstPos = true;
+                    l_colon_pos = l_line.find(':');
+                    l_comma_pos = l_line.find(',');
+                    std::vector<target_label> origCopy;
+
+                    while ((l_comma_pos != std::string::npos) &&
+                            (l_comma_pos < l_colon_pos))
+                    {
+                        // grab targetPos number
+                        // (stops at first non-numerical character)
+                        l_label.targetPos =
+                                strtoul(l_line.c_str(), NULL, 10);
+
+                        if (firstPos)
+                        {
+                            // save a copy of current targets before
+                            // adding targetPos
+                            origCopy = o_targetLabels;
+
+                            // update targetPos of current targets
+                            updateLabels(o_targetLabels, l_label);
+                            firstPos = false;
+                        }
+                        else
+                        {
+                            // update targetPos of original targets
+                            updateLabels(origCopy, l_label);
+
+                            // add these new targetPos targets to
+                            // current target list
+                            o_targetLabels.insert( o_targetLabels.end(),
+                                    origCopy.begin(),
+                                    origCopy.end() );
+                        }
+
+                        // skip past the comma
+                        l_line = l_line.substr(l_comma_pos+1);
+
+                        // now look for next potential comma
+                        l_comma_pos = l_line.find(',');
+                    }
+
+                    // grab number (stops at first non-numerical character)
+                    l_label.targetPos = strtoul(l_line.c_str(), NULL, 10);
+                    if (firstPos)
+                    {
+                        // no comma found, so just update
+                        // current target list
+                        updateLabels(o_targetLabels, l_label);
+                    }
+                    else
+                    {
+                        // last targetPos in comma list
+                        // update targetPos of original targets
+                        updateLabels(origCopy, l_label);
+
+                        // add these new targetPos targets to
+                        // the current target list
+                        o_targetLabels.insert(o_targetLabels.end(),
+                                origCopy.begin(),
+                                origCopy.end());
+                    }
+                    l_label.targetPos = AttributeTank::ATTR_POS_NA;
 
                     // line may have changed size so refind the ending colon
-                    // for the node part
+                    // for targetPos part
                     l_colon_pos = l_line.find(':');
                     if (l_colon_pos != std::string::npos)
                     {
@@ -640,253 +831,79 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                         l_line.clear();
                     }
                 }
-            } // end figure out target node
-
-            if (0 == l_line.find(ATTR_FILE_TARGET_EXT_FOOTER_STR))
-            {
-                // Remove the target footer
-                l_line = l_line.substr(strlen(ATTR_FILE_TARGET_EXT_FOOTER_STR));
             }
 
-            // Figure out the target type
-            // Remove the end of the target string (position and unitpos) before
-            // using the line to search for target types
-            l_colon_pos = l_line.find(":");
-
-            std::string l_targetType;
-            std::string l_origTargetType;
-
-            TargStrToType* chip_type_first = NULL;
-            TargStrToType* chip_type_last = NULL;
-
-
-            TargStrToType* item = NULL;
-            if( l_colon_pos != std::string::npos)
+            // Figure out the target's unit position
+            if (0 == l_line.find(TARGET_UNIT_POS_HEADER_STR))
             {
-                // save the full target type name
-                l_origTargetType = l_line.substr(0, l_colon_pos);
+                l_line = l_line.substr(strlen(TARGET_UNIT_POS_HEADER_STR));
 
-                // put it into an alterable target type
-                l_targetType = l_origTargetType;
-
-                auto l_dotIndex = l_targetType.find(".");
-
-                if(l_dotIndex != std::string::npos)
+                if (0 == l_line.find(TARGET_POS_ALL_STR))
                 {
-                    // "." found, meaning both chip type and chip unit are specified
-                    // Isolate the chip unit type
-                    l_targetType = l_targetType.substr(l_dotIndex + 1);
-
-                    // Save range to search in correct target type array
-                    chip_type_first = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE[0];
-                    chip_type_last = &CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
-                    [(sizeof(CHIP_UNIT_TYPE_TARG_STR_TO_TYPE)/sizeof(TargStrToType))-1];
+                    l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
                 }
                 else
                 {
-                    // Only chip type specified
-                    // Save range to search in correct target type array
-                    chip_type_first = &CHIP_TYPE_TARG_STR_TO_TYPE[0];
-                    chip_type_last = &CHIP_TYPE_TARG_STR_TO_TYPE
-                    [(sizeof(CHIP_TYPE_TARG_STR_TO_TYPE)/sizeof(TargStrToType))-1];
+                    bool firstPos = true;
+                    l_comma_pos = l_line.find(',');
+                    std::vector<target_label> origCopy;
 
-                }
-
-                //Search for target type
-                item = std::find( chip_type_first,
-                                  chip_type_last, l_targetType.c_str());
-
-                if( item != chip_type_last )
-                {
-                    // Target type found
-                    // choose fapi2 or targeting type
-                    o_targetType = ( i_tankLayer == AttributeTank::TANK_LAYER_TARG ?
-                                     item->iv_targType : item->iv_fapiType);
-
-                    // skip past the full target type name
-                    l_line = l_line.substr(l_origTargetType.length());
-                    l_sysTarget = false;
-                }
-                else
-                {
-                    printf("Error: Could not find matching target type for given target string(%s)\n",
-                            l_targetType.c_str());
-                    l_err = true;
-                    break;
-                }
-            }
-            else
-            {
-                // no target type specified, so default to sys target
-                l_sysTarget = true;
-            }
-
-
-            // For a non-system target,
-            // figure out the position and unit position
-            if (l_sysTarget == false)
-            {
-                // Figure out the target's position
-                if (0 == l_line.find(TARGET_POS_HEADER_STR))
-                {
-                    l_line = l_line.substr(strlen(TARGET_POS_HEADER_STR));
-
-                    if (0 == l_line.find(TARGET_POS_ALL_STR))
+                    while (l_comma_pos != std::string::npos)
                     {
-                        l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
-                    }
-                    else
-                    {
-                        bool firstPos = true;
-                        l_colon_pos = l_line.find(':');
-                        l_comma_pos = l_line.find(',');
-                        std::vector<target_label> origCopy;
-
-                        while ((l_comma_pos != std::string::npos) &&
-                               (l_comma_pos < l_colon_pos))
-                        {
-                            // grab targetPos number
-                            // (stops at first non-numerical character)
-                            l_label.targetPos =
-                                strtoul(l_line.c_str(), NULL, 10);
-
-                            if (firstPos)
-                            {
-                                // save a copy of current targets before
-                                // adding targetPos
-                                origCopy = o_targetLabels;
-
-                                // update targetPos of current targets
-                                updateLabels(o_targetLabels, l_label);
-                                firstPos = false;
-                            }
-                            else
-                            {
-                                // update targetPos of original targets
-                                updateLabels(origCopy, l_label);
-
-                                // add these new targetPos targets to
-                                // current target list
-                                o_targetLabels.insert( o_targetLabels.end(),
-                                                       origCopy.begin(),
-                                                       origCopy.end() );
-                            }
-
-                            // skip past the comma
-                            l_line = l_line.substr(l_comma_pos+1);
-
-                            // now look for next potential comma
-                            l_comma_pos = l_line.find(',');
-                        }
-
-                        // grab number (stops at first non-numerical character)
-                        l_label.targetPos = strtoul(l_line.c_str(), NULL, 10);
-                        if (firstPos)
-                        {
-                            // no comma found, so just update
-                            // current target list
-                            updateLabels(o_targetLabels, l_label);
-                        }
-                        else
-                        {
-                            // last targetPos in comma list
-                            // update targetPos of original targets
-                            updateLabels(origCopy, l_label);
-
-                            // add these new targetPos targets to
-                            // the current target list
-                            o_targetLabels.insert(o_targetLabels.end(),
-                                                  origCopy.begin(),
-                                                  origCopy.end());
-                        }
-                        l_label.targetPos = AttributeTank::ATTR_POS_NA;
-
-                        // line may have changed size so refind the ending colon
-                        // for targetPos part
-                        l_colon_pos = l_line.find(':');
-                        if (l_colon_pos != std::string::npos)
-                        {
-                            l_line = l_line.substr(l_colon_pos);
-                        }
-                        else
-                        {
-                            l_line.clear();
-                        }
-                    }
-                }
-
-                // Figure out the target's unit position
-                if (0 == l_line.find(TARGET_UNIT_POS_HEADER_STR))
-                {
-                    l_line = l_line.substr(strlen(TARGET_UNIT_POS_HEADER_STR));
-
-                    if (0 == l_line.find(TARGET_POS_ALL_STR))
-                    {
-                        l_line = l_line.substr(strlen(TARGET_POS_ALL_STR));
-                    }
-                    else
-                    {
-                        bool firstPos = true;
-                        l_comma_pos = l_line.find(',');
-                        std::vector<target_label> origCopy;
-
-                        while (l_comma_pos != std::string::npos)
-                        {
-                            // grab unitPos number
-                            // (stops at first non-numerical character)
-                            l_label.unitPos = strtoul(l_line.c_str(), NULL, 10);
-                            if (firstPos)
-                            {
-                                // save a copy of current targets
-                                // before adding unitPos
-                                origCopy = o_targetLabels;
-
-                                // update unitPos of current targets
-                                updateLabels(o_targetLabels, l_label);
-                                firstPos = false;
-                            }
-                            else
-                            {
-                                // update unitPos of original targets
-                                updateLabels(origCopy, l_label);
-
-                                // add these new unitPos targets to
-                                // the current target list
-                                o_targetLabels.insert( o_targetLabels.end(),
-                                                       origCopy.begin(),
-                                                       origCopy.end() );
-                            }
-                            // skip past the comma
-                            l_line = l_line.substr(l_comma_pos+1);
-
-                            // now look for next potential comma
-                            l_comma_pos = l_line.find(',');
-                        }
-
-                        // grab number (stops at first non-numerical character)
+                        // grab unitPos number
+                        // (stops at first non-numerical character)
                         l_label.unitPos = strtoul(l_line.c_str(), NULL, 10);
                         if (firstPos)
                         {
-                            // no comma found, so just update
-                            // current target list
+                            // save a copy of current targets
+                            // before adding unitPos
+                            origCopy = o_targetLabels;
+
+                            // update unitPos of current targets
                             updateLabels(o_targetLabels, l_label);
+                            firstPos = false;
                         }
                         else
                         {
-                            // last unitPos in comma list
                             // update unitPos of original targets
                             updateLabels(origCopy, l_label);
 
                             // add these new unitPos targets to
                             // the current target list
-                            o_targetLabels.insert(o_targetLabels.end(),
-                                                  origCopy.begin(),
-                                                  origCopy.end());
+                            o_targetLabels.insert( o_targetLabels.end(),
+                                    origCopy.begin(),
+                                    origCopy.end() );
                         }
+                        // skip past the comma
+                        l_line = l_line.substr(l_comma_pos+1);
+
+                        // now look for next potential comma
+                        l_comma_pos = l_line.find(',');
+                    }
+
+                    // grab number (stops at first non-numerical character)
+                    l_label.unitPos = strtoul(l_line.c_str(), NULL, 10);
+                    if (firstPos)
+                    {
+                        // no comma found, so just update
+                        // current target list
+                        updateLabels(o_targetLabels, l_label);
+                    }
+                    else
+                    {
+                        // last unitPos in comma list
+                        // update unitPos of original targets
+                        updateLabels(origCopy, l_label);
+
+                        // add these new unitPos targets to
+                        // the current target list
+                        o_targetLabels.insert(o_targetLabels.end(),
+                                origCopy.begin(),
+                                origCopy.end());
                     }
                 }
             }
-        } // else, the "k0" string was not found. Process as system target
+        }
 
         // System targets must have an NA node
         if (l_sysTarget)
@@ -1052,36 +1069,138 @@ void AttrTextToBinaryBlob::padToNextPage( uint8_t *& io_buffer,
     memset(&io_buffer[l_startPoint], 0xff, l_paddingSize);
     return;
 }
+
+
+
+//******************************************************************************
+bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
+                                            std::string & o_convertedLine )
+{
+    // input string begins with "target"
+    bool l_rc = false;
+    std::string l_line = i_line;
+
+    do
+    {
+        size_t l_kPosn = l_line.find( "k", 0);
+        size_t l_sPosn = l_line.find( ":s", 0);
+
+        if (l_line.find_first_not_of(" \t", 6) == std::string::npos)
+        {
+            // old format, all white space after "target"
+            o_convertedLine = "target = k0:s0";
+
+            printf("convertTargLine : Warning : "
+                   "Obsolete Target Line converted to : %s \n",
+                   o_convertedLine.c_str() );
+            break;
+        }
+
+        else if ( (l_kPosn == std::string::npos) ||
+                  (l_sPosn == std::string::npos) )
+        {
+            // missing parms, cant convert
+            o_convertedLine = i_line;
+            printf("convertTargLine : Error : "
+                   "Missing k or s parm, cannot convert : %s \n",
+                   o_convertedLine.c_str() );
+
+            l_rc = true;
+            break;
+        }
+
+        else if ( (l_sPosn == (l_kPosn + 2)) )
+        {
+            // kx:sy new format, no conversion needed
+            o_convertedLine = i_line;
+            break;
+        }
+
+        else if ( l_kPosn > l_sPosn )
+        {
+            // out of order parms, cant convert
+            o_convertedLine = i_line;
+            printf("convertTargLine : Error : "
+                   "s parm preceeds k parm, cannot convert : %s \n",
+                   o_convertedLine.c_str() );
+
+            l_rc = true;
+            break;
+        }
+
+        else
+        {
+            // (old format)
+        }
+
+        // (old format, convert to new format.  see header file)
+
+        // locate k & s term strings
+        size_t l_kPosn_overflow = l_line.find( ":", l_kPosn+1);
+        size_t l_kStrSize = (l_kPosn_overflow != std::string::npos) ?
+                (l_kPosn_overflow - l_kPosn) : (l_line.size() - l_kPosn);
+        std::string l_kStr = l_line.substr(l_kPosn, l_kStrSize);
+
+        size_t l_sPosn_overflow = l_line.find( ":", l_sPosn+1);
+        size_t l_sStrSize;
+        if (l_sPosn_overflow != std::string::npos)
+        {
+            l_sStrSize = l_sPosn_overflow - l_sPosn;
+        }
+        else
+        {
+            // eof or garbage after :sy term....
+            l_sStrSize = 3;
+            l_sPosn_overflow = l_sPosn + 3;
+        }
+
+        std::string l_sStr = l_line.substr(l_sPosn, l_sStrSize);
+
+        // strip out the k & s terms to create a postamble string
+        std::string l_postAmble;
+        l_postAmble = l_line.substr( l_kPosn_overflow,
+                                     l_sPosn - l_kPosn_overflow );
+        l_postAmble = l_postAmble +
+                      l_line.substr( l_sPosn_overflow,
+                                     l_line.size() - l_sPosn_overflow );
+
+        o_convertedLine = "target = " + l_kStr + l_sStr;
+        if ( (l_postAmble != ":n0") &&
+             (l_postAmble != ":n0:") &&
+             (l_postAmble != ":nall") &&
+             (l_postAmble != ":nall:") )
+        {
+            // add postamble when not a legacy system target
+            o_convertedLine = o_convertedLine + l_postAmble;
+        }
+
+        printf("convertTargLine : Warning : "
+               "Obsolete Target Line converted to : %s \n",
+               o_convertedLine.c_str() );
+
+    } while ( 0 );
+
+    return l_rc;
+}
+
+
 //******************************************************************************
 bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
 {
     // input line :
     //  - has previously had leading white space stripped
     //  - begins with string "target"
+    //  - has been converted from obsolete format to current format
     std::string l_line = i_line;
 
     bool isValidLine = true;
 
-    // determine target type:
+    // determine target type:  rules are listed in attrTextToBinaryBlob.H
     //  - system
-    //     target  <blank>
-    //     target = k0:n0:s0 <blank>
-    //     target = k0:n0:s0: <blank>
+    //     target = k0:s0[:] <blank>
     //
     //  - chip
     //     system || chip string
-    //
-    //        note : system string is of form kx:ny:sz
-    //        note : x may be 0-9
-    //        note : y may be :
-    //                - single digit 0-9
-    //                - comma separated list of digits 0-9
-    //                   -- 2 or more items in list
-    //                   -- no ordering dependencies
-    //                   e.g. 0,4
-    //                   e.g. 5,3,9
-    //                - all
-    //        note : z = 0
     //
 
     // remove "target" label from line
@@ -1093,14 +1212,7 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
 
     do
     {
-        if // all white space
-          ( l_nextTextPos == std::string::npos )
-        {
-            // target is system target, encoded correctly
-            break;
-        }
-
-        else if // missing "=" but contains other garbage
+        if // missing "=" but contains other garbage
           ( (l_line.substr(0, 1)) != "=" )
         {
             // bad encoding
@@ -1133,6 +1245,15 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
 
         // at this point the "target =" and
         //  any preceeding white space has been stripped
+
+        // strip off trailing white space
+        int l_nextWhiteSpacePos = l_line.find_first_of(" \t");
+        if ( (l_nextWhiteSpacePos != std::string::npos) &&
+             (l_line.find_first_not_of(" \t") == std::string::npos))
+        {
+            l_line = l_line.substr(0, l_nextWhiteSpacePos);
+        }
+
         // the header encoding needs to be validated for a System Target
         TargetTypeRc tgtTypeRc = validateSysSubstr( l_line );
 
@@ -1157,6 +1278,10 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
         //------------------------------
         // check for terms without values
         //------------------------------
+
+        // strip off the system string portion k0:s0
+        l_line = l_line.substr(5, l_line.size() );
+
         int curColonPosn = l_line.find_first_of(":", 0);
 
         for ( int nextColonPosn = 0;
@@ -1169,7 +1294,7 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
               ( nextColonPosn == std::string::npos)
             {
                 if // last term was missing a value
-                ( (l_line.size() - curColonPosn) < 3 )
+                  ( (l_line.size() - curColonPosn) < 3 )
                 {
                     // bad encoding
                     isValidLine = false;
@@ -1177,6 +1302,17 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
                             "Parameter is missing a Value \n" );
                     break;
                 }
+
+                else if // blank follows the colon
+                  (l_line.substr(curColonPosn+1,1) == " ")
+                {
+                    // bad encoding
+                    isValidLine = false;
+                    printf("validateTargLine : Error : "
+                            "Blank Parm follows : \n" );
+                    break;
+                }
+
                 else
                 {
                     // (all done checking)
@@ -1208,7 +1344,7 @@ bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
         } // end loop thru string
 
         if // validation failed
-        ( isValidLine == false )
+          ( isValidLine == false )
         {
             // all done
             break;
@@ -1329,43 +1465,25 @@ AttrTextToBinaryBlob::TargetTypeRc
 {
     // input line :
     //  - "target =" and any preceeding white space has been stripped
+    //  - any trailing white space has been stripped
     std::string l_line = i_line;
 
     AttrTextToBinaryBlob::TargetTypeRc rc;
 
-    // determine target type:
+    // determine target type:  rules are listed in attrTextToBinaryBlob.H
     //  - system
-    //     k0:n0:s0 <blank>
-    //     k0:n0:s0: <blank>
+    //     target = k0:s0[:] <blank>
     //
     //  - chip
     //     system || chip string
-    //
-    //        note : system string is of form kx:ny:sz
-    //        note : x may be 0-9
-    //        note : y may be :
-    //                - single digit 0-9
-    //                - comma separated list of digits 0-9
-    //                   -- 2 or more items in list
-    //                   -- no ordering dependencies
-    //                   e.g. 0,4
-    //                   e.g. 5,3,9
-    //                - all
-    //        note : z = 0
     //
 
     do
     {
         int l_lineSize = l_line.size();
-        size_t kPosn = (l_line.substr(0, 1) == "k") ?
-                0 : l_line.find( ":k", 0);
-        size_t nPosn = (l_line.substr(0, 1) == "n") ?
-                0 : l_line.find( ":n", 0);
-        size_t sPosn = (l_line.substr(0, 1) == "s") ?
-                0 : l_line.find( ":s", 0);
 
-        if // system string is too short
-          ( l_lineSize < 8 )
+        if // input line is too short to be a system string
+          ( l_lineSize < 5 )
         {
             // bad encoding
             rc = TargetTypeRcError;
@@ -1374,76 +1492,25 @@ AttrTextToBinaryBlob::TargetTypeRc
             break;
         }
 
-        else if // missing k, n, or s term
-          ( (kPosn == std::string::npos) ||
-            (nPosn == std::string::npos) ||
-            (sPosn == std::string::npos) )        {
-            // bad encoding
-            rc = TargetTypeRcError;
-            printf("validateSysSubstr : Error : "
-                    "System Substring is missing k, n or s \n" );
-            break;
-        }
-
-        else if // system string does not begin with k
-          ( (l_line.substr(0, 1) != "k") )
+        else if // input line is too short to be a chip target
+          ( l_lineSize <= 6 )
         {
-            // bad encoding
-            rc = TargetTypeRcError;
-            printf("validateSysSubstr : Error : "
-                    "System Substring does not begin with"
-                    "k \n" );
-            break;
-        }
-
-        else if // terms are not in k/n/s order
-        ( (kPosn >= nPosn) ||
-          (kPosn >= sPosn) ||
-          (nPosn >= sPosn) )
-        {
-            // bad encoding
-            rc = TargetTypeRcError;
-            printf("validateSysSubstr : Error : "
-                    "k / n / s terms are out of order \n" );
-            break;
-
-        }
-
-        else if // k, n, s parm values are not 0
-          ( (l_line.substr(1, 2) != "0:") ||
-            (l_line.substr(4, 2) != "0:") ||
-            (l_line.substr(7, 1) != "0") )
-        {
-            if // string is long enough to hold chip parms
-              ( l_lineSize > 9 )
+            // check for valid system target string
+            if ( (l_line == "k0:s0") ||
+                 (l_line == "k0:s0:") )
             {
-              // (target is a potential chip target)
+                // target is system target, encoded correctly
+                rc = TargetTypeRcSystem;
+                break;
             }
             else
             {
                 // bad encoding
                 rc = TargetTypeRcError;
                 printf("validateSysSubstr : Error : "
-                        "System Target String k, n, s must be 0 \n" );
+                        "System Target String must be k0:s0 \n" );
                 break;
             }
-        }
-
-        else if // k0, n0, s0 and no more
-          ( l_lineSize == 8 )
-        {
-            // target is system target, encoded correctly
-            rc = TargetTypeRcSystem;
-            break;
-        }
-
-        else if // k0, n0, s0, : and no more
-          ( (l_lineSize == 9) &&
-            (l_line.substr(8, 1) == ":" ) )
-        {
-            // target is system target, encoded correctly
-            rc = TargetTypeRcSystem;
-            break;
         }
 
         else
@@ -1451,68 +1518,58 @@ AttrTextToBinaryBlob::TargetTypeRc
             // (potential chip target)
         }
 
-
         //  Only Potential Chip Targets get to this point
-        //        note : Kx/Ny/Sz terms may be in any order
-        //        note : x may be 0-9
-        //        note : y may be 0-9; 0-8, 1-9;  or all
-        //        note : z = 0
 
-        size_t kValStartPosn = (kPosn == 0) ? 1 : kPosn+2;
-        size_t kValEndPosn = l_line.find( ":", kValStartPosn ) - 1;
-
-        size_t nValStartPosn = (nPosn == 0) ? 1 : nPosn+2;
-        size_t nValEndPosn = l_line.find( ":", nValStartPosn ) - 1;
-
-        size_t sValStartPosn = (sPosn == 0) ? 1 : sPosn+2;
-        size_t sValEndPosn = l_line.find( ":", sValStartPosn ) - 1;
-
-        std::string kValString =
-                i_line.substr( kValStartPosn, (kValEndPosn-kValStartPosn)+1 );
-
-        std::string nValString =
-                i_line.substr( nValStartPosn, (nValEndPosn-nValStartPosn)+1 );
-
-        std::string sValString =
-                i_line.substr( sValStartPosn, (sValEndPosn-sValStartPosn)+1 );
-
-        if // s parameter value is not valid
-          ( (sValStartPosn != sValEndPosn) ||
-            (sValString != "0") )
+        if // system string is not correct
+          ( i_line.substr(0, 5) != "k0:s0" )
         {
             // bad encoding
             rc = TargetTypeRcError;
             printf("validateSysSubstr : Error : "
-                    "Invalid s value. s must be 0 \n" );
+                    "System String must be k0:s0 \n" );
             break;
         }
 
-        else if // k parameter value is not valid
-          ( (kValStartPosn != kValEndPosn) ||
-            (kValString < "0") ||
-            (kValString > "9")         )
-        {
-            // bad encoding
-            rc = TargetTypeRcError;
-            printf("validateSysSubstr : Error : "
-                    "Invalid k value. k must be 0 - 9\n" );
-            break;
-        }
-
-        else if // n parameter value = all
-          (nValString == "all")
+        if // optional n term does not exist
+          ( i_line.substr(5, 2) != ":n" )
         {
             // valid chip target encoding
             rc = TargetTypeRcChip;
             break;
         }
 
-        else if // n has a single character parameter value
-          ( nValStartPosn == nValEndPosn )
+        // Optional end Term exists, check n parm value(s)
+        size_t l_nValStartPosn = 7;
+        size_t l_nValOverflowPosn = l_line.find( ":", l_nValStartPosn );
+
+        if // chip string does not follow optional n term
+          ( l_nValOverflowPosn == std::string::npos )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "Missing chip string\n" );
+            break;
+        }
+
+        size_t l_nValLen = l_nValOverflowPosn - l_nValStartPosn;
+        std::string l_nValString = i_line.substr( l_nValStartPosn, l_nValLen );
+
+        if // n value = all
+          ( l_nValString == "all" )
+
+        {
+            // valid chip target encoding
+            rc = TargetTypeRcChip;
+            break;
+        }
+
+        if // n has a single character parameter value
+          ( l_nValLen == 1 )
         {
             if // parameter value is between 0 and 9
-              ( (nValString >= "0") &&
-                (nValString <= "9") )
+            ( (l_nValString >= "0") &&
+              (l_nValString <= "9") )
             {
                 // valid chip target encoding
                 rc = TargetTypeRcChip;
@@ -1528,60 +1585,60 @@ AttrTextToBinaryBlob::TargetTypeRc
             }
         }
 
-        else if // no comma separated n values
-          (nValString.find(",", 0) == std::string::npos)
+        if // no comma separated n values
+          (l_nValString.find(",", 0) == std::string::npos)
         {
             // bad encoding
             rc = TargetTypeRcError;
             printf("validateSysSubstr : Error : "
-                    "Invalid n value. n must be 0 - 9 or all\n" );
+                    "Invalid n value. n must be 0 - 9, all,"
+                    " or a comma separated numeric list\n" );
             break;
         }
 
-        else
+        // n value is a comma separated list
+        // assume a valid chip encoding
+        rc = TargetTypeRcChip;
+
+        // (check for comma separated list)
+        size_t l_nValCurPosn = 0;
+        size_t l_nValSize = l_nValString.size();
+
+        for // loop thru the comma separated list
+          ( int i = 0;
+                i < l_nValSize;
+          )
         {
-            // assume a valid chip encoding
-            rc = TargetTypeRcChip;
-
-            // (check for comma separated list)
-            size_t nValCurPosn = nValStartPosn;
-
-            for // loop thru the potential comma separated list
-              ( int i = nValStartPosn;
-                i <= nValEndPosn;
-                )
+            size_t l_commaPosn = l_nValString.find(",", i);
+            if // comma not found
+            ( l_commaPosn != std::string::npos)
             {
-                size_t commaPosn = nValString.find(",", i);
-                if // comma not found
-                  ( commaPosn != std::string::npos)
-                {
-                    // this is the last term
-                    i = nValEndPosn + 1;
-                    commaPosn =  nValEndPosn + 1;
-                }
-                else
-                {
-                    // end of intermediary term
-                    i = commaPosn + 1;
-                }
+                // this is the last term
+                i = l_nValSize;
+                l_commaPosn =  l_nValSize;
+            }
+            else
+            {
+                // end of intermediary term
+                i = l_commaPosn + 1;
+            }
 
-                if // parameter value is not valid
-                  ( (nValString.substr(nValCurPosn, commaPosn) < "0") ||
-                    (nValString.substr(nValCurPosn, commaPosn) > "9") )
-                {
-                    // bad encoding
-                    rc = TargetTypeRcError;
-                    printf("validateSysSubstr : Error : "
-                            "Invalid n value. n list value must be 0 - 9\n" );
-                    break;
-                }
-                else
-                {
-                    // keep walking the list
-                    nValCurPosn = i;
-                }
-            } // end loop thru comma separated list
-        } // end check n is comma separated list
+            if // parameter value is not valid
+              ( (l_nValString.substr(l_nValCurPosn, l_commaPosn) < "0") ||
+                (l_nValString.substr(l_nValCurPosn, l_commaPosn) > "9") )
+            {
+                // bad encoding
+                rc = TargetTypeRcError;
+                printf("validateSysSubstr : Error : "
+                        "Invalid n value. n list value must be 0 - 9\n" );
+                break;
+            }
+            else
+            {
+                // keep walking the list
+                l_nValCurPosn = i;
+            }
+        } // end loop thru comma separated list
 
     } while ( 0 );
 
@@ -1793,10 +1850,34 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
             {
                 if (l_attrString.empty())
                 {
-                    // Not currently processing attribute lines, save the target
-                    // line, it is for following attribute lines
+                    // Not currently processing attribute lines, save the
+                    // target line, it is for following attribute lines
                     l_targetLine = l_line;
+
+                    l_pErr = convertTargLine( l_line, l_targetLine );
+
                     l_line.clear();
+
+                    if (l_pErr)
+                    {
+                        // (error message already printed)
+                        break;
+                    }
+
+                    // verify target line is encoded correctly
+                    bool l_isTgtLineValid = validateTargLine( l_targetLine );
+
+                    if // target line is good
+                      (l_isTgtLineValid)
+                    {
+                        // (keep going)
+                    }
+                    else
+                    {
+                        // all done, error message allready printed
+                        l_pErr = true;
+                        break;
+                    }
                 }
                 else
                 {
@@ -1836,6 +1917,12 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
         }
         while(1);
 
+        if (l_pErr)
+        {
+            // (error message already printed)
+            break;
+        }
+
         if (l_attrLines.size())
         {
             // Get the attribute data for this attribute
@@ -1846,23 +1933,6 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
             {
                 printf("attrTextToBinaryBlob:"
                        " Error getting attribute data\n");
-                break;
-            }
-
-            // verify target line is encoded correctly
-            bool isTgtLineValid = validateTargLine( l_targetLine );
-
-            if // target line is good
-              (isTgtLineValid)
-            {
-                // (keep going)
-            }
-            else
-            {
-                // all done
-                l_pErr = true;
-                printf("attrTextToBinaryBlob:"
-                       " Target Line is incorrectly coded\n");
                 break;
             }
 
@@ -2181,22 +2251,17 @@ int main(int argc, char *argv[])
                 printf("\nExpected args:\n\t Attribute text file of the "
                         "following format: \n\n\t\t # This is a comment\n\n"
                         "\t\tCLEAR\n\n"
-                        "\t\ttarget = k0:n0:s0:\n"
+                        "\t\ttarget = k0:s0\n"
                         "\t\tATTR_SCRATCH_UINT8_1 0x12\n"
                         "\t\tATTR_SCRATCH_UINT32_1 0x12345678\n"
                         "\t\tATTR_SCRATCH_UINT64_1 0x8000000000000001 CONST\n\n"
-                        "\t\ttarget = k0:n0:s0:centaur:p06\n"
+                        "\t\ttarget = k0:s0:n0:centaur:p06\n"
                         "\t\tATTR_MSS_CACHE_ENABLE 0x0 CONST\n\n"
-                        "\t\ttarget = k0:n0:s0:centaur.mba:p06:c1\n"
+                        "\t\ttarget = k0:s0:n0:centaur.mba:p06:c1\n"
                         "\t\tATTR_MSS_FREQ 0x00000640 CONST\n"
                         "\t\tATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 CONST\n"
                         "\t\tATTR_EFF_CEN_DRV_IMP_CNTL[0] OHM15 CONST\n"
-                        "\t\tATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST\n\n"
-                        "\t\ttarget = k0:n0:s0:centaur.mba:pall:call\n"
-                        "\t\tATTR_MSS_DIMM_MFG_ID_CODE[0][0] 0x12345678\n"
-                        "\t\tATTR_MSS_DIMM_MFG_ID_CODE[0][1] 0x12345678\n"
-                        "\t\tATTR_MSS_DIMM_MFG_ID_CODE[1][0] 0x12345678\n"
-                        "\t\tATTR_MSS_DIMM_MFG_ID_CODE[1][1] 0x12345678\n\n");
+                        "\t\tATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST\n\n");
 
                 printf("\tOne of the following options:\n\n"
                        "\t\t'-d' - allow debug logs.\n"
