@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,6 +120,7 @@ enum sbeioReasonCode
     SBEIO_INCORRECT_FCN_CALL           = SBEIO_COMP_ID | 0x56,
     SBEIO_RETURNED_FFDC                = SBEIO_COMP_ID | 0x57,
     SBEIO_SLAVE_TIMEOUT                = SBEIO_COMP_ID | 0x58,
+    SBEIO_ATTEMPTING_REBOOT            = SBEIO_COMP_ID | 0x59,
 
     // SBE Vital Attention error codes
     SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,
