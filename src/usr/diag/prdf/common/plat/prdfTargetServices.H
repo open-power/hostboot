@@ -370,15 +370,13 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget, bool &o_memBuf);
  */
 int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port );
 
-
 /**
  * @brief   Obtain the Dimm select for the given Dimm.
  * @param   i_dimmTarget Dimm.
- * @param   o_dimm Dimm select.
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ * @return  The DIMM select
  */
 template<TARGETING::TYPE T>
-int32_t getDimmSlct( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
+uint32_t getDimmSlct( TARGETING::TargetHandle_t i_dimmTarget );
 
 /**
  * @brief   checks dram widh ( x4 ) for mba

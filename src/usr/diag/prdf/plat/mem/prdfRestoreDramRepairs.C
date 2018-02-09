@@ -93,6 +93,52 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
+                    TargetHandle_t i_dimmTrgt )
+{
+    #define PRDF_FUNC "[RDR::__calloutDimm] "
+
+    PRDF_ASSERT( nullptr != i_portTrgt );
+    PRDF_ASSERT( T == getTargetType(i_portTrgt) );
+
+    PRDF_ASSERT( nullptr != i_dimmTrgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
+
+    // Callout the DIMM.
+    io_errl->addHwCallout( i_dimmTrgt, HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DELAYED_DECONFIG, HWAS::GARD_Predictive );
+
+    // Clear the VPD on this DIMM. The DIMM has been garded, but it is possible
+    // the customer will want to ungard the DIMM. Without clearing the VPD, the
+    // DIMM will be permanently garded because the customer has no ability to
+    // clear the VPD. Therefore, we will clear the VPD on this DIMM. If the
+    // customer takes the risk of ungarding the DIMM (that they should replace),
+    // the repairs will need to be rediscovered.
+
+    std::vector<MemRank> ranks;
+    getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct<T>(i_dimmTrgt) );
+
+    uint8_t data[D][DQ_BITMAP::BITMAP_SIZE];
+    memset( data, 0x00, sizeof(data) );
+
+    for ( auto & rank : ranks )
+    {
+        MemDqBitmap<D> dqBitmap { i_portTrgt, rank, data };
+
+        if ( SUCCESS != setBadDqBitmap<D>(i_portTrgt, rank, dqBitmap) )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<%d>(0x%08x,0x%02x) failed",
+                      D, getHuid(i_portTrgt), rank.getKey() );
+            continue;
+        }
+    }
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 // If there were analysis errors, will create and commit an error log with 2nd
 // level support callout.
 template<TARGETING::TYPE T>
@@ -138,6 +184,11 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
                 break;
             }
         }
+
+        // Keep a list of DIMMs to callout. Note that we are using a map with
+        // the DIMM target as the key so that we can maintain a unique list. The
+        // map value has no significance.
+        std::map<TargetHandle_t, uint32_t> calloutList;
 
         ExtensibleChip * mcaChip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
 
@@ -189,11 +240,9 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
                     MemoryMru mm( i_trgt, rank, sym );
 
                     // Add all parts to the error log.
-                    for ( auto & part : mm.getCalloutList() )
+                    for ( auto & dimm : mm.getCalloutList() )
                     {
-                        errl->addHwCallout( part, HWAS::SRCI_PRIORITY_HIGH,
-                                            HWAS::DELAYED_DECONFIG,
-                                            HWAS::GARD_Predictive );
+                        calloutList[dimm] = 1;
                     }
 
                     // Add the MemoryMru to the capture data.
@@ -202,6 +251,13 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 
                 o_calloutMade = true;
             }
+        }
+
+        // Callout all DIMMs in the map.
+        for ( auto const & dimm : calloutList )
+        {
+            __calloutDimm<TYPE_MCA, DIMMS_PER_RANK::MCA>( errl, i_trgt,
+                                                          dimm.first );
         }
 
         // Commit the error log, if needed.
@@ -357,15 +413,13 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 
     // Iterate the list of all DIMMs
     TargetHandleList dimms = getConnected( i_trgt, TYPE_DIMM );
-    for ( auto & i : dimms )
+    for ( auto & dimm : dimms )
     {
-        uint8_t dimm = getTargetPosition( i ) % MAX_DIMM_PER_PORT;
-
         // i_badDimmMask is defined as a 2-bit mask where a bit set means that
         // DIMM had more bad bits than could be repaired. Note: the value is
         // actually a 4-bit field for use with Centaur, but we only use the
         // first 2 bits of that field here.
-        uint8_t mask = 0x80 >> dimm;
+        uint8_t mask = 0x80 >> getDimmSlct<TYPE_MCA>(dimm);
 
         if ( 0 != (i_badDimmMask & mask) )
         {
@@ -375,10 +429,9 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
                                    PRDFSIG_RdrRepairUnavail );
             }
 
+            __calloutDimm<TYPE_MCA, DIMMS_PER_RANK::MCA>( errl, i_trgt, dimm );
+
             o_calloutMade = true;
-            errl->addHwCallout( i, HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::DELAYED_DECONFIG,
-                                HWAS::GARD_Predictive );
         }
     }
 
@@ -606,24 +659,7 @@ uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt )
 
         // Callout DIMMs with too many bad bits and not enough repairs available
         if ( RDR::processBadDimms<TYPE_MCA>(i_trgt, dimmMask) )
-        {
-            // Clear VPD after callout of ISDIMMs
-            uint8_t data[DIMMS_PER_RANK::MCA][DQ_BITMAP::BITMAP_SIZE];
-            memset( data, 0x00, sizeof(data) );
-            for ( auto & rank : ranks )
-            {
-                MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap( i_trgt, rank, data );
-                if ( SUCCESS != setBadDqBitmap<DIMMS_PER_RANK::MCA>( i_trgt,
-                    rank, dqBitmap ) )
-                {
-                    PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                              "(0x%08x,0x%02x) failed.", getHuid(i_trgt),
-                              rank.getKey() );
-                    continue;
-                }
-            }
             calloutMade = true;
-        }
 
         // Check repaired ranks for RAS policy violations.
         if ( RDR::processRepairedRanks<TYPE_MCA>(i_trgt, rankMask) )
