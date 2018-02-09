@@ -880,9 +880,36 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
             SBE_TRACF("p9_extract_sbe_rc HWP returned action %d and errorlog "
                       "PLID=0x%x, rc=0x%.4X", this->iv_currentAction,
                       l_errl->plid(), l_errl->reasonCode() );
-            delete l_errl;
-            l_errl = nullptr;
+            errlCommit(l_errl, SBEIO_COMP_ID);
         }
+
+        SBE_TRACF("sbe_boot_fail_handler: We have hit an error in the SBE "
+                  "and hostboot will now attempt to reboot the SBE");
+        /*@
+         * @errortype
+         * @severity    ERRORLOG::ERRL_SEV_PREDICTIVE
+         * @moduleid    SBEIO_EXTRACT_RC_HANDLER
+         * @reasoncode  SBEIO_ATTEMPTING_REBOOT
+         * @userdata1   HUID of proc which had the SBE timeout
+         * @userdata2   Current action to be taken on the SBE
+         * @devdesc     HWP has returned a reboot action to be taken
+         *              Hostboot will now attempt to reboot the SBE
+         * @custdesc    A processor in the system has failed to initialize.
+         *              Hostboot is attempting a recovery.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        SBEIO_EXTRACT_RC_HANDLER,
+                        SBEIO_ATTEMPTING_REBOOT,
+                        TARGETING::get_huid(i_target),
+                        this->iv_currentAction);
+        l_errl->collectTrace("SBEIO_TRACE",KILOBYTE/4);
+
+        // Set the PLID of the error log to caller's PLID if provided
+        if(iv_callerErrorLogPLID)
+        {
+            l_errl->plid(iv_callerErrorLogPLID);
+        }
+        errlCommit(l_errl,SBEIO_COMP_ID);
 
         if(INITSERVICE::spBaseServicesEnabled())
         {
