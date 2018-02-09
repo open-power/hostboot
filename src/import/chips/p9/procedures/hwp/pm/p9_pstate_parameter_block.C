@@ -813,8 +813,16 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_occppb.vdn_sysparm = l_globalppb.vdn_sysparm;
 
         // frequency_min_khz - Value from Power safe operating point after biases
+        Pstate l_ps;
 
-        l_occppb.frequency_min_khz = revle32(attr.attr_pm_safe_frequency_mhz * 1000);
+        //Translate safe mode frequency to pstate
+        freq2pState(&l_globalppb, 
+                    revle32(attr.attr_pm_safe_frequency_mhz * 1000), 
+                    &l_ps, ROUND_FAST);
+
+        //Compute real frequency
+        l_occppb.frequency_min_khz = l_globalppb.reference_frequency_khz - 
+                                     (l_ps * l_globalppb.frequency_step_khz);
 
         // frequency_max_khz - Value from Ultra Turbo operating point after biases
         l_occppb.frequency_max_khz = l_globalppb.reference_frequency_khz;
@@ -891,6 +899,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         {
             l_state.iv_wof_enabled = false;
         }
+
+        //Update nest frequency in OPPB
+        l_occppb.nest_frequency_mhz = l_globalppb.nest_frequency_mhz;
 
         // The minimum Pstate must be rounded FAST so that core floor
         // constraints are not violated.
