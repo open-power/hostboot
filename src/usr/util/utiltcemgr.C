@@ -55,8 +55,9 @@ TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
 
 // ------------------------
 // Macros for unit testing - leave extra trace enabled for now
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+// @TODO RTC 168745 - Disable TRACUCOMP as the default
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
 
 
 namespace TCE
@@ -1189,13 +1190,13 @@ UtilTceMgr::~UtilTceMgr()
 // Debug for printing out iv_allocatedAddrs map
 void UtilTceMgr::printIvMap(void) const
 {
-    TRACFCOMP(g_trac_tce,"UtilTceMgr::printIvMap: size=%d", iv_allocatedAddrs.size());
+    TRACUCOMP(g_trac_tce,"UtilTceMgr::printIvMap: size=%d", iv_allocatedAddrs.size());
 
-    // To avoid map_itr below being an unused variable
     for ( auto const& map_itr : iv_allocatedAddrs )
     {
-        TRACFCOMP(g_trac_tce,"UtilTceMgr: printIvMap: token=0x%.8X, addr=0x%.16llX, size=0x%X", map_itr.first, map_itr.second.start_addr, map_itr.second.size);
+        TRACUCOMP(g_trac_tce,"UtilTceMgr: printIvMap: token=0x%.8X, addr=0x%.16llX, size=0x%X", map_itr.first, map_itr.second.start_addr, map_itr.second.size);
     }
+
 }
 
 
@@ -1370,7 +1371,16 @@ bool utilUseTcesForDmas(void)
 
     if (INITSERVICE::spBaseServicesEnabled())
     {
-        retVal = true;
+        // @TODO RTC 168745 - Eventually this will default to true in all cases
+        // where was have a FSP
+
+        // Get Target Service and the system target to get ATTR_USE_TCES_FOR_DMA
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target* sys = nullptr;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "utilUseTcesForDmas() system target is NULL");
+
+        retVal = sys->getAttr<TARGETING::ATTR_USE_TCES_FOR_DMAS>();
     }
 
     TRACFCOMP(g_trac_tce,INFO_MRK"utilUseTcesForDmas: %s",
