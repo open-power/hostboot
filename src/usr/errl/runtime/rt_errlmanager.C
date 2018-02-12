@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ bool rt_processCallout(errlHndl_t &io_errl,
 ///////////////////////////////////////////////////////////////////////////////
 ErrlManager::ErrlManager() :
         iv_currLogId(0),
+        iv_pnorReadyForErrorLogs(true),
         iv_pStorage(NULL),
         iv_hwasProcessCalloutFn(NULL),
         iv_pnorAddr(NULL),

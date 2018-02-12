@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,37 @@ uint8_t getHiddenLogsEnable( )
 // Atomically increment log id and return it.
 uint32_t ErrlManager::getUniqueErrId()
 {
-    return (__sync_add_and_fetch(&iv_currLogId, 1));
+    uint32_t l_logId = 0;
+    uint32_t l_nextLogId = 1;
+
+    while (1)
+    {
+        l_logId = iv_currLogId;
+
+        if (!iv_pnorReadyForErrorLogs)
+        {
+            // Range [__800000 - __FFFFFF]
+            l_nextLogId = ( iv_baseNodeId |
+                             (((l_logId + 1) & ERRLOG_PLID_MASK) |
+                                ERRLOG_PLID_INITIAL) );
+        }
+        else
+        {
+            // Range [__000000 - __7FFFFFF]
+            l_nextLogId = ( iv_baseNodeId |
+                            ((l_logId + 1) & ERRLOG_PLID_POST_MAX) );
+        }
+
+        if (__sync_bool_compare_and_swap(&iv_currLogId, l_logId, l_nextLogId))
+        {
+            // To maintain thread-safeness (do not use iv_currLogId here)
+            // Do the same operation to l_logId as this is the same value
+            // that iv_currLogID had before its operation
+            l_logId = l_nextLogId;
+            break;
+        }
+    }
+    return l_logId;
 }
 
 // ------------------------------------------------------------------
@@ -117,7 +147,8 @@ void ErrlManager::setupPnorInfo()
         // so that our first save will increment and wrap correctly
         iv_pnorOpenSlot = (iv_maxErrlInPnor - 1);
 
-        // walk thru memory, finding error logs and determine the highest ID
+        // walk thru memory, finding error logs and
+        // determine the highest ID within the lower POST range of EIDs
         uint32_t l_maxId = 0;
         for (uint32_t i = 0; i < iv_maxErrlInPnor; i++)
         {
@@ -134,7 +165,7 @@ void ErrlManager::setupPnorInfo()
                 }
                 // if this is 'my' type of plid (HB or HBRT) see if it's max
                 if (((l_id & FIRST_BYTE_ERRLOG) == ERRLOG_PLID_BASE ) &&
-                    (l_id > l_maxId ))
+                    (l_id > l_maxId ) && (l_id <= ERRLOG_PLID_POST_MAX))
                 {
                     l_maxId = l_id;
 
@@ -203,10 +234,18 @@ void ErrlManager::setupPnorInfo()
         } // for
 
         // bump the current eid to 1 past the max eid found
-        while (!__sync_bool_compare_and_swap(&iv_currLogId, iv_currLogId,
-                    (iv_currLogId & ERRLOG_PLID_BASE_MASK) +
-                    (l_maxId & ERRLOG_PLID_MASK) + 1));
-        TRACFCOMP( g_trac_errl, INFO_MRK"setupPnorInfo reseting LogId 0x%X", iv_currLogId);
+        // Stay within the non-preboot range
+        while ( !__sync_bool_compare_and_swap(&iv_currLogId, iv_currLogId,
+                 (iv_baseNodeId |
+                 ((l_maxId + 1) & ERRLOG_PLID_POST_MAX))) );
+
+        // set this to change new max/min values for iv_currLogId
+        // new max = ERRLOG_PLID_POST_MAX, new min = 0
+        iv_pnorReadyForErrorLogs = true;
+        TRACFCOMP( g_trac_errl,
+            INFO_MRK"setupPnorInfo resetting LogId number 0x%X",
+            iv_currLogId);
+
 
         // if error(s) came in before PNOR was ready,
         // the error log(s) would be on this list. save now.
