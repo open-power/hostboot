@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1219,7 +1219,7 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
     constexpr uint64_t P9_FIRST_EQ   = 0x10;
     constexpr uint64_t P9_LAST_EQ    = 0x1F;
     constexpr uint64_t P9_FIRST_EC   = 0x20;
-    constexpr uint64_t P9_LAST_EC    = 0x2F;
+    constexpr uint64_t P9_LAST_EC    = 0x3F;
 #endif
 
     // Skip calls to the SENTINEL since we don't have the
@@ -1292,7 +1292,7 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
             //  because we don't start clocks until later on in that case
             auto l_syncMode =
               i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-            if( l_syncMode )
+            if( l_syncMode == TARGETING::MC_SYNC_MODE_NOT_IN_SYNC )
             {
                 continue;
             }
