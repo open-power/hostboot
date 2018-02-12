@@ -388,71 +388,85 @@
     <attribute>
           <id>ATTR_PROC_FSP_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_FSP_BAR_SIZE</id>
           <default>0xFFFFFC00FFFFFFFF</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_FSP_BAR_BASE_ADDR_OFFSET</id>
           <default>0x0000030100000000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_FSP_MMIO_MASK_SIZE</id>
           <default>0x0010000000000000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR_OFFSET</id>
           <default>0x0000030203000000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_PHY0_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_PHY0_BAR_BASE_ADDR_OFFSET</id>
           <default>0x0000030201200000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_PHY1_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_PHY1_BAR_BASE_ADDR_OFFSET</id>
           <default>0x0000030201400000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_MMIO_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET</id>
           <default>0x0000030200000000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NX_RNG_BAR_ENABLE</id>
           <default>0</default>
+          <no_export/>
      </attribute>
 
     <attribute>
           <id>ATTR_PROC_NX_RNG_BAR_BASE_ADDR_OFFSET</id>
           <default>0x00000302031D0000</default>
+          <no_export/>
      </attribute>
 
     <attribute>
