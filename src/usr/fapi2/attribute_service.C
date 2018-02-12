@@ -563,7 +563,7 @@ size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
 //******************************************************************************
 ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                                 TARGETING::TargetHandle_t &o_mcsTarget,
-                                uint32_t o_ps )
+                                uint32_t &o_ps )
 {
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
@@ -637,7 +637,7 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 ReturnCode __badDqBitmapGetHelperAttrs(
     const TARGETING::TargetHandle_t i_dimmTarget,
     uint8_t  (&o_wiringData)[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint64_t &o_allMnfgFlags, uint32_t o_ps )
+    uint64_t &o_allMnfgFlags, uint32_t &o_ps )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1002,7 +1002,17 @@ ReturnCode __mcLogicalToDimmDqHelper(
         }
 
         // use wiring data to translate c4 pin to dimm dq format
-        o_dimm_dq = i_wiringData[i_ps][l_c4];
+        // Note: the wiring data maps from dimm dq format to c4 format
+        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
+        {
+            // Check to see which bit in the wiring data corresponds to our
+            // DIMM DQ format pin.
+            if ( i_wiringData[i_ps][bit] == l_c4 )
+            {
+                o_dimm_dq = bit;
+                break;
+            }
+        }
 
     }while(0);
 
@@ -1097,16 +1107,8 @@ ReturnCode __dimmDqToMcLogicalHelper(
     uint64_t l_c4 = 0;
 
     // Translate from DIMM DQ format to C4 using wiring data
-    for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
-    {
-        // Check to see which bit in the wiring data corresponds to our DIMM DQ
-        // format pin.
-        if ( i_wiringData[i_ps][bit] == i_dimm_dq )
-        {
-            l_c4 = bit;
-            break;
-        }
-    }
+    // Note: the wiring data maps from dimm dq format to c4 format
+    l_c4 = i_wiringData[i_ps][i_dimm_dq];
 
     // determine whether this is a Nimbus or Cumulus chip
     TARGETING::Target * masterProc = nullptr;
