@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <devicefw/userif.H>
 #include <util/runtime/util_rt.H>
+#include <sys/internode.h>
 
 
 using namespace TARGETING;
@@ -63,7 +64,7 @@ int apply_attr_override(uint8_t* i_data,
         // expected to be empty. The passed overrides are added, not updated
         // in place.
         AttributeTank * l_pAttributeTank =
-                        &fapi2::theAttrOverrideSync().iv_overrideTank;
+                    &fapi2::theAttrOverrideSync().iv_overrideTank;
         if ((*l_pAttributeTank).attributesExist())
         {
             TRACFCOMP(g_trac_targeting, "apply_attr_override:"
@@ -74,7 +75,7 @@ int apply_attr_override(uint8_t* i_data,
         if ((*l_pAttributeTank).attributesExist())
         {
             TRACFCOMP(g_trac_targeting, "apply_attr_override:"
-                                        " clear targeting attribute overrides");
+                      " clear targeting attribute overrides");
             (*l_pAttributeTank).clearAllAttributes();
         }
 
@@ -130,48 +131,54 @@ void applyTempOverrides()
     errlHndl_t l_err = NULL;
     bool l_usingStash = false;
 
-    // Get a pointer to the reserved memory where HB
-    // saved the overrides during boot
-    uint64_t l_overAttrSize = 0;
-    uint64_t l_overAddr = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTROVER,
-                                             0, l_overAttrSize);
-
-
-    // Having no overrides is a normal thing
-    if( (l_overAddr == 0) )
+    for(NODE_ID l_nodeId = NODE0;
+        l_nodeId < Singleton<AttrRP>::instance().getNodeCount();
+        l_nodeId++)
     {
-        TRACFCOMP(g_trac_targeting, "No Overrides found" );
-        TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
-        return;
-    }
-    else
-    {
-        TRACFCOMP(g_trac_targeting, "Overrides found at %.16llX", l_overAddr );
-    }
+        // Get a pointer to the reserved memory where HB
+        // saved the overrides during boot
+        uint64_t l_overAttrSize = 0;
+        uint64_t l_overAddr = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTROVER,
+                                                 l_nodeId, l_overAttrSize);
 
-    // Use a faux PNOR Section that is associated
-    //  with the data in mainstore
-    PNOR::SectionInfo_t l_info;
-    l_info.vaddr = l_overAddr;
-    l_info.size = l_overAttrSize;
-    l_info.id = PNOR::ATTR_TMP;
-    l_info.name = "HBRT Overrides";
 
-    TRACFCOMP(g_trac_targeting," HBRT: processing overrides from boot");
-    l_err = TARGETING::getAttrOverrides(l_info);
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_targeting," HBRT: Failed applying overrides");
-        if( l_usingStash )
+        // Having no overrides is a normal thing
+        if( (l_overAddr == 0) )
         {
-            // if the new RHB is in use, this will always fail
-            //  so just delete the error
-            delete l_err;
-            l_err = nullptr;
+            TRACFCOMP(g_trac_targeting, "No Overrides found" );
+            TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
+            continue;
         }
         else
         {
-            errlCommit( l_err, TARG_COMP_ID );
+            TRACFCOMP(g_trac_targeting, "Overrides found at %.16llX",
+                      l_overAddr );
+        }
+
+        // Use a faux PNOR Section that is associated
+        //  with the data in mainstore
+        PNOR::SectionInfo_t l_info;
+        l_info.vaddr = l_overAddr;
+        l_info.size = l_overAttrSize;
+        l_info.id = PNOR::ATTR_TMP;
+        l_info.name = "HBRT Overrides";
+
+        TRACFCOMP(g_trac_targeting," HBRT: processing overrides from boot");
+        l_err = TARGETING::getAttrOverrides(l_info);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_targeting," HBRT: Failed applying overrides");
+            if( l_usingStash )
+            {
+                // if the new RHB is in use, this will always fail
+                //  so just delete the error
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                errlCommit( l_err, TARG_COMP_ID );
+            }
         }
     }
 

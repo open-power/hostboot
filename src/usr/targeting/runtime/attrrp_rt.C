@@ -171,7 +171,7 @@ namespace TARGETING
 
                 EntityPath l_physPath = l_pTarget->getAttr<ATTR_PHYS_PATH>();
                 TRACFCOMP( g_trac_targeting,
-                           "Target %d of %d, %s, HB images %0.8x",
+                           "Target %d of %d, %s, HB images %0.2x",
                            l_targetNum,
                            *l_pNumTargets,
                            l_physPath.toString(),
