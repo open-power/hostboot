@@ -1037,6 +1037,14 @@
   </attribute>
 </targetType>
 
+<!-- This special TPM target exists only to adapt Hostboot's TPM target to
+     various workbooks' TPM target; all attributes should be declared against
+     the parent target -->
+<targetType>
+    <id>chip-NPCT501</id>
+    <parent>chip-tpm-cectpm</parent>
+</targetType>
+
 <targetType>
   <id>chip-processor-power9</id>
   <parent>chip-processor</parent>
