@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -296,5 +296,14 @@ Layout Description
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
+    </section>
+    <section>
+        <description>Secure Boot (144K)</description>
+        <eyeCatch>SECBOOT</eyeCatch>
+        <physicalOffset>0x3B61000</physicalOffset>
+        <physicalRegionSize>0x24000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+        <preserved/>
     </section>
 </pnor>
