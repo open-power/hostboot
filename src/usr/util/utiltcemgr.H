@@ -136,11 +136,13 @@ class UtilTceMgr
     void printIvMap() const;
 
 
-    /** Max TCE Entries and Size for the TCE Table */
+    /** Max TCE Entries and Size for the TCE Table. */
+    /** And Max amount of Memory The TCEs can cover. */
     enum
     {
         MAX_NUM_TCE_TABLE_ENTRIES   = 0x080000, // 512k entries - HW Max
         MAX_TCE_TABLE_SIZE          = 0x400000, // 512k * 8 bytes/entry
+        MAX_TCE_MEMORY_SPACE        = MAX_NUM_TCE_TABLE_ENTRIES * PAGESIZE,
     };
 
     /** Values related to PSIHB_SW_INTERFACES_t registers */
@@ -265,8 +267,7 @@ class UtilTceMgr
      * - see utiltce.H for details
      *
      */
-    errlHndl_t deallocateTces(uint32_t i_startingToken,
-                              size_t   i_size);
+    errlHndl_t deallocateTces(uint32_t i_startingToken);
 
     /**
      * @brief Responsible for disabling TCEs on the system, including
