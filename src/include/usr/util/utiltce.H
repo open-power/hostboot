@@ -74,15 +74,10 @@ errlHndl_t utilAllocateTces(uint64_t  i_startingAddress,
  * @param[in] i_startingToken  Token indicating the starting entry of the
  *                             TCE Table to remove
  *
- * @param[in] i_size - Size of memory space to remove associated TCE entries
- *                     Size must be less than (512K * PAGESIZE) or will fail.
- *                     Assert if not greater than zero.
- *
  * @return errlHndl_t - Return Error Handle if failed
  *
  */
-errlHndl_t utilDeallocateTces(uint32_t i_startingToken,
-                              size_t i_size);
+errlHndl_t utilDeallocateTces(uint32_t i_startingToken);
 
 
 /**

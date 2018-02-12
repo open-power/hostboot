@@ -7456,7 +7456,7 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 <attribute>
   <id>USE_TCES_FOR_DMAS</id>
   <description>
-<!-- @TODO RTC 168745 Remove This Attribute -->
+<!-- @TODO RTC 187906 Remove This Attribute -->
       Specifies whether or not the FSP is ready for Hostboot to enable TCEs
       for DMAs for the given IPL.  This is a temporary attribute which will
       be used to phase-in TCE support.

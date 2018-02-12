@@ -2980,8 +2980,8 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                 // Even though we don't see the Clock Line High, just
                 // trace a warning here and continue to send the 'stop' cmd
                 TRACFCOMP( g_trac_i2c, INFO_MRK"i2cSendSlaveStop(): "
-                           "Not seeing SCL High 0x%.16llX after 0x%X ns of "
-                           "polling (max=0x%X)",
+                           "Not seeing SCL High 0x%.16llX after %d ns of "
+                           "polling (max=%d)",
                            status_reg.value, delay_ns,
                            I2C_RESET_POLL_DELAY_TOTAL_NS );
             }

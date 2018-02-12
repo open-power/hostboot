@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -640,8 +640,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     if (tces_allocated)
     {
         // Use Preverification Location and Size
-        auto tce_errl = TCE::utilDeallocateTces(tceToken,
-                                                tceSize);
+        auto tce_errl = TCE::utilDeallocateTces(tceToken);
 
         if(tce_errl)
         {
