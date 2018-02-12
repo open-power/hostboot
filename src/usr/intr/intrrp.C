@@ -1061,6 +1061,7 @@ void IntrRp::msgHandler()
                                     "IntrRp::msgHandler MSG_INTR_REGISTER_MSGQ "
                                     "error unmasking interrupt type: %lx",
                                     l_intr_type);
+                                errlCommit(err, INTR_COMP_ID);
                                 break;
                             }
                         }
@@ -1645,7 +1646,7 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
 
             l_unmaskRead = *l_psiHbEsbptr;
 
-            if (l_unmaskRead != ESB_STATE_RESET)
+            if (l_unmaskRead == ESB_STATE_OFF)
             {
                 TRACFCOMP(g_trac_intr, "Error unmasking interrupt source: %x."
                               " ESB state is: %lx.",
@@ -1805,6 +1806,7 @@ void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
 
 {
     intr_hdlr_t* l_proc = NULL;
+    errlHndl_t l_err = NULL;
 
     //Find target handle for Proc to remove pending interrupt for
     for (ChipList_t::iterator targ_itr = iv_chipList.begin();
@@ -1873,7 +1875,15 @@ void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
             }
 
             //Enable this interrupt source again
-            unmaskInterruptSource(i_intSource, l_proc, true);
+            l_err = unmaskInterruptSource(i_intSource, l_proc, true);
+
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_intr,
+                    "IntrRp::completeInterruptProcessing "
+                    "error unmasking interrupt type: %lx", i_intSource);
+                errlCommit(l_err, INTR_COMP_ID);
+            }
 
             //Send final EOI to enable interrupts for this source again
             sendEOI(i_intSource, i_pir);
