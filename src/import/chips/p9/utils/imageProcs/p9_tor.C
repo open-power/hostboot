@@ -121,7 +121,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                 //
                 // 1. Calc offset to TOR slot pointing to chiplet's COM or INST section
                 cpltOffset = sizeof(TorHeader_t) +
-                             iCplt * sizeof(cpltBlock) +
+                             iCplt * sizeof(TorCpltBlock_t) +
                              bInstCase * sizeof(cpltBlock->cmnOffset);
                 // 2. Retrive offset, endian convert and make it relative to ring section origin
                 cpltOffset = *(uint32_t*)( (uint8_t*)i_ringSection + cpltOffset );
@@ -226,6 +226,11 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                                     if (ringOffset)
                                     {
                                         MY_ERR("Ring container is already present in image\n");
+                                        MY_ERR("  Ring section addr: 0x%016lx  (First 8B: 0x%016lx)\n",
+                                               (uintptr_t)i_ringSection,
+                                               be64toh(*((uint64_t*)i_ringSection)));
+                                        MY_ERR("  cpltOffset=0x%08x, torSlotNum=0x%x, TOR offset=0x%04x\n",
+                                               cpltOffset, torSlotNum, ringOffset);
                                         return TOR_RING_AVAILABLE_IN_RINGSECTION;
                                     }
 
