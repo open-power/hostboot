@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                  * @userdata1    PNOR Section specified
                  * @userdata2    Size of AttrOverrideSection
                  * @devdesc      AttrOverrideSection too big to fit in remaining
-                 *               chunck of pnor section
+                 *               chunk of pnor section
                  * @custdesc     Invalid configuration data in firmware Processor
                  *               NOR flash
                  */
@@ -122,7 +122,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                      sizeof(AttrOverrideSection));
                 l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
                                            HWAS::SRCI_PRIORITY_HIGH);
-                    break;
+                break;
             }
 
             l_index += sizeof(AttrOverrideSection);
