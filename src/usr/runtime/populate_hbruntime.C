@@ -1236,17 +1236,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 // Align size for OPAL
                 size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize,
                         HBRT_RSVD_MEM_OPAL_ALIGN);
-                // @TODO: RTC:183697 determine if OPAL can also use the
-                // actual size and remove the need for l_hdatEntrySize
-                // Size to add to HDAT entry
-                size_t l_hdatEntrySize = l_secRomSizeAligned;
 
                 uint64_t l_secureRomAddr = 0x0;
                 if(TARGETING::is_phyp_load())
                 {
                     l_secureRomAddr = l_prevDataAddr + l_prevDataSize;
-                    // Specify actual size in HDAT entry for POWERVM
-                    l_hdatEntrySize = l_secureRomSize;
                 }
                 else if(TARGETING::is_sapphire_load())
                 {
@@ -1256,7 +1250,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
                         i_nodeId,
                         l_secureRomAddr,
-                        l_hdatEntrySize,
+                        l_secureRomSize,
                         HBRT_RSVD_MEM__SECUREBOOT);
                 if(l_elog)
                 {
@@ -1264,7 +1258,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 }
 
                 l_prevDataAddr = l_secureRomAddr;
-                l_prevDataSize = l_secRomSizeAligned;
+                l_prevDataSize = l_secureRomSize;
 
                 // Load the Cached SecureROM into memory
                 l_elog = mapPhysAddr(l_secureRomAddr, l_secureRomSize, l_vAddr);
