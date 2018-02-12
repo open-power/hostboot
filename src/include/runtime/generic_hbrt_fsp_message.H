@@ -65,12 +65,12 @@ struct TargetDeconfigHbrtFspData_t
 
 /**
   * A useful struct to access the PLID from GenericFspMboxMessage_t.data
-  * The PLID will be in the first 4 bytes followed by some other data.
+  * in the case where the FSP is requesting Hostboot to restart a SBE
   */
-struct HbrtFspData_t
+struct SbeRetryReqData_t
 {
+   uint32_t huid;
    uint32_t plid;
-   uint32_t userData;
 } PACKED ;
 
 
@@ -139,9 +139,9 @@ struct GenericFspMboxMessage_t
         MSG_TOD_TOPOLOGY_DATA            = 0x0003,
         MSG_DECONFIG_TARGET              = 0x0004,
         MSG_ATTR_SYNC_REQUEST            = 0x000000A5,
-        MSG_SBE_ERROR                    = 0x000000E1,
-        MSG_SBE_RECOVERY_SUCCESS         = 0x000000E2,
-        MSG_SBE_RECOVERY_FAILED          = 0x000000E3,
+        MSG_SBE_ERROR                    = 0x000000D4,
+        MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5,
+        MSG_SBE_RECOVERY_FAILED          = 0x000000D6,
     };
 
     /**

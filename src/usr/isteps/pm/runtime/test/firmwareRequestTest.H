@@ -194,7 +194,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             uint64_t l_req_fw_msg_size(0), l_resp_fw_msg_size(0);
 
             // Create the dynamic firmware messages
-            createGenericFspMsg(sizeof(HbrtFspData_t),
+            createGenericFspMsg(sizeof(SbeRetryReqData_t),
                                 l_fsp_data_size,
                                 l_req_fw_msg_size,
                                 l_req_fw_msg,
@@ -208,11 +208,11 @@ class FirmwareRequestTest : public CxxTest::TestSuite
 
             // Create a useful struct to populate the generic_msg::data field
             // Setting the PLID and userData
-            HbrtFspData_t* l_fspData =
-                  reinterpret_cast<HbrtFspData_t*>
+            SbeRetryReqData_t* l_fspData =
+                  reinterpret_cast<SbeRetryReqData_t*>
                                  (&(l_req_fw_msg->generic_msg.data));
+            l_fspData->huid = 0x700;
             l_fspData->plid = 0x600;
-            l_fspData->userData = 0x700;
 
             if (l_req_fw_msg->generic_msg.magic !=
                 GenericFspMboxMessage_t::MAGIC_NUMBER)

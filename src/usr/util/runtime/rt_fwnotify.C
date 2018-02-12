@@ -85,19 +85,19 @@ uint16_t SeqId_t::getCurrentSeqId()
 
 /**
  *  @brief Attempt an SBE recovery after an SBE error
- *  @param[in] uint64_t i_data Contains a plid (in the first 4 bytes)
- *                             and a HUID (in the last 4 bytes)
+ *  @param[in] uint64_t i_data Contains a HUID (in the first 4 bytes)
+ *                             and a plid (in the last 4 bytes)
  *  @platform FSP, OpenPOWER
  **/
 void sbeAttemptRecovery(uint64_t i_data)
 {
    // Create a useful struct to get to the data
-   // The data is expected to be a plid (in the first 4 bytes)
-   // followed by a HUID (in the last 4 bytes).
-   HbrtFspData_t *l_hbrtFspData = reinterpret_cast<HbrtFspData_t*>(&i_data);
+   // The data is expected to be a HUID (in the first 4 bytes)
+   // followed by a PLID (in the last 4 bytes).
+   SbeRetryReqData_t *l_sbeRetryData = reinterpret_cast<SbeRetryReqData_t*>(&i_data);
 
    TRACFCOMP(g_trac_runtime, ENTER_MRK"sbeAttemptRecovery: plid:0x%X, "
-             "HUID:0x%X", l_hbrtFspData->plid, l_hbrtFspData->userData);
+             "HUID:0x%X", l_sbeRetryData->plid, l_sbeRetryData->huid);
 
     errlHndl_t l_err = nullptr;
 
@@ -105,14 +105,14 @@ void sbeAttemptRecovery(uint64_t i_data)
     {
         // Extract the target from the given HUID
         TargetHandle_t l_target =
-                        Target::getTargetFromHuid(l_hbrtFspData->userData);
+                        Target::getTargetFromHuid(l_sbeRetryData->huid);
 
         // If HUID invalid, log error and quit
         if (nullptr == l_target)
         {
              TRACFCOMP(g_trac_runtime, ERR_MRK"sbeAttemptRecovery: "
                        "No target associated with HUID:0x%.8X",
-                       l_hbrtFspData->userData);
+                       l_sbeRetryData->huid);
 
             /*@
              * @errortype
@@ -126,8 +126,8 @@ void sbeAttemptRecovery(uint64_t i_data)
             l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
                                    MOD_RT_FIRMWARE_NOTIFY,
                                    RC_SBE_RT_INVALID_HUID,
-                                   l_hbrtFspData->userData,
-                                   l_hbrtFspData->plid,
+                                   l_sbeRetryData->huid,
+                                   l_sbeRetryData->plid,
                                    true);
             break;
         }
@@ -135,7 +135,7 @@ void sbeAttemptRecovery(uint64_t i_data)
         // Get the SBE Retry Handler, propagating the supplied PLID
         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
                         SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-                        l_hbrtFspData->plid);
+                        l_sbeRetryData->plid);
 
         // Retry the recovery of the SBE
         l_SBEobj.main_sbe_handler(l_target);
@@ -161,8 +161,8 @@ void sbeAttemptRecovery(uint64_t i_data)
             l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
                                    MOD_RT_FIRMWARE_NOTIFY,
                                    RC_FW_REQUEST_RT_NULL_PTR,
-                                   l_hbrtFspData->userData,
-                                   l_hbrtFspData->plid,
+                                   l_sbeRetryData->huid,
+                                   l_sbeRetryData->plid,
                                    true);
 
            break;
