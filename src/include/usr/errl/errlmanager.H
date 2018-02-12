@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -276,7 +276,9 @@ private:
 #endif
         ERRLOG_PLID_NODE_SHIFT  = 24,        // shift to put node number 0x9#
         ERRLOG_PLID_MASK        = 0x00FFFFFF,// mask to find log number
-        ERRLOG_PLID_INITIAL     = 0x00FF0000,// initial big id number
+        ERRLOG_PLID_INITIAL     = 0x00800000,// min number for pre-boot
+        ERRLOG_PLID_PRE_MAX     = 0x00FFFFFF,// max number during pre-boot
+        ERRLOG_PLID_POST_MAX    = 0x007FFFFF,// max number after pre-boot
     };
 
     /**
@@ -311,7 +313,7 @@ private:
     /**
      * @brief Access PNOR and get the address and size of the HBEL section in
      * PNOR; sets the iv_pnorAddr, iv_maxErrlInPnor, iv_pnorOpenSlot variables;
-     * parsers the error logs in PNOR and determines the new iv_currLogId.
+     * parses the error logs in PNOR and determines the new iv_currLogId.
      *
      * @param[in/out] NONE
      * @return NONE.
@@ -407,6 +409,19 @@ private:
       * this value will be used to assign the new error log its ID.
       */
     uint32_t    iv_currLogId;
+
+    /**
+      * @brief    Base & Node part of log ID.
+      *  This value will be used as a common ID among this node's error logs
+      */
+    uint32_t    iv_baseNodeId;
+
+    /**
+     *  @brief   Indicates if PNOR is ready for handling error logs
+     *  Will cause a switch of MIN/MAX values used in calculating the
+     *  next iv_currLogId.
+     */
+    bool        iv_pnorReadyForErrorLogs;
 
     /**
       * @brief

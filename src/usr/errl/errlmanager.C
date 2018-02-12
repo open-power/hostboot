@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -117,6 +117,7 @@ AtLoadFunctions atLoadFunction;
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ErrlManager::ErrlManager() :
+    iv_pnorReadyForErrorLogs(false),
     iv_hwasProcessCalloutFn(NULL),
     iv_msgQ(NULL),
     iv_pnorAddr(NULL),
@@ -162,8 +163,8 @@ ErrlManager::ErrlManager() :
                                     masterCpu.groupId :
                                     masterCpu.groupId + 4;
 
-    iv_currLogId = ERRLOG_PLID_BASE + ERRLOG_PLID_INITIAL +
-                        (l_eid_id << ERRLOG_PLID_NODE_SHIFT);
+    iv_baseNodeId = ERRLOG_PLID_BASE + (l_eid_id << ERRLOG_PLID_NODE_SHIFT);
+    iv_currLogId = iv_baseNodeId | ERRLOG_PLID_INITIAL;
 
     // next, we need to look thru PNOR and see what error records are there;
     //   ours will be 1 after the highest found.
