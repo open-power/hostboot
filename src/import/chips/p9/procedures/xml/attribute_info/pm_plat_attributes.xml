@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2211,6 +2211,22 @@
     <writeable/>
     <platInit/>
     <default>NO_FALLBACK</default>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SKIP_WAKEUP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The PM_RESET hwp calls special wakeup enable on all EX targets, then
+      will clear auto-special wakeup bit on the core if special wakeup is done.
+      In some cases hostboot does not want these steps of the PM_RESET. This
+      attribute gives the platform the ability to decide if they want to enable
+      special wakeup and clear autowakeup on the cores during PM_RESET
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <platInit/>
+    <default>0</default>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>

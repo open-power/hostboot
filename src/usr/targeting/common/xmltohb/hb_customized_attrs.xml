@@ -662,6 +662,10 @@
         <id>LINK_TRAIN</id>
         <writeable/>
     </attribute>
+    <attribute>
+        <id>SKIP_WAKEUP</id>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
