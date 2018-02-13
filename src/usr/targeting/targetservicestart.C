@@ -344,6 +344,12 @@ static void initializeAttributes(TargetService& i_targetService,
     i_targetService.getTopLevelTarget(l_pTopLevel);
     if(l_pTopLevel)
     {
+        //Set SKIP_WAKEUP to true until all cores  are powered on (16.2)
+        //If this is not set to true, PM_RESET , which is called between
+        //now and istep 16.2 in various configurations and IPL flows will attempt
+        //to enable special wakeup on cores that are not yet powered
+        l_pTopLevel->setAttr<ATTR_SKIP_WAKEUP>(1);
+
         Target* l_pMasterProcChip = NULL;
         i_targetService.masterProcChipTargetHandle(l_pMasterProcChip);
 

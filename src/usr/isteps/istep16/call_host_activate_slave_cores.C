@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
     uint32_t l_numCores = 0;
 
     for(TargetHandleList::const_iterator
@@ -99,9 +102,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
           l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
         FABRIC_CHIP_ID_ATTR l_chipId =
           l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-        TARGETING::Target* sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        assert( sys != NULL );
+
 
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
               const_cast<TARGETING::Target*> (*l_core));
@@ -257,6 +258,11 @@ void* call_host_activate_slave_cores (void *io_pArgs)
         }
     }
 #endif
+
+    //Set SKIP_WAKEUP to false after all cores are powered on (16.2)
+    //If this is not set false, PM_RESET will fail to enable special wakeup.
+    // PM_RESET is expected to enable special_wakeup after all the cores powered on
+    sys->setAttr<ATTR_SKIP_WAKEUP>(0);
 
     // Now that the slave cores are running, we need to include them in
     //  multicast scom operations
