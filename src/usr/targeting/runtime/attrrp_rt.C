@@ -38,54 +38,6 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
-    void AttrRP::fillInAttrRP(TargetingHeader* i_header)
-    {
-        TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::fillInAttrRP");
-
-        do
-        {
-            // Allocate section structures based on section count in header.
-            iv_sectionCount = i_header->numSections;
-            iv_sections = new AttrRP_Section[iv_sectionCount]();
-
-            // Find start to the first section:
-            //          (header address + size of header + offset in header)
-            TargetingSection* l_section =
-                reinterpret_cast<TargetingSection*>(
-                    reinterpret_cast<uint64_t>(i_header) +
-                    sizeof(TargetingHeader) + i_header->offsetToSections
-                );
-
-            uint64_t l_offset = 0;
-
-            for (size_t i = 0; i < iv_sectionCount; ++i, ++l_section)
-            {
-                iv_sections[i].type = l_section->sectionType;
-                iv_sections[i].size = l_section->sectionSize;
-
-                iv_sections[i].vmmAddress =
-                        static_cast<uint64_t>(
-                            TARG_TO_PLAT_PTR(i_header->vmmBaseAddress)) +
-                        i_header->vmmSectionOffset*i;
-                iv_sections[i].pnorAddress =
-                        reinterpret_cast<uint64_t>(i_header) + l_offset;
-
-                l_offset += ALIGN_PAGE(iv_sections[i].size);
-
-                TRACFCOMP(g_trac_targeting,
-                          "Decoded Attribute Section: %d, 0x%lx, 0x%lx, 0x%lx",
-                          iv_sections[i].type,
-                          iv_sections[i].vmmAddress,
-                          iv_sections[i].pnorAddress,
-                          iv_sections[i].size);
-            }
-        } while(false);
-
-        TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::fillInAttrRP");
-
-        return;
-    }
-
     void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
     {
         TRACFCOMP(g_trac_targeting, "AttrRP::startup");
@@ -282,7 +234,7 @@ namespace TARGETING
                                     TargetingHeader* i_header,
                                     const NODE_ID i_nodeId)
     {
-        TRACFCOMP(g_trac_targeting, "AttrRP::nodeInfoInit");
+        TRACFCOMP(g_trac_targeting, "AttrRP::nodeInfoInit %d", i_nodeId);
         errlHndl_t l_errl = nullptr;
 
         do

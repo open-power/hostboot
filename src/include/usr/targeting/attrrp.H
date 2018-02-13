@@ -114,7 +114,7 @@ class AttrRP
 #else
     friend errlHndl_t RT_TARG::saveRestoreAttrs(void *,
                                                 void *,
-                                                uint64_t&);
+                                                uint8_t);
 #endif
 
     public:
@@ -306,14 +306,16 @@ class AttrRP
 
 #else
         /**
-         *  @brief Fill in new attribute resource provider for HBRT.
+         *  @brief Get node instance status of attribute resource provider
+         *  which indicates if the attribute resource provider is handling
+         *  a single node or multiple nodes
          *
-         *  @param[in] i_header
-         *      TargetingHeader to use with filling in the new RT AttrRP.
-         *
-         *  @return void
+         *  @return Node instance status
          */
-        void fillInAttrRP(TargetingHeader* i_header);
+        NodeInstanceStatus getInstanceStatus()
+        {
+            return iv_instanceStatus;
+        }
 
         /**
          *  @brief Get count of nodes handled by attribute resource provider.
@@ -352,12 +354,39 @@ class AttrRP
          *  @par Detailed Description:
          *      Ensures member variables are initialized to sane values.
          */
-        AttrRP(TargetingHeader* i_header)
-            : iv_isTempInstance(true), iv_instanceStatus(SINGLE_NODE),
+        AttrRP(TargetingHeader* i_header,
+               NODE_ID i_nodeId,
+               size_t i_nodeCount,
+               NodeInstanceStatus i_instanceStatus)
+            : iv_isTempInstance(true), iv_instanceStatus(i_instanceStatus),
               iv_isMpipl(false)
         {
-            // Fill in member variables
-            fillInAttrRP(i_header);
+            // Work with nodes before passed in node
+            for(NODE_ID l_nodeId = NODE0; l_nodeId < i_nodeCount; ++l_nodeId)
+            {
+                // Create local copy of container for node info struct
+                NodeInfo l_nodeCont;
+
+                if(l_nodeId == i_nodeId)
+                {
+                    // Initialize local copy of container for node info struct
+                    errlHndl_t l_errl = nodeInfoInit(l_nodeCont,
+                                                     i_header,
+                                                     i_nodeId);
+                    if (l_errl)
+                    {
+                        l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
+                        /* Commit the error */
+                        errlCommit(l_errl, TARG_COMP_ID);
+
+                        break;
+                    }
+                }
+
+                // Push back node info struct into the node container
+                iv_nodeContainer.push_back(l_nodeCont);
+            }
         };
 #endif
 

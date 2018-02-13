@@ -33,6 +33,7 @@
 #include <targeting/attrPlatOverride.H>
 #include <util/runtime/util_rt.H>
 #include <targeting/attrrp.H>
+#include <targeting/targplatreasoncodes.H>
 
 #define MEMCMPPTR(addr, offset) \
         reinterpret_cast<void*>(reinterpret_cast<uint64_t>(addr) + offset)
@@ -286,21 +287,280 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 allow_attr_overrides);
         }
 
-        // Test the two internal functions used during HBRT concurrent update.
-        // The first function validates the LID Structure against the Reserved
-        // Memory data.  The second function saves and restores attribute
-        // values from current Reserved Memory data into new LID Structure
-        // data.  This testcase uses Reserved Memory data to make its LID
-        // Structure, so it tests basic logic in the functions, but does not
-        // test more complex handling of special data conditions.
-        void _testSaveRestoreAttrs()
+        // Test internal function used during HBRT concurrent update to validate
+        // the LID Structure against the Reserved Memory data.  This testcase
+        // uses Reserved Memory data to make its LID Structure, so it tests
+        // basic logic in the functions, but does not test more complex handling
+        // of special data conditions.
+        void testValidateData()
         {
-#if 0 //@todo-RTC:188625-Turn this back on
+            using namespace TARGETING;
+            TRACFCOMP(g_trac_targeting,ENTER_MRK"testValidateData");
+
+            errlHndl_t l_err = nullptr;
+            void *l_lidStruct = nullptr;
+            NODE_ID l_node = NODE0; // Runs on Standalone, so only Node 0
+
+            do
+            {
+                uint64_t l_attr_size = 0;
+                uint64_t l_rsvdMem =
+                    hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
+                                       l_node,
+                                       l_attr_size);
+                void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
+
+                // Access TargetingHeader in current data
+                TargetingHeader* l_headerRsvd =
+                    reinterpret_cast<TargetingHeader*>(l_rsvdMemPtr);
+
+                // Find start to the first section in current data:
+                //      (header address + size of header + offset in header)
+                TargetingSection* l_sectionRsvd =
+                    reinterpret_cast<TargetingSection*>(
+                        reinterpret_cast<uint64_t>(l_headerRsvd) +
+                        sizeof(TargetingHeader) +
+                        l_headerRsvd->offsetToSections);
+
+                // Allocate memory for new LID structure
+                l_lidStruct = malloc(l_attr_size);
+
+                // Make LID structure from current Reserved Memory data
+                memcpy(l_lidStruct,
+                       l_rsvdMemPtr,
+                       l_attr_size);
+
+                // Intentionally invalidate the eyecatcher for LID structure
+                // Then run validateData() to make sure this error is detected
+                TargetingHeader* l_headerLid =
+                    reinterpret_cast<TargetingHeader*>(l_lidStruct);
+                uint32_t *l_pEyeCatcher =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerLid->eyeCatcher));
+                *l_pEyeCatcher += 0x20202020;
+                size_t l_lidDataSize = 0;
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(ERRL_GETRC_SAFE(l_err) != TARG_RT_BAD_EYECATCHER_LID)
+                {
+                    TS_FAIL("testValidateData> unexpected reason code from "
+                            "validateData, expected 0x%.4x, received 0x%.4x",
+                            TARG_RT_BAD_EYECATCHER_LID,
+                            ERRL_GETRC_SAFE(l_err));
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->moduleId() != TARG_RT_VALIDATEDATA))
+                {
+                    TS_FAIL("testValidateData> unexpected module ID from "
+                            "validateData, expected 0x86, received 0x%.2x",
+                            TARG_RT_VALIDATEDATA,
+                            l_err->moduleId());
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->getUserData1() != l_headerLid->eyeCatcher))
+                {
+                    TS_FAIL("testValidateData> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_headerLid->eyeCatcher,
+                            l_err->getUserData1());
+                    break;
+                }
+                else
+                {
+                    *l_pEyeCatcher -= 0x20202020;
+                }
+
+                // Intentionally invalidate the eyecatcher for Reserved Memory
+                // Then run validateData() to make sure this error is detected
+                l_pEyeCatcher =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerRsvd->eyeCatcher));
+                *l_pEyeCatcher += 0x00202020;
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(ERRL_GETRC_SAFE(l_err) != TARG_RT_BAD_EYECATCHER_MEM)
+                {
+                    TS_FAIL("testValidateData> unexpected reason code from "
+                            "validateData, expected 0x%.4x, received 0x%.4x",
+                            TARG_RT_BAD_EYECATCHER_MEM,
+                            ERRL_GETRC_SAFE(l_err));
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->moduleId() != TARG_RT_VALIDATEDATA))
+                {
+                    TS_FAIL("testValidateData> unexpected module ID from "
+                            "validateData, expected 0x86, received 0x%.2x",
+                            TARG_RT_VALIDATEDATA,
+                            l_err->moduleId());
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->getUserData1() != l_headerRsvd->eyeCatcher))
+                {
+                    TS_FAIL("testValidateData> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_headerRsvd->eyeCatcher,
+                            l_err->getUserData1());
+                    break;
+                }
+                else
+                {
+                    *l_pEyeCatcher -= 0x00202020;
+                }
+
+                // Intentionally cause mismatch with number of sections
+                // Then run validateData() to make sure this error is detected
+                uint32_t *l_pNumSections =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_headerRsvd->numSections));
+                *l_pNumSections += 2;
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(ERRL_GETRC_SAFE(l_err) != TARG_RT_SECTION_NUM_MISMATCH)
+                {
+                    TS_FAIL("testValidateData> unexpected reason code from "
+                            "validateData, expected 0x%.4x, received 0x%.4x",
+                            TARG_RT_SECTION_NUM_MISMATCH,
+                            ERRL_GETRC_SAFE(l_err));
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->moduleId() != TARG_RT_VALIDATEDATA))
+                {
+                    TS_FAIL("testValidateData> unexpected module ID from "
+                            "validateData, expected 0x86, received 0x%.2x",
+                            TARG_RT_VALIDATEDATA,
+                            l_err->moduleId());
+                    break;
+                }
+                else if(l_err &&
+                        ((l_err->getUserData1() != l_headerLid->numSections) ||
+                         (l_err->getUserData2() != l_headerRsvd->numSections)))
+                {
+                    TS_FAIL("testValidateData> unexpected user data from "
+                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx, "
+                            "expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_headerLid->numSections,
+                            l_err->getUserData1(),
+                            l_headerRsvd->numSections,
+                            l_err->getUserData2());
+                    break;
+                }
+                else
+                {
+                    *l_pNumSections -= 2;
+                }
+
+                // Intentionally cause mismatch with TargetingSection type
+                // Then run validateData() to make sure this error is detected
+                TargetingSection* l_sectionLid =
+                    reinterpret_cast<TargetingSection*>(
+                        reinterpret_cast<uint64_t>(l_headerLid) +
+                        sizeof(TargetingHeader) +
+                        l_headerLid->offsetToSections);
+                uint8_t l_sectionType = l_sectionLid[0].sectionType;
+                uint8_t *l_pSectionType =
+                    reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(
+                        &l_sectionLid[0])); // sectionType is first field
+                *l_pSectionType = l_sectionType + 0xF0;
+                uint64_t l_expected =
+                    TWO_UINT32_TO_UINT64(l_sectionLid[0].sectionType,
+                                         l_sectionRsvd[0].sectionType);
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(ERRL_GETRC_SAFE(l_err) != TARG_RT_SECTION_MISMATCH)
+                {
+                    TS_FAIL("testValidateData> unexpected reason code from "
+                            "validateData, expected 0x%.4x, received 0x%.4x",
+                            TARG_RT_SECTION_MISMATCH,
+                            ERRL_GETRC_SAFE(l_err));
+                    break;
+                }
+                else if(l_err &&
+                        (l_err->moduleId() != TARG_RT_VALIDATEDATA))
+                {
+                    TS_FAIL("testValidateData> unexpected module ID from "
+                            "validateData, expected 0x86, received 0x%.2x",
+                            TARG_RT_VALIDATEDATA,
+                            l_err->moduleId());
+                    break;
+                }
+                else if(l_err &&
+                        ((l_err->getUserData1() != 0) ||
+                         (l_err->getUserData2() != l_expected)))
+                {
+                    TS_FAIL("testValidateData> unexpected user data from "
+                            "validateData, expected 0, rcvd 0x%.16llx, "
+                            "expected 0x%.16llx, rcvd 0x%.16llx",
+                            l_err->getUserData1(),
+                            l_expected,
+                            l_err->getUserData2());
+                    break;
+                }
+                else
+                {
+                    *l_pSectionType = l_sectionType;
+                }
+
+                // Detect TargetingSection size mismatch
+                uint32_t l_sectionSize = l_sectionRsvd[0].sectionSize;
+                uint32_t *l_pSectionSize =
+                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
+                        &l_sectionRsvd[0].sectionSize));
+                *l_pSectionSize = l_sectionSize + 0x100;
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(l_err)
+                {
+                    TS_FAIL("testValidateData> unexpected error log from "
+                            "validateData, should only trace mismatch");
+                    break;
+                }
+                else
+                {
+                    *l_pSectionSize = l_sectionSize;
+                }
+
+                // Validate LID Structure against Reserved Memory
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(l_err)
+                {
+                    TS_FAIL("testValidateData> unexpected error log from "
+                            "validateData");
+                    break;
+                }
+
+                TRACFCOMP(g_trac_targeting,"testValidateData SUCCESS");
+            } while(false);
+
+            free(l_lidStruct);
+            l_lidStruct = nullptr;
+
+            TRACFCOMP(g_trac_targeting,EXIT_MRK"testValidateData");
+        }
+
+        // Test the internal function used during HBRT concurrent update to save
+        // and restoresattribute values from current Reserved Memory data into
+        // new LID Structure data.  This testcase uses Reserved Memory data to
+        // make its LID Structure, so it tests basic logic in the functions, but
+        // does not test more complex handling of special data conditions.
+        void testSaveRestoreAttrs()
+        {
             using namespace TARGETING;
             TRACFCOMP(g_trac_targeting,ENTER_MRK"testSaveRestoreAttrs");
 
-            int rc = 0;
-            uint64_t l_userdata2 = 0;
+            errlHndl_t l_err = nullptr;
+            NODE_ID l_node = NODE0; // Runs on Standalone, so only Node 0
             void *l_lidStruct = nullptr;
 
             do
@@ -308,7 +568,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 uint64_t l_attr_size = 0;
                 uint64_t l_rsvdMem =
                     hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
-                                       0,
+                                       l_node,
                                        l_attr_size);
                 void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
 
@@ -325,22 +585,13 @@ class TargetingTestSuite : public CxxTest::TestSuite
                    number of sections match, and that the types of each
                    TargetingSection match. */
                 size_t l_lidDataSize = 0;
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc)
+                l_err = RT_TARG::validateData(l_lidStruct,
+                                              l_rsvdMemPtr,
+                                              l_lidDataSize);
+                if(l_err)
                 {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != 0)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, received 0x%.16llx",
-                            l_userdata2);
+                    TS_FAIL("testSaveRestoreAttrs> unexpected error log from "
+                            "validateData");
                     break;
                 }
 
@@ -358,21 +609,13 @@ class TargetingTestSuite : public CxxTest::TestSuite
                    into new LID Structure data.  Leave attribute values in new
                    LID Structure data as is, if there is no value from current
                    Reserved Memory data. */
-                rc = RT_TARG::saveRestoreAttrs(l_rsvdMemPtr,
-                                               l_lidStruct,
-                                               l_userdata2);
-                if(rc)
+                l_err = RT_TARG::saveRestoreAttrs(l_rsvdMemPtr,
+                                                  l_lidStruct,
+                                                  l_node);
+                if(l_err)
                 {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "saveRestoreAttrs, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != 0)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "saveRestoreAttrs, received 0x%.8x",
-                            l_userdata2);
+                    TS_FAIL("testSaveRestoreAttrs> unexpected error log from "
+                            "validateData");
                     break;
                 }
 
@@ -523,159 +766,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     break;
                 }
 
-                // Detect invalid LID Structure TargetingHeader eyecatcher
-                TargetingHeader* l_headerLid =
-                    reinterpret_cast<TargetingHeader*>(l_lidStruct);
-                uint32_t *l_pEyeCatcher =
-                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
-                        &l_headerLid->eyeCatcher));
-                *l_pEyeCatcher += 0x20202020;
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc != 0x11)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, expected 0x11, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != l_headerLid->eyeCatcher)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
-                            l_headerLid->eyeCatcher,
-                            l_userdata2);
-                    break;
-                }
-                else
-                {
-                    *l_pEyeCatcher -= 0x20202020;
-                    l_userdata2 = 0;
-                }
-
-                // Detect invalid Reserved Memory TargetingHeader eyecatcher
-                l_pEyeCatcher =
-                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
-                        &l_headerRsvd->eyeCatcher));
-                *l_pEyeCatcher += 0x00202020;
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc != 0x12)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, expected 0x12, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != l_headerRsvd->eyeCatcher)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
-                            l_headerRsvd->eyeCatcher,
-                            l_userdata2);
-                    break;
-                }
-                else
-                {
-                    *l_pEyeCatcher -= 0x00202020;
-                    l_userdata2 = 0;
-                }
-
-                // Detect TargetingHeader number of sections mismatch
-                uint32_t *l_pNumSections =
-                    reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
-                        &l_headerRsvd->numSections));
-                *l_pNumSections += 2;
-                uint64_t l_expected =
-                    TWO_UINT32_TO_UINT64(l_headerLid->numSections,
-                                         l_headerRsvd->numSections);
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc != 0x13)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, expected 0x13, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != l_expected)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
-                            l_expected,
-                            l_userdata2);
-                    break;
-                }
-                else
-                {
-                    *l_pNumSections -= 2;
-                    l_userdata2 = 0;
-                }
-
-                // Detect TargetingSection type mismatch
-                TargetingSection* l_sectionLid =
-                    reinterpret_cast<TargetingSection*>(
-                        reinterpret_cast<uint64_t>(l_headerLid) +
-                        sizeof(TargetingHeader) +
-                        l_headerLid->offsetToSections);
-                uint8_t l_sectionType = l_sectionLid[0].sectionType;
-                uint8_t *l_pSectionType =
-                    reinterpret_cast<uint8_t*>(reinterpret_cast<uint64_t>(
-                        &l_sectionLid[0])); // sectionType is first field
-                *l_pSectionType = l_sectionType + 0xF0;
-                l_expected =
-                    TWO_UINT32_TO_UINT64(l_sectionLid[0].sectionType,
-                                         l_sectionRsvd[0].sectionType);
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc != 0x14)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, expected 0x14, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != l_expected)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, expected 0x%.16llx, rcvd 0x%.16llx",
-                            l_expected,
-                            l_userdata2);
-                    break;
-                }
-                else
-                {
-                    *l_pSectionType = l_sectionType;
-                    l_userdata2 = 0;
-                }
-
-                // Validate LID Structure against Reserved Memory
-                rc = RT_TARG::validateData(l_lidStruct,
-                                           l_rsvdMemPtr,
-                                           l_lidDataSize,
-                                           l_userdata2);
-                if(rc)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected return code from "
-                            "validateData, received 0x%.2x",
-                            rc);
-                    break;
-                }
-                else if(l_userdata2 != 0)
-                {
-                    TS_FAIL("testSaveRestoreAttrs> unexpected user data from "
-                            "validateData, received 0x%.16llx",
-                            l_userdata2);
-                    break;
-                }
 
                 TRACFCOMP(g_trac_targeting,"testSaveRestoreAttrs SUCCESS");
             } while(false);
@@ -684,7 +774,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
             l_lidStruct = nullptr;
 
             TRACFCOMP(g_trac_targeting,EXIT_MRK"testSaveRestoreAttrs");
-#endif
         }
 
 };

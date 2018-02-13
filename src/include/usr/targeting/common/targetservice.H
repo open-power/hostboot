@@ -726,31 +726,30 @@ class TargetService
         void getMasterNodeTarget(Target*& o_masterNodeTarget) const;
 
         /**
-         *  @brief Returns Target Range Filter information.
+         *  @brief Returns Array of Targets from Targeting Image.
          *
          *  @par Detailed Description:
-         *  Returns the Target Range Filter information for the specified
-         *  attribute data and resource provider.
+         *  Returns a pointer to the Array of Targets found in the Targeting
+         *  Image as provided by the Attribute Data.
          *
          *  @param[in] i_attrData pointer to attribute data
          *
+         *  @param[in] i_nodeId, node ID for the targeting image
+         *
          *  @param[in] i_attrRP pointer to attribute resource provider
          *
-         *  @param[out] o_maxTargets maximum targets in the range
-         *
-         *  @param[in] i_nodeId, node ID for the target.
+         *  @param[out] o_maxTargets maximum targets in image
          *
          *  @pre TargetService must be initialized.
          *
-         *  @post Returns the Target Range Filter information for the specified
-         *  attribute data and resource provider.
+         *  @post Returns pointer to Array of Targets from Targeting Image.
          *
-         *  @return TargetRangeFilter
+         *  @return Target*
          */
-        TargetRangeFilter getTargetRangeFilter(void *i_attrData,
-                                               AttrRP *i_attrRP,
-                                               uint32_t &o_maxTargets,
-                                               NODE_ID i_nodeId);
+        Target* getTargetArray(void *i_attrData,
+                               NODE_ID i_nodeId,
+                               AttrRP *i_attrRP,
+                               uint32_t &o_maxTargets);
 
         /**
          *  @brief Returns Target Attribute information.
