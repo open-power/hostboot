@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -174,6 +174,11 @@ sub loadPnorLayout
                 die "ERROR: $this_func: Image size ($imageSize) smaller than $eyeCatch's offset + $eyeCatch's size (".($physicalOffset + $physicalRegionSize)."). Aborting! ";
             }
 
+            if (exists $$i_pnorLayoutRef{sections}{$physicalOffset})
+            {
+                die "ERROR: $this_func: Region ".$$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch}." already starts where $eyeCatch starts: ".sprintf("0x%X",$physicalOffset)."!";
+            }
+
             $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
@@ -205,7 +210,10 @@ sub loadPnorLayout
                 $$i_physicalOffsets{side}{$side}{eyecatch}{$eyeCatch} = $physicalOffset;
             }
         }
+        # After all sections have been processed, check for overlaps among them
+        checkForOverlap($i_pnorLayoutRef);
     }
+
     return 0;
 }
 
@@ -521,6 +529,39 @@ sub checkFile
 }
 
 ###############################################################################
+# Check For Overlap - Check For Overlaps Between PNOR Sections
+################################################################################
+sub checkForOverlap
+{
+    my ($i_pnorLayoutRef) = @_;
+    my $curOffset = 0;
+    my $gapTotal = 0;
+    my $prevOffset = 0;
+    my $prevSize = 0;
+    my $prevEyeCatch = 0;
+    # Iterate through all sections of PNOR, including TOC's
+    foreach my $section (sort {$a <=> $b} keys %{$$i_pnorLayoutRef{sections}})
+    {
+        # Get hex format for each value
+        my $offset = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalOffset});
+        my $size = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalRegionSize});
+        my $end = sprintf("0x%X",hex($offset)+hex($size));
+
+        if ($prevOffset+$prevSize > hex($offset))
+        {
+            my $hexEndPrevSection = sprintf("0x%X",$prevOffset+$prevSize);
+            print "---- Error: checkForOverlap: Previous Section $prevEyeCatch ends at offset $hexEndPrevSection which is after Current Offset $offset\n";
+            print "---- Current Offset Section: ".$$i_pnorLayoutRef{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
+            die ">>Error overlapping section\n";
+        }
+        $prevOffset = hex($offset);
+        $prevSize = hex($size);
+        $prevEyeCatch=$$i_pnorLayoutRef{sections}{$section}{eyeCatch};
+    }
+}
+
+
+###############################################################################
 # Display Pnor Layout -   Display XML pnor layout more simply
 ################################################################################
 sub displayPnorLayout
@@ -549,7 +590,7 @@ sub displayPnorLayout
         if ($prevOffset+$prevSize > hex($offset))
         {
             my $hexEndPrevSection = sprintf("0x%X",$prevOffset+$prevSize);
-            print "---- Error: Prevoius Section ends at offset $hexEndPrevSection which is after Current Offset $offset\n";
+            print "---- Error: Previous Section ends at offset $hexEndPrevSection which is after Current Offset $offset\n";
             print "---- Current Offset Section: ".$$i_pnorLayoutRef{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
             die ">>Error overlapping section\n";
         }
