@@ -363,8 +363,8 @@ void firmware_notify( uint64_t i_len, void *i_data )
                 TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_notify: "
                     "Unknown FSP message type:0x%.8X, "
                     "message queue id:0x%.8X, seqNum:%d ",
-                    l_hbrt_fw_msg->generic_msg.msgq,
                     l_hbrt_fw_msg->generic_msg.msgType,
+                    l_hbrt_fw_msg->generic_msg.msgq,
                     l_hbrt_fw_msg->generic_msg.seqnum);
 
                 // Pack user data 1 with message input type and
