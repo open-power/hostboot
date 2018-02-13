@@ -179,32 +179,38 @@ fapi_try_exit:
 fapi2::ReturnCode broadcast_out_of_sync( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
         const mss::states i_value )
 {
-    fapi2::ReturnCode l_rc;
-    fapi2::buffer<uint64_t> recr_buffer;
-
-    fir::reg<MCBIST_MCBISTFIRQ> l_mcbist_fir_reg(i_target, l_rc);
-    FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCBIST_MCBISTFIRQ);
-
-    // Check for enabled (post memdiag) or disbaled (pre memdiag) workaround
-    if ( i_value )
+    // Check for enabled (post memdiag) or disabled (pre memdiag) workaround
+    if ( i_value == mss::ON )
     {
-        // Initialize Broadcast of out sync to checkstop post workaround
-        l_mcbist_fir_reg.checkstop<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>();
+        fapi2::buffer<uint64_t> l_mcbist_action_buffer;
+
+        // Change Broadcast of out sync to checkstop post workaround
+        // Current FIR register API resets FIR mask registers when setting up FIR
+        // This can result in FIRs being incorrectly unmasked after being handled in memdiags
+        // The scoms below set the mask to checkstop while preserving the current mask state
+        FAPI_TRY( mss::getScom(i_target, MCBIST_MCBISTFIRACT1, l_mcbist_action_buffer) );
+        l_mcbist_action_buffer.clearBit<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>();
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBISTFIRACT1, l_mcbist_action_buffer) );
     }
     else
     {
-        // Initialize Broadcast of out sync to recoverable pre workaround
-        l_mcbist_fir_reg.recoverable_error<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>();
-    }
+        fapi2::ReturnCode l_rc;
+        fir::reg<MCBIST_MCBISTFIRQ> l_mcbist_fir_reg(i_target, l_rc);
+        FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCBIST_MCBISTFIRQ);
 
-    FAPI_TRY(l_mcbist_fir_reg.write(), "unable to write fir::reg %d", MCBIST_MCBISTFIRQ);
+        // Initialize Broadcast out of sync to recoverable pre workaround
+        l_mcbist_fir_reg.recoverable_error<MCBIST_MCBISTFIRQ_MCBIST_BRODCAST_OUT_OF_SYNC>();
+        FAPI_TRY(l_mcbist_fir_reg.write(), "unable to write fir::reg %d", MCBIST_MCBISTFIRQ);
+    }
 
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        fapi2::buffer<uint64_t> l_recr_buffer;
+
         // Set UE noise window for workaround
-        mss::read_recr_register(p, recr_buffer);
-        mss::set_enable_ue_noise_window(recr_buffer, i_value);
-        mss::write_recr_register(p, recr_buffer);
+        mss::read_recr_register(p, l_recr_buffer);
+        mss::set_enable_ue_noise_window(l_recr_buffer, i_value);
+        mss::write_recr_register(p, l_recr_buffer);
     }
 
 fapi_try_exit:
