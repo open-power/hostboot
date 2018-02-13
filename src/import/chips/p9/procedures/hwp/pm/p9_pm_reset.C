@@ -109,6 +109,9 @@ fapi2::ReturnCode p9_pm_reset(
 
     fapi2::buffer<uint64_t> l_data64;
     fapi2::ReturnCode l_rc;
+    fapi2::ATTR_SKIP_WAKEUP_Type l_skip_wakeup;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SKIP_WAKEUP, FAPI_SYSTEM, l_skip_wakeup),
+             "fapiGetAttribute of ATTR_SKIP_WAKEUP failed");
 
     //  ************************************************************************
     //  Put a mark on the wall that we are in the Reset Flow
@@ -166,31 +169,40 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(l_rc, "ERROR: Failed to reset OCC PPC405");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After safe reset of OCC PPC405"));
 
-    if (l_malfAlert == false)
+    //Call special wake up if ATTR_SKIP_WAKEUP is not set.
+    if (!l_skip_wakeup)
     {
+        if (l_malfAlert == false)
+        {
+            //  ************************************************************************
+            //  Put all EX chiplets in special wakeup
+            //  ************************************************************************
+            FAPI_DBG("Enable special wakeup for all functional  EX targets.");
+            l_phase = PM_RESET_SPL_WKUP_EX_ALL;
+            FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
+            FAPI_TRY(special_wakeup_all(i_target,
+                                        true),//Enable splwkup
+                     "ERROR: Failed to remove EX chiplets from special wakeup");
+            FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
+        }
+        else
+        {
+            FAPI_TRY(p9_pm_glob_fir_trace(i_target, "Skip special wakeup in malf alert path"));
+        }
+
         //  ************************************************************************
-        //  Put all EX chiplets in special wakeup
+        //  Set Auto Special Wake-up Mode to all EXs ECs if spl. wkup done is asserted
         //  ************************************************************************
-        FAPI_DBG("Enable special wakeup for all functional  EX targets.");
-        l_phase = PM_RESET_SPL_WKUP_EX_ALL;
+        FAPI_DBG("Set auto special wakeup for all functional  EX targets.");
+        l_phase = PM_RESET_SET_AUTO_SPL_WKUP;
         FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
-        FAPI_TRY(special_wakeup_all(i_target,
-                                    true),//Enable splwkup
-                 "ERROR: Failed to remove EX chiplets from special wakeup");
-        FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
+        FAPI_TRY(p9_pm_set_auto_spwkup(i_target));
     }
     else
     {
-        FAPI_TRY(p9_pm_glob_fir_trace(i_target, "Skip special wakeup in malf alert path"));
+        FAPI_INF("Skipping enabling special wakup and setting"
+                 "auto-special wakeup because SKIP_WAKEUP attribute is set");
     }
-
-    //  ************************************************************************
-    //  Set Auto Special Wake-up Mode to all EXs ECs if spl. wkup done is asserted
-    //  ************************************************************************
-    FAPI_DBG("Set auto special wakeup for all functional  EX targets.");
-    l_phase = PM_RESET_SET_AUTO_SPL_WKUP;
-    FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
-    FAPI_TRY(p9_pm_set_auto_spwkup(i_target));
 
     //  ************************************************************************
     //  Mask the PBA & CME FIRs as errors can occur in what follows
