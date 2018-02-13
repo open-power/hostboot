@@ -57,7 +57,7 @@ extern trace_desc_t* g_trac_vpd;
 // Global variable to store the location of hbrt-vpd-image returned by the
 // host interface get_reserved_mem function.  We only want to call the
 // function once as memory is allocated with every call.
-static uint64_t g_reserved_mem_addr = 0;
+static uint64_t g_reserved_mem_addr[] = {0, 0, 0, 0};
 
 
 namespace VPD
@@ -97,20 +97,22 @@ rtVpdInit g_rtVpdInit;
 // Fake getPnorAddr - VPD image is in memory
 // ------------------------------------------------------------------
 errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
+                        uint8_t i_instance,
                         uint64_t &io_cachedAddr,
                         mutex_t * i_mutex )
 {
     errlHndl_t err = NULL;
 
     // Get the reserved_mem_addr only once
-    if( g_reserved_mem_addr == 0 )
+    if( g_reserved_mem_addr[i_instance] == 0 )
     {
         uint64_t l_vpdSize;
-        g_reserved_mem_addr = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_VPD,
-                                                 0,
-                                                 l_vpdSize);
+        g_reserved_mem_addr[i_instance] =
+            hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_VPD,
+                               i_instance,
+                               l_vpdSize);
 
-        if( g_reserved_mem_addr == 0 )
+        if( g_reserved_mem_addr[i_instance] == 0 )
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd: Failed to get VPD addr. "
                     "vpd_type: %d",
@@ -120,14 +122,14 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
             * @moduleid     VPD::VPD_RT_GET_ADDR
             * @reasoncode   VPD::VPD_RT_NULL_VPD_PTR
             * @userdata1    VPD type
-            * @userdata2    0
+            * @userdata2    Node ID
             * @devdesc      Hypervisor returned NULL address for VPD
             */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                         VPD::VPD_RT_GET_ADDR,
                                         VPD::VPD_RT_NULL_VPD_PTR,
                                         i_pnorInfo.pnorSection,
-                                        0);
+                                        i_instance);
 
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
@@ -136,7 +138,7 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
         }
     }
 
-    uint64_t vpd_addr = g_reserved_mem_addr;
+    uint64_t vpd_addr = g_reserved_mem_addr[i_instance];
 
     if(!err)
     {
@@ -204,6 +206,7 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
                       mutex_t * i_mutex )
 {
     errlHndl_t err = NULL;
+    TARGETING::NODE_ID l_nodeId = TARGETING::NODE0;
     int64_t vpdLocation = 0;
     uint64_t addr = 0x0;
     const char * readAddr = NULL;
@@ -211,10 +214,16 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"RT fake readPNOR()" );
 
+    // Get AttrRP pointer
+    TARGETING::AttrRP *l_attrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
+    // Get the node ID associated with the input target
+    l_attrRP->getNodeId(i_target, l_nodeId);
+
     do
     {
         // fake getPnorAddr gets memory address of VPD
         err = getPnorAddr(i_pnorInfo,
+                          l_nodeId,
                           io_cachedAddr,
                           i_mutex );
         if(err)
@@ -267,12 +276,18 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
 {
     errlHndl_t err = NULL;
 
+    TARGETING::NODE_ID l_nodeId = TARGETING::NODE0;
     int64_t vpdLocation = 0;
     uint64_t addr = 0x0;
     const char * writeAddr = NULL;
 
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"RT writePNOR()" );
+
+    // Get AttrRP pointer
+    TARGETING::AttrRP *l_attrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
+    // Get the node ID associated with the input target
+    l_attrRP->getNodeId(i_target, l_nodeId);
 
     do
     {
@@ -281,6 +296,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
         //----------------------------
         // Fake getPnorAddr gets memory address of VPD
         err = getPnorAddr( i_pnorInfo,
+                           l_nodeId,
                            io_cachedAddr,
                            i_mutex );
         if(err)

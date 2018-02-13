@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,8 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
  * @param[in] i_pnorInfo - Structure of common PNOR information needed to
  *      query for the sections address.
  *
+ * @param[in] i_instance -Reserved memory instance (Hostboot Runtime only).
+ *
  * @param[in/out] io_cachedAddr - This parameter is a gloval variable in the
  *      calling code.  It is the address that is obtained from the PNOR
  *      RP.
@@ -118,6 +120,9 @@ errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
  *      Error log.
 */
 errlHndl_t getPnorAddr ( pnorInformation & i_pnorInfo,
+#ifdef __HOSTBOOT_RUNTIME
+                         uint8_t i_instance,
+#endif
                          uint64_t &io_cachedAddr,
                          mutex_t * i_mutex );
 
