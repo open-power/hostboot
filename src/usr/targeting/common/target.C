@@ -138,6 +138,34 @@ bool Target::_tryGetAttrUnsafe(
 }
 
 //******************************************************************************
+// Target::_tryGetAttrUnsafe
+//******************************************************************************
+bool Target::_tryGetAttrUnsafe(
+    const ATTRIBUTE_ID i_attr,
+    const uint32_t     i_size,
+    AttrRP*            i_attrRP,
+    ATTRIBUTE_ID*      i_pAttrId,
+    AbstractPointer<void>* i_ppAttrAddr,
+    void* const        io_pAttrData) const
+{
+    #define TARG_FN "_tryGetAttrUnsafe()"
+
+    bool l_found = false;
+
+    void* l_pAttrData = NULL;
+    _getAttrPtr(i_attr, i_attrRP, i_pAttrId, i_ppAttrAddr, l_pAttrData);
+    if (l_pAttrData)
+    {
+        memcpy(io_pAttrData, l_pAttrData, i_size);
+        l_found = true;
+    }
+
+    return l_found;
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
 // Target::_trySetAttr
 //******************************************************************************
 

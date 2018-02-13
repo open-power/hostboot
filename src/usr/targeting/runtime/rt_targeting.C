@@ -202,13 +202,11 @@ errlHndl_t getHbTarget(
  * @param[in] Pointer to new LID Structure targeting binary data
  * @param[in] Pointer to current Reserved Memory targeting binary data
  * @param[out] Total size of all sections in the new lid
- * @param[out] Error log userdata2 value associated with non-zero rtn code
  * @return 0 on success, else return code
  */
 errlHndl_t validateData(void *i_lidStructPtr,
                         void *i_rsvdMemPtr,
-                        size_t& o_lidTotalSize,
-                        uint64_t& o_userdata2)
+                        size_t& o_lidTotalSize)
 {
     TRACFCOMP(g_trac_targeting, ENTER_MRK"validateData: %p %p",
               i_lidStructPtr, i_rsvdMemPtr);
@@ -376,7 +374,7 @@ errlHndl_t validateData(void *i_lidStructPtr,
 
             o_lidTotalSize += l_sectionLid->sectionSize;
         }
-        // *** Could check if rc was set in for loop and break from do loop     
+        // *** Could check if rc was set in for loop and break from do loop
     } while(false);
 
     TRACFCOMP(g_trac_targeting,
@@ -391,24 +389,23 @@ errlHndl_t validateData(void *i_lidStructPtr,
  * into new LID Structure data
  * @param[in] Pointer to current Reserved Memory targeting binary data
  * @param[in/out] Pointer to new LID Structure targeting binary data
- * @param[out] Error log userdata2 value associated with non-zero rtn code
+ * @param[in] Instance, ie, Node ID
  * @return 0 on success, else return code
  */
 errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                             void *io_lidStructPtr,
-                            uint64_t& o_userdata2)
+                            uint8_t i_instance)
 {
     TRACFCOMP( g_trac_targeting,
-               ENTER_MRK"saveRestoreAttrs: %p %p",
-               i_rsvdMemPtr, io_lidStructPtr );
+               ENTER_MRK"saveRestoreAttrs: %p %p %d",
+               i_rsvdMemPtr, io_lidStructPtr, i_instance );
 
     errlHndl_t l_errhdl = nullptr;
     AttrRP *l_attrRPLid = nullptr;
 
     do
     {
-        // Node ID
-        NODE_ID l_nodeId = NODE0;
+        NODE_ID l_nodeId = static_cast<TARGETING::NODE_ID>(i_instance);
 
         // Locate current Reserved Memory data via TargetService
         TARGETING::TargetService& l_targSrv = TARGETING::targetService();
@@ -418,41 +415,47 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
 
         // Create temporary AttrRP instance for new LID Structure targeting data
         l_attrRPLid =
-            new AttrRP(reinterpret_cast<TargetingHeader*>(io_lidStructPtr));
+            new AttrRP(reinterpret_cast<TargetingHeader*>(io_lidStructPtr),
+                       l_nodeId,
+                       l_attrRPRsvd->getNodeCount(),
+                       l_attrRPRsvd->getInstanceStatus());
 
-        // Create TargetRangeFilter for LID Structure targeting data
+        // Get pointer to array of targets in the targeting image
         uint32_t l_maxTargetsLid = 0;
-        TargetRangeFilter l_allTargetsLid =
-            l_targSrv.getTargetRangeFilter(io_lidStructPtr,
-                                           l_attrRPLid,
-                                           l_maxTargetsLid,
-                                           l_nodeId);
+        Target (*l_targetsLid)[] = reinterpret_cast< Target(*)[] >(
+            l_targSrv.getTargetArray(io_lidStructPtr,
+                                     l_nodeId,
+                                     l_attrRPLid,
+                                     l_maxTargetsLid));
 
         TRACFCOMP( g_trac_targeting,
-                   "Found %d targets in the lid",
-                   l_maxTargetsLid );
+                   "Found %d targets in the lid for node %d",
+                   l_maxTargetsLid,
+                   l_nodeId );
 
         // Set up variables for getting attribute information for a target
         uint32_t l_attrCountRsvd = 0;
         ATTRIBUTE_ID* l_pAttrIdRsvd = nullptr;
         AbstractPointer<void>* l_ppAttrAddrRsvd = nullptr;
+
         uint32_t l_attrCountLid = 0;
         ATTRIBUTE_ID* l_pAttrIdLid = nullptr;
         AbstractPointer<void>* l_ppAttrAddrLid = nullptr;
-        uint32_t l_huidLid = 0;
-        EntityPath l_physPathLid;
 
         // Walk through new LID Structure Targets
         for(uint32_t l_targetNum = 1;
             (l_targetNum <= l_maxTargetsLid);
-            ++l_allTargetsLid, ++l_targetNum)
+            ++l_targetNum)
         {
+            // Get target for this pass through loop
+            Target *l_targetLid = &(*(l_targetsLid))[l_targetNum - 1];
+
             // Counts of how many new attribute values were kept
             uint32_t l_kept_for_added_attr = 0;
             uint32_t l_kept_for_unknown_size = 0;
 
             // Get attribute information for a target in LID Structure (new)
-            l_attrCountLid = l_targSrv.getTargetAttributes(*l_allTargetsLid,
+            l_attrCountLid = l_targSrv.getTargetAttributes(l_targetLid,
                                                            l_attrRPLid,
                                                            l_pAttrIdLid,
                                                            l_ppAttrAddrLid);
@@ -466,16 +469,35 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                 continue;
             }
 
-            l_huidLid = l_allTargetsLid->getAttr<ATTR_HUID>();
-            l_physPathLid = l_allTargetsLid->getAttr<ATTR_PHYS_PATH>();
+            // Get key attributes and trace the information
+            ATTR_CLASS_type l_classLid =
+                l_targetLid->getAttr<ATTR_CLASS>(l_attrRPLid,
+                                                 l_pAttrIdLid,
+                                                 l_ppAttrAddrLid);
+            ATTR_TYPE_type l_typeLid =
+                l_targetLid->getAttr<ATTR_TYPE>(l_attrRPLid,
+                                                l_pAttrIdLid,
+                                                l_ppAttrAddrLid);
+            ATTR_ORDINAL_ID_type l_ordinalIdLid =
+                l_targetLid->getAttr<ATTR_ORDINAL_ID>(l_attrRPLid,
+                                                      l_pAttrIdLid,
+                                                      l_ppAttrAddrLid);
+            ATTR_HUID_type l_huidLid =
+                l_targetLid->getAttr<ATTR_HUID>(l_attrRPLid,
+                                                l_pAttrIdLid,
+                                                l_ppAttrAddrLid);
+            ATTR_PHYS_PATH_type l_physPathLid =
+                l_targetLid->getAttr<ATTR_PHYS_PATH>(l_attrRPLid,
+                                                     l_pAttrIdLid,
+                                                     l_ppAttrAddrLid);
             TRACFCOMP( g_trac_targeting,
                        "Target %3d has %3d attrs, class %0.8x, type %0.8x, "
                        "ord ID %0.8x, HUID 0x%0.8x, %s",
                        l_targetNum,
                        l_attrCountLid,
-                       l_allTargetsLid->getAttr<ATTR_CLASS>(),
-                       l_allTargetsLid->getAttr<ATTR_TYPE>(),
-                       l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>(),
+                       l_classLid,
+                       l_typeLid,
+                       l_ordinalIdLid,
                        l_huidLid,
                        l_physPathLid.toString());
 
@@ -492,11 +514,9 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                 l_allTargetsRsvd;
                 ++l_allTargetsRsvd)
             {
-                if((l_allTargetsLid->getAttr<ATTR_CLASS>() ==
-                    l_allTargetsRsvd->getAttr<ATTR_CLASS>()) &&
-                   (l_allTargetsLid->getAttr<ATTR_TYPE>() ==
-                    l_allTargetsRsvd->getAttr<ATTR_TYPE>()) &&
-                   (l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>() ==
+                if((l_classLid == l_allTargetsRsvd->getAttr<ATTR_CLASS>()) &&
+                   (l_typeLid == l_allTargetsRsvd->getAttr<ATTR_TYPE>()) &&
+                   (l_ordinalIdLid ==
                     l_allTargetsRsvd->getAttr<ATTR_ORDINAL_ID>()) &&
                    (l_physPathLid ==
                     l_allTargetsRsvd->getAttr<ATTR_PHYS_PATH>()))
@@ -575,11 +595,11 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                 {
                     // Get the LID Structure attribute value pointer
                     void* l_pAttrLid = nullptr;
-                    l_allTargetsLid->_getAttrPtr(*l_pAttrId,
-                                                 l_attrRPLid,
-                                                 l_pAttrIdLid,
-                                                 l_ppAttrAddrLid,
-                                                 l_pAttrLid);
+                    l_targetLid->_getAttrPtr(*l_pAttrId,
+                                             l_attrRPLid,
+                                             l_pAttrIdLid,
+                                             l_ppAttrAddrLid,
+                                             l_pAttrLid);
 
                     // Check if attribute is in LID Structure data
                     if(l_pAttrLid == nullptr)
@@ -700,22 +720,30 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
 int hbrt_update_prep(void)
 {
     errlHndl_t pError = nullptr;
-    uint64_t l_userdata2 = 0;
     UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID);
     void *l_lidStructPtr = nullptr;
     void* l_newMem = nullptr;
 
-    do
+    for(NODE_ID l_nodeId = NODE0;
+        l_nodeId < Singleton<AttrRP>::instance().getNodeCount();
+        l_nodeId++)
     {
         // Get size and location of attributes in reserved memory
         uint64_t l_attr_size = 0;
         uint64_t l_rsvdMem = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
-                                                0, l_attr_size);
+                                                l_nodeId, l_attr_size);
         TRACFCOMP( g_trac_targeting, "l_rsvdMem @ %.16llX for 0x%llX",
                    l_rsvdMem, l_attr_size );
 
         // Set pointer to reserved memory targeting data
         void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
+
+        // Set LID for this node
+        pError = l_lidMgr.setLidId(Util::TARGETING_BINARY_LIDID + l_nodeId);
+        if(pError)
+        {
+            break;
+        }
 
         // Create lidMgr and get size of Targeting Binary LID
         size_t l_lidSize = 0;
@@ -733,9 +761,6 @@ int hbrt_update_prep(void)
                        "Memory(Current) 0x%0.8x",
                        l_lidSize,
                        l_attr_size);
-
-            l_userdata2 = TWO_UINT32_TO_UINT64(l_lidSize,
-                                               l_attr_size);
 
             break;
         }
@@ -755,8 +780,7 @@ int hbrt_update_prep(void)
         // Validate LID Structure against Reserved Memory
         pError = validateData(l_lidStructPtr,
                               l_rsvdMemPtr,
-                              l_lidDataSize,
-                              l_userdata2);
+                              l_lidDataSize);
         if(pError)
         {
             break;
@@ -801,7 +825,7 @@ int hbrt_update_prep(void)
         // new LID Structure data
         pError = saveRestoreAttrs(l_rsvdMemPtr,
                                   l_newMem,
-                                  l_userdata2);
+                                  l_nodeId);
         if(pError)
         {
             break;
@@ -831,7 +855,7 @@ int hbrt_update_prep(void)
                    0,
                    l_setSize);
         }
-    } while(false);
+    }
 
     // Delete the scratch space for the new attributes
     if( l_newMem )

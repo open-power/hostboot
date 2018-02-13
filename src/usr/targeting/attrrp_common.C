@@ -61,6 +61,7 @@ namespace TARGETING
         if (iv_sections) // @TODO RTC:186585 move if... to #ifndef clause
         {
             delete[] iv_sections;
+            iv_sections = nullptr;
         } // @TODO RTC:186585 move if... to #ifndef clause
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -71,7 +72,13 @@ namespace TARGETING
         {
             if (iv_nodeContainer[i].pSections)
             {
+                if((i == NODE0) && (iv_sections == nullptr))
+                {
+                    iv_nodeContainer[i].pSections = nullptr;
+                    continue;
+                } // @TODO RTC:186585 move if...
                 delete[] iv_nodeContainer[i].pSections;
+                iv_nodeContainer[i].pSections = nullptr;
             }
         }
 

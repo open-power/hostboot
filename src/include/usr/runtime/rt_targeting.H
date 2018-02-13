@@ -67,12 +67,12 @@ namespace RT_TARG
      * into new LID Structure data
      * @param[in] Pointer to current Reserved Memory targeting binary data
      * @param[in/out] Pointer to new LID Structure targeting binary data
-     * @param[out] Error log userdata2 value associated with non-zero rtn code
+     * @param[in] Instance, ie, Node ID
      * @return nullptr on success, else error log
      */
     errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                                 void *io_lidStructPtr,
-                                uint64_t& o_userdata2);
+                                uint8_t i_instance);
 
     /**
      * @brief Validate LID Structure against Reserved Memory.  Check that the
@@ -82,13 +82,11 @@ namespace RT_TARG
      * @param[in] Pointer to new LID Structure targeting binary data
      * @param[in] Pointer to current Reserved Memory targeting binary data
      * @param[out] Total size of all sections in the new lid
-     * @param[out] Error log userdata2 value associated with non-zero rtn code
      * @return nullptr on success, else error log
      */
     errlHndl_t validateData(void *i_lidStructPtr,
                             void *i_rsvdMemPtr,
-                            size_t& o_lidTotalSize,
-                            uint64_t& o_userdata2);
+                            size_t& o_lidTotalSize);
 
     /**
      * @brief Apply ATTR_TMP overrides to be available for run time

@@ -64,7 +64,7 @@ namespace RT_TARG
     void adjustTargeting4Runtime();
     ERRORLOG::ErrlEntry* saveRestoreAttrs(void *i_rsvdMemPtr,
                                           void *io_lidStructPtr,
-                                          uint64_t& o_userdata2);
+                                          uint8_t i_instance);
 }
 #endif
 
@@ -178,6 +178,34 @@ class Target
          */
         template<const ATTRIBUTE_ID A>
         typename AttributeTraits<A>::Type getAttr() const;
+
+        /**
+         *  @brief Get the target's specified attribute value
+         *
+         *  Returns the target's specified attribute value.  If the specified
+         *  attribute does not exist for the associated target, the routine
+         *  asserts.  Thus callers must be sure the attribute exists for the
+         *  given target.
+         *
+         *  @param[in] i_attrRP Pointer to attribute resource provider
+         *  @param[in] i_pAttrId Pointer to array of attribute IDs for target
+         *  @param[in] i_ppAttrAddr Pointer to array of attribute addresses
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's specified attribute value returned, or assert
+         *      called if specified attribute doesn't exist for the
+         *      associated target
+         *
+         *  @return Data type associated with the attribute being returned
+         *
+         *  @retval Varies The attribute data
+         */
+        template<const ATTRIBUTE_ID A>
+        typename AttributeTraits<A>::Type getAttr(AttrRP* i_attrRP,
+                                                  ATTRIBUTE_ID* i_pAttrId,
+                                                  AbstractPointer<void>*
+                                                      i_ppAttrAddr) const;
 
         /**
          *  @brief DEBUG ONLY!  Returns the requested attribute as a string
@@ -480,6 +508,39 @@ class Target
             void*        io_attrData) const;
 
         /**
+         *  @brief Tries to get the target's specified attribute value without
+         *         checking for valid values. Do not call this function
+         *         directly. This function is private.
+         *
+         *  Tries to get the target's specified attribute value
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_size Size of the attribute
+         *  @param[in] i_attrRP Pointer to attribute resource provider
+         *  @param[in] i_pAttrId Pointer to array of attribute IDs for target
+         *  @param[in] i_ppAttrAddr Pointer to array of attribute addresses
+         *  @param[in/out] io_attrData On input, location to store the attribute
+         *      On output, location updated with attribute data
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Caller notified if attribute retrieval succeeded or not.  If
+         *      so, the attribute data is stored at io_addrData
+         *
+         *  @return bool indicating if attribute retrieval succeeded or not
+         *
+         *  @retval true Attribute retrieval succeeded
+         *  @retval false Attribute retrieval failed
+         */
+        bool _tryGetAttrUnsafe(
+            ATTRIBUTE_ID i_attr,
+            uint32_t     i_size,
+            AttrRP*      i_attrRP,
+            ATTRIBUTE_ID* i_pAttrId,
+            AbstractPointer<void>* i_ppAttrAddr,
+            void*        io_attrData) const;
+
+        /**
          *  @brief Tries to set the target's specified attribute value
          *
          *  Tries to set the target's specified attribute value
@@ -704,7 +765,7 @@ class Target
         friend void RT_TARG::adjustTargeting4Runtime();
         friend ERRORLOG::ErrlEntry* RT_TARG::saveRestoreAttrs(void *,
                                                               void *,
-                                                              uint64_t&);
+                                                              uint8_t);
 #endif
 
 
@@ -756,6 +817,31 @@ typename AttributeTraits<A>::Type Target::getAttr() const
 {
     typename AttributeTraits<A>::Type l_attrValue;
     bool l_read = tryGetAttr<A>(l_attrValue);
+    if (unlikely(!l_read))
+    {
+        targAssert(GET_ATTR, A);
+    }
+    return l_attrValue;
+}
+
+template<const ATTRIBUTE_ID A>
+typename AttributeTraits<A>::Type Target::getAttr(AttrRP* i_attrRP,
+                                                  ATTRIBUTE_ID* i_pAttrId,
+                                                  AbstractPointer<void>*
+                                                      i_ppAttrAddr) const
+{
+    typename AttributeTraits<A>::Type l_attrValue;
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex) { }
+    if(AttributeTraits<A>::notFspMutex) { }
+
+    bool l_read = _tryGetAttrUnsafe(A,
+                                    sizeof(l_attrValue),
+                                    i_attrRP,
+                                    i_pAttrId,
+                                    i_ppAttrAddr,
+                                    reinterpret_cast<void*>(&l_attrValue));
+
     if (unlikely(!l_read))
     {
         targAssert(GET_ATTR, A);
