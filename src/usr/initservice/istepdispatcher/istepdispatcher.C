@@ -180,7 +180,7 @@ IStepDispatcher::~IStepDispatcher ()
 
     // Singleton destructor gets run when module gets unloaded.
     // The istepdispatcher module never gets unloaded. So rather to send a
-    // message to error log daemon and tell it to shutdow and delete
+    // message to error log daemon and tell it to shutdown and delete
     // the queue we will assert here because the destructor never gets
     // call.
     assert(0);
@@ -204,7 +204,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
     printk( "IStepDispatcher entry.\n" );
     TRACFCOMP( g_trac_initsvc, "IStepDispatcher entry." );
 
-    //  Read the and process the Hostboot configuration flags
+    //  Read and process the Hostboot configuration flags
     BOOTCONFIG::readAndProcessBootConfig();
 
     TARGETING::Target* l_pTopLevelTarget = NULL;
@@ -214,7 +214,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
     do
     {
-        //Need to get ATTR overides first if non FSP system
+        // Need to get ATTR overrides first if non FSP system
         if(!iv_spBaseServicesEnabled)
         {
             PNOR::SectionInfo_t l_sectionInfo;
@@ -2291,18 +2291,23 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 {
+    static uint8_t lastIstep = 0, lastSubstep = 0;
+    errlHndl_t err = NULL;
+
     if (i_needsLock)
     {
         mutex_lock( &iv_mutex );
     }
 
-    TRACDCOMP( g_trac_initsvc,ENTER_MRK"IStepDispatcher::sendProgressCode()");
-    errlHndl_t err = NULL;
+    // Reduce output to once per step/substep
+    if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
+    {
+        TRACDCOMP( g_trac_initsvc,
+                   ENTER_MRK"IStepDispatcher::sendProgressCode()");
 
-
-    //--- Display istep in Simics console
-    MAGIC_INST_PRINT_ISTEP( iv_curIStep, iv_curSubStep );
-
+        //--- Display istep in Simics console
+        MAGIC_INST_PRINT_ISTEP( iv_curIStep, iv_curSubStep );
+    }
 
     //--- Save step to a scratch reg
     SPLESS::MboxScratch5_HB_t l_scratch5;
@@ -2326,14 +2331,16 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     port80_val++;
 #endif
 
-    //--- Display step on serial console
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-    // Note If we ever send progress codes multiple times, we may need to
-    // eliminate the console write on subsequent.
-    const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
-    CONSOLE::displayf(NULL, "ISTEP %2d.%2d - %s", iv_curIStep, iv_curSubStep,
-                      taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
-    CONSOLE::flush();
+    //--- Display step on serial console
+    if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
+    {
+        const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
+        CONSOLE::displayf(NULL, "ISTEP %2d.%2d - %s",
+                     iv_curIStep, iv_curSubStep,
+                     taskinfo && taskinfo->taskname ? taskinfo->taskname : "");
+        CONSOLE::flush();
+    }
 #endif
 
 
@@ -2365,11 +2372,21 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
             err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         }
         clock_gettime(CLOCK_MONOTONIC, &iv_lastProgressMsgTime);
-        TRACFCOMP( g_trac_initsvc,INFO_MRK"Progress Code %d.%d Sent",
-                   myMsg->data[0],myMsg->data[1]);
+        if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
+        {
+            TRACFCOMP( g_trac_initsvc,INFO_MRK"Progress Code %d.%d Sent",
+                       myMsg->data[0],myMsg->data[1]);
+        }
     }
 
-    TRACDCOMP( g_trac_initsvc,EXIT_MRK"IStepDispatcher::sendProgressCode()" );
+    if ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))
+    {
+        TRACDCOMP( g_trac_initsvc,
+                   EXIT_MRK"IStepDispatcher::sendProgressCode()" );
+    }
+
+    lastIstep = iv_curIStep;
+    lastSubstep = iv_curSubStep;
 
     if (i_needsLock)
     {
@@ -2488,7 +2505,7 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
 }
 
 // ----------------------------------------------------------------------------
-// Extarnal functions defined that map directly to IStepDispatcher public member
+// External functions defined that map directly to IStepDispatcher public member
 // functions.
 // Defined in istepdispatcherif.H, initsvcbreakpoint.H
 // ----------------------------------------------------------------------------
@@ -2500,6 +2517,19 @@ void waitForSyncPoint()
 errlHndl_t sendSyncPoint()
 {
     return IStepDispatcher::getTheInstance().sendSyncPoint();
+}
+
+void sendProgressCode(bool i_needsLock)
+{
+    errlHndl_t err = NULL;
+
+    err = IStepDispatcher::getTheInstance().sendProgressCode(i_needsLock);
+
+    if (err)
+    {
+        // Commit the error and continue
+        errlCommit(err, INITSVC_COMP_ID);
+    }
 }
 
 errlHndl_t sendIstepCompleteMsg()

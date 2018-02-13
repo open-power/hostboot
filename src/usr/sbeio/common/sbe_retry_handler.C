@@ -43,6 +43,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <errl/errludtarget.H>
 #include <sys/time.h>
 #include <util/misc.H>
@@ -429,26 +430,10 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
 
             {
                 iv_retriggeredMain = true;
-#ifdef CONFIG_BMC_IPMI
+
 #ifndef __HOSTBOOT_RUNTIME
                 // This could potentially take awhile, reset watchdog
-                l_errl = IPMIWATCHDOG::resetWatchDogTimer();
-                if(l_errl)
-                {
-                    SBE_TRACF("Inside handle_sbe_reg_value before sbe_handler "
-                              "Resetting watchdog");
-                    l_errl->collectTrace("ISTEPS_TRACE",256);
-
-                    // Set the PLID of the error log to caller's PLID,
-                    // if provided
-                    if (iv_callerErrorLogPLID)
-                    {
-                       l_errl->plid(iv_callerErrorLogPLID);
-                    }
-
-                    errlCommit(l_errl,ISTEP_COMP_ID);
-                }
-#endif
+                INITSERVICE::sendProgressCode();
 #endif
                 SBE_TRACF("handle_sbe_reg_value(): Attempting "
                    "REIPL_UPD_SEEPROM failed. Recalling with BKP_SEEPROM");
@@ -910,26 +895,9 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
 #endif
         }
 
-#ifdef CONFIG_BMC_IPMI
 #ifndef __HOSTBOOT_RUNTIME
         // This could potentially take awhile, reset watchdog
-        l_errl = IPMIWATCHDOG::resetWatchDogTimer();
-        if(l_errl)
-        {
-            SBE_TRACF("sbe_boot_fail_handler "
-                      "Resetting watchdog before sbe_handler");
-            l_errl->collectTrace("ISTEPS_TRACE",KILOBYTE/4);
-
-            // Set the PLID of the error log to caller's PLID,
-            // if provided
-            if (iv_callerErrorLogPLID)
-            {
-                l_errl->plid(iv_callerErrorLogPLID);
-            }
-
-            errlCommit(l_errl,ISTEP_COMP_ID);
-        }
-#endif
+        INITSERVICE::sendProgressCode();
 #endif
         SBE_TRACF("sbe_boot_fail_handler. iv_switchSides count is %llx",
                    iv_switchSidesCount);

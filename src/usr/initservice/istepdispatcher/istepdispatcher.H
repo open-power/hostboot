@@ -141,9 +141,18 @@ public:
     void waitForSyncPoint();
 
     /**
+     * @brief Sends a progress message from Hostboot to Fsp.
+     *
+     * param[in] i_needsLock flag to acquire mutex or not
+     *
+     * @return errlHndl_t
+     */
+    errlHndl_t sendProgressCode(bool i_needsLock = true);
+
+    /**
      * @brief Sends an IStepComplete message
      *
-     * Only called by ISteps that do not return and need to repsond to the
+     * Only called by ISteps that do not return and need to respond to the
      * IStep request message (i.e. start_payload), this should only be called
      * in IStep mode.
      *
@@ -401,15 +410,6 @@ private:
                               const uint8_t i_curSubstep,
                               uint8_t & o_newIstep,
                               uint8_t & o_newSubstep);
-
-    /**
-     * @brief Sends a progress message from Hostboot to Fsp.
-     *
-     * param[in] i_needsLock flag to acquire mutex or not
-     *
-     * @return errlHndl_t
-     */
-    errlHndl_t sendProgressCode(bool i_needsLock = true);
 
     /**
      * @brief This function is called on a dedicated task to post progress codes
