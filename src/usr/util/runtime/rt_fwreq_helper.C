@@ -37,6 +37,36 @@ trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 
+/**
+ * @brief Add some FFDC to the error log
+ *
+ * @param i_request  Pointer to request buffer
+ * @param i_reqLen  Size of request buffer in bytes
+ * @param i_response  Pointer to response buffer
+ * @param i_respLen  Size of response buffer in bytes
+ */
+void add_ffdc( errlHndl_t i_err,
+               void* i_request,
+               size_t i_reqLen,
+               void* i_response,
+               size_t i_respLen )
+{
+    i_err->addFFDC(RUNTIME_COMP_ID,
+                   i_request,
+                   i_reqLen,
+                   0, 0, false );
+
+    if (i_respLen > 0)
+    {
+        i_err->addFFDC(RUNTIME_COMP_ID,
+                       i_response,
+                       i_respLen,
+                       0, 0, false );
+    }
+
+    i_err->collectTrace( RUNTIME_COMP_NAME, 256);
+}
+
 /*****************************************************************************/
 // firmware_request_helper
 /*****************************************************************************/
@@ -85,8 +115,12 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
          // Commit any previous errors
          if (l_err)
          {
-            // Commit any previous error log
-            errlCommit(l_err, RUNTIME_COMP_ID);
+             add_ffdc( l_err,
+                       l_req_fw_msg, i_reqLen,
+                       l_resp_fw_msg, *o_respLen );
+
+             // Commit any previous error log
+             errlCommit(l_err, RUNTIME_COMP_ID);
          }
 
          // Print trace info based on request message and populate error
@@ -255,8 +289,12 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
       {
          if (l_err)
          {
-            // Commit any previous reset/reload error log
-            errlCommit(l_err, RUNTIME_COMP_ID);
+             add_ffdc( l_err,
+                       l_req_fw_msg, i_reqLen,
+                       l_resp_fw_msg, *o_respLen );
+
+             // Commit any previous reset/reload error log
+             errlCommit(l_err, RUNTIME_COMP_ID);
          }
 
          // This NOT a reset/reload error
@@ -455,8 +493,12 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
       {
          if (l_err)
          {
-            // Commit any previous reset/reload error log
-            errlCommit(l_err, RUNTIME_COMP_ID);
+             add_ffdc( l_err,
+                       l_req_fw_msg, i_reqLen,
+                       l_resp_fw_msg, *o_respLen );
+
+             // Commit any previous reset/reload error log
+             errlCommit(l_err, RUNTIME_COMP_ID);
          }
 
          // This NOT a reset/reload error
@@ -526,20 +568,9 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
          l_err->setSev(ERRL_SEV_PREDICTIVE);
       }
 
-      l_err->addFFDC(RUNTIME_COMP_ID,
-                     l_req_fw_msg,
-                     i_reqLen,
-                     0, 0, false );
-
-      if (*o_respLen > 0)
-      {
-         l_err->addFFDC(RUNTIME_COMP_ID,
-                        l_resp_fw_msg,
-                        *o_respLen,
-                        0, 0, false );
-      }
-
-      l_err->collectTrace( "FW_REQ", 256);
+      add_ffdc( l_err,
+                l_req_fw_msg, i_reqLen,
+                l_resp_fw_msg, *o_respLen );
    }  // END if (l_err)
 
   return l_err;
