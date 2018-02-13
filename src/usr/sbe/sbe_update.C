@@ -439,18 +439,7 @@ namespace SBE
                 /**********************************************/
                 /*   Reset the watchdog after each Action     */
                 /**********************************************/
-#ifdef CONFIG_BMC_IPMI
-                err = IPMIWATCHDOG::resetWatchDogTimer();
-
-                if( err )
-                {
-                    TRACFCOMP( g_trac_sbe,
-                               INFO_MRK"updateProcessorSbeSeeproms(): "
-                               "resetWatchDogTimer() Failed rc=0x%.4X",
-                               err->reasonCode());
-                    errlCommit( err, SBE_COMP_ID );
-                }
-#endif
+                INITSERVICE::sendProgressCode();
 
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);

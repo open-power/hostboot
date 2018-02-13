@@ -1346,18 +1346,8 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             eventType = STOP_TESTING;
         }
 
-#ifdef CONFIG_BMC_IPMI
         // Reset the watchdog timer after running each pattern
-        errlHndl_t err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
-
-        if(err_ipmi)
-        {
-            MDIA_FAST("sm executeWorkitem: IPMI reset watchdog failed");
-            err_ipmi->collectTrace("MDIA_FAST",1024);
-            errlCommit(err_ipmi, MDIA_COMP_ID );
-
-        }
-#endif
+        INITSERVICE::sendProgressCode();
 
         switch(eventType)
         {

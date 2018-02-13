@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,16 @@ void waitForSyncPoint ( void );
  *      log.
  */
 errlHndl_t sendSyncPoint ( void );
+
+
+/**
+* @brief This function is used by external code to send a progress message
+*      from Hostboot to Fsp.
+*
+* param[in] i_needsLock flag to acquire mutex or not
+*
+*/
+void sendProgressCode(bool i_needsLock = true);
 
 
 /**
