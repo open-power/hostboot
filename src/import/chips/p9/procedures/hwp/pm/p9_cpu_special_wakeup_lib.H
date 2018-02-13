@@ -45,7 +45,6 @@
 
 static const uint32_t NUM_CHIPLET_TYPES = 2;
 static const uint32_t NUM_ENTITIES = 4;
-#define PIB_CHIPLET_OFFLINE_ERR  0x2
 
 
 /**
