@@ -446,12 +446,8 @@ void MailboxSp::msgHandler()
                 {
                     if (msg->data[0] == INTR::SHUT_DOWN)
                     {
-                        //Unregister for this message to prevent future
-                        // messages from INTRP during shut down
-                        msg_respond(iv_msgQ,msg);
-                        TRACFCOMP(g_trac_mbox,INFO_MRK
-                          "MSG_IPC SHUT_DOWN message received, unregistering for IPC messages");
-                        INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
+                        TRACFCOMP(g_trac_mbox, INFO_MRK
+                          "Shutdown Message sent for IPC, ignoring.");
                     }
                     else
                     {
@@ -1953,8 +1949,9 @@ void MailboxSp::handleShutdown()
 
 #if (0) // @todo RTC:126643
     INTR::unRegisterMsgQ(INTR::LSI_FSIMBOX);
-    INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
 #endif
+
+    INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
 
     if(err)  // SCOM failed.
     {

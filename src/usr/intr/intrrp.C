@@ -1074,19 +1074,23 @@ void IntrRp::msgHandler()
                     TRACFCOMP(g_trac_intr,
                            "INTR remove registration of interrupt type = 0x%lx",
                             msg->data[0]);
-                    LSIvalue_t l_type = static_cast<LSIvalue_t>(msg->data[0]);
-                    LSIvalue_t l_intr_type = static_cast<LSIvalue_t>
+
+                    ext_intr_t l_type = static_cast<ext_intr_t>(msg->data[0]);
+                    ext_intr_t l_intr_type = static_cast<ext_intr_t>
                       (l_type & LSI_SOURCE_MASK);
 
-                    // Mask the interrupt source prior to unregistering
-                    errlHndl_t err = maskInterruptSource(l_intr_type);
-                    if(err)
+                    if (l_type != ISN_INTERPROC)
                     {
-                        TRACFCOMP(g_trac_intr,
-                             "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ error"
-                             " masking interrupt type: %lx",
-                             l_intr_type);
-                        errlCommit(err,INTR_COMP_ID);
+                        // Mask the interrupt source prior to unregistering
+                        errlHndl_t err = maskInterruptSource(l_intr_type);
+                        if(err)
+                        {
+                            TRACFCOMP(g_trac_intr,
+                                 "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ"
+                                 " error masking interrupt type: %lx",
+                                 l_intr_type);
+                            errlCommit(err,INTR_COMP_ID);
+                        }
                     }
 
                     // Unregister for this source and return rc in response
