@@ -95,7 +95,7 @@ const uint64_t PERV_LFIR_ACTION1[15] =
 
 const uint64_t PERV_LFIR_MASK[15] =
 {
-    0x0FFFBBDFFC400000ULL, // TP
+    0x0FFFBBFFFC400000ULL, // TP
     0x0FFFFFFFFFC00000ULL, // N0
     0x0FFFFFFFFFC00000ULL, // N1
     0x0FFFFFFFFFC00000ULL, // N2
@@ -766,6 +766,14 @@ fapi2::ReturnCode p9_sbe_common_configure_chiplet_FIR(
              "Error from putScom (PERV_LOCAL_FIR_ACTION1)");
 
     l_scom_data = PERV_LFIR_MASK[l_unit_idx];
+#ifdef __PPE__
+
+    if(l_unit_idx == 0) //TP chiplet
+    {
+        l_scom_data.clearBit<26>(); //Clear LFIR Mask bit 26 of TP
+    }
+
+#endif
     FAPI_TRY(fapi2::putScom(i_target_chiplet, PERV_LOCAL_FIR_MASK, l_scom_data),
              "Error from putScom (PERV_LOCAL_FIR_MASK)");
 
