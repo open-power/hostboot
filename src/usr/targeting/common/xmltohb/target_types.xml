@@ -1019,6 +1019,9 @@
    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id></attribute>
    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
+   <attribute><id>TCE_START_TOKEN_FOR_PAYLOAD</id></attribute>
+   <attribute><id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id></attribute>
+   <attribute><id>TCE_START_TOKEN_FOR_HDAT</id></attribute>
 </targetType>
 
 <targetType>
