@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -363,7 +363,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                             "0x%08x, but read 0x%08x",
                             (l_read_reg & ~l_mask) | i_checkMask,
                             l_read_reg);
-
+                    rc = 1;
                     break;
                 }
 
@@ -400,8 +400,6 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             // Test entry
             TRACFCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingVersions");
-//@TODO RTC:178802
-#if 0
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
             RT_TARG::rtChipId_t chipId = 0;
@@ -485,7 +483,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                     break;
                 }
             }while (0);
-#endif
+
             // Test exit
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingVersions");
@@ -800,7 +798,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Check setting of bits in CFAM register
-                rc = checkResetSbeMessagePassingCFAM(chipId);
+                rc = checkResetSbeMessagePassingCFAM(chipId,
+                                                     SBE_MSG_IN_PROGRESS);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "
@@ -1051,7 +1050,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Check setting of bits in CFAM register
-                rc = checkResetSbeMessagePassingCFAM(chipId);
+                rc = checkResetSbeMessagePassingCFAM(chipId,
+                                                     SBE_MSG_COMPLETE);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "
@@ -1112,7 +1112,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Check setting of bits in CFAM register
-                rc = checkResetSbeMessagePassingCFAM(chipId);
+                rc = checkResetSbeMessagePassingCFAM(chipId,
+                                                     SBE_MSG_COMPLETE);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "
@@ -1306,7 +1307,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 }
 
                 // Check setting of bits in CFAM register
-                rc = checkResetSbeMessagePassingCFAM(chipId);
+                rc = checkResetSbeMessagePassingCFAM(chipId,
+                                                     SBE_MSG_COMPLETE);
                 if(0 != rc)
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "

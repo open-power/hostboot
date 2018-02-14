@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,6 @@
 #define __SBEIO_SBEIO_TEST_RT_CONSTANTS_H
 
 // Constants for SBE Message bits in SCOM_ADDR_5003B
-const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
 const uint32_t SBE_MSG_IN_PROGRESS = 0x40000000;
 const uint32_t SBE_MSG_COMPLETE = 0x80000000;
 const uint32_t SBE_MSG_MASK = SBE_MSG_COMPLETE | SBE_MSG_IN_PROGRESS;
