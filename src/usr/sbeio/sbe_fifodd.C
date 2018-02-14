@@ -41,7 +41,6 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
-#include <initservice/initserviceif.H>
 #include <kernel/pagemgr.H>
 #include <fapi2.H>
 #include <set_sbe_error.H>
@@ -132,35 +131,6 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
     while (0);
 
     mutex_unlock(&l_fifoOpMux);
-
-    if( errl && (SBEIO_FIFO == errl->moduleId()) )
-    {
-        SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
-
-        //commit the original error after pulling some data out
-        uint32_t orig_plid = errl->plid();
-        uint32_t orig_rc = errl->reasonCode();
-        uint32_t orig_mod = errl->moduleId();
-        ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
-        /*@
-         * @errortype
-         * @moduleid     SBEIO_FIFO
-         * @reasoncode   SBEIO_HWSV_COLLECT_SBE_RC
-         * @userdata1    PLID of original error log
-         * @userdata2[00:31]    Original RC
-         * @userdata2[32:63]    Original Module Id
-         *
-         * @devdesc      SBE error, force HWSV to collect FFDC
-         * @custdesc     Firmware error communicating with boot device
-         */
-        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                             SBEIO_FIFO,
-                             SBEIO_HWSV_COLLECT_SBE_RC,
-                             orig_plid,
-                             TWO_UINT32_TO_UINT64(orig_rc,orig_mod));
-        INITSERVICE::doShutdownWithError( SBEIO_HWSV_COLLECT_SBE_RC,
-                                          TARGETING::get_huid(i_target) );
-    }
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
