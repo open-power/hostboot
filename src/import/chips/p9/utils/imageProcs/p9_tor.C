@@ -364,7 +364,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
     if ( torMagic >> 8 != TOR_MAGIC ||
          torHeader->version == 0 ||
-         torHeader->version > TOR_VERSION ||
          torHeader->chipType >= NUM_CHIP_TYPES )
     {
         MY_ERR("Invalid TOR header:\n"
