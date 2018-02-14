@@ -51,7 +51,7 @@
      * Each Cumulus has 2 CAPP units  ##TBD## has 2 sys0node0proc0capp0 units
      *    with same target ID...input MRW has capp0 and capp1...something
      *    wrong in the processMrw.pl (same observed for Witherspoon)
-     * Each Nimbus has 1 OCC unit
+     * Each Cumulus has 1 OCC unit
      *
 
     - p9Proc0(cumulus chip)
@@ -79,7 +79,7 @@
           - IsDimm0_0_0_1
           - IsDimm0_0_0_2
           - IsDimm0_0_0_3
-       - centaur-1)
+       - -centaur-1)
           - IsDimm0_0_1_0
           - IsDimm0_0_1_1
           - IsDimm0_0_1_2
