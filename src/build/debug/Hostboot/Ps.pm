@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -60,7 +60,7 @@ sub main
     my ($packName,$args) = @_;
 
     my $withBacktrace = 0;
-    if(defined $args->{"with-backtrace"})
+    if(defined $args->{"with-backtrace"} or (defined $args->{"--with-backtrace"}))
     {
         $withBacktrace = 1;
     }
