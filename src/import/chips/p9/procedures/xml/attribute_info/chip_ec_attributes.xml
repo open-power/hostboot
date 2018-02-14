@@ -307,6 +307,30 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW436858</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW436858 - TM suspend WAT workaround
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW433038</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
