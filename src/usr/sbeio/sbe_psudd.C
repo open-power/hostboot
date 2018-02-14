@@ -647,8 +647,8 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
         }
 
         // try later
-        task_yield();
-        l_elapsed_time_ns += ONE_CTX_SWITCH_NS;
+        nanosleep( 0, 10000 ); //sleep for 10us
+        l_elapsed_time_ns += 10000;
 
         // There will be many polls to check for the complete. If there
         // is a problem, then there will be hundreds before timing out
