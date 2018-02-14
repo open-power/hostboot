@@ -25,6 +25,90 @@ the user would like to override along with their new values.
     ATTR_ATTRIBUTE_2 <datatype> <value in hex>
     ATTR_ATTRIBUTE_3 <datatype> <value in hex> CONST
 
+###Target String Syntax:
+
+    <target string>
+            ** System Target Line Format **
+       <system string>
+
+            ** Unit Target Line Format **
+       <system string> || [:nz] ||
+                       :<chip type> || [.<chip unit type>] ||
+                       :<chip position> || [:<unit position>]
+
+            ** Unit Target Line Alternate Format**
+       <chip type> || [.<chip unit type>] ||
+                   : <system string> || [:nz] ||
+                   :<chip position> || [:<unit position>]
+
+
+         <system string>
+               *** System Target Line ***
+                 kx:sy[:]          note: x=0, y=0
+
+                 note : additional obsolete forms have beeng grandfathered in:
+
+                 blank             note: interpreted as k0:s0
+                 kx:nz:sy[:]       note: x=0, y=0, z=0 or all
+
+               *** Unit Target Line ***
+                 kx:sy[:]          note: x=0, y=0
+
+                 note : additional obsolete forms have beeng grandfathered in:
+
+                 kx:nz:sy[:]       note: x=0, y=0
+                                         z may be :
+                                          - single digit 0-9
+                                          - comma separated list of digits 0-9
+                                            -- 2 or more items in list
+                                            -- no ordering dependencies
+                                                 e.g. 0,4
+                                                 e.g. 5,3,9
+                                          - all
+
+         nz : optional node number term
+                z may be :
+                 - single digit 0-9
+                 - comma separated list of digits 0-9
+                   -- 2 or more items in list
+                   -- no ordering dependencies
+                        e.g. 0,4
+                        e.g. 5,3,9
+                 - all
+
+         <chip type>
+            definitions :
+              src/usr/targeting/attroverride/attrTextToBinaryBlob.C
+              AttrOverrideSyncConstants::CHIP_TYPE_TARG_STR_TO_TYPE
+              e.g.  p9n, pu, dimm
+
+         <chip unit type>
+            definitions :
+              src/usr/targeting/attroverride/attrTextToBinaryBlob.C
+              AttrOverrideSyncConstants::CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
+              e.g.  ex, mca, obus
+
+         <chip position>
+            pw
+               note : w may be :
+                - single number 0 - 65,534
+                - comma separated list of digits 0 - 65,534
+                  -- 2 or more items in list
+                  -- no ordering dependencies
+                       e.g. 0,4
+                       e.g. 5,3,9
+                - all
+
+         <unit position>
+            cv
+               note : v may be :
+                - single number 0 - 254
+                - comma separated list of digits 0 - 254
+                  -- 2 or more items in list
+                  -- no ordering dependencies
+                       e.g. 0,4
+                       e.g. 5,3,9
+                - all
 
 ####Examples
 
@@ -33,21 +117,21 @@ the user would like to override along with their new values.
 
        CLEAR
 
-       target = k0:n0:s0:
+       target = k0:s0
        ATTR_SCRATCH_UINT8_1 0x12
        ATTR_SCRATCH_UINT32_1 0x12345678
        ATTR_SCRATCH_UINT64_1 0x8000000000000001 CONST
 
-       target = k0:n0:s0:centaur:p06
+       target = k0:s0:n0:centaur:p06
        ATTR_MSS_CACHE_ENABLE 0x0 CONST
 
-       target = k0:n0:s0:centaur.mba:p06:c1
+       target = k0:s0:n0:centaur.mba:p06:c1
        ATTR_MSS_FREQ 0x00000640 CONST
        ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 CONST
        ATTR_EFF_CEN_DRV_IMP_CNTL[0] OHM15 CONST
        ATTR_EFF_CEN_DRV_IMP_CNTL[1] OHM15 CONST
 
-       target = k0:n0:s0:centaur.mba:pall:call
+       target = k0:s0:n0:centaur.mba:pall:call
        ATTR_MSS_DIMM_MFG_ID_CODE[0][0] 0x12345678
        ATTR_MSS_DIMM_MFG_ID_CODE[0][1] 0x12345678
        ATTR_MSS_DIMM_MFG_ID_CODE[1][0] 0x12345678
@@ -57,25 +141,24 @@ the user would like to override along with their new values.
 #####Other target examples:
 
     - System Target:
-        - target
-        - target = k0:n0:s0
-        - target = k0:n0:s0:
+        - target = k0:s0
+        - target = k0:s0:
 
     - DIMM Target
-        - target = k0:n0:s0:dimm:p06
+        - target = k0:s0:n0:dimm:p06
 
     - Multiple DIMM Targets
-        - target = k0:n0:s0:dimm:p2,4
+        - target = k0:s0:n0:dimm:p2,4
 
-    - All p8 chips
-        - target = k0:n0:s0:p8:pall
+    - All p9 chips
+        - target = k0:s0:n0:p9:pall
 
     - All MCS chiplets:
-        - target = k0:n0:s0:p8.mcs:pall:call
+        - target = k0:s0:n0:p9.mcs:pall:call
 
-    - Node number specified (Brazos only, for Tuleta, always use n0)
-        - target = k0:n1:s0:dimm:p06
-        - target = k0:nall:s0:dimm:p06
+    - Node number specified
+        - target = k0:s0:n1:dimm:p06
+        - target = k0:s0:nall:dimm:p06
 
 ###Rules:
 
@@ -86,35 +169,8 @@ the user would like to override along with their new values.
         -  You may want to have CLEAR as the first line of an overrides file to
            clear all overrides before applying the new set.
 
-    - Lines starting with "target = k0:n0:s0:" specify the target for all
+    - Lines starting with "target = k0:s0" specify the target for all
       following attributes until the next target line.
-
-        - The next part of the line specifies the target type
-
-            - p8.ex (EX (core) unit takes chip position and unit position)
-            - p8.mcs (MCS unit takes chip position and unit position)
-            - p8.xbus (XBUS unit takes chip position and unit position)
-            - p8.abus (ABUS unit takes chip position and unit position)
-            - centaur.mba (MBA unit takes chip position and unit position)
-            - centaur (takes chip position only)
-            - p8 (takes chip position only)
-            - dimm (takes dimm position only)
-            - else system target is assumed
-
-
-        - The next part of the line specifies the target position (for units
-        this is the parent chip position)
-
-            - :p0 or :p1 or :p1,3 or :p511 or :pall etc (note that 'all'
-              specifies an override for all Targets of the specified type)
-
-
-        - The next part of the line specified the target unit position (only
-          applicable to targets)
-
-            - :c0 or :c1 or :c1,2 or :call etc (note that 'all' specifies
-              an override for all Targets of the specified type)
-
 
     - Lines starting with "ATTR_" specify attribute overrides
 
