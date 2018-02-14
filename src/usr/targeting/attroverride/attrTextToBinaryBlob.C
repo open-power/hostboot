@@ -596,7 +596,9 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
             l_line = l_line.substr(0, l_nextWhiteSpacePos);
         }
 
-        // remove the single trailing colon
+        // if all that remains is a single ':' char
+        //   then remove it and continue (e.g started with k0:s0:<blanks>)
+        // otherwise the ':' is part of a parameter term
         if ( (l_line.size() == 1) &&
              (l_line.substr(0, 1) == ":") )
         {
@@ -604,7 +606,8 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
         }
 
         // Figure out the node number
-        if (0 == l_line.find(TARGET_NODE_HEADER_STR))
+        size_t l_nPosn = l_line.find(TARGET_NODE_HEADER_STR);
+        if (0 == l_nPosn)
         {
             l_line = l_line.substr(strlen(TARGET_NODE_HEADER_STR));
 
@@ -675,7 +678,6 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
         TargStrToType* chip_type_first = NULL;
         TargStrToType* chip_type_last = NULL;
 
-
         TargStrToType* item = NULL;
         if( l_colon_pos != std::string::npos)
         {
@@ -739,11 +741,20 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
             l_sysTarget = true;
         }
 
-
         // For a non-system target,
         // figure out the position and unit position
         if (l_sysTarget == false)
         {
+            if (l_nPosn == std::string::npos)
+            {
+                // missing n term, need to add a default label
+                o_targetLabels.push_back(l_label);
+            }
+            else
+            {
+                // (labels already exist)
+            }
+
             // Figure out the target's position
             if (0 == l_line.find(TARGET_POS_HEADER_STR))
             {
@@ -1083,6 +1094,7 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
     do
     {
         size_t l_kPosn = l_line.find( "k", 0);
+        size_t l_kColonPosn = l_line.find( ":k", 0);
         size_t l_sPosn = l_line.find( ":s", 0);
 
         if (l_line.find_first_not_of(" \t", 6) == std::string::npos)
@@ -1109,13 +1121,6 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
             break;
         }
 
-        else if ( (l_sPosn == (l_kPosn + 2)) )
-        {
-            // kx:sy new format, no conversion needed
-            o_convertedLine = i_line;
-            break;
-        }
-
         else if ( l_kPosn > l_sPosn )
         {
             // out of order parms, cant convert
@@ -1128,6 +1133,123 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
             break;
         }
 
+        else if ( l_kColonPosn != std::string::npos )
+        {
+            // (a parameter preceeds k term)
+
+            size_t eqPos = l_line.find( "=", 0);
+
+            if (eqPos == std::string::npos)
+            {
+                // missing =, cant convert
+                o_convertedLine = i_line;
+                printf("convertTargLine : Error : "
+                       "Missing = , cannot convert : %s \n",
+                       o_convertedLine.c_str() );
+
+                l_rc = true;
+                break;
+            }
+
+            // preAmble may be <chiptype> || [.<chip unit type>] || :
+            size_t l_preAmbleStart = l_line.find_first_not_of(" \t", eqPos+1);
+
+            // remove trailing colon and prepend colon
+            size_t l_preAmbleLen = (l_kColonPosn - l_preAmbleStart);
+            std::string l_preAmble = ":" +
+                    l_line.substr( l_preAmbleStart, l_preAmbleLen );
+
+            // k0:s0 term ( or k0:nz:s0 ) is next
+            size_t l_sysStrLen = (l_sPosn + 3) - (l_kColonPosn + 1);
+            std::string l_sysStr = l_line.substr( l_kColonPosn + 1,
+                                                  l_sysStrLen );
+
+            std::string l_nStr;
+            l_nStr.clear();
+
+            // check for non standard k0:nz:s0 format
+            size_t l_nStart = l_sysStr.find(":n", 0);
+
+            if (l_nStart != std::string::npos)
+            {
+                // extract n term and compress system string
+                std::string l_nPrefix = l_sysStr.substr(0, l_nStart);
+
+                size_t l_nPost = l_sysStr.find(":", (l_nStart + 1));
+                std::string l_nPostfix;
+                l_nPostfix.clear();
+
+                if ( l_nPost != std::string::npos )
+                {
+                    // extract n string & post fix
+                    l_nStr = l_sysStr.substr(l_nStart, (l_nPost - l_nStart));
+                    l_nPostfix = l_sysStr.substr( l_nPost, l_sysStr.size() );
+                }
+                else
+                {
+                    // extract n string, no post fix
+                    l_nStr = l_sysStr.substr(l_nStart, l_sysStr.size());
+                }
+
+                // rebuild the system string
+                l_sysStr = l_nPrefix + l_nPostfix + l_nStr;
+                l_nStr.clear();
+            } // end extract n term
+
+            std::string l_trlStr;
+            l_trlStr.clear();
+
+            // look for next term
+            size_t l_trlStart = l_line.find( ":", l_sPosn + 3);
+
+            if (l_trlStart != std::string::npos)
+            {
+                // step over optional :n term
+                if (l_line.substr( l_trlStart, 2) == ":n")
+                {
+                    // locate the end of the n term
+                    l_nStart = l_trlStart;
+                    l_trlStart = l_line.find( ":", l_nStart + 1);
+
+                    if ( l_trlStart != std::string::npos)
+                    {
+                        // create n and trl strings
+                        l_nStr = l_line.substr( l_nStart,
+                                                (l_trlStart - l_nStart));
+
+                        l_trlStr = l_line.substr( l_trlStart, l_line.size() );
+                    }
+                    else
+                    {
+                        // no trl string, create n string
+                        l_nStr = l_line.substr( l_nStart, l_line.size() );
+                    }
+                } // end step over n term
+                else
+                {
+                    // no n string, create trl string
+                    l_trlStr = l_line.substr( l_trlStart, l_line.size() );
+                }
+            } // end no trailer found
+
+            // assemble the converted line
+            o_convertedLine = ( "target = " + l_sysStr + l_nStr +
+                                l_preAmble + l_trlStr );
+
+            printf("convertTargLine : Info : "
+                   "Target Line converted to : %s \n",
+                   o_convertedLine.c_str() );
+
+            break;
+        }
+
+        else if ( l_sPosn == (l_kPosn + 2) )
+        {
+            // kx:sy new format, no conversion needed
+            o_convertedLine = i_line;
+            break;
+        }
+
         else
         {
             // (old format)
@@ -1136,6 +1258,9 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
         // (old format, convert to new format.  see header file)
 
         // locate k & s term strings
+        // "overflow" is the position right after the term string
+        //   and is the beginning of the next term string
+        //   std::string::npos occurs when no "next" term string
         size_t l_kPosn_overflow = l_line.find( ":", l_kPosn+1);
         size_t l_kStrSize = (l_kPosn_overflow != std::string::npos) ?
                 (l_kPosn_overflow - l_kPosn) : (l_line.size() - l_kPosn);
@@ -1539,6 +1664,8 @@ AttrTextToBinaryBlob::TargetTypeRc
         }
 
         // Optional end Term exists, check n parm value(s)
+        //  step over the k0:s0:n chars then isolate the
+        //   size/value of the n parm
         size_t l_nValStartPosn = 7;
         size_t l_nValOverflowPosn = l_line.find( ":", l_nValStartPosn );
 
@@ -1725,9 +1852,11 @@ bool AttrTextToBinaryBlob::validateBinaryXlate( const uint8_t * i_buffer,
                 tank, pad, termLen );
 
         printf("validateBinaryXlate: Attribute Hdr: "
-                "ID = %.8X  Target Type = %.8X  Positon = %.4X  "
-                "Unit Position = %.2X  node = %.1X  flags = %.1X  "
-                "Parm Length = %.8X\n",
+                "ID = %.8X  Target Type = %.8X \n"
+                "                                   Positon = %.4X"
+                "  Unit Position = %.2X node = %.1X  \n"
+                "                                   flags = %.1X"
+                "  Parm Length = %.8X\n",
                 attrId, targetType, pos, unitPos, node, flags, valSize);
 
         if // parm value exists
@@ -1822,6 +1951,9 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
         // multi-dimensional attributes, there is a line for each element
         l_attrString.clear();
         l_attrLines.clear();
+
+        // line feed before "target" string
+        printf("\n");
 
         do
         {

@@ -74,12 +74,28 @@ namespace AttrTextToBinaryBlob
      * ---------------------------------------
      * The format of a Unit Target Line is :
      *
-     *   <system string> || [:nz] || :<chip type> || [.<chip unit type>] ||
-     *     :<target position> || [:<unit position>]
+     *   target =  <system string> || [:nz] ||
+     *              :<chip type> || [.<chip unit type>] ||
+     *              :<chip position> || [:<unit position>]
      *
-     *     note : x = 0
-     *     note : Y = 0
-     *     note : z may be :
+     *       Examples:
+     *         target = k0:s0:centaur:p06            // no optional fields
+     *         target = k0:s0:n0:centaur.mba:p00:c0  // all optional fields
+     *
+     *          ---- OR ----
+     *   target =  <chip type> || [.<chip unit type>] ||
+     *              : <system string> || [:nz] ||
+     *              :<chip position> || [:<unit position>]
+     *
+     *       Examples:
+     *         target = centaur:k0:s0:p06            // no optional fields
+     *         target = centaur.mba:k0:s0:n0:p00:c0  // all optional fields
+     *
+     *
+     *      <system string> is defined above;  x=0, y=0
+     *
+     *      nz : optional node number term
+     *             z may be :
      *             - single digit 0-9
      *             - comma separated list of digits 0-9
      *                -- 2 or more items in list
@@ -87,7 +103,6 @@ namespace AttrTextToBinaryBlob
      *                e.g. 0,4
      *                e.g. 5,3,9
      *             - all
-     *
      *
      *      <chip type>
      *         definitions :
@@ -101,7 +116,7 @@ namespace AttrTextToBinaryBlob
      *           AttrOverrideSyncConstants::CHIP_UNIT_TYPE_TARG_STR_TO_TYPE
      *           e.g.  ex, mca, obus
      *
-     *      <target position>
+     *      <chip position>
      *         pw
      *            note : w may be :
      *             - single number 0 - 65,534
@@ -157,6 +172,17 @@ namespace AttrTextToBinaryBlob
      *
      *   target = k0:s0:n0:centaur.mba:p00:c0
      *   ATTR_MSS_FREQ 0x00000640 u32 CONST
+     *   ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 u32 CONST
+     *
+     *   target = k0:s0:nall:p9:pall
+     *   ATTR_VOLTAGE_EXT_VDD_BIAS_ULTRATURBO -5 CONST
+     *
+     *   target = k0:s0:n4:centaur:p06
+     *   ATTR_MSS_FREQ 0x00000345 CONST
+     *
+     *   target = k0:s0:n0,6,9:centaur.mba:p06:c1
+     *   ATTR_MSS_FREQ 0x00000640 CONST
+     *
      *   ATTR_MSS_VOLT_VDDR_MILLIVOLTS 0x00000546 u32 CONST
      *
      *   target = k0:s0:nall:p9:pall
@@ -304,7 +330,7 @@ namespace AttrTextToBinaryBlob
      * Structure for target's identification
      *
      * node         Target Node Number
-     * targetPos    Target Position
+     * targetPos    Target Position (chip position)
      * unitPos      Target Unit Position
      */
     struct target_label
