@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,15 +25,16 @@
 #ifndef SBEIO_ERRL_UDP_H
 #define SBEIO_ERRL_UDP_H
 
-/**
+/*
  *  @file sbeIoErrlUd.H
+ *
+ *  @NOTE: This file is literally a verbatim copy of the file in the FSP repo,
+ *         $SANDBOXBASE/obj/ppc/sbei/sbfw/parserplugins/sbeUserDataParser.C.
+ *         These files must be kept in sync. Any modification to this file
+ *         must be reflected in the file sbeUserDataParser.C and vice versa.
  *
  *  Defines the ErrlUserDetailsParser classes that parse SBEIO FFDC
  */
-
-#include <utilmem.H>
-#include "sbeIoFfdcType.H"
-#include "errluserdetails.H"
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -45,6 +46,8 @@
 #include <utilfile.H>
 #include <utilmem.H>
 
+#include "sbeIoFfdcType.H"
+
 #define SBE_TEMP_DUMP_FILE              "/tmp/trace_dump.bin"
 #define SBE_TRACE_BIN                   "/tmp/sbe_trace.bin"
 #define PPE2FSP_TOOL                    "ppe2fsp"
@@ -54,7 +57,8 @@
 #define SBE_ATTR_DUMP_HEADLINE          "SBE Attributes Dump"
 #define P9_XIP_ATTR_CMD                 "-ifs attrdump"
 #define SBE_STRING_FILE                 "sbeStringFile"
-#define SBE_SEEPROM_BIN                 "sbe_seeprom.bin"
+
+#define SBE_PARSER_MAX_LOCAL_BUFFER     8192
 
 #define SBE_PARSER_PRINT_DELIMITER {std::cout << \
 "*****************************************************************************"\
@@ -64,11 +68,10 @@ std::cout << \
 "                             "x<< std::endl;\
 SBE_PARSER_PRINT_DELIMITER }
 
-
-#define SBEIO_PARSER_MAX_LOCAL_BUFFER   8192
-
 namespace SBEIO
 {
+
+std::string SBE_SEEPROM_BIN = "sbe_seeprom_DD1.bin";
 
 /**
  * @class SbeIoFfdcErrlParser
@@ -103,8 +106,8 @@ public:
     {
         int l_rc = 0;
         uint32_t fapiRc = 0;
-        sbeIoFfdcDataHeader_t l_pData = {0};
-        char l_buffer[SBEIO_PARSER_MAX_LOCAL_BUFFER] = {0};
+        sbeFFDCDataHeader_t l_pData = {0};
+        char l_buffer[SBE_PARSER_MAX_LOCAL_BUFFER] = {0};
         char *l_pBuffer = (char*)i_pBuffer;
         uint32_t l_buflen = i_buflen;
 
@@ -118,8 +121,8 @@ public:
             //seek l_mem to the binary blob of FFDC package
             UtilMem l_mem(const_cast<void*>(i_pBuffer),i_buflen);
 
-            // The data is a buffer of SBEIO FFDC data
-            i_parser.PrintHeading("SBEIO FFDC Parser");
+            // The data is a buffer of SBE FFDC data
+            i_parser.PrintHeading("SBE FFDC Parser");
 
             if(l_buflen < sizeof(fapiRc))
             {
@@ -129,8 +132,7 @@ public:
             l_buflen -= sizeof(fapiRc);
             l_pBuffer += sizeof(fapiRc);
             l_mem >> fapiRc;
-
-            i_parser.PrintNumber("FAPI RC ", "0x%08X", fapiRc);
+            i_parser.PrintNumber("FAPI RC ", "0x%08X", ntohl(fapiRc));
 
             if(l_buflen < sizeof(l_pData))
             {
@@ -142,13 +144,18 @@ public:
             l_mem >> l_pData;
 
             i_parser.PrintNumber("Primary Status ", "0x%04X",
-                    (uint16_t)l_pData.primaryStatus);
+                   (uint16_t)ntohs(l_pData.primaryStatus));
             i_parser.PrintNumber("Secondary Status ", "0x%04X",
-                    (uint16_t)l_pData.secondaryStatus);
+                   (uint16_t)ntohs(l_pData.secondaryStatus));
             i_parser.PrintNumber("FW Commit ID ", "0x%08X",
-                (uint32_t)l_pData.fwCommitID);
-
+                   (uint32_t)ntohl(l_pData.fwCommitID));
+            if(ntohl(l_pData.ddLevel) == SBE_FFDC_DD2)
+            {
+                SBE_SEEPROM_BIN = "sbe_seeprom_DD2.bin";
+            }
             //loop through the number of fields configured
+            uint32_t *data = (uint32_t *)&l_pData.dumpFields;
+            *data = ntohl(*data);
             uint32_t l_dumpFields = l_pData.dumpFields.get();
             while(l_dumpFields && !l_rc)
             {
@@ -160,23 +167,28 @@ public:
                         //as possible but break from next loop
                         l_rc = -1;
                     }
-                    sbeIoFfdcUserDataIdentifier_t l_ffdcUserDataId = {0};
+                    sbeFFDCUserDataIdentifier_t l_ffdcUserDataId = {0};
                     l_buflen -= sizeof(uint32_t); //l_ffdcUserDataId
                     l_pBuffer += sizeof(uint32_t); //l_ffdcUserDataId
 
                     l_mem >> l_ffdcUserDataId;
 
-                    if((l_buflen < l_ffdcUserDataId.fieldLen) &&
-                        (l_ffdcUserDataId.fieldId != SBEIO_FFDC_TRACE_DUMP))
+                    // TODO via RTC:158462 continue even for attribute dump
+                    // Need to extend p9_xip_tool for partial attr dump handling
+                    uint16_t fieldLen = ntohs(l_ffdcUserDataId.fieldLen);
+                    uint16_t fieldId = ntohs(l_ffdcUserDataId.fieldId);
+
+                    if((l_buflen < fieldLen) &&
+                       (fieldId != SBE_FFDC_TRACE_DUMP))
                     {
                         i_parser.PrintHexDump(l_pBuffer, l_buflen);
                         break;
                     }
 
-                    l_buflen -= l_ffdcUserDataId.fieldLen;
-                    l_pBuffer += l_ffdcUserDataId.fieldLen;
+                    l_buflen -= fieldLen;
+                    l_pBuffer += fieldLen;
 
-                    l_mem.read(l_buffer, l_ffdcUserDataId.fieldLen);
+                    l_mem.read(l_buffer, fieldLen);
                     std::ostringstream  l_strFile;
                     //Generate temp dump file name
                     l_strFile << SBE_TEMP_DUMP_FILE;
@@ -187,21 +199,20 @@ public:
                     if ( l_errlHndl )
                     {
                         std::cerr << "Error opening "
-                                  << l_strFile.str() << std::endl;
+                                 << l_strFile.str() << std::endl;
                         l_errlHndl->commit(HWSV_COMP_ID, ERRL_ACTION_REPORT);
                         delete l_errlHndl;
                         l_errlHndl = NULL;
-                        i_parser.PrintHexDump(l_buffer, l_ffdcUserDataId.fieldLen);
-                        return;
+                        i_parser.PrintHexDump(l_buffer, fieldLen);
+                        break;
                     }
                     else
                     {
-                        l_fileObj.write( l_buffer, l_ffdcUserDataId.fieldLen);
+                        l_fileObj.write( l_buffer, fieldLen);
                         l_fileObj.Close();
                     }
-
                     //Specific handling
-                    if(l_ffdcUserDataId.fieldId == SBEIO_FFDC_ATTR_DUMP)
+                    if(fieldId == SBE_FFDC_ATTR_DUMP)
                     {
                         SBE_PARSER_PRINT_HEADING(SBE_ATTR_DUMP_HEADLINE)
                         //command
@@ -209,40 +220,40 @@ public:
                         // p9_xip_tool <sbe seeprom bin file>
                         // -ifs attrdump <attr dump file> 2>&1
                         l_strCmd1 << findSbeFile(P9_XIP_TOOL)
-                                  << " "
-                                  << findSbeFile(SBE_SEEPROM_BIN)
-                                  << " "
-                                  << P9_XIP_ATTR_CMD
-                                  << " "
-                                  << l_strFile.str().c_str()
-                                  << " "
-                                  << "2>&1";
+                                 << " "
+                                 << findSbeFile(SBE_SEEPROM_BIN.c_str())
+                                 << " "
+                                 << P9_XIP_ATTR_CMD
+                                 << " "
+                                 << l_strFile.str().c_str()
+                                 << " "
+                                 << "2>&1";
 
                         //Call out the command
                         sbeParserSysCall( l_strCmd1.str().c_str() );
                     }
-                    else if(l_ffdcUserDataId.fieldId == SBEIO_FFDC_TRACE_DUMP)
+                    else if(fieldId == SBE_FFDC_TRACE_DUMP)
                     {
                         SBE_PARSER_PRINT_HEADING(SBE_TRACE_HEADLINE)
                         //command
                         std::ostringstream  l_strCmd1, l_strCmd2;
                         // ppe2fsp <trace dump file> <trace bin file> 2>&1
                         l_strCmd1 << findSbeFile(PPE2FSP_TOOL)
-                                  << " "
-                                  << l_strFile.str().c_str()
-                                  << " "
-                                  << SBE_TRACE_BIN
-                                  << " "
-                                  << "2>&1";
+                                 << " "
+                                 << l_strFile.str().c_str()
+                                 << " "
+                                 << SBE_TRACE_BIN
+                                 << " "
+                                 << "2>&1";
 
                         // fsp-trace -s <sbe string file> <trace bin file> 2>&1
                         l_strCmd2 << SBE_TRACE_CMD
-                                  << " "
-                                  << findSbeFile(SBE_STRING_FILE)
-                                  << " "
-                                  << SBE_TRACE_BIN
-                                  << " "
-                                  << "2>&1";
+                                 << " "
+                                 << findSbeFile(SBE_STRING_FILE)
+                                 << " "
+                                 << SBE_TRACE_BIN
+                                 << " "
+                                 << "2>&1";
 
                         //Call out the commands
                         sbeParserSysCall( l_strCmd1.str().c_str() );
@@ -259,7 +270,6 @@ public:
                 }
             }
         } while(false);
-
     }
 
 private:
@@ -269,23 +279,20 @@ private:
 
     std::string findSbeFile(const char *name) const
     {
-    #ifdef CONTEXT_x86_nfp
-        std::string tmp = getenv("bb");
-        tmp += "obj/x86.nfp/sbei/sbfw/img/";
-        std::string file = tmp + name;
-
-        struct  stat    l_stat;
-        if(stat(file.c_str(), &l_stat) < 0)
-        {
-            //Can't find the file
-        }
-
-        return file;
-    #endif
-    #ifdef CONTEXT_ppc
         std::string tmp = getenv("PATH");
+#ifdef CONTEXT_x86_nfp
+        char *bb = getenv("bb");
+        if(bb != NULL)
+        {
+            std::string bbstr(bb);
+            tmp += ":" + bbstr + "/src/sbei/sbfw/img" +
+                  ":" + bbstr + "/obj/x86.nfp/sbei/sbfw/simics" +
+                  ":" + bbstr + "/obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries";
+        }
+#endif
+#ifdef CONTEXT_ppc
         tmp += ":/nfs:/maint";
-
+#endif
         char *path = strdup(tmp.c_str());
         char *dir = NULL;
 
@@ -313,7 +320,6 @@ private:
         path = NULL;        //sm05c
 
         return file;
-    #endif
     }
 
     void sbeParserSysCall(const char *cmd) const
@@ -328,7 +334,7 @@ private:
             {
                 if(fgets(buffer, 256, stream) != NULL)
                 {
-                    std::cout << buffer;
+                   std::cout << buffer;
                 }
             }
         }
@@ -338,7 +344,6 @@ private:
             std::cout << "errno [" << errno << "]" << std::endl;
         }
     }
-
 };
 
 } // end namespace
