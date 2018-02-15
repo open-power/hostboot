@@ -366,8 +366,9 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
                          mss::c_str(p), l_vpd_info.iv_freq_mhz, l_vpd_info.iv_rank_count_dimm_0, l_vpd_info.iv_rank_count_dimm_1);
 
                 // In order to retrieve the VPD contents we first need the keyword size.
-                // If we are unable to retrieve the keyword size then this speed isn't supported in the VPD
-                // and we skip to the next possible speed bin.
+                // If we are unable to retrieve the keyword size then this speed isn't
+                // supported in the VPD in Cronus (but not FW) and we skip to the next
+                // possible speed bin.
                 if(  fapi2::getVPD(mcs, l_vpd_info, nullptr) != fapi2::FAPI2_RC_SUCCESS )
                 {
                     FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
@@ -382,6 +383,7 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
                         o_vpd_supported_freqs.erase(l_it);
                     }
 
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                     continue;
                 }
 
@@ -394,13 +396,24 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
                              "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
                              l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
-                // If we are here then we should have a valid frequency selected from polling the VPD keyword size above.
-                // A hard-fail here means something is wrong and we want to return current_err instead of ignoring it.
-                // We turn on FFDC logging here because this is a real fail if we can't read valid VPD, we don't want
-                // to return a useless FAPI2_RC_FALSE that FW doesn't know what to do with.
-                l_vpd_info.iv_is_config_ffdc_enabled = true;
-                FAPI_TRY( fapi2::getVPD(mcs, l_vpd_info, &(l_mr_blob[0])),
-                          "Failed to retrieve VPD data for %s", mss::c_str(mcs) );
+                // Firmware doesn't do the VPD lookup in the size check so repeat the logic here
+                if(  fapi2::getVPD(mcs, l_vpd_info, &(l_mr_blob[0])) != fapi2::FAPI2_RC_SUCCESS )
+                {
+                    FAPI_INF("Couldn't retrieve MR data from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
+
+                    // If we added a freq that was supported in one MCA, but isn't supported for
+                    // another MCA under the same MCBIST (such as one port running single drop and another dual drop),
+                    // we remove it from the VPD supported freq list.
+                    auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
+
+                    if( l_it != o_vpd_supported_freqs.end()  )
+                    {
+                        o_vpd_supported_freqs.erase(l_it);
+                    }
+
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    continue;
+                }
 
                 // Add non-repeating supported freqs
                 auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
@@ -414,6 +427,7 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
             }// freqs
         }// mca
     }//mcs
+
 
     std::sort( o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end() );
 
