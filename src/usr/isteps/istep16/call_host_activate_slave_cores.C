@@ -42,7 +42,6 @@
 #include    <sys/misc.h>
 
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_cpu_special_wakeup.H>
 #include    <p9_check_idle_stop_done.H>
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
@@ -55,7 +54,6 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   p9specialWakeup;
 using   namespace   p9_check_idle_stop;
 
 namespace ISTEP_16
@@ -199,39 +197,6 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 l_stepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
                 break;
-            }
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running p9_cpu_special_wakeup_core (ENABLE)"
-                    " EX target HUID %.8X",
-                    TARGETING::get_huid(*l_core));
-
-            // Enable special wakeup on core
-            FAPI_INVOKE_HWP( l_errl,
-                    p9_cpu_special_wakeup_core,
-                    l_fapi2_coreTarget,
-                    SPCWKUP_ENABLE,
-                    HOST);
-
-            if( l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : enable p9_cpu_special_wakeup_core, "
-                        "PLID=0x%x", l_errl->plid()  );
-
-                ErrlUserDetailsTarget(*l_core).addToLog( l_errl );
-
-                // Create IStep error log and cross ref error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "SUCCESS: enable p9_cpu_special_wakeup_core");
             }
         }
     }

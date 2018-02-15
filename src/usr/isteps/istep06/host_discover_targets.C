@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -60,7 +60,6 @@
 #include    <sbeio/sbeioif.H>
 #include    <sys/misc.h>
 
-#include <p9_cpu_special_wakeup.H>
 #include <p9_query_core_access_state.H>
 #include <p9_query_cache_access_state.H>
 #include <p9_hcd_core_stopclocks.H>

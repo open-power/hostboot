@@ -75,7 +75,6 @@
 //  Uncomment these files as they become available:
 // #include    "host_coalesce_host/host_coalesce_host.H"
 #include <p9_block_wakeup_intr.H>
-#include <p9_cpu_special_wakeup.H>
 #include <initservice/istepdispatcherif.H>
 #include <isteps/hwpf_reasoncodes.H>
 
@@ -440,8 +439,6 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
     // assume success, unless we hit an error later.
     io_pMsg->data[0] = INITSERVICE::HWSVR_MSG_SUCCESS;
 
-    errlHndl_t l_errl = NULL;
-
     // if there is extra data, start processing it
     if(io_pMsg->extra_data)
     {
@@ -516,49 +513,6 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
 
     io_pMsg->data[1] = 0;
 
-    // if there wasn't an error
-    if (io_pMsg->data[0] == INITSERVICE::HWSVR_MSG_SUCCESS)
-    {
-        // Get all functional core units
-        TARGETING::TargetHandleList l_coreList;
-        getAllChiplets(l_coreList, TYPE_CORE);
-
-        for (auto l_core : l_coreList)
-        {
-            fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_core_target(l_core);
-
-            // disable special wakeup
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_cpu_special_wakeup_core (DISABLE) on Core target"
-                " HUID %.8X",
-                TARGETING::get_huid(l_core));
-
-            FAPI_INVOKE_HWP(l_errl,
-                            p9_cpu_special_wakeup_core,
-                            l_fapi2_core_target,
-                            p9specialWakeup::SPCWKUP_DISABLE,
-                            p9specialWakeup::HOST);
-
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Disable p9_cpu_special_wakeup_core ERROR :"
-                           " Returning errorlog, reason=0x%x",
-                           l_errl->reasonCode() );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_core).addToLog( l_errl );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS: Disable special wakeup");
-            }
-        }
-    }
-
     // response will be sent by calling routine
     // IStepDispatcher::handleProcFabIovalidMsg()
     // which will also execute the procedure to winkle all cores
@@ -608,51 +562,6 @@ errlHndl_t blockInterrupts()
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "SUCCESS : p9_block_wakeup_intr(SET) on ALL cores" );
 
-    return l_errl;
-}
-
-errlHndl_t enableSpecialWakeup()
-{
-    errlHndl_t l_errl = NULL;
-
-    // Get all functional core units
-    TARGETING::TargetHandleList l_coreList;
-    getAllChiplets(l_coreList, TYPE_CORE);
-
-    for (auto l_core : l_coreList)
-    {
-
-        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_core_target(l_core);
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Running p9_cpu_special_wakeup_core(ENABLE) "
-                  "on Core target HUID %.8X",
-                  TARGETING::get_huid(l_core));
-
-        FAPI_INVOKE_HWP(l_errl,
-                        p9_cpu_special_wakeup_core,
-                        l_fapi2_core_target,
-                        p9specialWakeup::SPCWKUP_ENABLE,
-                        p9specialWakeup::HOST);
-
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Enable p9_cpu_special_wakeup_core ERROR :"
-                       " Returning errorlog, reason=0x%x",
-                       l_errl->reasonCode() );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_core).addToLog( l_errl );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS: Enable special wakeup");
-        }
-    }
     return l_errl;
 }
 
