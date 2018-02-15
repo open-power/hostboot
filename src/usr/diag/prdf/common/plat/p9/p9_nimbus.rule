@@ -6787,7 +6787,7 @@ group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 
     /** NPU0FIR[19]
      *  CQ CTL/SM NVF NVLink fatal error
      */
-    (rNPU0FIR, bit(19)) ? self_th_1;
+    (rNPU0FIR, bit(19)) ? nvLinkAssist;
 
     /** NPU0FIR[20]
      *  spare
