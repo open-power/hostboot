@@ -3684,12 +3684,12 @@ group gVASFIR filter singlebit, cs_root_cause
     /** VASFIR[6]
      *  PB(CQ) Addr Error CRESP on Read
      */
-    (rVASFIR, bit(6)) ? self_th_1;
+    (rVASFIR, bit(6)) ? self_M_level2_L_th_1;
 
     /** VASFIR[7]
      *  PB (CQ) Address Error CRESP on Write
      */
-    (rVASFIR, bit(7)) ? self_th_1;
+    (rVASFIR, bit(7)) ? self_M_level2_L_th_1;
 
     /** VASFIR[8]
      *  Egress Correctable ECC Error
@@ -5119,7 +5119,7 @@ group gPBCENTFIR filter singlebit, cs_root_cause
     /** PBCENTFIR[5]
      *  pb cresp addr error
      */
-    (rPBCENTFIR, bit(5)) ? threshold_and_mask_self;
+    (rPBCENTFIR, bit(5)) ? defaultMaskedError;
 
     /** PBCENTFIR[6]
      *  pb cresp error
@@ -5367,7 +5367,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[1]
      *  PBA CRESP Addr Error for Read
      */
-    (rPBAFIR, bit(1)) ? level2_th_1;
+    (rPBAFIR, bit(1)) ? self_M_level2_L_th_1;
 
     /** PBAFIR[2]
      *  PBA Read Data Timeout
@@ -5422,7 +5422,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[12]
      *  PBA CRESP Addr Error for Write
      */
-    (rPBAFIR, bit(12)) ? level2_th_1;
+    (rPBAFIR, bit(12)) ? self_M_level2_L_th_1;
 
     /** PBAFIR[13]
      *  PBA Invalid CRESP
@@ -5452,7 +5452,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[18]
      *  PBA CRESP Addr Error for BC Write
      */
-    (rPBAFIR, bit(18)) ? level2_th_1;
+    (rPBAFIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** PBAFIR[19]
      *  BCUE Read Data Parity Error OR MRDERR
@@ -5472,7 +5472,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[22]
      *  PBA CRESP Addr Error for BC Read
      */
-    (rPBAFIR, bit(22)) ? level2_th_1;
+    (rPBAFIR, bit(22)) ? self_M_level2_L_th_1;
 
     /** PBAFIR[23]
      *  PBA Read Data Timeout
@@ -5673,32 +5673,32 @@ group gPSIHBFIR filter singlebit, cs_root_cause
     /** PSIHBFIR[15]
      *  PSI Interrupt address Error
      */
-    (rPSIHBFIR, bit(15)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(15)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[16]
      *  OCC Interrupt address Error
      */
-    (rPSIHBFIR, bit(16)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(16)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[17]
      *  FSI Interrupt address Error
      */
-    (rPSIHBFIR, bit(17)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[18]
      *  LPC Interrupt address Error
      */
-    (rPSIHBFIR, bit(18)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[19]
      *  LOCAL ERROR Interrupt address Error
      */
-    (rPSIHBFIR, bit(19)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(19)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[20]
      *  HOST ERROR Interrupt address Error
      */
-    (rPSIHBFIR, bit(20)) ? level2_M_self_L_th_1;
+    (rPSIHBFIR, bit(20)) ? self_M_level2_L_th_1;
 
     /** PSIHBFIR[21]
      *  PSI global error bit 0
@@ -5968,12 +5968,12 @@ group gNMMUCQFIR filter singlebit, cs_root_cause
     /** NMMUCQFIR[2]
      *  PowerBus read address error
      */
-    (rNMMUCQFIR, bit(2)) ? level2_th_1;
+    (rNMMUCQFIR, bit(2)) ? self_M_level2_L_th_1;
 
     /** NMMUCQFIR[3]
      *  PowerBus write address error
      */
-    (rNMMUCQFIR, bit(3)) ? level2_th_1;
+    (rNMMUCQFIR, bit(3)) ? self_M_level2_L_th_1;
 
     /** NMMUCQFIR[4]
      *  PowerBus miscellaneous error
@@ -6191,7 +6191,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[21]
      *  Address error cresp detected by twsm
      */
-    (rNMMUFIR, bit(21)) ? level2_th_1;
+    (rNMMUFIR, bit(21)) ? self_M_level2_L_th_1;
 
     /** NMMUFIR[22]
      *  PTE update fail due to armwf mismatch.
@@ -6201,7 +6201,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[23]
      *  Address error cresp detected by twsm
      */
-    (rNMMUFIR, bit(23)) ? level2_th_1;
+    (rNMMUFIR, bit(23)) ? self_M_level2_L_th_1;
 
     /** NMMUFIR[24]
      *  Unsupported radix cfg for guest-side .
@@ -6507,17 +6507,17 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[33]
      *  INT_CQ_FIR_WRQ_BAD_CRESP:
      */
-    (rINTCQFIR, bit(33)) ? level2_M_self_L_th_1;
+    (rINTCQFIR, bit(33)) ? self_M_level2_L_th_1;
 
     /** INTCQFIR[34]
      *  INT_CQ_FIR_RDQ_BAD_CRESP:
      */
-    (rINTCQFIR, bit(34)) ? level2_M_self_L_th_1;
+    (rINTCQFIR, bit(34)) ? self_M_level2_L_th_1;
 
     /** INTCQFIR[35]
      *  INT_CQ_FIR_INTQ_BAD_CRESP:
      */
-    (rINTCQFIR, bit(35)) ? level2_M_self_L_th_1;
+    (rINTCQFIR, bit(35)) ? self_M_level2_L_th_1;
 
     /** INTCQFIR[36]
      *  INT_CQ_FIR_BAD_128K_VP_OP:
@@ -7377,7 +7377,7 @@ group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 
     /** NPU0FIR[23]
      *  CQ CTL/SM PBF PowerBus Fatal Error
      */
-    (rNPU0FIR, bit(23)) ? level2_M_self_L_th_1;
+    (rNPU0FIR, bit(23)) ? self_M_level2_L_th_1;
 
     /** NPU0FIR[24]
      *  PowerBus configuration error
