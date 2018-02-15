@@ -78,6 +78,7 @@ class InterruptMsgHdlr : public MessageHandler
             MSG_KEY_THREAD_WKUP  = 0x8000000000000000ul,
             MSG_KEY_ADD_CPU_CORE = 0x4000000000000000ul,
             MSG_KEY_IPC_MSG      = 0x2000000000000000ul,
+            MSG_IPC_SALT         = 0x0000000100000000ul,
         };
 
         /**
@@ -177,6 +178,7 @@ class InterruptMsgHdlr : public MessageHandler
 
         static InterruptMsgHdlr * cv_instance;
         static uint64_t cv_ipc_base_address;
+        static uint64_t cv_ipc_salt;
 
         Spinlock iv_lock;
 };

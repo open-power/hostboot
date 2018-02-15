@@ -37,6 +37,7 @@ const char* VFS_ROOT_MSG_INTR = "/msg/interrupt";
 
 InterruptMsgHdlr * InterruptMsgHdlr::cv_instance = NULL;
 uint64_t InterruptMsgHdlr::cv_ipc_base_address = 0;
+uint64_t InterruptMsgHdlr::cv_ipc_salt = 0;
 
 void InterruptMsgHdlr::create(MessageQueue * i_msgQ, uint64_t i_ipc_addr)
 {
@@ -193,9 +194,19 @@ void InterruptMsgHdlr::sendIpcMsg(uint64_t i_pir)
 {
     if(cv_instance)
     {
-        // To avoid conflict with interrupts on thread i_pir, change the key
-        // for the message to be an invalid PIR.
-        uint64_t pir_key = i_pir | MSG_KEY_IPC_MSG;
+        //Note that due to how IPC works between independent HB
+        //Instances, their is a race between when the  data area
+        //"lock" is released and when  the doorbell handled response
+        //is sent back to the kernel. Basically the other instances
+        //pounce on the data area as soon as it is unlocked, and
+        //a duplicate doorbell happens before kernel clears first
+        //message.
+        //Since the kernel will drop any message with the same PIR
+        //key on the floor, need to make it unique with a incrementing
+        //counter
+
+        cv_ipc_salt += MSG_IPC_SALT;
+        uint64_t pir_key = i_pir | MSG_KEY_IPC_MSG | cv_ipc_salt;
 
         cv_instance->iv_lock.lock();
         cv_instance->sendMessage(MSG_INTR_IPC,
