@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,8 +183,6 @@ public:
    */
   void test_FSISCOMreadWrite_centaur(void)
   {
-//@TODO RTC:178802
-#if 0
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
       uint64_t fails = 0;
       uint64_t total = 0;
@@ -350,7 +348,6 @@ public:
       }
 
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> %d/%d fails", fails, total );
-#endif
   }
 
 
