@@ -60,7 +60,6 @@
 #include    <fapi2_hw_access.H>
 #include    <plat_hwp_invoker.H>
 #include    <istep_reasoncodes.H>
-#include    <p9_cpu_special_wakeup.H>
 
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>
@@ -385,37 +384,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore0 =
               (const_cast<TARGETING::Target*>(l_masterCore));
 
-        // --------------------------------------------------------------------
-        //Enable the special wake-up on master core
-        FAPI_INF("Enable special wake-up on master core");
-
-        //Need to explicitly load the library that has the wakeup HWP in it
-        if( !VFS::module_is_loaded( "libp9_cpuWkup.so" ) )
-        {
-            l_errl = VFS::module_load( "libp9_cpuWkup.so" );
-            if ( l_errl )
-            {
-                //  load module returned with errl set
-                TRACFCOMP( g_fapiTd,ERR_MRK"activate_threads: Could not load libp9_cpuWkup module" );
-                // break from do loop if error occured
-                break;
-            }
-            l_wakeup_lib_loaded = true;
-        }
-
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                        l_fapiCore0,
-                        p9specialWakeup::SPCWKUP_ENABLE,
-                        p9specialWakeup::HOST);
-        if(l_errl)
-        {
-            TRACFCOMP( g_fapiImpTd,
-                "ERROR: 0x%.8X : p9_cpu_special_wakeup_core set HWP(cpu %d)",
-                l_errl->reasonCode(),
-                l_masterCoreID);
-            break;
-        }
-
         //  AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
         uint64_t en_threads, en_threads_master;
@@ -559,24 +527,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore1 =
                 (const_cast<TARGETING::Target*>(l_fusedCore));
-
-            // -------------------------------------------------------------
-            //Enable the special wake-up on master-fused core
-            FAPI_INF("Enable special wake-up on master-fused core");
-
-            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                            l_fapiCore1,
-                            p9specialWakeup::SPCWKUP_ENABLE,
-                            p9specialWakeup::HOST);
-            if(l_errl)
-            {
-                TRACFCOMP( g_fapiImpTd,
-                    "ERROR: 0x%.8X : "
-                    "p9_cpu_special_wakeup_core set HWP(cpu %d)",
-                    l_errl->reasonCode(),
-                    l_masterCoreID);
-                break;
-            }
 
             // First capture if threads 1,3 are enabled.  Then eliminate
             // even threads and compress to bits 0,1

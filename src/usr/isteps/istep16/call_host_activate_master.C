@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,6 @@
 
 //Import directory (EKB)
 #include    <p9_block_wakeup_intr.H>
-#include    <p9_cpu_special_wakeup.H>
 
 //HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
@@ -60,7 +59,6 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   p9specialWakeup;
 
 
 namespace ISTEP_16
@@ -263,34 +261,6 @@ void* call_host_activate_master (void *io_pArgs)
                        "p9_block_wakeup_intr SUCCESS"  );
         }
 
-        // Clear special wakeup
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Disable special wakeup on master core");
-
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                        l_fapi2_coreTarget,
-                        SPCWKUP_DISABLE,
-                        HOST);
-
-
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Disable p9_cpu_special_wakeup_core ERROR : Returning errorlog,"
-            " reason=0x%x",
-                l_errl->reasonCode() );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Disable special wakeup on master core SUCCESS");
-        }
-
         if(l_fusedCore != NULL)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -318,34 +288,6 @@ void* call_host_activate_master (void *io_pArgs)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "p9_block_wakeup_intr SUCCESS"  );
-            }
-
-            // Clear special wakeup
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Disable special wakeup on fused core");
-
-            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                            l_fapi2_fusedTarget,
-                            SPCWKUP_DISABLE,
-                            HOST);
-
-
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Disable p9_cpu_special_wakeup_core ERROR : Returning errorlog,"
-                " reason=0x%x",
-                    l_errl->reasonCode() );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Disable special wakeup on master core SUCCESS");
             }
         }
 
@@ -421,63 +363,6 @@ void* call_host_activate_master (void *io_pArgs)
 
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
-
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Enable special wakeup on master core");
-
-
-        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                        l_fapi2_coreTarget,
-                        SPCWKUP_ENABLE,
-                        HOST);
-
-        if(l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Enable p9_cpu_special_wakeup_core ERROR : Returning errorlog, "
-            "reason=0x%x",
-                l_errl->reasonCode() );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterCore).addToLog( l_errl );
-
-            break;
-        }
-        else
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Enable special wakeup on master core SUCCESS");
-        }
-
-        if(l_fusedCore != NULL)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Enable special wakeup on fused core");
-
-
-            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
-                            l_fapi2_fusedTarget,
-                            SPCWKUP_ENABLE,
-                            HOST);
-
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Enable p9_cpu_special_wakeup_core ERROR : Returning errorlog, "
-                "reason=0x%x",
-                    l_errl->reasonCode() );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Enable special wakeup on master core SUCCESS");
-            }
-        }
 
     }   while ( 0 );
 

@@ -111,14 +111,6 @@ namespace   ESTABLISH_SYSTEM_SMP
     void* host_sys_fab_iovalid_processing( void* io_pMsg );
 
     /**
-    * @brief  enableSpecialWakeup on all functional cores after
-    *         winkle wakeup.
-    *
-    * @return error log handle
-    */
-    errlHndl_t enableSpecialWakeup();
-
-    /**
     * @brief  block interrupts on all functional cores
     *
     * @return error log handle

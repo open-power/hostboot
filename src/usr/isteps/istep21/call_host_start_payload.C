@@ -49,7 +49,6 @@
 #include <isteps/hwpf_reasoncodes.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <p9_cpu_special_wakeup.H>
 #include <p9n2_quad_scom_addresses_fld.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
@@ -67,7 +66,6 @@ using namespace ERRORLOG;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace TARGETING;
-using namespace p9specialWakeup;
 
 namespace ISTEP_21
 {
@@ -92,13 +90,6 @@ errlHndl_t callShutdown ( uint64_t i_hbInstance, bool i_masterIntance );
  */
 errlHndl_t broadcastShutdown ( uint64_t i_hbInstance );
 
-/**
- * @brief This function disables the special wakeup that allows scom
- *        operations on napped cores
- *
- * @return errlHndl_t error handle
- */
-errlHndl_t disableSpecialWakeup();
 
 /**
  * @brief Re-enables the local core checkstop function
@@ -366,12 +357,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
     do
     {
-        err = disableSpecialWakeup();
-        if(err)
-        {
-            break;
-        }
-
         // Tell SBE to Close All Unsecure Memory Regions
         err = SBEIO::closeAllUnsecureMemRegions();
         if (err)
@@ -651,52 +636,6 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
     } while(0);
 
     return err;
-}
-
-
-errlHndl_t disableSpecialWakeup()
-{
-    errlHndl_t l_errl = nullptr;
-
-    TargetHandleList l_cores;
-    getAllChiplets(l_cores, TYPE_CORE);
-    uint32_t l_numCores = 0;
-
-    for( const auto & l_core: l_cores )
-    {
-        l_numCores += 1;
-
-        const fapi2::Target<fapi2::TARGET_TYPE_CORE>
-            l_fapi2_coreTarget(l_core);
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Running p9_cpu_special_wakeup_core (DISABLE) target HUID %.8X",
-            TARGETING::get_huid(l_core));
-
-        // Disable special wakeup on core
-        FAPI_INVOKE_HWP( l_errl,
-                         p9_cpu_special_wakeup_core,
-                         l_fapi2_coreTarget,
-                         SPCWKUP_DISABLE,
-                         HOST);
-        if( l_errl )
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : disable p9_cpu_special_wakeup_core, "
-                      "PLID=0x%x", l_errl->plid()  );
-
-            ErrlUserDetailsTarget(l_core).addToLog( l_errl );
-
-            break;
-        }
-        else
-        {
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS: disable p9_cpu_special_wakeup_core");
-        }
-    }
-
-    return l_errl;
 }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,18 +170,6 @@ namespace HBOCC
             {
                 TRACFCOMP(g_fapiTd, "ERROR: Failed to clear off the wakeup");
                 break;
-            }
-
-            //  ************************************************************
-            //  Take all EX chiplets out of special wakeup
-            //  ************************************************************
-            FAPI_DBG("Disable special wakeup for all functional"
-                                                               "  EX targets.");
-            FAPI_INVOKE_HWP(l_errl, special_wakeup_all, l_target, false);
-            if(l_errl)
-            {
-                TRACFCOMP(g_fapiTd,
-                     "ERROR: Failed to remove EX chiplets from special wakeup");
             }
 
             // Hack provided by Doug Gilbert (@dgilbert). The following six
