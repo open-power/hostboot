@@ -95,7 +95,7 @@ our %memory_states = (
                              MEMSTATE_FULL_CACHE ],
     MEMSTATE_MS_48MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
-                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_48MEG ]
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_48MEG ],
     MEMSTATE_MS_64MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE, MEMSTATE_MS_64MEG ]
