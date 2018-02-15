@@ -842,19 +842,19 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                     if (TCE::utilUseTcesForDmas())
                     {
                         // Align Physical addr down for TCE requirement
-                        uint64_t mdrt_phyp_aligned =
+                        uint64_t mdrt_phys_aligned =
                                    ALIGN_PAGE_DOWN(l_mdrt_phys);
 
-                        uint64_t offset = l_mdrt_phys - mdrt_phyp_aligned;
+                        uint64_t offset = l_mdrt_phys - mdrt_phys_aligned;
 
                         TRACFCOMP( g_trac_dump,"Setup TCEs for FSP to use for "
                                    "l_mdrt_phys=0x%.16llX (virt=0x%.16llX, "
                                    "aligned_phys=0x%.16llX, offset=0x%X)",
                                    l_mdrt_phys, resultsTableAddr,
-                                   mdrt_phyp_aligned, offset);
+                                   mdrt_phys_aligned, offset);
 
                         uint32_t token = 0;
-                        l_err = TCE::utilAllocateTces(mdrt_phyp_aligned,
+                        l_err = TCE::utilAllocateTces(mdrt_phys_aligned,
                                                       resultsTableSize+offset,
                                                       token,
                                                       false); //Read-Only

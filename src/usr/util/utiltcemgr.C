@@ -55,9 +55,8 @@ TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
 
 // ------------------------
 // Macros for unit testing - leave extra trace enabled for now
-// @TODO RTC 168745 - Disable TRACUCOMP as the default
-#define TRACUCOMP(args...)  TRACFCOMP(args)
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 
 namespace TCE
@@ -1185,9 +1184,8 @@ void UtilTceMgr::printIvMap(void) const
 
     for ( auto const& map_itr : iv_allocatedAddrs )
     {
-        TRACUCOMP(g_trac_tce,"UtilTceMgr: printIvMap: token=0x%.8X, addr=0x%.16llX, size=0x%X", map_itr.first, map_itr.second.start_addr, map_itr.second.size);
+        TRACDCOMP(g_trac_tce,"UtilTceMgr: printIvMap: token=0x%.8X, addr=0x%.16llX, size=0x%.8X", map_itr.first, map_itr.second.start_addr, map_itr.second.size);
     }
-
 }
 
 
@@ -1362,7 +1360,7 @@ bool utilUseTcesForDmas(void)
 
     if (INITSERVICE::spBaseServicesEnabled())
     {
-        // @TODO RTC 168745 - Eventually this will default to true in all cases
+        // @TODO RTC 187906 - This could eventually default to true in all cases
         // where was have a FSP
 
         // Get Target Service and the system target to get ATTR_USE_TCES_FOR_DMA
