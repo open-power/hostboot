@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -334,8 +334,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
         getAllChiplets( l_targs, TYPE_PHB);
         if(l_targs.size() == 0)
         {
-            //@TODO RTC:178802
-            //TS_FAIL("TYPE_PHB target incorrectly returned zero size");
+            TS_FAIL("TYPE_PHB target incorrectly returned zero size");
         }
         else
         {

@@ -7932,7 +7932,7 @@
 
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
-        <default>,0x0000,0x0000,0x0000</default>
+        <default>0xFFFF,0x0000,0x0000,0x0000</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -8057,7 +8057,7 @@
 
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
-        <default>,0x0000,0x0000,0x0000</default>
+        <default>0xFF00,0x0000,0x00FF,0x0000</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -8180,7 +8180,7 @@
 
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
-        <default>,0x0000,0x0000,0x0000</default>
+        <default>0xFFFF,0x0000,0x0000,0x0000</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>

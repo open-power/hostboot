@@ -1149,8 +1149,6 @@ public:
 
   void test_Centaur_ScomTranslations(void)
   {
-    // @todo RTC 178802 Enable test cases turned off during bring up
-    /*
     TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_ScomTranslations> Start" );
 
     uint64_t fails = 0;
@@ -1201,10 +1199,10 @@ public:
         bool     expectError;
     } test_data[] = {
         //Target            Address       Expected    error
-        { scom_targets[myMBA0], 0x03010655 ,0x111111111111DDDD,false},
-        { scom_targets[myMBA1], 0x03010655, 0x333333334444EEEE,false},
-        { scom_targets[myMBA0], 0x8000C0140301143F,0x1111111111111212,false},
-        { scom_targets[myMBA1], 0x8000C0140301143F, 0x333333334444abcd,false},
+        { scom_targets[myMBA0], 0x03010655,0x3010655,false},
+        { scom_targets[myMBA1], 0x03010655,0x3010E55,false},
+        { scom_targets[myMBA0], 0x8000C0140301143F,0x8000C0140301143F,false},
+        { scom_targets[myMBA1], 0x8000C0140301143F,0x8000C0140301183F,false},
         { scom_targets[myMBA0], 0x8000C0140301183F,0x111111111111ccee,true}, // invalid non zero indirect address
         { scom_targets[myMBA0], 0x03010E55, 0x010101010101CCCC,true},  // invalid passing in a non-0 unit address
     };
@@ -1260,7 +1258,6 @@ public:
         }
     }
     TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_translateScom_SBE> %d/%d fails", fails, total );
-    */
   }
 
 
