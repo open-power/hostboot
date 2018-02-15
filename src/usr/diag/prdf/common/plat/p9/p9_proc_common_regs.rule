@@ -324,3 +324,92 @@
         capture     group default;
     };
 
+    ############################################################################
+    # NPU CERR for NVLINK (open power systems)
+    ############################################################################
+
+    register NPU_0_0_CERR
+    {
+        name        "NPU.STCK0.SM0.CERR";
+        scomaddr    0x05011017;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_0_1_CERR
+    {
+        name        "NPU.STCK0.SM1.CERR";
+        scomaddr    0x05011047;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_0_2_CERR
+    {
+        name        "NPU.STCK0.SM2.CERR";
+        scomaddr    0x05011077;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_0_3_CERR
+    {
+        name        "NPU.STCK0.SM3.CERR";
+        scomaddr    0x050110A7;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_1_0_CERR
+    {
+        name        "NPU.STCK1.SM0.CERR";
+        scomaddr    0x05011217;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_1_1_CERR
+    {
+        name        "NPU.STCK1.SM1.CERR";
+        scomaddr    0x05011247;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_1_2_CERR
+    {
+        name        "NPU.STCK1.SM2.CERR";
+        scomaddr    0x05011277;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_1_3_CERR
+    {
+        name        "NPU.STCK1.SM3.CERR";
+        scomaddr    0x050112A7;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_2_0_CERR
+    {
+        name        "NPU.STCK2.SM0.CERR";
+        scomaddr    0x05011417;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_2_1_CERR
+    {
+        name        "NPU.STCK2.SM1.CERR";
+        scomaddr    0x05011447;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_2_2_CERR
+    {
+        name        "NPU.STCK2.SM2.CERR";
+        scomaddr    0x05011477;
+        capture     group nvLinkErr;
+    };
+
+    register NPU_2_3_CERR
+    {
+        name        "NPU.STCK2.SM3.CERR";
+        scomaddr    0x050114A7;
+        capture     group nvLinkErr;
+    };
+
+

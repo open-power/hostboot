@@ -114,3 +114,13 @@ actionclass pmRecovery
     funccall("PmRecovery");
     threshold1;
 };
+
+/** Used for NVLINK errors (open power)
+ *  which can be the cause of OPAL TIs
+ */
+actionclass nvLinkAssist
+{
+    capture(nvLinkErr);
+    self_th_1;
+};
+
