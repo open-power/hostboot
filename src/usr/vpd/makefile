@@ -57,14 +57,12 @@ BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:d9299c4027c597c31337b46ed311edc131ec9
 #Update to Centaur DD2.0 for CCIN 31E8
 
 # CDIMM Format - download 4k cvpd file
-#BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
-#BINARY_FILES += $(IMGDIR)/dimmspd.dat:e9bd99127597db1d20342d9953f3075c9079e0d2
-
+BINARY_FILES += $(IMGDIR)/cvpd_cdimm.dat:b12431fbc14304edd31e74405cdcb27560a8e00b
+BINARY_FILES += $(IMGDIR)/dimmspd_cdimm.dat:21b0da9354a588bb1247f1408bfce3111fbc4c82
 
 # ISDIMM Format - download 8k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd.dat:af41c35b5a10f309f2519a871204936a2129e5ea
 BINARY_FILES += $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
-
 
 #Direct memory vpd
 BINARY_FILES += $(IMGDIR)/dvpd.dat:9292032f653710f92bbeb56b39582b2d0e5296b7
