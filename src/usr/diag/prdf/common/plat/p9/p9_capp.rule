@@ -281,12 +281,12 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[29]
      *  CXA: PB Addr Error detected by APC : ld
      */
-    (rCXAFIR, bit(29)) ? level2_th_1;
+    (rCXAFIR, bit(29)) ? self_M_level2_L_th_1;
 
     /** CXAFIR[30]
      *  CXA PB Addr Err detected by APC : st
      */
-    (rCXAFIR, bit(30)) ? level2_th_1;
+    (rCXAFIR, bit(30)) ? self_M_level2_L_th_1;
 
     /** CXAFIR[31]
      *  CXA: PPHB0 or PHB1 i linkdown

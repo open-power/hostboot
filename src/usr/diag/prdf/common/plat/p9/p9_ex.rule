@@ -335,12 +335,12 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     /** L2FIR[17]
      *  (RC) load received pb cresp addr error
      */
-    (rL2FIR, bit(17)) ? level2_th_1_UERE;
+    (rL2FIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** L2FIR[18]
      *  (RC) store received pb cresp addr error
      */
-    (rL2FIR, bit(18)) ? level2_th_1;
+    (rL2FIR, bit(18)) ? self_M_level2_L_th_1;
 
     /** L2FIR[19]
      *  Rc or NCU Pb data CE error
@@ -375,7 +375,7 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     /** L2FIR[25]
      *  L2 castout or CN cresp addr err
      */
-    (rL2FIR, bit(25)) ? self_th_1;
+    (rL2FIR, bit(25)) ? self_M_level2_L_th_1;
 
     /** L2FIR[26]
      *  LVDIR tracking PE
@@ -441,7 +441,7 @@ rule rNCUFIR
     NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 &  NCUFIR_ACT1;
 };
 
-group gNCUFIR filter singlebit, cs_root_cause( 8 )
+group gNCUFIR filter singlebit, cs_root_cause( 3, 4, 7, 8 )
 {
     /** NCUFIR[0]
      *  NCU store queue control error
@@ -461,12 +461,12 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[3]
      *  NCU Store Address Error
      */
-    (rNCUFIR, bit(3)) ? level2_M_self_L_th_1;
+    (rNCUFIR, bit(3)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[4]
      *  NCU load Address Error
      */
-    (rNCUFIR, bit(4)) ? level2_M_self_L_th_1;
+    (rNCUFIR, bit(4)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[5]
      *  Store received ack_dead.
@@ -481,7 +481,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[7]
      *  MSGSND received addr_err
      */
-    (rNCUFIR, bit(7)) ? level2_M_self_L_th_1;
+    (rNCUFIR, bit(7)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[8]
      *  NCU Store Queue Data Parity Err
@@ -506,7 +506,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[12]
      *  ima cresp addr error
      */
-    (rNCUFIR, bit(12)) ? self_th_1;
+    (rNCUFIR, bit(12)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[13]
      *  ima received ack_dead
@@ -516,17 +516,17 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[14]
      *  pmisc cresp addr err
      */
-    (rNCUFIR, bit(14)) ? level2_M_self_L_th_1;
+    (rNCUFIR, bit(14)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[15]
      *  PPE read cresp address error
      */
-    (rNCUFIR, bit(15)) ? level2_th_1;
+    (rNCUFIR, bit(15)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[16]
      *  PPE write cresp address error
      */
-    (rNCUFIR, bit(16)) ? level2_th_1;
+    (rNCUFIR, bit(16)) ? self_M_level2_L_th_1;
 
     /** NCUFIR[17]
      *  ppe read received ack dead
@@ -667,7 +667,7 @@ group gL3FIR filter singlebit, cs_root_cause( 5, 8, 11, 17, 21 )
     /** L3FIR[17]
      *  Received addr_error cresp for Prefetch
      */
-    (rL3FIR, bit(17)) ? self_th_1;
+    (rL3FIR, bit(17)) ? self_M_level2_L_th_1;
 
     /** L3FIR[18]
      *  An L3 machine hung waiting for PB cresp
