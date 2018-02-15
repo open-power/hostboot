@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,58 +41,26 @@
 
 extern trace_desc_t* g_trac_tce;
 
+// ------------------------
+// Macros for unit testing
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 class TCETest: public CxxTest::TestSuite
 {
   public:
 
-// TODO RTC 168745 - reenable helper functions
-#if 0
-
     // This helper functions retrieves the private member variable
     // iv_allocatedAddrs from the Singleton UtilTceMgr class
-    std::map<uint64_t, uint32_t> getAllocatedAddrsMap(void)
+    std::map<uint32_t, TCE::TceEntryInfo_t> getAllocatedAddrsMap(void)
     {
-        std::map<uint64_t, uint32_t> o_map(TCE::getTceManager().iv_allocatedAddrs);
+        std::map<uint32_t, TCE::TceEntryInfo_t> o_map(TCE::getTceManager().iv_allocatedAddrs);
         return o_map;
     };
 
 
-    // This helper function looks for the position associated with the input
-    // address in the Singleton's UtilTceMgr::iv_allocatedAddrs
-    uint32_t getPos(uint64_t i_addr)
-    {
-        uint32_t o_pos = 0xFEFEFEFE; // Default for no position found
-
-        auto map = getAllocatedAddrsMap();
-
-        TRACDCOMP(g_trac_tce,ENTER_MRK"TCETest::getPos: i_addr=0x%llX, map.size=%d", i_addr, map.size());
-
-        // Debug-only loop
-        for (auto mapElement : map )
-        {
-            TRACDCOMP(g_trac_tce,"TCETest::getPos: printIvMap: addr=0x%llX, pos=0x%X", mapElement.first, mapElement.second);
-        }
-
-        // Find i_addr in map; otherwise o_pos = bad default from above
-        auto map_itr = map.find(i_addr);
-        if (map_itr != map.end())
-        {
-            o_pos = map_itr->second;
-        }
-
-        TRACDCOMP(g_trac_tce,EXIT_MRK"TCETest::getPos: i_addr=0x%llX, o_pos=0x%X", i_addr, o_pos);
-
-        return o_pos;
-    }
-#endif
-
-
     void testTCE(void)
     {
-// TODO RTC 168745 - reenable testcase
-#if 0
-
         TRACFCOMP( g_trac_tce, ENTER_MRK"testTCE> start" );
 
         errlHndl_t errhdl = nullptr;
@@ -100,269 +68,210 @@ class TCETest: public CxxTest::TestSuite
         uint64_t fails = 0x0;
         uint64_t total = 0x0;
 
+
+        // Call before running test loop
+        TRACFCOMP( g_trac_tce,"testTCE> Calling TCE::utilEnableTcesWithoutTceTable");
+        ++total;
+        errhdl = TCE::utilEnableTcesWithoutTceTable();
+        if (errhdl != nullptr)
+        {
+            TRACUCOMP(g_trac_tce,ERR_MRK"testTCE> "
+                      "TCE::utilEnableTcesWithoutTceTable returned unexpected "
+                      "error: rc=0x%X, plid=0x%X",
+                      ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
+            TS_FAIL("testTCE> TCE::utilEnableTcesWithoutTceTable returned "
+                    "unexpected error: rc=0x%X, plid=0x%X",
+                    ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
+            errlCommit(errhdl,UTIL_COMP_ID);
+            ++fails;
+        }
+
+        // NOTE: Not calling utilSetupPayloadTces() and utilClosePayloadTces()
+        // because they open/close SBEIO memRegions and that could interfere
+        // with the SBEIO memRegions testcases.
+
+        // Create testData[] structure to then loop on
         struct
         {
-            uint64_t addr;  // Start address that TCEs Map To
-            uint64_t size;  // Size of memory that TCEs Map To
-            uint32_t pos;  // Starting Entry Position in TCE Table
+            bool func;       // Function: false=deallocate; true=allocate
+            uint64_t addr;
+            size_t   size;
+            uint32_t token;
+            uint16_t err_rc; // expected reason code (0x0=no error expected)
         } testData[] =
         {
-           { 0x00,     16*PAGESIZE, 0x0},
-           { 0x0000000004000000, PAGESIZE*8,  0x10},
-           { 0x0000000004010000, PAGESIZE*16, 0x18},
-           { 0x0000000004800000, PAGESIZE*50, 0x28},
-           { 0x0000000004020000, PAGESIZE*10, 0x18},
-           { 0x0000000005010000, PAGESIZE*20, 0x5A},
-           { 0x0000000006010000, PAGESIZE*6,  0x22},
+            { true, //T0
+                PAGESIZE+1,
+                  PAGESIZE,
+                    0x0,
+                      Util::UTIL_TCE_ADDR_NOT_ALIGNED},
+            { true, //T1
+               PAGESIZE,
+                 (TCE::UtilTceMgr::MAX_NUM_TCE_TABLE_ENTRIES+1)*PAGESIZE,
+                   0x0,
+                     Util::UTIL_TCE_INVALID_SIZE},
+            { true, //T2
+               0x0000000004010000,
+                 16*PAGESIZE,
+                   0x0,
+                     0x0},
+            { true, //T3
+               0x0000000004800000,
+                 50*PAGESIZE,
+                   16*PAGESIZE,
+                     0x0},
+            { true, //T4
+               0x0000000004800000,
+                 50*PAGESIZE,
+                   16*PAGESIZE,
+                     Util::UTIL_TCE_PREVIOUSLY_ALLOCATED},
+            { true, //T5
+                PAGESIZE,
+                  TCE::UtilTceMgr::MAX_NUM_TCE_TABLE_ENTRIES*PAGESIZE,
+                    0x0,
+                      Util::UTIL_TCE_NOT_ENOUGH_FREE_ENTRIES},
+            { false, //T6
+                0x0,
+                  0x0,
+                    0x0,  // deallocate of T2
+                      0x0},
+            { true, //T7
+                0x0000000004020000,
+                  10*PAGESIZE,
+                    0x0, // Into gap created by T6
+                      0x0},
+            { true, //T8
+                0x0000000005010000,
+                  20*PAGESIZE,
+                    66*PAGESIZE, // Skipping gap created by T6
+                      0x0},
+           { true, //T9
+               0x0000000006010000,
+                 6*PAGESIZE,
+                   10*PAGESIZE, // Also into gap created by T6
+                     0x0},
+            { false, //T10
+                0x0,
+                  0x0,
+                    66*PAGESIZE,  // deallocate of T8
+                      0x0},
+            { false, //T11
+                0x0,
+                  0x0,
+                    10*PAGESIZE,  // deallocate of T9
+                      0x0},
+            { false, //T12
+                0x0,
+                  0x0,
+                    0x0,  // deallocate of T7
+                      0x0},
+            { false, //T14
+                0x0,
+                  0x0,
+                    16*PAGESIZE,  // deallocate of T3
+                      0x0},
+
         };
+        const size_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
 
+        // Test Loop over testData[]
+        for (size_t i=0; i < NUM_CMDS; i++)
+        {
+            uint32_t l_token = 0;
 
-        //---------------------------------------------------
-        // TEST 1 - Call Allocate with unaligned addr
-        //---------------------------------------------------
+            ++total;
+            // Make function call
+            if (testData[i].func)
+            {
+                errhdl = TCE::utilAllocateTces(testData[i].addr,
+                                               testData[i].size,
+                                               l_token);
+            }
+            else
+            {
+                errhdl = TCE::utilDeallocateTces(testData[i].token);
+            }
+
+            // Check error returnCode
+            if (ERRL_GETRC_SAFE(errhdl) == testData[i].err_rc)
+            {
+                // Success: got expected error back
+                TRACFCOMP(g_trac_tce,"testTCE> T%d: Got Expected Result back "
+                          "from %s: rc=0x%X (Expected: addr=0x%.16llX, "
+                          "size=0x%.8X, token=0x%.8X, err_rc=0x%X)",
+                          i, testData[i].func ? "TCE::utilAllocateTces" :
+                          "TCE::utilDeallocateTces", ERRL_GETRC_SAFE(errhdl),
+                          testData[i].addr, testData[i].size,
+                          testData[i].token, testData[i].err_rc);
+
+                // Cleanup, if necessary 
+                if (errhdl)
+                {
+                    delete errhdl;
+                    errhdl = nullptr;
+                }
+            }
+            else
+            {
+                // Fail: got unexpected error back
+                ++fails;
+                TS_FAIL("testTCE> T%d: FAIL: Got Unexpected Result back from "
+                        "%s: rc=0x%X (addr=0x%.16llX, size=0x%.8X, "
+                        "token=0x%.8X, err_rc=0x%X)",
+                        i, testData[i].func ? "TCE::utilAllocateTces" :
+                        "TCE::utilDeallocateTces", ERRL_GETRC_SAFE(errhdl),
+                        testData[i].addr, testData[i].size,
+                        testData[i].token, testData[i].err_rc);
+
+                // Commit Log if there is one
+                if (errhdl)
+                {
+                    errlCommit(errhdl,UTIL_COMP_ID);
+                }
+            }
+
+            // Check that successful TCE allocation returned the correct token
+            if ((testData[i].func  == true) &&
+                (testData[i].err_rc == 0x0) &&
+                (testData[i].token != l_token))
+            {
+                // Report fail but keep going
+                ++fails;
+                TS_FAIL("testTCE> T%d: FAIL: Got Unexpected TOKEN back from "
+                        "TCE::utilAllocateTces: l_token=0x%.8X (addr=0x%.16llX,"
+                        " size=0x%.8X, token=0x%.8X, err_rc=0x%X)",
+                        i, l_token, testData[i].addr, testData[i].size,
+                        testData[i].token, testData[i].err_rc);
+            }
+
+        } // end of Test Loop over testData[]
+
+        // After testloop no entries should remain
+        std::map<uint32_t, TCE::TceEntryInfo_t> l_map = getAllocatedAddrsMap();
         ++total;
-        errhdl = TCE::utilAllocateTces(PAGESIZE+1, PAGESIZE);
-
-        if (errhdl == nullptr)
+        if (l_map.size() != 0 )
         {
-            TRACFCOMP( g_trac_tce,"testTCE> T1:  Did not get expected error from utilAllocateTces");
-            TS_FAIL("testTCE> T1: Did not get expected error back from utilAllocateTces.");
+            TS_FAIL("testTCE> Unexpected sizeof l_map=%d (should be zero)", l_map.size());
             ++fails;
-        }
-        else if ( ERRL_GETRC_SAFE(errhdl) == Util::UTIL_TCE_ADDR_NOT_ALIGNED )
-        {
-            TRACFCOMP( g_trac_tce,"testTCE> T1: Got expected error unaligned addr back from utilAllocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            delete errhdl;
-            errhdl = nullptr;
         }
         else
         {
-            TRACFCOMP( g_trac_tce,"testTCE> T1: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X (expected rc=0x%X)", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl), Util::UTIL_TCE_ADDR_NOT_ALIGNED);
-            TS_FAIL("testTCE> T1: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X (expected rc=0x%X)", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl), Util::UTIL_TCE_ADDR_NOT_ALIGNED);
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
+            TRACUCOMP( g_trac_tce,"testTCE> After loop expected sizeof l_map=%d was found", l_map.size());
         }
 
-
-        //---------------------------------------------------
-        // TEST 2 - Call create with aligned addr with large size
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilAllocateTces(PAGESIZE, 520*KILOBYTE*PAGESIZE);
-
-        if (errhdl == nullptr)
-        {
-            TRACFCOMP( g_trac_tce,"testTCE> T2:  Did not get expected error from utilAllocateTces");
-            TS_FAIL("testTcE> T2: Did not get expected error back from utilAllocateTces.");
-            ++fails;
-        }
-        else if ( ERRL_GETRC_SAFE(errhdl) == Util::UTIL_TCE_INVALID_SIZE )
-        {
-            TRACFCOMP( g_trac_tce,"testTCE> T2: Got expected error of invalid size back from utilAllocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            delete errhdl;
-            errhdl = nullptr;
-        }
-        else
-        {
-            TRACFCOMP( g_trac_tce,"testTCE> T2: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X (expected rc=0x%X)", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl), Util::UTIL_TCE_ADDR_NOT_ALIGNED);
-            TS_FAIL("testTCE> T2: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X (expected rc=0x%X)", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl), Util::UTIL_TCE_INVALID_SIZE);
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-        //---------------------------------------------------
-        // TEST 3 - Four allocate calls
-        // - init will be called under the covers for the first test
-        //---------------------------------------------------
-        for ( size_t i = 0; i <= 3; ++i )
-        {
-            ++total;
-            errhdl = TCE::utilAllocateTces(testData[i].addr, testData[i].size);
-
-            if (errhdl != nullptr)
-            {
-                TRACFCOMP( g_trac_tce,"testTCE> T3-%d: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", i, ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-                TS_FAIL("testTCE> T3-%d: got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", i, ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-                errlCommit(errhdl,UTIL_COMP_ID);
-                ++fails;
-            }
-            else if (testData[i].pos !=
-                     getPos(testData[i].addr))
-            {
-                TRACFCOMP( g_trac_tce,"testTCE> T3-%d: From TCE::utilAllocateTces testData[0].pos=0x%X !=  map-pos=0x%X", i, testData[i].pos, getPos(testData[i].addr));
-                TS_FAIL("testTCE> T3-%d: From TCE::utilAllocateTces testData[0].pos !=  map-pos", i);
-                ++fails;
-            }
-        }
-
-        //---------------------------------------------------
-        // TEST 4 - Deallocate token with 16 pages from above
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilDeallocateTces(testData[2].addr, testData[2].size);
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce, "testTCE> T4:  Got unexpected error back from TCE::utilDeallocateTces(testData[2].addr=0x%X, testData[2].size=0x%X: error rc=0x%X, plid=0x%X ", testData[2].addr, testData[2].size, ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T4: Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-
-        //---------------------------------------------------
-        // TEST 5: Two Allocates:
-        // 1) Allocate 10 pages to go into the available slot left by the
-        //    previous deallocate
-        // 2) Allocate 20 pages that will skip past some available slots
-        //    left by the previous deallocate
-        //---------------------------------------------------
-        for ( size_t i = 0; i <= 1; ++i )
-        {
-            ++total;
-            errhdl = TCE::utilAllocateTces(testData[i+4].addr, testData[i+4].size);
-
-            if (errhdl != nullptr)
-            {
-                TRACFCOMP( g_trac_tce, "testTCE> T5-%d:  Got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", i, ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-                TS_FAIL("testTCE> T5-%d: Got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", i, ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-                errlCommit(errhdl,UTIL_COMP_ID);
-                ++fails;
-            }
-            else if (testData[i+4].pos !=
-                     getPos(testData[i+4].addr))
-            {
-                TRACFCOMP( g_trac_tce,"testTCE> T5-%d: From TCE::utilAllocateTces testData[%d].pos=0x%X !=  map-pos=0x%X", i, i+4, testData[i+4].pos, getPos(testData[i+4].addr));
-                TS_FAIL("testTCE> T5-%d: From TCE::utilAllocateTces testData[%d].pos !=  map-pos", i, i+4);
-                ++fails;
-            }
-        }
-
-        //---------------------------------------------------
-        // TEST 6 Allocate 6 pages which should go into the 6
-        //        slots available from the 16 page deallocate
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilAllocateTces(testData[6].addr, testData[6].size);
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> T6:  Got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T6: Got unexpected error back from TCE::utilAllocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-        else if (testData[6].pos !=
-                 getPos(testData[6].addr))
-        {
-            TRACFCOMP( g_trac_tce,"testTCE> T6: From TCE::utilAllocateTces testData[6].pos=0x%X !=  map-pos=0x%X", testData[6].pos, getPos(testData[6].addr));
-            TS_FAIL("testTCE> T6: From TCE::utilAllocateTces testData[6].pos !=  map-pos");
-            ++fails;
-        }
-
-        //---------------------------------------------------
-        // TEST 7 Deallocate 20 pages from above
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilDeallocateTces(testData[5].addr, testData[5].size);
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> T7:  Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T7: Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-        //---------------------------------------------------
-        // TEST 8 Deallocate 10 pages from above
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilDeallocateTces(testData[4].addr, testData[4].size);
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> T8: Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T8: Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-
-        //---------------------------------------------------
-        // TEST 9 Deallocate Too large of size.   No error returned instead the
-        // code should go to end of the TCE table and commit errorlog and return
-        //---------------------------------------------------
-        ++total;
-        errhdl = TCE::utilDeallocateTces(0x0,  (520*KILOBYTE*PAGESIZE));
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> T9:  Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T9: Got unexpected error back from TCE::utilDeallocateTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-        //---------------------------------------------------
-        // TEST 10 disable TCEs, which should deallocate all existing TCEs
-        //---------------------------------------------------
-        TRACFCOMP( g_trac_tce,"testTCE> 10: Calling TCE::utilDisableTces");
+        // Disable TCEs before finishing test
+        TRACFCOMP( g_trac_tce,"testTCE> Calling TCE::utilDisableTces");
         ++total;
         errhdl = TCE::utilDisableTces();
 
         if (errhdl != nullptr)
         {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> 10: Got unexpected error back from TCE::utilDisableTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> T10: Got unexpected error back from TCE::utilDisableTces: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-
-        /************************************************************/
-        /* @TODO RTC 168745:                                        */
-        /* Make The PAYLOAD calls here in the testcase for now      */
-        /* Consider removing when when part of the IPL              */
-        /************************************************************/
-
-        TRACFCOMP( g_trac_tce,"testTCE> TA: Calling TCE::utilSetupPayloadTces");
-        ++total;
-        errhdl = TCE::utilSetupPayloadTces();
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> TA: TCE::utilSetupPayloadTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> TA: TCE::utilSetupPayloadTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-        TRACFCOMP( g_trac_tce,"testTCE> TB: Calling TCE::utilClosePayloadTces");
-        ++total;
-        errhdl = TCE::utilClosePayloadTces();
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> TB:  TCE::utilClosePayloadTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> TB: TCE::utilClosePayloadTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            errlCommit(errhdl,UTIL_COMP_ID);
-            ++fails;
-        }
-
-        TRACFCOMP( g_trac_tce,"testTCE> TC: Calling TCE::utilDisableTces");
-        ++total;
-        errhdl = TCE::utilDisableTces();
-
-        if (errhdl != nullptr)
-        {
-            TRACFCOMP( g_trac_tce,ERR_MRK"testTCE> TC:  TCE::utilDisableTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
-            TS_FAIL("testTCE> TC: TCE::utilDisableTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
+            TS_FAIL("testTCE> TCE::utilDisableTces returned unexpected error: rc=0x%X, plid=0x%X", ERRL_GETRC_SAFE(errhdl), ERRL_GETPLID_SAFE(errhdl));
             errlCommit(errhdl,UTIL_COMP_ID);
             ++fails;
         }
 
         TRACFCOMP(g_trac_tce, EXIT_MRK"testTCE> complete - %d/%d fails", fails, total);
-#endif
     }
 
 };

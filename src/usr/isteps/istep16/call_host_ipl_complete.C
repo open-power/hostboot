@@ -111,7 +111,7 @@ void* call_host_ipl_complete (void *io_pArgs)
             l_err = nullptr;
         }
 #endif
-        //@TODO RTC:172767
+        //@TODO RTC:187335
         //TCE setup is broken on multinode.  This is a quick hack to only do it
         //on drawer 0 (and if you don't have a drawer 0 this is busted)
         TARGETING::Target* mproc = nullptr;
