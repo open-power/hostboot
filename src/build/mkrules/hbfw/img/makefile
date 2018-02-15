@@ -249,7 +249,7 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
     # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
 
 	# Call script to generate final bin files for default images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
@@ -420,7 +420,7 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL vesion(2):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
 
 	#for NIMBUS fake pnor skip version header
 	.if (${FAKEPNOR} != "")
