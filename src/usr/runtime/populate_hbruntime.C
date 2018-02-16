@@ -263,11 +263,26 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
 errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
 {
     errlHndl_t l_errl = nullptr;
+
+    //Get base HRMOR Base attribute
+    TARGETING::Target * pTgt = NULL;
+    TARGETING::targetService().getTopLevelTarget(pTgt);
+    assert(pTgt != NULL);
+    auto hrmor_base = pTgt->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+
+    //get this hb instance
+    pTgt = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(pTgt);
+    auto epath = pTgt->getAttr<TARGETING::ATTR_PHYS_PATH>();
+    auto pe = epath.pathElementOfType(TARGETING::TYPE_NODE);
+    auto this_node = pe.instance;
+
+    auto hrmor = hrmor_base * this_node;
     // Only check if PHYP is running or if running in standalone.
     if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
     {
-        if((i_addr < HB_RES_MEM_LOWER_LIMIT) or
-           ((i_addr + i_size - 1) > HB_RES_MEM_UPPER_LIMIT))
+        if((i_addr < (HB_RES_MEM_LOWER_LIMIT + hrmor)) or
+           ((i_addr + i_size - 1) > (HB_RES_MEM_UPPER_LIMIT+hrmor)))
         {
             TRACFCOMP(g_trac_runtime, "checkHbResMemLimit> Attempt to write"
             " to hostboot reserved memory outside of allowed hostboot address"
