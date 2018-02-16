@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -195,6 +197,21 @@ void ScanFacility::ResetPluginRegister()
 
 }
 
+//-----------------------------------------------------------------------------
+
+void ScanFacility::reset()
+{
+    iv_scomRegFw.clear();
+    iv_attnRegFw.clear();
+    iv_andRegFw.clear();
+    iv_orRegFw.clear();
+    iv_notRegFw.clear();
+    iv_leftRegFw.clear();
+    iv_rightRegFw.clear();
+    iv_constRegFw.clear();
+    iv_pluginRegFw.clear();
+}
+
 //------------------------------------------------------------------------------
 #ifdef FLYWEIGHT_PROFILING
 void ScanFacility::printStats()
@@ -211,7 +228,12 @@ void ScanFacility::printStats()
     iv_andRegFw.printStats();
     PRDF_TRAC("Or Register");
     iv_orRegFw.printStats();
-
+    PRDF_TRAC("AttnTypeRegisters FW" );
+    iv_attnRegFw.printStats();
+    PRDF_TRAC("ConstantRegisters FW" );
+    iv_constRegFw.printStats();
+    PRDF_TRAC("PluginRegisters FW" );
+    iv_pluginRegFw.printStats();
 }
 
 #endif
