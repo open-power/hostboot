@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,27 @@ const uint32_t MEM_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
     2400,
     2666,
     2666
+};
+
+// OMI bucket descriptor
+struct OmiBucketDescriptor_t
+{
+    uint32_t freq; // Frequency in MHz
+    uint32_t vco;  // VCO selector
+};
+
+//MC PLL frequency in MHz for Axone
+// index is bucket number
+// OMI -> ATTR_FREQ_OMI_MHZ
+// VCO -> ATTR_OMI_PLL_VCO
+const OmiBucketDescriptor_t OMI_PLL_FREQ_LIST[MEM_PLL_FREQ_BUCKETS] =
+{
+    //  OMI    VCO       Data rate   MCA_FREQ
+    { 19200, 0 }, // ->DDR4-2400   1200
+    { 21330, 0 }, // ->DDR4-2667   1333
+    { 23460, 0 }, // ->DDR4-2933   1466
+    { 23460, 1 }, // ->DDR4-2933   1466
+    { 25600, 1 }  // ->DDR4-3200   1600
 };
 
 // constant definining number of OBUS PLL frequency options ('buckets')

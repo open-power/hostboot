@@ -60,8 +60,11 @@
   <valueType>uint32</valueType>
   <enum>
     2000 = 2000,
-    2400 = 2400
+    2400 = 2400,
+    1333 = 1333,
+    1600 = 1600
   </enum>
+  <writeable/>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -73,9 +76,25 @@
   </description>
   <valueType>uint32</valueType>
   <enum>
+    19200 = 19200,
     21330 = 21330,
     23460 = 23460,
     25600 = 25600
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_OMI_PLL_VCO</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Should the 20GHz or the 26GHz OMI PLL VCO be used.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    20G = 0,
+    26G = 1
   </enum>
   <platInit/>
   <writeable/>
