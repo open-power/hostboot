@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,6 +172,14 @@ public:
    * exist.
    */
   void ResetPluginRegister();
+
+  /**
+   * @brief Intended to reset all the flyweights if PRD is uninitialized due to
+   *        a reIPL, reset/reload, or failover. This free up the memory and
+   *        avoids memory leaks in the flyweights.
+   */
+  void reset();
+
 #ifdef FLYWEIGHT_PROFILING
 /**
  * @brief       prints memory allocated for object residing on flyweight
