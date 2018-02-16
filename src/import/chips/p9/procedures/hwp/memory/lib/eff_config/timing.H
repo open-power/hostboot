@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ enum functions
     TRRD_L_HALF_AND_1KB_PAGE_HELPER = 8,
     TRRD_S_HALF_AND_1KB_PAGE_HELPER = 9,
     TRRD_S_2KB_PAGE_HELPER = 10,
+    TDLLK = 11,
 };
 
 enum guard_band : uint16_t
@@ -292,10 +293,38 @@ template< fapi2::TargetType T, typename OT = uint64_t >
 inline fapi2::ReturnCode tdllk( const fapi2::Target<T>& i_target, OT& o_value )
 {
     uint64_t l_freq = 0;
+    o_value = 854;
 
     // Calculate tDLLK from our MT/s. Magic numbers (in clocks) from the DDR4 spec
     FAPI_TRY( mss::freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
-    o_value = (l_freq < fapi2::ENUM_ATTR_MSS_FREQ_MT2133) ? 597 : 768;
+
+    switch(l_freq)
+    {
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            o_value = 597;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            o_value = 768;
+            break;
+
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
+            o_value = 854;
+            break;
+
+        default:
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_FREQ_PASSED_IN()
+                         .set_FREQ(l_freq)
+                         .set_FUNCTION(TDLLK)
+                         .set_DIMM_TARGET(i_target),
+                         "%s Invalid frequency %lu",
+                         mss::c_str(i_target),
+                         l_freq);
+    }
+
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -474,7 +503,7 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
 {
-    // From mthe PHY databook:
+    // From the PHY databook:
     // 12 + std::max((twldqsen - tmod), (twlo - twlow))
     //    + longest DQS delay in clocks (rounded up) + longest DQ delay in clocks (rounded up)
     // Magic numbers taken from talking with Anuwat (twloe) and reviewing the Centaur code (ldq/ldqs)
