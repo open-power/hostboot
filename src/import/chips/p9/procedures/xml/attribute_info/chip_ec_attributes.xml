@@ -226,6 +226,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
        Nimbus DD2.2 - MTTRIG2 setup to flush L1D
+                    - Always obey SW branch hint bits
     </description>
     <chipEcFeature>
       <chip>
@@ -240,16 +241,23 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW420171</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-       Nimbus DD2.2 - Disable HW420171 Fix
+       Disable HW420171 Fix
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -257,7 +265,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW413922</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
        Nimbus DD2.2 - Disable HW413922 Fix
     </description>
@@ -266,7 +274,14 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -274,7 +289,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW414249_ROUND2</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
        Additional chickenswitch needed to mitigate HW414249
     </description>
@@ -283,7 +298,14 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -291,16 +313,23 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW423358</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      HW423358 - NDD2.2 Only
+      HW423358 - NDD2.2+ / CDD1.1+
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -379,61 +408,82 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW426420</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Additional workaround needed for TM - NDD2.2 only
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x22</value>
-          <test>EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW420489</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      HW420489 - NDD2.2 Only
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x22</value>
-          <test>EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW419082</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      HW419082 - NDD2.2 Only
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x22</value>
-          <test>EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW430944_ROUND2</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW430233</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      HW430944 Quaint Gate, NDD2.2 and CDD1.1 only
+      HW430233
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW430233_ROUND2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW430233 - Disable fix in later chips
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW434484</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW434484 - ISU clockgate
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW426420</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Additional workaround needed for TM - NDD2.2 / CDD1.1 only
     </description>
     <chipEcFeature>
       <chip>
@@ -448,6 +498,78 @@
         <ec>
           <value>0x11</value>
           <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW420489</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW420489
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW419082</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW419082
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW430944_ROUND2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW430944 Quaint Gate
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1115,6 +1237,30 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_EMQ_DIS_TRACKER_ROUND2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Disable tracker fix for CDD1.1+/NDD2.3+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -1127,21 +1273,45 @@
     <description>
       Nimbus DD1.0: HW393929 / HW394578
       Nimbus DD2.0 / Cumulus DD1.0: HW416227
-      Nimbus DD2.1 / Nimbus DD2.2: HW425027
+      Nimbus DD2.1 / Nimbus DD2.2 / Cumulus DD1.1: HW425027
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x22</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW425526_ROUND2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Cumulus DD1.1+ / Nimbus 2.3+ - Undo fix
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1152,22 +1322,22 @@
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW425526 - Force H-Bit in the TLB
-      Nimbus DD1.0 / DD2.0 / DD2.1 / DD2.2
-      Cumulus DD1.0
+      Nimbus DD1.0 / DD2.0 / DD2.1 / DD2.2 / DD2.3
+      Cumulus DD1.0 / DD1.1
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x22</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1183,15 +1353,15 @@
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x22</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1818,7 +1988,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -3921,7 +4091,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4025,7 +4195,7 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW422533</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW422533
     </description>
@@ -4047,6 +4217,13 @@
       Serialize indirect branches in TA=1
     </description>
     <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
@@ -4205,6 +4382,40 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CDD11_SEC_MEM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable secure memory for Cumulus DD1.1
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW426554</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW426554
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW435395</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -4229,10 +4440,27 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_IBMI_SEC</id>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CHIP_EC_FEATURE_DIS_PATTERN_CACHE_RL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Enable IBMi-specific security enhancements
+      Disable Pattern Cache at risklevel=0 for Nimbus DD2.2
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DIS_COUNT_CACHE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable Count Cache
     </description>
     <chipEcFeature>
       <chip>
@@ -4266,10 +4494,27 @@
           <test>EQUAL</test>
         </ec>
       </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DIS_PATTERN_CACHE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable Pattern Cache globally for Cumulus and Nimbus DD2.3+
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x23</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x11</value>
+          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -4413,8 +4658,8 @@
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <value>0x11</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4534,7 +4779,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4582,7 +4827,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4630,7 +4875,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4654,7 +4899,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -4678,7 +4923,7 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
