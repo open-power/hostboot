@@ -375,8 +375,8 @@ fapi2::ReturnCode broadcast_mode_start_address_check_helper(
 
     // Checking that we are received a valid address (port_dimm) that is no less than the first configured port_dimm
     // on this MCBIST. This vector is sorted to make sure this is true.
-    FAPI_ASSERT( i_start_addr >= l_portdimm_this_dimm_min &&
-                 i_start_addr <= l_portdimm_this_dimm_max,
+    // Note: cronus always passes in a 0 address, so we need to support an address that is on or before this port
+    FAPI_ASSERT( i_start_addr <= l_portdimm_this_dimm_max,
                  fapi2::MSS_MEMDIAGS_BCMODE_INVALID_ADDRESS()
                  .set_MCA_TARGET(l_first_configured_mca)
                  .set_START_ADDRESS(i_start_addr)
