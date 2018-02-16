@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,9 @@ void unInitialize()
     delete systemPtr;
     systemPtr = NULL;
     g_initialized = false;
+
+    ScanFacility::Access().reset();
+
     // Some Resolutions carry state and must be re-created - this call resets
     // what it needs to.
     ResolutionFactory::Access().Reset();

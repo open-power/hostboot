@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -307,8 +307,6 @@ void ResolutionFactory::printStats()
     iv_flagResolutionFW.printStats( );
     PRDF_TRAC("dumpResolution");
     iv_dumpResolutionFW.printStats( );
-    PRDF_TRAC("gardResolution");
-    iv_gardResolutionFW.printStats( );
     PRDF_TRAC("captureResolution");
     iv_captureResolutionFW.printStats( );
     PRDF_TRAC("clockResolution");
