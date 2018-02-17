@@ -187,7 +187,7 @@ namespace TARGETING
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const Target* i_pUnused)
     {
-        void* l_address = NULL;
+        void* l_address = i_pAddress;
 
         for (size_t i = 0; i < iv_sectionCount; ++i)
         {
