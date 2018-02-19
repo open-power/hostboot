@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,115 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::IBSCOM,
                       TARGETING::TYPE_MEMBUF,
                       xscomPerformOp);
+
+struct RcPibErrMap
+{
+    PIB::PibError        iv_Piberr;
+    HbrtRcPiberr_t       iv_Common;
+    int                  iv_Opal; // note : opal values taken from opal-api.h
+};
+
+
+const RcPibErrMap pibErrTbl[] =
+{
+        // 001
+        PIB::PIB_RESOURCE_OCCUPIED,
+        HBRT_RC_PIBERR_001_BUSY,
+        -12,     // OPAL_XSCOM_BUSY
+
+        // 002
+        PIB::PIB_CHIPLET_OFFLINE,
+        HBRT_RC_PIBERR_010_OFFLINE,
+        -14,    // OPAL_XSCOM_CHIPLET_OFF
+
+        // 003
+        PIB::PIB_PARTIAL_GOOD,
+        HBRT_RC_PIBERR_011_PGOOD,
+        -25,    // OPAL_XSCOM_PARTIAL_GOOD
+
+        // 004
+        PIB::PIB_INVALID_ADDRESS,
+        HBRT_RC_PIBERR_100_INVALIDADDR,
+        -26,    // OPAL_XSCOM_ADDR_ERROR
+
+        // 005
+        PIB::PIB_CLOCK_ERROR,
+        HBRT_RC_PIBERR_101_CLOCKERR,
+        -27,    // OPAL_XSCOM_CLOCK_ERROR
+
+        // 006
+        PIB::PIB_PARITY_ERROR,
+        HBRT_RC_PIBERR_110_PARITYERR,
+        -28,    // OPAL_XSCOM_PARITY_ERROR
+
+        // 007
+        PIB::PIB_TIMEOUT,
+        HBRT_RC_PIBERR_111_TIMEOUT,
+        -29     // OPAL_XSCOM_TIMEOUT
+};
+
+
+/**
+ * @brief Internal routine that translates a HBRT return code to a
+ * PIB error code
+ *
+ * @param[in]   i_rc           HBRT return code,
+ * @return      PibError,  PIB::PIB_NO_ERROR if not translatable
+ *
+ */
+PIB::PibError HbrtRcToPibErr( HbrtRcPiberr_t i_rc )
+{
+    int l_entryCnt = sizeof(pibErrTbl) / sizeof(RcPibErrMap);
+    PIB::PibError l_rv = PIB::PIB_NO_ERROR;
+
+    for // loop thru the xlate table
+      ( int i = 0;
+        i < l_entryCnt;
+        i++ )
+    {
+        if // matching entry found
+          ( pibErrTbl[i].iv_Common == i_rc )
+        {
+            // extract translation value
+            l_rv = pibErrTbl[i].iv_Piberr;
+            break;
+        }
+    }
+
+    return( l_rv );
+}
+
+
+/**
+ * @brief Internal routine that translates an OPAL return code to a
+ * PIB error code
+ *
+ * @param[in]   i_rc           OPAL return code
+ * @return      PibError,  PIB::PIB_NO_ERROR if not translatable
+ */
+PIB::PibError OpalRcToPibErr( int i_rc )
+{
+    int l_entryCnt = sizeof(pibErrTbl) / sizeof(RcPibErrMap);
+    PIB::PibError l_rv = PIB::PIB_NO_ERROR;
+
+    for // loop thru the xlate table
+      ( int i = 0;
+        i < l_entryCnt;
+        i++ )
+    {
+        if // matching entry found
+          ( pibErrTbl[i].iv_Opal == i_rc )
+        {
+            // extract translation value
+            l_rv = pibErrTbl[i].iv_Piberr;
+            break;
+        }
+    }
+
+    return( l_rv );
+}
+
+
 /**
  * @brief Internal routine that verifies the validity of input parameters
  * for an XSCOM access.
@@ -212,51 +321,48 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
                                             rc,
                                             i_scomAddr);
 
-            // translate the rc into a pib error when possible
-            uint32_t l_piberr = PIB::PIB_NO_ERROR;
+            // attempt to translate rc into a pib error assuming
+            //  the rc is in common format
+            HbrtRcPiberr_t l_commonRc = static_cast<HbrtRcPiberr_t>(rc);
+            PIB::PibError l_piberr = HbrtRcToPibErr( l_commonRc );
 
-            if( TARGETING::is_sapphire_load() )
+            if // input was translated to a PIB error code
+              ( l_piberr != PIB::PIB_NO_ERROR )
             {
-                // values taken from opal-api.h
-                switch( rc )
-                {
-                    case(-12 /*OPAL_XSCOM_BUSY*/):
-                        l_piberr = PIB::PIB_RESOURCE_OCCUPIED;
-                        break;
-                    case(-14 /*OPAL_XSCOM_CHIPLET_OFF*/):
-                        l_piberr = PIB::PIB_CHIPLET_OFFLINE;
-                        break;
-                    case(-25 /*OPAL_XSCOM_PARTIAL_GOOD*/):
-                        l_piberr = PIB::PIB_PARTIAL_GOOD;
-                        break;
-                    case(-26 /*OPAL_XSCOM_ADDR_ERROR*/):
-                        l_piberr = PIB::PIB_INVALID_ADDRESS;
-                        break;
-                    case(-27 /*OPAL_XSCOM_CLOCK_ERROR*/):
-                        l_piberr = PIB::PIB_CLOCK_ERROR;
-                        break;
-                    case(-28 /*OPAL_XSCOM_PARITY_ERROR*/):
-                        l_piberr = PIB::PIB_PARITY_ERROR;
-                        break;
-                    case(-29 /*OPAL_XSCOM_TIMEOUT*/):
-                        l_piberr = PIB::PIB_TIMEOUT;
-                        break;
-                }
+                // (translation was successful)
             }
-            else if( TARGETING::is_phyp_load() )
+
+            else if // input was common format, but not a PIB error
+              ( l_commonRc == HBRT_RC_SOMEOTHERERROR )
             {
-                //@todo-RTC:86782-Add PHYP support
+                // (already translated to PIB::PIB_NO_ERROR,
+                //   no more translation needed)
+            }
+
+            else if  // legacy opal
+              ( TARGETING::is_sapphire_load() )
+            {
+                // attempt to translate rc into a pib error assuming
+                //  the rc is in old opal format
+                // this preserves legacy behavior to avoid co-req/pre-req
+                l_piberr =  OpalRcToPibErr( rc );
+            }
+
+            else if  // legacy phyp
+              ( TARGETING::is_phyp_load() )
+            {
                 // default to OFFLINE for now to trigger
                 // the multicast workaround in scom.C
                 l_piberr = PIB::PIB_CHIPLET_OFFLINE;
             }
+
             else
             {
                 // our testcases respond back with the
                 //  pib error directly
                 if( rc > 0 )
                 {
-                    l_piberr = rc;
+                    l_piberr = static_cast<PIB::PibError>(rc);
                 }
             }
 

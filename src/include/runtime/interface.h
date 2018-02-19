@@ -77,6 +77,25 @@ enum MemoryError_t
 };
 
 
+/** Common return codes to translate into pib error codes. */
+// RC for a piberr is equal to 0x1000 plus the pib error value,
+//  made into a negative
+enum HbrtRcPiberr_t
+{
+    HBRT_RC_PIBERR_MASK            = (0x00000000u - 0x00001007u), // 0xFFFF_EFF9
+
+    HBRT_RC_PIBERR_001_BUSY        = (0x00000000u - 0x00001001u), // 0xFFFF_EFFF
+    HBRT_RC_PIBERR_010_OFFLINE     = (0x00000000u - 0x00001002u), // 0xFFFF_EFFE
+    HBRT_RC_PIBERR_011_PGOOD       = (0x00000000u - 0x00001003u), // 0xFFFF_EFFD
+    HBRT_RC_PIBERR_100_INVALIDADDR = (0x00000000u - 0x00001004u), // 0xFFFF_EFFC
+    HBRT_RC_PIBERR_101_CLOCKERR    = (0x00000000u - 0x00001005u), // 0xFFFF_EFFB
+    HBRT_RC_PIBERR_110_PARITYERR   = (0x00000000u - 0x00001006u), // 0xFFFF_EFFA
+    HBRT_RC_PIBERR_111_TIMEOUT     = (0x00000000u - 0x00001007u), // 0xFFFF_EFF9
+
+    HBRT_RC_SOMEOTHERERROR         = (0x00000000u - 0x00001008u)  // 0xFFFF_EFF8
+};
+
+
 /**
  * I2C Master Description: chip, engine and port packed into
  * a single 64-bit argument
