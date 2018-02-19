@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -591,7 +591,7 @@ void calloutMcbistChildDimms( errlHndl_t & io_errl,
 
             io_errl->addHwCallout( l_dimm,
                     HWAS::SRCI_PRIORITY_LOW,
-                    HWAS::NO_DECONFIG,
+                    HWAS::DELAYED_DECONFIG,
                     HWAS::GARD_NULL );
         }
     }
