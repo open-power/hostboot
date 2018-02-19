@@ -683,7 +683,8 @@ errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
     }
     else
     {
-        if(0 == iv_lidImageSize)
+        errl = updateLid(iv_lidId);
+        if(0 == iv_lidImageSize && errl == nullptr)
         {
             errl = getLidSize(iv_lidImageSize);
         }
