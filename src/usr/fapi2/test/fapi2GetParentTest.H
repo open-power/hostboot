@@ -36,6 +36,20 @@ class Fapi2GetParentTest : public CxxTest::TestSuite
 {
 public:
 
+// Check units which have a pervasive parent
+struct pervasiveParentTestRec {
+    // Source unit from which to find parent pervasive
+    TARGETING::Target* pTarget;
+    // Lambda function taking a unit target and returning its
+    // parent pervasive target (if any)
+    TARGETING::Target* (*getParent)(TARGETING::Target* i_pTarget);
+};
+
+void test_fapi2GetParentPervasive(int& numTests, int& numFails,
+                                  const pervasiveParentTestRec[],
+                                  TARGETING::Target *);
+
+
 //******************************************************************************
 // fapi2GetParentTest
 //******************************************************************************
@@ -43,7 +57,7 @@ void test_fapi2GetParent()
 {
     int numTests = 0;
     int numFails = 0;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     do
     {
         // Create a vector of TARGETING::Target pointers
@@ -52,8 +66,9 @@ void test_fapi2GetParent()
         // Get a list of all of the proc chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-        TARGETING::Target * l_nimbusProc = NULL;
-        TARGETING::Target * l_cumulusProc = NULL;
+        TARGETING::Target * l_nimbusProc = nullptr;
+        TARGETING::Target * l_cumulusProc = nullptr;
+        TARGETING::Target * l_proc = nullptr;
 
         //Take the first NIMBUS proc and use it
         for(uint32_t i = 0; i < l_chipList.size(); i++)
@@ -72,41 +87,48 @@ void test_fapi2GetParent()
             }
         }
 
-        if(l_cumulusProc)
+        if (l_nimbusProc != nullptr)
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            // This test needs to be updated for Cumulus
-            break;
+            l_proc = l_nimbusProc;
         }
-        if(l_nimbusProc == NULL)
+        else if (l_cumulusProc != nullptr)
         {
-            // Send an errorlog because we cannot find any NIMBUS procs.
-            FAPI_ERR("FAPI2_GETPARENT:: could not find Nimbus proc, skipping tests");
+            l_proc = l_cumulusProc;
+        }
+        else //both are nullptr
+        {
+            // Send errorlog because we cannot find any NIMBUS or CUMULUS procs.
+            FAPI_ERR("FAPI2_GETPARENT:: could not find Nimbus or Cumulus procs, skipping tests");
             numFails++;
             /*@
             * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
             * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
             * @reasoncode   fapi2::RC_NO_PROCS_FOUND
-            * @userdata1    Model Type we looked for
-            * @userdata2    Unused
-            * @devdesc      Could not find NIMBUS procs in system model
+            * @userdata1    Model Type we looked for (Nimbus)
+            * @userdata2    Other Model Type we looked for (Cumulus)
+            * @devdesc      Couldn't find nimbus or cumulus procs in sys model
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
                                           fapi2::RC_NO_PROCS_FOUND,
                                           TARGETING::MODEL_NIMBUS,
-                                          NULL,
+                                          TARGETING::MODEL_CUMULUS,
                                           true/*SW Error*/);
             errlCommit(l_err,HWPF_COMP_ID);
             break;
         }
 
         TARGETING::Target* targeting_targets[NUM_TARGETS];
-        generateTargets(l_nimbusProc, targeting_targets);
+        generateTargets(l_proc, targeting_targets);
 
         for( uint64_t x = 0; x < NUM_TARGETS; x++ )
         {
-            if(targeting_targets[x] == NULL)
+            //Skip tests where the HW unit to test isn't valid for the proc type
+            if (!isHwValid(l_proc, x))
+            {
+                continue;
+            }
+            else if(targeting_targets[x] == nullptr)
             {
                 FAPI_ERR("Unable to find target for item %d in targeting_targets", x);
 
@@ -128,9 +150,8 @@ void test_fapi2GetParent()
             }
         }
 
-
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
-                l_nimbusProc);
+                l_proc);
         Target<fapi2::TARGET_TYPE_EQ> fapi2_eqTarget(
                 targeting_targets[MY_EQ]);
         Target<fapi2::TARGET_TYPE_EX> fapi2_exTarget(
@@ -161,6 +182,12 @@ void test_fapi2GetParent()
                 targeting_targets[MY_SBE]);
         Target<fapi2::TARGET_TYPE_CAPP> fapi2_cappTarget(
                 targeting_targets[MY_CAPP]);
+        Target<fapi2::TARGET_TYPE_MC> fapi2_mcTarget( // MC (Cumulus)
+                targeting_targets[MY_MC]);
+        Target<fapi2::TARGET_TYPE_MI> fapi2_miTarget( // MI (Cumulus)
+                targeting_targets[MY_MI]);
+        Target<fapi2::TARGET_TYPE_DMI> fapi2_dmiTarget( // DMI (Cumulus)
+                targeting_targets[MY_DMI]);
 
         TARGETING::Target * l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
@@ -205,7 +232,6 @@ void test_fapi2GetParent()
             numFails++;
         }
 
-
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
                 fapi2_coreTarget.getParent<TARGET_TYPE_EQ>());
@@ -247,13 +273,12 @@ void test_fapi2GetParent()
             numFails++;
         }
 
-
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
                 fapi2_coreTarget.getParent<TARGET_TYPE_PROC_CHIP>());
 
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -277,7 +302,7 @@ void test_fapi2GetParent()
                                 TWO_UINT32_TO_UINT64(
                                 TO_UINT32(
                                 TARGETING::get_huid(
-                                l_nimbusProc)),
+                                l_proc)),
                                 TO_UINT32(
                                 TARGETING::get_huid(
                                 l_tempTargetingParent))),
@@ -289,7 +314,6 @@ void test_fapi2GetParent()
             TS_FAIL( "fapi2TargetTest::Unable to find CORE's PROC parent!");
             numFails++;
         }
-
 
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
@@ -340,7 +364,7 @@ void test_fapi2GetParent()
 
         //Check EX's parents
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -363,7 +387,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -382,7 +406,7 @@ void test_fapi2GetParent()
 
         //Check EQ's parents
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -405,7 +429,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -418,30 +442,34 @@ void test_fapi2GetParent()
             numFails++;
         }
 
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_mcaTarget.getParent<TARGET_TYPE_MCS>());
-
-        //Check MCA's parents
-        numTests++;
-        if(TARGETING::get_huid(targeting_targets[MY_MCS]) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        if (isHwValid(l_proc, MY_MCA)
+              && isHwValid(l_proc, MY_MCBIST)
+              && isHwValid(l_proc, MY_MCS))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_MCA]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_MCA_NO_MCS_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of MCA
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent MSC of this
-            *                     MCA target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_tempTargetingParent =
+                static_cast<TARGETING::Target*>(
+                    fapi2_mcaTarget.getParent<TARGET_TYPE_MCS>());
+
+            //Check MCA's parents
+            numTests++;
+            if(TARGETING::get_huid(targeting_targets[MY_MCS]) !=
+               TARGETING::get_huid(l_tempTargetingParent))
+            {
+                uint8_t l_instance = 0;
+                targeting_targets[MY_MCA]->
+                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
+                /*@
+                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
+                * @reasoncode         fapi2::RC_MCA_NO_MCS_FOUND
+                * @userdata1[0:31]    Expected Parent HUID
+                * @userdata1[32:63]   Actual Parent HUID
+                * @userdata2[0:31]    Instance of MCA
+                * @userdata2[32:63]   fapi2 Type of expected parent
+                * @devdesc            Could not find the parent MSC of this
+                *                     MCA target
+                */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
                                           fapi2::RC_MCA_NO_MCS_FOUND,
                                           TWO_UINT32_TO_UINT64(
@@ -455,42 +483,42 @@ void test_fapi2GetParent()
                                           TO_UINT32(l_instance),
                                           TO_UINT32(TARGET_TYPE_MCS)),
                                           true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find MCA's MCS parent!");
-            numFails++;
-        }
+                errlCommit(l_err,HWPF_COMP_ID);
+                TS_FAIL( "fapi2TargetTest::Unable to find MCA's MCS parent!");
+                numFails++;
+            }
 
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_mcaTarget.getParent<TARGET_TYPE_PROC_CHIP>());
+            l_tempTargetingParent =
+                static_cast<TARGETING::Target*>(
+                    fapi2_mcaTarget.getParent<TARGET_TYPE_PROC_CHIP>());
 
-        numTests++;
+            numTests++;
 
-        if(TARGETING::get_huid(l_nimbusProc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_MCA]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_MCA_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of MCA
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     MCA target
-            */
-            l_err = new ERRORLOG::ErrlEntry(
+            if(TARGETING::get_huid(l_proc) !=
+               TARGETING::get_huid(l_tempTargetingParent))
+            {
+                uint8_t l_instance = 0;
+                targeting_targets[MY_MCA]->
+                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
+                /*@
+                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
+                * @reasoncode         fapi2::RC_MCA_NO_PROC_FOUND
+                * @userdata1[0:31]    Expected Parent HUID
+                * @userdata1[32:63]   Actual Parent HUID
+                * @userdata2[0:31]    Instance of MCA
+                * @userdata2[32:63]   fapi2 Type of expected parent
+                * @devdesc            Could not find the parent PROC of this
+                *                     MCA target
+                */
+                l_err = new ERRORLOG::ErrlEntry(
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                   fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
                                   fapi2::RC_MCA_NO_PROC_FOUND,
                                   TWO_UINT32_TO_UINT64(
                                   TO_UINT32(
                                   TARGETING::get_huid(
-                                  l_nimbusProc)),
+                                  l_proc)),
                                   TO_UINT32(
                                   TARGETING::get_huid(
                                   l_tempTargetingParent))),
@@ -498,42 +526,46 @@ void test_fapi2GetParent()
                                   TO_UINT32(l_instance),
                                   TO_UINT32(TARGET_TYPE_PROC_CHIP)),
                                   true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find MCA's PROC parent!");
-            numFails++;
+                errlCommit(l_err,HWPF_COMP_ID);
+                TS_FAIL( "fapi2TargetTest::Unable to find MCA's PROC parent!");
+                numFails++;
+            }
         }
 
-        //Check MCS's parents
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_mcsTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-        numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        //Check MCS's parents -- Only for Nimbus
+        if (isHwValid(l_proc, MY_MCA)
+              && isHwValid(l_proc, MY_MCBIST)
+              && isHwValid(l_proc, MY_MCS))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_MCS]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_MCS_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of MCS
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     MCS target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_tempTargetingParent =
+                static_cast<TARGETING::Target*>(
+                    fapi2_mcsTarget.getParent<TARGET_TYPE_PROC_CHIP>());
+
+            numTests++;
+            if(TARGETING::get_huid(l_proc) !=
+               TARGETING::get_huid(l_tempTargetingParent))
+            {
+                uint8_t l_instance = 0;
+                targeting_targets[MY_MCS]->
+                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
+                /*@
+                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
+                * @reasoncode         fapi2::RC_MCS_NO_PROC_FOUND
+                * @userdata1[0:31]    Expected Parent HUID
+                * @userdata1[32:63]   Actual Parent HUID
+                * @userdata2[0:31]    Instance of MCS
+                * @userdata2[32:63]   fapi2 Type of expected parent
+                * @devdesc            Could not find the parent PROC of this
+                *                     MCS target
+                */
+                l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
                                           fapi2::RC_MCS_NO_PROC_FOUND,
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -541,41 +573,41 @@ void test_fapi2GetParent()
                                           TO_UINT32(l_instance),
                                           TO_UINT32(TARGET_TYPE_PROC_CHIP)),
                                           true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find MCS's PROC parent!");
-            numFails++;
-        }
+                errlCommit(l_err,HWPF_COMP_ID);
+                TS_FAIL( "fapi2TargetTest::Unable to find MCS's PROC parent!");
+                numFails++;
+            }
 
-        //Check MCBIST's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_mcbistTarget.getParent<TARGET_TYPE_PROC_CHIP>());
+            //Check MCBIST's parents
+            l_tempTargetingParent =
+                static_cast<TARGETING::Target*>(
+                    fapi2_mcbistTarget.getParent<TARGET_TYPE_PROC_CHIP>());
 
-        numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_MCBIST]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_MCBIST_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of MCS
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     MCBIST target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            numTests++;
+            if(TARGETING::get_huid(l_proc) !=
+               TARGETING::get_huid(l_tempTargetingParent))
+            {
+                uint8_t l_instance = 0;
+                targeting_targets[MY_MCBIST]->
+                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
+                /*@
+                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
+                * @reasoncode         fapi2::RC_MCBIST_NO_PROC_FOUND
+                * @userdata1[0:31]    Expected Parent HUID
+                * @userdata1[32:63]   Actual Parent HUID
+                * @userdata2[0:31]    Instance of MCS
+                * @userdata2[32:63]   fapi2 Type of expected parent
+                * @devdesc            Could not find the parent PROC of this
+                *                     MCBIST target
+                */
+                l_err =new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
                                           fapi2::RC_MCBIST_NO_PROC_FOUND,
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -583,9 +615,10 @@ void test_fapi2GetParent()
                                           TO_UINT32(l_instance),
                                           TO_UINT32(TARGET_TYPE_PROC_CHIP)),
                                           true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find MCBIST's PROC parent!");
-            numFails++;
+                errlCommit(l_err,HWPF_COMP_ID);
+                TS_FAIL( "fapi2TargetTest::Unable to find MCBIST's PROC parent!");
+               numFails++;
+            }
         }
 
         //Check PHB's parents
@@ -594,7 +627,7 @@ void test_fapi2GetParent()
                 fapi2_phbTarget.getParent<TARGET_TYPE_PROC_CHIP>());
 
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -618,7 +651,7 @@ void test_fapi2GetParent()
                                 TWO_UINT32_TO_UINT64(
                                 TO_UINT32(
                                 TARGETING::get_huid(
-                                l_nimbusProc)),
+                                l_proc)),
                                 TO_UINT32(
                                 TARGETING::get_huid(
                                 l_tempTargetingParent))),
@@ -632,12 +665,11 @@ void test_fapi2GetParent()
         }
 
         //Check PEC's parents
-
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
                 fapi2_pecTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -660,7 +692,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -678,7 +710,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_xbusTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -701,7 +733,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -719,7 +751,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_obusTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -742,7 +774,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -760,7 +792,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_oBrickTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -783,7 +815,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -801,7 +833,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_ppeTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -824,7 +856,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -842,7 +874,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_pervTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -865,7 +897,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -883,7 +915,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_cappTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -906,7 +938,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -924,7 +956,7 @@ void test_fapi2GetParent()
             static_cast<TARGETING::Target*>(
                 fapi2_sbeTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
-        if(TARGETING::get_huid(l_nimbusProc) !=
+        if(TARGETING::get_huid(l_proc) !=
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
@@ -947,7 +979,7 @@ void test_fapi2GetParent()
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
-                                          l_nimbusProc)),
+                                          l_proc)),
                                           TO_UINT32(
                                           TARGETING::get_huid(
                                           l_tempTargetingParent))),
@@ -960,20 +992,8 @@ void test_fapi2GetParent()
             numFails++;
         }
 
-        // Check units which have a pervasive parent
-
-        static struct pervasiveParentTestRec {
-
-            // Source unit from which to find parent pervasive
-            TARGETING::Target* pTarget;
-
-            // Lambda function taking a unit target and returning its
-            // parent pervasive target (if any)
-            TARGETING::Target* (*getParent)(TARGETING::Target* i_pTarget);
-
-        } pervasiveParentTests [] = {
-
-            {targeting_targets[MY_EQ],
+        static pervasiveParentTestRec nimbusPervasiveParentTests [] = {
+             {targeting_targets[MY_EQ],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
             {targeting_targets[MY_CORE],
@@ -1002,24 +1022,77 @@ void test_fapi2GetParent()
                  {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
             {targeting_targets[MY_OBUS_BRICK],
              [](TARGETING::Target* i_pTarget)
-                 {return
-                     getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
+               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
             {targeting_targets[MY_CAPP],
              [](TARGETING::Target* i_pTarget)
                  {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
-        };
+          };
+
+        static pervasiveParentTestRec cumulusPervasiveParentTests [] = {
+            {targeting_targets[MY_EQ],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
+            {targeting_targets[MY_CORE],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CORE>(i_pTarget); }},
+            {targeting_targets[MY_PEC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PEC>(i_pTarget); }},
+            {targeting_targets[MY_PHB],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
+            {targeting_targets[MY_XBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
+            {targeting_targets[MY_OBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
+            {targeting_targets[MY_OBUS_BRICK],
+             [](TARGETING::Target* i_pTarget)
+               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
+            {targeting_targets[MY_CAPP],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
+            {targeting_targets[MY_MC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MC>(i_pTarget); }},
+            {targeting_targets[MY_MI],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MI>(i_pTarget); }},
+            {targeting_targets[MY_DMI],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_DMI>(i_pTarget); }},
+          };
+
+        pervasiveParentTestRec* ptr;
+        int numPervTests = 0;
+        if (l_nimbusProc != nullptr)
+        {
+            numPervTests = sizeof(nimbusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
+            ptr = nimbusPervasiveParentTests;
+        }
+        else
+        {
+            numPervTests = sizeof(cumulusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
+            ptr = cumulusPervasiveParentTests;
+        }
 
         // Test each type of target that can have exactly one pervasive parent
-        for(const pervasiveParentTestRec& pervasiveParentTest
-                : pervasiveParentTests)
+        for (int i = 0; i < numPervTests; ++i)
         {
+            const pervasiveParentTestRec& pervasiveParentTest = ptr[i];
             numTests++;
+            if (pervasiveParentTest.pTarget == nullptr)
+            {
+                FAPI_ERR("Found pervasive parent to be null pervasiveParentTestRec for test: %d",
+                          i);
+            }
             l_tempTargetingParent = pervasiveParentTest.getParent(
                 pervasiveParentTest.pTarget);
 
-            // Result must be a non-NULL target of pervasive type, and its
+            // Result must be a non-nullptr target of pervasive type, and its
             // parent must be the same proc as the other tests above
-            TARGETING::Target* pPervasiveParent = NULL;
+            TARGETING::Target* pPervasiveParent = nullptr;
             if(    l_tempTargetingParent
                && (   l_tempTargetingParent->getAttr<TARGETING::ATTR_TYPE>()
                    == TARGETING::TYPE_PERV))
@@ -1029,10 +1102,10 @@ void test_fapi2GetParent()
                     fapi2_pervTarg.getParent<TARGET_TYPE_PROC_CHIP>());
             }
 
-            // If the parent of the target under test was NULL, or it was
-            // not a pervasive, or if the parent of the pervasive was NULL
+            // If the parent of the target under test was nullptr, or it was
+            // not a pervasive, or if the parent of the pervasive was nullptr
             // or was not the processor, fail the test
-            if(TARGETING::get_huid(l_nimbusProc) !=
+            if(TARGETING::get_huid(l_proc) !=
                TARGETING::get_huid(pPervasiveParent))
             {
                 TARGETING::ATTR_CHIP_UNIT_type instance = 0;
@@ -1073,12 +1146,10 @@ void test_fapi2GetParent()
                 numFails++;
             }
         }
+    } while(0);
 
-    }while(0);
     FAPI_INF("fapi2GetParentTest:: Test Complete. %d/%d fails", numFails, numTests);
 }
-
-
 
 
 };

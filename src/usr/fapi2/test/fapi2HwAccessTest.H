@@ -66,7 +66,7 @@ void test_fapi2HwAccess()
 {
     int numTests = 0;
     int numFails = 0;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     do
     {
         // Create a vector of TARGETING::Target pointers
@@ -75,8 +75,9 @@ void test_fapi2HwAccess()
         // Get a list of all of the proc chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-        TARGETING::Target * l_nimbusProc = NULL;
-        TARGETING::Target * l_cumulusProc = NULL;
+        TARGETING::Target * l_nimbusProc = nullptr;
+        TARGETING::Target * l_cumulusProc = nullptr;
+        TARGETING::Target * l_proc = nullptr;
 
         //Take the first NIMBUS proc and use it
         for(uint32_t i = 0; i < l_chipList.size(); i++)
@@ -96,26 +97,27 @@ void test_fapi2HwAccess()
         }
 
         numTests++;
-        if(l_cumulusProc)
+        if (l_nimbusProc != nullptr)
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            // This test needs to be updated for Cumulus
-            break;
+            l_proc = l_nimbusProc;
         }
-        if(l_nimbusProc == NULL)
+        else if (l_cumulusProc != nullptr)
         {
-            // Send an errorlog because we cannot find any NIMBUS procs.
-            TS_FAIL("FAPI2_GETPARENT:: could not find Nimbus proc, skipping tests");
+            l_proc = l_cumulusProc;
+        }
+        else //both are nullptr
+        {
+            TS_FAIL("FAPI2_fapi2HwAccess:: could not find any procs, skipping tests");
             numFails++;
             break;
         }
 
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
-                l_nimbusProc);
+                l_proc);
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -126,7 +128,7 @@ void test_fapi2HwAccess()
         }
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -137,7 +139,7 @@ void test_fapi2HwAccess()
         }
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_cfamtest_putcfam_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -148,7 +150,7 @@ void test_fapi2HwAccess()
         }
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_cfamtest_getcfam_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -202,7 +204,7 @@ void test_fapi2HwAccess()
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -241,7 +243,7 @@ void test_fapi2HwAccess()
 #if 0 // TODO-RTC:151428 - need simics support for these to pass
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             delete l_errl; // delete expected error log
         }
@@ -283,7 +285,7 @@ void test_piberrmask()
     FAPI_INF("Entering test_piberrmask...");
     FAPI_INF("Ensure that getPIBErrorMask return 0 initially");
 
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     do
     {
@@ -352,7 +354,7 @@ void test_getsetopmode()
         }
 
         //Call FAPI_INVOKE on an empty function to test if it resets the opMode
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
         FAPI_INVOKE_HWP(l_errl,empty_function);
         if( l_errl )
         {
