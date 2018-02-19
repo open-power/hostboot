@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,9 @@ extern "C"
 ///                                are to be collected. See p9_ppe_defs.H
 /// @param[out] io_rc               Return code to add FFDC data to
 /// @return FAPI2_RC_SUCCESS       Always succeeds
+/// @note i_dumpMode is used as a hint. The HWP dynamically overrides the mode
+///       to use based on the execution platform (e.g. RAMming is not possible
+///       on FSP), state of PPE (already halted) and other considerations
     fapi2::ReturnCode
     p9_collect_ppe_state ( const fapi2::ffdc_t& i_target,
                            const fapi2::ffdc_t& i_mode,

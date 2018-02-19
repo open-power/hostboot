@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -674,7 +674,7 @@ fapi2::ReturnCode ppe_isHalted(
                        l_data64 ),
              "Failed reading XIRAMDBG register!" );
 
-    *o_halted = l_data64.getBit<0>();
+    *o_halted = l_data64.getBit<PU_PPE_XIRAMDBG_XSR_HS>();
 
 fapi_try_exit:
     return fapi2::current_err;

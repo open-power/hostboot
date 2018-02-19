@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -387,7 +387,11 @@ extern "C"
     {
         FAPI_INF (">> p9_collect_ppe_state");
         fapi2::ReturnCode l_rc;
+        bool l_limitToXIRs = false;
+
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         fapi2::ATTR_INITIATED_PM_RESET_Type l_pm_reset_active;
+        fapi2::ATTR_EXECUTION_PLATFORM_Type l_plat = 0;
         fapi2::ffdc_t PPE_BASE_ADDR;
 
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_chip =
@@ -400,16 +404,20 @@ extern "C"
 
         PPE_DUMP_MODE l_mode = *(reinterpret_cast<const PPE_DUMP_MODE*>(i_mode.ptr()));
 
-        // if call to this HWP is in PM Reset flow then just collect XIRs.
+        // If call to this HWP is in PM Reset flow then just collect XIRs.
         // Full PPE state will be collected as a part of PM Recovery in
-        // later part of PM reset flow.
+        // later part of PM reset flow. Do not want to artifically HALT for debug
         FAPI_ATTR_GET(fapi2::ATTR_INITIATED_PM_RESET,
                       l_proc_chip,
                       l_pm_reset_active);
 
-        if( fapi2::ENUM_ATTR_INITIATED_PM_RESET_ACTIVE == l_pm_reset_active )
+        // On FSP, Ramming PPE Regs is blacklisted, collect only XIRs
+        FAPI_ATTR_GET(fapi2::ATTR_EXECUTION_PLATFORM, FAPI_SYSTEM, l_plat);
+
+        if ((fapi2::ENUM_ATTR_INITIATED_PM_RESET_ACTIVE == l_pm_reset_active) ||
+            (fapi2::ENUM_ATTR_EXECUTION_PLATFORM_FSP == l_plat))
         {
-            l_mode = XIRS;
+            l_limitToXIRs = true;
         }
 
         std::vector<PPERegValue_t> l_v_sprs;
@@ -420,6 +428,47 @@ extern "C"
         {
             fapi2::ReturnCode l_rc_tmp = fapi2::current_err;
             uint64_t l_addr = it1;
+            bool l_isHalted = false;
+
+            // Override l_mode dynamically to decide what gets collected
+            if (l_limitToXIRs == true)
+            {
+                // Either on a FSP or in PM Reset, avoid halting & RAMming the PPE
+                l_mode = XIRS; // Override #1
+            }
+            else
+            {
+                // Neither on a FSP, not in PM Reset, read PPE Halt State and decide
+                l_rc = ppe_isHalted (l_proc_chip, it1, &l_isHalted);
+
+                if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+                {
+                    if (l_isHalted == true)
+                    {
+                        // Already halted, so go ahead and get everything possible
+                        // the l_mode here set just to steer the code to do that
+                        l_mode = HALT; // Override #2
+                    }
+                    else if (l_mode != FORCE_HALT)
+                    {
+                        // Not halted & User not requested to FORCE a HALT for FFDC
+                        // Avoid halting the PPE
+                        l_mode = XIRS; // Override #3
+                    }
+                    else
+                    {
+                        // mode remains the user supplied FORCE_HALT, that hits the big
+                        // hammer to try to reset the PPE bypassing completion of any
+                        // in-flight instructions or sync or reset operations. PPE may
+                        // need a hard reset to recover fomr a force halt.
+                    }
+                }
+                else
+                {
+                    // Unable to read PPE Halt State, avoid halting the PPE
+                    l_mode = XIRS; // Override #4
+                }
+            }
 
             FAPI_INF ("p9_collect_ppe_state: PPE Base Addr 0x%.16llX, 0x%.8X",
                       it1, l_mode);
