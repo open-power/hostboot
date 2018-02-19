@@ -629,7 +629,6 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
-    <overrideOnly/>
     <enum> NO = 0, YES = 1 </enum>
     <mssAccessorName>mrw_force_bcmode_off</mssAccessorName>
   </attribute>
