@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef _SBEIF_H
 #define _SBEIF_H
 
+#include <sbe/sbe_common.H>
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
 #include <secureboot/service.H>
@@ -32,10 +33,6 @@
 
 namespace SBE
 {
-    // Each SBE Image stored in PNOR has a 64-byte version associated with it
-    // (like a SHA hash of the image)
-    const size_t   SBE_IMAGE_VERSION_SIZE = 64; // 64 bytes
-
     typedef uint8_t sbe_image_version_t[SBE_IMAGE_VERSION_SIZE];
 
     /**

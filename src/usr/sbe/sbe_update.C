@@ -355,6 +355,13 @@ namespace SBE
                 /**********************************************/
                 /*  Perform Update Actions For This Target    */
                 /**********************************************/
+                // Force an update if necessary
+                if (sbeState.mvpdSbKeyword.flags & FORCE_UPDATE_FLAG_MASK)
+                {
+                   sbeState.update_actions = static_cast<sbeUpdateActions_t>
+                                         (sbeState.update_actions | DO_UPDATE);
+                }
+
                 if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
                 {
                     // If update is needed, check to see if it's in MPIPL
@@ -410,9 +417,8 @@ namespace SBE
                                 l_restartNeeded = true;
                             }
                         }
-                    }
-
-                }
+                    }  // end else of if(sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
+                }  // end if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
 
                 if ( err )
                 {
@@ -499,7 +505,6 @@ namespace SBE
             }
 
         }while(0);
-
 
         // Cleanup VMM Workspace
         if ( l_cleanupVmmSpace == true )

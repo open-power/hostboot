@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,99 +25,25 @@
 #ifndef __SBE_SBE_UPDATE_H
 #define __SBE_SBE_UPDATE_H
 
+#include <sbe/sbe_common.H> // sbeSeepromVersionInfo_t
+#include <sbe/sbeif.H>      // sbe_image_version_t
 
-#include <stdint.h>
-#include <builtins.h>
-#include <errl/errlentry.H>
-#include <pnor/pnorif.H>
-#include <pnor/ecc.H>
-#include <util/utilxipimage.H>
-#include <vmmconst.h>
-#include <targeting/common/targetservice.H>
-#include <i2c/eepromif.H>
-#include <p9_infrastruct_help.H>
-#include <sbe/sbeif.H>
+#include <stdint.h>                   // uint32_t, etc
+#include <errl/errlentry.H>           // errlHndl_t
+#include <errl/hberrltypes.H>         // ERRORLOG::errlSeverity_t
+#include <targeting/common/target.H>  // Target
+#include <i2c/eepromif.H>             // eeprom_chip_types_t
+#include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
+#include <util/utilxipimage.H>        // Util::imageBuild_t
+#include <p9_infrastruct_help.H>      // MAX_RING_BUF_SIZE, etc
+
+#include <vector>
 
 namespace SBE
 {
-    /******************************************/
-    /*  Constants                             */
-    /******************************************/
-
-    // Using only first 20 bytes of 64-byte sbe_image_version
-    const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
-
-    // Number of versions supported
-    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x02;
-
-    // Size of supported versions - must be 8-byte aligned
-    const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
-                      {
-                         0,   // ver0: uninitialized - no size
-                         80,  // ver1: size of struct is 80 bytes
-                      };
-
-    // This enum provides the struct versions for sbeSeepromVersionInfo_t
-    // Each numeric version is named after the key feature it introduces.
-    enum sbeSeepromStructVersionInfo_t {
-        STRUCT_VERSION_FIRST  = 0x1,
-        STRUCT_VERSION_LATEST = 0x1,
-        STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
-    };
-
-    #define STRUCT_VERSION_CHECK(version) (((version) >= STRUCT_VERSION_FIRST) \
-                                        && ((version) <= STRUCT_VERSION_LATEST))
-
-    // Constant written to SBE SEEPROM version struct to invalidate the
-    // struct and the image - 'INVALID\0'
-    const uint64_t SBE_SEEPROM_STRUCT_INVALID = 0x494E56414C494400;
-
-    // Used for locations of SBE_Version and SBE Image on a SEEPROM
-    const uint64_t SBE_IMAGE_SEEPROM_ADDRESS    = 0x00;          // 0
-    const uint64_t SBE_VERSION_SPACE_WITH_ECC   = (256 * 9) / 8; // 256B + ECC
-    const uint64_t SBE_SEEPROM_SIZE             = 64*KILOBYTE;   // 64KB
-    const uint64_t SBE_SEEPROM_ECC_PAD          = SBE_SEEPROM_SIZE % 9;
-    const uint64_t SBE_SEEPROM_SIZE_WO_ECC      = ((64*KILOBYTE - SBE_SEEPROM_ECC_PAD) / 9) * 8 ;
-    // SBE Version (with ECC) kept at end of fourth 64KB memory
-    // Adjust end of usable memory with ECC to be a multiple of 9 bytes
-    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 4*SBE_SEEPROM_SIZE
-                                                - SBE_SEEPROM_ECC_PAD
-                                                - SBE_VERSION_SPACE_WITH_ECC;
-
-    const uint64_t SBE_SEEPROM_VERSION_READ_SIZE = 0x100; // 128 Bytes * 2  (256 decimal)
-    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE = 4*SBE_SEEPROM_SIZE_WO_ECC
-                                                  - SBE_SEEPROM_VERSION_READ_SIZE;
-
-    // Used to read SBE Boot Side from processor
-    // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
-    const uint64_t SBE_BOOT_SELECT_MASK = 0x0000400000000000;
-
-    // Hard coded value, pass in 2KB max
-    const uint32_t RING_OVD_SIZE = 0x800;
-
-
-    // PNOR SBE Partition constants
-    const uint32_t MAX_SBE_ENTRIES = 9;
-    const uint32_t SBETOC_EYECATCH = 0x53424500;  //'SBE\0'
-    const uint64_t NONSECURE_VER_EYECATCH = 0x56455253494F4E00; //'VERSION\0'
-    const uint32_t SUPPORTED_TOC_VER = 0x00000001;
-
-    // Cacheline Size
-    const uint64_t CACHELINE_SIZE = 128;
-
-    // MVPD SB Keyword contants
-    const size_t  MVPD_SB_RECORD_SIZE = 129;
-
-    // PERMANENT FLAG - bit 0: 0x0 -> indicates 0 is permanent.
-    const uint8_t PERMANENT_FLAG_MASK             = 0x80;
-    const uint8_t SEEPROM_0_PERMANENT_VALUE       = 0x00;
-    const uint8_t SEEPROM_1_PERMANENT_VALUE       = 0x80;
-
-    // RE-IPL SEEPROM DESIGNATION - bit 1: 0x0 -> indicates boot from SEEPROM 0
-    // NOTE: Used *ONLY* for re-IPL Requests
-    const uint8_t REIPL_SEEPROM_MASK              = 0x40;
-    const uint8_t REIPL_SEEPROM_0_VALUE           = 0x00;
-    const uint8_t REIPL_SEEPROM_1_VALUE           = 0x40;
+    // This line forces a compile fail if the two imageBuild_t deviate
+    static_assert(sizeof(SBE::imageBuild_t) == sizeof(Util::imageBuild_t),
+     "SBE::imageBuild_t and Util::imageBuild_t must be equivalent and in sync");
 
     // Situation constants -- bits numbered from left to right
 #ifndef CONFIG_SBE_UPDATE_CONSECUTIVE
@@ -218,91 +144,6 @@ namespace SBE
         GOLDEN_SIDE = 1,
     };
 
-    /******************************************/
-    /*  Structs                               */
-    /******************************************/
-
-    /**
-     * @brief Struct containing version information stored on SBE SEEPROMs
-     *
-     * NOTE: For ECC purposes, this must be 8-byte aligned,
-     *       so pad data if necessary
-     *       struct_version 1: size = 4+4+64+4+1+3 = 80 (aligned)
-     */
-    struct sbeSeepromVersionInfo_t
-    {
-        // The first 64-bits will be read out to check for struct_version
-        uint32_t  struct_version;
-        uint32_t  data_crc;
-        uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
-        uint32_t  nest_freq_mhz;
-        uint8_t   origin;        // set if SBE came from golden side
-        uint8_t   unused[3];     // unused space; added for alignment
-    } PACKED;
-
-    // This line forces a compile fail if struct is NOT 8-byte-aligned
-    static_assert(0 == (sizeof(sbeSeepromVersionInfo_t) % 8),
-                  "sbeSeepromVersionInfo_t is not 8-byte-aligned");
-
-
-    /**
-     * @brief Struct of individual SBE entry in SBE
-     *        Table of Contents in PNOR partitions
-     */
-    struct sbeTocEntry_t
-    {
-        uint32_t ec;          // Chip EC, right aligned
-        uint32_t offset;      // Offset within partition, in bytes
-        uint32_t size;        // Size of image, in bytes
-    } PACKED;
-
-    /**
-     * @brief Layout of Table of Contents at beginning of SBE Partitions in PNOR
-     */
-    struct sbeToc_t
-    {
-        uint32_t eyeCatch;                      // Expected to contain 'SBE\0'
-        uint32_t tocVersion;                    // Version of SBE TOC
-        sbeTocEntry_t entries[MAX_SBE_ENTRIES]; // Image entries
-    } PACKED;
-
-    /**
-     * @brief Layout of Hostboot Bootloader (HBBL) end of load data
-     */
-    struct hbblEndData_t
-    {
-        uint64_t eyecatcher;                 // Expected to contain 'HBBLend\0'
-        uint64_t address;                    // bootloader.ld end_load_address
-    } PACKED;
-
-    /**
-     * @brief Layout of SB keyword in MVPD
-     */
-    struct mvpdSbKeyword_t
-    {
-        uint8_t flags;                 // 1 byte for various flags
-
-        uint32_t seeprom_0_data_crc;
-        uint8_t seeprom_0_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
-
-        uint32_t seeprom_1_data_crc;
-        uint8_t seeprom_1_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
-
-        Util::imageBuild_t seeprom_0_build;
-
-        Util::imageBuild_t seeprom_1_build;
-
-        uint8_t mvpdSbPad[MVPD_SB_RECORD_SIZE - sizeof(flags)
-                          - sizeof(seeprom_0_data_crc)
-                          - sizeof(seeprom_1_data_crc)
-                          - (SBE_MVPD_SHORT_IMAGE_VERSION_SIZE * 2)
-                          - (sizeof(Util::imageBuild_t) * 2)];
-    } PACKED;
-
-    // This line forces a compile fail if struct is too large
-    static_assert(sizeof(mvpdSbKeyword_t) <= MVPD_SB_RECORD_SIZE,
-                  "mvpdSbKeyword_t is too large");
-
     /**
      * @brief Contains the SBE state for a given target
      */
@@ -355,8 +196,6 @@ namespace SBE
           err_sev(ERRORLOG::ERRL_SEV_UNKNOWN)
         {};
     };
-
-
 
     /******************************************/
     /*  Functions -- High Level Functions     */
