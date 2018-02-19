@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,11 +50,9 @@ fapi2::ReturnCode p9_sample_procedure_proc(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 uint8_t expectedValue);
 
-
 fapi2::ReturnCode p9_sample_procedure_ex(
                fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
                 uint8_t expectedValue);
-
 
 fapi2::ReturnCode p9_sample_procedure_eq(
                fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
@@ -63,7 +61,6 @@ fapi2::ReturnCode p9_sample_procedure_eq(
 fapi2::ReturnCode p9_sample_procedure_core(
                fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
                 uint8_t expectedValue);
-
 
 fapi2::ReturnCode p9_sample_procedure_mcs(
                fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
@@ -112,6 +109,19 @@ fapi2::ReturnCode p9_sample_procedure_phb(
 fapi2::ReturnCode p9_sample_procedure_pec(
                fapi2::Target<fapi2::TARGET_TYPE_PEC>& i_target,
                 uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_mc(
+               fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target,
+                uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_mi(
+               fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
+                uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_dmi(
+               fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+                uint8_t expectedValue);
+
 }
 
 #endif // _P9_SAMPLE_PROCEDURE_H_

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -384,3 +384,74 @@ fapi_try_exit:
 
 }
 
+fapi2::ReturnCode p9_sample_procedure_mc(
+               fapi2::Target<fapi2::TARGET_TYPE_MC>& i_target,
+                                          uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on MC Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on MC Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+            fapi2::FAPI2_SAMPLE(),
+            "p9_sample_procedure_mc read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode p9_sample_procedure_mi(
+               fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
+                                          uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on MI Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on MI Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+                  fapi2::FAPI2_SAMPLE(),
+                  "p9_sample_procedure_mi read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode p9_sample_procedure_dmi(
+               fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+                                          uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on DMI Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on DMI Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+                  fapi2::FAPI2_SAMPLE(),
+                  "p9_sample_procedure_dmi read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}

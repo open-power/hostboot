@@ -71,7 +71,12 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
             // Verify we generated valid targets
             for( uint64_t x = 0; x <= NUM_TARGETS; x++ )
             {
-                if(targetList[x] == NULL)
+                //Skip tests where the HW unit to test isn't valid for the proc type
+                if (!isHwValid(proc, x))
+                {
+                    continue;
+                }
+                else if(targetList[x] == nullptr)
                 {
                    FAPI_INF("fapi2IsFunctionalTest: Unable to find target at index [%d]",
                             x);
@@ -154,12 +159,25 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
                     targetList[MY_CAPP]);
             fapiTargetList[MY_CAPP] = fapi2_cappTarget;
 
+            // MC (Cumulus)
+            Target<fapi2::TARGET_TYPE_MC> fapi2_mcTarget(
+                    targetList[MY_MC]);
+            fapiTargetList[MY_MC] = fapi2_mcTarget;
+
+            // MI (Cumulus)
+            Target<fapi2::TARGET_TYPE_MI> fapi2_miTarget(
+                    targetList[MY_MI]);
+            fapiTargetList[MY_MI] = fapi2_miTarget;
+
+            // DMI (Cumulus)
+            Target<fapi2::TARGET_TYPE_DMI> fapi2_dmiTarget(
+                     targetList[MY_DMI]);
+            fapiTargetList[MY_DMI] = fapi2_dmiTarget;
+
             // PROC_CHIP
             Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
                     targetList[NUM_TARGETS]);
             fapiTargetList[NUM_TARGETS] = fapi2_procTarget;
-
-
 
             // Iterate through both arrays comparing ATTR_HWAS_STATE
             // against the return of fapi2::Target<K> isFunctional()

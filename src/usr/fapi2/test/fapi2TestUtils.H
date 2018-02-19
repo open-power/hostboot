@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,9 +37,13 @@
 #define EX_PER_EQ            2
 #define CORE_PER_EX          2
 #define MCS_PER_PROC         4
+#define MI_PER_PROC          4
 #define MCA_PER_MCS          2
+#define DMI_PER_MI           2
 #define MCBIST_PER_PROC      2
+#define MC_PER_PROC          2
 #define MCS_PER_MCBIST       2
+#define MI_PER_MC            2
 #define PERV_PER_PROC        43
 #define XBUS_PER_PROC        1
 #define OBUS_PER_PROC        2
@@ -92,6 +96,9 @@ enum{
     MY_PERV,
     MY_CAPP,
     MY_SBE,
+    MY_MC,
+    MY_MI,
+    MY_DMI,
     NUM_TARGETS
 };
 
@@ -101,9 +108,11 @@ enum{
 enum PERVASIVE_CHILDREN {
     PERV_EQ_CHILDREN           = 1,
     PERV_CORE_CHILDREN         = 1,
-    PERV_XBUS_CHILDREN         = 2,
+    PERV_XBUS_NIMBUS_CHILDREN  = 2,
+    PERV_XBUS_CUMULUS_CHILDREN = 3,
     PERV_OBUS_CHILDREN         = 1,
-    PERV_CAPP_CHILDREN         = 1,
+    PERV_CAPP_NIMBUS_CHILDREN  = 1,
+    PERV_CAPP_CUMULUS_CHILDREN = 2,
     PERV_OBUS_BRICK_CHILDREN   = 3,
     PERV_MCBIST_CHILDREN       = 1,
     PERV_MCS_CHILDREN          = 2,
@@ -112,6 +121,9 @@ enum PERVASIVE_CHILDREN {
     PERV_PEC0_PHB_CHILDREN     = 1,
     PERV_PEC1_PHB_CHILDREN     = 2,
     PERV_PEC2_PHB_CHILDREN     = 3,
+    PERV_MC_CHILDREN           = 1,
+    PERV_MI_CHILDREN           = 2,
+    PERV_DMI_CHILDREN          = 4,
 };
 
 /**
@@ -169,6 +181,16 @@ inline V getPervasiveParent(V i_pTarget)
         fapi2_target.template getParent<TARGET_TYPE_PERV>());
 }
 
-} // End namespace fapi2
+/**
+ * @brief Helper to determine if hw unit is valid for given
+ *      proc type
+ *
+ * @param[in] i_procChip Proc chip to check type of
+ * @param[in] i_hwType   Hw unit type to compare with proc
+ *
+ * @return True if hw unit is valid for proc type, false otherwise
+ */
+bool isHwValid(TARGETING::Target* i_procChip, uint8_t i_hwType);
 
+} // End namespace fapi2
 #endif
