@@ -317,9 +317,6 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
         .insertFromRight<4, 4>(0xA);    // FIT
         FAPI_TRY(fapi2::putScom(i_target, PU_GPE3_GPETSEL_SCOM, l_data64));
 
-        // @TODO via CQ SW417195: Renable this once FW Simics support is in.
-        //       Writing OCC FLG2 breaks HB CIs
-#if 0
         // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
         FAPI_IMP ("Malf Alert Policy Enabled: %d", malfAlertEnable);
 
@@ -335,7 +332,6 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
         }
 
         FAPI_IMP ("Malf Alert Policy Set to OCC FLAG2 .. now init SGPE");
-#endif
 
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");
