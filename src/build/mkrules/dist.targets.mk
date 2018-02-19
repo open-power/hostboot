@@ -321,7 +321,8 @@ fsp.tar_CONTENTS = \
     src/import/hwpf/fapi2/include/target_types.H \
     src/include/usr/fapi2/plat_target_filter.H \
     src/usr/targeting/attroverride/attrTextToBinaryBlob.C \
-    src/usr/targeting/attroverride/attrTextToBinaryBlob.H
+    src/usr/targeting/attroverride/attrTextToBinaryBlob.H \
+    src/include/usr/sbe/sbe_common.H
 
 
 #
