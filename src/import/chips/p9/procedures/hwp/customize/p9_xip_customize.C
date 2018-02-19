@@ -2008,7 +2008,7 @@ ReturnCode p9_xip_customize (
                   (uint64_t)fapi2::current_err );
 
         // extract data
-        l_filterPllBucket = (uint8_t)(*l_bufMvpdField);
+        l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
 
         FAPI_ASSERT( l_filterPllBucket <= MAX_FILTER_PLL_BUCKETS,
                      fapi2::XIPC_MVPD_AW_FIELD_VALUE_ERR().
