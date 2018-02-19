@@ -53,244 +53,167 @@ bool isEnabled()
              !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() );
 }
 
-int32_t getRowsAndIntrlv( ExtensibleChip * i_chip, uint8_t i_dslct,
-                           uint8_t &o_rows, bool &o_interleaved)
+int32_t __getAddrConfig( ExtensibleChip * i_mcaChip, uint8_t i_dslct,
+                         bool & o_twoDimmConfig, uint8_t & o_mrnkBits,
+                         uint8_t & o_srnkBits, uint8_t & o_extraRowBits )
 {
+    #define PRDF_FUNC "[MemDealloc::__getAddrConfig] "
+
     int32_t o_rc = SUCCESS;
-    o_rows = 0;
-    o_interleaved = false;
 
-    SCAN_COMM_REGISTER_CLASS * addrTransReg =
-        i_chip->getRegister( "MC_ADDR_TRANS" );
-
-    o_rc = addrTransReg->Read();
+    SCAN_COMM_REGISTER_CLASS * reg = i_mcaChip->getRegister( "MC_ADDR_TRANS" );
+    o_rc = reg->Read();
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR("getRows Read failed on addrTransReg: chip=0x%08x",
-                 i_chip->getHuid() );
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS: i_mcaChip=0x%08x",
+                  i_mcaChip->getHuid() );
         return o_rc;
     }
 
-    if (addrTransReg->IsBitSet(i_dslct ? 31:15))
-        o_rows = 18;
-    else if (addrTransReg->IsBitSet(i_dslct ? 30:14))
-        o_rows = 17;
-    else if (addrTransReg->IsBitSet(i_dslct ? 29:13))
-        o_rows = 16;
-    else
-        o_rows = 15;
+    o_twoDimmConfig = false;
+    if ( reg->IsBitSet(0) && reg->IsBitSet(16) )
+        o_twoDimmConfig = true;
 
-    if ( addrTransReg->IsBitSet(0) && addrTransReg->IsBitSet(16))
-        o_interleaved = true;
+    o_mrnkBits = 0;
+    if ( reg->IsBitSet(i_dslct ? 21: 5) ) o_mrnkBits++;
+    if ( reg->IsBitSet(i_dslct ? 22: 6) ) o_mrnkBits++;
+
+    o_srnkBits = 0;
+    if ( reg->IsBitSet(i_dslct ? 25: 9) ) o_srnkBits++;
+    if ( reg->IsBitSet(i_dslct ? 26:10) ) o_srnkBits++;
+    if ( reg->IsBitSet(i_dslct ? 27:11) ) o_srnkBits++;
+
+    // According to the hardware team, B2 is used for DDR4e which went away. If
+    // for some reason B2 is valid, there is definitely a bug.
+    if ( reg->IsBitSet(i_dslct ? 28:12) )
+    {
+        PRDF_ERR( PRDF_FUNC "B2 enabled in MC_ADDR_TRANS: i_mcaChip=0x%08x "
+                  "i_dslct=%d", i_mcaChip->getHuid(), i_dslct );
+        return FAIL;
+    }
+
+    o_extraRowBits = 0;
+    if ( reg->IsBitSet(i_dslct ? 29:13) ) o_extraRowBits++;
+    if ( reg->IsBitSet(i_dslct ? 30:14) ) o_extraRowBits++;
+    if ( reg->IsBitSet(i_dslct ? 31:15) ) o_extraRowBits++;
 
     return o_rc;
+
+    #undef PRDF_FUNC
 }
 
-void setRemainingRowBitsAndDimmSelect(uint8_t  i_bit, //bit position in o_addr
-                                      uint64_t i_row, //row value from MemAddr
-                                      uint8_t  i_numRows, //# of row bits
-                                      uint64_t i_dsclt, // dimm select
-                                      uint64_t &o_addr) // system address
+uint64_t __reverseBits( uint64_t i_val, uint64_t i_numBits )
 {
-    // Write bits R15..R17 followed by dimm select bit
-    uint8_t rowBit = 15;
-    while ( i_bit >= 0 && rowBit <= i_numRows )
+    uint64_t o_val = 0;
+
+    for ( uint64_t i = 0; i < i_numBits; i++ )
     {
-        if (i_numRows == rowBit)
-        {
-            // We've finished writing row bits, now write the dimm select
-            // and we're done
-            o_addr |= (i_dsclt << (63-i_bit));
-            break;;
-        }
-        else
-        {
-            // Set i_bit to rowBit
-            o_addr |= (((i_row >> (17-rowBit)) & 0x1) << (63-i_bit));
-            ++rowBit;
-            --i_bit;
-        }
+        o_val <<= 1;
+        o_val |= i_val & 0x1;
+        i_val >>= 1;
     }
-    return;
+
+    return o_val;
 }
 
-int32_t getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                        uint64_t & o_addr )
+uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
 {
-    #define PRDF_FUNC "[MemDealloc::getMcaPortAddr] "
+    uint64_t mask = (0xffffffffffffffffull >> i_numBits) << i_numBits;
+    return i_val & ~mask;
+}
 
+int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
+                          uint64_t & o_addr )
+{
     int32_t o_rc = SUCCESS;
+
     o_addr = 0;
-    TargetHandle_t tgt = i_chip->GetChipHandle();
-    MemRank rnk = i_addr.getRank();
 
     // Local vars for address fields
-    uint64_t col   = i_addr.getCol();   // C3 C4 C5 C6 C7 C8 C9
-    uint64_t row   = i_addr.getRow();   //  R0 R1 R2 .. R16 R17
-    uint64_t bnk   = i_addr.getBank();  //     BG0 BG1 B0 B1 B2
-    uint64_t srnk  = rnk.getSlave();    //             S0 S1 S2
-    uint64_t mrnk  = rnk.getRankSlct(); //                M0 M1
-    uint64_t dslct = rnk.getDimmSlct(); //                1 bit
+    uint64_t col   = __reverseBits(i_addr.getCol(),  7); // C9 C8 C7 C6 C5 C4 C3
+    uint64_t row   = __reverseBits(i_addr.getRow(), 18); // R17 R16 R15 .. R1 R0
+    uint64_t bnk   = i_addr.getBank();                   //     BG0 BG1 B0 B1 B2
+    uint64_t srnk  = i_addr.getRank().getSlave();        //             S0 S1 S2
+    uint64_t mrnk  = i_addr.getRank().getRankSlct();     //                M0 M1
+    uint64_t dslct = i_addr.getRank().getDimmSlct();     //                    D
 
-    // number of masters and slaves per dimm
-    uint8_t mstrs = getNumMasterRanksPerDimm<TYPE_MCA>(tgt, dslct);
-    uint8_t slvs  = getNumRanksPerDimm<TYPE_MCA>(tgt, dslct) / mstrs;
+    // Determine if a two DIMM config is used. Also, determine how many
+    // mrank (M0-M1), srnk (S0-S2), or extra row (R17-R15) bits are used.
+    bool twoDimmConfig;
+    uint8_t mrnkBits, srnkBits, extraRowBits;
+    o_rc = __getAddrConfig( i_chip, dslct, twoDimmConfig, mrnkBits, srnkBits,
+                            extraRowBits );
+    if ( SUCCESS != o_rc ) return o_rc;
 
-    uint8_t rowBits = 0;   // Number of row bits used for an addr on this dimm
-    bool interleaved = false; // Whether dimm slot interleaving is used
-    o_rc = getRowsAndIntrlv( i_chip, dslct, rowBits, interleaved);
-    if (o_rc != SUCCESS)
-        return o_rc;
+    // Mask off the non-configured bits. If this address came from hardware,
+    // this would not be a problem. However, the get_mrank_range() and
+    // get_srank_range() HWPS got lazy just set the entire fields and did not
+    // take into account the actual bit ranges.
+    mrnk = __maskBits( mrnk, mrnkBits );
+    srnk = __maskBits( srnk, srnkBits );
+    row  = __maskBits( row,  15 + extraRowBits );
 
-    // If we're not using 2 dimm slots, the DS bit should always be set to 0
-    if (!interleaved)
-        dslct = 0;
+    // Combine master and slave ranks.
+    uint64_t rnk     = (mrnk << srnkBits) | srnk;
+    uint8_t  rnkBits = mrnkBits + srnkBits;
 
-    // Set Bits 33-0
-    do {
-        // Bits 33-30 are common to all configs
-        // Set bit 33 to C3
-        o_addr |= ((col & 0x40) << 24);
-        // Set bits 31 32 to BG0 BG1
-        o_addr |= ((bnk & 0x18) << 28);
-        // Set bit 30 to B1
-        o_addr |= ((bnk & 0x02) << 32);
+    // Now split the DIMM select and combined rank into components.
+    uint64_t rnk_pt1     = 0, rnk_pt2     = 0, rnk_pt3     = 0;
+    uint8_t  rnkBits_pt1 = 0, rnkBits_pt2 = 0, rnkBits_pt3 = 0;
 
-        // Bit 29
-        if ( slvs != 0 )
-        {
-            // Set bit 29 to S2
-            o_addr |= ((srnk & 0x01) << 34);
-        }
-        else if (mstrs > 1)
-        {
-            // Set bit 29 to M1
-            o_addr |= ((mrnk & 0x01) << 34);
-        }
-        else if (interleaved)
-        {
-            // Set bit 29 to D
-            o_addr |= (dslct << 34);
-        }
-        else
-        {
-            // Set bit 29 to B0
-            o_addr |= ((bnk & 0x04) << 32);
-        }
+    if ( 0 == rnkBits )
+    {
+        if ( twoDimmConfig ) // The DIMM select goes into part 3.
+            rnk_pt3 = dslct; rnkBits_pt3 = 1;
+    }
+    else // At least one master or slave.
+    {
+        // Put the LSB of the combined rank in part 3 and the rest in part 2.
+        rnk_pt3 = rnk & 0x1; rnkBits_pt3 = 1;
+        rnk_pt2 = rnk >> 1;  rnkBits_pt2 = rnkBits - 1;
 
-        //Bits 28-23
-        if ( mstrs == 1 && slvs == 0 && !interleaved )
-        {
-            // Set Bit 28 to C4
-            o_addr |= ((col & 0x20) << 30);
-            // Set bits 23-27 to C9-C5
-            o_addr |= ((col & 0x10) << 32);
-            o_addr |= ((col & 0x08) << 34);
-            o_addr |= ((col & 0x04) << 36);
-            o_addr |= ((col & 0x02) << 38);
-            o_addr |= ((col & 0x01) << 40);
-        }
-        else
-        {
-            // Set Bit 28 to B0
-            o_addr |= ((bnk & 0x04) << 33);
-            // Set bits 23-27 to C8-C4
-            o_addr |= ((col & 0x20) << 31);
-            o_addr |= ((col & 0x10) << 33);
-            o_addr |= ((col & 0x08) << 35);
-            o_addr |= ((col & 0x04) << 37);
-            o_addr |= ((col & 0x02) << 39);
-        }
+        if ( twoDimmConfig ) // The DIMM select goes into part 1.
+            rnk_pt1 = dslct; rnkBits_pt1 = 1;
+    }
 
-        // Bits 22-8
-        o_addr |= ((row & 0x00010) << 37); // R13 -> bit 22
-        o_addr |= ((row & 0x20000) << 25); // R0  -> bit 21
-        o_addr |= ((row & 0x10000) << 27); // R1  -> bit 20
-        o_addr |= ((row & 0x08000) << 29); // R2  -> bit 19
-        o_addr |= ((row & 0x04000) << 31); // R3  -> bit 18
-        o_addr |= ((row & 0x02000) << 33); // R4  -> bit 17
-        o_addr |= ((row & 0x01000) << 35); // R5  -> bit 16
-        o_addr |= ((row & 0x00800) << 37); // R6  -> bit 15
-        o_addr |= ((row & 0x00400) << 39); // R7  -> bit 14
-        o_addr |= ((row & 0x00200) << 41); // R8  -> bit 13
-        o_addr |= ((row & 0x00100) << 43); // R9  -> bit 12
-        o_addr |= ((row & 0x00080) << 45); // R10 -> bit 11
-        o_addr |= ((row & 0x00040) << 47); // R11 -> bit 10
-        o_addr |= ((row & 0x00020) << 49); // R12 -> bit  9
-        o_addr |= ((row & 0x00008) << 52); // R14 -> bit  8
+    // Split the row into its components.
+    uint64_t r17_r15 = (row & 0x38000) >> 15;
+    uint64_t r14     = (row & 0x04000) >> 14;
+    uint64_t r13     = (row & 0x02000) >> 13;
+    uint64_t r12_r0  = (row & 0x01fff);
 
-        // Bit 7
-        if ( mstrs == 1 && slvs == 0 && !interleaved )
-        {
-            // Set remaining row bits starting at bit 7
-            setRemainingRowBitsAndDimmSelect(7, row, rowBits, dslct, o_addr);
-            break;
-        }
-        else
-        {
-            // Set bit 7 to C9
-            o_addr |= ((col & 0x01) << 56);
-        }
+    // Split the column into its components.
+    uint64_t c9_c4 = (col & 0x7e) >> 1;
+    uint64_t c3    = (col & 0x01);
 
-        // Bit 6...
-        if (slvs >= 4)
-        {
-            // set bit 6 to S1
-            o_addr |= ((srnk & 0x02) << 56);
-        }
-        else if (mstrs == 4 && slvs==0)
-        {
-            // set Bit 6 to M0
-            o_addr |= ((mrnk & 0x02) << 56);
-        }
-        else if (mstrs == 2 && slvs == 2)
-        {
-            // Set Bit 6 to M1
-            o_addr |= ((mrnk & 0x01) << 57);
-        }
-        else
-        {
-            // Set remaining bits starting at 6
-            setRemainingRowBitsAndDimmSelect(6, row, rowBits, dslct, o_addr);
-            break;
-        }
+    // Split the bank into its components.
+    uint64_t bg0_bg1 = (bnk & 0x18) >> 3;
+    uint64_t b0      = (bnk & 0x04) >> 2;
+    uint64_t b1      = (bnk & 0x02) >> 1;
+    // NOTE: B2 is not supported on Nimbus.
 
-        // Bit 5
-        if (slvs >= 8)
-        {
-            // Set bit 5 to S0
-            o_addr |= ((srnk & 0x04) << 56);
-        }
-        else if (mstrs == 2 && slvs == 4)
-        {
-            // Set bit 5 to M1
-            o_addr |= ((mrnk & 0x01) << 58);
-        }
-        else
-        {
-            setRemainingRowBitsAndDimmSelect(5, row, rowBits, dslct, o_addr);
-            break;
-        }
+    // Now start building the flexible part of the address (bits 0-7,23-33).
+    o_addr = (o_addr << rnkBits_pt1 ) | rnk_pt1;
+    o_addr = (o_addr << extraRowBits) | r17_r15;
+    o_addr = (o_addr << rnkBits_pt2 ) | rnk_pt2;
+    o_addr = (o_addr << 6           ) | c9_c4;
+    o_addr = (o_addr << 1           ) | b0;
+    o_addr = (o_addr << rnkBits_pt3 ) | rnk_pt3;
+    o_addr = (o_addr << 1           ) | b1;
+    o_addr = (o_addr << 2           ) | bg0_bg1;
+    o_addr = (o_addr << 1           ) | c3;
 
-        // Bit 4
-        if (mstrs == 2 && slvs == 8)
-        {
-            // Set bit 4 to M1
-            o_addr |= ((mrnk & 0x01) << 59);
+    // C2 is in bit 34, but the Nimbus physical address does not contain a C2.
+    // It will be set to 0 for now. Also, bits 35-39 are the rest of the cache
+    // line address, which we do not need. So, that will be set to 0 as well.
+    o_addr <<= 6;
 
-            // Set remaining row bits
-            setRemainingRowBitsAndDimmSelect(3, row, rowBits, dslct, o_addr);
-            break;
-        }
-        else
-        {
-            setRemainingRowBitsAndDimmSelect(4, row, rowBits, dslct, o_addr);
-            break;
-        }
-
-    } while (0);
+    // Finally, insert R14,R12-R0,R13 into bits 8-22.
+    o_addr  = ((o_addr & 0xfffffe0000ull) << 15) | (o_addr & 0x000001ffffull);
+    o_addr |= ((r14 << 14) | (r12_r0 << 1) | r13) << 17;
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
@@ -314,14 +237,11 @@ int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     int32_t l_rc = SUCCESS;
 
     do {
-        // Get 40-bit MCA Port address
-        l_rc = getMcaPortAddr( i_chip, i_addr, o_addr);
+        // Get the 40-bit port address (right justified).
+        l_rc = __getMcaPortAddr( i_chip, i_addr, o_addr );
         if (l_rc) break;
 
         // Construct the 56-bit Powerbus address
-
-        // Shift the 40 bit port address in bits 0:39 over to bits 24:63
-        o_addr = o_addr >> 24;
 
         // Get MCA target position
         ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
@@ -479,7 +399,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
         }
 
         sendPageGardRequest( sysAddr );
-        PRDF_TRAC( PRDF_FUNC "Page dealloc address: 0x%016llX", sysAddr );
+        PRDF_TRAC( PRDF_FUNC "Page dealloc address: 0x%016llx", sysAddr );
 
     } while( 0 );
 
@@ -521,7 +441,7 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
         // Send the address range to HV
         sendDynMemDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "Rank dealloc for Start Addr: 0x%016llx "
-                   "End Addr: 0x%016llX", ssAddr, seAddr );
+                   "End Addr: 0x%016llx", ssAddr, seAddr );
 
     } while( 0 );
 
@@ -583,8 +503,8 @@ int32_t port( ExtensibleChip * i_chip )
 
         // Send the address range to PHYP
         sendDynMemDeallocRequest( ssAddr, seAddr );
-        PRDF_TRAC( PRDF_FUNC "MBA dealloc for Start Addr: 0x%016llx "
-                   "End Addr: 0x%016llX", ssAddr, seAddr );
+        PRDF_TRAC( PRDF_FUNC "Port dealloc for Start Addr: 0x%016llx "
+                   "End Addr: 0x%016llx", ssAddr, seAddr );
 
     } while (0);
 
@@ -659,7 +579,7 @@ int32_t dimmSlct( TargetHandle_t  i_dimm )
         // Send the address range to PHYP
         sendDynMemDeallocRequest( smallestAddr, largestAddr );
         PRDF_TRAC( PRDF_FUNC "DIMM Slct dealloc for Start Addr: 0x%016llx "
-                   "End Addr: 0x%016llX", smallestAddr, largestAddr );
+                   "End Addr: 0x%016llx", smallestAddr, largestAddr );
 
     } while (0);
 

@@ -115,6 +115,20 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
     #undef PRDF_FUNC
 }
 
+MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
+{
+    uint64_t dslct = i_addr.get_dimm();
+    uint64_t rslct = i_addr.get_master_rank();
+    uint64_t srnk  = i_addr.get_slave_rank();
+    uint64_t bnk   = i_addr.get_bank();
+    uint64_t row   = i_addr.get_row();
+    uint64_t col   = i_addr.get_column();
+
+    uint64_t mrnk  = (dslct << 2) | rslct;
+
+    return MemAddr ( MemRank ( mrnk, srnk ), bnk, row, col );
+}
+
 int32_t getMemAddrRange( TargetHandle_t i_tgt, uint8_t i_mrank,
                          uint8_t i_dimmSlct, MemAddr & o_startAddr,
                          MemAddr & o_endAddr, uint8_t i_srank,
@@ -140,8 +154,8 @@ int32_t getMemAddrRange( TargetHandle_t i_tgt, uint8_t i_mrank,
                                                saddr, eaddr );
     }
 
-    o_startAddr = MemAddr::fromMaintAddr<TYPE_MCBIST>( (uint64_t) saddr );
-    o_endAddr   = MemAddr::fromMaintAddr<TYPE_MCBIST>( (uint64_t) eaddr );
+    o_startAddr = __convertMssMcbistAddr( saddr );
+    o_endAddr   = __convertMssMcbistAddr( eaddr );
 
     return SUCCESS;
 }
