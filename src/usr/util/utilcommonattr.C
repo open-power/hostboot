@@ -77,14 +77,18 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
     }
     else if(l_chipModel == TARGETING::MODEL_CUMULUS)
     {
-        if(l_chipECLevel == 0x10)
+        switch (l_chipECLevel)
         {
-            l_freqList = OBUS_PLL_FREQ_LIST_P9C_10;
-        }
-        else
-        {
-            TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for CUMULUS",
-                l_chipECLevel);
+            case 0x10:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9C_10;
+                break;
+            case 0x11:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9C_11;
+                break;
+            default:
+                TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for CUMULUS",
+                    l_chipECLevel);
+                break;
         }
     }
     //else
