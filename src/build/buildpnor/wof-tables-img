@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -223,82 +223,70 @@ package CSVFile;
 
 use IO::File;
 
-# Columns in the CSV file.  Order is important, but case is not.
-our @CSV_COLUMN_NAMES =
+# Columns in the CSV file.  Index value is important, but case is not.
+# This contains the latest CSV version of columns
+our %CSV_COLUMN_NAMES_INDEX =
 (
-  'mopt',
-  'yield',
-  'package',
-  'version',
-  'socket_power',
-  'rdp_capacity',
-  'core_count',
-  'pdv_sort_power_target_freq',
-  'pdv_sort_power_ultra_turbo_freq',
-  'nest_freq',
-  'vratio_start',
-  'vratio_step',
-  'fratio_start',
-  'fratio_step',
-  'core_ceff',
-  'core_ceff_index',
-  'nest_ceff',
-  'nest_ceff_index',
-  'active_quads',
-  'vratio',
-  'vratio_index',
-  'fratio',
-  'fratio_index',
-  'wof_freq'
+  'mopt' => 0,
+  'yield' => 1,
+  'package' => 2,
+  'version'  => 3,
+  'mode' => 4,
+  'socket_power' => 5,
+  'rdp_capacity' => 6,
+  'core_count' => 7,
+  'pdv_sort_power_target_freq'  => 8,
+  'pdv_sort_power_ultra_turbo_freq' => 9,
+  'nest_freq' => 10,
+  'vratio_start' => 11,
+  'vratio_step' => 12,
+  'fratio_start' => 13,
+  'fratio_step' => 14,
+  'core_ceff' => 15,
+  'core_ceff_index' => 16,
+  'nest_ceff' => 17,
+  'nest_ceff_index' => 18,
+  'active_quads' => 19,
+  'vratio' => 20,
+  'vratio_index' => 21,
+  'fratio' => 22,
+  'fratio_index' => 23,
+  'wof_freq' => 24,
 );
 
-# Number of columns in the CSV file
-our $CSV_COLUMN_COUNT = scalar(@CSV_COLUMN_NAMES);
+# Look up column name via index number
+our %CSV_COLUMN_NAMES = reverse %CSV_COLUMN_NAMES_INDEX;
 
-# Column indices
-our $CSV_MOPT_COLUMN                            = 0;
-our $CSV_YIELD_COLUMN                           = 1;
-our $CSV_PACKAGE_COLUMN                         = 2;
-our $CSV_VERSION_COLUMN                         = 3;
-our $CSV_SOCKET_POWER_COLUMN                    = 4;
-our $CSV_RDP_CAPACITY_COLUMN                    = 5;
-our $CSV_CORE_COUNT_COLUMN                      = 6;
-our $CSV_PDV_SORT_POWER_TARGET_FREQ_COLUMN      = 7;
-our $CSV_PDV_SORT_POWER_ULTRA_TURBO_FREQ_COLUMN = 8;
-our $CSV_NEST_FREQ_COLUMN                       = 9;
-our $CSV_VRATIO_START_COLUMN                    = 10;
-our $CSV_VRATIO_STEP_COLUMN                     = 11;
-our $CSV_FRATIO_START_COLUMN                    = 12;
-our $CSV_FRATIO_STEP_COLUMN                     = 13;
-our $CSV_CORE_CEFF_COLUMN                       = 14;
-our $CSV_CORE_CEFF_INDEX_COLUMN                 = 15;
-our $CSV_NEST_CEFF_COLUMN                       = 16;
-our $CSV_NEST_CEFF_INDEX_COLUMN                 = 17;
-our $CSV_ACTIVE_QUADS_COLUMN                    = 18;
-our $CSV_VRATIO_COLUMN                          = 19;
-our $CSV_VRATIO_INDEX_COLUMN                    = 20;
-our $CSV_FRATIO_COLUMN                          = 21;
-our $CSV_FRATIO_INDEX_COLUMN                    = 22;
-our $CSV_WOF_FREQ_COLUMN                        = 23;
+# Number of columns in the CSV file
+our $CSV_COLUMN_COUNT = scalar(keys %CSV_COLUMN_NAMES_INDEX);
 
 # Columns we want to store that have file scope (all rows have same value)
 our @CSV_FILE_SCOPE_COLUMNS =
 (
-  $CSV_PACKAGE_COLUMN,
-  $CSV_VERSION_COLUMN,
-  $CSV_SOCKET_POWER_COLUMN,
-  $CSV_RDP_CAPACITY_COLUMN,
-  $CSV_CORE_COUNT_COLUMN,
-  $CSV_PDV_SORT_POWER_TARGET_FREQ_COLUMN,
-  $CSV_NEST_FREQ_COLUMN,
-  $CSV_VRATIO_START_COLUMN,
-  $CSV_VRATIO_STEP_COLUMN,
-  $CSV_FRATIO_START_COLUMN,
-  $CSV_FRATIO_STEP_COLUMN
+  $CSV_COLUMN_NAMES_INDEX{'package'},
+  $CSV_COLUMN_NAMES_INDEX{'version'},
+  $CSV_COLUMN_NAMES_INDEX{'mode'},
+  $CSV_COLUMN_NAMES_INDEX{'socket_power'},
+  $CSV_COLUMN_NAMES_INDEX{'rdp_capacity'},
+  $CSV_COLUMN_NAMES_INDEX{'core_count'},
+  $CSV_COLUMN_NAMES_INDEX{'pdv_sort_power_target_freq'},
+  $CSV_COLUMN_NAMES_INDEX{'nest_freq'},
+  $CSV_COLUMN_NAMES_INDEX{'vratio_start'},
+  $CSV_COLUMN_NAMES_INDEX{'vratio_step'},
+  $CSV_COLUMN_NAMES_INDEX{'fratio_start'},
+  $CSV_COLUMN_NAMES_INDEX{'fratio_step'},
 );
 
 # Number of file scope columns we are storing
 our $CSV_FILE_SCOPE_COLUMN_COUNT = scalar(@CSV_FILE_SCOPE_COLUMNS);
+
+# modes supported
+our %CSV_MODES_SUPPORTED =
+(
+  'NM' => 1, # Nominal mode
+  'TM' => 2, # Turbo mode
+);
+
 
 # Number of nest_ceff_index values
 our $CSV_NEST_CEFF_INDEX_COUNT = 8;
@@ -334,6 +322,7 @@ sub new
     'file_name'                  => $file_name,
     'package'                    => undef,
     'version'                    => undef,
+    'mode'                       => undef,
     'socket_power'               => undef,
     'rdp_capacity'               => undef,
     'core_count'                 => undef,
@@ -392,6 +381,27 @@ sub version
 {
   my ($self) = @_;
   return $self->{'version'};
+}
+
+
+sub mode
+{
+  my ($self) = @_;
+  return $self->{'mode'};
+}
+
+
+sub mode_value
+{
+  my ($self) = @_;
+  if ($CSV_MODES_SUPPORTED{uc($self->{'mode'})})
+  {
+    return $CSV_MODES_SUPPORTED{uc($self->{'mode'})};
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 
@@ -565,10 +575,67 @@ sub _parse_row
   }
 }
 
+sub _setup_column_consts
+{
+    my ($self, $columns) = @_;
+
+    # All CSV files passed in should have the same columns and number of columns
+
+    # If 'mode' column index is removed, then we have already setup
+    # the column_consts to support the older version
+    # (new version is the default support - so no changes needed)
+
+    # support old version without 'mode' column
+    if ( defined $CSV_COLUMN_NAMES_INDEX{'mode'} &&
+        lc($columns->[$CSV_COLUMN_NAMES_INDEX{'mode'}]) ne 'mode' )
+    {
+        # remove 'mode' column
+        my $replace_index = $CSV_COLUMN_NAMES_INDEX{'mode'};
+        delete $CSV_COLUMN_NAMES_INDEX{'mode'};
+
+        # Move up (closer to 0) all of its following indices
+        foreach my $cname (keys %CSV_COLUMN_NAMES_INDEX)
+        {
+            my $index = $CSV_COLUMN_NAMES_INDEX{$cname};
+            if ($index > $replace_index)
+            {
+                $CSV_COLUMN_NAMES_INDEX{$cname} = $index-1;
+            }
+        }
+
+        # lookup column name via column index
+        %CSV_COLUMN_NAMES = reverse %CSV_COLUMN_NAMES_INDEX;
+
+        # Number of columns in the CSV file
+        $CSV_COLUMN_COUNT = scalar(keys %CSV_COLUMN_NAMES_INDEX);
+
+        # Columns we want to store that have file scope
+        #(all rows have same value)
+        @CSV_FILE_SCOPE_COLUMNS =
+        (
+          $CSV_COLUMN_NAMES_INDEX{'package'},
+          $CSV_COLUMN_NAMES_INDEX{'version'},
+          $CSV_COLUMN_NAMES_INDEX{'socket_power'},
+          $CSV_COLUMN_NAMES_INDEX{'rdp_capacity'},
+          $CSV_COLUMN_NAMES_INDEX{'core_count'},
+          $CSV_COLUMN_NAMES_INDEX{'pdv_sort_power_target_freq'},
+          $CSV_COLUMN_NAMES_INDEX{'nest_freq'},
+          $CSV_COLUMN_NAMES_INDEX{'vratio_start'},
+          $CSV_COLUMN_NAMES_INDEX{'vratio_step'},
+          $CSV_COLUMN_NAMES_INDEX{'fratio_start'},
+          $CSV_COLUMN_NAMES_INDEX{'fratio_step'},
+        );
+
+        $CSV_FILE_SCOPE_COLUMN_COUNT = scalar(@CSV_FILE_SCOPE_COLUMNS);
+    }
+}
 
 sub _verify_first_row_columns
 {
   my ($self, $columns) = @_;
+
+  # Setup possible column constants
+  $self->_setup_column_consts($columns);
 
   # Verify row has the correct number of columns
   my $row_number = 1;
@@ -579,7 +646,7 @@ sub _verify_first_row_columns
   my ($expected_name, $actual_name);
   for (my $i = 0; $i < $CSV_COLUMN_COUNT; $i++)
   {
-    $expected_name = $CSV_COLUMN_NAMES[$i];
+    $expected_name = $CSV_COLUMN_NAMES{$i};
     $actual_name = $columns->[$i];
     if (lc($expected_name) ne lc($actual_name))
     {
@@ -703,7 +770,7 @@ sub _store_file_scope_columns
   for (my $i = 0; $i < $CSV_FILE_SCOPE_COLUMN_COUNT; $i++)
   {
     $column_index = $CSV_FILE_SCOPE_COLUMNS[$i];
-    $column_name  = $CSV_COLUMN_NAMES[$column_index];
+    $column_name  = $CSV_COLUMN_NAMES{$column_index};
 
     # Get column value from current row
     $column_value = $columns->[$column_index];
@@ -715,6 +782,16 @@ sub _store_file_scope_columns
     {
       # We do not have a stored value yet for this column; store it
       $self->{$column_name} = $column_value;
+
+      # verify valid mode present
+      if (lc($column_name) eq 'mode')
+      {
+          if (!defined ($CSV_MODES_SUPPORTED{uc($column_value)}))
+          {
+              die "Error: Invalid mode value ($column_value) found in " .
+                $self->{'file_name'} . ".\n";
+          }
+      }
     }
     elsif ($column_value ne $stored_value)
     {
@@ -735,7 +812,7 @@ sub _store_vfrt_scope_columns
   my $vfrt = $self->_get_vfrt($row_number, $columns);
 
   # Get fratio_index value and verify it is valid.  This is the VFRT row index.
-  my $fratio_index = $columns->[$CSV_FRATIO_INDEX_COLUMN];
+  my $fratio_index = $columns->[$CSV_COLUMN_NAMES_INDEX{'fratio_index'}];
   if (($fratio_index < 0) || ($fratio_index >= $VFRT_ROW_COUNT))
   {
     die "Error: Invalid fratio_index value $fratio_index in row " .
@@ -743,7 +820,7 @@ sub _store_vfrt_scope_columns
   }
 
   # Get vratio_index value and verify it is valid.  This is the VFRT column index.
-  my $vratio_index = $columns->[$CSV_VRATIO_INDEX_COLUMN];
+  my $vratio_index = $columns->[$CSV_COLUMN_NAMES_INDEX{'vratio_index'}];
   if (($vratio_index < 0) || ($vratio_index >= $VFRT_COLUMN_COUNT))
   {
     die "Error: Invalid vratio_index value $vratio_index in row " .
@@ -751,7 +828,7 @@ sub _store_vfrt_scope_columns
   }
 
   # Get wof_freq value and verify it is valid
-  my $wof_freq = $columns->[$CSV_WOF_FREQ_COLUMN];
+  my $wof_freq = $columns->[$CSV_COLUMN_NAMES_INDEX{'wof_freq'}];
   if ($wof_freq < 0)
   {
     die "Error: Invalid wof_freq value $wof_freq in row " .
@@ -768,7 +845,7 @@ sub _get_vfrt
   my ($self, $row_number, $columns) = @_;
 
   # Get nest_ceff value and verify it is valid
-  my $nest_ceff = $columns->[$CSV_NEST_CEFF_COLUMN];
+  my $nest_ceff = $columns->[$CSV_COLUMN_NAMES_INDEX{'nest_ceff'}];
   if ($nest_ceff < 0)
   {
     die "Error: Invalid nest_ceff value $nest_ceff in row " .
@@ -776,7 +853,7 @@ sub _get_vfrt
   }
 
   # Get nest_ceff_index value and verify it is valid
-  my $nest_ceff_index = $columns->[$CSV_NEST_CEFF_INDEX_COLUMN];
+  my $nest_ceff_index = $columns->[$CSV_COLUMN_NAMES_INDEX{'nest_ceff_index'}];
   if (($nest_ceff_index < 0) ||
       ($nest_ceff_index >= $CSV_NEST_CEFF_INDEX_COUNT))
   {
@@ -789,7 +866,7 @@ sub _get_vfrt
 
   # Get core_ceff value and verify it is valid.  Add 0 to core_ceff value to
   # ensure numerical comparison used when finding matching map key.
-  my $core_ceff = $columns->[$CSV_CORE_CEFF_COLUMN];
+  my $core_ceff = $columns->[$CSV_COLUMN_NAMES_INDEX{'core_ceff'}];
   my $expected_core_ceff_index = $CSV_CORE_CEFF_INDEX_MAP{$core_ceff + 0};
   if (!defined($expected_core_ceff_index))
   {
@@ -798,7 +875,7 @@ sub _get_vfrt
   }
 
   # Get core_ceff_index value and verify it matches expected value
-  my $core_ceff_index = $columns->[$CSV_CORE_CEFF_INDEX_COLUMN];
+  my $core_ceff_index = $columns->[$CSV_COLUMN_NAMES_INDEX{'core_ceff_index'}];
   if ($core_ceff_index != $expected_core_ceff_index)
   {
     die "Error: Invalid core_ceff_index value $core_ceff_index in row " .
@@ -806,7 +883,7 @@ sub _get_vfrt
   }
 
   # Get active_quads value
-  my $active_quads = $columns->[$CSV_ACTIVE_QUADS_COLUMN];
+  my $active_quads = $columns->[$CSV_COLUMN_NAMES_INDEX{'active_quads'}];
 
   # Find active_quads_index value via map.  Add 0 to active_quads value to
   # ensure numerical comparison used when finding matching map key.
@@ -1332,7 +1409,7 @@ package WOFTablesHeader;
 
 # Constants representing expected field values
 our $WOF_TABLES_HEADER_MAGIC_VALUE            = 'WFTH';
-our $WOF_TABLES_HEADER_VERSION                = 1;
+our $WOF_TABLES_HEADER_VERSION_MAX            = 2;
 our $WOF_TABLES_HEADER_VFRT_BLOCK_SIZE        = 128;
 our $WOF_TABLES_HEADER_VFRT_BLOCK_HEADER_SIZE = 8;
 our $WOF_TABLES_HEADER_VFRT_DATA_SIZE         = 1;
@@ -1351,7 +1428,8 @@ sub new
   my $self =
   {
     'magic_value'            => $WOF_TABLES_HEADER_MAGIC_VALUE,
-    'version'                => $WOF_TABLES_HEADER_VERSION,
+    'mode'                   => undef,
+    'version'                => undef,
     'vfrt_block_size'        => $WOF_TABLES_HEADER_VFRT_BLOCK_SIZE,
     'vfrt_block_header_size' => $WOF_TABLES_HEADER_VFRT_BLOCK_HEADER_SIZE,
     'vfrt_data_size'         => $WOF_TABLES_HEADER_VFRT_DATA_SIZE,
@@ -1395,10 +1473,23 @@ sub magic_value
   return $self->{'magic_value'};
 }
 
+sub mode
+{
+  my ($self, $new_value) = @_;
+  if (defined($new_value))
+  {
+    $self->{'mode'} = $new_value;
+  }
+  return $self->{'mode'};
+}
 
 sub version
 {
-  my ($self) = @_;
+  my ($self, $new_value) = @_;
+  if (defined($new_value))
+  {
+    $self->{'version'} = $new_value;
+  }
   return $self->{'version'};
 }
 
@@ -1633,7 +1724,8 @@ sub read
 
   # Read field values from binary file
   $self->{'magic_value'}            = $file->read_ascii_text(4);
-  $file->skip_bytes(3);             # Reserved
+  $file->skip_bytes(2);             # Reserved
+  $self->{'mode'}                   = (0x0F & $file->read_uint8());
   $self->{'version'}                = $file->read_uint8();
   $self->{'vfrt_block_size'}        = $file->read_uint16();
   $self->{'vfrt_block_header_size'} = $file->read_uint16();
@@ -1670,7 +1762,7 @@ sub read
     die "Error: Unexpected value in Magic Value field of WOF Tables Header: " .
         $self->{'magic_value'} . "\n";
   }
-  if ($self->{'version'} != $WOF_TABLES_HEADER_VERSION)
+  if ($self->{'version'} > $WOF_TABLES_HEADER_VERSION_MAX)
   {
     die "Error: Unexpected value in Version field of WOF Tables Header: " .
         sprintf("0x%02X", $self->{'version'}) . "\n";
@@ -1684,7 +1776,8 @@ sub write
 
   # Write field values to binary file
   $file->write_ascii_text($self->{'magic_value'}, 4);
-  $file->fill_bytes      (3, 0x00);  # Reserved
+  $file->fill_bytes      (2, 0x00);  # Reserved
+  $file->write_uint8     (0x0F & ($self->{'mode'}));
   $file->write_uint8     ($self->{'version'});
   $file->write_uint16    ($self->{'vfrt_block_size'});
   $file->write_uint16    ($self->{'vfrt_block_header_size'});
@@ -1721,9 +1814,18 @@ sub print
 {
   my ($self) = @_;
 
+  # convert mode value to a readable, understandable string
+  my %mode_value_to_str = reverse %CSV_MODES_SUPPORTED;
+  my $mode_str = $mode_value_to_str{$self->{'mode'}};
+  unless (defined $mode_str)
+  {
+    $mode_str = sprintf("%d unknown", $self->{'mode'});
+  }
+
   # Print header fields to stdout
   printf("WOF Tables Header:\n");
   printf("  Magic Value                    : %s\n", $self->{'magic_value'});
+  printf("  Mode                           : %s\n", $mode_str);
   printf("  Version                        : %u\n", $self->{'version'});
   printf("  VFRT Block Size                : %u\n", $self->{'vfrt_block_size'});
   printf("  VFRT Block Header Size         : %u\n", $self->{'vfrt_block_header_size'});
@@ -1754,7 +1856,6 @@ sub print
   printf("  Package Name                   : %s\n", $self->{'package_name'});
   printf("\n");
 }
-
 
 ################################################################################
 # VFRTHeader Class
@@ -1991,7 +2092,7 @@ sub view
 {
   my ($self, $core_count, $socket_power, $nest_freq,
       $pdv_sort_power_target_freq, $nest_ceff_index, $core_ceff_index,
-      $active_quads, $convert_to_mhz) = @_;
+      $active_quads, $convert_to_mhz, $power_mode) = @_;
 
   # Open image file for reading
   $self->{'file'}->open('r');
@@ -2002,7 +2103,7 @@ sub view
 
   # Find WOF Tables section that matches input parameters
   my $section_number = $self->_find_section($core_count, $socket_power, $nest_freq,
-                                            $pdv_sort_power_target_freq);
+                                     $pdv_sort_power_target_freq, $power_mode);
 
   # Read and print the matching VFRT within this WOF Tables section
   $self->_view_vfrt($section_number, $nest_ceff_index, $core_ceff_index,
@@ -2016,7 +2117,7 @@ sub view
 sub extract
 {
   my ($self, $core_count, $socket_power, $nest_freq,
-      $pdv_sort_power_target_freq, $output_file_name) = @_;
+      $pdv_sort_power_target_freq, $power_mode, $output_file_name) = @_;
 
   # Open image file for reading
   $self->{'file'}->open('r');
@@ -2027,7 +2128,7 @@ sub extract
 
   # Find WOF Tables section that matches input parameters
   my $section_number = $self->_find_section($core_count, $socket_power, $nest_freq,
-                                            $pdv_sort_power_target_freq);
+                                     $pdv_sort_power_target_freq, $power_mode);
 
   # Extract section to the specified output file
   $self->_extract_section($section_number, $output_file_name);
@@ -2156,7 +2257,8 @@ sub _update_section_table
 
 sub _find_section
 {
-  my ($self, $core_count, $socket_power, $nest_freq, $pdv_sort_power_target_freq) = @_;
+  my ($self, $core_count, $socket_power, $nest_freq,
+      $pdv_sort_power_target_freq, $power_mode) = @_;
 
   # Loop through section table entries looking for a matching WOF Tables section
   my $section_number = undef;
@@ -2170,14 +2272,32 @@ sub _find_section
     # Read the WOF Tables Header at the start of the section
     my $wof_tables_header = $self->_read_wof_tables_header();
 
-    # Check if header matches input parameters
-    if (($wof_tables_header->core_count()            == $core_count  ) &&
-        ($wof_tables_header->socket_power_w()        == $socket_power) &&
-        ($wof_tables_header->nest_frequency_mhz()    == $nest_freq   ) &&
-        ($wof_tables_header->sort_pwr_tgt_freq_mhz() == $pdv_sort_power_target_freq))
+    # select based on power_mode if possible
+    if (defined $power_mode)
     {
-      $section_number = $i;
-      last;
+        # Check if header matches input parameters
+        if (($wof_tables_header->core_count()            == $core_count  ) &&
+            ($wof_tables_header->socket_power_w()        == $socket_power) &&
+            ($wof_tables_header->sort_pwr_tgt_freq_mhz() ==
+                                              $pdv_sort_power_target_freq) &&
+            ($wof_tables_header->mode() == $power_mode))
+        {
+          $section_number = $i;
+          last;
+        }
+    }
+    else
+    {
+        # Check if header matches input parameters
+        if (($wof_tables_header->core_count()            == $core_count  ) &&
+            ($wof_tables_header->socket_power_w()        == $socket_power) &&
+            ($wof_tables_header->nest_frequency_mhz()    == $nest_freq   ) &&
+            ($wof_tables_header->sort_pwr_tgt_freq_mhz() ==
+                                              $pdv_sort_power_target_freq))
+        {
+          $section_number = $i;
+          last;
+        }
     }
   }
 
@@ -2297,6 +2417,17 @@ sub _write_wof_tables_header
   $wof_tables_header->rdp_capacity         ($csv_file->rdp_capacity());
   $wof_tables_header->wof_tables_source_tag($csv_file->version());
   $wof_tables_header->package_name         ($csv_file->package());
+  $wof_tables_header->mode                 ($csv_file->mode_value());
+
+  if (defined $csv_file->mode())
+  {
+      # version 2 has a mode
+      $wof_tables_header->version           (2);
+  }
+  else
+  {
+      $wof_tables_header->version           (1);
+  }
 
   # Write header to image file
   $wof_tables_header->write($self->{'file'});
@@ -2586,7 +2717,8 @@ sub new
     'active_quads'               => undef,
     'freq_format'                => undef,
     'csv_files'                  => [],
-    'output_file'                => undef
+    'output_file'                => undef,
+    'mode'                       => undef
   };
   bless($self);
   return $self;
@@ -2638,7 +2770,6 @@ sub socket_power
   my ($self) = @_;
   return $self->{'socket_power'};
 }
-
 
 sub nest_freq
 {
@@ -2696,6 +2827,13 @@ sub output_file
 }
 
 
+sub mode
+{
+  my ($self) = @_;
+  return $self->{'mode'};
+}
+
+
 sub parse
 {
   my ($self) = @_;
@@ -2711,7 +2849,7 @@ sub parse
                          'core_count=i', 'socket_power=i',
                          'nest_freq=i', 'pdv_sort_power_target_freq=i',
                          'nest_ceff_index=i', 'core_ceff_index=i',
-                         'active_quads=i', 'freq_format=s'))
+                         'active_quads=i', 'freq_format=s', 'mode=s'))
   {
     die "Error: Invalid command line options specified.\n";
   }
@@ -2754,12 +2892,14 @@ sub print_usage
     "  wof-tables-img --create <image_file> <csv_file>/<csv_dir> [<csv_file> ...]\n" .
     "  wof-tables-img --list <image_file>\n" .
     "  wof-tables-img --view <image_file> --core_count <number>\n" .
-    "                   --socket_power <number> --nest_freq <number>\n" .
+    "                   --socket_power <number> \n" .
+    "                   (--nest_freq <number> OR --mode <2 chars>)\n" .
     "                   --pdv_sort_power_target_freq <number>\n" .
     "                   --nest_ceff_index <number> --core_ceff_index <number>\n" .
     "                   --active_quads <number> [--freq_format mhz|system]\n" .
     "  wof-tables-img --extract <image_file> --core_count <number>\n" .
-    "                   --socket_power <number> --nest_freq <number>\n" .
+    "                   --socket_power <number> \n" .
+    "                   (--nest_freq <number> OR --mode <2 chars>)\n" .
     "                   --pdv_sort_power_target_freq <number> <output_file>\n" .
     "  wof-tables-img --help\n" .
     "Actions:\n" .
@@ -2771,6 +2911,7 @@ sub print_usage
     "Options:\n" .
     "  --core_count                  WOF Tables core_count value.\n" .
     "  --socket_power                WOF Tables socket_power value.\n" .
+    "  --mode                        WOF Tables mode value. (TM or NM)\n" .
     "  --nest_freq                   WOF Tables nest_freq value.\n" .
     "  --pdv_sort_power_target_freq  WOF Tables pdv_sort_power_target_freq value.\n" .
     "  --nest_ceff_index             VFRT nest_ceff_index value.\n" .
@@ -2794,7 +2935,7 @@ sub _verify_create_options
   foreach my $option ('list', 'view', 'extract', 'help', 'core_count',
                       'socket_power', 'nest_freq', 'pdv_sort_power_target_freq',
                       'nest_ceff_index', 'core_ceff_index', 'active_quads',
-                      'freq_format')
+                      'freq_format', 'mode')
   {
     if (defined($self->{$option}))
     {
@@ -2837,7 +2978,7 @@ sub _verify_list_options
   foreach my $option ('create', 'view', 'extract', 'help', 'core_count',
                       'socket_power', 'nest_freq', 'pdv_sort_power_target_freq',
                       'nest_ceff_index', 'core_ceff_index', 'active_quads',
-                      'freq_format')
+                      'freq_format', 'mode')
   {
     if (defined($self->{$option}))
     {
@@ -2867,9 +3008,9 @@ sub _verify_view_options
   }
 
   # Verify all required options were specified
-  foreach my $option ('core_count', 'socket_power', 'nest_freq',
-                      'pdv_sort_power_target_freq', 'nest_ceff_index',
-                      'core_ceff_index', 'active_quads')
+  foreach my $option ('core_count', 'socket_power',
+                      'pdv_sort_power_target_freq',
+                      'nest_ceff_index','core_ceff_index', 'active_quads')
   {
     if (!defined($self->{$option}))
     {
@@ -2881,6 +3022,13 @@ sub _verify_view_options
   if (!defined($self->{'freq_format'}))
   {
     $self->{'freq_format'} = $OPTIONS_FREQ_FORMAT_MHZ;
+  }
+
+  # if either nest_freq or mode is specified, the other is not needed
+  unless ( (!defined($self->{'nest_freq'}) && defined $self->{'mode'}) ||
+           (!defined($self->{'mode'}) && defined $self->{'nest_freq'}) )
+  {
+    die "Error: either --nest_freq or --mode must be specified with --view.\n";
   }
 
   # Verify there are no remaining (unparsed) command line arguments
@@ -2937,13 +3085,19 @@ sub _verify_extract_options
   }
 
   # Verify all required options were specified
-  foreach my $option ('core_count', 'socket_power', 'nest_freq',
-                      'pdv_sort_power_target_freq')
+  foreach my $option ('core_count', 'socket_power','pdv_sort_power_target_freq')
   {
     if (!defined($self->{$option}))
     {
       die "Error: --$option is required with --extract.\n";
     }
+  }
+
+  # if either nest_freq or mode is specified, the other is not needed
+  unless ( (!defined($self->{'nest_freq'}) && defined $self->{'mode'}) ||
+           (!defined($self->{'mode'}) && defined $self->{'nest_freq'}) )
+  {
+    die "Error: either --nest_freq or --mode must be specified with --extract.\n";
   }
 
   # Treat any remaining (unparsed) command line arguments as output files.
@@ -2964,7 +3118,7 @@ sub _verify_help_options
   foreach my $option ('create', 'list', 'view', 'extract', 'core_count',
                       'socket_power', 'nest_freq', 'pdv_sort_power_target_freq',
                       'nest_ceff_index', 'core_ceff_index', 'active_quads',
-                      'freq_format')
+                      'freq_format', 'mode')
   {
     if (defined($self->{$option}))
     {
@@ -3015,6 +3169,22 @@ sub list_image_file_contents
   $image_file->list();
 }
 
+sub mode_to_value
+{
+    my ($mode_str) = @_;
+
+    my $value = undef;
+    if (defined $mode_str)
+    {
+        $value = $CSV_MODES_SUPPORTED{lc($mode_str)};
+        unless (defined $value)
+        {
+            my $valid_strs = join( ', ', keys %CSV_MODES_SUPPORTED);
+            die "ERROR: Invalid mode($mode_str); valid modes ($valid_strs)\n";
+        }
+    }
+    return $value;
+}
 
 sub view_vfrt_in_image_file
 {
@@ -3030,13 +3200,16 @@ sub view_vfrt_in_image_file
   my $core_ceff_index = $options->core_ceff_index();
   my $active_quads = $options->active_quads();
   my $freq_format = $options->freq_format();
+  my $power_mode = mode_to_value($options->mode());
+
 
   # View one VFRT within specified image file
   my $image_file = ImageFile->new($image_file_name);
   my $convert_to_mhz = ($freq_format eq $OPTIONS_FREQ_FORMAT_MHZ) ? 1 : 0;
   $image_file->view($core_count, $socket_power, $nest_freq,
                     $pdv_sort_power_target_freq, $nest_ceff_index,
-                    $core_ceff_index, $active_quads, $convert_to_mhz);
+                    $core_ceff_index, $active_quads, $convert_to_mhz,
+                    $power_mode);
 }
 
 
@@ -3051,11 +3224,13 @@ sub extract_from_image_file
   my $nest_freq = $options->nest_freq();
   my $pdv_sort_power_target_freq = $options->pdv_sort_power_target_freq();
   my $output_file_name = $options->output_file();
+  my $power_mode = mode_to_value($options->mode());
 
   # Extract one set of WOF Tables from the specified image file
   my $image_file = ImageFile->new($image_file_name);
   $image_file->extract($core_count, $socket_power, $nest_freq,
-                       $pdv_sort_power_target_freq, $output_file_name);
+                       $pdv_sort_power_target_freq, $power_mode,
+                       $output_file_name);
 }
 
 
