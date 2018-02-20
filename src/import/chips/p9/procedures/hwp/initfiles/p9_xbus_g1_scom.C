@@ -3455,20 +3455,20 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800cf42006010c3full, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x800d2c0006010c3full, l_scom_buffer ));
+            FAPI_TRY(fapi2::getScom( TGT0, 0x800d2c2006010c3full, l_scom_buffer ));
 
             if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_DIS_TX_AC_BOOST))
             {
-                constexpr auto l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF = 0x0;
-                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF = 0x0;
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX1_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF );
             }
             else if (( true ))
             {
-                constexpr auto l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON = 0x1;
-                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON );
+                constexpr auto l_IOF1_TX_WRAP_TX1_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON = 0x1;
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX1_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON );
             }
 
-            FAPI_TRY(fapi2::putScom(TGT0, 0x800d2c0006010c3full, l_scom_buffer));
+            FAPI_TRY(fapi2::putScom(TGT0, 0x800d2c2006010c3full, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800f1c0006010c3full, l_scom_buffer ));
