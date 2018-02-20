@@ -484,6 +484,14 @@ else
     push @systemAttr, ['SUPPORTS_DYNAMIC_MEM_VOLT', 0];
 }
 
+# Handle the new name when/if it shows up in the xml
+#  otherwise we'll just rely on the default value
+if ( exists $reqPol->{'mss_mrw_force_bcmode_off'} )
+{
+    push @systemAttr, ['MSS_MRW_FORCE_BCMODE_OFF',
+      $reqPol->{'mss_mrw_force_bcmode_off'}];
+}
+
 
 my $nestFreq = $reqPol->{'proc_pb_frequency'}->{content};
 
