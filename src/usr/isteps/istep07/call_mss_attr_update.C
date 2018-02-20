@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,9 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
 
+    TARGETING::Target * l_sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+
     // Loop through all procs getting IDs
     procIds_t l_procIds[l_procsList.size()];
     uint8_t i = 0;
@@ -187,12 +190,14 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                                   TargetService::ALL,
                                   &l_checkExprFunctional);
 
+    TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
+            l_sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "check_proc0_memory_config: %d functional dimms behind proc0 "
               "%.8X",
               l_dimms.size(), get_huid(l_procIds[l_proc0].proc) );
 
-    // Check if proc0 does not have memory
     if(l_dimms.empty())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -227,6 +232,42 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                 continue;
             }
 
+            // If our master proc doesn't have memory, and we're on a phyp
+            // system, we want to use this proc's memory instead.
+#if 0
+            // TODO RTC: 181139. This support can not be put into place
+            // until we're able to use the Get Capabilities function
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "check_proc0_memory_config: Payload kind is %llx",
+                      payload_kind);
+            if(payload_kind == TARGETING::PAYLOAD_KIND_PHYP)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                         "check_proc0_memory_config: We are in a PHYP system, "
+                         "setting master to use alt memory from proc %llx.",
+                         get_huid(l_procIds[i].proc));
+
+                uint8_t l_chipID = l_procIds[i].chipId;
+                uint8_t l_groupID = l_procIds[i].groupId;
+
+                TargetHandle_t l_masterProc = NULL;
+                targetService().masterProcChipTargetHandle(l_masterProc);
+
+                uint8_t l_proc_memory = l_masterProc->getAttr<
+                        TARGETING::ATTR_PROC_MEM_TO_USE>();
+
+                if( l_proc_memory != ((l_groupID <<3) | l_chipID))
+                {
+                    l_masterProc->setAttr<TARGETING::ATTR_PROC_MEM_TO_USE>(
+                                ((l_groupID << 3) | l_chipID));
+
+                    l_updateNeeded = true;
+                    // Leave loop after switching memory
+                    break;
+                }
+            }else
+            {
+#endif
             // Use this proc for swapping memory with proc0
             l_victim = i;
 
@@ -252,16 +293,68 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 
             // Leave loop after swapping memory
             break;
+#if 0
+            }
+#endif
         }
 
-        // Check that a victim was found
-        assert( l_victim < l_procsList.size(), "No swap match found" );
+        if(payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+        {
+            // Check that a victim was found
+            assert( l_victim < l_procsList.size(), "No swap match found" );
+        }
     }
-
-    // Loop through all procs detecting that IDs are set correctly
-    for (i = 0; i < l_procsList.size(); i++)
+#if 0
+    //  TODO RTC: 181139. This support can not be put into place
+    //  until we're able to use the Get Capabilities function
+    else if( !(l_dimms.empty()) &&
+               (payload_kind == TARGETING::PAYLOAD_KIND_PHYP) )
     {
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+        // If the memory isn't empty, and we're on a phyp system,
+        // we want to verify that we're set up to use the correct memory
+        uint8_t l_chipID = l_procIds[i].chipId;
+        uint8_t l_groupID = l_procIds[i].groupId;
+
+        TargetHandle_t l_masterProc = NULL;
+        targetService().masterProcChipTargetHandle(l_masterProc);
+
+        uint8_t l_proc_memory =
+                l_masterProc->getAttr<TARGETING::ATTR_PROC_MEM_TO_USE>();
+
+        if( l_proc_memory != ((l_groupID <<3) | l_chipID))
+        {
+            l_masterProc->setAttr<TARGETING::ATTR_PROC_MEM_TO_USE>(
+                                ((l_groupID << 3) | l_chipID));
+
+            l_updateNeeded = true;
+        }
+    }
+#endif
+
+    if(payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+    {
+#if 0
+        // TODO RTC: 181139. This support can not be put into place
+        // until we're able to use the Get Capabilities function
+        TargetHandle_t l_masterProc = NULL;
+        targetService().masterProcChipTargetHandle(l_masterProc);
+
+        // Check the attribute, and default it to proc0 if
+        // it doesn't match.
+        uint8_t l_proc_memory =
+                    l_masterProc->getAttr<TARGETING::ATTR_PROC_MEM_TO_USE>();
+
+        if( l_proc_memory != 0)
+        {
+            l_masterProc->setAttr<TARGETING::ATTR_PROC_MEM_TO_USE>(0);
+
+            l_updateNeeded = true;
+        }
+#endif
+        // Loop through all procs detecting that IDs are set correctly
+        for (i = 0; i < l_procsList.size(); i++)
+        {
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "check_proc0_memory_config: Compare settings for "
                   "Proc %.8X\n"
                   "  groupIdEff = %d, groupId = %d\n"
@@ -272,19 +365,19 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                   l_procIds[i].chipIdEff,
                   l_procIds[i].chipId);
 
-        if((l_procIds[i].groupId != l_procIds[i].groupIdEff) ||
-           (l_procIds[i].chipId != l_procIds[i].chipIdEff) )
-        {
-            // Update attributes
-            (l_procIds[i].proc)->
-                setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_procIds[i].groupId);
-            (l_procIds[i].proc)->
-                setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_procIds[i].chipId);
+            if((l_procIds[i].groupId != l_procIds[i].groupIdEff) ||
+               (l_procIds[i].chipId != l_procIds[i].chipIdEff) )
+            {
+                // Update attributes
+                (l_procIds[i].proc)->
+                  setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_procIds[i].groupId);
+                (l_procIds[i].proc)->
+                  setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_procIds[i].chipId);
 
-            l_updateNeeded = true;
-        }
+                l_updateNeeded = true;
+            }
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "check_proc0_memory_config: Current attribute "
                   "settings for Proc %.8X\n"
                   "  ATTR_PROC_EFF_FABRIC_GROUP_ID = %d\n"
@@ -298,6 +391,8 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                   (l_procIds[i].proc)->
                       getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(),
                   (l_procIds[i].proc)->getAttr<ATTR_FABRIC_CHIP_ID>());
+        }
+
     }
 
     if(l_updateNeeded)

@@ -700,10 +700,13 @@
         <id>ATTR_SKIP_WAKEUP</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
-
     <attribute>
         <id>ATTR_EI_BUS_TX_MSBSWAP</id>
         <global/>
+    </attribute>
+    <attribute>
+        <id>ATTR_PROC_MEM_TO_USE</id>
+        <writeable/>
     </attribute>
     <!-- =====================================================================
      End of customizations definitions
