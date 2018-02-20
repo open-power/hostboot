@@ -100,6 +100,7 @@ struct GenericFspMboxMessage_t
       * Value for the GenericFspMboxMessage_t::magic
       */
     static constexpr uint32_t MAGIC_NUMBER = 0x4746464D;  // `GFFM`
+    static constexpr uint32_t FSP_HBRT_MESSAGEQ = 0x8000000F;
 
    /**
     * GenericFspMboxMessage_t Version info
