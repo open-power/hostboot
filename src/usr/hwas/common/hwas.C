@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1204,7 +1204,18 @@ errlHndl_t restrictECunits(
     const uint32_t i_deconfigReason)
 {
     HWAS_INF("restrictECunits entry, %d elements", i_procList.size());
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
+    TargetHandle_t l_masterProcTarget = nullptr;
+
+    do {
+
+    errl = targetService().queryMasterProcChipTargetHandle(l_masterProcTarget);
+    if(errl)
+    {
+        HWAS_ERR( "restrictECunits:: Unable to find master proc");
+        break;
+    }
+    HWAS_DBG("master proc huid: 0x%X", TARGETING::get_huid(l_masterProcTarget));
 
     // sort by group so PROC# are in the right groupings.
     std::sort(i_procList.begin(), i_procList.end(),
@@ -1220,6 +1231,7 @@ errlHndl_t restrictECunits(
     {
         // determine the number of procs we should enable
         uint8_t procs = i_procList[procIdx].procs;
+        int l_masterProc = -1;
         uint32_t maxECs = i_procList[procIdx].maxECs;
 
         // this procs number, used to determine groupings
@@ -1255,6 +1267,12 @@ errlHndl_t restrictECunits(
                 // we're done - break so that we use procIdx as the
                 //  start index next time
                 break;
+            }
+
+            // is this proc the master for this node?
+            if (pProc == l_masterProcTarget)
+            {
+                l_masterProc = i;
             }
 
             // get this proc's (CHILD) EX units
@@ -1337,6 +1355,8 @@ errlHndl_t restrictECunits(
             continue;
         }
 
+        HWAS_INF("master proc idx: %d", l_masterProc);
+
         HWAS_DBG("currentECs 0x%X > maxECs 0x%X -- restricting!",
                 (currentPairedECs + currentSingleECs), maxECs);
 
@@ -1356,6 +1376,10 @@ errlHndl_t restrictECunits(
         uint32_t goodECs = 0;
         HWAS_DBG("procs 0x%X maxECs 0x%X", procs, maxECs);
 
+        // Keep track of when we allocate at least one core to the master chip
+        // in order to avoid the situation of master not having any cores.
+        bool l_allocatedToMaster = false;
+
         // Each pECList has ECs for a given EX and proc.  Check each EC list to
         //  determine if it has an EC pair or a single EC and if the remaining
         //  count indicates the given EC from that list is to stay functional.
@@ -1367,32 +1391,49 @@ errlHndl_t restrictECunits(
         // remaining ones.
         for (uint32_t j = 0; j < NUM_EX_PER_CHIP; j++)
         {
-            for (uint32_t i = 0; i < procs; i++)
+            for (int i = 0; i < procs; i++)
             {
                 // Walk through the EC list from this EX
                 while (pEC_it[i][j] != pECList[i][j].end())
                 {
                     // Check if EC pair for this EX
                     if ((pECList[i][j].size() == 2) &&
-                        (pairedECs_remaining != 0))
+                        (pairedECs_remaining != 0)  &&
+                         (i==l_masterProc || // is master or
+                          l_allocatedToMaster || // was allocated to master
+                          pairedECs_remaining > 2)) // save 2 cores for master
                     {
                         // got a functional EC that is part of a pair
                         goodECs++;
                         pairedECs_remaining--;
-                        HWAS_DBG("pEC   %.8X - is good %d!",
+                        HWAS_DBG("pEC   0x%.8X - is good %d! (paired) pi:%d EXi:%d pairedECs_remaining %d",
                                  (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
-                                 goodECs);
+                                 goodECs, i, j, pairedECs_remaining);
+                        if (i == l_masterProc)
+                        {
+                            HWAS_DBG("Allocated to master");
+                            l_allocatedToMaster = true;
+                        }
                     }
                     // Check if single EC for this EX
                     else if ((pECList[i][j].size() == 1) &&
-                             (singleECs_remaining != 0))
+                             (singleECs_remaining != 0) &&
+                              (i==l_masterProc || // is master or
+                               l_allocatedToMaster || // was allocated to master
+                               singleECs_remaining > 1)) // save core for master
+
                     {
                         // got a functional EC without a pair
                         goodECs++;
                         singleECs_remaining--;
-                        HWAS_DBG("pEC   %.8X - is good %d!",
+                        HWAS_DBG("pEC   0x%.8X - is good %d! (single) pi:%d EXi:%d singleECs_remaining %d",
                                  (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
-                                 ++goodECs);
+                                 goodECs, i, j, singleECs_remaining);
+                        if (i == l_masterProc)
+                        {
+                            HWAS_DBG("Allocated to master");
+                            l_allocatedToMaster = true;
+                        }
                     }
                     // Otherwise paired or single EC, but not needed for maxECs
                     else
@@ -1400,6 +1441,10 @@ errlHndl_t restrictECunits(
                         // got an EC to be restricted and marked not functional
                         TargetHandle_t l_pEC = *(pEC_it[i][j]);
                         forceEcExEqDeconfig(l_pEC, i_present, i_deconfigReason);
+                        HWAS_DBG("pEC   0x%.8X - deconfigured! (%s) pi:%d EXi:%d",
+                            (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
+                            (pECList[i][j].size() == 1)? "single": "paired",
+                            i, j);
                     }
 
                     (pEC_it[i][j])++; // next ec in this ex's list
@@ -1407,6 +1452,8 @@ errlHndl_t restrictECunits(
             } // for i < procs
         } // for j < NUM_EX_PER_CHIP
     } // for procIdx < l_ProcCount
+
+    } while(0); // do {
 
     if (errl)
     {
