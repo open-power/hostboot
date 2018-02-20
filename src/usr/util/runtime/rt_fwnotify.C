@@ -132,17 +132,19 @@ void sbeAttemptRecovery(uint64_t i_data)
             break;
         }
 
-        // Get the SBE Retry Handler, propagating the supplied PLID
-        SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
-                        SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-                        l_sbeRetryData->plid);
-
-        // Retry the recovery of the SBE
-        l_SBEobj.main_sbe_handler(l_target);
 
         // Get the recovery results
-        bool l_recoverySuccessful = l_SBEobj.getSbeRestart();
+        // TODO SW415675 Need to attempt sbe retry if requested
+        // Get the SBE Retry Handler, propagating the supplied PLID
+//         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
+//                         SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+//                         l_sbeRetryData->plid);
 
+        // Retry the recovery of the SBE
+//         l_SBEobj.main_sbe_handler(l_target);
+//         //bool l_recoverySuccessful = l_SBEobj.getSbeRestart();
+
+        bool l_recoverySuccessful = false;
         if (nullptr == g_hostInterfaces ||
             nullptr == g_hostInterfaces->firmware_request)
         {
@@ -177,7 +179,7 @@ void sbeAttemptRecovery(uint64_t i_data)
 
         // Populate the firmware_request request struct with given data
         l_req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
-        l_req_fw_msg.generic_msg.msgq = GenericFspMboxMessage_t::MSG_SBE_ERROR;
+        l_req_fw_msg.generic_msg.msgq = GenericFspMboxMessage_t::FSP_HBRT_MESSAGEQ;
         l_req_fw_msg.generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
         l_req_fw_msg.generic_msg.data = i_data;
 
