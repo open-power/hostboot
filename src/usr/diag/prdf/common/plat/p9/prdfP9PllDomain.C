@@ -292,7 +292,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             if ( tmpCount == serviceData.service_data->getMruListSize() )
             {
                 // No additional callouts were made so add this chip to the list
-                serviceData.service_data->SetCallout( sysRefList[0]->getTrgt());
+                serviceData.service_data->SetCallout( pciList[0]->getTrgt());
             }
         }
 
