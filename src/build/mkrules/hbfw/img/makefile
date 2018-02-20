@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -272,10 +272,11 @@ P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
 P9N_EC21_BIN = ${SBEI_OBJPATH:Fp9n_21.sbe_seeprom.hdr.bin}
 P9N_EC22_BIN = ${SBEI_OBJPATH:Fp9n_22.sbe_seeprom.hdr.bin}
 P9C_EC10_BIN = ${SBEI_OBJPATH:Fp9c_10.sbe_seeprom.hdr.bin}
+P9C_EC11_BIN = ${SBEI_OBJPATH:Fp9c_11.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
   ${NIMBUS_SBE_IMG}:20=${P9N_EC20_BIN},21=${P9N_EC21_BIN},22=${P9N_EC22_BIN} \
-  ${CUMULUS_SBE_IMG}:10=${P9C_EC10_BIN}
+  ${CUMULUS_SBE_IMG}:10=${P9C_EC10_BIN},11=${P9C_EC11_BIN}
 
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
