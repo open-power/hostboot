@@ -296,6 +296,7 @@ foreach my $target (@targets)
         {
             $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_GROUP");
         }
+
     }
     elsif ($type eq "PROC")
     {
@@ -1087,9 +1088,12 @@ sub processProcessor
                              $targetObj->getAttribute($target,
                                                       "FABRIC_CHIP_ID"));
 
-
     processMembufVpdAssociation($targetObj,$target);
     setupBars($targetObj,$target);
+
+    $targetObj->setAttribute($target,
+                     "PROC_MEM_TO_USE", ( $targetObj->getAttribute($target,
+                     "FABRIC_GROUP_ID") << 3));
 }
 
 

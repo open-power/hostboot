@@ -156,7 +156,8 @@ namespace SPLESS
         uint32_t data32;
         struct
         {
-            uint32_t reserved1           :23;   //0:22
+            uint32_t procMemToUse        :7;    //0:6
+            uint32_t reserved1           :23;   //7:22
             uint32_t groupPumpMode       :1;    //23
             uint32_t isSlave             :1;    //24
             uint32_t reserved2           :1;    //25

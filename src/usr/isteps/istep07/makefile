@@ -56,12 +56,14 @@ EXTRAINCDIR += ${HWP_PATH_1}/lib/freq/
 EXTRAINCDIR += ${HWP_PATH_1}/lib/utils/
 EXTRAINCDIR += ${HWP_PATH_1}/lib/eff_config/
 EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/nest
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
 EXTRAINCDIR += ${HWP_PATH_2}/lib/
 EXTRAINCDIR += ${HWP_PATH_2}/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_2}/lib/utils/
 
 VPATH += ${HWP_PATH} ${HWP_PATH_1}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
+VPATH += ${PROCEDURES_PATH}/hwp/perv
 VPATH += ${HWP_PATH_1}/lib ${HWP_PATH_1}/lib/utils ${HWP_PATH_1}/lib/eff_config
 VPATH += ${HWP_PATH_1}/lib/freq ${HWP_PATH_1}/lib/dimm
 VPATH += ${ROOTPATH}/src/usr/sbe
