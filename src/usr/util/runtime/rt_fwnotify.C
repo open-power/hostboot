@@ -342,21 +342,22 @@ void firmware_notify( uint64_t i_len, void *i_data )
                        static_cast<hostInterfaces::hbrt_fw_msg*>(i_data);
         switch (l_hbrt_fw_msg->io_type)
         {
-
            case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
            {
               // Distinguish based on msgType and msgq
-              if (l_hbrt_fw_msg->generic_msg.msgType ==
-                  GenericFspMboxMessage_t::MSG_SBE_ERROR)
-              {
-                sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
-              }
-              else if ( (l_hbrt_fw_msg->generic_msg.msgType ==
+              if ( (l_hbrt_fw_msg->generic_msg.msgType ==
                          GenericFspMboxMessage_t::MSG_ATTR_SYNC_REQUEST) &&
                         (l_hbrt_fw_msg->generic_msg.msgq ==
                          MBOX::HB_ATTR_SYNC_MSGQ) )
               {
                 attrSyncRequest((void*)&(l_hbrt_fw_msg->generic_msg.data));
+              }
+              // Placing this at end as it does not have a msgq specified
+              // Want to match msgType & msgq combos first
+              else if (l_hbrt_fw_msg->generic_msg.msgType ==
+                       GenericFspMboxMessage_t::MSG_SBE_ERROR)
+              {
+                sbeAttemptRecovery(l_hbrt_fw_msg->generic_msg.data);
               }
               else
               {
