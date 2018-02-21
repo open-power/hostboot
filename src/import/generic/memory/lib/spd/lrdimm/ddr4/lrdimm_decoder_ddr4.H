@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief LRDIMM module SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -55,10 +55,6 @@ namespace lrdimm
 ///
 class decoder_v1_0 : public dimm_module_decoder
 {
-    protected:
-
-        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
-
     public:
 
         // First field - SPD byte
@@ -104,12 +100,6 @@ class decoder_v1_0 : public dimm_module_decoder
         constexpr static field_t DATA_BUFFER_GAIN_ADJUST{156, 7, 1};
         constexpr static field_t DATA_BUFFER_DFE{156, 6, 1};
 
-        // Allows injection of errors for testing
-        // TK - Consider API change to use setter/getters
-        // for this instance variable, RDIMM decoder
-        // uses this interface so they have to match - AAM
-        std::vector<uint8_t> iv_spd_data;
-
         // deleted default ctor
         decoder_v1_0() = delete;
 
@@ -120,7 +110,7 @@ class decoder_v1_0 : public dimm_module_decoder
         ///
         decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                      const std::vector<uint8_t>& i_spd_data)
-            : iv_target(i_target), iv_spd_data(i_spd_data)
+            : dimm_module_decoder(i_target, i_spd_data)
         {}
 
         ///

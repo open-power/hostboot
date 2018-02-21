@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @brief SPD decoder definitions
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -115,7 +115,7 @@ fapi2::ReturnCode decoder_v1_1::sdram_density( uint8_t& o_value ) const
               "Failed check for SPD DRAM capacity") );
 
     FAPI_INF("%s. SDRAM density: %d Gb",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -162,7 +162,7 @@ fapi2::ReturnCode decoder_v1_1::sec_sdram_signal_loading( uint8_t& o_value ) con
               "Failed check for Secondary SDRAM Signal Loading") );
 
     FAPI_INF("%s. Secondary SDRAM Signal Loading: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -208,7 +208,7 @@ fapi2::ReturnCode decoder_v1_1::soft_post_package_repair( uint8_t& o_value ) con
               "Failed check for Soft PPR") );
 
     FAPI_INF("%s. Soft Post Package Repair (Soft PPR): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -240,7 +240,7 @@ fapi2::ReturnCode decoder_v1_1::sec_dram_density_ratio( uint8_t& o_value ) const
               "Failed check for DRAM Density Ratio") );
 
     FAPI_INF("%s. DRAM Density Ratio: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -294,7 +294,7 @@ fapi2::ReturnCode decoder_v1_1::sec_sdram_die_count( uint8_t& o_value ) const
               "Failed check for Secondary Die Count") );
 
     FAPI_INF("%s. Secondary Die Count: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -341,7 +341,7 @@ fapi2::ReturnCode decoder_v1_1::sec_sdram_package_type( uint8_t& o_value ) const
               "Failed check for Secondary Package Type") );
 
     FAPI_INF("%s. Secondary Package Type: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -393,7 +393,7 @@ fapi2::ReturnCode decoder_v1_1::num_package_ranks_per_dimm( uint8_t& o_value ) c
               "Failed check for Num Package Ranks Per DIMM") );
 
     FAPI_INF("%s. Num Package Ranks per DIMM: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -428,7 +428,7 @@ fapi2::ReturnCode decoder_v1_1::rank_mix( uint8_t& o_value ) const
     o_value = l_field_bits;
 
     FAPI_INF("%s. Rank Mix: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -450,28 +450,28 @@ fapi2::ReturnCode decoder_v1_1::supported_cas_latencies( uint64_t& o_value ) con
     constexpr size_t FIRST_BYTE = 20;
     uint8_t first_raw_byte = iv_spd_data[FIRST_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(iv_target),
+             iv_target_str_storage,
              FIRST_BYTE,
              first_raw_byte);
 
     constexpr size_t SEC_BYTE = 21;
     uint8_t sec_raw_byte = iv_spd_data[SEC_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(iv_target),
+             iv_target_str_storage,
              SEC_BYTE,
              sec_raw_byte);
 
     constexpr size_t THIRD_BYTE = 22;
     uint8_t third_raw_byte = iv_spd_data[THIRD_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(iv_target),
+             iv_target_str_storage,
              THIRD_BYTE,
              third_raw_byte);
 
     constexpr size_t FOURTH_BYTE = 23;
     uint8_t fourth_raw_byte = iv_spd_data[FOURTH_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             c_str(iv_target),
+             iv_target_str_storage,
              FOURTH_BYTE,
              fourth_raw_byte);
 
@@ -501,7 +501,7 @@ fapi2::ReturnCode decoder_v1_1::supported_cas_latencies( uint64_t& o_value ) con
     o_value = l_buffer;
 
     FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -561,7 +561,7 @@ fapi2::ReturnCode decoder_v1_1::min_twr( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Write Recovery Time (tWRmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -623,7 +623,7 @@ fapi2::ReturnCode decoder_v1_1::min_twtr_s( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Smin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -684,7 +684,7 @@ fapi2::ReturnCode decoder_v1_1::min_twtr_l( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Write to Read Time - Same Bank Group (tWTR_Lmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:

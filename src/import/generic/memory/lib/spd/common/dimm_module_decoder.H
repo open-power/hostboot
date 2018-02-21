@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief base dimm module SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -53,11 +53,24 @@ namespace spd
 class dimm_module_decoder
 {
     public:
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
+
+        //
+        std::vector<uint8_t> iv_spd_data;
 
         ///
         /// @brief default ctor
         ///
         dimm_module_decoder() = default;
+
+        ///
+        /// @brief ctor
+        ///
+        dimm_module_decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                            const std::vector<uint8_t>& i_spd_data): iv_target(i_target), iv_spd_data(i_spd_data)
+        {
+            fapi2::toString(iv_target, iv_target_str_storage, fapi2::MAX_ECMD_STRING_LEN);
+        }
 
         ///
         /// @brief default dtor
@@ -508,6 +521,11 @@ class dimm_module_decoder
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+    protected:
+
+        char iv_target_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+
 };
 
 ///

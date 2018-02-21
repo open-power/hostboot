@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -1529,7 +1529,7 @@ class decoder_v1_0 : public decoder
                 l_buffer.extractToRight<TT::EXTRACT_START, TT::EXTRACT_LEN>(l_field);
 
                 FAPI_DBG("%s SPD byte %d, data: %d, field value: %d, starting bit: %d, bit length: %d",
-                         mss::c_str(iv_target), byte, iv_spd_data[byte], l_field, TT::EXTRACT_START, TT::EXTRACT_LEN);
+                         iv_target_str_storage, byte, iv_spd_data[byte], l_field, TT::EXTRACT_START, TT::EXTRACT_LEN);
 
                 FAPI_TRY( TT::fail_check(iv_target, byte, l_field) );
 

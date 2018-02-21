@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @brief SPD decoder definitions
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -117,7 +117,7 @@ fapi2::ReturnCode decoder_v1_0::number_of_used_bytes( uint16_t& o_value ) const
               "Failed check on SPD used bytes") );
 
     FAPI_INF("%s. Bytes Used: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -164,7 +164,7 @@ fapi2::ReturnCode decoder_v1_0::number_of_total_bytes( uint16_t& o_value ) const
               "Failed check on SPD total bytes") );
 
     FAPI_INF("%s. Total Bytes: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -214,7 +214,7 @@ fapi2::ReturnCode decoder_v1_0::sdram_density( uint8_t& o_value) const
               "Failed check for SPD DRAM capacity") );
 
     FAPI_INF("%s. SDRAM density: %d Gb",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -261,7 +261,7 @@ fapi2::ReturnCode decoder_v1_0::bank_bits( uint8_t& o_value) const
               "Failed check for SPD DRAM banks") );
 
     FAPI_INF("%s. Number of banks address bits: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -308,7 +308,7 @@ fapi2::ReturnCode decoder_v1_0::bank_group_bits( uint8_t& o_value) const
               "Failed check for SPD DRAM bank groups") );
 
     FAPI_INF("%s. Number of bank group bits: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -356,7 +356,7 @@ fapi2::ReturnCode decoder_v1_0::column_address_bits( uint8_t& o_value) const
               "Failed check for SDRAM Column Address Bits") );
 
     FAPI_INF("%s. Number of Column Address Bits: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -407,7 +407,7 @@ fapi2::ReturnCode decoder_v1_0::row_address_bits( uint8_t& o_value) const
               "Failed check for SDRAM Row Address Bits") );
 
     FAPI_INF("%s. Number of Row Address Bits: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -455,7 +455,7 @@ fapi2::ReturnCode decoder_v1_0::prim_sdram_signal_loading( uint8_t& o_value) con
               "Failed check for Primary SDRAM Signal Loading") );
 
     FAPI_INF("%s. Primary SDRAM Signal Loading: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -507,7 +507,7 @@ fapi2::ReturnCode decoder_v1_0::prim_sdram_die_count( uint8_t& o_value) const
               "Failed check for SDRAM Row Address Bits") );
 
     FAPI_INF("%s. Number of Row Address Bits: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -553,7 +553,7 @@ fapi2::ReturnCode decoder_v1_0::prim_sdram_package_type( uint8_t& o_value) const
               "Failed check for Primary SDRAM package type") );
 
     FAPI_INF("%s. Primary SDRAM package type: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -606,7 +606,7 @@ fapi2::ReturnCode decoder_v1_0::maximum_activate_count( uint32_t& o_value ) cons
               "Failed check for SDRAM Maximum Active Count (MAC)") );
 
     FAPI_INF("%s. Maximum Active Count (MAC): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -654,7 +654,7 @@ fapi2::ReturnCode decoder_v1_0::maximum_activate_window_multiplier( uint32_t& o_
               "Failed check for Maximum Active Window (tMAW)") );
 
     FAPI_INF("%s. Maximum Active Window multiplier: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -700,7 +700,7 @@ fapi2::ReturnCode decoder_v1_0::post_package_repair( uint8_t& o_value) const
               "Failed check for PPR") );
 
     FAPI_INF("%s. Post Package Repair (PPR): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -845,7 +845,7 @@ fapi2::ReturnCode decoder_v1_0::operable_nominal_voltage( uint8_t& o_value) cons
               "Failed check for Operable nominal voltage") );
 
     FAPI_INF("%s. Operable: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -892,7 +892,7 @@ fapi2::ReturnCode decoder_v1_0::endurant_nominal_voltage( uint8_t& o_value) cons
               "Failed check for Endurant nominal voltage") );
 
     FAPI_INF("%s. Endurant: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -941,7 +941,7 @@ fapi2::ReturnCode decoder_v1_0::device_width( uint8_t& o_value) const
               "Failed check for Device Width") );
 
     FAPI_INF("%s. Device Width: %d bits",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -991,7 +991,7 @@ fapi2::ReturnCode decoder_v1_0::num_package_ranks_per_dimm( uint8_t& o_value) co
               "Failed check for Num Package Ranks Per DIMM") );
 
     FAPI_INF("%s. Num Package Ranks per DIMM: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1060,7 +1060,7 @@ fapi2::ReturnCode decoder_v1_0::prim_bus_width( uint8_t& o_value) const
               "Failed check for Primary Bus Width") );
 
     FAPI_INF("%s. Primary Bus Width: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1106,7 +1106,7 @@ fapi2::ReturnCode decoder_v1_0::bus_width_extension( uint8_t& o_value) const
               "Failed check for Bus Width Extension") );
 
     FAPI_INF("%s. Bus Width Extension (bits): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1141,7 +1141,7 @@ fapi2::ReturnCode decoder_v1_0::thermal_sensor( uint8_t& o_value) const
     o_value = l_field_bits;
 
     FAPI_INF("%s. Thermal Sensor: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1176,7 +1176,7 @@ fapi2::ReturnCode decoder_v1_0::extended_base_module_type( uint8_t& o_value) con
     o_value = l_field_bits;
 
     FAPI_INF("%s. Extended Base Module Type: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1224,7 +1224,7 @@ fapi2::ReturnCode decoder_v1_0::fine_timebase( int64_t& o_value) const
               "Failed check for Fine Timebase") );
 
     FAPI_INF("%s. Fine Timebase: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1271,7 +1271,7 @@ fapi2::ReturnCode decoder_v1_0::medium_timebase( int64_t& o_value) const
               "Failed check for Medium Timebase") );
 
     FAPI_INF("%s. Medium Timebase: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1300,7 +1300,7 @@ fapi2::ReturnCode decoder_v1_0::min_tck( int64_t& o_value ) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: %d.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_timing_val);
 
@@ -1319,7 +1319,7 @@ fapi2::ReturnCode decoder_v1_0::min_tck( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Cycle Time (tCKmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1347,7 +1347,7 @@ fapi2::ReturnCode decoder_v1_0::max_tck( int64_t& o_value ) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: %d.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_timing_val);
 
@@ -1366,7 +1366,7 @@ fapi2::ReturnCode decoder_v1_0::max_tck( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Maximum Cycle Time (tCKmax) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1389,28 +1389,28 @@ fapi2::ReturnCode decoder_v1_0::supported_cas_latencies( uint64_t& o_value ) con
     constexpr size_t FIRST_BYTE = 20;
     uint8_t first_raw_byte = iv_spd_data[FIRST_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              FIRST_BYTE,
              first_raw_byte);
 
     constexpr size_t SEC_BYTE = 21;
     uint8_t sec_raw_byte = iv_spd_data[SEC_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              SEC_BYTE,
              sec_raw_byte);
 
     constexpr size_t THIRD_BYTE = 22;
     uint8_t third_raw_byte = iv_spd_data[THIRD_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              THIRD_BYTE,
              third_raw_byte);
 
     constexpr size_t FOURTH_BYTE = 23;
     uint8_t fourth_raw_byte = iv_spd_data[FOURTH_BYTE];
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              FOURTH_BYTE,
              fourth_raw_byte);
 
@@ -1439,7 +1439,7 @@ fapi2::ReturnCode decoder_v1_0::supported_cas_latencies( uint64_t& o_value ) con
     o_value = l_supported_cl;
 
     FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1468,7 +1468,7 @@ fapi2::ReturnCode decoder_v1_0::min_taa( int64_t& o_value ) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_timing_val);
 
@@ -1487,7 +1487,7 @@ fapi2::ReturnCode decoder_v1_0::min_taa( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum CAS Latency Time (tAAmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1515,7 +1515,7 @@ fapi2::ReturnCode decoder_v1_0::min_trcd( int64_t& o_value ) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_timing_val);
 
@@ -1534,7 +1534,7 @@ fapi2::ReturnCode decoder_v1_0::min_trcd( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum RAS to CAS Delay Time (tRCDmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1562,7 +1562,7 @@ fapi2::ReturnCode decoder_v1_0::min_trp( int64_t& o_value ) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_timing_val);
 
@@ -1581,7 +1581,7 @@ fapi2::ReturnCode decoder_v1_0::min_trp( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Row Precharge Delay Time (tRPmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1640,7 +1640,7 @@ fapi2::ReturnCode decoder_v1_0::min_tras( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Active to Precharge Delay Time (tRASmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1702,7 +1702,7 @@ fapi2::ReturnCode decoder_v1_0::min_trc( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Active to Active/Refresh Delay Time (tRCmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1761,7 +1761,7 @@ fapi2::ReturnCode decoder_v1_0::min_trfc1( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 1 (tRFC1min) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1819,7 +1819,7 @@ fapi2::ReturnCode decoder_v1_0::min_trfc2( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 2 (tRFC2min) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1877,7 +1877,7 @@ fapi2::ReturnCode decoder_v1_0::min_trfc4( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Refresh Recovery Delay Time 4 (tRFC4min) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1935,7 +1935,7 @@ fapi2::ReturnCode decoder_v1_0::min_tfaw( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Four Activate Window Delay Time (tFAWmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -1961,7 +1961,7 @@ fapi2::ReturnCode decoder_v1_0::min_trrd_s( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 38;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -1984,7 +1984,7 @@ fapi2::ReturnCode decoder_v1_0::min_trrd_s( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Activate to Activate Delay Time - Different Bank Group (tRRD_Smin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2010,7 +2010,7 @@ fapi2::ReturnCode decoder_v1_0::min_trrd_l( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 39;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2033,7 +2033,7 @@ fapi2::ReturnCode decoder_v1_0::min_trrd_l( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum Activate to Activate Delay Time - Same Bank Group (tRRD_Lmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2059,7 +2059,7 @@ fapi2::ReturnCode decoder_v1_0::min_tccd_l( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 40;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2082,7 +2082,7 @@ fapi2::ReturnCode decoder_v1_0::min_tccd_l( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Minimum CAS to CAS Delay Time - Same Bank Group (tCCD_Lmin) in MTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2168,13 +2168,13 @@ fapi2::ReturnCode decoder_v1_0::package_rank_map( std::vector<uint8_t>& o_value 
     o_value.clear();
 
     FAPI_TRY( (sdram_connector_helper<DQ0_31, PKG_RANK_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for DQ0_31, PKG_RANK_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for DQ0_31, PKG_RANK_MAP", iv_target_str_storage );
 
     FAPI_TRY( (sdram_connector_helper<DQ32_63, PKG_RANK_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for DQ32_63, PKG_RANK_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for DQ32_63, PKG_RANK_MAP", iv_target_str_storage );
 
     FAPI_TRY( (sdram_connector_helper<CB0_7, PKG_RANK_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for CB0_7, PKG_RANK_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for CB0_7, PKG_RANK_MAP", iv_target_str_storage );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2194,13 +2194,13 @@ fapi2::ReturnCode decoder_v1_0::nibble_map( std::vector<uint8_t>& o_value ) cons
     o_value.clear();
 
     FAPI_TRY( (sdram_connector_helper<DQ0_31, NIBBLE_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for DQ0_31, NIBBLE_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for DQ0_31, NIBBLE_MAP", iv_target_str_storage );
 
     FAPI_TRY( (sdram_connector_helper<DQ32_63, NIBBLE_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for DQ32_63, NIBBLE_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for DQ32_63, NIBBLE_MAP", iv_target_str_storage );
 
     FAPI_TRY( (sdram_connector_helper<CB0_7, NIBBLE_MAP>(o_value)),
-              "%s Failed to sdram_connector_helper for CB0_7, NIBBLE_MAP", mss::c_str(iv_target) );
+              "%s Failed to sdram_connector_helper for CB0_7, NIBBLE_MAP", iv_target_str_storage );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2221,7 +2221,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_tccd_l( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 117;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2245,7 +2245,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_tccd_l( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum RAS to CAS Delay Time (tCCD_Lmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2267,7 +2267,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_l( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 118;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2291,7 +2291,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_l( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Activate to Activate Delay Time (tRRD_Lmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2313,7 +2313,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_s( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 119;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2337,7 +2337,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trrd_s( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Activate to Activate Delay Time - Different Bank Group (tRRD_Smin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2359,7 +2359,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trc( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 120;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2383,7 +2383,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trc( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Active to Active/Refresh Delay Time (tRCmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2405,7 +2405,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trp( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 121;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2429,7 +2429,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trp( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Row Precharge Delay Time (tRPmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2450,7 +2450,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trcd( int64_t& o_value) const
     constexpr size_t BYTE_INDEX = 122;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2474,7 +2474,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_trcd( int64_t& o_value) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum RAS to CAS Delay Time (tRCDmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2496,7 +2496,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_taa( int64_t& o_value ) const
     constexpr size_t BYTE_INDEX = 123;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2520,7 +2520,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_taa( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum CAS Latency Time (tAAmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2542,7 +2542,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_max_tck( int64_t& o_value ) const
     constexpr size_t BYTE_INDEX = 124;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2566,7 +2566,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_max_tck( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Maximum Cycle Time (tCKmax) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2589,7 +2589,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_tck( int64_t& o_value ) const
     constexpr size_t BYTE_INDEX = 125;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
@@ -2613,7 +2613,7 @@ fapi2::ReturnCode decoder_v1_0::fine_offset_min_tck( int64_t& o_value ) const
     o_value = l_timing_val;
 
     FAPI_INF("%s. Fine offset for Minimum Cycle Time (tCKmin) in FTB units: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
 fapi_try_exit:
@@ -2652,7 +2652,7 @@ fapi2::ReturnCode decoder_v1_0::cyclical_redundancy_code( uint16_t& o_value ) co
     o_value = l_buffer;
 
     FAPI_INF("%s. Cyclical Redundancy Code (CRC): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2689,7 +2689,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturer_id_code( uint16_t& o_value )
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Manufacturer ID Code: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2711,14 +2711,14 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_location( uint8_t& o_value)
     constexpr size_t BYTE_INDEX = 322;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. Module Manufacturing Location: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2757,7 +2757,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_date( uint16_t& o_value ) c
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Manufacturer ID date: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2807,7 +2807,7 @@ fapi2::ReturnCode decoder_v1_0::module_serial_number( uint32_t& o_value ) const
     o_value = l_buffer;
 
     FAPI_INF("%s.Module Serial Number : %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2829,14 +2829,14 @@ fapi2::ReturnCode decoder_v1_0::module_revision_code( uint8_t& o_value) const
     constexpr size_t BYTE_INDEX = 349;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. Module Revision Code: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2871,7 +2871,7 @@ fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value ) c
     o_value = l_buffer;
 
     FAPI_INF("%s.DRAM Manufacturer ID Code (dram_mfg_id): %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     // Returns "happy" until we can figure out a way to test this - AAM
@@ -2907,7 +2907,7 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code( uint16_t& o_value ) co
     o_value = l_buffer;
 
     FAPI_INF("%s.RCD Manufacturer ID Code (rcd_mfg_id): %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2928,14 +2928,14 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num( uint8_t& o_value ) const
     constexpr size_t BYTE_INDEX = 135;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%01X.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. Register Revision Number: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2957,14 +2957,14 @@ fapi2::ReturnCode decoder_v1_0::dram_stepping( uint8_t& o_value) const
     constexpr size_t BYTE_INDEX = 352;
 
     FAPI_INF("%s SPD data at Byte %d: 0x%01X.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              iv_spd_data[BYTE_INDEX]);
 
     o_value = iv_spd_data[BYTE_INDEX];
 
     FAPI_INF("%s. DRAM stepping: %x",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_value);
     return fapi2::FAPI2_RC_SUCCESS;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief LRDIMM module SPD decoder definitions for revision 1.0
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -65,13 +65,13 @@ namespace lrdimm
 // For LRDIMM module rev 1.0
 /////////////////////////
 
+///
 /// @brief Helper function to find SPD byte based on freq
 /// @param[in] i_dimm_speed DIMM speed in MT/s
 /// @param[out] o_byte byte to extract spd from
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD spec sets encoding based on freq ranges such as, 1866 < data rate <= 2400,
-/// But for Nimbus we can only be 1866, 2133, 2400, and 2666.  No intermediate values
-/// so we use a simple case statement to get our results.
+///
 static fapi2::ReturnCode mdq_helper(const uint64_t i_dimm_speed, uint8_t& o_byte)
 {
     switch(i_dimm_speed)
@@ -98,13 +98,13 @@ static fapi2::ReturnCode mdq_helper(const uint64_t i_dimm_speed, uint8_t& o_byte
     return fapi2::FAPI2_RC_SUCCESS;
 };
 
+///
 /// @brief Helper function to find start bit based on freq
 /// @param[in] i_dimm_speed DIMM speed in MT/s
 /// @param[out] o_start_bit start bit to extract SPD from
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD spec sets encoding based on freq ranges such as, 1866 < data rate <= 2400,
-/// But for Nimbus we can only be 1866, 2133, 2400, and 2666.  No intermediate values
-/// so we use a simple case statement to get our results.
+///
 static fapi2::ReturnCode drive_strength_start_bit_finder(const uint64_t i_dimm_speed, size_t& o_start_bit)
 {
     switch(i_dimm_speed)
@@ -131,13 +131,13 @@ static fapi2::ReturnCode drive_strength_start_bit_finder(const uint64_t i_dimm_s
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
 /// @brief Helper function to find SPD byte based on freq
 /// @param[in] i_dimm_speed DIMM speed in MT/s
 /// @param[out] o_byte byte to extract spd from
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD spec sets encoding based on freq ranges such as, 1866 < data rate <= 2400,
-/// But for Nimbus we can only be 1866, 2133, 2400, and 2666.  No intermediate values
-/// so we use a simple case statement to get our results.
+///
 static fapi2::ReturnCode rtt_wr_and_nom_byte_finder(const uint64_t i_dimm_speed, size_t& o_byte)
 {
     switch(i_dimm_speed)
@@ -164,13 +164,13 @@ static fapi2::ReturnCode rtt_wr_and_nom_byte_finder(const uint64_t i_dimm_speed,
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
 /// @brief Helper function to find SPD byte based on freq
 /// @param[in] i_dimm_speed DIMM speed in MT/s
 /// @param[out] o_byte byte to extract spd from
 /// @return FAPI2_RC_SUCCESS if okay
 /// @note SPD spec sets encoding based on freq ranges such as, 1866 < data rate <= 2400,
-/// But for Nimbus we can only be 1866, 2133, 2400, and 2666.  No intermediate values
-/// so we use a simple case statement to get our results.
+///
 static fapi2::ReturnCode rtt_park_byte_finder(const uint64_t i_dimm_speed, size_t& o_byte)
 {
     switch(i_dimm_speed)
@@ -213,8 +213,8 @@ static fapi2::ReturnCode rtt_park_byte_finder(const uint64_t i_dimm_speed, size_
 ///
 fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output) const
 {
-    uint8_t l_field_bits = extract_spd_field< MODULE_NOMINAL_HEIGHT >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< MODULE_NOMINAL_HEIGHT >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b11111;
@@ -229,7 +229,7 @@ fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output) con
     o_output = l_field_bits;
 
     FAPI_INF("%s. Max module nominal height: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -247,8 +247,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode decoder_v1_0::raw_card_extension(uint8_t& o_output) const
 {
-    uint8_t l_field_bits = extract_spd_field< RAW_CARD_EXTENSION >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< RAW_CARD_EXTENSION >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b111;
@@ -263,7 +263,7 @@ fapi2::ReturnCode decoder_v1_0::raw_card_extension(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Raw card extension: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -282,9 +282,9 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< FRONT_MODULE_THICKNESS >(iv_target, iv_spd_data);
+    const uint8_t l_field_bits = extract_spd_field< FRONT_MODULE_THICKNESS >(iv_target, iv_spd_data);
 
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b1111;
@@ -299,7 +299,7 @@ fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output) co
     o_output = l_field_bits;
 
     FAPI_INF("%s. Front module max thickness: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -319,8 +319,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< BACK_MODULE_THICKNESS >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< BACK_MODULE_THICKNESS >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 0b1111;
@@ -335,7 +335,7 @@ fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output) con
     o_output = l_field_bits;
 
     FAPI_INF("%s. Back module max thickness: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -355,8 +355,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< NUM_REGISTERS_USED >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< NUM_REGISTERS_USED >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 0b10;
@@ -371,7 +371,7 @@ fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of registers used on LRDIMM : %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -390,8 +390,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< NUM_ROWS_OF_DRAMS >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< NUM_ROWS_OF_DRAMS >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 0b11;
@@ -406,7 +406,7 @@ fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of rows of DRAMs on LRDIMM : %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -426,8 +426,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< HEAT_SPREADER_SOLUTION >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< HEAT_SPREADER_SOLUTION >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 1;
@@ -442,7 +442,7 @@ fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Heat spreader solution: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -461,8 +461,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< CONTINUATION_CODES >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< CONTINUATION_CODES >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VALUE = 10; // JEP106AS spec
@@ -477,7 +477,7 @@ fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of continuation codes: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -500,7 +500,7 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output) cons
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_byte);
 
@@ -508,7 +508,7 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output) cons
     o_output = l_raw_byte;
 
     FAPI_INF("%s. Register revision number: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -530,7 +530,7 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_byte);
 
@@ -538,7 +538,7 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output) const
     o_output = l_raw_byte;
 
     FAPI_INF("%s. Register revision number: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -556,8 +556,8 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output) const
 fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< ADDR_MAPPING >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< ADDR_MAPPING >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t MAX_VALID_VAL = 1;
@@ -572,7 +572,7 @@ fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output)
     o_output = l_field_bits;
 
     FAPI_INF("%s. Address mapping from register to dram: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -591,8 +591,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< CKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< CKE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 3;
@@ -607,7 +607,7 @@ fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CKE: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -626,8 +626,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< ODT_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< ODT_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 3;
@@ -642,7 +642,7 @@ fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for ODT: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -661,8 +661,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< CA_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< CA_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t INVALID_VAL = 4;
@@ -677,7 +677,7 @@ fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CA: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -696,8 +696,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< CS_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< CS_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 3;
@@ -712,7 +712,7 @@ fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CS: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -731,8 +731,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< B_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< B_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 3;
@@ -747,7 +747,7 @@ fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y0,Y2): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -766,8 +766,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< A_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< A_SIDE_DRIVE_STRENGTH >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // This checks my extracting params returns a value within bound
     constexpr size_t RESERVED = 3;
@@ -782,7 +782,7 @@ fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y1,Y3): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -806,7 +806,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_rev(uint8_t& o_output) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_byte);
 
@@ -823,7 +823,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_rev(uint8_t& o_output) const
     o_output = l_raw_byte;
 
     FAPI_INF("%s. Data buffer rev: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -843,8 +843,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank0(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK0 >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK0 >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // JESD79-4 specification
     constexpr size_t RESERVED = 0b110011;
@@ -859,7 +859,7 @@ fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank0(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. DRAM VrefDQ for Package Rank 0: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -878,8 +878,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank1(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK1 >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK1 >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // JESD79-4 specification
     constexpr size_t RESERVED = 0b110011;
@@ -894,7 +894,7 @@ fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank1(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. DRAM VrefDQ for Package Rank 1: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -913,8 +913,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank2(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK2  >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK2  >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // JESD79-4 specification
     constexpr size_t RESERVED = 0b110011;
@@ -929,7 +929,7 @@ fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank2(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. DRAM VrefDQ for Package Rank 2: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -948,8 +948,8 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank3(uint8_t& o_output) const
 {
     // Extracting desired bits
-    uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK3 >(iv_target, iv_spd_data);
-    FAPI_INF("Field Bits value: %d", l_field_bits);
+    const uint8_t l_field_bits = extract_spd_field< VREF_DQ_RANK3 >(iv_target, iv_spd_data);
+    FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
     // JESD79-4 specification
     constexpr size_t RESERVED = 0b110011;
@@ -964,7 +964,7 @@ fapi2::ReturnCode decoder_v1_0::dram_vref_dq_rank3(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. DRAM VrefDQ for Package Rank 3: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -987,7 +987,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_vref_dq(uint8_t& o_output) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_data);
 
@@ -1004,7 +1004,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_vref_dq(uint8_t& o_output) const
     o_output = l_raw_data;
 
     FAPI_INF("%s. Data buffer VrefDQ for DRAM interface: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -1025,7 +1025,6 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_drive_strength(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     uint8_t l_byte = 0;
-    uint8_t l_field_bits = 0;
 
     FAPI_TRY( mdq_helper(i_dimm_speed, l_byte) );
 
@@ -1034,8 +1033,8 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_drive_strength(const uint64_t i_
         constexpr size_t LEN = 3;
         const field_t MDQ_DRIVE_STRENGTH(l_byte, START, LEN);
 
-        l_field_bits = extract_spd_field( iv_target, MDQ_DRIVE_STRENGTH, iv_spd_data );
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field( iv_target, MDQ_DRIVE_STRENGTH, iv_spd_data );
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // Lets make sure we aren't being set to a reserved field
         bool is_reserved_bit = false;
@@ -1068,7 +1067,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_drive_strength(const uint64_t i_
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM interface MDQ Drive Strenth: %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 
@@ -1090,7 +1089,6 @@ fapi_try_exit:
 fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_rtt(const uint64_t i_dimm_speed, uint8_t& o_output) const
 {
     uint8_t l_byte = 0;
-    uint8_t l_field_bits = 0;
 
     FAPI_TRY( mdq_helper(i_dimm_speed, l_byte) );
 
@@ -1099,8 +1097,8 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_rtt(const uint64_t i_dimm_speed,
         constexpr size_t LEN = 3;
         const field_t DATA_BUFFER_MDQ_RTT(l_byte, START, LEN);
 
-        l_field_bits = extract_spd_field( iv_target, DATA_BUFFER_MDQ_RTT, iv_spd_data );
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field( iv_target, DATA_BUFFER_MDQ_RTT, iv_spd_data );
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // This checks my extracting params returns a value within bound
         constexpr size_t MAX_VALID_VALUE = 7;
@@ -1115,7 +1113,7 @@ fapi2::ReturnCode decoder_v1_0::data_buffer_mdq_rtt(const uint64_t i_dimm_speed,
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM interface MDQ RTT: %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 fapi_try_exit:
@@ -1143,8 +1141,8 @@ fapi2::ReturnCode decoder_v1_0::dram_drive_strength(const uint64_t i_dimm_speed,
         constexpr size_t LEN = 2;
         const field_t DRAM_DRIVE_STRENGTH(BYTE_INDEX, l_start, LEN);
 
-        uint8_t l_field_bits = extract_spd_field( iv_target, DRAM_DRIVE_STRENGTH, iv_spd_data );
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field( iv_target, DRAM_DRIVE_STRENGTH, iv_spd_data );
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // SPD JEDEC specification
         constexpr size_t RESERVED = 0b11;
@@ -1159,7 +1157,7 @@ fapi2::ReturnCode decoder_v1_0::dram_drive_strength(const uint64_t i_dimm_speed,
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM drive strenth: %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 
@@ -1188,8 +1186,8 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_nom(const uint64_t i_dimm_speed, uint8_
         constexpr size_t LEN = 3;
         const field_t DRAM_RTT_NOM(l_byte, START, LEN);
 
-        uint8_t l_field_bits = extract_spd_field(iv_target,  DRAM_RTT_NOM, iv_spd_data);
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field(iv_target,  DRAM_RTT_NOM, iv_spd_data);
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // This checks my extracting params returns a value within bound
         constexpr size_t MAX_VALID_VALUE = 7;
@@ -1204,7 +1202,7 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_nom(const uint64_t i_dimm_speed, uint8_
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM RTT_NOM: %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 
@@ -1233,8 +1231,8 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t
         constexpr size_t LEN = 3;
         const field_t DRAM_RTT_WR(l_byte, START, LEN);
 
-        uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_WR, iv_spd_data);
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_WR, iv_spd_data);
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // Lets make sure we aren't being set to a reserved field
         bool is_reserved_bit = false;
@@ -1266,7 +1264,7 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_wr(const uint64_t i_dimm_speed, uint8_t
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM_RTT_WR: %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 
@@ -1295,8 +1293,8 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks0_1(const uint64_t i_dimm_spe
         constexpr size_t LEN = 3;
         const field_t DRAM_RTT_PARK(l_byte, START, LEN);
 
-        uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_PARK, iv_spd_data);
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_PARK, iv_spd_data);
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // This checks my extracting params returns a value within bound
         constexpr size_t MAX_VALID_VALUE = 7;
@@ -1311,7 +1309,7 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks0_1(const uint64_t i_dimm_spe
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM RTT_PARK (package ranks 0,1): %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 
@@ -1340,8 +1338,8 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks2_3(const uint64_t i_dimm_spe
         constexpr size_t LEN = 3;
         const field_t DRAM_RTT_PARK(l_byte, START, LEN);
 
-        uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_PARK, iv_spd_data);
-        FAPI_INF("Field Bits value: %d", l_field_bits);
+        const uint8_t l_field_bits = extract_spd_field(iv_target, DRAM_RTT_PARK, iv_spd_data);
+        FAPI_INF("%s Field Bits value: %d", iv_target_str_storage, l_field_bits);
 
         // This checks my extracting params returns a value within bound
         constexpr size_t MAX_VALID_VALUE = 7;
@@ -1356,7 +1354,7 @@ fapi2::ReturnCode decoder_v1_0::dram_rtt_park_ranks2_3(const uint64_t i_dimm_spe
         o_output = l_field_bits;
 
         FAPI_INF("%s. DRAM RTT_PARK (package ranks 2,3): %d",
-                 mss::c_str(iv_target),
+                 iv_target_str_storage,
                  o_output);
     }
 

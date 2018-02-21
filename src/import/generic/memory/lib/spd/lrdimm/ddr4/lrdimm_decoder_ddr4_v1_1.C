@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief LRDIMM module SPD decoder definitions for revision 1.1
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -87,7 +87,7 @@ fapi2::ReturnCode decoder_v1_1::register_and_buffer_type(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register and Data Buffer Types: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -123,7 +123,7 @@ fapi2::ReturnCode decoder_v1_1::cke_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CKE: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -158,7 +158,7 @@ fapi2::ReturnCode decoder_v1_1::odt_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for ODT: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -193,7 +193,7 @@ fapi2::ReturnCode decoder_v1_1::cs_signal_output_driver(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CS: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -228,7 +228,7 @@ fapi2::ReturnCode decoder_v1_1::b_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y0,Y2): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -263,7 +263,7 @@ fapi2::ReturnCode decoder_v1_1::a_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y1,Y3): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:

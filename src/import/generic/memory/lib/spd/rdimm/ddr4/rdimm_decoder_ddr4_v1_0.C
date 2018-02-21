@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @brief RDIMM module specific SPD decoder definitions
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -91,7 +91,7 @@ fapi2::ReturnCode decoder_v1_0::max_module_nominal_height(uint8_t& o_output) con
     o_output = l_field_bits;
 
     FAPI_INF("%s. Max module nominal height: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -125,7 +125,7 @@ fapi2::ReturnCode decoder_v1_0::front_module_max_thickness(uint8_t& o_output) co
     o_output = l_field_bits;
 
     FAPI_INF("%s. Front module max thickness: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -160,7 +160,7 @@ fapi2::ReturnCode decoder_v1_0::back_module_max_thickness(uint8_t& o_output) con
     o_output = l_field_bits;
 
     FAPI_INF("%s. Back module max thickness: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -195,7 +195,7 @@ fapi2::ReturnCode decoder_v1_0::num_registers_used(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of registers used on RDIMM : %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -230,7 +230,7 @@ fapi2::ReturnCode decoder_v1_0::num_rows_of_drams(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of rows of DRAMs on RDIMM : %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -265,7 +265,7 @@ fapi2::ReturnCode decoder_v1_0::heat_spreader_thermal_char(uint8_t& o_output) co
     o_output = l_field_bits;
 
     FAPI_INF("%s. Heat spreader thermal characteristics: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -299,7 +299,7 @@ fapi2::ReturnCode decoder_v1_0::heat_spreader_solution(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Heat spreader solution: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -334,7 +334,7 @@ fapi2::ReturnCode decoder_v1_0::num_continuation_codes(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Number of continuation codes: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -358,14 +358,14 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code(uint8_t& o_output) cons
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_byte);
 
     o_output = l_raw_byte;
 
     FAPI_INF("%s. Manufacturer ID code: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -387,14 +387,14 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num(uint8_t& o_output) const
 
     // Trace in the front assists w/ debug
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              BYTE_INDEX,
              l_raw_byte);
 
     o_output = l_raw_byte;
 
     FAPI_INF("%s. Register revision number: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -427,7 +427,7 @@ fapi2::ReturnCode decoder_v1_0::register_to_dram_addr_mapping(uint8_t& o_output)
     o_output = l_field_bits;
 
     FAPI_INF("%s. Address mapping from register to dram: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -461,7 +461,7 @@ fapi2::ReturnCode decoder_v1_0::cke_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CKE: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -495,7 +495,7 @@ fapi2::ReturnCode decoder_v1_0::odt_signal_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for ODT: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -529,7 +529,7 @@ fapi2::ReturnCode decoder_v1_0::ca_signal_output_driver(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CA: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -563,7 +563,7 @@ fapi2::ReturnCode decoder_v1_0::cs_signal_output_driver(uint8_t& o_output) const
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for CS: %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -597,7 +597,7 @@ fapi2::ReturnCode decoder_v1_0::b_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y0,Y2): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:
@@ -631,7 +631,7 @@ fapi2::ReturnCode decoder_v1_0::a_side_clk_output_driver(uint8_t& o_output) cons
     o_output = l_field_bits;
 
     FAPI_INF("%s. Register Output Driver for clock (Y1,Y3): %d",
-             mss::c_str(iv_target),
+             iv_target_str_storage,
              o_output);
 
 fapi_try_exit:

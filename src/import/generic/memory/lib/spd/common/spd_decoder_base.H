@@ -28,7 +28,7 @@
 /// @brief SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -59,8 +59,11 @@ template< const field_t& F >
 inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                  const std::vector<uint8_t>& i_spd_data)
 {
+    char l_target_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString(i_target, l_target_str_storage, fapi2::MAX_ECMD_STRING_LEN);
+
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             l_target_str_storage,
              F.iv_byte,
              i_spd_data[F.iv_byte]);
 
@@ -84,8 +87,11 @@ inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
                                  const field_t& i_field,
                                  const std::vector<uint8_t>& i_spd_data)
 {
+    char l_target_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString(i_target, l_target_str_storage, fapi2::MAX_ECMD_STRING_LEN);
+
     FAPI_INF("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
+             l_target_str_storage,
              i_field.iv_byte,
              i_spd_data[i_field.iv_byte]);
 
@@ -105,6 +111,7 @@ inline uint8_t extract_spd_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 class decoder
 {
     protected:
+        char iv_target_str_storage[fapi2::MAX_ECMD_STRING_LEN];
 
         ///
         /// @brief Helper function that turns Logical ranks in Primary SDRAM type
@@ -154,7 +161,9 @@ class decoder
               iv_module_decoder(i_module_decoder),
               iv_spd_data(i_spd_data),
               iv_raw_card(i_raw_card)
-        {}
+        {
+            fapi2::toString(iv_target, iv_target_str_storage, fapi2::MAX_ECMD_STRING_LEN);
+        }
 
         ///
         /// @brief Default dtor
