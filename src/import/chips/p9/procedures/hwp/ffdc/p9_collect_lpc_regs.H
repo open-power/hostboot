@@ -22,3 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef _COLLECT_LPC_REGS_H_
+#define _COLLECT_LPC_REGS_H_
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+#include <return_code.H>
+#include <error_info_defs.H>
+
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_collect_lpc_regs_FP_t)(fapi2::ffdc_t&, fapi2::ReturnCode&);
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+///
+/// @brief Procedure for gathering LPC register data into FFDC, to complement p9_sbe_lpc_init
+/// @param[in] i_target_chip - P9 chip to collect LPC registers from
+/// @param[out] o_rc - return code to add FFDC data to.
+///
+/// @return FAPI2_RC_SUCCESS
+extern "C" fapi2::ReturnCode p9_collect_lpc_regs(fapi2::ffdc_t& i_target_chip, fapi2::ReturnCode& o_rc);
+
+#endif

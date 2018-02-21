@@ -92,6 +92,7 @@ OBJS += fapi2_utils.o
 OBJS += p9_collect_some_ffdc.o
 OBJS += p9_pib2pcb_mux_seq.o
 OBJS += p9_collect_ppe_state.o
+OBJS += p9_collect_lpc_regs.o
 OBJS += p9_ppe_state.o
 OBJS += p9_ppe_utils.o
 OBJS += p9_eq_clear_atomic_lock.o
