@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,6 +155,7 @@ void* PageManager::allocatePage(size_t n, bool userspace)
     // In non-kernel mode, make a system-call to allocate in kernel-mode.
     if (!KernelMisc::in_kernel_mode())
     {
+        size_t attempts = 0;
         while (NULL == page)
         {
             page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
@@ -164,6 +165,12 @@ void* PageManager::allocatePage(size_t n, bool userspace)
             // will eventually free up (ex. VMM flushes).
             if (NULL == page)
             {
+                attempts++;
+                if( attempts == 10000 ) //arbitrarily huge number
+                {
+                    printk("Cannot allocate %ld pages\n", n);
+                    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+                }
                 task_yield();
             }
         }
