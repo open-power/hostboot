@@ -22,3 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+PROCEDURE=p9_collect_lpc_regs
+$(call BUILD_PROCEDURE)

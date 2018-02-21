@@ -45,4 +45,29 @@
       <target>TARGET_CHIP</target>
     </deconfigure>
   </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_LPC_OPB_ERROR</rc>
+    <description>After LPC initialization, the OPB master indicated an error.</description>
+    <collectFfdc>p9_collect_lpc_regs, FFDC_TARGET_CHIP</collectFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+    </deconfigure>
+  </hwpError>
+  <hwpError>
+    <rc>RC_LPC_REGISTERS</rc>
+    <description>LPC register dump</description>
+    <buffer>OPB_MST_REGS</buffer>
+    <buffer>OPB_ARB_REGS</buffer>
+    <buffer>LPC_HC_REGS</buffer>
+  </hwpError>
 </hwpErrors>
