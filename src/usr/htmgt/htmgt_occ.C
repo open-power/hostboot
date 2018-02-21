@@ -441,7 +441,8 @@ namespace HTMGT
 
 
     // Query the functional OCCs and build OCC objects
-    errlHndl_t OccManager::_buildOccs(const bool i_occStart)
+    errlHndl_t OccManager::_buildOccs(const bool i_occStart,
+                                      const bool i_skipComm)
     {
         errlHndl_t err = nullptr;
         bool safeModeNeeded = false;
@@ -591,7 +592,8 @@ namespace HTMGT
             safeModeNeeded = true;
         }
 
-        if ((false == i_occStart) && (nullptr == err))
+        if ((false == i_occStart) && (nullptr == err) &&
+            (false == i_skipComm))
         {
             // Send poll to query state of all OCCs
             // and flush any errors reported by the OCCs
@@ -870,7 +872,7 @@ namespace HTMGT
         errlHndl_t err = nullptr;
         bool atThreshold = false;
 
-        err = _buildOccs(); // if not a already built.
+        err = _buildOccs(false, i_skipComm); // if not a already built.
         if (nullptr == err)
         {
             if (false == int_flags_set(FLAG_RESET_DISABLED))
@@ -1502,9 +1504,10 @@ namespace HTMGT
     }
 
 
-    errlHndl_t OccManager::buildOccs(const bool i_occStart)
+    errlHndl_t OccManager::buildOccs(const bool i_occStart, bool i_skipComm)
     {
-        return Singleton<OccManager>::instance()._buildOccs(i_occStart);
+        return Singleton<OccManager>::instance()._buildOccs(i_occStart,
+                                                                    i_skipComm);
     }
 
 

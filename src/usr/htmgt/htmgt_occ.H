@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -453,9 +453,12 @@ namespace HTMGT
              *
              * @param[in] i_occStart  true if call is being made after
              *                        OCCs have just been started.
+             * @param[in] i_skipComm  true if sendOccPoll should not
+             *                        be called
              * @return NULL on success, or error handle on failure
              */
-            static errlHndl_t buildOccs(const bool i_occStart = false);
+            static errlHndl_t buildOccs(bool i_occStart = false,
+                                        bool i_skipComm = false);
 
 
             /**
@@ -687,7 +690,8 @@ namespace HTMGT
 
 
             /* See buildOccs() above */
-            errlHndl_t _buildOccs(const bool i_occStart = false);
+            errlHndl_t _buildOccs(bool i_occStart = false,
+                                  bool i_skipComm = false);
 
 
             /* See getNumOccs() above */
