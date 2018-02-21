@@ -176,6 +176,17 @@ fapi2::ReturnCode p9_sbe_lpc_init(
     FAPI_TRY(lpc_write(i_target_chip, LPCM_LPC_MASTER_TIMEOUT_REG, LPCM_LPC_MASTER_TIMEOUT_VALUE),
              "Error trying to set up the LPC host controller timeout");
 
+    //------------------------------------------------------------------------------------------
+    //--- STEP 4: Check that everyone is happy
+    //------------------------------------------------------------------------------------------
+    FAPI_TRY(lpc_read(i_target_chip, LPCM_OPB_MASTER_STATUS_REG, l_data32),
+             "Error reading OPB master status register");
+    FAPI_ASSERT(0 == (l_data32 & LPCM_OPB_MASTER_STATUS_ERROR_BITS),
+                fapi2::LPC_OPB_ERROR().
+                set_FFDC_TARGET_CHIP(i_target_chip).
+                set_TARGET_CHIP(i_target_chip),
+                "The OPB master indicated an error after LPC setup");
+
     FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
 
 fapi_try_exit:
