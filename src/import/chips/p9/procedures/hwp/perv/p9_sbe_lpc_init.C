@@ -27,7 +27,7 @@
 ///
 /// @brief procedure to initialize LPC to enable communictation to PNOR
 //------------------------------------------------------------------------------
-// *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
+// *HWP HW Owner        : Joachim Fenkes <fenkes@de.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
@@ -43,6 +43,9 @@
 #include "p9_perv_scom_addresses_fld.H"
 #include "p9_misc_scom_addresses.H"
 #include "p9_misc_scom_addresses_fld.H"
+
+const bool LPC_UTILS_TIMEOUT_FFDC = true;
+#include "p9_lpc_utils.H"
 
 static fapi2::ReturnCode reset_lpc_master(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
@@ -79,32 +82,20 @@ fapi_try_exit:
 static fapi2::ReturnCode reset_lpc_bus_via_master(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-    fapi2::buffer<uint64_t> l_data64;
-    fapi2::buffer<uint64_t> l_lpcm_opb_master_control_register_data(0);
-
-    //Write to the LPCM OPB Master Control Register (address x'C001 0008')
-    l_lpcm_opb_master_control_register_data.setBit<PU_LPC_CMD_REG_RNW>().insertFromRight<PU_LPC_CMD_REG_ADR, PU_LPC_CMD_REG_ADR_LEN>
-    (LPCM_OPB_MASTER_CONTROL_REG).insertFromRight<PU_LPC_CMD_REG_SIZE, PU_LPC_CMD_REG_SIZE_LEN>(0x4);
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
-             "Erro writing the LPC_CMD_REG to get the current reset value");
-    FAPI_TRY(fapi2::getScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error getting the reset value");
+    fapi2::buffer<uint32_t> l_control;
 
     //Set register bit 23 lpc_lreset_oe to b'1' and set lpc_lreset_out to b'0' to drive a low reset
-    l_data64.setBit<LPC_LRESET_OE>().clearBit<LPC_LRESET_OUT>();
-    l_lpcm_opb_master_control_register_data.clearBit<PU_LPC_CMD_REG_RNW>();
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
-             "Error writing to the LPC_CMD_REG to set lpc_lreset_oe");
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error setting lpc_lreset_oe");
+    FAPI_TRY(lpc_read(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control),
+             "Error reading the OPB master control register");
+    l_control.setBit<LPC_LRESET_OE>().clearBit<LPC_LRESET_OUT>();
+    FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control), "Error asserting LPC reset");
 
     //Give the bus some time to reset
     fapi2::delay(LPC_LRESET_DELAY_NS, LPC_LRESET_DELAY_NS);
 
     //Clear bit 23 lpc_lreset_oe to stop driving the low reset
-    l_data64.clearBit<LPC_LRESET_OE>();
-    l_lpcm_opb_master_control_register_data.clearBit<PU_LPC_CMD_REG_RNW>();
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_lpcm_opb_master_control_register_data),
-             "Error writing to the LPC_CMD_REG to clear lpc_lreset_oe");
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error clearing lpc_lreset_oe");
+    l_control.clearBit<LPC_LRESET_OE>();
+    FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_control), "Error deasserting LPC reset");
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -140,15 +131,10 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 fapi2::ReturnCode p9_sbe_lpc_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-    const uint64_t C_LPC_TIMEOUT_ADDR = 0x00400000C001202C;
-    const uint64_t C_LPC_TIMEOUT_DATA = 0x00000000FE000000;
-    const uint64_t C_OPB_TIMEOUT_ADDR = 0x00400000C0010040;
-    const uint64_t C_OPB_TIMEOUT_DATA = 0x00000000FFFFFFFE;
-    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint32_t> l_data32;
     uint8_t l_use_gpio = 0;
     uint8_t l_is_fsp = 0;
     FAPI_DBG("p9_sbe_lpc_init: Entering ...");
@@ -180,16 +166,15 @@ fapi2::ReturnCode p9_sbe_lpc_init(
     //--- STEP 3: Program settings in LPC Master and FPGA
     //------------------------------------------------------------------------------------------
 
-    //Set up the LPC timeout settings
-    l_data64 = C_LPC_TIMEOUT_ADDR;
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_data64), "Error tring to set LPC timeout address");
-    l_data64 = C_LPC_TIMEOUT_DATA;
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error trying to set LPC timeout data");
-    //Set up the OPB timeout settings
-    l_data64 = C_OPB_TIMEOUT_ADDR;
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_data64), "Error trying to set OPB timeout address");
-    l_data64 = C_OPB_TIMEOUT_DATA;
-    FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data64), "Error trying to set OPB timeout data");
+    // Set up the LPC timeout settings - OPB master first, in case the LPC HC hangs
+    FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_TIMEOUT_REG, LPCM_OPB_MASTER_TIMEOUT_VALUE),
+             "Error trying to set up the OPB master timeout");
+    FAPI_TRY(lpc_read(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_data32), "Error reading OPB master control register");
+    l_data32.setBit<LPCM_OPB_MASTER_CONTROL_REG_TIMEOUT_ENABLE>();
+    FAPI_TRY(lpc_write(i_target_chip, LPCM_OPB_MASTER_CONTROL_REG, l_data32), "Error enabling OPB master timeout");
+
+    FAPI_TRY(lpc_write(i_target_chip, LPCM_LPC_MASTER_TIMEOUT_REG, LPCM_LPC_MASTER_TIMEOUT_VALUE),
+             "Error trying to set up the LPC host controller timeout");
 
     FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
 
