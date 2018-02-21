@@ -23,4 +23,26 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <sbeTarget>TARGET_CHIP</sbeTarget>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_LPC_ACCESS_TIMEOUT</rc>
+    <description>An attempt to read/write data in the LPC address space via the Alter/Display unit timed out.</description>
+    <ffdc>COUNT</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>DATA</ffdc>
+    <ffdc>STATUS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+    </deconfigure>
+  </hwpError>
 </hwpErrors>
