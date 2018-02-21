@@ -84,10 +84,18 @@ struct SbeRetryReqData_t
   */
 struct HbrtAttrSyncData_t
 {
+    // HUID of target on which we want to update the attribute
     uint32_t huid;
+
+    // Attribute ID of attribute to update
     TARGETING::ATTRIBUTE_ID attrID;
+
+    // size of attribute data in bytes
     uint32_t sizeOfAttrData;
+
+    // first byte of <sizeOfAttrData> bytes of attribute data
     uint8_t attrDataStart;
+
 } PACKED ;
 
 /**
@@ -172,6 +180,7 @@ struct GenericFspMboxMessage_t
                     // to do casting to other types:
                     // MyDataType_t* mydatatype =
                     //              (MyDataType_t*)&(l_generic_msg.data);
+                    // more than 8 bytes of data is possible
 
     // A method to set the local vars to a default state
     void initialize()
