@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -341,6 +341,13 @@ typedef struct __attribute__((packed)) VFRTHeaderLayout
     uint8_t rsvd_QAId;
 } VFRTHeaderLayout_t;// WOF Tables Header
 
+typedef enum
+{
+    WOF_MODE_UNKNOWN = 0,
+    WOF_MODE_NOMINAL = 1,
+    WOF_MODE_TURBO   = 2
+} WOF_MODE;
+
 typedef struct __attribute__((packed, aligned(128))) WofTablesHeader
 {
 
@@ -348,7 +355,19 @@ typedef struct __attribute__((packed, aligned(128))) WofTablesHeader
     ///   Set to ASCII  "WFTH___x" where x is the version of the VFRT structure
     uint32_t magic_number;
 
-    uint32_t reserved_version; // reserved:24b, version:8b
+    /// Reserved version
+    /// version 1 - mode is reserved (0)
+    /// version 2 - mode is SET to 1 or 2
+    union
+    {
+        uint32_t reserved_version;
+        struct
+        {
+            unsigned reserved_bits: 20;
+            unsigned mode: 4;  /// new to version 2 (1 = Nominal, 2 = Turbo)
+            uint8_t  version;
+        } PACKED;
+    };
 
     /// VFRT Block Size
     ///    Length, in bytes, of a VFRT
