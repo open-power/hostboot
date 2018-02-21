@@ -299,6 +299,13 @@ void saveActualCount( SectionId i_id,
 errlHndl_t writeActualCount( SectionId i_id );
 
 /**
+ * @brief  Use relocated payload base address
+ *
+ * @param[in] val  'true' for post dump data collection
+ */
+void useRelocatedPayloadAddr(bool val);
+
+/**
  * @brief  Retrieve and log FFDC data relevant to a given section of
  *         host data memory
  *
