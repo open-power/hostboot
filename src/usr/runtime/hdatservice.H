@@ -303,6 +303,12 @@ namespace RUNTIME
         uint16_t iv_actuals[RUNTIME::LAST_SECTION+1];
 
         /**
+         * Used to identify whether to use relocated payload base address
+         * or normal address.
+         */
+        bool iv_useRelocatedPayload;
+
+        /**
          * Dummy value for unassigned actual
          */
         enum {
@@ -338,6 +344,17 @@ namespace RUNTIME
                 l_err = updateHostDataSectionActual( i_id, iv_actuals[i_id] );
             }
             return l_err;
+        }
+
+        /**
+         * @brief  Use relocated payload base address
+         *
+         * @param[in] val  'true' for post dump data collection
+         *
+         */
+        void useRelocatedPayloadAddr(bool val)
+        {
+            iv_useRelocatedPayload = val;
         }
     };
 

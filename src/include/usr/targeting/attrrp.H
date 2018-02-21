@@ -159,6 +159,14 @@ class AttrRP
 #endif
 
         /**
+         *  @brief Returns relocated absolute address of payload
+         *
+         *  @return phys addr of payload
+         *
+         */
+        static uint64_t getHbDataRelocPayloadAddr();
+
+        /**
          *  @brief Returns base address of the RO section containing the
          *      targets
          *

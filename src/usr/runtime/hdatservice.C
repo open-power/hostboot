@@ -38,6 +38,7 @@
 #include "hdatservice.H"
 #include "errlud_hdat.H"
 #include <errl/errlmanager.H>
+#include <targeting/attrrp.H>
 
 //#define REAL_HDAT_TEST
 
@@ -316,6 +317,7 @@ hdatService::hdatService(void)
 :iv_spiraL(NULL)
 ,iv_spiraH(NULL)
 ,iv_spiraS(NULL)
+,iv_useRelocatedPayload(false)
 {
     for( uint8_t id = static_cast<uint8_t>(RUNTIME::FIRST_SECTION);
          id <= static_cast<uint8_t>(RUNTIME::LAST_SECTION);
@@ -491,6 +493,26 @@ errlHndl_t hdatService::loadHostData(void)
 
             uint64_t hdat_start = payload_base*MEGABYTE;
             uint64_t hdat_size = HDAT_MEM_SIZE;
+
+            // OPAL relocates itself after boot. Hence get relocated payload
+            // address. If relocated address not available then use normal
+            // base address (as OPAL would have crashed during early init).
+            if (iv_useRelocatedPayload == true &&
+                TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind)
+            {
+                uint64_t reloc_base;
+
+                reloc_base = TARGETING::AttrRP::getHbDataRelocPayloadAddr();
+                if (reloc_base != 0)
+                {
+                    hdat_start = reloc_base;
+                    TRACFCOMP( g_trac_runtime, "Relocated payload base =%p", hdat_start);
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_runtime, "No relocated payload base found, continuing on");
+                }
+            }
 
 #ifdef REAL_HDAT_TEST
             hdat_start = 256*MEGABYTE;
@@ -1743,6 +1765,11 @@ void saveActualCount( SectionId i_id,
 errlHndl_t writeActualCount( SectionId i_id )
 {
     return Singleton<hdatService>::instance().writeActualCount(i_id);
+}
+
+void useRelocatedPayloadAddr(bool val)
+{
+    return Singleton<hdatService>::instance().useRelocatedPayloadAddr(val);
 }
 
 /**

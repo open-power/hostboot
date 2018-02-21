@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,9 @@ namespace SBEIO
 {
     enum KeyAddrStashKeys
     {
-        RSV_MEM_ATTR_ADDR = 0x01,  //Start at non-zero
-        HYPERVISOR_HRMOR  = 0x02,
+        RSV_MEM_ATTR_ADDR  = 0x01,  //Start at non-zero
+        HYPERVISOR_HRMOR   = 0x02,
+        RELOC_PAYLOAD_ADDR = 0x03,
         //On SBE side struct is defaulted so that
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
         //So a key w/ FF means its empty or at its default val

@@ -361,6 +361,25 @@ namespace TARGETING
         return l_toc_addr;
     }
 
+    uint64_t AttrRP::getHbDataRelocPayloadAddr()
+    {
+        uint64_t payload_addr = 0;
+        Bootloader::keyAddrPair_t l_keyAddrPairs =
+            g_BlToHbDataManager.getKeyAddrPairs();
+
+        for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+        {
+            if(l_keyAddrPairs.key[keyIndex] == SBEIO::RELOC_PAYLOAD_ADDR)
+            {
+                payload_addr = l_keyAddrPairs.addr[keyIndex];
+                break;
+            }
+        }
+
+        // return relocated payload physical address
+        return payload_addr;
+    }
+
     errlHndl_t AttrRP::parseAttrSectHeader()
     {
         errlHndl_t l_errl = NULL;
