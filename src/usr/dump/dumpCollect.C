@@ -60,6 +60,9 @@ errlHndl_t doDumpCollect(void)
 {
     TRACFCOMP(g_trac_dump, "doDumpCollect - start ");
 
+    // Use relocated payload base to get MDST, MDDT, MDRT details
+    RUNTIME::useRelocatedPayloadAddr(true);
+
     errlHndl_t l_err = NULL;
 
     // Table Sizes
@@ -99,6 +102,8 @@ errlHndl_t doDumpCollect(void)
         }
 
     }while (0);
+
+    RUNTIME::useRelocatedPayloadAddr(false);
 
     return (l_err);
 }
