@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,4 +34,5 @@
 #include <p9_pib2pcb_mux_seq.H>
 #include <p9_collect_ppe_state.H>
 #include <p9_eq_clear_atomic_lock.H>
+#include <p9_collect_lpc_regs.H>
 #endif
