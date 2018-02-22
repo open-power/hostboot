@@ -463,8 +463,11 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     // Now calculate ATTR size
     l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_ATTR;
     l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
-    l_hbTOC.entry[l_hbTOC.total_entries].size =
-        TARGETING::AttrRP::maxSize();
+    uint64_t l_attrSize = TARGETING::AttrRP::maxSize();
+    // add 10% more extra space to account for a concurrent update
+    //  that adds more attributes
+    l_attrSize = ((l_attrSize*110)/100);
+    l_hbTOC.entry[l_hbTOC.total_entries].size = l_attrSize;
     l_totalSectionSize +=
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;

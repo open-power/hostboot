@@ -34,6 +34,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/targreasoncodes.H>
+#include <targeting/targplatreasoncodes.H>
 #include <targeting/common/attributeTank.H>
 #include <targeting/attrrp.H>
 #include <arch/pirformat.H>
@@ -183,18 +184,19 @@ errlHndl_t getHbTarget(
  * match.
  * @param[in] Pointer to new LID Structure targeting binary data
  * @param[in] Pointer to current Reserved Memory targeting binary data
+ * @param[out] Total size of all sections in the new lid
  * @param[out] Error log userdata2 value associated with non-zero rtn code
  * @return 0 on success, else return code
  */
-int validateData(void *i_lidStructPtr,
-                 void *i_rsvdMemPtr,
-                 uint64_t& o_userdata2)
+errlHndl_t validateData(void *i_lidStructPtr,
+                        void *i_rsvdMemPtr,
+                        size_t& o_lidTotalSize,
+                        uint64_t& o_userdata2)
 {
     TRACFCOMP(g_trac_targeting, ENTER_MRK"validateData: %p %p",
               i_lidStructPtr, i_rsvdMemPtr);
 
-    int rc = 0;
-    o_userdata2 = 0;
+    errlHndl_t l_errhdl = nullptr;
 
     do
     {
@@ -225,8 +227,22 @@ int validateData(void *i_lidStructPtr,
                       "LID Structure TargetingHeader",
                       l_headerLid->eyeCatcher);
 
-            rc = 0x11;
-            o_userdata2 = l_headerLid->eyeCatcher;
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_BAD_EYECATCHER_LID
+             * @userdata1    Eyecatcher from LID
+             * @userdata2    Expected eyecatcher
+             * @devdesc      Bad eyecatcher in the new lid data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TARGETING::TARG_RT_VALIDATEDATA,
+                TARGETING::TARG_RT_BAD_EYECATCHER_LID,
+                l_headerLid->eyeCatcher,
+                PNOR_TARG_EYE_CATCHER,
+                true);
 
             break;
         }
@@ -239,8 +255,22 @@ int validateData(void *i_lidStructPtr,
                       "Reserved Memory TargetingHeader",
                       l_headerRsvd->eyeCatcher);
 
-            rc = 0x12;
-            o_userdata2 = l_headerRsvd->eyeCatcher;
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_BAD_EYECATCHER_MEM
+             * @userdata1    Eyecatcher from existing memory
+             * @userdata2    Expected eyecatcher
+             * @devdesc      Bad eyecatcher in the existing attribute data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TARGETING::TARG_RT_VALIDATEDATA,
+                TARGETING::TARG_RT_BAD_EYECATCHER_MEM,
+                l_headerRsvd->eyeCatcher,
+                PNOR_TARG_EYE_CATCHER,
+                true);
 
             break;
         }
@@ -255,15 +285,29 @@ int validateData(void *i_lidStructPtr,
                       l_headerLid->numSections,
                       l_headerRsvd->numSections);
 
-            rc = 0x013;
-            o_userdata2 = TWO_UINT32_TO_UINT64(l_headerLid->numSections,
-                                               l_headerRsvd->numSections);
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_SECTION_NUM_MISMATCH
+             * @userdata1    Number of sections in lid
+             * @userdata2    Number of sections in existing mem
+             * @devdesc      Section number mismatch between new and old data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TARGETING::TARG_RT_VALIDATEDATA,
+                TARGETING::TARG_RT_SECTION_NUM_MISMATCH,
+                l_headerLid->numSections,
+                l_headerRsvd->numSections,
+                true);
 
             break;
         }
 
         // Count of attribute sections
         size_t l_sectionCount = l_headerLid->numSections;
+        o_lidTotalSize = 0;
 
         // Loop on each TargetingSection
         for (size_t i = 0;
@@ -279,9 +323,24 @@ int validateData(void *i_lidStructPtr,
                           l_sectionLid->sectionType,
                           l_sectionRsvd->sectionType);
 
-                rc = 0x14;
-                o_userdata2 = TWO_UINT32_TO_UINT64(l_sectionLid->sectionType,
-                                                   l_sectionRsvd->sectionType);
+                /*@
+                 * @errortype
+                 * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+                 * @reasoncode   TARGETING::TARG_RT_SECTION_MISMATCH
+                 * @userdata1    Section number
+                 * @userdata2[00:31]    Section type in the lid
+                 * @userdata2[32:63]    Section type in the memory
+                 * @devdesc      Section number mismatch between new and old data
+                 * @custdesc     Firmware error doing code update
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                     TARGETING::TARG_RT_VALIDATEDATA,
+                     TARGETING::TARG_RT_SECTION_MISMATCH,
+                     i,
+                     TWO_UINT32_TO_UINT64(l_sectionLid->sectionType,
+                                          l_sectionRsvd->sectionType),
+                     true);
 
                 break;
             }
@@ -297,13 +356,17 @@ int validateData(void *i_lidStructPtr,
 
                 // Just trace the size mismatch; Don't set rc or break
             }
+
+            o_lidTotalSize += l_sectionLid->sectionSize;
         }
-        // *** Could check if rc was set in for loop and break from do loop
+        // *** Could check if rc was set in for loop and break from do loop     
     } while(false);
 
-    TRACFCOMP(g_trac_targeting,EXIT_MRK"validateData");
+    TRACFCOMP(g_trac_targeting,
+              EXIT_MRK"validateData : o_lidTotalSize=0x%llX",
+              o_lidTotalSize);
 
-    return rc;
+    return l_errhdl;
 }
 
 /**
@@ -314,16 +377,15 @@ int validateData(void *i_lidStructPtr,
  * @param[out] Error log userdata2 value associated with non-zero rtn code
  * @return 0 on success, else return code
  */
-int saveRestoreAttrs(void *i_rsvdMemPtr,
-                     void *io_lidStructPtr,
-                     uint64_t& o_userdata2)
+errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
+                            void *io_lidStructPtr,
+                            uint64_t& o_userdata2)
 {
     TRACFCOMP( g_trac_targeting,
                ENTER_MRK"saveRestoreAttrs: %p %p",
-               i_rsvdMemPtr, io_lidStructPtr);
+               i_rsvdMemPtr, io_lidStructPtr );
 
-    int rc = 0;
-    o_userdata2 = 0;
+    errlHndl_t l_errhdl = nullptr;
     AttrRP *l_attrRPLid = nullptr;
 
     do
@@ -349,6 +411,10 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                                            l_maxTargetsLid,
                                            l_nodeId);
 
+        TRACFCOMP( g_trac_targeting,
+                   "Found %d targets in the lid",
+                   l_maxTargetsLid );
+
         // Set up variables for getting attribute information for a target
         uint32_t l_attrCountRsvd = 0;
         ATTRIBUTE_ID* l_pAttrIdRsvd = nullptr;
@@ -361,7 +427,7 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
 
         // Walk through new LID Structure Targets
         for(uint32_t l_targetNum = 1;
-            (l_targetNum <= l_maxTargetsLid) && (rc == 0);
+            (l_targetNum <= l_maxTargetsLid);
             ++l_allTargetsLid, ++l_targetNum)
         {
             // Counts of how many new attribute values were kept
@@ -377,6 +443,8 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
             // Make sure that attributes were found
             if(l_attrCountLid == 0)
             {
+                TRACFCOMP( g_trac_targeting,
+                           "Target %3d has no attributes", l_targetNum );
                 // Continue to next target if there were no attributes
                 continue;
             }
@@ -444,7 +512,7 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                                                             l_attrRPRsvd,
                                                             l_pAttrIdRsvd,
                                                             l_ppAttrAddrRsvd);
-            TRACDCOMP( g_trac_targeting,
+            TRACFCOMP( g_trac_targeting,
                        "Rsvd Memory: "
                        "HUID 0x%0.8x, attr cnt %d, AttrRP %p, pAttrId %p, "
                        "ppAttrAddr %p",
@@ -470,11 +538,12 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
 
             // Walk through Attributes for the new LID Structure target
             for(uint32_t l_attrNumLid = 0;
-                (l_attrNumLid < l_attrCountLid) && (rc == 0);
+                (l_attrNumLid < l_attrCountLid);
                 ++l_attrNumLid)
             {
                 // Get ID for attribute on this pass through loop
                 ATTRIBUTE_ID* l_pAttrId = l_pAttrIdLid + l_attrNumLid;
+                TRACDCOMP( g_trac_targeting, "Attr %x", *l_pAttrId );
 
                 // Get the Reserved Memory attribute value pointer
                 void* l_pAttrRsvd = nullptr;
@@ -506,9 +575,22 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                                    *l_pAttrId,
                                    l_huidLid);
 
-                        rc = 0x21;
-                        o_userdata2 = TWO_UINT32_TO_UINT64(l_huidLid,
-                                                           *l_pAttrId);
+                        /*@
+                         * @errortype
+                         * @moduleid     TARGETING::TARG_RT_SAVERESTOREATTRS
+                         * @reasoncode   TARGETING::TARG_RT_MISSING_ATTR
+                         * @userdata1    Attribute Id
+                         * @userdata2    HUID of target
+                         * @devdesc      Could not find attribute data in lid
+                         * @custdesc     Firmware error doing code update
+                         */
+                        l_errhdl = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             TARGETING::TARG_RT_SAVERESTOREATTRS,
+                             TARGETING::TARG_RT_MISSING_ATTR,
+                             *l_pAttrId,
+                             l_huidLid,
+                             true);
 
                         break;
                     }
@@ -519,7 +601,7 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                     // Check that a valid size was returned for the attribute
                     if(l_attrSize == 0)
                     {
-                        TRACDCOMP( g_trac_targeting,
+                        TRACFCOMP( g_trac_targeting,
                                    "UNEXPECTEDLY Did not find size for "
                                    "attribute ID 0x%.8x, target HUID 0x%0.8x "
                                    "in Reserved Memory, Keeping value from "
@@ -530,7 +612,7 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                         // Increment for keeping value because size was unknown
                         ++l_kept_for_unknown_size;
 
-                        // rc should not be changed
+                        // not an error
 
                         // Continue with this target's next attribute
                         continue;
@@ -557,12 +639,12 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
 
                         // Copy attribute value from current Reserved Memory
                         // attribute to new LID Structure attribute
-                        memcpy(l_pAttrRsvd, l_pAttrLid, l_attrSize);
+                        memcpy(l_pAttrLid, l_pAttrRsvd, l_attrSize);
                     }
                 }
                 else
                 {
-                    TRACDCOMP( g_trac_targeting,
+                    TRACFCOMP( g_trac_targeting,
                                "Did not find attribute ID 0x%.8x, target HUID "
                                "0x%0.8x in Reserved Memory, Keeping value from "
                                "LID Structure",
@@ -572,7 +654,7 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                     // Increment for keeping value because attribute was added
                     ++l_kept_for_added_attr;
 
-                    // rc should not be changed
+                    // not an error
 
                     // Continue with this target's next attribute
                     continue;
@@ -595,16 +677,16 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
 
     TRACFCOMP( g_trac_targeting, EXIT_MRK"saveRestoreAttrs");
 
-    return rc;
+    return l_errhdl;
 }
 
 int hbrt_update_prep(void)
 {
-    int rc = 0;
     errlHndl_t pError = nullptr;
     uint64_t l_userdata2 = 0;
     UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID);
     void *l_lidStructPtr = nullptr;
+    void* l_newMem = nullptr;
 
     do
     {
@@ -612,6 +694,8 @@ int hbrt_update_prep(void)
         uint64_t l_attr_size = 0;
         uint64_t l_rsvdMem = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
                                                 0, l_attr_size);
+        TRACFCOMP( g_trac_targeting, "l_rsvdMem @ %.16llX for 0x%llX",
+                   l_rsvdMem, l_attr_size );
 
         // Set pointer to reserved memory targeting data
         void *l_rsvdMemPtr = reinterpret_cast<void*>(l_rsvdMem);
@@ -621,10 +705,6 @@ int hbrt_update_prep(void)
         pError = l_lidMgr.getLidSize(l_lidSize);
         if(pError)
         {
-            pError->collectTrace(TARG_COMP_NAME);
-
-            rc = 0x01;
-
             break;
         }
 
@@ -637,7 +717,6 @@ int hbrt_update_prep(void)
                        l_lidSize,
                        l_attr_size);
 
-            rc = 0x02;
             l_userdata2 = TWO_UINT32_TO_UINT64(l_lidSize,
                                                l_attr_size);
 
@@ -648,40 +727,80 @@ int hbrt_update_prep(void)
         pError = l_lidMgr.getStoredLidImage(l_lidStructPtr, l_lidSize);
         if(pError)
         {
-            pError->collectTrace(TARG_COMP_NAME);
-
-            rc = 0x03;
-
             break;
         }
+        TRACFCOMP( g_trac_targeting, "LID @ %.16llX for 0x%llX",
+                   l_lidStructPtr, l_lidSize );
+
+        // Keep track of how much space the new lid data needs
+        size_t l_lidDataSize = 0;
 
         // Validate LID Structure against Reserved Memory
-        rc = validateData(l_lidStructPtr,
-                          l_rsvdMemPtr,
-                          l_userdata2);
-        if(rc)
+        pError = validateData(l_lidStructPtr,
+                              l_rsvdMemPtr,
+                              l_lidDataSize,
+                              l_userdata2);
+        if(pError)
         {
             break;
         }
 
+        // Need to allocate enough space for all the volatile attributes
+        if( (l_lidDataSize <= l_attr_size)
+            && (l_lidSize <= l_lidDataSize) )
+        {
+            l_newMem = calloc(l_lidDataSize,1);
+            memcpy( l_newMem, l_lidStructPtr, l_lidSize );
+            // note - original lid data is no longer used after this
+        }
+        else
+        {
+            TRACFCOMP( g_trac_targeting, "hbrt_update_prep: Size mismatches> LID=0x%llX, LID Data=0x%llX, RsvdMem=0x%llX",
+                       l_lidSize, l_lidDataSize, l_attr_size );
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_HBRT_UPDATE_PREP
+             * @reasoncode   TARGETING::TARG_RT_BAD_ATTR_SIZES
+             * @userdata1[00:31]  Lid size
+             * @userdata1[32:63]  Attribute size in lid
+             * @userdata2[00:31]  Reserved mem size
+             * @userdata2[32:63]  unused
+             * @devdesc      There is a mismatch with the sizes of the
+             *               lid and/or reserved memory section
+             * @custdesc     Firmware error doing code update
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                 TARGETING::TARG_RT_HBRT_UPDATE_PREP,
+                 TARGETING::TARG_RT_BAD_ATTR_SIZES,
+                 TWO_UINT32_TO_UINT64( l_lidSize, l_lidDataSize ),
+                 TWO_UINT32_TO_UINT64( l_attr_size, 0 ),
+                 true);
+            break;
+        }
+
+
         // Save/Restore attribute values from current Reserved Memory data into
         // new LID Structure data
-        rc = saveRestoreAttrs(l_rsvdMemPtr,
-                              l_lidStructPtr,
-                              l_userdata2);
-        if(rc)
+        pError = saveRestoreAttrs(l_rsvdMemPtr,
+                                  l_newMem,
+                                  l_userdata2);
+        if(pError)
         {
             break;
         }
 
         // Copy new LID Structure data over current Reserved Memory data
-        size_t l_copySize = std::min(l_lidSize, l_attr_size);
+        size_t l_copySize = std::min(l_lidDataSize, l_attr_size);
         TRACFCOMP( g_trac_targeting,
                    "hbrt_update_prep: Copy 0x%0.8x bytes of targeting data",
                    l_copySize);
         memcpy(l_rsvdMemPtr,
-               l_lidStructPtr,
+               l_newMem,
                l_copySize);
+        TRACFCOMP( g_trac_targeting,
+                   "RsvdMem @ %p, LidMem @ %p",
+                   l_rsvdMemPtr, l_newMem );
 
         // Set any remaining bytes to zero
         size_t l_setSize = l_attr_size - l_copySize;
@@ -697,44 +816,26 @@ int hbrt_update_prep(void)
         }
     } while(false);
 
+    // Delete the scratch space for the new attributes
+    if( l_newMem )
+    {
+        free( l_newMem );
+        l_newMem = nullptr;
+    }
+
     // Release the LID with new targeting structure
-    pError = l_lidMgr.releaseLidImage();
+    errlHndl_t l_lidErr = l_lidMgr.releaseLidImage();
+    if( l_lidErr )
+    {
+        // just commit this log instead of failing the operation
+        errlCommit(l_lidErr,TARG_COMP_ID);
+    }
+
+    // Add the traces onto any error log and commit it
+    int rc = ERRL_GETRC_SAFE(pError);
     if(pError)
     {
         pError->collectTrace(TARG_COMP_NAME);
-
-        rc = 0x04;
-    }
-
-    // Check for failing return code
-    if(rc)
-    {
-        // Determine if an error log has not been created yet
-        if(pError == nullptr)
-        {
-            /*@
-             *   @errortype   ERRORLOG::ERRL_SEV_PREDICTIVE
-             *   @moduleid    TARG_RT_HBRT_UPDATE_PREP
-             *   @reasoncode  TARG_RC_CONCURRENT_CODE_UPDATE_FAIL
-             *   @userdata1   HBRT Concurrent Code Update RC
-             *   @userdata2   Variable depending on RC
-             *
-             *   @devdesc   HBRT Concurrent Code Update failure
-             *
-             *   @custdesc  Internal firmware error preparing
-             *              for concurrent code update
-             */
-            pError =
-                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                        TARG_RT_HBRT_UPDATE_PREP,
-                                        TARG_RC_CONCURRENT_CODE_UPDATE_FAIL,
-                                        rc,
-                                        l_userdata2,
-                                        true /*SW Error */);
-
-            pError->collectTrace(TARG_COMP_NAME);
-        }
-
         errlCommit(pError,TARG_COMP_ID);
     }
 

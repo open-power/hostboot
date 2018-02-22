@@ -55,12 +55,16 @@
 // Forward declarations to allow friend functions to work
 //******************************************************************************
 #ifdef __HOSTBOOT_RUNTIME
+namespace ERRORLOG
+{
+    class ErrlEntry;
+}
 namespace RT_TARG
 {
     void adjustTargeting4Runtime();
-    int saveRestoreAttrs(void *i_rsvdMemPtr,
-                         void *io_lidStructPtr,
-                         uint64_t& o_userdata2);
+    ERRORLOG::ErrlEntry* saveRestoreAttrs(void *i_rsvdMemPtr,
+                                          void *io_lidStructPtr,
+                                          uint64_t& o_userdata2);
 }
 #endif
 
@@ -698,9 +702,9 @@ class Target
 
 #ifdef __HOSTBOOT_RUNTIME
         friend void RT_TARG::adjustTargeting4Runtime();
-        friend int RT_TARG::saveRestoreAttrs(void *,
-                                             void *,
-                                             uint64_t&);
+        friend ERRORLOG::ErrlEntry* RT_TARG::saveRestoreAttrs(void *,
+                                                              void *,
+                                                              uint64_t&);
 #endif
 
 
