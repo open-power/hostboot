@@ -123,10 +123,11 @@ fapi2::ReturnCode collectCoreTimeoutFailInfo( const fapi2::Target < fapi2::TARGE
     uint8_t l_exPos = 0;
     FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, parentExTgt, l_exPos );
 
-    std::vector<uint64_t> l_cmeBaseAddress;
-    std::vector<uint64_t> l_sgpeBaseAddress;
-    l_sgpeBaseAddress.push_back( SGPE_BASE_ADDRESS );
-    l_cmeBaseAddress.push_back( getCmeBaseAddress( l_exPos ) );
+    // Collect PPE FFDC for CME, SGPE and PGPE
+    std::vector<uint64_t> l_ppeBaseAddresses;
+    l_ppeBaseAddresses.push_back( getCmeBaseAddress( l_exPos ) );
+    l_ppeBaseAddresses.push_back( SGPE_BASE_ADDRESS );
+    l_ppeBaseAddresses.push_back( PGPE_BASE_ADDRESS );
 
     FAPI_ASSERT( false ,
                  fapi2::SPCWKUP_CORE_TIMEOUT().
@@ -140,10 +141,8 @@ fapi2::ReturnCode collectCoreTimeoutFailInfo( const fapi2::Target < fapi2::TARGE
                  set_EX_TARGET( parentExTgt ).
                  set_CORE_TARGET( i_target ).
                  set_PROC_CHIP_TARGET( i_processing_info.procTgt ).
-                 set_CME_BASE_ADDRESS( l_cmeBaseAddress ).
-                 set_SGPE_BASE_ADDRESS( l_sgpeBaseAddress ).
-                 set_CME_STATE_MODE( XIRS ).
-                 set_SGPE_STATE_MODE( XIRS ),
+                 set_PPE_BASE_ADDRESSES( l_ppeBaseAddresses ).
+                 set_PPE_STATE_MODE( XIRS ),
                  "Timed Out In Setting Core Special Wakeup");
 fapi_try_exit:
     FAPI_INF("<< collectCoreTimeoutFailInfo" );
