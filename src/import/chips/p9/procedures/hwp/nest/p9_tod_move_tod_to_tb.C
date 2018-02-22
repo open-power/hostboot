@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,11 +347,11 @@ fapi2::ReturnCode p9_tod_move_tod_to_tb(
                                                    i_thread_num,
                                                    l_tfmr_reg),
                          "Error from p9_tod_utils_get_tfmr_reg (poll for 'not set')");
-                l_tfmr_reg.extract<CAPP_TFMR_TBST_ENCODED,
-                                   CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
+                l_tfmr_reg.extractToRight<CAPP_TFMR_TBST_ENCODED,
+                                          CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
 
-                if (!l_tfmr_reg.getBit<CAPP_TFMR_LOAD_TOD_MOD>() &&
-                    (l_tfmr_state == TFMR_STATE_TB_NOT_SET))
+                if ((!l_tfmr_reg.getBit<CAPP_TFMR_LOAD_TOD_MOD>()) &&
+                    ((uint32_t) l_tfmr_state == TFMR_STATE_TB_NOT_SET))
                 {
                     FAPI_DBG("TFMR_LOAD_TOD_MOD cleared.");
                     break;
@@ -409,10 +409,10 @@ fapi2::ReturnCode p9_tod_move_tod_to_tb(
                                                    i_thread_num,
                                                    l_tfmr_reg),
                          "Error from p9_tod_utils_get_tfmr_reg (poll for 'get_tod')");
-                l_tfmr_reg.extract<CAPP_TFMR_TBST_ENCODED,
-                                   CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
+                l_tfmr_reg.extractToRight<CAPP_TFMR_TBST_ENCODED,
+                                          CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
 
-                if (l_tfmr_state == TFMR_STATE_GET_TOD)
+                if ((uint32_t) l_tfmr_state == TFMR_STATE_GET_TOD)
                 {
                     FAPI_DBG("TFMR in GET_TOD state");
                     break;
@@ -468,13 +468,20 @@ fapi2::ReturnCode p9_tod_move_tod_to_tb(
                                                    i_thread_num,
                                                    l_tfmr_reg),
                          "Error from p9_tod_utils_get_tfmr_reg (poll for 'tod_running')");
-                l_tfmr_reg.extract<CAPP_TFMR_TBST_ENCODED,
-                                   CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
+                l_tfmr_reg.extractToRight<CAPP_TFMR_TBST_ENCODED,
+                                          CAPP_TFMR_TBST_ENCODED_LEN>(l_tfmr_state);
 
-                if (l_tfmr_state == TFMR_STATE_TB_RUNNING)
+
+
+                if ((uint32_t) l_tfmr_state == TFMR_STATE_TB_RUNNING)
                 {
                     FAPI_DBG("TFMR in TB_RUNNING state");
                     break;
+                }
+                else
+                {
+                    FAPI_DBG("TFMR Reg: %016llX", l_tfmr_reg());
+                    FAPI_DBG("State: %X", l_tfmr_state);
                 }
 
                 ++l_tod_init_pending_count;
