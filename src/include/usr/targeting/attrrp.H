@@ -73,9 +73,9 @@ class AttrRP
                            const TARGETING::NODE_ID i_nodeId);
 
 #ifdef __HOSTBOOT_RUNTIME
-    friend int RT_TARG::saveRestoreAttrs(void *,
-                                         void *,
-                                         uint64_t&);
+    friend errlHndl_t RT_TARG::saveRestoreAttrs(void *,
+                                                void *,
+                                                uint64_t&);
 #endif
 
     public:
