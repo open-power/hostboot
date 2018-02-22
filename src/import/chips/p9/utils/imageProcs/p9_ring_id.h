@@ -29,9 +29,17 @@
 /// @enum RingID
 /// @brief Enumeration of Ring ID values. These values are used to traverse
 ///        an image having Ring Containers.
-// NOTE: Do not change the numbering, the sequence or add new constants to
-//       the below enum, unless you know the effect it has on the traversing
-//       of the image for Ring Containers.
+
+// *****************
+// *** IMPORTANT ***
+// *****************
+// Do  *NOT*  change the numbering, the sequence or add new constants to
+// the below enum, unless you know the effect it has on the traversing
+// of the image for Ring Containers:
+// - There are hard coded assumptions in SBE and SGPE PPE codes about the
+//   below enums.
+// - A change to the below values is likely to cause a co-req situation.
+//
 enum RingID
 {
     //*****************************
