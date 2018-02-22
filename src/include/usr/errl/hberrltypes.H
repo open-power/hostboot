@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -247,8 +247,8 @@ enum epubSubSystem_t
 
     // Processor subsystem
     EPUB_PROCESSOR_SUBSYS           = 0x10,
-    EPUB_PROCESSOR_FRU              = 0x11, //@PUB_IGNORE
-    EPUB_PROCESSOR_CHIP_CACHE       = 0x12, //@PUB_IGNORE
+    EPUB_PROCESSOR_FRU              = 0x11,
+    EPUB_PROCESSOR_CHIP_CACHE       = 0x12,
     EPUB_PROCESSOR_UNIT             = 0x13,
     EPUB_PROCESSOR_BUS_CTL          = 0x14,
 
@@ -257,8 +257,8 @@ enum epubSubSystem_t
     EPUB_MEMORY_CONTROLLER          = 0x21,
     EPUB_MEMORY_BUS                 = 0x22,
     EPUB_MEMORY_DIMM                = 0x23,
-    EPUB_MEMORY_FRU                 = 0x24, //@PUB_IGNORE
-    EPUB_EXTERNAL_CACHE             = 0x25, //@PUB_IGNORE
+    EPUB_MEMORY_FRU                 = 0x24,
+    EPUB_EXTERNAL_CACHE             = 0x25,
 
     // I/O subsystem: hub and bridge
     EPUB_IO_SUBSYS                  = 0x30,
@@ -284,7 +284,7 @@ enum epubSubSystem_t
     EPUB_MISC_INFORMATIONAL         = 0x76, //@PUB_IGNORE
 
     // Platform Firmware
-    EPUB_FIRMWARE_SUBSYS            = 0x80, //@PUB_IGNORE
+    EPUB_FIRMWARE_SUBSYS            = 0x80,
     EPUB_FIRMWARE_SP                = 0x81,
     EPUB_FIRMWARE_PHYP              = 0x82,
 
