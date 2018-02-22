@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,7 @@ namespace IBSCOM
         IBSCOM_SANITY_CHECK          = 0x02,
         IBSCOM_GET_TARG_VIRT_ADDR    = 0x03,
         IBSCOM_DO_IBSCOM             = 0x04,
+        IBSCOM_GET_PARRENT_DMI       = 0x05,
     };
 
     enum ibscomReasonCode

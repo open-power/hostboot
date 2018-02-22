@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,13 @@
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <util/utilmbox_scratch.H>
+#include <util/misc.H>
 
 //HWP
 #include    <p9c_set_inband_addr.H>
+
+//Inband SCOM
+#include    <ibscom/ibscomif.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -94,6 +98,7 @@ void* call_cen_set_inband_addr (void *io_pArgs)
 
             // Commit Error
             errlCommit( l_err, ISTEP_COMP_ID );
+
         }
         else
         {
@@ -103,6 +108,13 @@ void* call_cen_set_inband_addr (void *io_pArgs)
 
     }
 
+    // @todo RTC 187913 inband centaur scom in P9
+    // Re-enable when support available in simics
+    if ( Util::isSimicsRunning() == false )
+    {
+        //Now enable Inband SCOM for all membuf chips.
+        IBSCOM::enableInbandScoms();
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_cen_set_inband_addr exit" );
 
