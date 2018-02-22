@@ -144,16 +144,11 @@ fapi2::ReturnCode collectExTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_
     uint8_t l_exPos = 0;
     FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target, l_exPos );
 
-    //For Special Wakeup of EX, in case of timeout, SGPE can't be halted.
-    //Hence, only XIRs will be collected for it. Whereas for CME, full PPE
-    //state dump is permissible. As a result, collect PPE State is getting called
-    //separately for CME and SGPE. Otherwise , collect PPE state expects a
-    //vector of base addresses.
-
-    std::vector<uint64_t> l_cmeBaseAddress;
-    std::vector<uint64_t> l_sgpeBaseAddress;
-    l_sgpeBaseAddress.push_back( SGPE_BASE_ADDRESS );
-    l_cmeBaseAddress.push_back( getCmeBaseAddress( l_exPos ) );
+    // Collect CME, SGPE and PGPE FFDC, currently we only collect XIRs
+    std::vector<uint64_t> l_ppeBaseAddresses;
+    l_ppeBaseAddresses.push_back (getCmeBaseAddress (l_exPos));
+    l_ppeBaseAddresses.push_back (SGPE_BASE_ADDRESS);
+    l_ppeBaseAddresses.push_back (PGPE_BASE_ADDRESS);
 
     //From this point onwards, any usage of FAPI TRY in physical or
     //logical path can be a serious problem. Hence, should not be used.
@@ -175,10 +170,8 @@ fapi2::ReturnCode collectExTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_
                  set_EQ_TARGET( i_target.getParent<fapi2::TARGET_TYPE_EQ>() ).
                  set_EX_TARGET( i_target ).
                  set_PROC_CHIP_TARGET( i_processing_info.procTgt ).
-                 set_CME_BASE_ADDRESS( l_cmeBaseAddress ).
-                 set_SGPE_BASE_ADDRESS( l_sgpeBaseAddress ).
-                 set_CME_STATE_MODE( XIRS ).
-                 set_SGPE_STATE_MODE( XIRS ),
+                 set_PPE_BASE_ADDRESSES( l_ppeBaseAddresses ).
+                 set_PPE_STATE_MODE( XIRS ),
                  "Timed Out In Setting The EX Special Wakeup" );
 
 fapi_try_exit:

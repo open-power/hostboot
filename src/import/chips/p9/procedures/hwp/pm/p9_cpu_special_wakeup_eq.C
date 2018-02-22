@@ -115,7 +115,8 @@ fapi2::ReturnCode collectEqTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_
     fapi2::buffer<uint64_t> l_histRegVal;
     fapi2::buffer<uint64_t> l_netCtrlVal;
     std::vector<uint64_t> l_ppeBaseAddressList;
-    l_ppeBaseAddressList.push_back( SGPE_BASE_ADDRESS );
+    l_ppeBaseAddressList.push_back (SGPE_BASE_ADDRESS);
+    l_ppeBaseAddressList.push_back (PGPE_BASE_ADDRESS);
 
     uint8_t l_exPos = 0;
     auto l_ex_vector =

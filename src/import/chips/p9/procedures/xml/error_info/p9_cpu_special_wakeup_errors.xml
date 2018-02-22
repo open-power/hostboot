@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -87,12 +87,10 @@
     <ffdc>EQ_TARGET</ffdc>
     <ffdc>EX_TARGET</ffdc>
     <ffdc>PROC_CHIP_TARGET</ffdc>
-    <ffdc>CME_STATE_MODE</ffdc>
-    <ffdc>SGPE_STATE_MODE</ffdc>
+    <ffdc>PPE_STATE_MODE</ffdc>
 
     <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
-    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, CME_STATE_MODE, CME_BASE_ADDRESS</collectFfdc>
-    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, SGPE_STATE_MODE, SGPE_BASE_ADDRESS</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_STATE_MODE, PPE_BASE_ADDRESSES</collectFfdc>
 
     <collectRegisterFfdc>
        <id>CME_FFDC_REGISTERS</id>
@@ -125,12 +123,10 @@
     <ffdc>EQ_TARGET</ffdc>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>PROC_CHIP_TARGET</ffdc>
-    <ffdc>CME_STATE_MODE</ffdc>
-    <ffdc>SGPE_STATE_MODE</ffdc>
+    <ffdc>PPE_STATE_MODE</ffdc>
+
     <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
-    
-    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, CME_STATE_MODE, CME_BASE_ADDRESS</collectFfdc>
-    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, SGPE_STATE_MODE, SGPE_BASE_ADDRESS</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_STATE_MODE, PPE_BASE_ADDRESSES</collectFfdc>
 
     <collectRegisterFfdc>
        <id>CME_FFDC_REGISTERS</id>

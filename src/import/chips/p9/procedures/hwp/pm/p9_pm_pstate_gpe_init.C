@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -327,7 +327,7 @@ fapi2::ReturnCode pstate_gpe_reset(
                 fapi2::PSTATE_GPE_RESET_TIMEOUT()
                 .set_CHIP(i_target)
                 .set_PGPE_BASE_ADDRESS(l_pgpe_base_addr)
-                .set_PGPE_STATE_MODE(SNAPSHOT),
+                .set_PGPE_STATE_MODE(HALT),
                 "PSTATE GPE Reset timeout");
 
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_data64));
