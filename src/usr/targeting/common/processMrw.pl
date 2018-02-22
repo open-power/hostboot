@@ -919,13 +919,16 @@ sub processProcessor
 
     if ($proc_type eq "ACTING_MASTER" )
     {
-        $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "reserved",
+        if($targetObj->isBadAttribute($target, "FSI_MASTER_TYPE"))
+        { 
+          $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "reserved",
             "0");
-        $targetObj->setAttribute($target, "FSI_MASTER_CHIP",    "physical:sys-0");
-        $targetObj->setAttribute($target, "FSI_MASTER_PORT",    "0xFF");
-        $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
-        $targetObj->setAttribute($target, "ALTFSI_MASTER_PORT", "0xFF");
-        $targetObj->setAttribute($target, "FSI_MASTER_TYPE",    "NO_MASTER");
+          $targetObj->setAttribute($target, "FSI_MASTER_CHIP",    "physical:sys-0");
+          $targetObj->setAttribute($target, "FSI_MASTER_PORT",    "0xFF");
+          $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
+          $targetObj->setAttribute($target, "ALTFSI_MASTER_PORT", "0xFF");
+          $targetObj->setAttribute($target, "FSI_MASTER_TYPE",    "NO_MASTER");
+        }
         $targetObj->setAttribute($target, "FSI_SLAVE_CASCADE",  "0");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
             "1");
@@ -934,7 +937,10 @@ sub processProcessor
     }
     else
     {
-        $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
+        if($targetObj->isBadAttribute($target, "ALTFSI_MASTER_CHIP"))
+        {
+          $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
+        }
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
             "0");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
@@ -1430,13 +1436,17 @@ sub processFsi
         #   | Slave  |        |  Slave  |
         #   |        |        |         |
         #   |--------|        |---------|
-        my $fsi_child_type = $targetObj->getType($fsi_child_target);
-        if ( $fsi_child_type eq "PROC" )
+        my $source_type = $targetObj->getType($parentTarget);
+        if ( $source_type eq "PROC" )
         {
-            my $proc_type = $targetObj->getAttribute($fsi_child_target, "PROC_MASTER_TYPE");
+            my $proc_type = $targetObj->getAttribute($parentTarget, "PROC_MASTER_TYPE");
             if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
             {
-                $flip_port = 1;
+                my $fcid = $targetObj->getAttribute($parentTarget,"FABRIC_CHIP_ID");
+                if($fcid eq 1)
+                {
+                  $flip_port = 1;
+                }
             }
         }
         $targetObj->setFsiAttributes($fsi_child_target,

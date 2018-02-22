@@ -1614,22 +1614,38 @@ sub setFsiAttributes
     {
         $self->setAttribute($target, "FSI_MASTER_TYPE","CMFSI");
     }
-    $self->setAttribute($target, "FSI_MASTER_CHIP","physical:sys-0");
-    $self->setAttribute($target, "FSI_MASTER_PORT","0xFF");
-    $self->setAttribute($target, "ALTFSI_MASTER_CHIP","physical:sys-0");
-    $self->setAttribute($target, "ALTFSI_MASTER_PORT","0xFF");
+    if ($self->isBadAttribute($target, "FSI_MASTER_CHIP"))
+    {
+      $self->setAttribute($target, "FSI_MASTER_CHIP","physical:sys-0");
+      $self->setAttribute($target, "FSI_MASTER_PORT","0xFF");
+    }
+    if ($self->isBadAttribute($target,"ALTFSI_MASTER_CHIP"))
+    {
+      $self->setAttribute($target, "ALTFSI_MASTER_CHIP","physical:sys-0");
+      $self->setAttribute($target, "ALTFSI_MASTER_PORT","0xFF");
+    }
     $self->setAttribute($target, "FSI_SLAVE_CASCADE", "0");
-    if ($cmfsi == 0)
+    if ($type eq "FSICM")
     {
         $self->setAttribute($target, "FSI_MASTER_CHIP",$phys_path);
         $self->setAttribute($target, "FSI_MASTER_PORT", $fsi_port);
-    }
-    else
-    {
         $self->setAttribute($target, "ALTFSI_MASTER_CHIP",$phys_path);
         $self->setAttribute($target, "ALTFSI_MASTER_PORT", $fsi_port);
     }
-
+    else
+    {
+      if ($flip_port eq 0 )
+      {
+        $self->setAttribute($target, "FSI_MASTER_CHIP",$phys_path);
+        $self->setAttribute($target, "FSI_MASTER_PORT", $fsi_port);
+      }
+      else
+      {
+        $self->setAttribute($target, "ALTFSI_MASTER_CHIP",$phys_path);
+        $self->setAttribute($target, "ALTFSI_MASTER_PORT", $fsi_port);
+      }
+    }
+    
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","flipPort",
           $flip_port);
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");
