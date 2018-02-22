@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <errl/errlmanager.H>
 #include <util/misc.H>
 
+
 namespace fapi2
 {
 
@@ -51,7 +52,9 @@ const uint32_t WOF_IMAGE_MAGIC_VALUE = 0x57544948;  // WTIH
 const uint32_t WOF_TABLES_MAGIC_VALUE = 0x57465448; // WFTH
 const uint32_t RES_VERSION_MASK = 0xFF;
 const uint32_t WOF_IMAGE_VERSION = 1;
-const uint32_t WOF_TABLES_VERSION = 1;
+const uint32_t WOF_TABLE_VERSION_2 = 2;
+const uint32_t WOF_TABLE_VERSION_POWERMODE = WOF_TABLE_VERSION_2;
+const uint32_t MAX_WOF_TABLES_VERSION = WOF_TABLE_VERSION_2;
 
 #ifndef __HOSTBOOT_RUNTIME
 // Remember that we have already allocated the VMM space for
@@ -131,7 +134,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     // Choose a sort freq
     uint32_t l_sortFreq = 0;
 
-    // Get the socket power
+    // Get the socket power and mode
+    WOF_MODE l_mode = WOF_MODE_UNKNOWN;
     uint32_t l_socketPower = 0;
     uint8_t l_wofPowerLimit =
                 l_sys->getAttr<TARGETING::ATTR_WOF_POWER_LIMIT>();
@@ -141,12 +145,14 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
         l_socketPower =
                 l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_TURBO>();
         l_sortFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_CORE_MAX>();
+        l_mode = WOF_MODE_TURBO;
     }
     else
     {
         l_socketPower =
                 l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
         l_sortFreq = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
+        l_mode = WOF_MODE_NOMINAL;
     }
 
     // Get the frequencies
@@ -155,8 +161,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
 
     // Trace the input params
     FAPI_INF("WOF table search: "
-             "Cores %d SocketPower 0x%X NestFreq 0x%X SortFreq 0x%X",
-             l_numCores, l_socketPower, l_nestFreq, l_sortFreq);
+             "Cores %d SocketPower 0x%X NestFreq 0x%X SortFreq 0x%X Mode 0x%X",
+             l_numCores, l_socketPower, l_nestFreq, l_sortFreq, l_mode);
 
     void* l_pWofImage = nullptr;
     size_t l_lidImageSize = 0;
@@ -357,7 +363,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             l_wth = reinterpret_cast<WofTablesHeader_t*>
                         (reinterpret_cast<uint8_t*>(l_pWofImage)
                             + l_ste[l_ent].offset);
-            l_ver = l_wth->reserved_version & RES_VERSION_MASK;
+            l_ver = l_wth->version;
 
             // Check for the eyecatcher
             if(l_wth->magic_number != WOF_TABLES_MAGIC_VALUE)
@@ -391,17 +397,18 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             }
 
             // Check for a valid tables header version
-            if(l_ver > WOF_TABLES_VERSION)
+            // Valid versions (1 - MAX_WOF_TABLES_VERSION)
+            if((l_ver > MAX_WOF_TABLES_VERSION) || (l_ver == 0))
             {
                 FAPI_ERR("WOF tables header version not supported: "
-                        " Header Version %d Supported Version %d",
-                        l_ver, WOF_TABLES_VERSION);
+                        " Header Version %d Max Supported Version %d",
+                        l_ver, MAX_WOF_TABLES_VERSION);
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
                 * @reasoncode        fapi2::RC_WOF_TABLES_VERSION_MISMATCH
                 * @userdata1[00:31]  WOF tables header version
-                * @userdata1[32:63]  Supported header version
+                * @userdata1[32:63]  Max supported header version
                 * @userdata2         WOF tables entry number
                 * @devdesc           WOF tables header version not supported
                 * @custdesc          Firmware Error
@@ -412,7 +419,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                                 fapi2::RC_WOF_TABLES_VERSION_MISMATCH,
                                 TWO_UINT32_TO_UINT64(
                                     l_ver,
-                                    WOF_TABLES_VERSION),
+                                    MAX_WOF_TABLES_VERSION),
                                 l_ent,
                                 true); //software callout
                 l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
@@ -424,21 +431,27 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                      "SectionTableEntry %d "
                      "SectionTableOffset 0x%X "
                      "SectionTableSize %d "
-                     "Version %d Cores %d SocketPower 0x%X "
+                     "Version %d Mode %d Cores %d SocketPower 0x%X "
                      "NestFreq 0x%X NomFreq 0x%X",
                      l_ent, l_ste[l_ent].offset, l_ste[l_ent].size,
-                     l_ver, l_wth->core_count, l_wth->socket_power_w,
+                     l_ver, l_wth->mode, l_wth->core_count,
+                     l_wth->socket_power_w,
                      l_wth->nest_frequency_mhz, l_wth->sort_power_freq_mhz);
 
             // Compare the fields
             if( (l_wth->core_count == l_numCores) &&
                 (l_wth->socket_power_w == l_socketPower) &&
-                (l_wth->sort_power_freq_mhz == l_sortFreq) )
+                (l_wth->sort_power_freq_mhz == l_sortFreq) &&
+                ((l_ver < WOF_TABLE_VERSION_POWERMODE) ||  // mode is ignored
+                 ((l_ver >= WOF_TABLE_VERSION_POWERMODE) &&
+                  ((l_wth->mode == l_mode) ||  // match specific mode
+                   (l_wth->mode == WOF_MODE_UNKNOWN)))) // or wild-card
+              )
             {
                 // Found a match
                 FAPI_INF("Found a WOF table match");
 
-                // Copy the WOF table to the ouput pointer
+                // Copy the WOF table to the output pointer
                 memcpy(o_wofData,
                        reinterpret_cast<uint8_t*>(l_wth),
                        l_ste[l_ent].size);
@@ -455,7 +468,12 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                 if( Util::isSimicsRunning() && l_simMatch == nullptr )
                 {
                     if( (l_wth->socket_power_w == l_socketPower) &&
-                        (l_wth->sort_power_freq_mhz == l_sortFreq) )
+                        (l_wth->sort_power_freq_mhz == l_sortFreq) &&
+                        ((l_ver < WOF_TABLE_VERSION_POWERMODE) || //mode ignored
+                         ((l_ver >= WOF_TABLE_VERSION_POWERMODE) &&
+                          ((l_wth->mode == l_mode) ||  // match specific mode
+                          (l_wth->mode == WOF_MODE_UNKNOWN)))) // or wild-card
+                      )
                     {
                         FAPI_INF("Found a potential WOF table match for Simics");
                         // Copy the WOF table to a local var temporarily
