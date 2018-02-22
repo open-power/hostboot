@@ -96,6 +96,8 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_DISABLE_HBBL_VECTORS_BIT      = 3,
     ATTR_MC_SYNC_MODE_BIT              = 4,
     ATTR_SLOW_PCI_REF_CLOCK_BIT        = 5,
+    ATTR_PROC_CHIP_MEM_TO_USE_STARTBIT = 6,
+    ATTR_PROC_CHIP_MEM_TO_USE_LENGTH   = 4,
 
     // Scratch_reg_6
     ATTR_PROC_EFF_FABRIC_GROUP_ID_STARTBIT = 17,
@@ -422,6 +424,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_disable_hbbl_vectors;
         uint32_t l_pll_mux;
         uint8_t l_mc_sync_mode;
+        uint8_t l_proc_chip_mem_to_use;
         uint8_t l_slow_pci_ref_clock;
 
         FAPI_DBG("Reading Scratch_reg5");
@@ -444,6 +447,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_FORCE_ALL_CORES, FAPI_SYSTEM, l_force_all_cores));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DISABLE_HBBL_VECTORS, FAPI_SYSTEM, l_disable_hbbl_vectors));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, i_target_chip, l_mc_sync_mode));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_CHIP_MEM_TO_USE, FAPI_SYSTEM, l_proc_chip_mem_to_use));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DD1_SLOW_PCI_REF_CLOCK, FAPI_SYSTEM, l_slow_pci_ref_clock));
 
         // set cache contained flag
@@ -488,6 +492,11 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         {
             l_read_scratch_reg.clearBit<ATTR_MC_SYNC_MODE_BIT>();
         }
+
+        // set which proc memory to use
+        l_read_scratch_reg.insert<ATTR_PROC_CHIP_MEM_TO_USE_STARTBIT,
+                                  ATTR_PROC_CHIP_MEM_TO_USE_LENGTH,
+                                  4>(l_proc_chip_mem_to_use);
 
         // set slow PCI ref clock bit
         if (l_slow_pci_ref_clock == fapi2::ENUM_ATTR_DD1_SLOW_PCI_REF_CLOCK_SLOW)
