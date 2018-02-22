@@ -1130,9 +1130,8 @@ void tpmVerifyFunctionalTpmExists(
         err = SECUREBOOT::getJumperState(l_state);
         if (err)
         {
-            errlCommit(err, TRBOOT_COMP_ID);
-
             auto errPlid = err->plid();
+            errlCommit(err, TRBOOT_COMP_ID);
 
             // we should not continue if we could not read the jumper state
             INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
