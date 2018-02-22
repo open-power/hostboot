@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,7 @@ function build {
     mkdir -p $SANDBOXBASE || exit -1
     mkdir -p $CMVC_DIR/src/hbfw/nimbus || exit -1
     mkdir -p $CMVC_DIR/src/hbfw/cumulus || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
 
     ### Compile and provide binaries
     setup
@@ -63,6 +64,8 @@ function build {
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/nimbus || exit -1
         cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus.pnor $CMVC_DIR/src/hbfw/cumulus || exit -1
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus || exit -1
+        cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
+        cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
 
         make clean
         # Now build the FSP-based images
