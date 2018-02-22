@@ -273,6 +273,9 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x05013030, // INTCQFIR
         0x05013400, // PBIOEFIR
         0x05013800, // PBIOOFIR
+        0x05013C00, // NPU0FIR
+        0x05013C40, // NPU1FIR
+        0x05013C80, // NPU2FIR
 
         0x0604000a, // XBUS_LFIR
         0x06010840, // XBPPEFIR
@@ -1007,38 +1010,10 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
 /***************************************************/
 static HOMER_ChipSpecAddr_t  s_ecDepProcRegisters[]
 {
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x10,
-      0, 0x0000000005011400ll }, // NPU0FIR DD1
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x10,
-      0, 0x0000000005011440ll }, // NPU1FIR DD1
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
-      0, 0x0000000005013C00ll }, // NPU0FIR DD2
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
-      0, 0x0000000005013C40ll }, // NPU1FIR DD2
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
-      0, 0x000000005013C80ll },  // NPU2FIR DD2
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x21,
-      0, 0x0000000005013C00ll }, // NPU0FIR DD2.1
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x21,
-      0, 0x0000000005013C40ll }, // NPU1FIR DD2.1
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x21,
-      0, 0x000000005013C80ll },  // NPU2FIR DD2.1
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x22,
-      0, 0x0000000005013C00ll }, // NPU0FIR DD2.2
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x22,
-      0, 0x0000000005013C40ll }, // NPU1FIR DD2.2
-
-    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x22,
-      0, 0x000000005013C80ll }   // NPU2FIR DD2.2
+    /* EXAMPLE:
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x10, 0, 0x05011400ll }, // DD1
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20, 0, 0x05013C00ll }, // DD2
+    */
 };
 
 //------------------------------------------------------------------------------
