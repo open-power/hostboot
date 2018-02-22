@@ -819,6 +819,10 @@ sub processProcessor
                 $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
             }
         }
+        elsif ($child_type eq "MC")
+        {
+            processMc($targetObj, $child);
+        }
 
         elsif ($child_type eq "OCC")
         {
@@ -914,13 +918,13 @@ sub processProcessor
     $targetObj->setAttributeField($target,
         "EEPROM_SBE_BACKUP_INFO","i2cMasterPath",$path);
 
-    ## need to initialize the master processor's FSI connections here 
+    ## need to initialize the master processor's FSI connections here
     my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
 
     if ($proc_type eq "ACTING_MASTER" )
     {
         if($targetObj->isBadAttribute($target, "FSI_MASTER_TYPE"))
-        { 
+        {
           $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "reserved",
             "0");
           $targetObj->setAttribute($target, "FSI_MASTER_CHIP",    "physical:sys-0");
@@ -1117,23 +1121,6 @@ sub processMcs
     $targetObj->setAttribute( $target, "MEMVPD_POS",
                              $chip_unit + ($proc_num * MAX_MCS_PER_PROC) );
 
-
-#@TODO RTC:163874 -- maybe needed for centaur support
-
-
-#    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
-#               $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
-#    my $i_base = Math::BigInt->new($base);
-#    my $i_node_offset = Math::BigInt->new($group_offset);
-#    my $i_proc_offset = Math::BigInt->new($proc_offset);
-#    my $i_offset = Math::BigInt->new($offset);
-
-#    my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
-#    #Note: Hex convert method avoids overflow on 32bit machines
-#    my $mcsStr=sprintf("0x%016s",substr((
-#         $i_base+$i_node_offset*$group+
-#         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
-#    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
 
 
@@ -1146,14 +1133,6 @@ sub processMcbist
 
     my $group = $targetObj->getAttribute($parentTarget, "FABRIC_GROUP_ID");
     my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
-#@TODO RTC:163874 -- maybe needed for centaur support
-#    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
-#               $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
-#    my $i_base = Math::BigInt->new($base);
-#    my $i_node_offset = Math::BigInt->new($group_offset);
-#    my $i_proc_offset = Math::BigInt->new($proc_offset);
-#    my $i_offset = Math::BigInt->new($offset);
-
 
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
@@ -1172,19 +1151,83 @@ sub processMcbist
         }
     }
 
-#@TODO RTC:163874 -- maybe needed for centaur support
-#    my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
-#    #Note: Hex convert method avoids overflow on 32bit machines
-#    my $mcsStr=sprintf("0x%016s",substr((
-#         $i_base+$i_node_offset*$group+
-#         $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
-#    $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
+
+
+#--------------------------------------------------
+## MC
+##
+##
+sub processMc
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing MC child: $child Type: $child_type");
+
+        if ($child_type eq "MI")
+        {
+            processMi($targetObj, $child);
+        }
+    }
+}
+
+
+#--------------------------------------------------
+## MI
+##
+##
+sub processMi
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+
+    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    {
+        my $child_type = $targetObj->getType($child);
+
+        $targetObj->log($target,
+            "Processing MI child: $child Type: $child_type");
+
+        if ($child_type eq "DMI")
+        {
+            processDmi($targetObj, $child);
+        }
+    }
+}
+
+
+#--------------------------------------------------
+## DMI
+##
+## Sets DMI offset address attribute
+sub processDmi
+{
+    my $targetObj    = shift;
+    my $target       = shift;
+
+    my $dmi = Math::BigInt->new($targetObj->getAttribute($target,"CHIP_UNIT"));
+
+    my $ibase       = 0x0030220000000;  # Base ibscom offset
+    my $dmiOffset   = 0x0000004000000;  # 64MB
+
+    my $value = sprintf("0x%016s",substr((
+                        $ibase+
+                        $dmiOffset*$dmi)->as_hex(),2));
+
+    $targetObj->setAttribute($target,"DMI_INBAND_BAR_BASE_ADDR_OFFSET",$value);
+}
+
+
 #--------------------------------------------------
 ## OBUS
 ##
 ## Finds OBUS connections and copy the slot position to obus brick target
-
 sub processObus
 {
     my $targetObj = shift;
@@ -1245,7 +1288,7 @@ sub processObus
                      while($targetObj->getAttribute($intarget,"CLASS") ne "CONNECTOR")
                      {
                        $intarget = $targetObj->getTargetParent($intarget);
-                     } 
+                     }
                      addObusCfgToGpuSensors($obrick_conn->{DEST_PARENT},
                                             $intarget, $cfg);
                  }
@@ -1319,13 +1362,13 @@ sub processAbus
     my $abusdest   = $aBus->{DEST};
     my $abus_dest_parent = $aBus->{DEST_PARENT};
     my $bustype = $targetObj->getBusType($abussource);
-#       print"Found bus from $abussource to $abus_dest_parent and $bustype\n"; 
-    
+#       print"Found bus from $abussource to $abus_dest_parent and $bustype\n";
+
     ## set attributes for both directions
     my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
     my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
-    
-    $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1); 
+
+    $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
     $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
     $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
     $targetObj->setAttribute($target, "PEER_PATH", $phys2);
@@ -1391,7 +1434,7 @@ sub processFsi
         # In High End systems there are 2 master capable procs per node.
         # For the alt-master processor we need to set flip_port so that when it is master,
         # it knows to send instructions to the B port. During processMrw
-        # we cannot determine which proc is master and which is the alt-master. 
+        # we cannot determine which proc is master and which is the alt-master.
         # We will set flipPort on both and the later clear flipPort when we determine
         # which is actually master during hwsv init.
 
@@ -1400,16 +1443,16 @@ sub processFsi
         #   | FSP A  |        | FSP B  |
         #   |  (M)   |        |    (M) |
         #   |--------|        |--------|
-        #       |                   
-        #       V                   
+        #       |
+        #       V
         #   |--------|        |--------|
         #   |  (A)(B)|------->|(B) (A) |
         #   | Master |        |Alt Mast|
         #   |     (M)|        |(M)     |
         #   |--------|\       |--------|
-        #          |   \        
-        #         /     \       
-        #        /       \ 
+        #          |   \
+        #         /     \
+        #        /       \
         #   |--------|    \   |---------|
         #   | (A) (B)|     \->|(A)  (B) |
         #   | Slave  |        |  Slave  |
@@ -1430,7 +1473,7 @@ sub processFsi
         #   |     (M)|      /||(B)     |
         #   |--------|     / ||--------|
         #                 /   \
-        #                /     \__ 
+        #                /     \__
         #               /         \
         #   |--------| /      |---------|
         #   |(A)  (B)|        |(A) (B)  |

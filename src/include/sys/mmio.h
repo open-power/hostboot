@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,10 +146,10 @@ mutex_t * mmio_xscom_mutex();
  */
 static const uint64_t MMIO_IBSCOM_UE_DETECTED = 0x53434F4D4641494C;
 
-/** Constants used to define IBSCOM MMIO address range
+/** Constants used to define IBSCOM MMIO address ranges
 */
-static const uint64_t MMIO_IBSCOM_START = 0x0003E00000000000;
-static const uint64_t MMIO_IBSCOM_END = 0x0003F02000000000;
+static const uint64_t MMIO_IBSCOM_BASE = 0x6030220000000;
+static const uint64_t MMIO_IBSCOM_SIZE = 0x0000020000000;
 
 #ifdef __cplusplus
 }

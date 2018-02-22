@@ -654,6 +654,7 @@
 
     <attribute>
         <id>ATTR_DMI_INBAND_BAR_ENABLE</id>
+        <default>0x1</default>
         <no_export/>
     </attribute>
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +26,7 @@
 #include <kernel/console.H>
 #include <kernel/vmmmgr.H>
 #include <sys/mmio.h>
+#include <arch/memorymap.H>
 
 namespace Kernel
 {
@@ -83,12 +86,27 @@ bool handleLoadUE(task_t* t)
             uint64_t phys = VmmManager::findPhysicalAddress(vaddr);
 
             //Check if address is in IBSCOM MMIO Range.
-            if((phys >= MMIO_IBSCOM_START) &&
-               (phys <= MMIO_IBSCOM_END))
+            uint64_t ibAddrStart = 0;
+            for(uint32_t l_groupId=0; l_groupId<4; l_groupId++)
             {
-                ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
+                for(uint32_t l_chipId=0; l_chipId<4; l_chipId++)
+                {
+                    ibAddrStart = computeMemoryMapOffset( MMIO_IBSCOM_BASE,
+                                                          l_groupId,
+                                                          l_chipId );
+                    if((phys >= ibAddrStart) &&
+                       (phys <= ibAddrStart + MMIO_IBSCOM_SIZE - 1))
+                    {
+                        ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
+                        break;
+                    }
+                }
+                if(ueMagicValue == MMIO_IBSCOM_UE_DETECTED)
+                {
+                    break;
+                }
             }
-            else
+            if(ueMagicValue != MMIO_IBSCOM_UE_DETECTED)
             {
                 printk("MachineCheck::handleUE: Unrecognized address %lx\n",
                        phys);

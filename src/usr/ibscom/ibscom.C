@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,8 @@
 #include <xscom/piberror.H>
 #include <diag/attn/attn.H>
 #include <ibscom/ibscomif.H>
-#include    <targeting/common/utilFilter.H>
+#include <targeting/common/utilFilter.H>
+#include <arch/memorymap.H>
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -54,7 +55,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_ibscom = NULL;
-TRAC_INIT(&g_trac_ibscom, IBSCOM_COMP_NAME, KILOBYTE);
+TRAC_INIT(&g_trac_ibscom, IBSCOM_COMP_NAME, 8*KILOBYTE);
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -64,6 +65,10 @@ namespace IBSCOM
 // SCOM Register addresses
 const uint32_t MBS_FIR = 0x02011400;
 const uint32_t MBSIBERR0 = 0x0201141B;
+const uint64_t IBSCOM_BASE = 0x0006000000000000;
+const uint64_t BIT_02_MASK = 0x0000000020000000;
+const uint64_t BIT_03_MASK = 0x0000000010000000;
+const uint64_t BIT_18_MASK = 0x0000000000002000;
 
 // Register XSCcom access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -177,6 +182,68 @@ errlHndl_t ibscomOpSanityCheck(const DeviceFW::OperationType i_opType,
     return l_err;
 }
 
+
+/**
+ * @brief Return the parent DMI target for the input membuf target
+ *
+ * @param[in]   i_target      inband membuf scom target
+ * @param[out]  o_target      parent DMI target
+ *
+ * @return errlHndl_t
+ */
+errlHndl_t getParentDMI( Target* i_target, Target*& o_target )
+{
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        PredicateCTM l_dmi(CLASS_UNIT,
+                           TYPE_DMI,
+                           MODEL_NA);
+
+        TargetHandleList l_dmi_list;
+        targetService().
+          getAssociated(l_dmi_list,
+                        i_target,
+                        TargetService::PARENT_BY_AFFINITY,
+                        TargetService::ALL,
+                        &l_dmi);
+
+        if( l_dmi_list.size() != 1 )
+        {
+            TRACFCOMP(g_trac_ibscom, ERR_MRK
+                      "getParentDMI:Unexpectd parent DMI list size %d",
+                      l_dmi_list.size());
+            /*@
+             * @errortype
+             * @moduleid     IBSCOM_GET_PARRENT_DMI
+             * @reasoncode   IBSCOM_INVALID_CONFIG
+             * @userdata1[0:31]   HUID of Centaur Target
+             * @userdata1[32:63]  DMI List Size
+             * @userdata2    Not Used
+             * @devdesc      System configuration does not have a Parent DMI
+             *               for the current centaur.
+             */
+            l_err =
+              new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            IBSCOM_GET_PARRENT_DMI,
+                            IBSCOM_INVALID_CONFIG,
+                            TWO_UINT32_TO_UINT64(
+                                                 get_huid(i_target),
+                                                 l_dmi_list.size()),
+                            0);
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+            break;
+        }
+        o_target = *(l_dmi_list.begin());
+
+    } while (0);
+
+    return l_err;
+}
+
+
 /**
  * @brief Get the virtual address of the input target
  *        for an inband scom access.
@@ -199,7 +266,8 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
 {
     errlHndl_t l_err = NULL;
     o_virtAddr = NULL;
-    IBScomBase_t l_IBScomBaseAddr = 0;
+    IBScomBase_t l_IBScomBaseAddrOffset = 0;
+    IBScomBase_t l_IBScomAddr = 0;
     mutex_t* l_mutex = NULL;
     bool need_unlock = false;
 
@@ -232,56 +300,36 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
             TRACDCOMP(g_trac_ibscom, INFO_MRK
                       "getTargetVirtualAddress: Need to compute virtual address for Centaur");
 
-            //Get MMIO Offset from parent MCS attribute.
+            //Get the parent DMI
+            Target* parentDMI = NULL;
+            l_err = getParentDMI(i_target, parentDMI);
 
-            //Get the parent MCS
-            Target* parentMCS = NULL;
-
-            PredicateCTM l_mcs(CLASS_UNIT,
-                               TYPE_MCS,
-                               MODEL_NA);
-
-            TargetHandleList mcs_list;
-            targetService().
-              getAssociated(mcs_list,
-                            i_target,
-                            TargetService::PARENT_BY_AFFINITY,
-                            TargetService::ALL,
-                            &l_mcs);
-
-            if( mcs_list.size() != 1 )
+            if( l_err )
             {
-                TRACFCOMP(g_trac_ibscom, ERR_MRK
-                          "getTargetVirtualAddress:  mcs_list size is zero");
-                /*@
-                 * @errortype
-                 * @moduleid     IBSCOM_GET_TARG_VIRT_ADDR
-                 * @reasoncode   IBSCOM_INVALID_CONFIG
-                 * @userdata1[0:31]   HUID of Centaur Target
-                 * @userdata2    Not Used
-                 * @devdesc      System configuration does not have a Parent MCS
-                 *               for the current centaur.
-                 */
-                l_err =
-                  new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                IBSCOM_GET_TARG_VIRT_ADDR,
-                                IBSCOM_INVALID_CONFIG,
-                                TWO_UINT32_TO_UINT64(
-                                                     get_huid(i_target),
-                                                     0),
-                                0);
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
                 break;
             }
-            parentMCS = *(mcs_list.begin());
 
-            l_IBScomBaseAddr =
-              parentMCS->getAttr<ATTR_IBSCOM_MCS_BASE_ADDR>();
+            //Get MMIO Offset from parent DMI attribute
+            //and generate the full ibscom address from
+            //the base and offset
+            l_IBScomBaseAddrOffset =
+                    parentDMI->getAttr<ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET>();
+
+            Target* l_parentChip =
+                    const_cast<Target *>(getParentChip(parentDMI));
+
+            uint8_t l_groupId = l_parentChip->getAttr<ATTR_FABRIC_GROUP_ID>();
+            uint8_t l_chipId  = l_parentChip->getAttr<ATTR_FABRIC_CHIP_ID>();
+
+            l_IBScomAddr = computeMemoryMapOffset( IBSCOM_BASE,
+                                                   l_groupId,
+                                                   l_chipId );
+            l_IBScomAddr = l_IBScomAddr + l_IBScomBaseAddrOffset;
 
             TRACUCOMP(g_trac_ibscom, INFO_MRK
-                      "getTargetVirtualAddress: From Attribute query l_IBScomBaseAddr=0x%llX, i_target=0x%.8x",
+                      "getTargetVirtualAddress: From Attribute query l_IBScomBaseAddrOffset=0x%llX, l_IBScomAddr=0x%llX, i_target=0x%.8x",
                       l_IBScomBaseAddr,
+                      l_IBScomAddr,
                       i_target->getAttr<ATTR_HUID>());
 
             // Map target's virtual address
@@ -289,7 +337,7 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
             //hostboot IBSCOM MMIO allocated 64GB, but the SCOM address space
             //is small enough that 32 GB is sufficient.
             o_virtAddr = static_cast<uint64_t*>
-              (mmio_dev_map(reinterpret_cast<void*>(l_IBScomBaseAddr),
+              (mmio_dev_map(reinterpret_cast<void*>(l_IBScomAddr),
                             THIRTYTWO_GB));
 
             // Save the virtual address attribute.
@@ -314,6 +362,7 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
 
     return l_err;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -419,6 +468,40 @@ void err_cleanup(Target* i_target,
 }
 
 
+/**
+ * @brief Compress the input SCOM address
+ *
+ * @param[in]  i_addr    inband scom address
+ * @return     l_addr    compressed scom address
+ */
+uint64_t compressScomAddr(uint64_t i_addr)
+{
+    // Bits with X are removed in compressed address
+    // Rsvd  Multi  PCB_Slave Rsvd  Port   Rsvd   Loop#  Sat#/Register#
+    // 0     1      2:7       8:11  12:15  16:17  18:21  22:31
+    // -     -      ------    ----  ----   --     ----   ----------  Input Addr
+    // -     -      XXXX--    XXXX  ----   XX     X---   ----------  Compressed
+
+    const uint64_t LOOPSAT_MASK = 0x0000000000001FFF;
+    const uint64_t PORT_MASK    = 0x00000000000F0000;
+    const uint64_t SLAVE_MASK   = 0x0000000003000000;
+    const uint64_t MULTI_MASK   = 0x00000000C0000000;
+
+    const uint32_t PORT_SHIFT   = 3;
+    const uint32_t SLAVE_SHIFT  = 7;
+    const uint32_t MULTI_SHIFT  = 11;
+
+    uint64_t l_addr;
+
+    l_addr  = (i_addr & LOOPSAT_MASK);
+    l_addr |= (i_addr & PORT_MASK) >> PORT_SHIFT;
+    l_addr |= (i_addr & SLAVE_MASK) >> SLAVE_SHIFT;
+    l_addr |= (i_addr & MULTI_MASK) >> MULTI_SHIFT;
+
+    return l_addr;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
@@ -448,6 +531,9 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
         // Set to buffer len to 0 until successfully access
         io_buflen = 0;
 
+        // Compress the scom address
+        uint64_t l_addr = compressScomAddr(i_addr);
+
         // Get the target chip's virtual address
         uint64_t* l_virtAddr = NULL;
         l_err = getTargetVirtualAddress(i_target, l_virtAddr);
@@ -459,7 +545,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
 
         TRACDCOMP(g_trac_ibscom,
                   "doIBScom: Base Virt Addr: 0x%.16X, Read addr: 0x%.16X",
-                  l_virtAddr, &(l_virtAddr[i_addr]));
+                  l_virtAddr, &(l_virtAddr[l_addr]));
 
 
         // The dereferencing should handle Cache inhibited internally
@@ -495,7 +581,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                 IBSCOM_DO_IBSCOM,
                                 IBSCOM_RETRY_DUE_TO_ERROR,
                                 get_huid(i_target),
-                                i_addr);
+                                l_addr);
                 //This error should NEVER get returned to caller, so it's a
                 //FW bug if it actually gets committed.
                 l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -507,12 +593,12 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
         if (i_opType == DeviceFW::READ)
         {
             //This is the actual MMIO Read
-            l_data = l_virtAddr[i_addr];
+            l_data = l_virtAddr[l_addr];
             eieio();
 
             TRACUCOMP(g_trac_ibscom,
                       "doIBScom: Read address: 0x%.8X data: %.16X",
-                      i_addr, l_data);
+                      l_addr, l_data);
 
             // Check for error or done
             if(l_data == MMIO_IBSCOM_UE_DETECTED)
@@ -536,7 +622,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                                     IBSCOM_SUE_IN_ERR_PATH,
                                     TWO_UINT32_TO_UINT64(
                                                          get_huid(i_target),
-                                                         i_addr),
+                                                         l_addr),
                                     0);
                     //This error should NEVER get returned to caller, so it's a
                     //FW bug if it actually gets committed.
@@ -564,9 +650,9 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             memcpy(&l_data, io_buffer, sizeof(l_data));
             TRACUCOMP(g_trac_ibscom,
                       "doIBScom: Write addr: 0x%.8X data: %.16X",
-                      i_addr, l_data);
+                      l_addr, l_data);
             //This is the actual MMIO Write
-            l_virtAddr[i_addr] = l_data;
+            l_virtAddr[l_addr] = l_data;
             eieio();
 
             //Workaround for HW264203
@@ -675,7 +761,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
             //  address that was being accessed when the error was detected.
             else if( mbsiberr0.addr != i_addr )
             {
-                TRACFCOMP( g_trac_ibscom, "doIBScom> The address in MBSIBERR0 (0x%.8X) doesn't match what we were scomming (0x%.8X)", mbsiberr0.addr, i_addr );
+                TRACFCOMP( g_trac_ibscom, "doIBScom> The address in MBSIBERR0 (0x%.8X) doesn't match what we were scomming (0x%.8X)", mbsiberr0.addr, l_addr );
                 /*@
                  * @errortype
                  * @moduleid     IBSCOM_DO_IBSCOM
@@ -859,7 +945,7 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
         TRACDCOMP(g_trac_ibscom,"doIBScom: OpType 0x%.16llX, SCOM Address 0x%llX, Virtual Address 0x%llX",
                   static_cast<uint64_t>(i_opType),
                   i_addr,
-                  &(l_virtAddr[i_addr]));
+                  &(l_virtAddr[l_addr]));
 
     } while (0);
 
@@ -883,12 +969,27 @@ errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
-    l_err = doIBScom(i_opType,
-                     i_target,
-                     io_buffer,
-                     io_buflen,
-                     l_addr,
-                     false);
+    // Addressses with bit 18 set are not handled correctly
+    // by inband scom, reroute to fsi scom
+    if( (l_addr & BIT_02_MASK) ||
+        (l_addr & BIT_03_MASK) ||
+        (l_addr & BIT_18_MASK) )
+    {
+        l_err = deviceOp(i_opType,
+                         i_target,
+                         io_buffer,
+                         io_buflen,
+                         DEVICE_FSISCOM_ADDRESS(l_addr));
+    }
+    else
+    {
+        l_err = doIBScom(i_opType,
+                         i_target,
+                         io_buffer,
+                         io_buflen,
+                         l_addr,
+                         false);
+    }
     return l_err;
 }
 
@@ -930,6 +1031,34 @@ void enableInbandScoms( bool i_disable )
               (l_override != 0) )
             )
         {
+            //Get the parent DMI
+            errlHndl_t l_err = NULL;
+            Target* parentDMI = NULL;
+            l_err = getParentDMI(mb, parentDMI);
+            if( l_err )
+            {
+                // Commit Error
+                errlCommit( l_err, IBSCOM_COMP_ID );
+                break;
+            }
+
+            //Get inband enable from the parent DMI attribute
+            uint32_t l_IBScomEnable =
+                parentDMI->getAttr<ATTR_DMI_INBAND_BAR_ENABLE>();
+
+            TRACUCOMP(g_trac_ibscom, INFO_MRK
+                      "enableInbandScoms: From Attribute query l_IBScomEnable=0x%X, i_target=0x%.8x",
+                      l_IBScomEnable,
+                      mb->getAttr<ATTR_HUID>());
+
+            if( l_IBScomEnable == 0 )
+            {
+                TRACFCOMP(g_trac_ibscom, INFO_MRK
+                          "enableInbandScoms: ATTR_DMI_INBAND_BAR_ENABLE = 0 for target 0x%.8x",
+                          mb->getAttr<ATTR_HUID>());
+                continue;
+            }
+
             //don't mess with attributes without the mutex (just to be safe)
             l_mutex = mb->getHbMutexAttr<TARGETING::ATTR_IBSCOM_MUTEX>();
             mutex_lock(l_mutex);
