@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,6 +100,16 @@ int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################
+
+/**
+ * @brief  Determines if the given target is capable of running in broadcast
+ *         mode. Super fast commands will always run in broadcast mode if it is
+ *         possible.
+ * @param  i_chip MCBIST chip.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+bool isBroadcastModeCapable( ExtensibleChip * i_chip );
 
 /**
  * @brief  Starts a super fast read command from the first address of the given
