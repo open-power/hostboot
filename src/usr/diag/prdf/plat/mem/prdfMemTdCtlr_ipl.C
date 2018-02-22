@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,32 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::initialize()
+{
+    #define PRDF_FUNC "[MemTdCtlr::initialize] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( iv_initialized ) break; // nothing to do
+
+        // Check if broadcast mode is capable on this chip.
+        iv_broadcastModeCapable = isBroadcastModeCapable<T>( iv_chip );
+
+        // At this point, the TD controller is initialized.
+        iv_initialized = true;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
 uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
@@ -72,7 +98,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
     uint32_t o_rc = SUCCESS;
 
     TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank,
-                                                    iv_broadcastMode );
+                                                    iv_broadcastModeCapable );
 
     do
     {

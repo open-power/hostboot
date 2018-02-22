@@ -86,8 +86,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        #ifdef __HOSTBOOT_RUNTIME
-
         // Make sure the TD controller is initialized.
         o_rc = initialize();
         if ( SUCCESS != o_rc )
@@ -96,7 +94,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        #else // IPL only
+        #ifndef __HOSTBOOT_RUNTIME // IPL only
 
         // TODO: RTC 179251 asserting here doesn't give us enough FFDC to debug
         //       why we got this erroneous attention. Eventually, we will want
@@ -142,36 +140,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // informational error logs.
             if ( !errorsFound ) io_sc.service_data->setDontCommitErrl();
         }
-        else
-        {
-            // Make sure iv_stoppedRank still gets updated.
-            std::vector<ExtensibleChip *> portList;
-            o_rc = getMcbistMaintPort( iv_chip, portList );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
-                        iv_chip->getHuid() );
-                break;
-            }
-
-            // In broadcast mode, the rank configuration for all ports will be
-            // the same. In non-broadcast mode, there will only be one MCA in
-            // the list. Therefore, we can simply use the first MCA in the list
-            // for all configs.
-            ExtensibleChip * stopChip = portList.front();
-
-            // Get the address in which the command stopped.
-            MemAddr addr;
-            o_rc = getMemMaintAddr<T>( iv_chip, addr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
-                          iv_chip->getHuid() );
-                break;
-            }
-
-            iv_stoppedRank = __getStopRank<TYPE_MCA>( stopChip, addr );
-        }
 
         // Move onto the next step in the state machine.
         o_rc = nextStep( io_sc );
@@ -188,7 +156,10 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
     //       successfully with no errors because the error log will not be
     //       committed.
     if ( !io_sc.service_data->queryDontCommitErrl() )
+    {
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
         MemCaptureData::addEccData<T>( iv_chip, io_sc );
+    }
 
     if ( SUCCESS != o_rc )
     {
@@ -219,10 +190,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         #endif
     }
-    else
-    {
-        collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
-    }
 
     return o_rc;
 
@@ -249,9 +216,6 @@ template<TARGETING::TYPE T>
 uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
                                TdQueue & io_queue,
                                TdRankListEntry & o_stoppedRank,
-                               #ifndef __HOSTBOOT_RUNTIME
-                               bool & o_broadcastMode,
-                               #endif
                                const MemAddr & i_addr,
                                bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
@@ -260,9 +224,6 @@ template<>
 uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
                                             TdQueue & io_queue,
                                             TdRankListEntry & o_stoppedRank,
-                                            #ifndef __HOSTBOOT_RUNTIME
-                                            bool & o_broadcastMode,
-                                            #endif
                                             const MemAddr & i_addr,
                                             bool & o_errorsFound,
                                             STEP_CODE_DATA_STRUCT & io_sc )
@@ -293,11 +254,6 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
 
         // Update iv_stoppedRank.
         o_stoppedRank = __getStopRank<TYPE_MCA>( stopChip, i_addr );
-
-        #ifndef __HOSTBOOT_RUNTIME
-        // Update iv_broadcastMode.
-        o_broadcastMode = ( 1 < portList.size() );
-        #endif
 
         // Check each MCA for ECC errors.
         for ( auto & mcaChip : portList )
@@ -330,9 +286,6 @@ template<>
 uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
                                          TdQueue & io_queue,
                                          TdRankListEntry & o_stoppedRank,
-                                         #ifndef __HOSTBOOT_RUNTIME
-                                         bool & o_broadcastMode,
-                                         #endif
                                          const MemAddr & i_addr,
                                          bool & o_errorsFound,
                                          STEP_CODE_DATA_STRUCT & io_sc )
@@ -371,9 +324,6 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
 
         // Then, check for ECC errors, if they exist.
         o_rc = __analyzeCmdComplete<T>( iv_chip, iv_queue, iv_stoppedRank,
-                                        #ifndef __HOSTBOOT_RUNTIME
-                                        iv_broadcastMode,
-                                        #endif
                                         addr, o_errorsFound, io_sc );
         if ( SUCCESS != o_rc )
         {

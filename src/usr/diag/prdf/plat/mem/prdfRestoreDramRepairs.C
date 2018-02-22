@@ -54,6 +54,7 @@ namespace RDR // local utility functions to support PRDF::restoreDramRepairs()
 {
 
 // Creates and returns an error log.
+template<TARGETING::TYPE T>
 errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
                        uint32_t i_signature )
 {
@@ -63,12 +64,18 @@ errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
     // Note that the error log tags are not needed because PRD uses its own
     // signature parser.
 
-    return new ERRORLOG::ErrlEntry(
+    errlHndl_t errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_PREDICTIVE,  // severity
                             PRDF_RESTORE_DRAM_REPAIR,       // module ID
                             i_reasonCode,                   // reason code
                             userdata12,                     // user data 1 & 2
                             userdata34 );                   // user data 3 & 4
+
+    // Add capture data. Need to do this now before the DIMM callouts are made
+    // because the VPD is cleared if a DIMM is added to the callout list.
+    MemCaptureData::addEccData<T>( i_trgt, errl );
+
+    return errl;
 }
 
 //------------------------------------------------------------------------------
@@ -80,9 +87,6 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 {
     if ( NULL != i_errl )
     {
-        // Add capture data
-        MemCaptureData::addEccData<T>( i_trgt, i_errl );
-
         // Add traces
         i_errl->collectTrace( PRDF_COMP_NAME, 512 );
 
@@ -147,7 +151,7 @@ void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_trgt,
 {
     if ( i_analysisErrors )
     {
-        errlHndl_t errl = createErrl( i_reasonCode, i_trgt, i_signature );
+        errlHndl_t errl = createErrl<T>( i_reasonCode, i_trgt, i_signature );
         errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP,
                                    HWAS::SRCI_PRIORITY_HIGH );
         commitErrl<T>( errl, i_trgt );
@@ -225,8 +229,9 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 
                 if ( NULL == errl )
                 {
-                    errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_trgt,
-                                       PRDFSIG_RdrRepairsUsed );
+                    errl = createErrl<TYPE_MCA>( PRDF_DETECTED_FAIL_HARDWARE,
+                                                 i_trgt,
+                                                 PRDFSIG_RdrRepairsUsed );
                 }
 
                 std::vector<MemSymbol> symList;
@@ -344,8 +349,9 @@ bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
 
                 if ( NULL == errl )
                 {
-                    errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
-                                       PRDFSIG_RdrRepairsUsed );
+                    errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE,
+                                                 i_mba,
+                                                 PRDFSIG_RdrRepairsUsed );
                 }
 
                 std::vector<CenSymbol> list;
@@ -425,8 +431,8 @@ bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         {
             if ( NULL == errl )
             {
-                errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_trgt,
-                                   PRDFSIG_RdrRepairUnavail );
+                errl = createErrl<TYPE_MCA>( PRDF_DETECTED_FAIL_HARDWARE,
+                                             i_trgt, PRDFSIG_RdrRepairUnavail );
             }
 
             __calloutDimm<TYPE_MCA, DIMMS_PER_RANK::MCA>( errl, i_trgt, dimm );
@@ -492,8 +498,8 @@ bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
         {
             if ( NULL == errl )
             {
-                errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
-                                   PRDFSIG_RdrRepairUnavail );
+                errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE, i_mba,
+                                             PRDFSIG_RdrRepairUnavail );
             }
 
             o_calloutMade = true;

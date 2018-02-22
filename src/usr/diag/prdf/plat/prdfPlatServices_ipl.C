@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,6 +252,19 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
 //##############################################################################
 
 template<>
+bool isBroadcastModeCapable<TYPE_MCBIST>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
+
+    fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
+
+    return ( mss::states::YES == mss::mcbist::is_broadcast_capable(fapiTrgt) );
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
                                 const MemRank & i_rank )
 {
@@ -334,6 +347,14 @@ uint32_t startSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
+
+template<>
+bool isBroadcastModeCapable<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    return false; // Not supported on Centaur.
+}
+
+//------------------------------------------------------------------------------
 
 template<>
 uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,

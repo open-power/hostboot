@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,25 +57,23 @@ class MemTdCtlr
      * This contructor will only be called in the MCBIST or MBA data bundle,
      * which already checks for a valid type.
      *
+     * Need to initialize iv_stoppedRank to a valid entry in iv_rankList. Use
+     * the last entry in the list so that the 'next' rank is the first entry
+     * in the list.
+     *
      * @param i_chip An MCBIST or MBA chip.
      */
     explicit MemTdCtlr( ExtensibleChip * i_chip ) :
         iv_chip( i_chip ), iv_rankList( i_chip ),
-        iv_stoppedRank( i_chip, MemRank(0) )
+        iv_stoppedRank( iv_rankList.getList().back() )
     {
         PRDF_ASSERT( T == iv_chip->getType() );
-        if ( TARGETING::TYPE_MCBIST == i_chip->getType() )
-        {
-            ExtensibleChip * mcaChip =
-                PlatServices::getConnectedChild(i_chip, TARGETING::TYPE_MCA, 0);
-            iv_stoppedRank = TdRankListEntry( mcaChip, MemRank(0) );
-        }
     }
 
     /**
      * @brief  Determines and executes the next course of action after a
      *         maintenance command complete attention.
-     * @note   Initializes the TD controller, if needed (runtime only).
+     * @note   Initializes the TD controller, if needed.
      * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
@@ -97,8 +95,8 @@ class MemTdCtlr
      * requests will be ignored. Any chip marks placed during this time will be
      * redetected when the runtime TD controller is initialized.
      *
-     * During IPL, this will simply add a new procedure to the queue, since we
-     * know TD will already be in progress when this is called.
+     * During MemDiags, this will simply add a new procedure to the queue, since
+     * we know a TD procedure will already be in progress when this is called.
      *
      * @note   Initializes the TD controller, if needed.
      * @param  io_sc    The step code data struct.
@@ -118,14 +116,23 @@ class MemTdCtlr
 
     /**
      * @brief Handles reset-reload or FO scenario.
-     * @note  This function will check if PRD was unable to restart maintenance
-     *        command before R/R or FO. In that scenario, this function will
-     *        start maintenance command. As during R/R or F/O we do not have any
-     *        mechanism to restore the complete state of TD controller, we will
-     *        not start any interrupted or pending TD procedure. We will only
-     *        start BG scrub. If we found any chip marks during TD state
-     *        machine initialize we will start VCM procedure rather than
-     *        BG scrub.
+     *
+     * This does not call initialize() or start any maintenance commands.
+     * Instead, it checks the hardware's current state and ensures by the end of
+     * the function that either a command is currently running or there will be
+     * a command complete attention pending that PRD will handle separately.
+     *
+     * If there is already an active command complete attention. This function
+     * does nothing because PRD will handle the attention soon.
+     *
+     * If there is no active command complete attention and there is no command
+     * currently in progress, it will set the command complete attention and PRD
+     * will handle that attention soon.
+     *
+     * Otherwise, there is a command in progress. So, it will check for any
+     * unverified chip marks. If any exist, it will force the current command to
+     * stop, causing a command complete attention that PRD will handle soon.
+     *
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     uint32_t handleRrFo();
@@ -133,6 +140,24 @@ class MemTdCtlr
     #endif
 
   private:
+
+    /**
+     * @brief  Initializes the TD controller, if needed.
+     *
+     * This should be called at the beginning of every public function to ensure
+     * the TD controller is initialized.
+     *
+     * During MemDiags, this initializes iv_broadcastModeCapable.
+     *
+     * At runtime, this is used to query hardware for any unverified chip marks
+     * that may have occurred after starting background scrubbing, but before
+     * PRD is up and running. We may also have unverified chip marks if the HBRT
+     * service is stopped and restarted (PRD is reinitialize and all previous
+     * state machine data is lost).
+     *
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t initialize();
 
     /**
      * @brief This is called when there are no more TD procedures to execute.
@@ -198,8 +223,8 @@ class MemTdCtlr
 
     /**
      * @brief  This is called when handling a command complete attention for a
-     *         non-TD command to initialize iv_stoppedRank and iv_broadcastMode
-     *         then check for any ECC errors.
+     *         non-TD command to initialize iv_stoppedRank then check for any
+     *         ECC errors.
      * @param  o_errorsFound True if errors where found and handled. False
      *                       otherwise.
      * @param  io_sc         The step code data struct.
@@ -237,22 +262,6 @@ class MemTdCtlr
      */
     uint32_t unmaskEccAttns();
 
-    /**
-     * @brief  Initializes the TD controller, if needed.
-     *
-     * This is only supported during runtime. This is mostly useful at runtime
-     * to query hardware for any unverified chip marks. Those may occur after
-     * starting background scrubbing, but before PRD is up and running. We may
-     * also have unverified chip marks if the HBRT service is stopped and
-     * restarted (PRD is reinitialize and all previous state machine data is
-     * lost).
-     *
-     * @note   Should be called at the beginning of every public function to
-     *         ensure the TD controller is initialized.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t initialize();
-
     #endif
 
   private: // instance variables
@@ -276,10 +285,10 @@ class MemTdCtlr
      *  diagnostics are complete. */
     TdRankListEntry iv_stoppedRank;
 
-    #ifdef __HOSTBOOT_RUNTIME
-
     /** True if the TD controller has been initialized. False otherwise. */
     bool iv_initialized = false;
+
+    #ifdef __HOSTBOOT_RUNTIME
 
     /** True if background scrubbing should be resumed after pausing on error.
      *  False if a TD procedure had been executed and background scrubbing needs
@@ -288,9 +297,8 @@ class MemTdCtlr
 
     #else // IPL only
 
-    /** Combined with iv_stoppedRank. Indicates if the non-TD command that
-     *  stopped was in broadcast mode or not. */
-    bool iv_broadcastMode = false;
+    /** Indicates if broadcast mode is capable on iv_chip. */
+    bool iv_broadcastModeCapable = false;
 
     #endif
 
