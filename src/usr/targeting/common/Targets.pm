@@ -1604,6 +1604,7 @@ sub setFsiAttributes
     my $phys_path = shift;
     my $fsi_port = shift;
     my $flip_port = shift;
+    my $altfsiswitch = shift;
 
     $self->setAttribute($target, "FSI_MASTER_TYPE","NO_MASTER");
     if ($type eq "FSIM")
@@ -1634,7 +1635,7 @@ sub setFsiAttributes
     }
     else
     {
-      if ($flip_port eq 0 )
+      if ($altfsiswitch eq 0 )
       {
         $self->setAttribute($target, "FSI_MASTER_CHIP",$phys_path);
         $self->setAttribute($target, "FSI_MASTER_PORT", $fsi_port);
