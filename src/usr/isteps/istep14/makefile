@@ -71,6 +71,7 @@ OBJS += p9_pcie_config.o
 OBJS += p9_setup_bars.o
 OBJS += p9_fbc_smp_utils.o
 OBJS += p9_mpipl_chip_cleanup.o
+OBJS += p9_mss_thermal_init.o
 OBJS += p9c_mss_thermal_init.o
 OBJS += p9c_mss_unmask_errors.o
 OBJS += p9c_mss_power_cleanup.o
