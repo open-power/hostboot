@@ -92,6 +92,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_CUMULUS.system.xml:openpower \
+    src/usr/targeting/common/xmltohb/simics_CUMULUS_CDIMM.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
@@ -233,6 +234,8 @@ simics.tar_CONTENTS = \
     img/procmvpd_p9c.dat \
     img/cvpd.dat \
     img/dvpd.dat \
+    img/cvpd_cdimm.dat \
+    img/dimmspd_cdimm.dat \
     obj/genfiles/attrInfo.csv \
     obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv
@@ -264,10 +267,13 @@ fsp.tar_CONTENTS = \
     $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
     img/simics_CUMULUS_targeting.bin \
+    img/simics_CUMULUS_CDIMM_targeting.bin \
     img/simics_NIMBUS_targeting.bin.protected \
     img/simics_NIMBUS_targeting.bin.unprotected \
     img/simics_CUMULUS_targeting.bin.protected \
     img/simics_CUMULUS_targeting.bin.unprotected \
+    img/simics_CUMULUS_CDIMM_targeting.bin.protected \
+    img/simics_CUMULUS_CDIMM_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \

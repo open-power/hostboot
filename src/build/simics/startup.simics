@@ -4,10 +4,14 @@ $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
 $model = (shell "printenv CEC_MODEL")
+$machine_name = (shell "printenv MACHINE")
 $hb_machine = "unknown"
 if ($model == "p9_nimbus") {$hb_machine = "nimbus"}
 if ($model == "p9zz_1s2u") {$hb_machine = "zztop"}
-if ($model == "p9_cumulus") {$hb_machine = "cumulus"}
+if ($model == "p9_cumulus") {
+    if ($machine_name == "CUMULUS_CDIMM") { $hb_machine = "cumulus_cdimm" }
+    if ($machine_name != "CUMULUS_CDIMM") { $hb_machine = "cumulus" }
+}
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
