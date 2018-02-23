@@ -1125,6 +1125,8 @@ foreach my $argnum ( 0 .. $#ARGV )
                         $callout->{priority};
 
                     $elementsFound++;
+
+                    addFfdcMethod( \%methods, $callout->{target}, $err->{rc}, $target_ffdc_type );
                 }
                 if ( exists $callout->{childTargets} )
                 {
