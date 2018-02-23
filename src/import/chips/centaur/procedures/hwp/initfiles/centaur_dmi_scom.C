@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@ constexpr uint64_t literal_0b0011000 = 0b0011000;
 constexpr uint64_t literal_0b0010001 = 0b0010001;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b11 = 0b11;
-constexpr uint64_t literal_0b0001111 = 0b0001111;
+constexpr uint64_t literal_0b1000000 = 0b1000000;
 constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b0111 = 0b0111;
 constexpr uint64_t literal_0b0011 = 0b0011;
@@ -588,9 +588,9 @@ fapi2::ReturnCode centaur_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8009d8000201043full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0001111 );
-            constexpr auto l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP7 = 0x7;
-            l_scom_buffer.insert<55, 4, 60, uint64_t>(l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP7 );
+            l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b1000000 );
+            constexpr auto l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP2 = 0x2;
+            l_scom_buffer.insert<55, 4, 60, uint64_t>(l_DMI_RX_RXCTL_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP2 );
             l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b101 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009d8000201043full, l_scom_buffer));
         }

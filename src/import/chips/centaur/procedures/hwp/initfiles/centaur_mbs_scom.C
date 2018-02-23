@@ -34,7 +34,6 @@ constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0b00000 = 0b00000;
-constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b010010 = 0b010010;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b00000000000000000000 = 0b00000000000000000000;
@@ -65,6 +64,7 @@ constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_12 = 12;
@@ -786,7 +786,7 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
 
             if (literal_1)
             {
-                l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
             }
 
             if (literal_1)
