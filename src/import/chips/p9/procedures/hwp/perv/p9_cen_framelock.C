@@ -1690,36 +1690,6 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
              "p9_cen_framelock: Error writing P9 MCI Configuration register to set CHI's FIRs mode.");
 #endif
 
-    // Set Centaur DATAPATH FIR Mask
-    mbi_data.flush<0>();
-    mbi_data.setBit<0>();     //Replay Timeout
-    mbi_data.setBit<5>();     //Replay Buffer CE
-    mbi_data.setBit<6>();     //Replay Buffer UE
-    mbi_data.setBit<8>();     //MBI Internal Control Parity Error
-    mbi_data.setBit<9>();     //MBI Data Flow Parity Error
-    mbi_data.setBit<10>();    //CRC Performance Degradation
-    mbi_data.setBit<16>();    //SCOM Register parity
-    mbi_data.setBit<19>();    //MBICFGQ Parity Error
-    mbi_data.setBit<20>();    //Replay Buffer Overrun Error
-    mbi_data.setBit<25>();    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE: Internal SCOM Error Clone
-    mbi_data.setBit<26>();    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY: Internal SCOM Error Clone copy
-    mbi_mask = mbi_data;
-
-    mbi_data.clearBit<0>();     //Replay Timeout
-    mbi_data.clearBit<5>();     //Replay Buffer CE
-    mbi_data.clearBit<6>();     //Replay Buffer UE
-    mbi_data.clearBit<8>();     //MBI Internal Control Parity Error
-    mbi_data.clearBit<9>();     //MBI Data Flow Parity Error
-    mbi_data.clearBit<10>();    //CRC Performance Degradation
-    mbi_data.clearBit<16>();    //SCOM Register parity
-    mbi_data.clearBit<19>();    //MBICFGQ Parity Error
-    mbi_data.clearBit<20>();    //Replay Buffer Overrun Error
-    mbi_data.clearBit<25>();    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE: Internal SCOM Error Clone
-    mbi_data.clearBit<26>();    //MBIFIRQ_INTERNAL_SCOM_ERROR_CLONE_COPY: Internal SCOM Error Clone copy
-
-    FAPI_TRY(p9_cen_framelock_set_cen_mbi_firmask_reg(i_mem_target, mbi_data, mbi_mask),
-             "p9_cen_framelock: Error writing Centaur MBI Fir Mask Register");
-
     // Bit set For Centaur
     // No Bits are set in CEN MBI FIR ACT0
 
@@ -1743,7 +1713,6 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     mbi_data.setBit<6>();     //Replay Buffer UE
     mbi_data.setBit<8>();     //MBI Internal Control Parity Error
     mbi_data.setBit<9>();     //MBI Data Flow Parity Error
-    mbi_data.setBit<10>();    //CRC Performance Degradation
     mbi_data.setBit<16>();    //SCOM Register parity
     mbi_data.setBit<19>();    //MBICFGQ Parity Error
     mbi_data.setBit<20>();    //Replay Buffer Overrun Error
@@ -1755,7 +1724,6 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     mbi_data.clearBit<6>();     //Replay Buffer UE
     mbi_data.clearBit<8>();     //MBI Internal Control Parity Error
     mbi_data.clearBit<9>();     //MBI Data Flow Parity Error
-    mbi_data.clearBit<10>();    //CRC Performance Degradation
     mbi_data.clearBit<16>();    //SCOM Register parity
     mbi_data.clearBit<19>();    //MBICFGQ Parity Error
     mbi_data.clearBit<20>();    //Replay Buffer Overrun Error
