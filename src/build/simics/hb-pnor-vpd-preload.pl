@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -38,6 +38,7 @@ my $machine;
 my $procConfig = "uninit";
 my $centConfig = "uninit";
 my $maxProcs = 8;
+my $dimmType = "ISDIMM";
 
 # Create temp file for MVPD
 my $emptyMVPDfh;
@@ -59,13 +60,14 @@ my $mvpdFile_ven = "procmvpd_ven.dat";
 my $mvpdFile_p9n = "procmvpd_p9n.dat";
 my $mvpdFile_p9c = "procmvpd_p9c.dat";
 my $cvpdFile = "cvpd.dat";
+my $cvpdCdimmFile = "cvpd_cdimm.dat";
 my $dvpdFile = "dvpd.dat";
-my $memVpdFile = $cvpdFile;
+my $memVpdFile = "";
 my $spdFile = "dimmspd.dat";
+my $spdCdimmFile = "dimmspd_cdimm.dat";
 my $sysMVPD = "sysmvpd.dat";
 my $sysMemVPD = "sysmemvpd.dat";
 my $sysSPD = "sysspd.dat";
-
 
 my $MAX_CENT_PER_PROC = 8;
 my $MAX_DIMMS_PER_CENT = 8;
@@ -131,6 +133,11 @@ while( $ARGV = shift )
             usage();
         }
     }
+    elsif( $ARGV =~ m/--dimmType/ ||
+           $ARGV =~ m/-dc/ )
+    {
+        $dimmType = shift;
+    }
     elsif( $ARGV =~ m/--examples/ ||
            $ARGV =~ m/-e/ )
     {
@@ -141,6 +148,16 @@ while( $ARGV = shift )
         usage();
     }
 }
+
+if ($dimmType eq "CDIMM")
+{
+    $memVpdFile = $cvpdCdimmFile;
+}
+else
+{
+    $memVpdFile = $cvpdFile;
+}
+
 
 #figure out default procConfig if one was not specified.
 #if procConfig was specified, validate it's length.
@@ -458,8 +475,17 @@ sub createSPDData
                      substr($procConfig,$proc,1) =~ /1/ )
                 {
                     debugMsg( "$machine( $proc, $mcs, $dimm ): Real File" );
-                    # Use the real data to the full image
-                    $sourceFile = "$dataPath/$spdFile";
+                    if ($dimmType eq "CDIMM")
+                    {
+                         # CDIMM Config - Use the real data to the full image
+                         $sourceFile = "$dataPath/$spdCdimmFile";
+                    }
+                    else
+                    {
+                        # Assume ISDIMM - Use the real data to the full image
+                        $sourceFile = "$dataPath/$spdFile";
+                    }
+                    
                 }
                 else
                 {
@@ -569,7 +595,7 @@ sub getMemoryConfig
                     }
                 }
             }
-            elsif( $machine eq "CUMULUS" )
+            elsif( $machine eq "CUMULUS" || $machine eq "CUMULUS_CDIMM" )
             {
                 # Plugging order is:
                 #   Processor 0 - 3

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -192,6 +192,9 @@ XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin.unprotected
 
 XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_targeting.bin.protected
 XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_targeting.bin.unprotected
+
+XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_CDIMM_targeting.bin.protected
+XMLTOHB_SYSTEM_BINARIES += simics_CUMULUS_CDIMM_targeting.bin.unprotected
 
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}

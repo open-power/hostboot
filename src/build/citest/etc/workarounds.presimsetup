@@ -40,9 +40,15 @@ mkdir -p  $sb/simu/data
 echo "+++ Get some simics info changes"
 sbex -t 1045730
 
+###############################################################################
+### NOTE - if you need to sbex a simicsInfo track it needs to be done BEFORE
+###        executing the code below
+###############################################################################
 chmod +w $sb/simu/data/simicsInfo
-egrep -v "nimbus.pnor|cumulus.pnor" $sb/simu/data/simicsInfo > $sb/simu/data/simicsInfo.new
+egrep -v "nimbus.pnor|cumulus.pnor|cumulus_cdimm.pnor" $sb/simu/data/simicsInfo > $sb/simu/data/simicsInfo.new
 mv $sb/simu/data/simicsInfo.new $sb/simu/data/simicsInfo
 echo "IMGS:NIMBUS_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
 echo "IMGS:BOSTON_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
 echo "IMGS:CUMULUS_PNOR_IMG | FLASH:cumulus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
+echo "MACHINE:CUMULUS_CDIMM| CODENAME:"Cumulus" | DESC:"P9 Cumulus standalone config" | CONF_FILE:P9_CUMULUS.config | TGT:targets/p9_cumulus/p9_cumulus_1.simics | REL_EXLD:fips730,fips731 | CONTEXT:ppc | SIMENV:DEFAULT | PROC:P9 | IMGS:CUMULUS_CDIMM_PNOR_IMG | IMGS:OTPROM_SBE_IMG_DD1_BIN | IMGS:SEEPROM_SBE_IMG_DD1_BIN | IMGS:PIBMEM_SBE_IMG_DD1_BIN | IMGS:OTPROM_SBE_IMG_DD2_BIN | IMGS:SEEPROM_SBE_IMG_P9C_BIN | IMGS:PIBMEM_SBE_IMG_DD2_BIN | IMGS:HOSTBOOT_IMG" >> $sb/simu/data/simicsInfo
+echo "IMGS:CUMULUS_CDIMM_PNOR_IMG | FLASH:cumulus_cdimm.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo

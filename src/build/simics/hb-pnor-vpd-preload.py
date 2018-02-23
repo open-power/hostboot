@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -35,16 +35,22 @@ numProcs = os.environ.get( "NUM_PROCS");
 dimmsPerProc = os.environ.get( "DIMMS_PER_PROC");
 numCentaurPerProcParm = "";
 numCentaurPerProc = "0";
-if (thisSys == "CUMULUS"):
+dimmType = "ISDIMM";
+print "dimmType = " + dimmType;
+if (thisSys == "CUMULUS" or thisSys == "CUMULUS_CDIMM"):
+    print "CUMULUS OR CUMULUS_CDIMM";
     numCentaurPerProc=str(int(dimmsPerProc)/2);
     numCentaurPerProcParm=" --numCentPerProc " + numCentaurPerProc;
+pass
+if (thisSys == "CUMULUS_CDIMM"):
+    dimmType = "CDIMM";
 pass
 procChipTypeParm = "";
 if os.environ.has_key('HB_PROC_CHIP_TYPE'):
     procChipType = os.environ.get('HB_PROC_CHIP_TYPE');
     procChipTypeParm=" --procChipType " + procChipType;
 pass
-cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + numCentaurPerProcParm + procChipTypeParm + " --machine " + thisSys + " --dataPath " + toolLoc
+cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + numCentaurPerProcParm + procChipTypeParm + " --machine " + thisSys + " --dataPath " + toolLoc + " --dimmType " + dimmType
 print "Generate PNOR VPD for " + numProcs + " processor(s), and " + numCentaurPerProc + " Centaur(s) per Processor.";
 args = shlex.split( cmd );
 subprocess.call( args );
