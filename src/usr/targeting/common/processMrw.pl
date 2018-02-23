@@ -1383,6 +1383,7 @@ sub processFsi
         my $proc_path = $targetObj->getAttribute($parentTarget,"PHYS_PATH");
         my $fsi_child_target = $targetObj->getTargetParent($fsi_child_conn);
         my $flip_port         = 0;
+        my $altfsiswitch      = 0;
 
         # If this is a proc that can be a master, then we need to set flip_port
         # attribute in FSI_OPTIONS. $flip_port tells us which FSI port to write to.
@@ -1445,12 +1446,25 @@ sub processFsi
                 my $fcid = $targetObj->getAttribute($parentTarget,"FABRIC_CHIP_ID");
                 if($fcid eq 1)
                 {
+                  $altfsiswitch = 1;
+                }
+            }
+        }
+        my $dest_type = $targetObj->getType($fsi_child_target);
+        if ($dest_type eq "PROC" )
+        {
+            my $proc_type = $targetObj->getAttribute($fsi_child_target, "PROC_MASTER_TYPE");
+            if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
+            {
+                my $fcid = $targetObj->getAttribute($fsi_child_target,"FABRIC_CHIP_ID");
+                if($fcid eq 1)
+                {
                   $flip_port = 1;
                 }
             }
         }
         $targetObj->setFsiAttributes($fsi_child_target,
-                    $type,$cmfsi,$proc_path,$fsi_link,$flip_port);
+                    $type,$cmfsi,$proc_path,$fsi_link,$flip_port,$altfsiswitch);
     }
 }
 
