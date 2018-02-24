@@ -304,10 +304,14 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                 curSrcTableAddr = srcTableEntry[curSourceIndex].dataAddr;
                 bytesLeftInSrc = srcTableEntry[curSourceIndex].dataSize;
 
-                // If the current Src table Address is 0 we are done
-                if (curSrcTableAddr == 0)
+                // src address 0 is valid source address on OPAL sytems
+                if (!TARGETING::is_sapphire_load())
                 {
-                    break;
+                    // If the current Src table Address is 0 we are done
+                    if (curSrcTableAddr == 0)
+                    {
+                        break;
+                    }
                 }
 
                 srcOffset =  curSrcTableAddr -
