@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -485,8 +485,8 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
 
         TARGETING::TYPE l_type_ecid = l_type;
         const TARGETING::Target* l_parentTarget = i_target;
-        if((l_type_ecid != TARGETING::TYPE_MEMBUF) ||
-              (l_type_ecid != TARGETING::TYPE_PROC) ||
+        if((l_type_ecid != TARGETING::TYPE_MEMBUF) &&
+              (l_type_ecid != TARGETING::TYPE_PROC) &&
               (l_type_ecid != TARGETING::TYPE_NODE)
              )
         {
