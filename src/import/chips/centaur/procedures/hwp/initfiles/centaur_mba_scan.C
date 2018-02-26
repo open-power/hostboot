@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,43 +41,71 @@ fapi2::ReturnCode centaur_mba_scan(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::variable_buffer l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS(1);
+        fapi2::variable_buffer l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE(1);
         constexpr auto l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS_ON = 0x1;
         l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS.insertFromRight<uint64_t>
         (l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS_ON, 0, 1);
-        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBA01.DD2_HW218537_MASTER_RANK_END_FIX_DIS",
-                               l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS));
+        l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE.insertFromRight<uint64_t>(0x1, 0, 1);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "MBU.MBA01.DD2_HW218537_MASTER_RANK_END_FIX_DIS",
+                                       l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS, l_MBU_MBA01_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE));
         fapi2::variable_buffer l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS(1);
+        fapi2::variable_buffer l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE(1);
         constexpr auto l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS_ON = 0x1;
         l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS.insertFromRight<uint64_t>
         (l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS_ON, 0, 1);
-        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBA23.DD2_HW218537_MASTER_RANK_END_FIX_DIS",
-                               l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS));
+        l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE.insertFromRight<uint64_t>(0x1, 0, 1);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "MBU.MBA23.DD2_HW218537_MASTER_RANK_END_FIX_DIS",
+                                       l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS, l_MBU_MBA23_DD2_HW218537_MASTER_RANK_END_FIX_DIS_CARE));
         fapi2::variable_buffer l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS(1);
+        fapi2::variable_buffer l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS_CARE(1);
         constexpr auto l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS_OFF = 0x0;
         l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS.insertFromRight<uint64_t>(l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS_OFF, 0, 1);
-        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBA01.DD2_HW220614_SCRUB_PSAVE_DIS", l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS));
+        l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS_CARE.insertFromRight<uint64_t>(0x1, 0, 1);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "MBU.MBA01.DD2_HW220614_SCRUB_PSAVE_DIS", l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS,
+                                       l_MBU_MBA01_DD2_HW220614_SCRUB_PSAVE_DIS_CARE));
         fapi2::variable_buffer l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS(1);
+        fapi2::variable_buffer l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS_CARE(1);
         constexpr auto l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS_OFF = 0x0;
         l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS.insertFromRight<uint64_t>(l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS_OFF, 0, 1);
-        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBA23.DD2_HW220614_SCRUB_PSAVE_DIS", l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS));
+        l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS_CARE.insertFromRight<uint64_t>(0x1, 0, 1);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "MBU.MBA23.DD2_HW220614_SCRUB_PSAVE_DIS", l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS,
+                                       l_MBU_MBA23_DD2_HW220614_SCRUB_PSAVE_DIS_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0(64);
+        fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0_CARE(64);
         l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0.insertFromRight<uint64_t>(literal_0x0000000000003FFF, 0, 64);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRDATA_CONFIG_0", l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0));
+        l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRDATA_CONFIG_0",
+                                       l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0, l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_0_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1(24);
+        fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1_CARE(24);
         l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1.insertFromRight<uint64_t>(literal_0xFFFFFF, 0, 24);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRDATA_CONFIG_1", l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1));
+        l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1_CARE.insertFromRight<uint64_t>(0xffffff, 0, 24);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRDATA_CONFIG_1",
+                                       l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1, l_TCM_TRA_MBA01TRA_TR_TRACE_TRDATA_CONFIG_1_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0(64);
+        fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0_CARE(64);
         l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0.insertFromRight<uint64_t>(literal_0x0000000000003FFF, 0, 64);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRDATA_CONFIG_0", l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0));
+        l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRDATA_CONFIG_0",
+                                       l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0, l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_0_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1(24);
+        fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1_CARE(24);
         l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1.insertFromRight<uint64_t>(literal_0xFFFFFF, 0, 24);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRDATA_CONFIG_1", l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1));
+        l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1_CARE.insertFromRight<uint64_t>(0xffffff, 0, 24);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRDATA_CONFIG_1",
+                                       l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1, l_TCM_TRA_MBA23TRA_TR_TRACE_TRDATA_CONFIG_1_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG(14);
+        fapi2::variable_buffer l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG_CARE(14);
         l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG.insertFromRight<uint64_t>(literal_0b00000000000011, 0, 14);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRCTRL_CONFIG", l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG));
+        l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG_CARE.insertFromRight<uint64_t>(0x3fff, 0, 14);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA01TRA.TR.TRACE_TRCTRL_CONFIG",
+                                       l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG, l_TCM_TRA_MBA01TRA_TR_TRACE_TRCTRL_CONFIG_CARE));
         fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG(14);
+        fapi2::variable_buffer l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG_CARE(14);
         l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG.insertFromRight<uint64_t>(literal_0b00000000000011, 0, 14);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRCTRL_CONFIG", l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG));
+        l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG_CARE.insertFromRight<uint64_t>(0x3fff, 0, 14);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCM.TRA.MBA23TRA.TR.TRACE_TRCTRL_CONFIG",
+                                       l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG, l_TCM_TRA_MBA23TRA_TR_TRACE_TRCTRL_CONFIG_CARE));
 
     };
 fapi_try_exit:

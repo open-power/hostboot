@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,21 +48,25 @@ fapi2::ReturnCode centaur_cleanup_pll_scan(const fapi2::Target<fapi2::TARGET_TYP
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         bool l_DMI_RX_RXCLKCTL_CUPLL_CTL_update = false;
         fapi2::variable_buffer l_DMI_RX_RXCLKCTL_CUPLL_CTL(47);
+        fapi2::variable_buffer l_DMI_RX_RXCLKCTL_CUPLL_CTL_CARE(47);
 
         if (l_def_IS_SIM)
         {
             l_DMI_RX_RXCLKCTL_CUPLL_CTL.insertFromRight<uint64_t>(literal_0x000020000000, 0, 47);
+            l_DMI_RX_RXCLKCTL_CUPLL_CTL_CARE.insertFromRight<uint64_t>(0x7fffffffffff, 0, 47);
             l_DMI_RX_RXCLKCTL_CUPLL_CTL_update = true;
         }
         else if (l_def_IS_HW)
         {
             l_DMI_RX_RXCLKCTL_CUPLL_CTL.insertFromRight<uint64_t>(literal_0x40002208BF00, 0, 47);
+            l_DMI_RX_RXCLKCTL_CUPLL_CTL_CARE.insertFromRight<uint64_t>(0x7fffffffffff, 0, 47);
             l_DMI_RX_RXCLKCTL_CUPLL_CTL_update = true;
         }
 
         if ( l_DMI_RX_RXCLKCTL_CUPLL_CTL_update)
         {
-            FAPI_TRY(fapi2::putSpy(TGT0, "DMI.RX.RXCLKCTL.CUPLL_CTL", l_DMI_RX_RXCLKCTL_CUPLL_CTL));
+            FAPI_TRY(fapi2::putSpyWithCare(TGT0, "DMI.RX.RXCLKCTL.CUPLL_CTL", l_DMI_RX_RXCLKCTL_CUPLL_CTL,
+                                           l_DMI_RX_RXCLKCTL_CUPLL_CTL_CARE));
         }
 
     };

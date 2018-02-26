@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,12 @@ fapi2::ReturnCode centaur_thermal_scan(const fapi2::Target<fapi2::TARGET_TYPE_ME
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::variable_buffer l_TCN_EPS_THERM_OVERFLOW_ERR_MASK(1);
+        fapi2::variable_buffer l_TCN_EPS_THERM_OVERFLOW_ERR_MASK_CARE(1);
         constexpr auto l_TCN_EPS_THERM_OVERFLOW_ERR_MASK_ON = 0x1;
         l_TCN_EPS_THERM_OVERFLOW_ERR_MASK.insertFromRight<uint64_t>(l_TCN_EPS_THERM_OVERFLOW_ERR_MASK_ON, 0, 1);
-        FAPI_TRY(fapi2::putSpy(TGT0, "TCN.EPS.THERM.OVERFLOW_ERR_MASK", l_TCN_EPS_THERM_OVERFLOW_ERR_MASK));
+        l_TCN_EPS_THERM_OVERFLOW_ERR_MASK_CARE.insertFromRight<uint64_t>(0x1, 0, 1);
+        FAPI_TRY(fapi2::putSpyWithCare(TGT0, "TCN.EPS.THERM.OVERFLOW_ERR_MASK", l_TCN_EPS_THERM_OVERFLOW_ERR_MASK,
+                                       l_TCN_EPS_THERM_OVERFLOW_ERR_MASK_CARE));
 
     };
 fapi_try_exit:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,89 +63,104 @@ fapi2::ReturnCode centaur_mem_pll_scan(const fapi2::Target<fapi2::TARGET_TYPE_ME
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         bool l_PLLMEM_PLL_CNTRL0_update = false;
         fapi2::variable_buffer l_PLLMEM_PLL_CNTRL0(64);
+        fapi2::variable_buffer l_PLLMEM_PLL_CNTRL0_CARE(64);
 
         if (l_def_IS_SIM)
         {
             l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0040D5, 0, 64);
+            l_PLLMEM_PLL_CNTRL0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1066)))
         {
             l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0030D2, 0, 64);
+            l_PLLMEM_PLL_CNTRL0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1333)))
         {
             l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0050D1, 0, 64);
+            l_PLLMEM_PLL_CNTRL0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1600)))
         {
             l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0030D1, 0, 64);
+            l_PLLMEM_PLL_CNTRL0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1866)))
         {
             l_PLLMEM_PLL_CNTRL0.insertFromRight<uint64_t>(literal_0x128000000A0150D5, 0, 64);
+            l_PLLMEM_PLL_CNTRL0_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL0_update = true;
         }
 
         if ( l_PLLMEM_PLL_CNTRL0_update)
         {
-            FAPI_TRY(fapi2::putSpy(TGT0, "PLLMEM.PLL_CNTRL0", l_PLLMEM_PLL_CNTRL0));
+            FAPI_TRY(fapi2::putSpyWithCare(TGT0, "PLLMEM.PLL_CNTRL0", l_PLLMEM_PLL_CNTRL0, l_PLLMEM_PLL_CNTRL0_CARE));
         }
 
         bool l_PLLMEM_PLL_CNTRL1_update = false;
         fapi2::variable_buffer l_PLLMEM_PLL_CNTRL1(64);
+        fapi2::variable_buffer l_PLLMEM_PLL_CNTRL1_CARE(64);
 
         if (l_def_IS_SIM)
         {
             l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0xB000000200040000, 0, 64);
+            l_PLLMEM_PLL_CNTRL1_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1066)))
         {
             l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0x5000000200040002, 0, 64);
+            l_PLLMEM_PLL_CNTRL1_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1333)))
         {
             l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0x3000000200040002, 0, 64);
+            l_PLLMEM_PLL_CNTRL1_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1600)))
         {
             l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0x3000000200040002, 0, 64);
+            l_PLLMEM_PLL_CNTRL1_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
         else if ((l_def_IS_HW && (l_def_MEMB_MEM_FREQ == literal_1866)))
         {
             l_PLLMEM_PLL_CNTRL1.insertFromRight<uint64_t>(literal_0xB000000200040002, 0, 64);
+            l_PLLMEM_PLL_CNTRL1_CARE.insertFromRight<uint64_t>(0xffffffffffffffff, 0, 64);
             l_PLLMEM_PLL_CNTRL1_update = true;
         }
 
         if ( l_PLLMEM_PLL_CNTRL1_update)
         {
-            FAPI_TRY(fapi2::putSpy(TGT0, "PLLMEM.PLL_CNTRL1", l_PLLMEM_PLL_CNTRL1));
+            FAPI_TRY(fapi2::putSpyWithCare(TGT0, "PLLMEM.PLL_CNTRL1", l_PLLMEM_PLL_CNTRL1, l_PLLMEM_PLL_CNTRL1_CARE));
         }
 
         bool l_PLLMEM_PLL_CNTRL2_update = false;
         fapi2::variable_buffer l_PLLMEM_PLL_CNTRL2(8);
+        fapi2::variable_buffer l_PLLMEM_PLL_CNTRL2_CARE(8);
 
         if (l_def_IS_SIM)
         {
             l_PLLMEM_PLL_CNTRL2.insertFromRight<uint64_t>(literal_0x00, 0, 8);
+            l_PLLMEM_PLL_CNTRL2_CARE.insertFromRight<uint64_t>(0xff, 0, 8);
             l_PLLMEM_PLL_CNTRL2_update = true;
         }
         else if (l_def_IS_HW)
         {
             l_PLLMEM_PLL_CNTRL2.insertFromRight<uint64_t>(literal_0x00, 0, 8);
+            l_PLLMEM_PLL_CNTRL2_CARE.insertFromRight<uint64_t>(0xff, 0, 8);
             l_PLLMEM_PLL_CNTRL2_update = true;
         }
 
         if ( l_PLLMEM_PLL_CNTRL2_update)
         {
-            FAPI_TRY(fapi2::putSpy(TGT0, "PLLMEM.PLL_CNTRL2", l_PLLMEM_PLL_CNTRL2));
+            FAPI_TRY(fapi2::putSpyWithCare(TGT0, "PLLMEM.PLL_CNTRL2", l_PLLMEM_PLL_CNTRL2, l_PLLMEM_PLL_CNTRL2_CARE));
         }
 
     };
