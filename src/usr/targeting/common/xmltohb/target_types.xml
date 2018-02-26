@@ -1476,25 +1476,29 @@
 <!-- MC
      Nimbus : None
      Cumulus: 2 per chip  -->
-  <targetType>
-    <id>unit-mc-power9</id>
-    <parent>unit</parent>
-    <attribute>
-      <id>TYPE</id>
-      <default>MC</default>
-    </attribute>
-    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
-    <attribute><id>PARENT_PERVASIVE</id></attribute>
-  </targetType>
+<targetType>
+  <id>unit-mc-power9</id>
+  <parent>unit</parent>
+  <attribute>
+    <id>TYPE</id>
+    <default>MC</default>
+  </attribute>
+  <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute><id>PARENT_PERVASIVE</id></attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
+</targetType>
 
-  <targetType>
-    <id>unit-mc-cumulus</id>
-    <parent>unit-mc-power9</parent>
-    <attribute>
-      <id>MODEL</id>
-      <default>CUMULUS</default>
-    </attribute>
-  </targetType>
+<targetType>
+  <id>unit-mc-cumulus</id>
+  <parent>unit-mc-power9</parent>
+  <attribute>
+    <id>MODEL</id>
+    <default>CUMULUS</default>
+  </attribute>
+</targetType>
 
 <!-- MI
      Nimbus : None
@@ -1512,6 +1516,10 @@
   </attribute>
   <attribute>
     <id>PARENT_PERVASIVE</id>
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
   </attribute>
 </targetType>
 
@@ -1540,6 +1548,10 @@
   </attribute>
   <attribute>
     <id>PARENT_PERVASIVE</id>
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
   </attribute>
 </targetType>
 
@@ -2086,20 +2098,28 @@
     <default>CENTAUR</default>
     <id>MODEL</id>
   </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
 </targetType>
 
 <!-- Centaur MBA -->
 <targetType>
-    <id>unit-mba-centaur</id>
-    <parent>unit</parent>
-    <attribute>
-        <id>TYPE</id>
-        <default>MBA</default>
-    </attribute>
-    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
-    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default> <!--GARD -->
-    </attribute>
+  <id>unit-mba-centaur</id>
+  <parent>unit</parent>
+  <attribute>
+    <id>TYPE</id>
+    <default>MBA</default>
+  </attribute>
+  <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    <default>0x00000001</default> <!--GARD -->
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
 </targetType>
 
 <targetType>
