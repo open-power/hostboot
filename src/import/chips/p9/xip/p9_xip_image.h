@@ -1391,7 +1391,7 @@ p9_xip_get_toc(void* i_image,
 int
 p9_xip_dd_section_support(const void* i_image,
                           const int i_sectionId,
-                          myBoolean_t* o_bDdSupport);
+                          MyBool_t* o_bDdSupport);
 
 
 /// \brief Decode a TOC entry from dump file
