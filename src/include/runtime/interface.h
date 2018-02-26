@@ -956,6 +956,19 @@ struct postInitCalls_t
     void (*callApplyTempOverrides)();
 
     /**
+     * @brief Calls RtPnor::init() which loads section(s) into memory
+     *        so PRD can access when PNOR is not accessible
+     */
+    void (*callInitPnor)();
+
+
+    /**
+     * @brief Sets up ErrlManager so it is ready for errors
+     *
+     */
+    void (*callInitErrlManager)();
+
+    /**
      * @brief Clear pending SBE messages
      *
      */

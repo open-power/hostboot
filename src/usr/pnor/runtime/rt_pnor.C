@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,11 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <targeting/common/targetservice.H>
 #include <initservice/taskargs.H>
 
 #include <runtime/rt_targeting.H>
-#include <runtime/interface.h>
+#include <runtime/interface.h>   // g_hostInterfaces, postInitCalls_t
 
 #include <pnor/pnorif.H>
 #include <pnor/ecc.H>
@@ -46,11 +47,6 @@
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
-
-/**
- * @brief   set up _start() task entry procedure for PNOR daemon
- */
-TASK_ENTRY_MACRO( RtPnor::init );
 
 /**
  * @brief  Return the size and address of a given section of PNOR data
@@ -116,26 +112,29 @@ uint64_t RtPnor::iv_masterProcId = RUNTIME::HBRT_HYP_ID_UNKNOWN;
  */
 void RtPnor::init(errlHndl_t &io_taskRetErrl)
 {
-    TRACFCOMP(g_trac_pnor, "RtPnor::init> " );
-    do {
-    io_taskRetErrl  = Singleton<RtPnor>::instance().getMasterProcId();
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::init()");
+
+    PNOR::SectionInfo_t l_sectionInfo;
+
+    // Now find FIRDATA section for PRD
+    // PRD can't tell OCC where to put FIRDATA if it can't read PNOR
+    // unless we cache that info here first
+    // Note: Singleton<RtPnor>::instance() will force RtPnor constructor first
+    io_taskRetErrl = Singleton<RtPnor>::instance().getSectionInfo(
+                                              PNOR::FIRDATA, l_sectionInfo);
     if (io_taskRetErrl)
     {
-        break;
+      TRACFCOMP(g_trac_pnor, "Rtnor: failed to read FIRDATA section" );
     }
-    io_taskRetErrl  = Singleton<RtPnor>::instance().readTOC();
-    if (io_taskRetErrl)
-    {
-        break;
-    }
-    }while (0);
-    TRACFCOMP(g_trac_pnor, "<RtPnor::init" );
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::init()");
 }
+
 /**************************************************************/
 errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                               PNOR::SectionInfo_t& o_info)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::getSectionInfo");
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::getSectionInfo %d", i_section);
     errlHndl_t l_err = nullptr;
     do
     {
@@ -193,6 +192,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
 
         //size of the section
         uint64_t l_sizeBytes = iv_TOC[i_section].size;
+
         if (l_sizeBytes == 0)
         {
             TRACFCOMP(g_trac_pnor,"RtPnor::getSectionInfo: Section %d"
@@ -263,7 +263,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         o_info.secure = iv_TOC[i_section].secure;
     } while (0);
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo");
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo %d", i_section);
     return l_err;
 }
 
@@ -365,18 +365,18 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 RtPnor::RtPnor()
 {
     do {
-    errlHndl_t l_err = getMasterProcId();
-    if (l_err)
-    {
-        errlCommit(l_err, PNOR_COMP_ID);
+        errlHndl_t l_err = getMasterProcId();
+        if (l_err)
+        {
+          errlCommit(l_err, PNOR_COMP_ID);
         break;
-    }
-    l_err = readTOC();
-    if (l_err)
-    {
-        errlCommit(l_err, PNOR_COMP_ID);
-        break;
-    }
+        }
+          l_err = readTOC();
+        if (l_err)
+        {
+          errlCommit(l_err, PNOR_COMP_ID);
+          break;
+        }
     } while (0);
 }
 
@@ -689,6 +689,7 @@ errlHndl_t RtPnor::writeToDevice( uint64_t i_procId,
 errlHndl_t RtPnor::readTOC ()
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readTOC" );
+
     errlHndl_t l_err = nullptr;
     uint8_t* l_toc0Buffer = new uint8_t[PNOR::TOC_SIZE];
     do {
@@ -890,4 +891,36 @@ errlHndl_t RtPnor::getMasterProcId()
     return l_err;
 }
 
+void initPnor()
+{
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"initPnor");
+    errlHndl_t l_errl = nullptr;
 
+    // call static init() function to save PNOR section into memory
+    RtPnor::init(l_errl);
+    if (l_errl)
+    {
+      TRACFCOMP(g_trac_pnor,ERR_MRK"initPnor: "
+                    "Failed RtPnor::init() with EID %.8X:%.4X",
+                    ERRL_GETEID_SAFE(l_errl),
+                    ERRL_GETRC_SAFE(l_errl) );
+      errlCommit (l_errl, PNOR_COMP_ID);
+    }
+
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"initPnor");
+}
+
+//------------------------------------------------------------------------
+
+struct registerinitPnor
+{
+    registerinitPnor()
+    {
+        // Register interface for Host to call
+        postInitCalls_t * rt_post = getPostInitCalls();
+        rt_post->callInitPnor = &initPnor;
+    }
+};
+
+registerinitPnor g_registerInitPnor;
