@@ -205,17 +205,17 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_FORCE_PRIV_L1D</id>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_NIMDD22_SECURITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-       Force Private L1D
+       Force Nimbus DD2.2-specific security settings
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
