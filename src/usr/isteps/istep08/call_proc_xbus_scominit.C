@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,14 +89,14 @@ void* call_proc_xbus_scominit( void *io_pArgs )
     {
         EDI_EI_INITIALIZATION::TargetPairs_t l_XbusConnections;
         // Note:
-        // i_noDuplicate parameter must be set to false because
-        // two separate  calls would be needed:
+        // i_noDuplicate parameter must be set to true because
+        // one call to p9_io_xbus_scominit will handle both
         //    X0 <--> X1
         //    X1 <--> X0
-        // only the first target is used to issue SCOMs
+        // both the xbus and the connected target are used to issue SCOMs
         l_err =
         EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
-                                          l_XbusConnections, TYPE_XBUS, false);
+                                          l_XbusConnections, TYPE_XBUS, true);
         if (l_err)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
