@@ -132,6 +132,13 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     postInitCalls_t* rtPost = getPostInitCalls();
     rtPost->callApplyTempOverrides();
 
+    // load FIRDATA section into memory so PRD can access
+    // when PNOR is no longer accessible (ie SBE reboot)
+    rtPost->callInitPnor();
+
+    // Make sure errlmanager is ready
+    rtPost->callInitErrlManager();
+
     // check for possible missed in-flight messages/interrupts
     rtPost->callClearPendingSbeMsgs();
 
