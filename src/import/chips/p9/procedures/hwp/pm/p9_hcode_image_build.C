@@ -681,7 +681,7 @@ uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_secId, uint8_t i_ecLeve
     uint32_t rc = IMG_BUILD_SUCCESS;
     do
     {
-        myBoolean_t ecLvlSupported = UNDEFINED_BOOLEAN;
+        MyBool_t ecLvlSupported = UNDEFINED_BOOLEAN;
 
         rc = p9_xip_dd_section_support( i_srcPtr, i_secId, &ecLvlSupported );
 
