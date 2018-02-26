@@ -796,20 +796,20 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             l_vpdRingSize = be16toh(((CompressedScanData*)i_vpdRing)->iv_size);
         }
 
-        //@TODO: Remove following line asap. Temporary fix until Sgro starts using
-        //       latest p9_scan_compression.H.
-        //       Also fix p9_mvpd_ring_funcs.C to look for entire RS4_MAGIC string.
-        //       Actually, do all the above in connection with RS4 header
-        //       shrinkage (RTC158101 and RTC159801).
-        // This TODO item now captured in RTC177327.
-        ((CompressedScanData*)i_vpdRing)->iv_magic = htobe16(RS4_MAGIC);
-
         // Initialize variable to check for redundant ring.
         int redundant = 0;
 
-        // Check if ring is a flush ring, i.e. if it is redundant, meaning that it will
-        // result in no change.
-        l_rc = rs4_redundant((CompressedScanData*)i_vpdRing, &redundant);
+        if ( ((CompressedScanData*)i_vpdRing)->iv_magic != htobe16(RS4_MAGIC) )
+        {
+            l_rc = INFRASTRUCT_RC_USER_ERROR;
+        }
+        else
+        {
+            // Check if ring is a flush ring, i.e. if it is redundant, meaning that it will
+            // result in no change.
+            l_rc = rs4_redundant((CompressedScanData*)i_vpdRing, &redundant);
+        }
+
         FAPI_ASSERT( l_rc == 0,
                      fapi2::XIPC_RS4_REDUNDANT_ERROR().
                      set_CHIP_TARGET(i_procTarget).
@@ -1005,7 +1005,7 @@ fapi2::ReturnCode resolve_gptr_overlays(
     P9XipSection l_xipSection;
     int      l_rc = INFRASTRUCT_RC_SUCCESS;
     uint8_t  l_nimbusDd1 = 1;
-    myBoolean_t  l_bDdSupport = UNDEFINED_BOOLEAN;
+    MyBool_t  l_bDdSupport = UNDEFINED_BOOLEAN;
 
     FAPI_DBG("Entering resolve_gptr_overlays");
 
@@ -1875,7 +1875,7 @@ ReturnCode p9_xip_customize (
 
     uint8_t      attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
     uint8_t      l_xipDdLevel = UNDEFINED_DD_LEVEL; // Used for XIP extraction
-    myBoolean_t  l_bDdSupport = UNDEFINED_BOOLEAN;
+    MyBool_t     l_bDdSupport = UNDEFINED_BOOLEAN;
 
 
 
