@@ -49,7 +49,7 @@ typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
 typedef uint8_t   RingBlockType_t;  // Type for RingBlockType enum, e.g. GET_SINGLE_RING
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
-typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOLEAN
+typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
 #define  UNDEFINED_RING_ID      (RingId_t)0xffff
 #define  UNDEFINED_CHIPLET_TYPE (ChipletType_t)0xff
@@ -66,7 +66,7 @@ typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  MAX_RING_PATH_LENGTH   (uint8_t)500
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
 
-#define  UNDEFINED_BOOLEAN      (myBoolean_t)0xff
+#define  UNDEFINED_BOOLEAN      (MyBool_t)0xff
 
 //                                                                           //
 //                     Declare assumptions - End                             //
