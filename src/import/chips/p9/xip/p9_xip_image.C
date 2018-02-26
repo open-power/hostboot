@@ -3238,7 +3238,7 @@ p9_xip_map_toc(void* io_image,
 //
 int p9_xip_dd_section_support(const void* i_image,
                               const int i_sectionId,
-                              myBoolean_t* o_bDdSupport)
+                              MyBool_t* o_bDdSupport)
 {
     int rc;
     P9XipSection section;
@@ -3247,7 +3247,7 @@ int p9_xip_dd_section_support(const void* i_image,
 
     if (!rc)
     {
-        *o_bDdSupport = (myBoolean_t)section.iv_ddSupport;
+        *o_bDdSupport = (MyBool_t)section.iv_ddSupport;
 
         if (section.iv_ddSupport != true && section.iv_ddSupport != false)
         {
