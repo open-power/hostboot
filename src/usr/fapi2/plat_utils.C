@@ -146,8 +146,8 @@ ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
         if(((P9XipHeader*)l_centaurHwImageAddr)->iv_magic
                                                 == P9_XIP_MAGIC_CENTAUR)
         {
-            uint8_t     l_ddLevel    = UNDEFINED_DD_LEVEL;
-            myBoolean_t l_bDdSupport = false;
+            uint8_t  l_ddLevel    = UNDEFINED_DD_LEVEL;
+            MyBool_t l_bDdSupport = UNDEFINED_BOOLEAN;
 
             int l_rc =  p9_xip_dd_section_support(l_centaurHwImageAddr,
                                         P9_XIP_SECTION_HW_RINGS, &l_bDdSupport);
