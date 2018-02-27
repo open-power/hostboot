@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,6 +171,23 @@ void AST2400BootConfig::configureBootOptions(uint8_t i_bootOptions )
             errlCommit(errl,INITSVC_COMP_ID);
         }
     }
+
+// configurePnorDriver()
+// ----------------------------------------------------------------------------
+void AST2400BootConfig::configurePnorDriver(enum pnorDriverOptions i_pnorDriver )
+{
+    switch (i_pnorDriver) {
+    case MBOX:
+        TRACFCOMP(g_bc_trace,
+                "configurePnorDriver() bmc supports mbox protocol"); }
+	/* fall through - no hostboot support for mbox */
+        TRACFCOMP(g_bc_trace,
+                "configurePnorDriver() hb does not support mbox protocol"); }
+    case SFC:
+        TRACFCOMP(g_bc_trace,
+                "configurePnorDriver() using sfc driver"); }
+	break;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -249,6 +266,8 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
 void AST2400BootConfig::processBootFlagsV1( uint8_t i_flags )
 {
     configureBootMode( i_flags & BOOT_MODE_FLAGS );
+
+    configurePnorDriver( i_flags & PNOR_DRIVER_FLAGS );
 
     configureBootOptions( i_flags & BOOT_OPTIONS_FLAGS );
 

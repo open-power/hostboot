@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,7 @@ class AST2400BootConfig : public BootConfig
     enum bootFlagMask_t
     {
         LOG_LEVEL_FLAGS     = 0x07,
-        RESERVED_FLAGS      = 0x08,
+        PNOR_DRIVER_FLAGS   = 0x08,
         BOOT_OPTIONS_FLAGS  = 0x30,
         BOOT_MODE_FLAGS     = 0xC0,
     };
@@ -86,6 +86,13 @@ class AST2400BootConfig : public BootConfig
         NORMAL             = 0x00,
         TERMINATE_ON_ERROR = 0x40,
         ISTEP_MODE         = 0x80,
+    };
+
+    // Select pnor driver from config register
+    enum pnorDriverOptions
+    {
+        SFC                = 0x00,
+        MBOX               = 0x08,
     };
 
     // Masks to test boot options flags from config register
