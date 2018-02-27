@@ -75,7 +75,7 @@ class AST2400BootConfig : public BootConfig
     enum bootFlagMask_t
     {
         LOG_LEVEL_FLAGS     = 0x07,
-        RESERVED_FLAGS      = 0x08,
+        PNOR_DRIVER_FLAGS   = 0x08,
         BOOT_OPTIONS_FLAGS  = 0x30,
         BOOT_MODE_FLAGS     = 0xC0,
     };
@@ -86,6 +86,13 @@ class AST2400BootConfig : public BootConfig
         NORMAL             = 0x00,
         TERMINATE_ON_ERROR = 0x40,
         ISTEP_MODE         = 0x80,
+    };
+
+    // Masks to select pnor driver from config register
+    enum pnorDriver
+    {
+        SFC                = 0x00,
+        MBOX               = 0x08,
     };
 
     // Masks to test boot options flags from config register
@@ -178,6 +185,14 @@ public:
      *
      */
     void configureBootMode( uint8_t i_mode );
+
+    /**
+     * @brief Process the pnor driver mode from the boot flags register.
+     *
+     * @param[i] i_driver - pnor driver as set in the boot flags reg.
+     *
+     */
+    void configurePnorDriver( uint8_t i_driver );
 
     /**
      * @brief Process boot options from boot flags register
