@@ -662,32 +662,47 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
 
 int32_t dimmList( TargetHandleList  & i_dimmList )
 {
-    if (i_dimmList.size() == 0)
-        return SUCCESS;
+    #define PRDF_FUNC "[MemDealloc::dimmList] "
 
-    // Determine MBA/MCA
-    TYPE T = TYPE_MCA;
-    TargetHandle_t dimmTgt = i_dimmList[0];
-    TargetHandle_t tgt = getConnectedParent( dimmTgt, T );
-    if ( NULL == tgt)
+    int32_t o_rc = SUCCESS;
+
+    do
     {
-        T = TYPE_MBA;
-        tgt = getConnectedParent( dimmTgt, T );
-    }
+        if ( i_dimmList.empty() ) break;
 
-    if (tgt == NULL)
-    {
-        PRDF_ERR( "[MemDealloc::dimmList] get parent tgt failed for 0x%08X",
-                  getHuid(dimmTgt));
-        return FAIL;
-    }
+        // Determine what target these DIMMs are connected to.
+        // Note that we cannot use getConnectedParent() because it will assert
+        // if there is no parent of that type.
 
-    if ( T == TYPE_MCA )
-       return dimmList<TYPE_MCA>( i_dimmList );
-    else if ( T == TYPE_MBA )
-       return dimmList<TYPE_MBA>( i_dimmList );
-    else
-       return FAIL;
+        TargetHandle_t dimmTrgt = i_dimmList.front();
+        TargetHandleList list;
+
+        // First, check for MCAs.
+        list = getConnected( dimmTrgt, TYPE_MCA );
+        if ( !list.empty() )
+        {
+            o_rc = dimmList<TYPE_MCA>( i_dimmList );
+            break;
+        }
+
+        // Second, check for MBAs.
+        list = getConnected( dimmTrgt, TYPE_MBA );
+        if ( !list.empty() )
+        {
+            o_rc = dimmList<TYPE_MBA>( i_dimmList );
+            break;
+        }
+
+        // If we get here we did not find a supported target.
+        PRDF_ERR( PRDF_FUNC "Unsupported connected parent to dimm 0x%08x",
+                  getHuid(dimmTrgt) );
+        PRDF_ASSERT(false); // code bug
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 } //namespace MemDealloc
