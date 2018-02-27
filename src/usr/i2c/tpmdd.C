@@ -48,6 +48,7 @@
 #include <i2c/i2creasoncodes.H>
 #include <i2c/tpmddreasoncodes.H>
 #include <i2c/i2cif.H>
+#include <secureboot/service.H>
 #include "tpmdd.H"
 #include "errlud_i2c.H"
 
@@ -297,11 +298,16 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 
     } while( 0 );
 
+    if ( err != nullptr )
+    {
+        // Add Security Registers to the error log
+        SECUREBOOT::addSecurityRegistersToErrlog(err);
+    }
+
     if( unlock )
     {
         mutex_unlock( & g_tpmMutex );
     }
-
 
     TRACDCOMP( g_trac_tpmdd,
                EXIT_MRK"tpmPerformOp() - %s",
