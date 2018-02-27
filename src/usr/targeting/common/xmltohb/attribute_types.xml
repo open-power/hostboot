@@ -1567,7 +1567,7 @@
   </attribute>
 
   <attribute>
-    <description>System XSCOM base address</description>
+    <description>XSCOM base address</description>
     <id>XSCOM_BASE_ADDRESS</id>
     <persistency>volatile</persistency>
     <readable></readable>
@@ -1575,6 +1575,7 @@
     <simpleType>
       <uint64_t></uint64_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -4154,6 +4155,7 @@
     <simpleType>
       <uint64_t></uint64_t>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>
