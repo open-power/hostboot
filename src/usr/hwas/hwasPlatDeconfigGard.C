@@ -567,7 +567,9 @@ void DeconfigGard::platPostDeconfigureTarget(
     {
         HWAS_INF("platPostDeconfigureTarget: Deconfiguring TPM 0x%08X",
             get_huid(i_pTarget));
-        (void)TRUSTEDBOOT::tpmMarkFailed(i_pTarget);
+        errlHndl_t pError = nullptr; // No error log with FFDC
+        (void)TRUSTEDBOOT::tpmMarkFailed(i_pTarget,
+                                         pError);
     }
 #endif  // CONFIG_TPMDD
 #endif  // #ifndef __HOSTBOOT_RUNTIME

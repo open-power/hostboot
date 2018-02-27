@@ -362,7 +362,7 @@ void* host_update_master_tpm( void *io_pArgs )
         getBackupTpm(pBackupTpm);
         if(pBackupTpm == nullptr)
         {
-            TRACUCOMP( g_trac_trustedboot,
+            TRACFCOMP( g_trac_trustedboot,
                        "host_update_master_tpm() "
                        "Backup TPM unavailable "
                        "since it's not in the system blueprint.");
@@ -558,12 +558,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     } while ( 0 );
 
 
-    // If the TPM failed we will mark it not functional
+    // If the TPM failed we will mark it not functional and commit err
     if (nullptr != err)
     {
-        tpmMarkFailed(i_pTpm);
-        // Log this failure
-        errlCommit(err, TRBOOT_COMP_ID);
+        // err will be committed and set to nullptr
+        tpmMarkFailed(i_pTpm, err);
     }
 
     TRACDCOMP( g_trac_trustedboot,
@@ -644,13 +643,12 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
             }
         }
     }
+
     // If the TPM failed we will mark it not functional and commit errl
     if (err)
     {
-        tpmMarkFailed(i_pTpm);
-        errlCommit(err, TRBOOT_COMP_ID);
-        delete err;
-        err = nullptr;
+        // err will be committed and set to nullptr
+        tpmMarkFailed(i_pTpm, err);
     }
 }
 
@@ -855,10 +853,8 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
     if (nullptr != err)
     {
         // We failed to extend to this TPM we can no longer use it
-        tpmMarkFailed(i_pTpm);
-
-        // Log this failure
-        errlCommit(err, TRBOOT_COMP_ID);
+        // Mark TPM as not functional, commit err and set it to nullptr
+        tpmMarkFailed(i_pTpm, err);
     }
 
     if (unlock)
@@ -977,7 +973,8 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     if (nullptr != err)
     {
         // We failed to extend to this TPM we can no longer use it
-        tpmMarkFailed(i_pTpm);
+        // Mark TPM as not functional, commit err and set it to nullptr
+        tpmMarkFailed(i_pTpm, err);
 
         // Log this failure
         errlCommit(err, TRBOOT_COMP_ID);
@@ -990,7 +987,8 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
     return;
 }
 
-void tpmMarkFailed(TpmTarget* const i_pTpm)
+void tpmMarkFailed(TpmTarget* const i_pTpm,
+                   errlHndl_t& io_err)
 {
     assert(i_pTpm != nullptr,"tpmMarkFailed: BUG! i_pTpm was nullptr");
     assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
@@ -999,8 +997,9 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
 
     TRACFCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
-               "tgt=0x%08X",
-               TARGETING::get_huid(i_pTpm));
+               "tgt=0x%08X; io_err rc=0x%04X, plid=0x%08X",
+               TARGETING::get_huid(i_pTpm), ERRL_GETRC_SAFE(io_err),
+               ERRL_GETPLID_SAFE(io_err));
 
     auto hwasState = i_pTpm->getAttr<
         TARGETING::ATTR_HWAS_STATE>();
@@ -1086,18 +1085,44 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
 
     } while(0);
 
+    // If we got a local error log, link it to input error log and then
+    // commit it
     if (l_err)
     {
-        TRACFCOMP(g_trac_trustedboot,
-            ERR_MRK "Processor tgt=0x%08X TPM tgt=0x%08X. Deconfiguring "
-            "processor because future security cannot be guaranteed.",
-            TARGETING::get_huid(l_proc),
-            TARGETING::get_huid(l_tpm));
-
-        // save the plid from the error before commiting
+        // commit this error log first before creating the new one
         auto plid = l_err->plid();
 
+        // If we have an input error log then link these all together
+        if (io_err)
+        {
+           TRACFCOMP(g_trac_trustedboot,
+                ERR_MRK "tpmMarkFailed(): Processor tgt=0x%08X TPM tgt=0x%08X. "
+                "Deconfiguring proc because future security cannot be "
+                "guaranteed. Linking new l_err rc=0x%04X eid=0x%08X to "
+                "io_err rc=0x%04X, plid=0x%08X",
+                TARGETING::get_huid(l_proc),
+                TARGETING::get_huid(l_tpm),
+                l_err->reasonCode(), l_err->eid(),
+                io_err->reasonCode(), io_err->plid());
+
+            // Use io_err's plid to link all errors together
+            plid = io_err->plid();
+            l_err->plid(plid);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                ERR_MRK "tpmMarkFailed(): Processor tgt=0x%08X TPM tgt=0x%08X: "
+                "Deconfiguring proc because future security cannot be "
+                "guaranteed due to new l_err rc=0x%04X plid=0x%08X",
+                TARGETING::get_huid(l_proc),
+                TARGETING::get_huid(l_tpm),
+                l_err->reasonCode(), l_err->plid());
+        }
+
         ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
+        l_err->collectTrace(SECURE_COMP_NAME);
+        l_err->collectTrace(TRBOOT_COMP_NAME);
 
         // commit this error log first before creating the new one
         errlCommit(l_err, TRBOOT_COMP_ID);
@@ -1120,6 +1145,16 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
             TARGETING::get_huid(l_proc),
             TARGETING::get_huid(l_tpm));
 
+        // Pass on the plid to connect all previous error(s)
+        l_err->plid(plid);
+
+       TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK "tpmMarkFailed(): Processor tgt=0x%08X TPM tgt=0x%08X. "
+            "Deconfiguring proc errorlog is rc=0x%04X plid=0x%08X, eid=0x%08X",
+            TARGETING::get_huid(l_proc),
+            TARGETING::get_huid(l_tpm),
+            l_err->reasonCode(), l_err->plid(), l_err->eid());
+
         l_err->addHwCallout(l_proc,
                             HWAS::SRCI_PRIORITY_LOW,
                             HWAS::DELAYED_DECONFIG,
@@ -1128,14 +1163,25 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
         l_err->collectTrace(SECURE_COMP_NAME);
         l_err->collectTrace(TRBOOT_COMP_NAME);
 
-        // pass on the plid from the previous error log to the new one
-        l_err->plid(plid);
-
         ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
 
         ERRORLOG::errlCommit(l_err, TRBOOT_COMP_ID);
     }
     #endif
+
+    // Commit input error log
+    if (io_err)
+    {
+       TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK "Committing io_err rc=0x%04X plid=0x%08X, eid=0x%08X",
+            io_err->reasonCode(), io_err->plid(), io_err->eid());
+
+        io_err->collectTrace(SECURE_COMP_NAME);
+        io_err->collectTrace(TRBOOT_COMP_NAME);
+
+        ERRORLOG::errlCommit(io_err, TRBOOT_COMP_ID);
+    }
+
 }
 
 void tpmVerifyFunctionalTpmExists(
@@ -1208,6 +1254,9 @@ void tpmVerifyFunctionalTpmExists(
                 err->collectTrace( I2C_COMP_NAME );
                 err->collectTrace( TPMDD_COMP_NAME );
                 uint32_t errPlid = err->plid();
+
+                // Add Security Registers to the error log
+                SECUREBOOT::addSecurityRegistersToErrlog(err);
 
                 // HW callout TPMs
                 TARGETING::TargetHandleList l_tpmList;
