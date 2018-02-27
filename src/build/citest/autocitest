@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -287,6 +287,8 @@ mods_completed_addr=`grep "CxxTest::g_ModulesCompleted" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 shutdown_status=`grep "CpuManager::cv_shutdown_status" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
+imageId_addr=`grep "CpuManager::cv_shutdown_status" \
+        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 
 #Adjust addresses for HRMOR
 HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
@@ -311,6 +313,9 @@ mods_completed_addr=`echo "obase=16; $temp" | bc`
 
 temp=$(($HRMOR + 0x$shutdown_status))
 shutdown_status=`echo "obase=16; $temp" | bc`
+
+temp=$((HRMOR + 0x$imageId_addr))
+imageId_addr=`echo "obase=16; $temp" | bc`
 
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
@@ -381,56 +386,66 @@ while [ "$loopcount" -lt 64 ]; do
     ((loopcount++))     # increment loopcount
 done
 
+# Start dumping a bunch of informaton about the simics run to various .log files
+# these files will create job artifacts in Jenkins that we can use to debug issues
+
+echo "====> dumping image id..."
+autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$imageId_addr 0x08)"     1> $SBXHOME/imageId.log  2> /dev/null
+if [ $? -ne 0 ] ; then
+    echo "ERROR: Unable to run $?"
+else
+    imageId=`cat $SBXHOME/imageId.log`
+    echo "Image id for PNOR that was loaded into simics is: $imageId"
+fi
+
 echo "====> dump totaltests..."
+    #init totalTests to be 0, which will cause test to fail collection fails
+    totaltests=0
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$totaltests_addr 0x08)"     1> $SBXHOME/totaltests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
-        echo "ERROR: Unable to run $?"
-        stopsim
-        stopserver
-        exit 1
+    echo "ERROR: Unable to run $?"
+else
+    totaltests=`cat $SBXHOME/totaltests.log |  awk '/0x/ {print strtonum($1)}'`
 fi
-totaltests=`cat $SBXHOME/totaltests.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump failedtests..."
+    #init failedtests to be 1, which will cause test to fail collection fails
+    failedtests=1
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$failedtests_addr 0x08)"     1> $SBXHOME/failedtests.log  2> /dev/null
 if [ $? -ne 0 ] ; then
-        echo "ERROR: Unable to run $?"
-        stopsim
-        stopserver
-        exit 1
+    echo "ERROR: Unable to run $?"
+else
+    failedtests=`cat $SBXHOME/failedtests.log |  awk '/0x/ {print strtonum($1)}'`
 fi
-failedtests=`cat $SBXHOME/failedtests.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump warnings..."
+    #init warnings to be 1, which will cause test to fail collection fails
+    warnings=1
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$warnings_addr 0x08)"     1> $SBXHOME/warnings.log  2> /dev/null
 if [ $? -ne 0 ] ; then
-        echo "ERROR: Unable to run $?"
-        stopsim
-        stopserver
-        exit 1
+    echo "ERROR: Unable to run $?"
+else
+    warnings=`cat $SBXHOME/warnings.log |  awk '/0x/ {print strtonum($1)}'`
 fi
-warnings=`cat $SBXHOME/warnings.log |  awk '/0x/ {print strtonum($1)}'`
 
 echo "====> dump tracecalls..."
 autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$tracecalls_addr 0x08)"     1> $SBXHOME/tracecalls.log  2> /dev/null
 if [ $? -ne 0 ] ; then
-        echo "ERROR: Unable to run $?"
-        stopsim
-        stopserver
-        exit 1
+    echo "ERROR: Unable to run $?"
+else
+    tracecalls=`cat $SBXHOME/tracecalls.log |  awk '/0x/ {print strtonum($1)}'`
 fi
-tracecalls=`cat $SBXHOME/tracecalls.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump printk buffer..."
 autosim $NOWIN --simcmd   "pipe hb-printk \"cat > ${SBXHOME}/testprintk.log \"" --timeout 300
 if [ $? -ne 0 ] ; then
-echo "ERROR: Unable to run $?"
-       stopsim
-       stopserver
-       exit 1
+    echo "ERROR: Unable to run $?"
+else
+    echo    "----------------- Printk Buffer -------------------"
+    cat $SBXHOME/testprintk.log
 fi
 
 ##  run CamVan's python script to dump out the trace logs
@@ -438,18 +453,15 @@ echo "====> dump trace buffer(s)..."
 runtraceHB
 if [ $? -ne 0 ] ; then
     echo "ERROR: Unable to run $?"
-    stopsim
-    stopserver
-    exit 1
+else
+    echo    "----------------- traceHB Buffer -------------------"
+    cat $SBXHOME/traceHB.log
 fi
 
 echo "====> dump L3..."
 autosim $NOWIN --simcmd   "hb-dump"
 if [ $? -ne 0 ] ; then
-    echo "ERROR 4 : Unable to run $?"
-    stopsim
-    stopserver
-    exit 1
+    echo "ERROR: Unable to run $?"
 fi
 
 ########################################################
@@ -465,20 +477,14 @@ stopserver
 ##  print out ending.
 timestamp=`date +'%H:%M:%S'`
 
-echo    "----------------- Printk Buffer -------------------"
-cat $SBXHOME/testprintk.log
 shutdown_code="$(grep --text 'Shutdown Requested' $SBXHOME/testprintk.log | awk -F '= 0x' '{ print $2 }')"
 
 
-echo    "----------------- traceHB Buffer -------------------"
-cat $SBXHOME/traceHB.log
-
 initfail=0
-echo "Shutdown Code = $shutdown_code"
-if [ "${shutdown_code}" != "1230000" ]
-then
- echo "**ERROR : System did not initialize and/or shutdown properly**"
- initfail=1
+echo "\nShutdown Code = $shutdown_code"
+if [ "${shutdown_code}" != "1230000" ] ; then
+    echo "**ERROR : System did not initialize and/or shutdown properly**"
+    initfail=1
 fi
 
 echo
@@ -501,16 +507,20 @@ if [ 0 !=  $timeout ] ; then
     echo "Modules completed: $modscompleted"
     exit 1
 fi
+if [ 0 ==  $(($totaltests)) ] ; then
+    echo "**ERROR : No test cases ran, check that the correct pnor image was ran**"
+    exit 1
+fi
 if [ 0 !=  $(($failedtests)) ] ; then
-    echo "$failedtests testcases failed."
+    echo "**ERROR : $failedtests testcases failed, check traces to detemine what failed"
     exit 1
 fi
 if [ 0 != $(($warnings)) ] ; then
-    echo "$warnings testcase warnings found."
+    echo "**ERROR : $warnings testcase warnings found, check traces to detemine what failed"
     exit 1
 fi
 if [ 0 != $(($initfail)) ] ; then
-    echo "Initialization Failure"
+    echo "**ERROR : Shutdown code is expected to be 1230000 but instead is $shutdown_code, check traces to see what caused the bad shutdown "
     exit 1
 fi
 
