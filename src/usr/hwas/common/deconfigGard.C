@@ -81,6 +81,8 @@ errlHndl_t collectGard(const PredicateBase *i_pPredicate)
             break;
         }
 
+        (void)theDeconfigGard().clearFcoDeconfigures();
+
         errl = theDeconfigGard().
                     deconfigureTargetsFromGardRecordsForIpl(i_pPredicate);
         if (errl)
@@ -804,6 +806,32 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
     return l_pErr;
 } // deconfigureTargetsFromGardRecordsForIpl
 
+void DeconfigGard::clearFcoDeconfigures()
+{
+    // Get top level target
+    Target* pSys = nullptr;
+    targetService().getTopLevelTarget(pSys);
+    HWAS_ASSERT(pSys!=nullptr,"Top level target was nullptr");
+
+    // Find all the nodes below it
+    PredicateCTM isNode(CLASS_ENC, TYPE_NODE);
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+    PredicatePostfixExpr isFunctionalNode;
+    isFunctionalNode.push(&isNode).push(&isFunctional).And();
+
+    TargetHandleList nodeHandleList;
+    targetService().getAssociated(nodeHandleList, pSys,
+                    TargetService::CHILD, TargetService::IMMEDIATE,
+                    &isFunctionalNode);
+
+    // Clear the FCO deconfigures for each one
+    for(auto const& pNode : nodeHandleList)
+    {
+        _clearFCODeconfigure(pNode);
+    }
+}
+
 //******************************************************************************
 errlHndl_t DeconfigGard::processFieldCoreOverride()
 {
@@ -841,9 +869,6 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
         {
             const TargetHandle_t pNode = *pNode_it;
 
-            //Clear all FCO based deconfigure before
-            //re-calculating FCO.
-            _clearFCODeconfigure(pNode);
             // Get FCO value
             uint32_t l_fco = 0;
             l_pErr = platGetFCO(pNode, l_fco);
