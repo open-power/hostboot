@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,12 +126,15 @@ errlHndl_t getDiagnosticMode(
 
         // Only need to check hw changed state attributes
         // when not already set to exhaustive and not in simics
-        if(( NINE_PATTERNS != o_mode ) &&
-           ( ! i_globals.simicsRunning ))
+        if( ( NINE_PATTERNS != o_mode ) &&
+            ( FOUR_PATTERNS != o_mode ) &&
+            ( ! i_globals.simicsRunning ) )
         {
             if(isHWStateChanged(i_trgt))
             {
-                o_mode = NINE_PATTERNS;
+                // To reduce IPL times without broadcast mode, we will just run
+                // 4 patterns instead of 9.
+                o_mode = FOUR_PATTERNS;
             }
         }
 
