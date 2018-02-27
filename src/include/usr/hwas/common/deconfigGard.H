@@ -295,7 +295,15 @@ public:
      *
      * @return errlHndl_t. Error log Handle
      * */
-     errlHndl_t platReLogGardError(GardRecord &i_gardRecord);
+    errlHndl_t platReLogGardError(GardRecord &i_gardRecord);
+
+    /**
+     * @brief Clears all FCO deconfigures across all nodes, in preparation for
+     *     assigning FCO resources.  Must be run prior to applying GARD records
+     *     to avoid contention with deconfig by association corner cases.
+     */
+    void clearFcoDeconfigures();
+
     /**
      * @brief Processes the Field Core Override attribute
      *
