@@ -37,9 +37,8 @@
 
 echo "+++ Need to alter where we look for pnor images so they will be picked up properly"
 mkdir -p  $sb/simu/data
-echo "+++ Need to pick up simics fix first"
-sbex -t 1043138
-
+echo "+++ Get some simics info changes"
+sbex -t 1045730
 
 chmod +w $sb/simu/data/simicsInfo
 egrep -v "nimbus.pnor|cumulus.pnor" $sb/simu/data/simicsInfo > $sb/simu/data/simicsInfo.new
@@ -47,7 +46,3 @@ mv $sb/simu/data/simicsInfo.new $sb/simu/data/simicsInfo
 echo "IMGS:NIMBUS_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
 echo "IMGS:BOSTON_PNOR_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
 echo "IMGS:CUMULUS_PNOR_IMG | FLASH:cumulus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> $sb/simu/data/simicsInfo
-
-
-echo "+++ Grab HCODE"
-sbex -t 1045730
