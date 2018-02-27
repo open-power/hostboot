@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -328,28 +328,6 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 #else
         io_TOC[secId].secure = false;
 #endif
-
-        // If secureboot is compiled in, skip header if not a secure section
-        // Otherwise always skip header as the secure flag is always false and
-        // SpnorRp will not handle skipping the header if one is indicated in PNOR
-        if ( (io_TOC[secId].version & FFS_VERS_SHA512)
-              && !io_TOC[secId].secure)
-        {
-            //increment flash addr for sha header
-            if (io_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
-            {
-                io_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC ;
-            }
-            else
-            {
-                io_TOC[secId].flashAddr += PAGESIZE ;
-            }
-
-            // now that we've skipped the header
-            // adjust the size to reflect that
-            io_TOC[secId].size -= PAGESIZE;
-        }
-
     } // For TOC Entries
 
 #ifndef BOOTLOADER

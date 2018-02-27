@@ -489,6 +489,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         {
             TRACDCOMP( g_trac_pnor, "PnorRP::getSectionInfo: i_section=%d, id=%d", i_section, iv_TOC[i_section].id );
 
+            uint64_t l_sectionVaddr = iv_TOC[id].virtAddr;
+            uint64_t l_sectionSize = iv_TOC[id].size;
             // copy my data into the external format
             o_info.id = iv_TOC[id].id;
             o_info.name = SectionIdToString(id);
@@ -502,16 +504,17 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             // sections in SPnorRP's address space
             if (o_info.secure)
             {
-                uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(iv_TOC[id].virtAddr);
+                uint8_t* l_vaddrPtr =
+                                reinterpret_cast<uint8_t*>(l_sectionVaddr);
                 // By adding VMM_VADDR_SPNOR_DELTA twice we can translate a pnor
-                // address into a secure pnor address, since pnor, temp, and spnor
-                // spaces are equidistant.
+                // address into a secure pnor address, since pnor, temp, and
+                // spnor spaces are equidistant.
                 // See comments in SPnorRP::verifySections() method in spnorrp.C
                 // and the definition of VMM_VADDR_SPNOR_DELTA in vmmconst.h
                 // for specifics.
-                o_info.vaddr = reinterpret_cast<uint64_t>(l_vaddr)
-                                                           + VMM_VADDR_SPNOR_DELTA
-                                                           + VMM_VADDR_SPNOR_DELTA;
+                l_sectionVaddr = reinterpret_cast<uint64_t>(l_vaddrPtr)
+                                                        + VMM_VADDR_SPNOR_DELTA
+                                                        + VMM_VADDR_SPNOR_DELTA;
 
                 // Get size of the secured payload for the secure section
                 // Note: the payloadSize we get back is untrusted because
@@ -521,7 +524,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 // and has valid beginning bytes. For optional Secure PNOR sections.
 
                 SECUREBOOT::ContainerHeader l_conHdr;
-                l_errhdl = l_conHdr.setHeader(l_vaddr);
+                l_errhdl = l_conHdr.setHeader(l_vaddrPtr);
                 if (l_errhdl)
                 {
                     TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: setheader failed");
@@ -557,25 +560,69 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 }
 
                 // skip secure header for secure sections at this point in time
-                o_info.vaddr += PAGESIZE;
+                l_sectionVaddr += PAGESIZE;
                 // now that we've skipped the header we also need to adjust the
                 // size of the section to reflect that.
                 // Note: For unsecured sections, the header skip and size decrement
                 // was done previously in pnor_common.C
-                o_info.size -= PAGESIZE;
+                l_sectionSize -= PAGESIZE;
 
                 // cache the value in SectionInfo struct so that we can
                 // parse the container header less often
                 o_info.secureProtectedPayloadSize = payloadTextSize;
             }
-            else
-#endif
+#else
+            // If secureboot is not compiled, still check the sections that are
+            // marked with sha512 tag in the xml to catch sections without fake
+            // headers. If we expect a header to be present and it's not,
+            // the virtual address of the section will not be pointing to the
+            // correct offset into the section.
+            if(iv_TOC[id].version & FFS_VERS_SHA512)
             {
-                o_info.vaddr = iv_TOC[id].virtAddr;
+                uint64_t l_magicNumber = 0;
+                bool l_knownHeader = PNOR::hasKnownHeader(
+                                reinterpret_cast<uint8_t*>(l_sectionVaddr),
+                                l_magicNumber);
+                if(!l_knownHeader)
+                {
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: "
+                        "The header of the partition %s"
+                        " is not of a known header format. Magic number"
+                        " = 0x%016llx",
+                         PNOR::SectionIdToString(id),
+                         l_magicNumber);
+                    /*@
+                    * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                    * @moduleid        PNOR::MOD_PNORCOMMON_GETSECTIONINFO
+                    * @reasoncode      PNOR::RC_BAD_HEADER_FORMAT
+                    * @userdata1       Partition ID
+                    * @userdata2       Partition's magic number
+                    * @devdesc         Error parsing partition header
+                    * @custdesc        Boot firmware integrity error;
+                    *                  reinstall the boot firmware
+                    */
+                    l_errhdl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PNOR::MOD_PNORCOMMON_GETSECTIONINFO,
+                                        PNOR::RC_BAD_HEADER_FORMAT,
+                                        id,
+                                        l_magicNumber,
+                                        true/*SW Error*/);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    l_errhdl->collectTrace(SECURE_COMP_NAME);
+                    break;
+                }
+                // Skip the fake header in memory after we've checked it.
+                // The vaddr of the parition will now point to the start
+                // of the actual partition.
+                l_sectionSize -= PAGESIZE;
+                l_sectionVaddr += PAGESIZE;
             }
 
+#endif
             o_info.flashAddr = iv_TOC[id].flashAddr;
-            o_info.size = iv_TOC[id].size;
+            o_info.size = l_sectionSize;
+            o_info.vaddr = l_sectionVaddr;
             o_info.eccProtected = ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT)
                                     != 0) ? true : false;
             o_info.sha512Version = ((iv_TOC[id].version & FFS_VERS_SHA512)

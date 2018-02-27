@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -406,3 +406,20 @@ bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)
 
     return l_result;
 }
+
+bool PNOR::hasKnownHeader(const uint8_t* i_vaddr,
+                          uint64_t& o_magicNumber)
+{
+    // Left symbolic constant defined in the function so it's easier to strip
+    // out later and nothing becomes dependent on it
+    const char VERSION_MAGIC[] = "VERSION";
+    const auto versionMagicSize = sizeof(VERSION_MAGIC);
+
+    bool secureHeader = PNOR::cmpSecurebootMagicNumber(i_vaddr);
+    bool versionHeader = (memcmp(i_vaddr,VERSION_MAGIC,versionMagicSize) == 0);
+
+    memcpy(&o_magicNumber, i_vaddr, sizeof(o_magicNumber));
+
+    return (versionHeader || secureHeader);
+}
+

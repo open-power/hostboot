@@ -261,6 +261,13 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
         o_info.secure = iv_TOC[i_section].secure;
+#ifndef CONFIG_SECUREBOOT
+        if(iv_TOC[i_section].version & FFS_VERS_SHA512)
+        {
+            o_info.size -= PAGESIZE;
+            o_info.vaddr += PAGESIZE;
+        }
+#endif
     } while (0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo %d", i_section);
