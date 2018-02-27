@@ -262,9 +262,8 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 l_scom_buffer.insert<37, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_ELEVEN_LANE_MODE_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_FAST_ASYNC_CROSS_ON = 0x1;
                 l_scom_buffer.insert<59, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_FAST_ASYNC_CROSS_ON );
