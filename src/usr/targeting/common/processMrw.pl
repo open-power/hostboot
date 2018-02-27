@@ -448,12 +448,10 @@ sub processSystem
         $targetObj->{NUM_PROCS_PER_NODE});
     parseBitwise($targetObj,$target,"CDM_POLICIES");
 
-    #@fixme-RTC:174616-Remove deprecated support
+    #Delete this attribute if it is leftover from an old format
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
     {
-        my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
-            $targetObj->getAttribute($target,"XSCOM_BASE_ADDRESS"));
-        $targetObj->setAttribute($target, "XSCOM_BASE_ADDRESS", $base);
+        $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
     }
 
     # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
@@ -1314,12 +1312,20 @@ sub setupBars
     #Each chip in the group has its own 4TB space,
     #which each group being 32TB of space.
     my %bars=(  "FSP_BASE_ADDR"             => 0x0006030100000000,
-                "LPC_BUS_ADDR"              => 0x0006030000000000,
-                "XSCOM_BASE_ADDRESS"        => 0x000603FC00000000,
                 "PSI_BRIDGE_BASE_ADDR"      => 0x0006030203000000,
                 "INTP_BASE_ADDR"            => 0x0003FFFF80300000,
                 "PSI_HB_ESB_ADDR"           => 0x00060302031C0000,
                 "XIVE_CONTROLLER_BAR_ADDR"  => 0x0006030203100000);
+    #Note - Not including XSCOM_BASE_ADDRESS and LPC_BUS_ADDR in here
+    # because Hostboot code itself writes those on every boot
+    if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") )
+    {
+        $targetObj->deleteAttribute($target,"XSCOM_BASE_ADDRESS");
+    }
+    if (!$targetObj->isBadAttribute($target,"LPC_BUS_ADDR") )
+    {
+        $targetObj->deleteAttribute($target,"LPC_BUS_ADDR");
+    }
 
     my $groupOffset = 0x200000000000;
     my $procOffset  = 0x40000000000;
