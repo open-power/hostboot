@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -96,6 +96,7 @@ namespace PNOR
 
         // pnor_common.C
         MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
+        MOD_PNORCOMMON_GETSECTIONINFO   = 0xC1, /**< PNOR::getSectionInfo */
 
         // spnorrp.C
         // Note: 0xD0 is available, so should be the next one used for spnorrp.
@@ -187,6 +188,7 @@ namespace PNOR
         RC_SECURE_SIZE_MISMATCH      = PNOR_COMP_ID | 0x3A,
         RC_NOT_PAGE_ALIGNED          = PNOR_COMP_ID | 0x3B,
         RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
+        RC_BAD_HEADER_FORMAT         = PNOR_COMP_ID | 0x3D,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
