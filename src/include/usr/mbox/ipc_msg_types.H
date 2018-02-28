@@ -40,6 +40,8 @@ namespace IPC
         IPC_QUERY_CHIPINFO,
         IPC_SET_SBE_CHIPINFO,
         IPC_CLOSE_TCES,
+        IPC_FREQ_ATTR_DATA, // frequency attribute data from master to other drawers
+
     };
 
 }; // namespace IPC
