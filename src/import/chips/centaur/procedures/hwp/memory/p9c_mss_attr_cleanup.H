@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,10 +52,38 @@ extern "C"
 
 ///
 /// @brief Programatic over-rides related to effective config
-/// @param[in] i_target, the controller (e.g., MCS)
+/// @param[in] i_dimm, the dimm on which to opearte
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9c_mss_attr_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target );
+    fapi2::ReturnCode p9c_mss_attr_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm );
+
+}
+
+namespace mss
+{
+namespace ddr4
+{
+///
+/// @brief Sets the DDR4 SPD attributes
+/// @param[in] i_dimm, the dimm on which to opearte
+/// @param[in] i_spd, the SPD on which to operate
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode set_spd_attributes( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                      const std::vector<uint8_t>& i_spd );
+}
+
+namespace ddr3
+{
+///
+/// @brief Sets the DDR3 SPD attributes
+/// @param[in] i_dimm, the dimm on which to opearte
+/// @param[in] i_spd, the SPD on which to operate
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode set_spd_attributes( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                      const std::vector<uint8_t>& i_spd );
+}
 
 }
 

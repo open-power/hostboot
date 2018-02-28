@@ -228,30 +228,14 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Platform support must call an Accessor HWP.
         For DDR3, the values would be from CL_4 through CL_18
         For DDR4, the values would be from CL_7 through CL_24
+        Note: the attributes decode changes from DDR3 to DDR4
+        In DDR3, we index from the lowest CL: CL_4
+        In DDR4, we index from the lowest CL: CL_7
     </description>
     <valueType>uint32</valueType>
     <enum>
-        CL_24 = 0x00100000,
-        CL_23 = 0x00080000,
-        CL_22 = 0x00040000,
-        CL_21 = 0x00020000,
-        CL_20 = 0x00010000,
-        CL_19 = 0x00008000,
-        CL_18 = 0x00004000,
-        CL_17 = 0x00002000,
-        CL_16 = 0x00001000,
-        CL_15 = 0x00000800,
-        CL_14 = 0x00000400,
-        CL_13 = 0x00000200,
-        CL_12 = 0x00000100,
-        CL_11 = 0x00000080,
-        CL_10 = 0x00000040,
-        CL_9  = 0x00000020,
-        CL_8  = 0x00000010,
-        CL_7  = 0x00000008,
-        CL_6  = 0x00000004,
-        CL_5  = 0x00000002,
-        CL_4  = 0x00000001
+        DDR3_LOWEST_CL = 4,
+        DDR4_LOWEST_CL = 7
     </enum>
     <writeable/>
 </attribute>

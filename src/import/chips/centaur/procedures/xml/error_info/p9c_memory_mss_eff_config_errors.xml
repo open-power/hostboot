@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -977,6 +977,26 @@
         <parent>TARGET_MBA</parent>
         <childType>TARGET_TYPE_DIMM</childType>
         </childTargets>
+    </deconfigure>
+
+</hwpError>
+  <hwpError>
+    <rc>RC_CEN_MSS_INVALID_SPD_SIZE</rc>
+    <description>Invalid SPD size found in p9c_mss_attr_cleanup</description>
+    <FFDC>TARGET_DIMM</FFDC>
+    <ffdc>SPD_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <callout>
+        <target>TARGET_DIMM</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET_DIMM</target>
     </deconfigure>
 
 </hwpError>
