@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,12 @@ typedef enum {
     GARD_Reconfig               = 0xEB, //Force deconfig on reconfig loop
     GARD_Void                   = 0xFF
 } GARD_ErrorType;
+
+enum ErrorCategory {
+    ERR_CATEGORY_INVALID_SERIAL = 0x01,
+    ERR_CATEGORY_INVALID_PART = 0x02,
+    
+};
 
 // from src/epub/fsp/epub_service_codes.H v1.24.24.4
 // - Any additions should be added to FipS code first

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 OBJS += call_host_runtime_setup.o
 OBJS += call_host_verify_hdat.o
+OBJS += freqAttrData.o
 OBJS += call_host_start_payload.o
 
 include ${ROOTPATH}/config.mk

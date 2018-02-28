@@ -40,13 +40,17 @@ namespace ISTEP_21
 {
     extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
                                      bool i_masterInstance );
+
+    extern errlHndl_t callCheckFreqAttrData(void *freq_data_obj_ptr);
 };
+
 
 trace_desc_t* g_trac_ipc = NULL;
 TRAC_INIT(&g_trac_ipc, IPC_TRACE_NAME, KILOBYTE);
 
 using namespace IPC;
 using namespace ERRORLOG;
+using namespace TARGETING;
 
 IpcSp::IpcSp()
     :
@@ -263,7 +267,79 @@ void IpcSp::msgHandler()
                 }
                 break;
              }
-             case IPC_START_PAYLOAD:
+
+            case IPC_FREQ_ATTR_DATA:
+            {
+                TRACFCOMP( g_trac_ipc,
+                           "IPC received the IPC_FREQ_ATTR_DATA msg - %d:%d",
+                            msg->data[0], msg->data[1]);
+
+                const int NUM_MOD = 2;
+                const char * mods[NUM_MOD] =
+                   { "libistep21.so","libruntime.so"};
+                bool loaded_mods[NUM_MOD] = {false, false};
+                for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
+                {
+                    if ( !VFS::module_is_loaded( mods[cnt] ) )
+                    {
+                        err = VFS::module_load( mods[cnt] );
+
+                        if ( err )
+                        {
+                            TRACFCOMP( g_trac_ipc,
+                                       "Could not load %s module", mods[cnt] );
+                            break;
+                        }
+                        else
+                        {
+                            loaded_mods[cnt] = true;
+                        }
+                    }
+                }
+
+                if(!err)
+                {
+
+                    //  Function will not return unless error
+                    err = ISTEP_21::callCheckFreqAttrData((void *)msg->extra_data);
+                }
+
+                if (err)
+                 {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                 }
+
+                 //Send response back to the master HB to indicate set freq attr successful
+                 err = MBOX::send(MBOX::HB_FREQ_ATTR_DATA_MSGQ, msg, msg->data[1] );
+
+                 if (err)
+                 {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                 }
+
+                for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
+                {
+                    if ( loaded_mods[cnt] )
+                    {
+                        err = VFS::module_unload( mods[cnt] );
+
+                        if (err)
+                        {
+                            errlCommit(err, IPC_COMP_ID);
+                        }
+                        loaded_mods[cnt] = false;
+                    }
+
+                }
+
+             break;
+
+            }
+            case IPC_START_PAYLOAD:
             {
                 const int NUM_MOD = 3;
                 const char * mods[NUM_MOD] =
@@ -288,11 +364,8 @@ void IpcSp::msgHandler()
                     }
                 }
 
-                if (err) break;
-
                 if(!err)
                 {
-                    //  Function will not return unless error
                     err = ISTEP_21::callShutdown(msg->data[0],false);
                 }
 
