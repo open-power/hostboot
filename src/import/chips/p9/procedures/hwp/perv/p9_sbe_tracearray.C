@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -412,8 +412,7 @@ fapi2::ReturnCode p9_sbe_tracearray(
         }
     }
 
-    /* Nimbus DD1 core traces can't be read out via SCOM.
-     * Check an EC feature to see if that's fixed. */
+    /* check that core trace arrays can be logged out, based on EC feature attribute */
     if (ta_type == fapi2::TARGET_TYPE_CORE)
     {
         uint8_t l_core_trace_not_scomable = 0;
@@ -425,7 +424,9 @@ fapi2::ReturnCode p9_sbe_tracearray(
                  "Failed to query chip EC feature "
                  "ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE");
 
-        FAPI_ASSERT(!l_core_trace_not_scomable, fapi2::PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE()
+        FAPI_ASSERT(!l_core_trace_not_scomable ||
+                    !i_args.collect_dump,
+                    fapi2::PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE()
                     .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
                     "Core arrays cannot be dumped in this chip EC; please use fastarray instead.");
     }
@@ -454,8 +455,10 @@ fapi2::ReturnCode p9_sbe_tracearray(
         }
     }
 
-    /* Check that the trace mux is set up as expected */
-    if (!i_args.ignore_mux_setting)
+    /* confirm the mux setting unless we are not dumping, or explicitly
+       instructed to skip the check */
+    if (!i_args.ignore_mux_setting &&
+        i_args.collect_dump)
     {
         fapi2::buffer<uint64_t> buf;
         FAPI_TRY(fapi2::getScom(target,
