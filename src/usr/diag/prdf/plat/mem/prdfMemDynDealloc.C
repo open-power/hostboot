@@ -213,9 +213,9 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
     o_addr |= ((r14 << 14) | (r12_r0 << 1) | r13) << 17;
 
     return o_rc;
-
-    #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
 
 template<TYPE T>
 int32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
@@ -252,129 +252,118 @@ int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
         l_rc = mcfgp->Read(); if (l_rc) break;
         l_rc = mcfgpm->Read(); if (l_rc) break;
 
-        // Get the MCS per group
-        uint8_t mcsPerGrp = mcfgp->GetBitFieldJustified( 1,4 );
-        // mcs position / group member id from mcfgp[5:7 or 8:10]
-        uint8_t mcGrpSel = mcfgp->GetBitFieldJustified( (mcaPos==0) ? 5 : 8, 3);
+        // Get the number of channels in this group.
+        uint8_t mcGrpCnfg = mcfgp->GetBitFieldJustified( 1, 4 );
+        uint32_t chnls = 0;
+        switch ( mcGrpCnfg )
+        {
+            case 0: chnls = 1;                     break; // 11
+            case 1: chnls = (0 == mcaPos) ? 1 : 3; break; // 13
+            case 2: chnls = (0 == mcaPos) ? 3 : 1; break; // 31
+            case 3: chnls = 3;                     break; // 33
+            case 4: chnls = 2;                     break; // 2D
+            case 5: chnls = 2;                     break; // 2S
+            case 6: chnls = 4;                     break; // 4
+            case 7: chnls = 6;                     break; // 6
+            case 8: chnls = 8;                     break; // 8
+            default:
+                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
+                          "on 0x%08x port %d", mcGrpCnfg, mcs_chip->getHuid(),
+                          mcaPos );
+                l_rc = FAIL;
+        }
+        if ( SUCCESS != l_rc ) break;
+
+        // Insert the group select.
+        // Notes on 3 and 6 channel per group configs. Let's use an example of 3
+        // channels in a group with 4 GB per channel. The group will be
+        // configured think there are 4 channels with 16 GB. However, only the
+        // first 12 GB of the 16 GB are used. Since we need a contiguous address
+        // space and can't have holes every fourth address, the hardware uses
+        // some crafty mod3 logic to evenly distribute the addresses among the
+        // 3 channels. The mod3 hashing is based on the address itself so there
+        // isn't a traditional group select like we are used to in the 2, 4, and
+        // 8 channel group configs. In fact, 3 channel group configs do not need
+        // a group select and are treated like 1 channel group configs. The 6
+        // channel group configs will also use the mod3 hashing and a 1-bit
+        // group select to handle all 6 channels. Fortunately, this group select
+        // is far easier to calculate than expected because it is always the
+        // last bit of the group ID from the MCFGP (just like 2 channel group
+        // configs).
+
+        uint8_t grpId = mcfgp->GetBitFieldJustified((0 == mcaPos) ? 5 : 8, 3);
+
         uint64_t upper33 = o_addr & 0xFFFFFFFF80ull;
         uint64_t lower7  = o_addr & 0x000000007full;
-        uint64_t bar = 0;
 
-        if (mcaPos == 0) // Channel 0
+        switch ( chnls )
         {
-            switch (mcsPerGrp)
-            {
-                case 0:
-                case 1:
-                    // 1 MCS per group -- no shift needed
-                    break;
-                case 4:
-                case 5:
-                    // 2 MCS per group
-                    // shift physical addr by 1 and set bit 56 to group sel
-                    o_addr = (upper33 << 1) | ((mcGrpSel & 0x1) << 7) | lower7;
-                    break;
-                case 6:
-                    // 4 MCS per group
-                    // shift physical addr by 2 and set bit 55:56 to group sel
-                    o_addr = (upper33 << 2) | ((mcGrpSel & 0x3) << 7) | lower7;
-                    break;
-                case 8:
-                    // 8 MCS per group
-                    // shift physical addr by 3 and set bit 54:56 to group sel
-                    o_addr = (upper33 << 3) | ((mcGrpSel & 0x7) << 7) | lower7;
-                    break;
-                case 2:
-                case 3:
-                    // 3 MCS per group
-                    // May not be a supported config
-                case 7:
-                    // 6 MCS per group
-                    // May not be a supported config
-                default:
-                    // Unsupported MCS per group config
-                    PRDF_ERR( PRDF_FUNC
-                              "Invalid MCS per group value: %x on HUID:0x%08X",
-                              mcsPerGrp, i_chip->GetId() );
-                    return FAIL;
-                    break;
-            }
+            case 1:
+            case 3: // no shifting
+                break;
 
-            // Get BAR from MCFGP
-            bar = mcfgp->GetBitFieldJustified(24, 24);
-            o_addr |= (bar << 32);
+            case 2:
+            case 6: // insert 1 bit
+                o_addr = (upper33 << 1) | ((grpId & 0x1) << 7) | lower7;
+                break;
+
+            case 4: // insert 2 bits
+                o_addr = (upper33 << 2) | ((grpId & 0x3) << 7) | lower7;
+                break;
+
+            case 8: // insert 3 bits
+                o_addr = (upper33 << 3) | ((grpId & 0x7) << 7) | lower7;
+                break;
+
+            default:
+                PRDF_ASSERT(false); // Definitely a code bug.
         }
-        else // Channel 1
+
+        // Get the base address (BAR).
+        uint64_t bar = 0;
+        if ( 0 == mcaPos ) // MCS channel 0
         {
-            switch (mcsPerGrp)
+            // Channel 0 is always from the MCFGP.
+            bar = mcfgp->GetBitFieldJustified(24, 24);
+        }
+        else // MCS channel 1
+        {
+            switch ( mcGrpCnfg )
             {
-                case 0:
-                case 2:
-                    // 1 MCS per group -- no shift needed
-
-                    // Get BAR from MCFGPM
+                // Each channel is in an different group. Use the MCFGPM.
+                case 0: // 11
+                case 1: // 13
+                case 2: // 31
+                case 3: // 33
+                case 4: // 2D
                     bar = mcfgpm->GetBitFieldJustified(24, 24);
                     break;
-                case 4:
-                    // 2 MCS per group
-                    // shift physical addr by 1 and set bit 56 to group sel
-                    o_addr = (upper33 << 1) | ((mcGrpSel & 0x1) << 7) | lower7;
 
-                    // Get BAR from MCFGPM
-                    bar = mcfgpm->GetBitFieldJustified(24, 24);
-                    break;
-                case 5:
-                    // 2 MCS per group
-                    // shift physical addr by 1 and set bit 56 to group sel
-                    o_addr = (upper33 << 1) | ((mcGrpSel & 0x1) << 7) | lower7;
-
-                    // Get BAR from MCFGPM
+                // Both channels are in the same group. Use the MCFGP.
+                case 5: // 2S
+                case 6: // 4
+                case 7: // 6
+                case 8: // 8
                     bar = mcfgp->GetBitFieldJustified(24, 24);
                     break;
-                case 6:
-                    // 4 MCS per group
-                    // shift physical addr by 2 and set bit 55:56 to group sel
-                    o_addr = (upper33 << 2) | ((mcGrpSel & 0x3) << 7) | lower7;
 
-                    // Get BAR from MCFGP
-                    bar = mcfgp->GetBitFieldJustified(24, 24);
-                    break;
-                case 8:
-                    // 8 MCS per group
-                    // shift physical addr by 3 and set bit 54:56 to group sel
-                    o_addr = (upper33 << 3) | ((mcGrpSel & 0x7) << 7) | lower7;
-
-                    // Get BAR from MCFGP
-                    bar = mcfgp->GetBitFieldJustified(24, 24);
-                    break;
-                case 1:
-                case 3:
-                    // 3 MCS per group
-                    // May not be a supported config
-
-                    // Get BAR from MCFGPM
-                case 7:
-                    // 6 MCS per group
-                    // May not be a supported config
-
-                    // Get BAR from MCFGP
                 default:
-                    // Unsupported MCS per group config
-                    PRDF_ERR( PRDF_FUNC
-                              "Invalid MCS per group value: %x on HUID:0x%08X",
-                              mcsPerGrp, i_chip->GetId() );
-                    return FAIL;
-                    break;
+                    PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: "
+                              "0x%x on 0x%08x port %d", mcGrpCnfg,
+                              mcs_chip->getHuid(), mcaPos );
+                    l_rc = FAIL;
             }
+        }
+        if ( SUCCESS != l_rc ) break;
 
-            // Insert BAR
-            o_addr |= (bar << 32);
-
-        } // Channel 1
+        // Add the BAR to the rest of the address. The BAR field is 24 bits and
+        // always starts at bit 8 of the real address.
+        o_addr |= (bar << 32);
 
     } while (0);
 
     return l_rc;
+
     #undef PRDF_FUNC
 }
 
