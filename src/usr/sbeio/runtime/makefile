@@ -47,6 +47,7 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
+OBJS += sbeio_vital_attn.o
 OBJS += ${SBEIO_COMMON_OBJS}
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/

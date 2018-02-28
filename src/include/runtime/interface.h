@@ -537,6 +537,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
        HBRT_FW_MSG_HBRT_FSP_RESP = 6,
        HBRT_FW_MSG_TYPE_I2C_LOCK = 7,
+       HBRT_FW_MSG_TYPE_SBE_STATE = 8,
     };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -592,6 +593,14 @@ typedef struct hostInterfaces
              uint8_t i_operation;   // type of operation to perform
                                     // 1 = lock, 2 = unlock
           } __attribute__ ((packed)) req_i2c_lock;
+
+          // This struct is sent from HBRT with
+          // io_type set to  HBRT_FW_MSG_TYPE_SBE_STATE
+          struct
+          {
+             uint64_t i_procId; // processor ID of the SBE that is disabled/enabled
+             uint64_t i_state;  // state of the SBE; 0 = disabled, 1 = enabled
+          } __attribute__ ((packed)) sbe_state;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or

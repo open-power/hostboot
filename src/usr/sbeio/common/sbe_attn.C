@@ -36,6 +36,9 @@
 #include <p9_extract_sbe_rc.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <sbeio/runtime/sbeio_attr_override.H>
+#include <sbeio/runtime/sbeio_vital_attn.H>
+#include <initservice/initserviceif.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -57,6 +60,16 @@ namespace SBEIO
         TRACFCOMP( g_trac_sbeio, "handleVitalAttn> Returned SBE PLID=0x%x",
                    l_sbePlid);
 
+#ifdef __HOSTBOOT_RUNTIME
+        // Inform OPAL, SBE is currently disabled
+        if (TARGETING::is_sapphire_load())
+        {
+            // Inform OPAL of the inoperable SBE
+            l_errhdl = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
+                                                        RT_SBEIO::SBE_DISABLED);
+        }
+#endif
+
         // @todo - RTC:180242 - Restart SBE
 
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
@@ -68,8 +81,19 @@ namespace SBEIO
 
         l_sbeObj.main_sbe_handler(i_procTarg);
 
-        // @todo - RTC:180244 - Disable the OCC
-        // @todo - RTC:180245 - Inform OPAL
+#ifdef __HOSTBOOT_RUNTIME
+        // Inform OPAL the state of the SBE after a retry
+        if (l_sbeObj.getSbeRestart())
+        {
+            if (TARGETING::is_sapphire_load())
+            {
+                l_errhdl = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
+                                                         RT_SBEIO::SBE_ENABLED);
+            }
+
+            // @todo - RTC:180244 - Disable the OCC
+        }
+#endif
 
         TRACFCOMP( g_trac_sbeio,
                    EXIT_MRK "handleVitalAttn> ");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,6 +190,32 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                 }
             break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
 
+            case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
+                {
+                    TRACFCOMP(g_trac_runtime,
+                              ERR_MRK"FSP is doing a reset/reload, "
+                                     "sending SBE vital attn to OPAL failed. "
+                                     "retry:%d/%d, rc:%d, procId:0x%08x, "
+                                     "state(0=disabled, 1=enable):%d",
+                              i,
+                              HBRT_FW_REQUEST_RETRIES,
+                              rc,
+                              l_req_fw_msg->sbe_state.i_procId,
+                              l_req_fw_msg->sbe_state.i_state);
+
+                    // Pack user data 1 with Hypervisor return code and
+                    // firmware request message type
+                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                       l_req_fw_msg->io_type);
+
+                    // Pack user data 2 with processor ID of SBE
+                    // and state of the SBE
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                      l_req_fw_msg->sbe_state.i_procId,
+                                      l_req_fw_msg->sbe_state.i_state);
+                }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
+
             default:
             break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -209,7 +235,8 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  MBOX message type (FSP MSG) ||
                                  chipID
              * @userdata2[32:63] SCOM data (HCODE Update) ||
-                                 Message Type (FSP MSG)
+                                 Message Type (FSP MSG) ||
+                                 SBE state
              * @devdesc          The Firmware Request call failed
              */
             l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
@@ -350,6 +377,30 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                     l_userData2 = l_req_fw_msg->req_i2c_lock.i_chipId;
                 }
             break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
+
+            case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
+                 {
+                    TRACFCOMP(g_trac_runtime,
+                              ERR_MRK"Failed sending SBE vital attn to OPAL. "
+                                     "rc:0x%X, procId:0x%08x, "
+                                     "state(0=disabled, 1=enable):%d",
+                              rc,
+                              l_req_fw_msg->sbe_state.i_procId,
+                              l_req_fw_msg->sbe_state.i_state);
+
+                    // Pack user data 1 with Hypervisor return code and
+                    // firmware request message type
+                    l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                                       l_req_fw_msg->io_type);
+
+                    // Pack user data 2 with processor ID of SBE
+                    // and state of the SBE
+                    l_userData2 = TWO_UINT32_TO_UINT64(
+                                      l_req_fw_msg->sbe_state.i_procId,
+                                      l_req_fw_msg->sbe_state.i_state);
+                 }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_SBE_STATE:
+
             default:
                break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -369,7 +420,8 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  MBOX message type (FSP MSG) ||
                                  chipId
              * @userdata2[32:63] SCOM data (HCODE Update) ||
-                                 Message Type (FSP MSG)
+                                 Message Type (FSP MSG)  ||
+                                 SBE state
              * @devdesc          The Firmware Request call failed
              */
             l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
