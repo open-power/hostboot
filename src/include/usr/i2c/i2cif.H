@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,8 +34,8 @@ namespace I2C
 /**
  * @enum i2cProcessType
  *
- * @brief I2C Process Type specifies which targets and which I2C master
- *        engines are reset or setup
+ * @brief I2C Process Type specifies which targets and which mode the
+ *        I2C master engines are in to be reset or setup
  *
  * Specifically:
  *
@@ -70,6 +70,45 @@ enum i2cProcessType
 };
 
 /**
+ * @enum i2cEngineSelect
+ *
+ * @brief I2C Engine Select determines which engine(s) the action will be
+ *        executed on.
+ *
+ * @note  This enum is setup to be used as a bit-mask where _ALL combines
+ *        all possibilities.
+ *
+ * @note  See i2cEngineToEngineSelect() function for converting an engine
+ *        number to a value represented by this enum.
+ */
+enum i2cEngineSelect : uint8_t
+{
+   // Individual Engines
+   I2C_ENGINE_SELECT_ONLY_0 =  0x80,
+   I2C_ENGINE_SELECT_ONLY_1 =  0x40,
+   I2C_ENGINE_SELECT_ONLY_2 =  0x20,
+   I2C_ENGINE_SELECT_ONLY_3 =  0x10,
+
+   I2C_ENGINE_SELECT_ALL    =  I2C_ENGINE_SELECT_ONLY_0 |
+                               I2C_ENGINE_SELECT_ONLY_1 |
+                               I2C_ENGINE_SELECT_ONLY_2 |
+                               I2C_ENGINE_SELECT_ONLY_3,
+};
+
+/**
+ * @brief This inline function will take an engine number input and convert
+ *        it to the corresponding i2cEngineSelect enum.
+ *
+ * @param[in] i_engine     - Specfies which engine number to convert
+ *
+ * @return i2cEngineSelect - Corresponding enum value
+ */
+inline i2cEngineSelect i2cEngineToEngineSelect(const uint8_t i_engine)
+{
+    return static_cast<i2cEngineSelect>(0x80 >> i_engine);
+}
+
+/**
  * @brief This function will handle everything required to reset a target's
  *        "active" I2C master engine.
  * [NOTE: "active" engine is determined by target's I2C_SWITCHES attribute]
@@ -88,7 +127,8 @@ enum i2cProcessType
  *      the error log.
  */
 errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
-                                   bool i_functional = true );
+                                   bool i_functional = true,
+                                   i2cEngineSelect = I2C_ENGINE_SELECT_ALL);
 
 /**
  * @brief This function will handle everything required to setup a target's
