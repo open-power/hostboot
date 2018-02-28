@@ -480,14 +480,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
-        // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
-        // whichever hypervisor is loaded can reference equivalent targets
-        l_err = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
-        if(l_err)
-        {
-            break;
-        }
-
         // Verify PAYLOAD and Move PAYLOAD+HDAT from Temporary TCE-related
         // memory region to the proper location
         l_err = verifyAndMovePayload();
