@@ -56,6 +56,7 @@ enum sbeioModuleId
     SBEIO_HANDLE_SBE_REG_VALUE          = 0x0B,
     SBEIO_GET_FFDC_HANDLER              = 0x0C,
     SBEIO_GET_SBE_RC                    = 0x0D,
+    SBEIO_RUNTIME_HANDLE_VITAL_ATTN     = 0x0E,
 };
 
 /**
@@ -108,6 +109,7 @@ enum sbeioReasonCode
     SBEIO_RT_NO_INTERFACE_POINTER      = SBEIO_COMP_ID | 0x3A,
     SBEIO_RT_NO_INTERFACE_FUNCTION     = SBEIO_COMP_ID | 0x3B,
     SBEIO_RT_NO_APPLY_ATTR_FUNCTION    = SBEIO_COMP_ID | 0x3C,
+    SBEIO_RT_NULL_FIRMWARE_REQUEST_PTR = SBEIO_COMP_ID | 0x3D,
 
     // SBE Unsecure Memory Region error codes
     SBEIO_MEM_REGION_DOES_NOT_EXIST    = SBEIO_COMP_ID | 0x50,
