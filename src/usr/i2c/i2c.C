@@ -3179,7 +3179,8 @@ enum i2cProcessOperation
 errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                                      i2cProcessOperation i_processOperation,
                                      uint64_t            i_busSpeed,
-                                     bool                i_functional )
+                                     bool                i_functional,
+                                     i2cEngineSelect     i_engineSelect )
 {
     errlHndl_t err = NULL;
     bool error_found = false;
@@ -3193,9 +3194,10 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
     TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
 
     TRACFCOMP( g_trac_i2c,
-               ENTER_MRK"i2cProcessActiveMasters(): Type=0x%X, "
-               "Operation=%d Bus Speed=%d Functional=%d",
-               i_processType, i_processOperation, i_busSpeed, i_functional );
+               ENTER_MRK"i2cProcessActiveMasters(): Type=0x%X "
+               "Operation=%d Bus Speed=%d Functional=%d engineSelect=0x%.2X",
+               i_processType, i_processOperation, i_busSpeed, i_functional,
+               i_engineSelect );
     do
     {
 
@@ -3357,7 +3359,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 }
             }
 
-            for( size_t engine = 0;
+            for( uint8_t engine = 0;
                  engine < I2C_BUS_ATTR_MAX_ENGINE;
                  engine++ )
             {
@@ -3373,8 +3375,7 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                     continue;
                 }
 
-                // Never touch engine 0 for Host -- the SBE owns
-                // it
+                // Never touch engine 0 for Host -- the SBE owns it
                 if ( ( engine == 0 ) &&
                      (io_args.switches.useHostI2C == 1) )
                 {
@@ -3382,6 +3383,16 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                         "Never touch engine 0 for Host");
                     continue;
                 }
+
+                // Only operate on selected engines
+                if ( ! ( i2cEngineToEngineSelect(engine) & i_engineSelect ) )
+                {
+                    TRACFCOMP( g_trac_i2c,INFO_MRK
+                        "Skipping engine %d because i_engineSelect=0x%.2X",
+                        engine, i_engineSelect );
+                    continue;
+                }
+
 
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
@@ -3647,19 +3658,21 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
  *        Set bus speed from the MRW value.
  */
 errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
-                                   bool i_functional )
+                                   bool i_functional,
+                                   i2cEngineSelect i_engineSelect )
 {
     errlHndl_t err = NULL;
 
     TRACFCOMP( g_trac_i2c,
                ENTER_MRK"i2cResetActiveMasters(): i2cProcessType=0x%X, "
-               "i_functional=%d",
-               i_resetType, i_functional );
+               "i_functional=%d, i_engineSelect=0x%.2X",
+               i_resetType, i_functional, i_engineSelect );
 
     err = i2cProcessActiveMasters (i_resetType,  // select engines
                                    I2C_OP_RESET, // reset engines
                                    I2C_BUS_SPEED_FROM_MRW,
-                                   i_functional);
+                                   i_functional,
+                                   i_engineSelect);
 
     TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cResetActiveMasters(): err rc=0x%X, plid=0x%X",
@@ -3686,7 +3699,8 @@ errlHndl_t i2cSetupActiveMasters ( i2cProcessType i_setupType,
     err = i2cProcessActiveMasters (i_setupType,   // select engines
                                    I2C_OP_SETUP,  // setup engines
                                    I2C_BUS_SPEED_400KHZ,
-                                   i_functional);
+                                   i_functional,
+                                   I2C_ENGINE_SELECT_ALL);
 
     TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cSetupActiveMasters(): err rc=0x%X, plid=0x%X",

@@ -52,6 +52,7 @@
 #include <config.h>
 #include <devicefw/driverif.H>
 #include <i2c/tpmddif.H>
+#include <i2c/i2cif.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
@@ -274,6 +275,33 @@ void* host_update_master_tpm( void *io_pArgs )
             if(   hwasState.present
                && hwasState.functional)
             {
+                // If MPIPL do I2C Reset to any processor's I2C engine that is
+                // driving the TPMs
+                TARGETING::Target* sys = nullptr;
+                (void) tS.getTopLevelTarget( sys );
+                assert(sys, "host_update_master_tpm() system target is nullptr");
+
+                if (sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+                {
+                   err = I2C::i2cResetActiveMasters(
+                             I2C::I2C_PROC_HOST,
+                             true,
+                             I2C::i2cEngineToEngineSelect(tpmData.engine));
+
+                   if (nullptr != err)
+                   {
+                       // Commit log and continue
+                       TRACFCOMP(g_trac_trustedboot,ERR_MRK
+                                 "host_update_master_tpm(): Committing I2C "
+                                 "Reset Fail plid=0x%X but continuing",
+                                 err->plid());
+                       err->collectTrace(TRBOOT_COMP_NAME);
+                       errlCommit(err, TRBOOT_COMP_ID);
+                       err = nullptr;
+                   }
+
+                }
+
                 // API call will set TPM init attempted appropriately
                 tpmInitialize(pPrimaryTpm);
             }
