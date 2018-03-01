@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,10 +72,16 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
             break;
         }
 
+        // Get the proc model
+        TARGETING::Target* l_masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
+        TARGETING::ATTR_MODEL_type l_procModel =
+            l_masterProc->getAttr<TARGETING::ATTR_MODEL>();
+
         // Get the DIMM
         TargetHandleList l_dimmList;
 
-        if ( fapi2::TARGET_TYPE_MBA == i_fapiTrgt.getType() )
+        if ( TARGETING::MODEL_CUMULUS == l_procModel )
         {
             // Get all functional DIMMs
             getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM );
@@ -105,7 +111,7 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
                 }
             }
         }
-        else
+        else if ( TARGETING::MODEL_NIMBUS == l_procModel )
         {
             // Get all connected DIMMs, even nonfunctioning ones.
             getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM,
@@ -115,6 +121,13 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
             // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
             l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, o_dimmTrgt,
                                   o_dqBitmap );
+        }
+        else
+        {
+            // Invalid target.
+            FAPI_ERR( "dimmBadDqCheckParamGetBitmap: Invalid proc model" );
+            l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
+            break;
         }
 
         if ( l_rc )
