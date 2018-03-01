@@ -6464,6 +6464,13 @@
           <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
