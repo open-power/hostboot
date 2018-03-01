@@ -6707,7 +6707,7 @@ rule rNPU0FIR
     NPU0FIR & ~NPU0FIR_MASK &  NPU0FIR_ACT0 &  NPU0FIR_ACT1;
 };
 
-group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 18, 19, 25, 29, 31, 40, 42, 44, 45 )
+group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 18, 29, 31, 40, 42, 44, 45 )
 {
     /** NPU0FIR[0]
      *  NTL array CE
