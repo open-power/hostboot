@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,6 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pm.H>
-#include <p9_misc_scom_addresses.H>
 
 typedef fapi2::ReturnCode (*p9_pm_pss_init_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
