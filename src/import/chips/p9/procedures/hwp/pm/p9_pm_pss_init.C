@@ -36,6 +36,8 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_pss_init.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
 
 // -----------------------------------------------------------------------------
 // Function prototypes
@@ -310,14 +312,14 @@ fapi2::ReturnCode pm_pss_reset(
         FAPI_TRY(fapi2::getScom(i_target, PU_SPIPSS_ADC_STATUS_REG, l_data64));
 
         // ADC on-going complete
-        if (l_data64.getBit<0>() == 0)
+        if (l_data64.getBit<PU_SPIPSS_ADC_STATUS_REG_HWCTRL_ONGOING>() == 0)
         {
             FAPI_INF("All frames sent from ADC to the APSS device.");
             break;
         }
 
         // ADC error
-        FAPI_ASSERT(l_data64.getBit<7>() != 1,
+        FAPI_ASSERT(!l_data64.getBit<PU_SPIPSS_ADC_STATUS_REG_HWCTRL_FSM_ERR>(),
                     fapi2::PM_PSS_ADC_ERROR()
                     .set_CHIP(i_target)
                     .set_POLLCOUNT(l_pollcount),
@@ -328,7 +330,7 @@ fapi2::ReturnCode pm_pss_reset(
     }
 
     // Write attempted while Bridge busy
-    if(l_data64.getBit<5>() == 1)
+    if(l_data64.getBit<PU_SPIPSS_ADC_STATUS_REG_HWCTRL_WRITE_WHILE_FSM_BUSY_ERR>() == 1)
     {
         FAPI_INF("SPIP2S Write While Bridge Busy bit asserted. May cause "
                  "undefined bridge behavior. Will be cleared during reset");
@@ -360,7 +362,7 @@ fapi2::ReturnCode pm_pss_reset(
         }
 
         // P2S error
-        FAPI_ASSERT(l_data64.getBit<7>() != 1,
+        FAPI_ASSERT(!l_data64.getBit<PU_SPIPSS_P2S_STATUS_REG_FSM_ERR>(),
                     fapi2::PM_PSS_P2S_ERROR()
                     .set_CHIP(i_target)
                     .set_POLLCOUNT(l_pollcount),
@@ -370,19 +372,20 @@ fapi2::ReturnCode pm_pss_reset(
         fapi2::delay(l_pss_poll_interval_us * 1000, 1000);
     }
 
-    // write attempted while bridge busy
-    if (l_data64.getBit<5>() == 1)
-    {
-        FAPI_INF("SPIP2S Write While Bridge Busy bit asserted. "
-                 "Will be cleared with coming reset");
-    }
+    FAPI_ASSERT_NOEXIT(!l_data64.getBit<PU_SPIPSS_P2S_STATUS_REG_WRITE_WHILE_BRIDGE_BUSY_ERR>(),
+                       fapi2::PM_PSS_ADC_WRITE_WHILE_BUSY()
+                       .set_CHIP(i_target)
+                       .set_POLLCOUNT(l_pollcount),
+                       "SPIP2S Write While Bridge Busy bit asserted. Will be cleared with coming reset");
 
-    // Poll timeout
-    if (l_pollcount >= l_max_polls)
-    {
-        FAPI_INF("WARNING: SPI P2S did not go to idle in at least %d us. "
-                 "Reset of PSS macro is commencing anyway", l_pss_timeout_us);
-    }
+    FAPI_ASSERT_NOEXIT(l_pollcount < l_max_polls,
+                       fapi2::PM_PSS_ADC_TIMEOUT()
+                       .set_CHIP(i_target)
+                       .set_POLLCOUNT(l_pollcount)
+                       .set_MAXPOLLS(l_max_polls)
+                       .set_TIMEOUTUS(l_pss_timeout_us),
+                       "SPI P2S did not go to idle in at least % d us. "
+                       "Reset of PSS macro is commencing anyway", l_pss_timeout_us );
 
     //  ******************************************************************
     //     - Resetting both ADC and P2S bridge
@@ -391,7 +394,8 @@ fapi2::ReturnCode pm_pss_reset(
     FAPI_INF("Resetting P2S and ADC bridges.");
 
     l_data64.flush<0>();
-    l_data64.setBit<1>();
+    // Need to write 01
+    l_data64.setBit < PU_SPIPSS_ADC_RESET_REGISTER_HWCTRL + 1 > ();
 
     FAPI_TRY(fapi2::putScom(i_target, PU_SPIPSS_ADC_RESET_REGISTER, l_data64),
              "Error: Could not reset ADC bridge");
@@ -406,6 +410,6 @@ fapi2::ReturnCode pm_pss_reset(
              "Error: Could not clear the P2S reset register");
 
 fapi_try_exit:
-    FAPI_IMP("<< pm_pss_reset");
+    FAPI_IMP(" << pm_pss_reset");
     return fapi2::current_err;
 }
