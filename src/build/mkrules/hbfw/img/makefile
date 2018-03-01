@@ -175,7 +175,6 @@ Secure Boot Signing Config:\n\
     Signing utils subdir [${SIGNING_UTILS_DIR}]\n\
     Final signing dir    [${SIGNING_DIR}]\n\
     Development key dir  [${DEV_KEY_DIR}]\n\
-    Signing edition      [${SIGNING_TOOL_EDITION}]\n\
     Signing mode         [${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}]\n\
     Compile secureboot?  [${CONFIG_SECUREBOOT}]\n\
     Libs to preload      [${SIGNING_LIBS}]\n\

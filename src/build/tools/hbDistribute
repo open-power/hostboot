@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -186,10 +186,6 @@ echo "Secure Boot: Signing utils dir is ${SIGNING_UTILS_DIR}"
 # Point to the development signing keys
 export DEV_KEY_DIR="${SIGNING_BASE_DIR}/sb-signing-keys"
 echo "Secure Boot: Development keys dir is ${DEV_KEY_DIR}"
-
-# Force genPnorImages.pl to use the open signing tool
-export SIGNING_TOOL_EDITION="community";
-echo "Secure Boot: Signing tool edition is ${SIGNING_TOOL_EDITION}"
 
 # Dynamically check config file if secureboot enabled build occurred
 if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then

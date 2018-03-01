@@ -34,8 +34,6 @@ use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                  getSwSignatures getBinDataFromFile);
 use Getopt::Long qw(:config pass_through);
 
-use constant COMMUNITY => "community";
-
 # Hostboot base image constants for the hardware header portion of the
 # secureboot header
 use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
@@ -75,7 +73,6 @@ use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
                                           * VFS_MODULE_TABLE_ENTRY_SIZE;
 # Flag parameter string passed into signing tools
 # Note spaces before/after are critical.
-use constant LOCAL_SIGNING_FLAG => " -flag ";
 use constant OP_SIGNING_FLAG => " --flags ";
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
@@ -249,33 +246,6 @@ if ($secureboot)
     die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
 }
 
-my $openSigningTool = 0;
-my $SIGNING_TOOL_EDITION = $ENV{'SIGNING_TOOL_EDITION'};
-if($SIGNING_TOOL_EDITION eq COMMUNITY)
-{
-    $openSigningTool = 1;
-}
-
-### Local development signing
-# Requires naming convention of hw/sw keys in DEV_KEY_DIR
-my $SIGN_BUILD_PARAMS = "-skp ${DEV_KEY_DIR}/sw_key_a";
-
-# Key prefix used for current key siging of partitions (N/A for open edition)
-my $SIGN_PREFIX_PARAMS = "-hka ${DEV_KEY_DIR}/hw_key_a -hkb "
-            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c "
-            . "-skp ${DEV_KEY_DIR}/sw_key_a";
-
-# Key prefix used for secureboot key transition partition.
-# Default key transition to same keys.
-my $SIGN_SBKT_PREFIX_PARAMS =  $SIGN_PREFIX_PARAMS;
-if ($keyTransition{enabled})
-{
-    # Note: simply reordered the keys to create a pseudo production key.
-    $SIGN_SBKT_PREFIX_PARAMS =  "-hka ${DEV_KEY_DIR}/hw_key_c -hkb "
-            . "${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_a "
-            . "-skp ${DEV_KEY_DIR}/sw_key_a";
-}
-
 ### Open POWER signing
 my $OPEN_SIGN_REQUEST=
     "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
@@ -340,23 +310,19 @@ my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
 my %sb_hdrs = (
     DEFAULT => {
         flags =>  sprintf("0x%08X",$buildFlag),
-        prefix => $SIGN_PREFIX_PARAMS,
         file => "$bin_dir/$randPrefix.default.secureboot.hdr.bin"
     },
     SBE => {
         flags =>  sprintf("0x%08X",($buildFlag | $labSecurityOverrideFlag)),
-        prefix => $SIGN_PREFIX_PARAMS,
         file => "$bin_dir/$randPrefix.sbe.default.secureboot.hdr.bin"
     },
     SBKT => {
         outer => {
             flags => sprintf("0x%08X", $buildFlag | KEY_TRANSITION_FLAG),
-            prefix => $SIGN_PREFIX_PARAMS,
             file => "$bin_dir/$randPrefix.sbkt.outer.secureboot.hdr.bin"
         },
         inner => {
             flags => sprintf("0x%08X", $buildFlag),
-            prefix => $SIGN_SBKT_PREFIX_PARAMS,
             file => "$bin_dir/$randPrefix.sbkt.inner.secureboot.hdr.bin"
         }
     }
@@ -384,36 +350,9 @@ $SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
 $SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
 
-if($secureboot && !$openSigningTool)
+if ($build_all && $secureboot)
 {
-    # Generate each secureboot header file
-    foreach my $header (keys %sb_hdrs)
-    {
-        next if($header eq "SBKT" && !$key_transition);
-
-        # SBKT parition has 2 sections outer and inner, need to create both
-        if ($header eq "SBKT")
-        {
-            foreach my $section (keys %{$sb_hdrs{$header}})
-            {
-                run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{$section}{file}".
-                            LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{$section}{flags}".
-                            " $sb_hdrs{$header}{$section}{prefix}");
-            }
-        }
-        else
-        {
-            run_command("$SIGNING_DIR/prefix -good -of $sb_hdrs{$header}{file}".
-                        LOCAL_SIGNING_FLAG."$sb_hdrs{$header}{flags}".
-                        " $sb_hdrs{$header}{prefix}");
-        }
-    }
-
-    # Generate test containers once and limit to build phase
-    if ($build_all)
-    {
-        gen_test_containers();
-    }
+    gen_test_containers();
 }
 
 #Load PNOR Layout XML file
@@ -441,25 +380,6 @@ foreach my $binFilesCSV (@systemBinFiles)
 
     # Make sure provided files will fit in their sections
     checkSpaceConstraints(\%pnorLayout, \%binFiles, $testRun);
-}
-
-
-# Clean up temp header files
-foreach my $header (keys %sb_hdrs)
-{
-    if($header eq "SBKT")
-    {
-        foreach my $section (keys %{$sb_hdrs{$header}})
-        {
-            system("rm -f $sb_hdrs{$header}{$section}{file}");
-            die "Could not delete $sb_hdrs{$header}{$section}{file}" if $?;
-        }
-    }
-    else
-    {
-        system("rm -f $sb_hdrs{$header}{file}");
-        die "Could not delete $sb_hdrs{$header}{file}" if $?;
-    }
 }
 
 ################################################################################
@@ -589,7 +509,6 @@ sub manipulateImages
         }
 
         my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
-        my $secureboot_hdr =  $header->{file};
 
         my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
         my $componentId = convertEyecatchToCompId($eyeCatch);
@@ -717,56 +636,29 @@ sub manipulateImages
                                 run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
                             }
 
-                            if($openSigningTool)
-                            {
-                                run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
-                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
-                            }
-                            else
-                            {
-                                # @TODO RTC:183183 Remove when official signing
-                                # supported
-                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
-                            }
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
+                                . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                             run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
                         }
                         # Handle read-only protected payload
                         elsif ($eyeCatch eq "HBD")
                         {
-                            if($openSigningTool)
-                            {
-                                run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "--protectedPayload $bin_file.protected "
-                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
-                            }
-                            else
-                            {
-                                # @TODO RTC:183183 Remove when official signing
-                                # supported
-                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
-                            }
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "--protectedPayload $bin_file.protected "
+                                . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                             run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
                         }
                         else
                         {
-                            if($openSigningTool)
-                            {
-                                my $codeStartOffset = ($eyeCatch eq "HBB") ?
-                                    "--code-start-offset 0x00000180" : "";
-                                run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "$codeStartOffset "
-                                    . "--protectedPayload $bin_file "
-                                    . "--out $tempImages{HDR_PHASE}");
-                            }
-                            else
-                            {
-                                # @TODO RTC:183183 Remove when official signing
-                                # supported
-                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
-                            }
+                            my $codeStartOffset = ($eyeCatch eq "HBB") ?
+                                "--code-start-offset 0x00000180" : "";
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "$codeStartOffset "
+                                . "--protectedPayload $bin_file "
+                                . "--out $tempImages{HDR_PHASE}");
                         }
 
                         # Customize secureboot prefix header with container size,
@@ -794,39 +686,17 @@ sub manipulateImages
                     elsif($secureboot && $isNormalSecure)
                     {
                         $callerHwHdrFields{configure} = 1;
-                        if($openSigningTool)
-                        {
-                            run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $bin_file "
-                                . "--out $tempImages{HDR_PHASE}");
-                        }
-                        else
-                        {
-                            # @TODO RTC:183183 Remove when official signing
-                            # supported
-                            run_command("$SIGNING_DIR/build -good -if "
-                                . "$secureboot_hdr -of $tempImages{HDR_PHASE} -bin "
-                                . "$bin_file $SIGN_BUILD_PARAMS");
-                        }
+                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                            . "--protectedPayload $bin_file "
+                            . "--out $tempImages{HDR_PHASE}");
                     }
                     # Add non-secure version header
                     else
                     {
                         # Attach signature-less secure header for OpenPOWER builds
-                        if($openSigningTool)
-                        {
-                            run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $bin_file "
-                                . "--out $tempImages{HDR_PHASE}");
-                        }
-                        # @TODO RTC:183183 Remove when official signing supported
-                        else # attach the legacy header
-                        {
-                            run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
-                            run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
-                            run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
-                            run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
-                        }
+                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                            . "--protectedPayload $bin_file "
+                            . "--out $tempImages{HDR_PHASE}");
                     }
                 }
                 else
@@ -915,18 +785,9 @@ sub manipulateImages
                         if ($secureboot && $secureSupported)
                         {
                             $callerHwHdrFields{configure} = 1;
-                            if($openSigningTool)
-                            {
-                                run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "--protectedPayload $tempImages{TEMP_BIN} "
-                                    . "--out $tempImages{PAD_PHASE}");
-                            }
-                            else
-                            {
-                                # @TODO RTC:183183 Remove when official signing
-                                # supported
-                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
-                            }
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "--protectedPayload $tempImages{TEMP_BIN} "
+                                . "--out $tempImages{PAD_PHASE}");
                             setCallerHwHdrFields(\%callerHwHdrFields,
                                                  $tempImages{PAD_PHASE});
                         }
@@ -934,20 +795,9 @@ sub manipulateImages
                         else
                         {
                             # Attach signature-less secure header for OpenPOWER builds
-                            if($openSigningTool)
-                            {
-                                run_command("$CUR_OPEN_SIGN_REQUEST "
-                                    . "--protectedPayload $tempImages{TEMP_BIN} "
-                                    . "--out $tempImages{PAD_PHASE}");
-                            }
-                            # @TODO RTC:183183 Remove when official signing supported
-                            else # Attach legacy header
-                            {
-                                run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
-                                run_command("sha512sum $tempImages{TEMP_BIN} | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
-                                run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
-                                run_command("cat $tempImages{TEMP_BIN} >> $tempImages{PAD_PHASE}");
-                            }
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "--protectedPayload $tempImages{TEMP_BIN} "
+                                . "--out $tempImages{PAD_PHASE}");
                         }
                     }
                     # Corrupt section if user specified to do so, before ECC injection.
@@ -1192,18 +1042,27 @@ sub gen_test_containers
         PROTECTED_PAYLOAD => "$bin_dir/$randPrefix.test.protected_payload.bin"
     );
 
+    # Setup open signing for test image
+    my $header = $sb_hdrs{DEFAULT};
+
+    my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
+
+    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
+    my $componentId = "TESTCONT";
+    $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
+
     # Create a signed test container
     # name = secureboot_signed_container (no prefix in hb cacheadd)
     my $test_container = "$bin_dir/secureboot_signed_container";
     run_command("dd if=/dev/zero count=1 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{DEFAULT}{file} -of $test_container -bin $tempImages{TEST_CONTAINER_DATA} $SIGN_BUILD_PARAMS");
+    run_command("$CUR_OPEN_SIGN_REQUEST --protectedPayload $tempImages{TEST_CONTAINER_DATA} --out $test_container");
 
     # Create a signed test container with a hash page table
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
     run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
     $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
-    run_command("$SIGNING_DIR/build -good -if $sb_hdrs{DEFAULT}{file} -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{hashPageTable} $SIGN_BUILD_PARAMS");
+    run_command("$CUR_OPEN_SIGN_REQUEST --protectedPayload $tempImages{hashPageTable} --out $tempImages{PROTECTED_PAYLOAD}");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");
 
     # Clean up temp images
@@ -1238,27 +1097,17 @@ sub create_sb_key_transition_container
     # Gen 4K blob of random data
     run_command("dd if=/dev/urandom of=$tempImages{RAND_BLOB} count=1 bs=4k");
 
-    if($openSigningTool)
-    {
-        die "Key transition not allowed in $sign_mode mode" if ($OPEN_SIGN_KEY_TRANS_REQUEST eq "");
+    die "Key transition not allowed in $sign_mode mode" if ($OPEN_SIGN_KEY_TRANS_REQUEST eq "");
 
-        # Create a signed container with new production keys
-        run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
-            . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
-            . "--out $tempImages{PRD_KEY_FILE}");
-        # Sign new production key container with imprint keys
-        my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
-        run_command("$OPEN_SIGN_REQUEST ".$sbktComponentIdArg.OP_SIGNING_FLAG
-            . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
-            . "--out $o_file");
-    }
-    else
-    {
-        # Create a signed container with new production keys
-        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{inner}{file} -of $tempImages{PRD_KEY_FILE} -bin $tempImages{RAND_BLOB} $SIGN_BUILD_PARAMS");
-        # Sign new production key container with imprint keys
-        run_command("$SIGNING_DIR/build -good -if $sb_hdrs{SBKT}{outer}{file} -of $o_file -bin $tempImages{PRD_KEY_FILE} $SIGN_BUILD_PARAMS");
-    }
+    # Create a signed container with new production keys
+    run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
+        . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
+        . "--out $tempImages{PRD_KEY_FILE}");
+    # Sign new production key container with imprint keys
+    my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
+    run_command("$OPEN_SIGN_REQUEST ".$sbktComponentIdArg.OP_SIGNING_FLAG
+        . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
+        . "--out $o_file");
 
     # Clean up temp images
     foreach my $image (keys %tempImages)
