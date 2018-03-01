@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -189,7 +189,7 @@ group gIOXBFIR filter singlebit, cs_root_cause
     /** IOXBFIR[2]
      *  GCR_HANG_ERROR
      */
-    (rIOXBFIR, bit(2)) ? calloutXbusInterface;
+    (rIOXBFIR, bit(2)) ? calloutBusInterface_th_32perDay;
 
     /** IOXBFIR[3:7]
      *  spare
@@ -372,7 +372,7 @@ rule rIOELFIR
     IOELFIR & ~IOELFIR_MASK &  IOELFIR_ACT0 &  IOELFIR_ACT1;
 };
 
-group gIOELFIR filter singlebit, cs_root_cause
+group gIOELFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
 {
     /** IOELFIR[0]
      *  link0 trained
@@ -512,42 +512,42 @@ group gIOELFIR filter singlebit, cs_root_cause
     /** IOELFIR[52]
      *  link0 correctable array error
      */
-    (rIOELFIR, bit(52)) ? self_th_32perDay;
+    (rIOELFIR, bit(52)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[53]
      *  link1 correctable array error
      */
-    (rIOELFIR, bit(53)) ? self_th_32perDay;
+    (rIOELFIR, bit(53)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOELFIR, bit(54)) ? self_th_32perDay;
+    (rIOELFIR, bit(54)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOELFIR, bit(55)) ? self_th_32perDay;
+    (rIOELFIR, bit(55)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[56]
      *  link0 training failed
      */
-    (rIOELFIR, bit(56)) ? self_th_32perDay;
+    (rIOELFIR, bit(56)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[57]
      *  link1 training failed
      */
-    (rIOELFIR, bit(57)) ? self_th_32perDay;
+    (rIOELFIR, bit(57)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[58]
      *  link0 unrecoverable error
      */
-    (rIOELFIR, bit(58)) ? self_th_32perDay;
+    (rIOELFIR, bit(58)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[59]
      *  link1 unrecoverable error
      */
-    (rIOELFIR, bit(59)) ? self_th_32perDay;
+    (rIOELFIR, bit(59)) ? calloutBusInterface_th_32perDay;
 
     /** IOELFIR[60]
      *  link0 internal error
