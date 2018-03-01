@@ -31,8 +31,6 @@
 
 #include <target.H>
 
-#error "Preventing CI from running"
-
 namespace PLAT_TARGET
 {
 
