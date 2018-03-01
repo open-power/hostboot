@@ -6193,32 +6193,32 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[28]
      *  parser00 attn or X0evn link down
      */
-    (rPBIOEFIR, bit(28)) ? self_th_1;
+    (rPBIOEFIR, bit(28)) ? calloutBusInterface_xbus0_th_1;
 
     /** PBIOEFIR[29]
      *  parser01 attn or X0odd link down
      */
-    (rPBIOEFIR, bit(29)) ? self_th_1;
+    (rPBIOEFIR, bit(29)) ? calloutBusInterface_xbus0_th_1;
 
     /** PBIOEFIR[30]
      *  parser02 attn or X1evn link down
      */
-    (rPBIOEFIR, bit(30)) ? self_th_1;
+    (rPBIOEFIR, bit(30)) ? calloutBusInterface_xbus1_th_1;
 
     /** PBIOEFIR[31]
      *  parser03 attn or X1odd link down
      */
-    (rPBIOEFIR, bit(31)) ? self_th_1;
+    (rPBIOEFIR, bit(31)) ? calloutBusInterface_xbus1_th_1;
 
     /** PBIOEFIR[32]
      *  parser04 attn or X2evn link down
      */
-    (rPBIOEFIR, bit(32)) ? self_th_1;
+    (rPBIOEFIR, bit(32)) ? calloutBusInterface_xbus2_th_1;
 
     /** PBIOEFIR[33]
      *  parser05 attn or X2odd link down
      */
-    (rPBIOEFIR, bit(33)) ? self_th_1;
+    (rPBIOEFIR, bit(33)) ? calloutBusInterface_xbus2_th_1;
 
     /** PBIOEFIR[34:35]
      *  spare
@@ -6293,17 +6293,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[52]
      *  data outbnd switch int. err-links 01
      */
-    (rPBIOEFIR, bit(52)) ? chip_to_chip;
+    (rPBIOEFIR, bit(52)) ? calloutBusInterface_xbus0_th_1;
 
     /** PBIOEFIR[53]
      *  data outbnd switch int. err-links 23
      */
-    (rPBIOEFIR, bit(53)) ? chip_to_chip;
+    (rPBIOEFIR, bit(53)) ? calloutBusInterface_xbus1_th_1;
 
     /** PBIOEFIR[54]
      *  data outbnd switch int. err-links 45
      */
-    (rPBIOEFIR, bit(54)) ? chip_to_chip;
+    (rPBIOEFIR, bit(54)) ? calloutBusInterface_xbus2_th_1;
 
     /** PBIOEFIR[55]
      *  spare
@@ -6313,17 +6313,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     /** PBIOEFIR[56]
      *  data inbnd switch int. err-links 01
      */
-    (rPBIOEFIR, bit(56)) ? chip_to_chip;
+    (rPBIOEFIR, bit(56)) ? calloutBusInterface_xbus0_th_1;
 
     /** PBIOEFIR[57]
      *  data inbnd switch int. err-links 23
      */
-    (rPBIOEFIR, bit(57)) ? chip_to_chip;
+    (rPBIOEFIR, bit(57)) ? calloutBusInterface_xbus1_th_1;
 
     /** PBIOEFIR[58]
      *  data inbnd switch int. err-links 45
      */
-    (rPBIOEFIR, bit(58)) ? chip_to_chip;
+    (rPBIOEFIR, bit(58)) ? calloutBusInterface_xbus2_th_1;
 
     /** PBIOEFIR[59:61]
      *  spare

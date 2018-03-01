@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,13 @@
 actionclass calloutXbusInterface
 {
     funccall("calloutInterface_xbus");
+};
+
+/** Callout the XBUS interface, threshold 32 per day */
+actionclass calloutBusInterface_th_32perDay
+{
+    calloutXbusInterface;
+    threshold32pday;
 };
 
 /** Lane Repair: spare deployed */

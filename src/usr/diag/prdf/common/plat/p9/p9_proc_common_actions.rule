@@ -122,3 +122,24 @@ actionclass analyzeNPU0FIR
     analyze(gNPU0FIR);
 };
 
+/** Callout connected XBUS 0 interface on first occurrence */
+actionclass calloutBusInterface_xbus0_th_1
+{
+    funccall("calloutBusInterface_XBUS0");
+    threshold1;
+};
+
+/** Callout connected XBUS 1 interface on first occurrence */
+actionclass calloutBusInterface_xbus1_th_1
+{
+    funccall("calloutBusInterface_XBUS1");
+    threshold1;
+};
+
+/** Callout connected XBUS 2 interface on first occurrence */
+actionclass calloutBusInterface_xbus2_th_1
+{
+    funccall("calloutBusInterface_XBUS2");
+    threshold1;
+};
+
