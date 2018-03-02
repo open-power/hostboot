@@ -488,8 +488,7 @@ namespace TARGETING
         #undef TARG_FN
     }
 
-    void AttrRP::getNodeId(const Target* i_pTarget,
-                           NODE_ID& o_nodeId) const
+    void AttrRP::getNodeId(const Target* i_pTarget, NODE_ID& o_nodeId) const
     {
         #define TARG_FN "getNodeId"
 
@@ -526,57 +525,53 @@ namespace TARGETING
               break;
            }
         }
+
         #undef TARG_FN
     }
 
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const Target* i_pTarget)
     {
-        #define TARG_FN "translateAddr(..., Target*)"
-//        TARG_ENTER(); // Disabled due to number of traces created
-
-        NODE_ID l_nodeId = NODE0;
-
+        void* o_pTransAddr = nullptr;
         if(i_pTarget != NULL)
         {
+            NODE_ID l_nodeId = NODE0;
             getNodeId(i_pTarget, l_nodeId);
+            o_pTransAddr =  translateAddr(i_pAddress, l_nodeId);
         }
-
-        void* l_address = translateAddr(i_pAddress, l_nodeId);
-
-//        TARG_EXIT(); // Disabled due to number of traces created
-        #undef TARG_FN
-
-        return l_address;
+        return o_pTransAddr;
     }
 
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const TARGETING::NODE_ID i_nodeId)
     {
-        #define TARG_FN "translateAddr(..., NODE_ID)"
-//        TARG_ENTER(); // Disabled due to number of traces created
-
-        void* l_address = NULL;
-
-        for (size_t i = 0; i < iv_nodeContainer[i_nodeId].sectionCount; ++i)
+        void* l_address = nullptr;
+        do
         {
-            if ((iv_nodeContainer[i_nodeId].pSections[i].vmmAddress +
-                 iv_nodeContainer[i_nodeId].pSections[i].size) >=
-                reinterpret_cast<uint64_t>(i_pAddress))
+            if (i_nodeId >= AttrRP::INVALID_NODE_ID)
             {
-                l_address = reinterpret_cast<void*>(
-                        iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
-                        reinterpret_cast<uint64_t>(i_pAddress) -
-                        iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
+                TRACFCOMP(g_trac_targeting, "ERROR: invalid nodeid=%d"
+                        " passed to translateAddr", i_nodeId);
                 break;
             }
-        }
+
+            for (size_t i = 0; i < iv_nodeContainer[i_nodeId].sectionCount; ++i)
+            {
+                if ((iv_nodeContainer[i_nodeId].pSections[i].vmmAddress +
+                     iv_nodeContainer[i_nodeId].pSections[i].size) >=
+                    reinterpret_cast<uint64_t>(i_pAddress))
+                {
+                    l_address = reinterpret_cast<void*>(
+                            iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
+                            reinterpret_cast<uint64_t>(i_pAddress) -
+                            iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
+                    break;
+                }
+            }
+        } while (0);
 
         TRACDCOMP(g_trac_targeting, "Translated 0x%p to 0x%p",
                   i_pAddress, l_address);
-
-//        TARG_EXIT(); // Disabled due to number of traces created
-        #undef TARG_FN
 
         return l_address;
     }

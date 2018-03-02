@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,11 +69,14 @@ namespace PLAT
  */
 namespace PROPERTIES
 {
-#ifdef __HOSTBOOT_MODULE
+#if defined(__HOSTBOOT_RUNTIME) //HBRT only
+    static const bool MULTINODE_AWARE = true;
+#elif defined(__HOSTBOOT_MODULE) //HB IPL only
     static const bool MULTINODE_AWARE = false;
-#else
+#else //FSP only
     static const bool MULTINODE_AWARE = true;
 #endif
+
 }
 
 }
