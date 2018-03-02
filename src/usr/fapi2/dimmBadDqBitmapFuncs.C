@@ -78,14 +78,12 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
         TARGETING::ATTR_MODEL_type l_procModel =
             l_masterProc->getAttr<TARGETING::ATTR_MODEL>();
 
-        // Get the DIMM
+        // Get all functional DIMMs
         TargetHandleList l_dimmList;
+        getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM );
 
         if ( TARGETING::MODEL_CUMULUS == l_procModel )
         {
-            // Get all functional DIMMs
-            getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM );
-
             // Find the DIMM with the correct MBA port/dimm
             uint8_t l_port = 0;
             uint8_t l_dimm = 0;
@@ -113,14 +111,19 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
         }
         else if ( TARGETING::MODEL_NIMBUS == l_procModel )
         {
-            // Get all connected DIMMs, even nonfunctioning ones.
-            getChildAffinityTargets( l_dimmList, l_trgt, CLASS_NA, TYPE_DIMM,
-                                     false );
-            o_dimmTrgt = l_dimmList[i_dimm];
-
-            // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, o_dimmTrgt,
-                                  o_dqBitmap );
+            for ( auto &dimmTrgt : l_dimmList )
+            {
+                uint32_t l_pos = dimmTrgt->getAttr<ATTR_FAPI_POS>() %
+                                 mss::MAX_DIMM_PER_PORT;
+                if ( l_pos == i_dimm )
+                {
+                    o_dimmTrgt = dimmTrgt;
+                    // Get the Bad DQ bitmap by querying ATTR_BAD_DQ_BITMAP.
+                    l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP,
+                                          o_dimmTrgt, o_dqBitmap );
+                    break;
+                }
+            }
         }
         else
         {
