@@ -695,11 +695,10 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
     const uint8_t ECC_DQ_BYTE_NUMBER_INDEX = 8;
     const uint8_t ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE8 = 0x08;
     size_t MEM_BUS_WIDTH_SIZE = 0x01;
+    uint8_t *l_eccBits = static_cast<uint8_t*>(malloc(MEM_BUS_WIDTH_SIZE));
 
     do
     {
-        uint8_t *l_eccBits = static_cast<uint8_t*>(malloc(MEM_BUS_WIDTH_SIZE));
-
         l_errl = deviceRead( i_dimm,
                 l_eccBits,
                 MEM_BUS_WIDTH_SIZE,
@@ -728,6 +727,12 @@ errlHndl_t __dimmUpdateDqBitmapEccByte(
             }
         }
     }while(0);
+
+    if ( l_eccBits != nullptr )
+    {
+        free( l_eccBits );
+        l_eccBits = nullptr;
+    }
 
     return l_errl;
 }
@@ -1222,6 +1227,9 @@ ReturnCode fapiAttrGetBadDqBitmap(
     errlHndl_t l_errl = nullptr;
     TARGETING::TargetHandle_t l_dimmTarget = nullptr;
 
+    uint8_t * l_badDqData =
+        static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
+
     do
     {
         l_errl = getTargetingTarget( i_dimmFapiTarget, l_dimmTarget );
@@ -1244,9 +1252,6 @@ ReturnCode fapiAttrGetBadDqBitmap(
                       "attributes" );
             break;
         }
-
-        uint8_t * l_badDqData =
-            static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
 
         l_errl = deviceRead(l_dimmTarget, l_badDqData,
                             DIMM_BAD_DQ_SIZE_BYTES,
@@ -1363,6 +1368,12 @@ ReturnCode fapiAttrGetBadDqBitmap(
 
     }while(0);
 
+    if ( l_badDqData != nullptr )
+    {
+        free( l_badDqData );
+        l_badDqData = nullptr;
+    }
+
     return l_rc;
 }
 
@@ -1376,7 +1387,8 @@ ReturnCode fapiAttrSetBadDqBitmap(
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
     TARGETING::TargetHandle_t l_dimmTarget = nullptr;
-
+    uint8_t * l_badDqData =
+        static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
     do
     {
         l_errl = getTargetingTarget(i_dimmFapiTarget, l_dimmTarget);
@@ -1507,9 +1519,6 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         // We need to make sure the rest of the data in VPD beyond the bad dq
         // bitmap is unchanged.
-        uint8_t * l_badDqData =
-            static_cast<uint8_t*>( malloc(DIMM_BAD_DQ_SIZE_BYTES) );
-
         l_errl = deviceRead(l_dimmTarget, l_badDqData,
                             DIMM_BAD_DQ_SIZE_BYTES,
                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA));
@@ -1559,6 +1568,12 @@ ReturnCode fapiAttrSetBadDqBitmap(
         }
 
     }while(0);
+
+    if ( l_badDqData != nullptr )
+    {
+        free( l_badDqData );
+        l_badDqData = nullptr;
+    }
 
     return l_rc;
 }
