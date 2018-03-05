@@ -40,6 +40,7 @@
 #include <secureboot/containerheader.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/header.H>
+#include <sys/task.h>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -72,6 +73,9 @@ using namespace PNOR;
  */
 void* secure_wait_for_message( void* unused )
 {
+    // Mark task as an independent daemon so if it crashes, Hostboot will
+    // terminate
+    (void)task_detach();
     TRACUCOMP(g_trac_pnor, "wait_for_message> " );
     Singleton<SPnorRP>::instance().waitForMessage();
     return NULL;
