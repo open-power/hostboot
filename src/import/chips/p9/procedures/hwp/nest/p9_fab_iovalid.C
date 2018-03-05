@@ -852,6 +852,10 @@ p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINK_DELAY, i_target, l_a_agg_link_delay),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINK_DELAY");
 
+    // Add delay for dd1.1+ procedure to compensate for lack of lane lock polls
+    FAPI_TRY(fapi2::delay(100000000, 1000000),
+             "Error from delay");
+
     for (uint8_t l_link_id = 0; l_link_id < P9_FBC_UTILS_MAX_X_LINKS; l_link_id++)
     {
         if (l_x_en[l_link_id])
