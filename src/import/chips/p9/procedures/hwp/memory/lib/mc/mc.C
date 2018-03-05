@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_TRY(mrw_power_control_requested(l_pwr_cntrl), "Error in set_pwr_cntrl_reg");
-    FAPI_TRY(mss::getScom(i_target, MCA_MBARPC0Q, l_data), "Error in set_pwr_cntrl_reg");
+    FAPI_TRY(read_mbarpc0(i_target, l_data));
 
     l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(MAXALL_MINALL);
 
@@ -117,7 +117,7 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     l_data.insertFromRight<TT::MIN_DOMAIN_REDUCTION_TIME, TT::MIN_DOMAIN_REDUCTION_TIME_LEN>
     (MIN_DOMAIN_REDUCTION_TIME);
 
-    FAPI_TRY(mss::putScom(i_target, MCA_MBARPC0Q, l_data), "Error in set_pwr_cntrl_reg" );
+    FAPI_TRY(write_mbarpc0(i_target, l_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -138,7 +138,7 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_tar
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_TRY(mrw_power_control_requested(l_str_enable), "Error in set_pwr_cntrl_reg");
-    FAPI_TRY(mss::getScom(i_target, MCA_MBASTR0Q, l_data), "Error in set_pwr_cntrl_reg");
+    FAPI_TRY(read_mbastr0(i_target, l_data));
 
     //Write bit if STR should be enabled
     switch (l_str_enable)
@@ -162,7 +162,7 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_tar
 
     l_data.insertFromRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>(ENTER_STR_TIME);
 
-    FAPI_TRY(mss::putScom(i_target, MCA_MBASTR0Q, l_data), "Error in set_str_reg" );
+    FAPI_TRY(write_mbastr0(i_target, l_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:

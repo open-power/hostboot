@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/dimm/kind.H>
+#include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 
 namespace mss
@@ -77,6 +78,10 @@ class mcTraits<fapi2::TARGET_TYPE_MCA>
     public:
         enum
         {
+            // Register definitions
+            MBARPC0 = MCA_MBARPC0Q,
+            MBASTR0 = MCA_MBASTR0Q,
+
             SLOT0_VALID = MCS_PORT02_MCP0XLT0_SLOT0_VALID,
             SLOT0_ROW15_VALID = MCS_PORT02_MCP0XLT0_SLOT0_ROW15_VALID,
             SLOT0_M1_VALID = MCS_PORT02_MCP0XLT0_SLOT0_M1_VALID,
@@ -182,6 +187,194 @@ enum
 
 namespace mc
 {
+
+///
+/// @brief Reads the contents of the MBARPC0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode read_mbarpc0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    o_data = 0;
+
+    FAPI_TRY( mss::getScom(i_target, TT::MBARPC0, o_data ), "%s failed to read MBARPC0 regiser", mss::c_str(i_target));
+    FAPI_DBG("%s MBARPC0 has data 0x%016lx", mss::c_str(i_target), o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the contents of the MBARPC0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode write_mbarpc0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::MBARPC0, i_data ), "%s failed to write MBARPC0 regiser", mss::c_str(i_target));
+    FAPI_DBG("%s MBARPC0 has data 0x%016lx", mss::c_str(i_target), i_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the power control enable bit
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void set_power_control_min_max_domains_enable( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    FAPI_DBG("set_power_control_min_max_domains_enable to %d", i_state);
+    io_data.writeBit<TT::MIN_MAX_DOMAINS_ENABLE>(i_state == mss::states::ON);
+}
+
+///
+/// @brief Gets the power control enable bit
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_power_control_min_max_domains_enable( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::MIN_MAX_DOMAINS_ENABLE>() ? mss::states::ON : mss::states::OFF;
+    FAPI_DBG("get_power_control_min_max_domains_enable to %d", o_state, TT::MIN_DOMAIN_REDUCTION_ENABLE);
+}
+
+///
+/// @brief Sets the power control min max domains
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_value the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void set_power_control_min_max_domains( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    FAPI_DBG("set_power_control_min_max_domains to %d", i_value);
+    io_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(i_value);
+}
+
+///
+/// @brief Gets the power control min max domains
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_value the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_power_control_min_max_domains( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(o_value);
+    FAPI_DBG("get_power_control_min_max_domains to %d", o_value);
+}
+
+///
+/// @brief Sets the power control minimum domain reduction enable
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void set_power_control_min_domain_reduction_enable( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    io_data.writeBit<TT::MIN_DOMAIN_REDUCTION_ENABLE>(i_state == mss::states::ON);
+    FAPI_DBG("set_power_control_min_domain_reduction_enable to %d 0x%016lx", i_state, io_data);
+}
+
+///
+/// @brief Gets the power control minimum domain reduction enable
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_power_control_min_domain_reduction_enable( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::MIN_DOMAIN_REDUCTION_ENABLE>() ? mss::states::ON : mss::states::OFF;
+    FAPI_DBG("get_power_control_min_domain_reduction_enable to %d", o_state);
+}
+
+///
+/// @brief Reads the contents of the MBASTR0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode read_mbastr0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    o_data = 0;
+
+    FAPI_TRY( mss::getScom(i_target, TT::MBASTR0, o_data ), "%s failed to read MBASTR0 regiser", mss::c_str(i_target));
+    FAPI_DBG("%s MBASTR0 has data 0x%016lx", mss::c_str(i_target), o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the contents of the MBASTR0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the register data
+/// @return fapi2::fapi2_rc_success if ok
+///
+template< fapi2::TargetType T, typename TT = mcTraits<T> >
+inline fapi2::ReturnCode write_mbastr0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::MBASTR0, i_data ), "%s failed to write MBASTR0 regiser", mss::c_str(i_target));
+    FAPI_DBG("%s MBASTR0 has data 0x%016lx", mss::c_str(i_target), i_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the self time refresh enable bit
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] i_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void set_self_time_refresh_enable( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    FAPI_DBG("set_power_control_min_domain_reduction_enable to %d", i_state);
+    io_data.writeBit<TT::CFG_STR_ENABLE>(i_state == mss::states::ON);
+}
+
+///
+/// @brief Sets the self time refresh enable bit
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to mcTraits<T>
+/// @param[in] i_data the value of the register
+/// @param[out] o_state the state to write into the enable
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = mcTraits<T> >
+inline void get_self_time_refresh_enable( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<TT::CFG_STR_ENABLE>() ? mss::states::ON : mss::states::OFF;
+    FAPI_DBG("get_power_control_min_domain_reduction_enable to %d", o_state);
+}
 
 ///
 /// @brief set the PWR CNTRL register
