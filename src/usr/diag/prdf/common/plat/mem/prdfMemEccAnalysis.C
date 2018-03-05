@@ -72,8 +72,7 @@ uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     #ifdef __HOSTBOOT_RUNTIME
 
     // Dynamically deallocate the rank.
-    o_rc = MemDealloc::rank<T>( i_chip, rank );
-    if ( SUCCESS != o_rc )
+    if ( SUCCESS != MemDealloc::rank<T>( i_chip, rank ) )
     {
         PRDF_ERR( PRDF_FUNC "MemDealloc::rank<T>(0x%08x,m%ds%d) failed",
                   i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
@@ -203,8 +202,7 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
         #ifdef __HOSTBOOT_RUNTIME
 
         // Dynamically deallocate the port.
-        o_rc = MemDealloc::port<TYPE_MCA>( i_chip );
-        if ( SUCCESS != o_rc )
+        if ( SUCCESS != MemDealloc::port<TYPE_MCA>( i_chip ) )
         {
             PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_MCA>(0x%08x) failed",
                       i_chip->getHuid() );
@@ -603,8 +601,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     if ( i_isHard )
     {
         // Dynamically deallocate the page.
-        o_rc = MemDealloc::page<T>( i_chip, i_addr );
-        if ( SUCCESS != o_rc )
+        if ( SUCCESS != MemDealloc::page<T>( i_chip, i_addr ) )
         {
             PRDF_ERR( PRDF_FUNC "MemDealloc::page(0x%08x) failed",
                       i_chip->getHuid() );
