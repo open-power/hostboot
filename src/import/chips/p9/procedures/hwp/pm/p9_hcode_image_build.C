@@ -2418,9 +2418,9 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         //------------------------------ OCC P-State Table Allocation ------------------------------
 
         //  The PPMR offset is from the begining --- which is the ppmrHeader
-        io_ppmrHdr.g_ppmr_pstables_offset    =   pPpmr->pstateTable - pPpmr->ppmrHeader;;
-        io_ppmrHdr.g_ppmr_pstables_length    =   sizeof(GeneratedPstateInfo);
-        FAPI_INF( "PPMR GEN PSTABLE 0x%08x", sizeof(GeneratedPstateInfo) );
+        io_ppmrHdr.g_ppmr_pstables_offset    =   pPpmr->pstateTable - pPpmr->ppmrHeader;
+        io_ppmrHdr.g_ppmr_pstables_length    =   PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE;
+        FAPI_INF( "PPMR GEN PSTABLE %u(KB)",PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE);
 
         //------------------------------ Copying WOF Table ----------------------------------------------
 

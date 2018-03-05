@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -631,8 +631,7 @@ typedef struct
     uint8_t  ppmr_reserved0[PGPE_IMAGE_RESERVE_SIZE];
     uint8_t  occParmBlock[sizeof(OCCPstateParmBlock)];  // PPMR + 128KB
     uint8_t  occParmBlockReserve[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE - sizeof(OCCPstateParmBlock)];
-    uint8_t  pstateTable[sizeof(GeneratedPstateInfo)];  // PPMR + 144KB
-    uint8_t  pstateTableReserve[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE - sizeof(GeneratedPstateInfo)];
+    uint8_t  pstateTable[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE];  // PPMR + 144KB
     uint8_t  ppmr_reserved1[WOF_TABLE_RESERVE];
     uint8_t  wofTableSize[OCC_WOF_TABLES_SIZE]; //WOF Tables located ar PPMR base + 768KB
 } PPMRLayout_t;
