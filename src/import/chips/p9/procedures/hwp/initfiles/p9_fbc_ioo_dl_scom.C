@@ -33,6 +33,7 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x0F = 0x0F;
 constexpr uint64_t literal_0xF = 0xF;
 constexpr uint64_t literal_0x0 = 0x0;
+constexpr uint64_t literal_0x00 = 0x00;
 constexpr uint64_t literal_0xE = 0xE;
 constexpr uint64_t literal_0x5 = 0x5;
 constexpr uint64_t literal_0b0001111 = 0b0001111;
@@ -61,6 +62,9 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, TGT0, l_TGT0_ATTR_PROC_FABRIC_LINK_ACTIVE));
         uint64_t l_def_OBUS_FBC_ENABLED = ((l_TGT0_ATTR_OPTICS_CONFIG_MODE == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
                                            && l_TGT0_ATTR_PROC_FABRIC_LINK_ACTIVE);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW419022_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW419022, TGT1, l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022));
+        uint64_t l_def_DLL_DD10_TRAIN = (l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022 != literal_0x00);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
@@ -153,14 +157,48 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 }
             }
 
-            l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0xE );
-            l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0xE );
+            if (( ! l_def_DLL_DD10_TRAIN))
+            {
+                constexpr auto l_PB_IOO_LL0_CONFIG_PHY_TRAIN_A_ADJ_USE4 = 0x2;
+                l_scom_buffer.insert<0, 2, 62, uint64_t>(l_PB_IOO_LL0_CONFIG_PHY_TRAIN_A_ADJ_USE4 );
+            }
+
+            if (( ! l_def_DLL_DD10_TRAIN))
+            {
+                constexpr auto l_PB_IOO_LL0_CONFIG_PHY_TRAIN_B_ADJ_USE12 = 0x2;
+                l_scom_buffer.insert<2, 2, 62, uint64_t>(l_PB_IOO_LL0_CONFIG_PHY_TRAIN_B_ADJ_USE12 );
+            }
+
+            if (( ! l_def_DLL_DD10_TRAIN))
+            {
+                l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0x0 );
+            }
+            else if (l_def_DLL_DD10_TRAIN)
+            {
+                l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0xE );
+            }
+
+            if (( ! l_def_DLL_DD10_TRAIN))
+            {
+                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0x0 );
+            }
+            else if (l_def_DLL_DD10_TRAIN)
+            {
+                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0xE );
+            }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
             {
-                l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x0 );
+                if (( ! l_def_DLL_DD10_TRAIN))
+                {
+                    l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0xF );
+                }
+                else if (l_def_DLL_DD10_TRAIN)
+                {
+                    l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x0 );
+                }
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x901080cull, l_scom_buffer));
