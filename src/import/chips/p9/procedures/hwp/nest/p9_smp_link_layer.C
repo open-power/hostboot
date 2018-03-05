@@ -201,7 +201,7 @@ p9_smp_link_layer_lock_lanes(
             {
                 // set PHY TX lane address, start at:
                 // - PHY lane 0 for even (work up)
-                // - PHY lane 23 for odd (work down)
+                // - PHY lane 23 for odd (work down) DD1.0
                 uint64_t l_phy_tx_mode1_pl_addr = OBUS_TX0_TXPACKS0_SLICE0_TX_MODE1_PL;
 
                 if (i_even)
