@@ -141,41 +141,71 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
                            l_hw419022),
              "Error from FAPI_ATTR_GET (fapi2::ATTR_CHIP_EC_FEATURE_HW419022)");
 
-    // perform DL training workaround
-    if (l_hw419022)
+    // Cable CDR lock
+    // determine link train capabilities (half/full)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
+                           i_tgt,
+                           l_link_train),
+             "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+    l_even = (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) ||
+             (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY);
+
+    l_odd = (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) ||
+            (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY);
+
+    // set TX lane control to force send of TS1 pattern
+    if (l_even)
     {
-        // determine link train capabilities (half/full)
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
-                               i_tgt,
-                               l_link_train),
-                 "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+        FAPI_TRY(fapi2::putScom(i_tgt,
+                                OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL,
+                                0x1111111111100000ULL),
+                 "Error from putScom (OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL)");
+    }
 
-        l_even = (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) ||
-                 (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY);
+    if (l_odd)
+    {
+        FAPI_TRY(fapi2::putScom(i_tgt,
+                                OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL,
+                                0x1111111111100000ULL),
+                 "Error from putScom (OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL)");
+    }
 
-        l_odd = (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) ||
-                (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY);
+    // Delay to compensate for active links
+    FAPI_TRY(fapi2::delay(100000000, 1000000),
+             "Error from A-link retimer delay");
 
-        // set TX lane control to force send of TS1 pattern
+    // DD1.1+ HW Start training sequence
+    if(!l_hw419022)
+    {
+
+        l_data.flush<0>();
+
+        // clear TX lane control overrides
         if (l_even)
         {
+            l_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+
             FAPI_TRY(fapi2::putScom(i_tgt,
                                     OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL,
-                                    0x1111111111100000ULL),
+                                    0x0000000000000000ULL),
                      "Error from putScom (OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL)");
         }
 
         if (l_odd)
         {
+            l_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+
             FAPI_TRY(fapi2::putScom(i_tgt,
                                     OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL,
-                                    0x1111111111100000ULL),
+                                    0x0000000000000000ULL),
                      "Error from putScom (OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL)");
         }
 
-        // Delay to compensate for active links
-        FAPI_TRY(fapi2::delay(100000000, 1000000),
-                 "Error from A-link retimer delay");
+        // Start phy training
+        FAPI_TRY(fapi2::putScom(i_tgt, OBUS_LL0_IOOL_CONTROL, l_data),
+                 "Error writing DLL control register (0x%08X)!",
+                 OBUS_LL0_IOOL_CONTROL);
     }
 
 fapi_try_exit:
