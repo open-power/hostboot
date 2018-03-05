@@ -355,6 +355,13 @@ fapi2::ReturnCode p9_l3err_extract(
     o_err_data.hashed_real_address_45_56 = real_address45_56;
     o_err_data.cache_read_address = err_stat_ra;
 
+    // Reset error status register for next capture
+    FAPI_DBG("Clearing error status register for next capture");
+
+    FAPI_TRY(fapi2::putScom(i_target, EX_ED_RD_ERR_STAT_REG0, 0x0000000000000000),
+             "Error from clearing L3 error status register (L3_eDRAM_RD_ERR_STAT_Register_0)");
+
+
 fapi_try_exit:
     // mark HWP exit
     FAPI_DBG("Exiting ...");
