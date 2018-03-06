@@ -240,7 +240,6 @@ namespace SBE
                 break;
             }
 
-
             // Get the Master Proc Chip Target for comparisons later
             TARGETING::Target* masterProcChipTargetHandle = NULL;
             err = tS.queryMasterProcChipTargetHandle(
@@ -355,11 +354,18 @@ namespace SBE
                 /**********************************************/
                 /*  Perform Update Actions For This Target    */
                 /**********************************************/
-                // Force an update if necessary
-                if (sbeState.mvpdSbKeyword.flags & FORCE_UPDATE_FLAG_MASK)
+                // Force an update of SEEPROM 0 or SEEPROM 1 if SB keyword
+                // flags is requesting an update for that particular seeprom
+                if (((sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY) &&
+                (sbeState.mvpdSbKeyword.flags & SEEPROM_0_FORCE_UPDATE_MASK)) ||
+                    ((sbeState.seeprom_side_to_update == EEPROM::SBE_BACKUP) &&
+                (sbeState.mvpdSbKeyword.flags & SEEPROM_1_FORCE_UPDATE_MASK)))
                 {
+                   // The DO_UPDATE flag alone might not be enough to
+                   // force an update, setting UPDATE_SBE flag as well
+                   // because I know that performUpdateActions checks that flag
                    sbeState.update_actions = static_cast<sbeUpdateActions_t>
-                                         (sbeState.update_actions | DO_UPDATE);
+                             (sbeState.update_actions | DO_UPDATE | UPDATE_SBE);
                 }
 
                 if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
