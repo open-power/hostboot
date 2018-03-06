@@ -427,6 +427,32 @@ errlHndl_t call_host_coalesce_host( )
     return l_errl;
 }
 
+static void set_is_master_drawer(TARGETING::EntityPath *master)
+{
+    // Figure out which node we are running on
+    TARGETING::Target *mproc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(mproc);
+
+    TARGETING::EntityPath epath =
+        mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+    const TARGETING::EntityPath::PathElement pe =
+        epath.pathElementOfType(TARGETING::TYPE_NODE);
+
+    const TARGETING::EntityPath::PathElement mpe =
+        master->pathElementOfType(TARGETING::TYPE_NODE);
+
+    if (pe.instance == mpe.instance)
+    {
+        // Current node is master, set IS_MASTER_DRAWER
+        TARGETING::TargetHandleList l_nodelist;
+        getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_FUNCTIONAL);
+        assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
+        l_nodelist[0]->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(1);
+    }
+}
+
 //******************************************************************************
 // host_sys_fab_iovalid_processing function
 //******************************************************************************
@@ -451,6 +477,12 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Master node %s List size = %d bytes Drawer count = %d",
                 ptr->toString(), drawerData->size, drawerCount);
+
+        if (drawerCount > 0)
+        {
+            // master node will be first node listed (lowest functional node)
+            set_is_master_drawer(ptr);
+        }
 
         // get FABRIC_TO_PHYSICAL_NODE_MAP
         TARGETING::Target * sys = NULL;

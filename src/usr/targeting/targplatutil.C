@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 // TARG
 #include <targeting/targplatutil.H>
 #include <targeting/common/predicates/predicates.H>
+#include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <config.h>
 #include <algorithm>
@@ -108,6 +109,18 @@ void getMasterNodeTarget(Target*& o_masterNodeTarget)
     }
 
     o_masterNodeTarget = masterNodeTarget;
+}
+
+bool isCurrentMasterNode()
+{
+    // Get node target
+    TARGETING::TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+    assert(l_nodelist.size() == 1, "ERROR, only expect one node.");
+    auto isMaster = l_nodelist[0]->getAttr<TARGETING::ATTR_IS_MASTER_DRAWER>();
+
+    return (isMaster == 1);
 }
 
 // return the sensor number from the passed in target
