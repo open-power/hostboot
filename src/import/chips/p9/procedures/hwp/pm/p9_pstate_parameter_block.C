@@ -3601,7 +3601,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 {
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::vdmData_t l_vdmBuf;
-    uint8_t    j                = 0;
+    uint8_t    selected_eq      = 0;
     uint8_t    bucket_id        = 0;
     uint8_t    version_id       = 0;
     const uint16_t VDM_VOLTAGE_IN_MV = 512;
@@ -3638,23 +3638,23 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         // -----------------------------------------------------------------
         l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
 
-        for (j = 0; j < l_eqChiplets.size(); j++)
+        for (selected_eq = 0; selected_eq < l_eqChiplets.size(); selected_eq++)
         {
-            uint8_t l_chipNum = 0xFF;
+            uint8_t l_chipletNum = 0xFF;
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_eqChiplets[j], l_chipNum));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_eqChiplets[selected_eq], l_chipletNum));
 
-            FAPI_INF("Chip Number => %u", l_chipNum);
+            FAPI_INF("Chiplet Number => %u", l_chipletNum);
 
             // clear out buffer to known value before calling fapiGetMvpdField
             memset(&l_vdmBuf, 0, sizeof(l_vdmBuf));
 
-            FAPI_TRY(p9_pm_get_poundw_bucket(l_eqChiplets[j], l_vdmBuf));
+            FAPI_TRY(p9_pm_get_poundw_bucket(l_eqChiplets[selected_eq], l_vdmBuf));
 
             bucket_id = l_vdmBuf.bucketId;
             version_id = l_vdmBuf.version;
 
-            FAPI_INF("#W chiplet = %u bucket id = %u", l_chipNum, bucket_id, version_id);
+            FAPI_INF("#W chiplet = %u bucket id = %u", l_chipletNum, bucket_id, version_id);
 
             //if we match with the bucket id, then we don't need to continue
             if (i_poundv_bucketId == bucket_id)
@@ -3775,6 +3775,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_ASSERT_NOEXIT(b_tdp_ac,
                                fapi2::PSTATE_PB_POUND_W_TDP_IAC_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
+                               .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                .set_NOMINAL_TDP_IAC(o_data->poundw[NOMINAL].ivdd_tdp_dc_current_10ma)
                                .set_POWERSAVE_TDP_IAC(o_data->poundw[POWERSAVE].ivdd_tdp_dc_current_10ma)
                                .set_TURBO_TDP_IAC(o_data->poundw[TURBO].ivdd_tdp_dc_current_10ma)
@@ -3783,6 +3784,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_ASSERT_NOEXIT(b_tdp_dc,
                                fapi2::PSTATE_PB_POUND_W_TDP_IDC_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
+                               .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                .set_NOMINAL_TDP_IDC(o_data->poundw[NOMINAL].ivdd_tdp_dc_current_10ma)
                                .set_POWERSAVE_TDP_IDC(o_data->poundw[POWERSAVE].ivdd_tdp_dc_current_10ma)
                                .set_TURBO_TDP_IDC(o_data->poundw[TURBO].ivdd_tdp_dc_current_10ma)
@@ -3840,6 +3842,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_ASSERT_NOEXIT(false,
                                fapi2::PSTATE_PB_POUND_W_INVALID_VID_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
+                               .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                .set_NOMINAL_VID_COMPARE_IVID_VALUE(o_data->poundw[NOMINAL].vdm_vid_compare_ivid)
                                .set_POWERSAVE_VID_COMPARE_IVID_VALUE(o_data->poundw[POWERSAVE].vdm_vid_compare_ivid)
                                .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
@@ -3862,6 +3865,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_ASSERT_NOEXIT(false,
                                fapi2::PSTATE_PB_POUND_W_INVALID_VID_ORDER(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
+                               .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                .set_NOMINAL_VID_COMPARE_IVID_VALUE(o_data->poundw[NOMINAL].vdm_vid_compare_ivid)
                                .set_POWERSAVE_VID_COMPARE_IVID_VALUE(o_data->poundw[POWERSAVE].vdm_vid_compare_ivid)
                                .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
@@ -3891,6 +3895,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                 FAPI_ASSERT_NOEXIT(false,
                                    fapi2::PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                    .set_CHIP_TARGET(i_target)
+                                   .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                    .set_OP_POINT_TYPE(p)
                                    .set_VDM_OVERVOLT((o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F)
                                    .set_VDM_SMALL(o_data->poundw[p].vdm_overvolt_small_thresholds & 0x0F)
@@ -3924,6 +3929,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                 FAPI_ASSERT_NOEXIT(false,
                                    fapi2::PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                    .set_CHIP_TARGET(i_target)
+                                   .set_EQ_TARGET(l_eqChiplets[selected_eq])
                                    .set_OP_POINT_TYPE(p)
                                    .set_VDM_NORMAL_SMALL((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F)
                                    .set_VDM_NORMAL_LARGE(o_data->poundw[p].vdm_normal_freq_drop & 0x0F)
