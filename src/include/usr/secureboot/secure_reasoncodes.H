@@ -47,6 +47,7 @@ namespace SECUREBOOT
         MOD_SECURE_SET_SBE_SECURE_MODE  = 0x0D,
         MOD_SECURE_GET_ALL_SEC_REGS     = 0x0E,
         MOD_SECURE_LOAD_HEADER          = 0x0F,
+        MOD_SECURE_VALIDATE_ECID_COUNT  = 0x10,
    };
 
     enum SECUREReasonCode
@@ -70,7 +71,7 @@ namespace SECUREBOOT
         RC_PROC_NOT_SCOMABLE            = SECURE_COMP_ID | 0x10,
         RC_DEVICE_READ_ERR              = SECURE_COMP_ID | 0x11,
         RC_INVALID_BASE_HEADER          = SECURE_COMP_ID | 0x12,
-
+        RC_INVALID_ECID_COUNT           = SECURE_COMP_ID | 0x13,
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,9 +88,11 @@ errlHndl_t ContainerHeader::parse_header()
         break;
     }
 
-    // Get ECID array
-    l_size = iv_headerInfo.hw_prefix_hdr.ecid_count * ECID_SIZE;
-    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr.ecid, l_hdr, l_size);
+    // Ensure HW header ECID count is 0, so that we can safely skip reading the
+    // ECID array that is defined in the secure header but unsupported in code.
+    l_errl = validateEcidCount(
+        ECID_COUNT_FIELD::HW_HEADER,
+        iv_headerInfo.hw_prefix_hdr.ecid_count);
     if(l_errl)
     {
         break;
@@ -108,8 +110,10 @@ errlHndl_t ContainerHeader::parse_header()
     l_size = iv_headerInfo.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
     // Cache total software keys size
     iv_totalSwKeysSize = l_size;
+    constexpr size_t MAX_SW_KEY_DATA=(SW_KEY_COUNT_MAX *
+                               sizeof(iv_headerInfo.hw_prefix_data.sw_pkey_p));
     l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.sw_pkey_p, l_hdr,
-                              l_size);
+        l_size,MAX_SW_KEY_DATA);
     if(l_errl)
     {
         break;
@@ -125,9 +129,11 @@ errlHndl_t ContainerHeader::parse_header()
     strncpy(iv_componentId,iv_headerInfo.sw_hdr.component_id,
         sizeof(iv_headerInfo.sw_hdr.component_id));
 
-    // Get ECID array
-    l_size = iv_headerInfo.sw_hdr.ecid_count * ECID_SIZE;
-    l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_hdr.ecid, l_hdr, l_size);
+    // Ensure SW header ECID count is 0, so that we can safely skip reading the
+    // ECID array that is defined in the secure header but unsupported in code.
+    l_errl = validateEcidCount(
+        ECID_COUNT_FIELD::SW_HEADER,
+        iv_headerInfo.sw_hdr.ecid_count);
     if(l_errl)
     {
         break;
@@ -135,7 +141,7 @@ errlHndl_t ContainerHeader::parse_header()
 
     /*---- Parse ROM_sw_sig_raw ----*/
     l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr,
-                              iv_totalSwKeysSize);
+                              iv_totalSwKeysSize,MAX_SW_KEY_DATA);
     if(l_errl)
     {
         break;
@@ -382,39 +388,99 @@ errlHndl_t ContainerHeader::validate()
     return l_errl;
 }
 
-errlHndl_t ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
-                                       const size_t i_size)
+errlHndl_t ContainerHeader::validateEcidCount(
+    const ECID_COUNT_FIELD i_ecidCountField,
+    const uint8_t          i_ecidCount) const
+{
+    errlHndl_t pError = nullptr;
+    if(i_ecidCount)
+    {
+        TRACFCOMP(g_trac_secure,ERR_MRK "ContainerHeader::validateEcidCount: "
+            "Secure header validation error; ECID count field of type 0x%02X "
+            "must be 0x00, but is actually 0x%02X.",
+            i_ecidCountField,i_ecidCount);
+
+        /*@
+         * @errortype   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    SECUREBOOT::MOD_SECURE_VALIDATE_ECID_COUNT
+         * @reasoncode  SECUREBOOT::RC_INVALID_ECID_COUNT
+         * @userdata1   ECID count field type
+         * @userdata2   Actual ECID count
+         * @devdesc     Error parsing secure header; ECID count field of
+         *     specified type was non-zero.  Reinstall boot firmware.
+         * @custdesc    Boot firmware integrity issue; Reinstall boot
+         *     firmware.
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            SECUREBOOT::MOD_SECURE_VALIDATE_ECID_COUNT,
+            SECUREBOOT::RC_INVALID_ECID_COUNT,
+            static_cast<uint64_t>(i_ecidCountField),
+            i_ecidCount,
+            true);
+        pError->collectTrace(SECURE_COMP_NAME);
+        pError->collectTrace(PNOR_COMP_NAME);
+        pError->collectTrace(TRBOOT_COMP_NAME);
+    }
+    return pError;
+}
+
+errlHndl_t ContainerHeader::safeMemCpyAndInc(
+          void*     i_dest,
+    const uint8_t*& io_hdr,
+    const size_t    i_size,
+    const size_t    i_maxSize)
 {
     assert(i_dest != nullptr, "ContainerHeader: dest nullptr");
     assert(io_hdr != nullptr, "ContainerHeader: current header location nullptr");
     assert(iv_pHdrStart != nullptr, "ContainerHeader: start of header nullptr");
 
-    TRACDCOMP(g_trac_secure,"dest: 0x%X src: 0x%X size: 0x%X",i_dest, io_hdr, i_size);
+    TRACDCOMP(g_trac_secure,
+              "dest: %p, src: %p, size: 0x%016llX, max: 0x%016llX",
+              i_dest, io_hdr, i_size, i_maxSize);
     errlHndl_t l_errl = nullptr;
 
     do {
-    // Determine if the memcpy is within the bounds of the container header
+
+    // Determine if the memcpy is within the bounds of the container header and
+    // does not exceed the maximum allowed transaction size
     iv_hdrBytesRead = io_hdr - iv_pHdrStart;
-    if((iv_hdrBytesRead + i_size) > MAX_SECURE_HEADER_SIZE)
+    if(   ((iv_hdrBytesRead + i_size) > MAX_SECURE_HEADER_SIZE)
+       || (i_size > i_maxSize) )
     {
-        TRACFCOMP(g_trac_secure,ERR_MRK"ContainerHeader::safeMemCpyAndInc parsed header is out of bounds of max header size of 0x%X",
-                  MAX_SECURE_HEADER_SIZE);
+        TRACFCOMP(g_trac_secure,ERR_MRK"ContainerHeader::safeMemCpyAndInc: "
+                  "Secure header validation error; requested copy of size "
+                  "0x%016llX starting at offset 0x%016llX would exceed either "
+                  "container header size of 0x%016llX or max transaction size "
+                  "of 0x%016llX.",
+                  i_size, iv_hdrBytesRead, MAX_SECURE_HEADER_SIZE,
+                  i_maxSize);
+
+        // Note: in the FFDC below, for every 64 bit size value, intentionally
+        // clip off the upper 32 bits in order to fit more FFDC variables.  The
+        // chance of any size requiring 64 bits is extremely low.
+
         /*@
-         * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC
-         * @reasoncode      SECUREBOOT::RC_CONT_HDR_NO_SPACE
-         * @userdata1       Size needed
-         * @userdata2       Max secure header size
-         * @devdesc         Error parsing secure header
-         * @custdesc        Firmware Error
+         * @errortype        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid         SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC
+         * @reasoncode       SECUREBOOT::RC_CONT_HDR_NO_SPACE
+         * @userdata1[00:31] Total bytes read so far
+         * @userdata1[32:63] Requested size to copy
+         * @userdata2[00:31] Max header size
+         * @userdata2[32:63] Max transaction size
+         * @devdesc          Error parsing secure header; requested copy size
+         *     starting at current offset would exceed the header size or the
+         *     max transaction size.  Reinstall boot firmware.
+         * @custdesc         Boot firmware integrity issue; Reinstall boot
+         *     firmware.
          */
         l_errl = new ERRORLOG::ErrlEntry(
-                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC,
-                                    SECUREBOOT::RC_CONT_HDR_NO_SPACE,
-                                    iv_hdrBytesRead + i_size,
-                                    MAX_SECURE_HEADER_SIZE,
-                                    true/*SW Error*/);
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC,
+            SECUREBOOT::RC_CONT_HDR_NO_SPACE,
+            TWO_UINT32_TO_UINT64(iv_hdrBytesRead,i_size),
+            TWO_UINT32_TO_UINT64(MAX_SECURE_HEADER_SIZE,i_maxSize),
+            true/*SW Error*/);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(PNOR_COMP_NAME);
         l_errl->collectTrace(TRBOOT_COMP_NAME);

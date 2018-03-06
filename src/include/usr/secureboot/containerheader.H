@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,16 @@ namespace SECUREBOOT
 class ContainerHeader
 {
     public:
+
+        /**
+         *  @brief Enum specifying a specific ECID count field from the secure
+         *      header
+         */
+        enum class ECID_COUNT_FIELD : uint8_t
+        {
+            HW_HEADER = 0x00, // ECID count field in the HW header
+            SW_HEADER = 0x01, // ECID count field in the SW header
+        };
 
         /**
          * @brief Default Constructor
@@ -270,21 +280,46 @@ class ContainerHeader
         errlHndl_t parse_header();
 
         /**
+         *  @brief Validate that the specified ECID count field from the secure
+         *      header is 0
+         *
+         *  @param[in] i_ecidCountField Indicates which secure header ECID count
+         *      field (HW header or SW header) should be validated
+         *  @param[in] i_ecidCount The actual value of the ECID count field
+         *
+         *  @return errlHndl_t Error log handle indicating success or failure
+         *  @retval nullptr    Success; the ECID count field is 0 (and valid)
+         *  @retval !nullptr   Error; the ECID count field had a value other
+         *      than 0 and the error log handle points to a valid error log
+         */
+        errlHndl_t validateEcidCount(
+            const ECID_COUNT_FIELD i_ecidCountField,
+            const uint8_t          i_ecidCount) const;
+
+        /**
          * @brief Checks bounds of parsing before mempy and increments pointer
          *
          * Ensures that we don't memcpy more bytes than the max size of a
-         * secure container header. Error log created on out of bounds memcpy.
+         * secure container header.  Optionally ensures that the requested copy
+         * does not exceed a supplied maximum size, in order to prevent
+         * dynamically sized data area overruns.  Error log created on any
+         * violation of the above constraints.
          *
-         * @param[in] i_dest   Pointer to the memory location to copy to
-         *                     nullptr input will assert
-         * @param[in] io_hdr   Pointer to current location of container header
-         *                     nullptr input will assert
-         * @param[in] i_size   Number of bytes to copy
+         * @param[in] i_dest    Pointer to the memory location to copy to
+         *                      nullptr input will assert
+         * @param[in] io_hdr    Pointer to current location of container header
+         *                      nullptr input will assert
+         * @param[in] i_size    Number of bytes to copy
+         * @param[in] i_maxSize Maximum transaction size in bytes for this
+         *     single copy.  Default=secure header size.
          *
          * @return Error handle if error; otherwise nullptr
          */
-        errlHndl_t safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
-                                    const size_t i_size);
+        errlHndl_t safeMemCpyAndInc(
+                   void*     i_dest,
+            const  uint8_t*& io_hdr,
+                   size_t    i_size,
+                   size_t    i_maxSize=MAX_SECURE_HEADER_SIZE);
 
         // Pointer to fake header generated
         std::array<uint8_t,PAGE_SIZE> iv_fakeHeader;
