@@ -2843,16 +2843,6 @@ errlHndl_t populate_hbRuntimeData( void )
     do {
         TRACFCOMP(g_trac_runtime, "Running populate_hbRuntimeData");
 
-        TARGETING::Target * sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != nullptr);
-
-        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
-            sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
-
-        TRACFCOMP( g_trac_runtime, "ATTR_HB_EXISTING_IMAGE (hb_images) = %x",
-                hb_images);
-
         // Figure out which node we are running on
         TARGETING::Target* mproc = nullptr;
         TARGETING::targetService().masterProcChipTargetHandle(mproc);
@@ -2865,13 +2855,23 @@ errlHndl_t populate_hbRuntimeData( void )
 
         uint64_t nodeid = pe.instance;
 
-        TRACFCOMP( g_trac_runtime, "Master node nodid = %x",
-                nodeid);
+        TRACFCOMP( g_trac_runtime, "Master node nodeid = %x",
+                   nodeid);
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
         // Currently set up in host_sys_fab_iovalid_processing() which only
         // gets called if there are multiple physical nodes.   It eventually
         // needs to be setup by a hb routine that snoops for multiple nodes.
+        TARGETING::Target * sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != nullptr);
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+            sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+        TRACFCOMP( g_trac_runtime, "ATTR_HB_EXISTING_IMAGE (hb_images) = %x",
+                hb_images);
+
         if (0 == hb_images)  //Single-node
         {
             if( !TARGETING::is_no_load() )
@@ -2966,7 +2966,7 @@ errlHndl_t populate_hbRuntimeData( void )
             TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
                 ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
 
-            TRACFCOMP( g_trac_runtime, "HB_EXISTING_IMAGE (mask) = %#x",
+            TRACFCOMP( g_trac_runtime, "HB_EXISTING_IMAGE (mask) = %x",
                     mask);
 
             for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )

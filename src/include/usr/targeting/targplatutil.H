@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,6 +183,20 @@ inline bool isThisMasterNodeTarget(const Target* const i_pTarget)
 {
     return true;
 }
+
+/* @brief - returns whether the current node is the master node
+ *
+ * @par Detailed Description:
+ * Checks whether the current node is the master node. If yes, returns
+ * true to the user, else false.  Master node is not determined until
+ * istep 18.9, so this function will return false before then except
+ * in the case of a MPIPL (second pass).
+ *
+ * @return boolean indicating whether request was successful or not
+ * @retval, Returns true if the current node is the master node
+ * @retval, Returns false if the current node is not the master node
+ */
+bool isCurrentMasterNode();
 
 /* @brief - Syncs the master system target's attribute with non-master system
  * targets.
