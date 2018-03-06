@@ -113,10 +113,16 @@ namespace SBE
     const uint8_t REIPL_SEEPROM_0_VALUE           = 0x00;
     const uint8_t REIPL_SEEPROM_1_VALUE           = 0x40;
 
-    // FORCE SEEPROM UPDATE FLAG - bit 2: 0x0 -> indicates do not force update
-    const uint8_t FORCE_UPDATE_FLAG_MASK          = 0x20;
-    const uint8_t FORCE_UPDATE_SEEPROM_0_VALUE    = 0x00;
-    const uint8_t FORCE_UPDATE_SEEPROM_1_VALUE    = 0x20;
+    // SEEPROM 0 FORCE UPDATE FLAG - bit 2: 0x0 -> indicates do not force update
+    const uint8_t SEEPROM_0_FORCE_UPDATE_MASK     = 0x20;
+    const uint8_t SEEPROM_0_DO_NOT_FORCE_UPDATE   = 0x00;
+    const uint8_t SEEPROM_0_FORCE_UPDATE          = 0x20;
+
+    // SEEPROM 1 FORCE UPDATE FLAG - bit 3: 0x0 -> indicates do not force update
+    const uint8_t SEEPROM_1_FORCE_UPDATE_MASK     = 0x10;
+    const uint8_t SEEPROM_1_DO_NOT_FORCE_UPDATE   = 0x00;
+    const uint8_t SEEPROM_1_FORCE_UPDATE          = 0x10;
+
 
     /******************************************/
     /*  Structs                               */
