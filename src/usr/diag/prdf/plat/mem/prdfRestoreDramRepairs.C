@@ -179,16 +179,6 @@ bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
 
     do
     {
-        if ( (false == g_initialized) || (nullptr == systemPtr) )
-        {
-            errl = noLock_initialize();
-            if ( nullptr != errl )
-            {
-                PRDF_ERR( PRDF_FUNC "Failed to initialize PRD" );
-                break;
-            }
-        }
-
         // Keep a list of DIMMs to callout. Note that we are using a map with
         // the DIMM target as the key so that we can maintain a unique list. The
         // map value has no significance.
@@ -639,6 +629,19 @@ uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt )
 
     do
     {
+        // Will need the chip and system objects initialized for several parts
+        // of this function and sub-functions.
+        if ( (false == g_initialized) || (nullptr == systemPtr) )
+        {
+            errlHndl_t errl = noLock_initialize();
+            if ( nullptr != errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to initialize PRD" );
+                RDR::commitErrl<TYPE_MCA>( errl, i_trgt );
+                break;
+            }
+        }
+
         std::vector<MemRank> ranks;
         getMasterRanks<TYPE_MCA>( i_trgt, ranks );
 
