@@ -503,6 +503,31 @@ if ( exists $reqPol->{'mss_mrw_force_bcmode_off'} )
 }
 
 
+# Handle the new name when it shows up in the xml
+#  otherwise force the value
+if ( exists $reqPol->{'wof_enable_vratio'} )
+{
+    push @systemAttr, ['WOF_ENABLE_VRATIO',
+      $reqPol->{'wof_enable_vratio'}];
+}
+else
+{
+    push @systemAttr, ['WOF_ENABLE_VRATIO', 'CALCULATED'];
+}
+
+# Handle the new name when it shows up in the xml
+#  otherwise force the value
+if ( exists $reqPol->{'wof_vratio_select'} )
+{
+    push @systemAttr, ['WOF_VRATIO_SELECT',
+      $reqPol->{'wof_vratio_select'}];
+}
+else
+{
+    push @systemAttr, ['WOF_VRATIO_SELECT', 'ACTIVE_CORES'];
+}
+
+
 my $nestFreq = $reqPol->{'proc_pb_frequency'}->{content};
 
 
