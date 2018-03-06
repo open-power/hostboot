@@ -82,6 +82,7 @@
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>
 #include <secureboot/service.H>
+#include <secureboot/trustedbootif.H>
 #include <p9_perst_phb.H>
 #include <plat_hwp_invoker.H>
 #include <ipcSp.H>
@@ -2164,6 +2165,15 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             {
                 TRACFCOMP( g_trac_initsvc,
                            "ERROR: ESTABLISH_SYSTEM_SMP::blockInterrupts");
+                errlCommit(err, INITSVC_COMP_ID);
+            }
+
+            err = TRUSTEDBOOT::flushTpmQueue();
+            if(err)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                          "ERROR: TPM message queue flushing failed. The system"
+                          " may experience a hang condition.");
                 errlCommit(err, INITSVC_COMP_ID);
             }
 

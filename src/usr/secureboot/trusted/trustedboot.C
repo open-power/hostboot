@@ -1488,8 +1488,7 @@ void* tpmDaemon(void* unused)
                       // Add the separator to this TPM,
                       // if an error occurs the TPM will
                       //  be marked as failed and the error log committed
-                      TRUSTEDBOOT::pcrExtendSeparator(
-                                   tpm);
+                      TRUSTEDBOOT::pcrExtendSeparator(tpm);
                   }
 
                   // Lastly make sure we are in a state
@@ -1537,7 +1536,6 @@ void* tpmDaemon(void* unused)
 
                   err = tpmTransmitCommand(l_pTpm, dataBuf, dataSize,
                                            TPM_LOCALITY_0);
-
                   if (err != nullptr)
                   {
                       TRACFCOMP( g_trac_trustedboot,
@@ -1571,6 +1569,12 @@ void* tpmDaemon(void* unused)
                   }
               }
               break;
+          case TRUSTEDBOOT::MSG_TYPE_FLUSH:
+              {
+                  TRACFCOMP(g_trac_trustedboot, "Flushing TPM message queue");
+              }
+              break;
+
           default:
             assert(false, "Invalid msg command");
             break;
