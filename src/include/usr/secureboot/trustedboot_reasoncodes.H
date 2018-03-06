@@ -58,6 +58,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_SYNCRESPONSE                = 0x0C,
         MOD_TPM_SEPARATOR                   = 0x0D,
         MOD_TPM_CMD_GETCAPNVINDEX           = 0x0E,
+        MOD_FLUSH_TPM_QUEUE                 = 0x0F,
         MOD_TPMLOGMGR_INITIALIZE            = 0x10,
         MOD_TPMLOGMGR_ADDEVENT              = 0x11,
         MOD_TPMLOGMGR_INITIALIZEEXISTLOG    = 0x12,
