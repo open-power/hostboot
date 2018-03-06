@@ -802,4 +802,52 @@ errlHndl_t testCmpPrimaryAndBackupTpm()
     return l_err;
 }
 
+errlHndl_t flushTpmQueue()
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"flushTpmQueue()");
+
+    Message* l_msg = Message::factory(MSG_TYPE_FLUSH,
+                                      0,
+                                      nullptr,
+                                      MSG_MODE_SYNC);
+
+    assert(l_msg != nullptr, "TPM flush message is nullptr");
+
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc)
+    {
+       /*@
+        * @errortype       ERRL_SEV_UNRECOVERABLE
+        * @moduleid        MOD_FLUSH_TPM_QUEUE
+        * @reasoncode      RC_SENDRECV_FAIL
+        * @userdata1       rc from msq_sendrecv()
+        * @devdesc         msg_sendrecv() failed trying to send flush message to
+        *                  TPM daemon
+        * @custdesc        Trusted boot failure
+        */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_FLUSH_TPM_QUEUE,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         0,
+                                         true);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    else
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+
+    delete l_msg;
+    l_msg = nullptr;
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"flushTpmQueue()");
+#endif
+    return l_errl;
+}
+
 } // end TRUSTEDBOOT

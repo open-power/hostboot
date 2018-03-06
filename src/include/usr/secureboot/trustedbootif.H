@@ -341,6 +341,14 @@ namespace TRUSTEDBOOT
      */
     bool isTpmRequired();
 
+    /**
+     * @brief Send the synchronous flush queue message to the TPM daemon
+     *
+     * @return errlHndl_t nullptr if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t flushTpmQueue();
+
 } // end TRUSTEDBOOT namespace
 
 
