@@ -978,7 +978,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
     do
     {
         // Do not deconfig Target if we're NOT being asked to force AND
-        //   the is System is at runtime
+        // the System is at runtime
         if ((i_deconfigRule == NOT_AT_RUNTIME) &&
                 platSystemIsAtRuntime())
         {
@@ -2015,7 +2015,13 @@ void DeconfigGard::_deconfigureByAssoc(
                 // no action
             break;
         } // switch
-    } // !i_Runkime
+    } // !i_Runtime
+    else
+    {
+        HWAS_INF("_deconfigureByAssoc() - system is at runtime"
+                " skipping all association checks beyond"
+                " the CHILD");
+    }
 
     HWAS_DBG("_deconfigureByAssoc exiting: %.8X", get_huid(&i_target));
 } // _deconfigByAssoc
@@ -2871,5 +2877,64 @@ bool DeconfigGard::anyChildFunctional(Target & i_parent)
     return retVal;
 } //anyChildFunctional
 
+#ifdef __HOSTBOOT_MODULE
+/******************************************************************************/
+// deconfigureTargetAtRuntime
+/******************************************************************************/
+errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
+        TARGETING::ConstTargetHandle_t const i_pTarget,
+        const DeconfigGard::DeconfigureFlags i_deconfigureAction,
+        const errlHndl_t i_deconfigErrl)
+
+{
+
+    errlHndl_t l_errl = nullptr;
+
+    uint32_t deconfigReason =
+        (i_deconfigErrl) ?
+        i_deconfigErrl->eid() : DeconfigGard::DECONFIGURED_BY_PRD;
+
+    HWAS_INF(">>>deconfigureTargetAtRuntime() - "
+            "Input Target HUID:0x%08X Deconfig Action"
+            " 0x%08X Deconfig Reason :0x%08X",
+            get_huid(i_pTarget),i_deconfigureAction,
+            deconfigReason);
+
+#ifdef __HOSTBOOT_RUNTIME
+
+    l_errl = platDeconfigureTargetAtRuntime(
+                                            i_pTarget,
+                                            i_deconfigureAction,
+                                            i_deconfigErrl
+                                           );
+#else
+    HWAS_ERR("deconfigureTargetAtRuntime() - "
+            "called outside of hbrt context");
+    /*@
+     * @errortype
+     * @moduleid     MOD_RUNTIME_DECONFIG
+     * @reasoncode   RC_NOT_AT_RUNTIME
+     * @userdata1    HUID of the target
+     * @userdata2    deconfig reason - either error log id, or
+     *                                 DeconfigGard::DECONFIGURED_BY_PRD
+     *
+     * @devdesc      deconfigureTargetAtRuntime is currently only
+     *               supported in hostboot runtime, this error
+     *               indicates the function was called outside of
+     *               the hostboot runtime context.
+     * @custdesc     Host firmware encountered an
+     *               internal error
+     */
+
+    l_errl = hwasError(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       MOD_RUNTIME_DECONFIG,RC_NOT_AT_RUNTIME,
+                       get_huid(i_pTarget),deconfigReason
+                       );
+#endif
+    HWAS_INF(">>>deconfigureTargetAtRuntime()" );
+    return l_errl ;
+}
+#endif
 } // namespace HWAS
 

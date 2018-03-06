@@ -50,6 +50,13 @@
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/hbrt_utilities.H>        // createGenericFspMsg
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
+#include <errl/errludtarget.H>
+
+// includes to support the fapi2 hwp call in
+// platDeconfigureTargetAtRuntime()
+#include <fapi2/target.H>
+#include <p9_update_ec_eq_state.H>
+#include <fapi2/plat_hwp_invoker.H>
 #endif
 
 #ifdef CONFIG_TPMDD
@@ -712,5 +719,152 @@ errlHndl_t hwasError(const uint8_t i_sev,
     l_pErr->collectTrace("HWAS_I");
     return l_pErr;
 }
+
+#ifdef __HOSTBOOT_RUNTIME
+/******************************************************************************/
+// platDeconfigureTargetAtRuntime
+/******************************************************************************/
+errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
+        TARGETING::ConstTargetHandle_t const i_pTarget,
+        const DeconfigureFlags i_deconfigureAction,
+        const errlHndl_t i_deconfigErrl)
+{
+
+    HWAS_INF(">>>platDeconfigureTargetAtRuntime()");
+
+    errlHndl_t l_errl = nullptr;
+
+    do
+    {
+        if( i_pTarget == nullptr )
+        {
+            HWAS_ERR("Target is NULL.");
+            /*@
+             * @errortype
+             * @moduleid     MOD_RUNTIME_DECONFIG
+             * @reasoncode   RC_NULL_TARGET
+             * @devdesc      Target is NULL
+             * @custdesc     Host Firmware encountered an internal
+             *               error
+             */
+            l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    HWAS::MOD_RUNTIME_DECONFIG,
+                    HWAS::RC_NULL_TARGET,0,0);
+
+            break;
+        }
+
+        if(i_pTarget->getAttr<TARGETING::ATTR_TYPE>() !=
+                TARGETING::TYPE_CORE)
+        {
+            // only supporting cores
+            /*@
+             * @errortype
+             * @moduleid     MOD_RUNTIME_DECONFIG
+             * @reasoncode   RC_INVALID_TARGET
+             * @devdesc      Target is not a TYPE_CORE
+             * userdata1     target huid
+             * @custdesc     Host Firmware encountered an internal
+             *               error
+             */
+            l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                               HWAS::MOD_RUNTIME_DECONFIG,
+                               HWAS::RC_INVALID_TARGET,get_huid(i_pTarget),0);
+            break;
+        }
+
+
+        switch(i_deconfigureAction)
+        {
+            case DeconfigGard::FULLY_AT_RUNTIME:
+
+                HWAS_INF(" Deconfig action FULLY_AT_RUNTIME :0x%08X",
+                        DeconfigGard::FULLY_AT_RUNTIME);
+
+                break;
+
+            default:
+                HWAS_ERR("Caller passed invalid DeconfigAction: 0x%08X",
+                        i_deconfigureAction);
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_RUNTIME_DECONFIG
+                 * @reasoncode   RC_INVALID_PARAM
+                 * @userdata1    HUID of the target
+                 * @userdata2    Target type
+                 * @userdata3    Target class
+                 * @userdata4    Deconfig Action
+                 * @devdesc      Caller passed invalid deconfigure action
+                 * @custdesc     Host firmware encountered an
+                 *               internal error
+                 */
+                l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        HWAS::MOD_RUNTIME_DECONFIG,
+                        HWAS::RC_INVALID_PARAM,0,0);
+
+                break;
+        }
+
+    }while(0);
+
+    if(l_errl == nullptr)
+    {
+        uint32_t  l_deconfigReason =  (i_deconfigErrl) ? i_deconfigErrl->eid() :
+            DeconfigGard::DECONFIGURED_BY_PRD;
+
+        HWAS_INF("deconfigureTargetAtRuntime() - "
+                "Input Target HUID:0x%08X Deconfig Action"
+                " 0x%08X deconfigReason:0x%08X",
+                get_huid(i_pTarget),i_deconfigureAction,
+                l_deconfigReason);
+
+
+        bool l_isTargetDeconfigured = false;
+        // deconfigureTarget() checks for targets that can be deconfigured at
+        // runtime
+        l_errl = theDeconfigGard().deconfigureTarget(
+                                   const_cast<TARGETING::Target&>(*i_pTarget),
+                                   l_deconfigReason,
+                                    &l_isTargetDeconfigured,
+                                    i_deconfigureAction);
+
+        if(l_errl == nullptr && l_isTargetDeconfigured)
+        {
+            HWAS_INF("platDeconfigureTargetAtRuntime() - "
+                    "deconfigure successful");
+
+            TARGETING::TYPE  l_type = TARGETING::TYPE_PROC;
+            const TARGETING::Target * l_parent =
+                                TARGETING::getParent(i_pTarget,l_type);
+            // get the parent proc and call the hwp to alert
+            // pm not to attempt to manage this core anymore
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_proc(const_cast<TARGETING::Target *>(l_parent));
+
+            HWAS_INF("platDeconfigureTargetAtRuntime() - "
+                    "calling p9_update_ec_eq_state");
+            FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,l_proc);
+
+            if(l_errl)
+            {
+                HWAS_ERR("platDeconfigureTargetAtRuntime() - "
+                        "call to p9_update_ec_eq_state() failed on proc "
+                        "with HUID : %d",TARGETING::get_huid(l_proc));
+                ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_errl);
+            }
+
+        }
+        else
+        {
+            HWAS_INF("platDeconfigureTargetAtRuntime() - deconfigure failed");
+        }
+    }
+    HWAS_INF(">>>platDeconfigureTargetAtRuntime()" );
+
+    return l_errl ;
+}
+
+#endif // __HOSTBOOT_RUNTIME
+
 
 } // namespace HWAS

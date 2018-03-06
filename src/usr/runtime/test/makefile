@@ -23,7 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
-
 MODULE = testruntime
 TESTS += testpreverifiedlidmgr.H
 TESTS += test_checkHbResMemLimit.H
