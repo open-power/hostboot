@@ -265,6 +265,7 @@
     <rc>RC_PSTATE_PB_POUND_W_TDP_IAC_INVALID</rc>
     <description>#W one or more Idd TDP AC values are zero</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>NOMINAL_TDP_IAC</ffdc>
     <ffdc>POWERSAVE_TDP_IAC</ffdc>
     <ffdc>TURBO_TDP_IAC</ffdc>
@@ -279,6 +280,7 @@
     <rc>RC_PSTATE_PB_POUND_W_TDP_IDC_INVALID</rc>
     <description>#W one or more Idd TDP DC values are zero</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>NOMINAL_TDP_IDC</ffdc>
     <ffdc>POWERSAVE_TDP_IDC</ffdc>
     <ffdc>TURBO_TDP_IDC</ffdc>
@@ -293,6 +295,7 @@
     <rc>RC_PSTATE_PB_POUND_W_INVALID_VID_VALUE</rc>
     <description>#W vid compare ivid value is zero</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>NOMINAL_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
@@ -307,6 +310,7 @@
     <rc>RC_PSTATE_PB_POUND_W_INVALID_VID_ORDER</rc>
     <description>#W vid compare ivid value is not in increasing order</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>NOMINAL_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
@@ -321,6 +325,7 @@
     <rc>RC_PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE</rc>
     <description>#W threshold values are invalid</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>OP_POINT_TYPE</ffdc>
     <ffdc>VDM_OVERVOLT</ffdc>
     <ffdc>VDM_SMALL</ffdc>
@@ -336,6 +341,7 @@
     <rc>RC_PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE</rc>
     <description>#W freq drop values are invalid</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>OP_POINT_TYPE</ffdc>
     <ffdc>VDM_NORMAL_SMALL</ffdc>
     <ffdc>VDM_NORMAL_LARGE</ffdc>
