@@ -1842,46 +1842,6 @@ fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x20118c2ull, l_scom_buffer));
         }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x2012300ull, l_scom_buffer ));
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<7, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x2012300ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x201230bull, l_scom_buffer ));
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x201230bull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x3012300ull, l_scom_buffer ));
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<7, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x3012300ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x301230bull, l_scom_buffer ));
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0b1 );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x301230bull, l_scom_buffer));
-        }
 
     };
 fapi_try_exit:

@@ -57,15 +57,89 @@ cen_scominits(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 {
     FAPI_DBG("Start");
 
-    // ensure that MBI traces are running, to trace framelock/FRTL activity
-    fapi2::buffer<uint64_t> l_trctrl_config = 0;
-    l_trctrl_config.setBit<CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL,
-                           CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN>();
+    // trace setup, moved from MBS SCOM initfile based on inability to apply
+    // via inband (HW440754)
+    //
+    {
+        // set controls in each chiplet to force trace freeze on xstop
+        fapi2::buffer<uint64_t> l_dbg_mode_reg;
+        fapi2::buffer<uint64_t> l_dbg_trace_mode_reg2;
 
-    FAPI_TRY(fapi2::putScom(i_target,
-                            CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG,
-                            l_trctrl_config),
-             "Error from putScom (CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG)");
+        // TP
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from getScom (CEN_DBG_MODE_REG)");
+        l_dbg_mode_reg.setBit<CEN_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from putScom (CEN_DBG_MODE_REG)");
+
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from getScom (CEN_DBG_TRACE_MODE_REG_2)");
+        l_dbg_trace_mode_reg2.setBit<CEN_DBG_TRACE_MODE_REG_2_STOP_ON_ERR>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from putScom (CEN_DBG_TRACE_MODE_REG_2)");
+
+        // NEST
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_TCN_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from getScom (CEN_TCN_DBG_MODE_REG)");
+        l_dbg_mode_reg.setBit<CEN_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_TCN_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from putScom (CEN_TCN_DBG_MODE_REG)");
+
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_TCN_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from getScom (CEN_TCN_DBG_TRACE_MODE_REG_2)");
+        l_dbg_trace_mode_reg2.setBit<CEN_DBG_TRACE_MODE_REG_2_STOP_ON_ERR>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_TCN_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from putScom (CEN_TCN_DBG_TRACE_MODE_REG_2)");
+
+        // MEM
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_TCM_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from getScom (CEN_TCM_DBG_MODE_REG)");
+        l_dbg_mode_reg.setBit<CEN_DBG_MODE_REG_STOP_ON_XSTOP_SELECTION>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_TCM_DBG_MODE_REG,
+                                l_dbg_mode_reg),
+                 "Error from putScom (CEN_TCM_DBG_MODE_REG)");
+
+        FAPI_TRY(fapi2::getScom(i_target,
+                                CEN_TCM_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from getScom (CEN_TCM_DBG_TRACE_MODE_REG_2)");
+        l_dbg_trace_mode_reg2.setBit<CEN_DBG_TRACE_MODE_REG_2_STOP_ON_ERR>();
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_TCM_DBG_TRACE_MODE_REG_2,
+                                l_dbg_trace_mode_reg2),
+                 "Error from putScom (CEN_TCM_DBG_TRACE_MODE_REG_2)");
+    }
+
+    // ensure that MBI traces are running, to trace framelock/FRTL activity
+    {
+        fapi2::buffer<uint64_t> l_trctrl_config = 0;
+        l_trctrl_config.setBit<CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL,
+                               CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN>();
+
+        FAPI_TRY(fapi2::putScom(i_target,
+                                CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG,
+                                l_trctrl_config),
+                 "Error from putScom (CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG)");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
