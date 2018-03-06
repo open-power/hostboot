@@ -455,6 +455,62 @@ public:
      */
     void platPostDeconfigureTarget(TARGETING::Target * i_pTarget);
 
+    /**
+     * @brief Deconfigures a Target at runtime
+     *
+     * Called from PRD, in response to a checkstop attention from phyp
+     *
+     * This function will call the platform specific function to do the
+     * deconfigure actions.
+     *
+     * NOTE: Currently only core targets are supported
+     *
+     * @param[in]  i_pTarget   const pointer to the core target to deconfigure
+     * @param[in]  i_deconfigureAction Deconfigure options -
+     *                                              FULLY_AT_RUNTIME
+     * @param[in]  i_deconfigErrl - error log assocated with this deconfig
+     *                              request. The error handle is non-null
+     *                              the eid of the errorlog will be listed as
+     *                              the deconfig reason, otherwise the
+     *                              reason will be DECONFIGURED_BY_PRD
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t deconfigureTargetAtRuntime(
+            TARGETING::ConstTargetHandle_t const i_pTarget,
+            const DeconfigureFlags i_deconfigureAction,
+            const errlHndl_t i_deconfigErrl);
+
+    /**
+     *
+     * @brief Deconfigures a Target at runtime
+     *
+     * Platform specific implementation to deconfgure a target at runtime
+     *
+     * This function will deconfigure the target, do any
+     * post deconfigure actions and will skip deconfiguring any associated
+     * child targets. Any errors deconfiguring targets are committed and
+     * the function continues. The only errors returned are usage errors.
+     *
+     * @param[in]  i_pTarget   const pointer to Target to deconfigure.
+     * @param[in]  i_deconfigureAction Deconfigure options -
+     *                                              FULLY_AT_RUNTIME
+     * @param[in]  i_deconfigErrl - error log assocated with this deconfig
+     *                              request. The error handle is non-null
+     *                              the eid of the errorlog will be listed as
+     *                              the deconfig reason, otherwise the
+     *                              reason will be DECONFIGURED_BY_PRD
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+
+#ifdef __HOSTBOOT_RUNTIME
+    errlHndl_t platDeconfigureTargetAtRuntime(
+            TARGETING::ConstTargetHandle_t const i_pTarget,
+            const DeconfigureFlags i_deconfigureAction,
+            const errlHndl_t i_deconfigErrl);
+#endif
+
 protected:
 
     /**

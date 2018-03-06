@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,18 @@ MODULE = errl_rt
 #include common ojects between hostboot and runtime hostboot
 include ../errl.mk
 
+#needed to compile hwasPlatDeconfigGard in runtime context
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+
+
+# need find the source for this hwp in runtime env
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+
 VPATH += ${ROOTPATH}/src/usr/hwas/common
 VPATH += ${ROOTPATH}/src/usr/hwas
 
@@ -37,6 +49,8 @@ OBJS += rt_vfs.o
 OBJS += hwasCallout.o
 OBJS += deconfigGard.o
 OBJS += hwasPlatDeconfigGard.o
+OBJS += p9_update_ec_eq_state.o
+
 
 SUBDIRS += test.d
 

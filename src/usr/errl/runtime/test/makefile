@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +26,7 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 MODULE = testerrl_rt
+
 TESTS = *.H
 
 include ${ROOTPATH}/config.mk

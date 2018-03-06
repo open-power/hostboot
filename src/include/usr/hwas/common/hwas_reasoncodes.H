@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@ namespace HWAS
         MOD_CHECK_MIN_HW          = 0x03,
         MOD_DECONFIG_TARGETS_FROM_GARD = 0x04,
         MOD_VALIDATE_EC_LEVELS    = 0x05,
+        MOD_RUNTIME_DECONFIG      = 0x06,
     };
 
     enum HwasReasonCode
@@ -58,6 +59,9 @@ namespace HWAS
         RC_SYSAVAIL_NO_NX_FUNC                  = HWAS_COMP_ID | 0x0E,
         RC_EC_MISMATCH                          = HWAS_COMP_ID | 0x0F,
         RC_FAILED_EC_VALIDATION                 = HWAS_COMP_ID | 0x10,
+        RC_INVALID_PARAM                        = HWAS_COMP_ID | 0x11,
+        RC_NOT_AT_RUNTIME                       = HWAS_COMP_ID | 0x12,
+        RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
     };
 };
 
