@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,7 +237,7 @@ extern "C" {
             for(l_group = 0; l_group < MAX_RANKS_PER_DIMM; l_group ++)
             {
                 //Check if rank group exists
-                if(l_primary_ranks_array[l_group][l_port] != INVALID)
+                if(l_primary_ranks_array[l_group][l_port] != INVALID_RANK)
                 {
                     //Set up for Init Cal - Done per port pair
                     FAPI_TRY(l_test_buffer_4.setBit(0, 2)); //Init Cal test = 11XX

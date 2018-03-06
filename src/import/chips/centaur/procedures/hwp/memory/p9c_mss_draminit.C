@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -363,7 +363,8 @@ extern "C" {
             for ( l_rank_pair_group = 0; l_rank_pair_group < MAX_RANKS_PER_DIMM; l_rank_pair_group++)
             {
                 //Check if rank group exists
-                if((l_primary_ranks_array[l_rank_pair_group][0] != INVALID) || (l_primary_ranks_array[l_rank_pair_group][1] != INVALID))
+                if((l_primary_ranks_array[l_rank_pair_group][0] != INVALID_RANK) ||
+                   (l_primary_ranks_array[l_rank_pair_group][1] != INVALID_RANK))
                 {
                     print_shadow_reg(i_target, l_port_number, l_rank_pair_group);
                 }

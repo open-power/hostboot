@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ enum mrs : size_t
     MRS4_BA = 4,   ///< MRS4 Bank Address
     MRS5_BA = 5,   ///< MRS5 Bank Address
     MRS6_BA = 6,   ///< MRS6 Bank Address
-    INVALID = 255, ///< INVALID
+    INVALID_RANK = 255, ///< INVALID
 };
 
 enum dimm_types : size_t

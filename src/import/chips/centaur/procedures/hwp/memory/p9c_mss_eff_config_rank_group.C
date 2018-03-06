@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,7 @@ extern "C" {
                 }
                 else
                 {
-                    primary_rank_group1_u8array[cur_port] = INVALID;
+                    primary_rank_group1_u8array[cur_port] = INVALID_RANK;
                 }
 
                 if (num_ranks_per_dimm_u8array[cur_port][0] > 2)
@@ -106,14 +106,14 @@ extern "C" {
                 }
                 else
                 {
-                    primary_rank_group2_u8array[cur_port] = INVALID;
-                    primary_rank_group3_u8array[cur_port] = INVALID;
+                    primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                    primary_rank_group3_u8array[cur_port] = INVALID_RANK;
                 }
 
-                secondary_rank_group0_u8array[cur_port] = INVALID;
-                secondary_rank_group1_u8array[cur_port] = INVALID;
-                secondary_rank_group2_u8array[cur_port] = INVALID;
-                secondary_rank_group3_u8array[cur_port] = INVALID;
+                secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
 
                 //Preet Add 3TSV /2H  Type - Single Drop Case
                 //ATTR_EFF_STACK_TYPE <enum>NONE = 0, DDP_QDP = 1, STACK_3DS = 2</enum>
@@ -125,20 +125,20 @@ extern "C" {
                     {
                         primary_rank_group0_u8array[cur_port] = 0;
                         primary_rank_group1_u8array[cur_port] = 1;
-                        primary_rank_group2_u8array[cur_port] = INVALID;
-                        primary_rank_group3_u8array[cur_port] = INVALID;
-                        secondary_rank_group0_u8array[cur_port] = INVALID;
-                        secondary_rank_group1_u8array[cur_port] = INVALID;
-                        secondary_rank_group2_u8array[cur_port] = INVALID;
-                        secondary_rank_group3_u8array[cur_port] = INVALID;
-                        tertiary_rank_group0_u8array[cur_port] = INVALID;
-                        tertiary_rank_group1_u8array[cur_port] = INVALID;
-                        tertiary_rank_group2_u8array[cur_port] = INVALID;
-                        tertiary_rank_group3_u8array[cur_port] = INVALID;
-                        quanternary_rank_group0_u8array[cur_port] = INVALID;
-                        quanternary_rank_group1_u8array[cur_port] = INVALID;
-                        quanternary_rank_group2_u8array[cur_port] = INVALID;
-                        quanternary_rank_group3_u8array[cur_port] = INVALID;
+                        primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        primary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group3_u8array[cur_port] = INVALID_RANK;
                     }
 
                     //if 4H
@@ -148,18 +148,18 @@ extern "C" {
                         primary_rank_group1_u8array[cur_port] = 1;
                         primary_rank_group2_u8array[cur_port] = 2;
                         primary_rank_group3_u8array[cur_port] = 3;
-                        secondary_rank_group0_u8array[cur_port] = INVALID;
-                        secondary_rank_group1_u8array[cur_port] = INVALID;
-                        secondary_rank_group2_u8array[cur_port] = INVALID;
-                        secondary_rank_group3_u8array[cur_port] = INVALID;
-                        tertiary_rank_group0_u8array[cur_port] = INVALID;
-                        tertiary_rank_group1_u8array[cur_port] = INVALID;
-                        tertiary_rank_group2_u8array[cur_port] = INVALID;
-                        tertiary_rank_group3_u8array[cur_port] = INVALID;
-                        quanternary_rank_group0_u8array[cur_port] = INVALID;
-                        quanternary_rank_group1_u8array[cur_port] = INVALID;
-                        quanternary_rank_group2_u8array[cur_port] = INVALID;
-                        quanternary_rank_group3_u8array[cur_port] = INVALID;
+                        secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group3_u8array[cur_port] = INVALID_RANK;
                     }
 
                     //if 8H   <Add Later if Required>
@@ -178,12 +178,12 @@ extern "C" {
 
                 primary_rank_group0_u8array[cur_port] = 0;
                 primary_rank_group1_u8array[cur_port] = 4;
-                primary_rank_group2_u8array[cur_port] = INVALID;
-                primary_rank_group3_u8array[cur_port] = INVALID;
-                secondary_rank_group0_u8array[cur_port] = INVALID;
-                secondary_rank_group1_u8array[cur_port] = INVALID;
-                secondary_rank_group2_u8array[cur_port] = INVALID;
-                secondary_rank_group3_u8array[cur_port] = INVALID;
+                primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                primary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
 
                 if (num_ranks_per_dimm_u8array[cur_port][0] == 2)
                 {
@@ -217,32 +217,32 @@ extern "C" {
                     {
                         primary_rank_group0_u8array[cur_port] = 0;
                         primary_rank_group1_u8array[cur_port] = 4;
-                        primary_rank_group2_u8array[cur_port] = INVALID;
-                        primary_rank_group3_u8array[cur_port] = INVALID;
-                        secondary_rank_group0_u8array[cur_port] = INVALID;
-                        secondary_rank_group1_u8array[cur_port] = INVALID;
-                        secondary_rank_group2_u8array[cur_port] = INVALID;
-                        secondary_rank_group3_u8array[cur_port] = INVALID;
+                        primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        primary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
                     }
                     //if 4H
                     else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
                     {
                         primary_rank_group0_u8array[cur_port] = 0;
                         primary_rank_group1_u8array[cur_port] = 4;
-                        primary_rank_group2_u8array[cur_port] = INVALID;
-                        primary_rank_group3_u8array[cur_port] = INVALID;
-                        secondary_rank_group0_u8array[cur_port] = INVALID;
-                        secondary_rank_group1_u8array[cur_port] = INVALID;
-                        secondary_rank_group2_u8array[cur_port] = INVALID;
-                        secondary_rank_group3_u8array[cur_port] = INVALID;
-                        tertiary_rank_group0_u8array[cur_port] = INVALID;
-                        tertiary_rank_group1_u8array[cur_port] = INVALID;
-                        tertiary_rank_group2_u8array[cur_port] = INVALID;
-                        tertiary_rank_group3_u8array[cur_port] = INVALID;
-                        quanternary_rank_group0_u8array[cur_port] = INVALID;
-                        quanternary_rank_group1_u8array[cur_port] = INVALID;
-                        quanternary_rank_group2_u8array[cur_port] = INVALID;
-                        quanternary_rank_group3_u8array[cur_port] = INVALID;
+                        primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        primary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        tertiary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                        quanternary_rank_group3_u8array[cur_port] = INVALID_RANK;
                     }
 
                     //if 8H   <Add Later if Required>
@@ -250,14 +250,14 @@ extern "C" {
             }
             else if ((num_ranks_per_dimm_u8array[cur_port][0] == 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0))
             {
-                primary_rank_group0_u8array[cur_port] = INVALID;
-                primary_rank_group1_u8array[cur_port] = INVALID;
-                primary_rank_group2_u8array[cur_port] = INVALID;
-                primary_rank_group3_u8array[cur_port] = INVALID;
-                secondary_rank_group0_u8array[cur_port] = INVALID;
-                secondary_rank_group1_u8array[cur_port] = INVALID;
-                secondary_rank_group2_u8array[cur_port] = INVALID;
-                secondary_rank_group3_u8array[cur_port] = INVALID;
+                primary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                primary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                primary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                primary_rank_group3_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group0_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group1_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group2_u8array[cur_port] = INVALID_RANK;
+                secondary_rank_group3_u8array[cur_port] = INVALID_RANK;
             }
             else
             {
@@ -269,14 +269,14 @@ extern "C" {
 
             }
 
-            tertiary_rank_group0_u8array[cur_port] = INVALID;
-            tertiary_rank_group1_u8array[cur_port] = INVALID;
-            tertiary_rank_group2_u8array[cur_port] = INVALID;
-            tertiary_rank_group3_u8array[cur_port] = INVALID;
-            quanternary_rank_group0_u8array[cur_port] = INVALID;
-            quanternary_rank_group1_u8array[cur_port] = INVALID;
-            quanternary_rank_group2_u8array[cur_port] = INVALID;
-            quanternary_rank_group3_u8array[cur_port] = INVALID;
+            tertiary_rank_group0_u8array[cur_port] = INVALID_RANK;
+            tertiary_rank_group1_u8array[cur_port] = INVALID_RANK;
+            tertiary_rank_group2_u8array[cur_port] = INVALID_RANK;
+            tertiary_rank_group3_u8array[cur_port] = INVALID_RANK;
+            quanternary_rank_group0_u8array[cur_port] = INVALID_RANK;
+            quanternary_rank_group1_u8array[cur_port] = INVALID_RANK;
+            quanternary_rank_group2_u8array[cur_port] = INVALID_RANK;
+            quanternary_rank_group3_u8array[cur_port] = INVALID_RANK;
 
             FAPI_INF("P[%02d][%02d][%02d][%02d],S[%02d][%02d][%02d][%02d],T[%02d][%02d][%02d][%02d],Q[%02d][%02d][%02d][%02d] on %s PORT%d.",
                      primary_rank_group0_u8array[cur_port], primary_rank_group1_u8array[cur_port], primary_rank_group2_u8array[cur_port],
