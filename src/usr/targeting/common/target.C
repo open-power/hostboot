@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,6 +148,17 @@ bool Target::_trySetAttr(
 {
     #define TARG_FN "_trySetAttr()"
 
+#ifdef __HOSTBOOT_RUNTIME
+    // Get AttrRP pointer
+    AttrRP *l_attrRP = &TARG_GET_SINGLETON(theAttrRP);
+    // Get the node ID associated with the input target
+    NODE_ID l_nodeId = NODE0;
+    l_attrRP->getNodeId(this, l_nodeId);
+    bool isSysTarget = ((this->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
+                        (this->getAttr<ATTR_TYPE>() == TYPE_SYS))
+                     ? true : false;
+#endif
+
     // Figure out if effort should be expended figuring out the target's type/
     // position in order to clear any non-const attribute overrides and/or to
     // store the attribute for syncing to Cronus
@@ -202,6 +213,55 @@ bool Target::_trySetAttr(
     if (l_pAttrData)
     {
         memcpy(l_pAttrData, i_pAttrData, i_size);
+#ifdef __HOSTBOOT_RUNTIME
+        if(isSysTarget)
+        {
+            for(NODE_ID l_nodeX = NODE0;
+                l_nodeX < l_attrRP->getNodeCount();
+                ++l_nodeX)
+            {
+                if(l_nodeX == l_nodeId)
+                {
+                    // Already set attribute for this node, so continue to next
+                    continue;
+                }
+
+                // Get target map pointer for the node
+                void* l_pMap = l_attrRP->getTargetMapPtr(l_nodeX);
+
+                // Get pointer to targets
+                Target (*l_pTargets)[] = reinterpret_cast<Target(*)[]>(l_pMap);
+
+                // Get pointer to number of targets
+                uint32_t *l_pNumTargets =
+                    reinterpret_cast<uint32_t*>(l_pMap) - 1;
+
+                // Walk through targets
+                for(uint32_t l_targetNum = 0;
+                    l_targetNum < *l_pNumTargets;
+                    ++l_targetNum)
+                {
+                    Target* l_pTarget = &(*(l_pTargets))[l_targetNum];
+
+                    // Check for system target
+                    if((l_pTarget->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
+                       (l_pTarget->getAttr<ATTR_TYPE>() == TYPE_SYS))
+                    {
+                        // Get pointer to the attribute being set
+                        void* l_pAttrDataNodeX = NULL;
+                        l_pTarget->_getAttrPtr(i_attr, l_pAttrDataNodeX);
+                        if (l_pAttrData)
+                        {
+                            // Set the attribute for this node
+                            memcpy(l_pAttrDataNodeX, i_pAttrData, i_size);
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+#endif
         if( unlikely(cv_pCallbackFuncPtr != NULL) )
         {
             cv_pCallbackFuncPtr(this, i_attr, i_size, i_pAttrData);
