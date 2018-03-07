@@ -164,7 +164,9 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
     if ( 0 == rnkBits )
     {
         if ( twoDimmConfig ) // The DIMM select goes into part 3.
+        {
             rnk_pt3 = dslct; rnkBits_pt3 = 1;
+        }
     }
     else // At least one master or slave.
     {
@@ -173,7 +175,9 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
         rnk_pt2 = rnk >> 1;  rnkBits_pt2 = rnkBits - 1;
 
         if ( twoDimmConfig ) // The DIMM select goes into part 1.
+        {
             rnk_pt1 = dslct; rnkBits_pt1 = 1;
+        }
     }
 
     // Split the row into its components.
@@ -187,10 +191,10 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
     uint64_t c3    = (col & 0x01);
 
     // Split the bank into its components.
-    uint64_t bg0_bg1 = (bnk & 0x18) >> 3;
-    uint64_t b0      = (bnk & 0x04) >> 2;
-    uint64_t b1      = (bnk & 0x02) >> 1;
+    uint64_t b0      = (bnk & 0x10) >> 4;
+    uint64_t b1      = (bnk & 0x08) >> 3;
     // NOTE: B2 is not supported on Nimbus.
+    uint64_t bg0_bg1 = (bnk & 0x03);
 
     // Now start building the flexible part of the address (bits 0-7,23-33).
     o_addr = (o_addr << rnkBits_pt1 ) | rnk_pt1;
