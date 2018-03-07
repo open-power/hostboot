@@ -722,6 +722,8 @@ fapi_try_exit:
 //    Defaults to the first address behind the target
 /// @param[in] i_end whether to end, and where
 ///   Defaults to stop after slave rank
+/// @param[in] i_end_address mcbist::address representing the address to end.
+//    Defaults to mcbist::address::LARGEST_ADDRESS
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
@@ -730,12 +732,13 @@ template<>
 fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                            const stop_conditions& i_stop,
                            const mss::mcbist::address& i_address,
-                           const end_boundary i_end)
+                           const end_boundary i_end,
+                           const mss::mcbist::address& i_end_address )
 {
     FAPI_INF("superfast read - start for %s", mss::c_str(i_target));
 
     fapi2::ReturnCode l_rc;
-    constraints l_const(i_stop, speed::LUDICROUS, i_end, i_address);
+    constraints l_const(i_stop, speed::LUDICROUS, i_end, i_address, i_end_address);
     sf_read_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,

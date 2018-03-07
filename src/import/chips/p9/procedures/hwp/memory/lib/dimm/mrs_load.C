@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,13 +49,15 @@ using fapi2::FAPI2_RC_SUCCESS;
 namespace mss
 {
 ///
-/// @brief Perform the mrs_load operations - TARGET_TYPE_MCBIST specialization
-/// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @brief Perform the mrs_load operations - TARGET_TYPE_MCA specialization
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCA>
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode mrs_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
     ccs::program<TARGET_TYPE_MCBIST> l_program;
 
@@ -64,18 +66,32 @@ fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
 
+    for ( const auto& d : find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        FAPI_DBG("mrs load for %s", mss::c_str(d));
+        FAPI_TRY( perform_mrs_load(d, l_program.iv_instructions) );
+    }
+
+    // We have to configure the CCS engine to let it know which port these instructions are
+    // going out (or whether it's broadcast ...) so lets execute the instructions we presently
+    // have so that we kind of do this by port
+    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform the mrs_load operations - TARGET_TYPE_MCBIST specialization
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode mrs_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
     for ( const auto& p : find_targets<TARGET_TYPE_MCA>(i_target) )
     {
-        for ( const auto& d : find_targets<TARGET_TYPE_DIMM>(p) )
-        {
-            FAPI_DBG("mrs load for %s", mss::c_str(d));
-            FAPI_TRY( perform_mrs_load(d, l_program.iv_instructions) );
-        }
-
-        // We have to configure the CCS engine to let it know which port these instructions are
-        // going out (or whether it's broadcast ...) so lets execute the instructions we presently
-        // have so that we kind of do this by port
-        FAPI_TRY( ccs::execute(i_target, l_program, p) );
+        FAPI_TRY( mrs_load(p) );
     }
 
 fapi_try_exit:

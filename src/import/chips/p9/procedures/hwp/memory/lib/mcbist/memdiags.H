@@ -380,6 +380,8 @@ fapi2::ReturnCode broadcast_mode_start_address_check(const fapi2::Target<fapi2::
 //    Defaults to the first address behind the target
 /// @param[in] i_end whether to end, and where
 ///   Defaults to stop after slave rank
+/// @param[in] i_end_address mcbist::address representing the address to end.
+//    Defaults to mcbist::address::LARGEST_ADDRESS
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
@@ -388,7 +390,8 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions& i_stop,
                            const mss::mcbist::address& i_address = mss::mcbist::address(),
-                           const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK );
+                           const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK,
+                           const mss::mcbist::address& i_end_address = mss::mcbist::address(mcbist::address::LARGEST_ADDRESS) );
 
 ///
 /// @brief Scrub - continuous scrub all memory behind the target

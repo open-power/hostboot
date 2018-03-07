@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,15 +49,16 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
-
 ///
-/// @brief Perform the rcd_load operations - TARGET_TYPE_MCBIST specialization
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @brief Perform the rcd_load operations - TARGET_TYPE_MCA specialization
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCA>
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
-fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode rcd_load<TARGET_TYPE_MCA>( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
+    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
     ccs::program<TARGET_TYPE_MCBIST> l_program;
 
@@ -69,28 +70,42 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
 
     FAPI_TRY(mss::is_simulation(l_sim));
 
+    for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        // CKE needs to be LOW before running the RCW sequence
+        // So we use the power down entry command to achieve this
+        if(!l_sim)
+        {
+            l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
+        }
+
+        FAPI_DBG("rcd load for %s", mss::c_str(d));
+        FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions),
+                  "Failed perform_rcd_load() for %s", mss::c_str(d) );
+    }// dimms
+
+    // We have to configure the CCS engine to let it know which port these instructions are
+    // going out (or whether it's broadcast ...) so lets execute the instructions we presently
+    // have so that we kind of do this by port
+    FAPI_TRY( ccs::execute(l_mcbist, l_program, i_target),
+              "Failed to execute ccs for %s", mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform the rcd_load operations - TARGET_TYPE_MCBIST specialization
+/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
     for ( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
     {
-        for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p) )
-        {
-            // CKE needs to be LOW before running the RCW sequence
-            // So we use the power down entry command to achieve this
-            if(!l_sim)
-            {
-                l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
-            }
-
-            FAPI_DBG("rcd load for %s", mss::c_str(d));
-            FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions),
-                      "Failed perform_rcd_load() for %s", mss::c_str(d) );
-        }// dimms
-
-        // We have to configure the CCS engine to let it know which port these instructions are
-        // going out (or whether it's broadcast ...) so lets execute the instructions we presently
-        // have so that we kind of do this by port
-        FAPI_TRY( ccs::execute(i_target, l_program, p),
-                  "Failed to execute ccs for %s", mss::c_str(p) );
-    }// ports
+        FAPI_TRY( rcd_load(p) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
