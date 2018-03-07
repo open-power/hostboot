@@ -334,6 +334,16 @@ enum dimm_select
     DIMM_NONE        = 0b00,
 };
 
+// Possible values for power domains in MBARPC0Q
+enum min_max_domains : uint64_t
+{
+    MAXALL_MINALL = 0b000,
+    MAXALL_MIN1 = 0b001,
+    MAXALL_MIN0 = 0b010,
+    MAX1_MIN1 = 0b011,
+    MAX1_MIN0 = 0b100,
+};
+
 namespace mcbist
 {
 
