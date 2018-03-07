@@ -430,6 +430,16 @@ sub execute_pre_release
     my $checkInDir = "";
     my $released = "";
     my $track = "";
+    #
+    #Pass $cmvcCheckinForceFlag from Jenkins to check in files w/ '-force' option
+    #within CMVC to break the file links
+
+    my $cmvcCheckinForceFlag = "";
+
+    if ( $ENV{CMVC_CHECKIN_FORCEFLAG} eq "-force" )
+    {
+        $cmvcCheckinForceFlag = "$ENV{CMVC_CHECKIN_FORCEFLAG}";
+    }
 
     GetOptions("release:s" => \$release);
     GetOptions("level:s" => \$level);
@@ -481,7 +491,7 @@ sub execute_pre_release
 
     #Check In Files
     chdir ($checkInDir);
-    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose");
+    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose $cmvcCheckinForceFlag");
 
     my $featureFile = $ENV{CMVC_FEATURE_FILE};
     open(CMVC_FEATURE,">",$featureFile)
@@ -634,6 +644,16 @@ sub execute_checkinBuildToTrack
     my $release = "";
     my $checkInDir = "";
     my $released = "";
+    #
+    #Pass $cmvcCheckinForceFlag from Jenkins to check in files w/ '-force' option
+    #within CMVC to break the file links
+
+    my $cmvcCheckinForceFlag = "";
+
+    if ( $ENV{CMVC_CHECKIN_FORCEFLAG} eq "-force" )
+    {
+        $cmvcCheckinForceFlag = "$ENV{CMVC_CHECKIN_FORCEFLAG}";
+    }
 
     GetOptions("level:s" => \$level);
     GetOptions("release:s" => \$release);
@@ -677,8 +697,8 @@ sub execute_checkinBuildToTrack
     print "Switching directory to \"$checkInDir\" .....\n";
     chdir ($checkInDir);
     run_system_command("pwd");
-    print "#####-> run_system_command(\"File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose\")\n";
-    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose");
+    print "#####-> run_system_command(\"File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose $cmvcCheckinForceFlag\")\n";
+    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose $cmvcCheckinForceFlag");
 
     #Complete Fix Records
     print "#####-> run_system_command(\"Fix -complete -feature $feature -release $release -component esw_hbfw -verbose\")\n";
