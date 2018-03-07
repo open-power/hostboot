@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,6 +115,8 @@ struct PVR_t
     {
         NIMBUS_DD1_MASK = 0x00FF2F0F,
         IS_NIMBUS_DD1   = 0x004E0100,
+        IS_NIMBUS_DD20   = 0x004E0200,
+        IS_NIMBUS_DD21   = 0x004E0201,
 
         // Field: chipType
         NIMBUS_CHIP = 0,
@@ -137,6 +139,22 @@ struct PVR_t
      */
     inline bool isNimbusDD1() {
         return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD1);
+    }
+
+    /**
+     * @brief Check if DD2.0
+     * @return true if DD2.0, else false
+     */
+    inline bool isNimbusDD20() {
+        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD20);
+    }
+
+    /**
+     * @brief Check if DD2.1
+     * @return true if DD2.1, else false
+     */
+    inline bool isNimbusDD21() {
+        return ((word & NIMBUS_DD1_MASK) == IS_NIMBUS_DD21);
     }
 };
 

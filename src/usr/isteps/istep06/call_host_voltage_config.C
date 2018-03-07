@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,6 +351,25 @@ void* call_host_voltage_config( void *io_pArgs )
                     "call_host_voltage_config.C::"
                     "ATTR_FREQ_X_MHZ = %d",
                     l_sys->getAttr<ATTR_FREQ_X_MHZ>());
+
+            //Nimbus DD21 only supports OBUS PLL of 1563(versus product of 1611)
+            //Force it because of a chip bug instead of letting MRW control
+            PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+            if( l_pvr.isNimbusDD21() )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_voltage_config.C::"
+                          "Nimbus DD2.1 -- Forcing ATTR_FREQ_X_MHZ = %d",
+                          l_sys->getAttr<ATTR_FREQ_X_MHZ>());
+
+                TARGETING::ATTR_FREQ_O_MHZ_type l_freq_array =
+                {OBUS_PLL_FREQ_LIST_P9N_21[0],OBUS_PLL_FREQ_LIST_P9N_21[0],
+                OBUS_PLL_FREQ_LIST_P9N_21[0], OBUS_PLL_FREQ_LIST_P9N_21[0]};
+                assert(l_proc->
+                       trySetAttr<TARGETING::ATTR_FREQ_O_MHZ>(l_freq_array),
+                       "call_host_voltage_config.C failed to set ATTR_FREQ_O_MHZ");
+            }
+
 
             // get the child EQ targets
             targetService().getAssociated(
