@@ -410,16 +410,17 @@ void set_enable_ue_noise_window( fapi2::buffer<uint64_t>& io_data, const mss::st
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
 fapi2::ReturnCode setup_read_pointer_delay (const fapi2::Target<T>& i_target)
 {
+    constexpr uint64_t MNFG_REPAIRS_DISABLED_ATTR = 56;
     fapi2::buffer<uint64_t> l_data;
-    uint64_t mnfg_flag = 0;
+    fapi2::buffer<uint64_t> l_mnfg_buffer;
     mss::states l_state = mss::OFF;
 
     FAPI_TRY( mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
     mss::set_read_pointer_delay(l_data, mss::ON);
 
     // Check for manufacturing disable dram repair flag to disable TCE correction
-    FAPI_TRY( mss::mnfg_flags(mnfg_flag), "%s: Failed mnfg_flags check", mss::c_str(i_target) );
-    l_state = (mnfg_flag == fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS ) ? mss::OFF : mss::ON;
+    FAPI_TRY( mss::mnfg_flags(l_mnfg_buffer), "%s: Failed mnfg_flags check", mss::c_str(i_target) );
+    l_state = ( l_mnfg_buffer.getBit<MNFG_REPAIRS_DISABLED_ATTR>() ) ? mss::OFF : mss::ON;
     mss::set_tce_correction(l_data, l_state);
 
     FAPI_TRY( mss::write_recr_register(i_target, l_data), "%s: Failed write_recr_register", mss::c_str(i_target));
