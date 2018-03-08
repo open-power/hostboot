@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,5 +78,39 @@ void hwpLock( bool i_lock );
         }\
         fapi2::hwpLock(false); \
     }
+
+/**
+ * @brief Pseudo-HWP Invoker macro
+ *
+ * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP)
+ * that does not return a ReturnCode
+ *
+ *  RETURN  - Local var to store the return value
+ *  FUNC    - HWP function name
+ * _args_...  - Any additional arguments that the HWP requires
+ */
+#define FAPI_CALL_HWP( RETURN, FUNC, _args_...) \
+   {\
+        fapi2::hwpLock(true); \
+        RETURN = FUNC(_args_); \
+        fapi2::hwpLock(false); \
+   }
+
+/**
+ * @brief Pseudo-HWP Invoker macro
+ *
+ * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP)
+ * that does not return a ReturnCode
+ *
+ *  FUNC    - HWP function name
+ * _args_...  - Any additional arguments that the HWP requires
+ */
+#define FAPI_CALL_HWP_NORETURN( FUNC, _args_...) \
+   {\
+        fapi2::hwpLock(true); \
+        FUNC(_args_); \
+        fapi2::hwpLock(false); \
+   }
+
 
 #endif // PLATHWPINVOKER_H_
