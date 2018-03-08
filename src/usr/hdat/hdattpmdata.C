@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,23 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
 
     const uint64_t l_baseAddr = static_cast<uint64_t>(i_msAddr.hi) << 32
                                                                  | i_msAddr.lo;
-    const auto maxLogicalSize = hdatTpmDataCalcMaxSize();
+
+    // get the top level target
+    TARGETING::Target* sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != nullptr,
+            "HdatTpmData::HdatTpmData: Bug! Could not obtain top level target");
+
+    // get the node bit string to see what our node layout looks like
+    auto l_nodeBits = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    // count the bits to get the functional/present nodes
+    iv_numNodes = __builtin_popcount(l_nodeBits);
+
+    // Must be at least one. Add one in the zero case.
+    iv_numNodes += !iv_numNodes;
+
+    const auto maxLogicalSize = hdatTpmDataCalcInstanceSize() * iv_numNodes;
     const uint64_t l_size = ALIGN_PAGE(maxLogicalSize) + PAGESIZE;
 
     const uint64_t l_alignedAddr = ALIGN_PAGE_DOWN(l_baseAddr);
@@ -69,9 +85,6 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
         iv_hdatTpmData = reinterpret_cast<hdatTpmData_t *>(l_virtAddr +
                                                                      l_offset);
 
-        // TODO RTC 167290 - This memset needs to be revisited for multinode
-        // support. We may need to do this memset once per node or use some
-        // other approach to initialization.
         memset(iv_hdatTpmData, 0x0, maxLogicalSize);
 
         HDAT_DBG("Ctr iv_hdatTpmData addr 0x%.16llX virtual addr 0x%.16llX",
@@ -147,25 +160,35 @@ errlHndl_t HdatTpmData::hdatLoadTpmData(uint32_t &o_size, uint32_t &o_count)
 
     o_count = 0;
 
-    o_size = hdatTpmDataCalcMaxSize();
+    // calculate the size of each instance
+    o_size = hdatTpmDataCalcInstanceSize();
 
-    // Note: HdatTpmData constructor already cleared the memory to the tune of
-    // o_size (hdatTpmDataCalcMaxSize()) bytes
+    auto l_hdatTpmData = iv_hdatTpmData;
 
-    // We add the first two fields for a reference to aid in debugging,
-    // but the rest will be populated in FSP/OpenPower common code. Any
-    // work here would just be duplicated later during the runtime istep.
+    for (uint32_t i_instance = 0; i_instance < iv_numNodes; i_instance++)
+    {
+        // Note: HdatTpmData constructor already cleared the memory to the tune
+        // of o_size (hdatTpmDataCalcInstanceSize()) bytes
 
-    // add the format magic number
-    iv_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
+        // We add the first two fields for a reference to aid in debugging,
+        // but the rest will be populated in FSP/OpenPower common code. Any
+        // work here would just be duplicated later during the runtime istep.
 
-    // add the eyecatcher
-    memcpy(iv_hdatTpmData->hdatHdr.hdatStructName,
+        // add the format magic number
+        iv_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
+
+        // add the eyecatcher
+        memcpy(iv_hdatTpmData->hdatHdr.hdatStructName,
            g_hdatTpmDataEyeCatch,
            strlen(g_hdatTpmDataEyeCatch));
 
-    // account for this one instance of Node TPM Related Data
-    ++o_count;
+        // Account for this one instance of Node TPM Related Data.
+        ++o_count;
+
+        // Move to the next instance
+        l_hdatTpmData = reinterpret_cast<hdatTpmData_t *>(
+                        reinterpret_cast<uint8_t*>(l_hdatTpmData) + o_size);
+    }
 
     return l_errl;
 }

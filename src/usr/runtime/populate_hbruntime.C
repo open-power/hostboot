@@ -39,6 +39,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/entitypath.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/targplatutil.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
 #include "hdatstructs.H"
@@ -1459,7 +1460,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         l_sysParmsPtr->hdatTpmConfBits = tpmRequired? TPM_REQUIRED_BIT: 0;
 
         // get max # of TPMs per drawer and populate hdat with it
-        auto l_maxTpms = HDAT::hdatTpmDataCalcMaxSize();
+        auto l_maxTpms = HDAT::hdatCalcMaxTpmsPerNode();
 
         l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
         TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
@@ -1483,7 +1484,7 @@ errlHndl_t populate_hbSecurebootData ( void )
     return (l_elog);
 } // end populate_hbRuntime
 
-errlHndl_t populate_TpmInfoByNode()
+errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
 
@@ -1491,13 +1492,12 @@ errlHndl_t populate_TpmInfoByNode()
 
         uint64_t l_baseAddr = 0;
         uint64_t l_dataSizeMax = 0;
-        const uint64_t l_instance = 0; // pass 0 since there is only one record
 
-        // TODO RTC 167290 - We will need to pass the appropriate instance value
-        // when we implement multinode support
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: "
+                    "calling get_host_data_section() to populate instance %d",i_instance);
 
         l_elog = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
-                l_instance,
+                i_instance,
                 l_baseAddr,
                 l_dataSizeMax);
         if(l_elog)
@@ -1524,15 +1524,15 @@ errlHndl_t populate_TpmInfoByNode()
         // as we fill the section
         uint32_t l_currOffset = 0;
 
-        ////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
         // Section Node Secure and Trusted boot Related Data
-        ////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
 
         auto const l_hdatTpmData
             = reinterpret_cast<HDAT::hdatTpmData_t*>(l_baseAddr);
 
         // make sure we have enough room
-        auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcMaxSize();
+        auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcInstanceSize();
         if(l_dataSizeMax < l_tpmDataCalculatedMax)
         {
 
@@ -1558,6 +1558,13 @@ errlHndl_t populate_TpmInfoByNode()
             l_elog->collectTrace(RUNTIME_COMP_NAME);
             break;
         }
+
+        // TODO RTC 190522 - Remove the following two lines of code once FSP
+        // adds missing eyecatch and magic number to non-master nodes
+        l_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
+        memcpy(l_hdatTpmData->hdatHdr.hdatStructName,
+           HDAT::g_hdatTpmDataEyeCatch,
+           strlen(HDAT::g_hdatTpmDataEyeCatch));
 
         // check that hdat structure format and eye catch were filled out
         if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
@@ -1657,7 +1664,7 @@ errlHndl_t populate_TpmInfoByNode()
                                                     (l_baseAddr + l_currOffset);
 
     TARGETING::TargetHandleList tpmList;
-    TRUSTEDBOOT::getTPMs(tpmList);
+    TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_IN_BLUEPRINT);
 
     TARGETING::TargetHandleList l_procList;
 
@@ -1678,11 +1685,22 @@ errlHndl_t populate_TpmInfoByNode()
     // Section Secure Boot and TPM Instance Info
     ////////////////////////////////////////////////////////////////////////////
 
+    // save of a list of TPM / Instance Info pairs to fix up in a second pass
+    std::vector<std::pair<TARGETING::Target*,
+                          HDAT::hdatSbTpmInstInfo_t*> > fixList;
+
+    // Calculate the SRTM log offset
+    auto l_srtmLogOffset = 0;
+
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
     {
         auto l_tpmInstInfo = reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>
                                                     (l_baseAddr + l_currOffset);
+
+        // save for second pass SRTM/DRTM log offset fixups
+        fixList.push_back(std::make_pair(pTpm, l_tpmInstInfo));
+
         auto l_tpmInfo = pTpm->getAttr<TARGETING::ATTR_TPM_INFO>();
 
         TARGETING::PredicateAttrVal<TARGETING::ATTR_PHYS_PATH>
@@ -1753,12 +1771,31 @@ errlHndl_t populate_TpmInfoByNode()
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);
 
+        // advance the SRTM log offset to account for this tpm instance info
+        l_srtmLogOffset += sizeof(*l_tpmInstInfo);
+
+    }
+
+    for (auto tpmInstPair : fixList)
+    {
+        const auto pTpm = tpmInstPair.first;
+        const auto l_tpmInstInfo = tpmInstPair.second;
+
         ////////////////////////////////////////////////////////////////////////
         // Section Secure Boot TPM Event Log
         ////////////////////////////////////////////////////////////////////////
 
-        // use the current offset for the beginning of the SRTM event log
-        l_tpmInstInfo->hdatTpmSrtmEventLogOffset = sizeof(*l_tpmInstInfo);
+        // The SRTM offset we had been tallying in the previous loop happens to
+        // be the offset from the first TPM Instance Info to the first SRTM log
+        l_tpmInstInfo->hdatTpmSrtmEventLogOffset = l_srtmLogOffset;
+
+        // As we go through the list we remove a TPM instance info length and
+        // add an SRTM log length to the previous offset. The reason is b/c a
+        // TPM Instance info's log offset is counted from the start of the
+        // that instance info. We subtract an instance info length from the
+        // previous offset to account for that difference. We also add a log max
+        // to account for the previous instance info's log.
+        l_srtmLogOffset += (TPM_SRTM_EVENT_LOG_MAX - sizeof(*l_tpmInstInfo));
 
         // copy the contents of the SRTM event log into HDAT picking the
         // min of log size and log max (to make sure log size never goes
@@ -1923,10 +1960,7 @@ errlHndl_t populate_TpmInfoByNode()
 
     // obtain a list of i2c targets
     std::vector<I2C::DeviceInfo_t> l_i2cTargetList;
-    for (auto pProc : l_procList)
-    {
-        I2C::getDeviceInfo(pProc, l_i2cTargetList);
-    }
+    I2C::getDeviceInfo(mproc, l_i2cTargetList);
     auto i2cDevItr = l_i2cTargetList.begin();
     while(i2cDevItr != l_i2cTargetList.end())
     {
@@ -2257,16 +2291,16 @@ errlHndl_t populate_TpmInfoByNode()
                 RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
                 RUNTIME::RC_EXTRA_I2C_DEVICE_IN_MRW,
                 TWO_UINT32_TO_UINT64(
-                    FOUR_UINT8_TO_UINT32(i2cDevItr->engine,
-                                     i2cDevItr->masterPort,
-                                     i2cDevItr->deviceType,
-                                     i2cDevItr->addr),
+                    FOUR_UINT8_TO_UINT32(i2cDev.engine,
+                                     i2cDev.masterPort,
+                                     i2cDev.deviceType,
+                                     i2cDev.addr),
                     TWO_UINT16_TO_UINT32(
-                        TWO_UINT8_TO_UINT16(i2cDevItr->slavePort,
-                                        i2cDevItr->devicePurpose),
-                        i2cDevItr->busFreqKhz)
+                        TWO_UINT8_TO_UINT16(i2cDev.slavePort,
+                                        i2cDev.devicePurpose),
+                        i2cDev.busFreqKhz)
                 ),
-                TARGETING::get_huid(i2cDevItr->masterChip),
+                TARGETING::get_huid(i2cDev.masterChip),
                 true);
             err->collectTrace(RUNTIME_COMP_NAME);
             ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
@@ -2374,15 +2408,11 @@ errlHndl_t populate_hbTpmInfo()
         // We will use it below to detect a multi-node scenario
         auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
-        // @TODO RTC: 167290
-        // Until TPM HDAT processing is multi-node aware, pretend the system is
-        // a single node system to get the HDAT partially populated
-        hb_images = 0;
-
         // if single node system
         if (!hb_images)
         {
-            l_elog = populate_TpmInfoByNode();
+            TRACDCOMP( g_trac_runtime, "populate_hbTpmInfo: Single node system");
+            l_elog = populate_TpmInfoByNode(0); // 0 for single node
             if(l_elog != nullptr)
             {
                 TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: "
@@ -2390,12 +2420,39 @@ errlHndl_t populate_hbTpmInfo()
             }
             break;
         }
+        // multinode system / grab payload base to give to the nodes
+        uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+
+        // get the node id for the master chip
+        const auto l_masterNode = TARGETING::UTIL::getCurrentNodePhysId();
+
 
         // start the 1 in the mask at leftmost position
         decltype(hb_images) l_mask = 0x1 << (sizeof(hb_images)*BITS_PER_BYTE-1);
 
-        // start at node 0
+        TRACDCOMP( g_trac_runtime, "populate_hbTpmInfo: l_mask 0x%.16llX hb_images 0x%.16llX",l_mask,hb_images);
+
+        // start at node 0, iterates thru all nodes in blueprint
         uint32_t l_node = 0;
+
+        // As the master node we assign instances to each node for them to
+        // write their HDAT TPM instance info to.
+        // start node instance at 0, counts only present/functional nodes
+        uint32_t l_instance = 0;
+
+        // create a message queue for receipt of responses from nodes
+        msg_q_t msgQ = msg_q_create();
+        l_elog = MBOX::msgq_register(MBOX::HB_POP_TPM_INFO_MSGQ, msgQ);
+
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: MBOX::msgq_register failed!" );
+            break;
+        }
+
+        // keep track of the number of messages we send so we know how
+        // many responses to expect
+        int msg_count = 0;
 
         // while the one in the mask hasn't shifted out
         while (l_mask)
@@ -2404,16 +2461,49 @@ errlHndl_t populate_hbTpmInfo()
             if(l_mask & hb_images)
             {
                 TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: "
-                    "MsgToNode %d for HBRT TPM Info",
+                    "MsgToNode (instance) %d for HBRT TPM Info",
                            l_node );
-                // @TODO RTC 167290
-                // Need to send message to the current node
-                // When node receives a message it should call
-                // populate_TpmInfoByNode()
+
+                // Send message to the current node
+                msg_t* msg = msg_allocate();
+                msg->type = IPC::IPC_POPULATE_TPM_INFO_BY_NODE;
+                msg->data[0] = l_instance;   // instance number
+                msg->data[1] = l_masterNode; // respond to this node
+                msg->extra_data = reinterpret_cast<uint64_t*>(payloadBase);
+
+                l_elog = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+
+                if (l_elog)
+                {
+                    TRACFCOMP( g_trac_runtime, "MBOX::send to node %d from node %d failed",
+                               l_node, l_masterNode);
+                    msg_free(msg);
+                    break;
+                }
+                msg_count++;
+                l_instance++;
             }
             l_mask >>= 1; // shift to the right for the next node
             l_node++; // go to the next node
         }
+
+        if (l_elog == nullptr)
+        {
+            msg_t* l_response = nullptr;
+            // TODO RTC:189356 - need timeout here
+            while (msg_count)
+            {
+                l_response = msg_wait(msgQ);
+                TRACFCOMP(g_trac_runtime,
+                    "populate_hbTpmInfo: drawer %d completed",
+                    l_response->data[0]);
+                msg_free(l_response);
+                msg_count--;
+            }
+        }
+
+        MBOX::msgq_unregister(MBOX::HB_POP_TPM_INFO_MSGQ);
+        msg_q_destroy(msgQ);
 
     } while(0);
 

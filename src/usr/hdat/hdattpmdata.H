@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -239,10 +239,11 @@ class HdatTpmData
 
     private:
 
-        HDAT::hdatMsAddr_t     iv_msAddr;
+        HDAT::hdatMsAddr_t iv_msAddr;
 
         hdatTpmData_t *iv_hdatTpmData;
 
+        uint32_t iv_numNodes;
 
 }; // end of HdatTpmData class
 
@@ -258,15 +259,21 @@ class HdatTpmData
 uint16_t hdatCalcMaxTpmsPerNode();
 
 /**
- * @brief Calculate the maximum size of the HDAT TPM data section
+ * @brief Calculate the maximum size of an instance of HDAT TPM data. There
+ *        will be one instance per functional node in the system. It is assumed
+ *        that this function will be used determine how much space one node's
+ *        worth of HDAT TPM data will occupy worst case. It is assumed that each
+ *        instance will have the same max size and that the instances will be
+ *        placed one after another in memory (not page aligned) with enough
+ *        space to accommodate the maximum possible size of each node.
  *
  * @pre None
  *
  * @post None
  *
- * @retval uint32_t Maximum size of the HDAT TPM data section
+ * @retval uint32_t Maximum size of one instance of HDAT TPM data.
  */
-uint32_t hdatTpmDataCalcMaxSize();
+uint32_t hdatTpmDataCalcInstanceSize();
 
 }
 #endif // HDATTPMDATA_H
