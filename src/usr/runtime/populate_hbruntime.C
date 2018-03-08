@@ -3000,12 +3000,16 @@ errlHndl_t populate_hbRuntimeData( void )
             // wait for a response to each message we sent
             if( l_elog == nullptr )
             {
-                msg_t * response = msg_wait(msgQ);
-                TRACFCOMP(g_trac_runtime,
-                        "IPC_POPULATE_ATTRIBUTES : drawer %d completed",
-                        response->data[0]);
-                msg_free(response);
-                --msg_count;
+                //$TODO RTC:189356 - need timeout here
+                while(msg_count)
+                {
+                    msg_t * response = msg_wait(msgQ);
+                    TRACFCOMP(g_trac_runtime,
+                            "IPC_POPULATE_ATTRIBUTES : drawer %d completed",
+                            response->data[0]);
+                    msg_free(response);
+                    --msg_count;
+                }
             }
 
             MBOX::msgq_unregister(MBOX::HB_POP_ATTR_MSGQ);
