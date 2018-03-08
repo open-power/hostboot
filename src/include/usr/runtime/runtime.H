@@ -121,11 +121,21 @@ errlHndl_t populate_hbSecurebootData( void );
 errlHndl_t populate_hbTpmInfo( void );
 
 /**
- * @brief Fills in Tpm Info in HDAT for current node
+ * @brief Fills in Tpm Info in HDAT for node passed in to the specified HDAT
+ *        instance
+ *
+ * @param[in]  i_instance - the instance number to use to populate the current
+ *                      node's data into HDAT, as directed by the master node.
+ *                      This function is typically called upon receiving a
+ *                      message of type IPC_POPULATE_TPM_INFO_BY_NODE, which
+ *                      provides the instance to use as an MBOX parameter. Each
+ *                      node must have a unique instance number, but beyond that
+ *                      there is no guaranteed direct correlation between nodes
+ *                      and instances at all.
  *
  * @return errlHndl_t nullptr on success else pointer to error log
  */
-errlHndl_t populate_TpmInfoByNode();
+errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance);
 
 /**
  * @brief Timer function for safe error handling in sendSBESystemConfig

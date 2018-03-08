@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,16 +72,9 @@ uint16_t hdatCalcMaxTpmsPerNode()
     return l_maxTpms;
 }
 
-uint32_t hdatTpmDataCalcMaxSize()
+uint32_t hdatTpmDataCalcInstanceSize()
 {
     uint32_t l_size = 0;
-
-    // TODO RTC 167290 - In order to support multiple nodes, this calculation
-    // needs to be #nodes * [ the entire 18.x set of structures ] and the
-    // initialization needs to be done on each instance. The reported size
-    // (in variable o_size) needs to be the size of a single instance and the
-    // reported count (via o_count) needs to be the number of nodes. For now,
-    // we assume one node.
 
     // account for the size of the TPM data header
     l_size += sizeof(hdatTpmData_t);

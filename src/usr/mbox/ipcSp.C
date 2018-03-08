@@ -101,6 +101,35 @@ void IpcSp::msgHandler()
 
         switch(msg->type)
         {
+            case IPC_POPULATE_TPM_INFO_BY_NODE:
+            {
+                // msg->extra_data contains PAYLOAD Base
+                RUNTIME::setPayloadBaseAddress(
+                    reinterpret_cast<uint64_t>(msg->extra_data));
+
+                // msg->data[0] contains the HDAT TPM info instance to populate
+                err = RUNTIME::populate_TpmInfoByNode(msg->data[0]);
+
+                if (err)
+                {
+                    TRACFCOMP( g_trac_ipc, ERR_MRK"IpcSp::msgHandler: populate_TpmInfoByNode errored - must shutdown now!!!");
+                    const auto l_errPlid = err->plid();
+                    errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+
+                // give a response back to the sender
+                err = MBOX::send(MBOX::HB_POP_TPM_INFO_MSGQ, msg, msg->data[1]);
+                if (err)
+                {
+                    const auto l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    msg_free(msg);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+                break;
+            }
+
             case IPC_POPULATE_ATTRIBUTES:
                 // make sure runtime module is loaded
                 if ( !VFS::module_is_loaded( "libruntime.so" ) )
@@ -266,8 +295,7 @@ void IpcSp::msgHandler()
                     INITSERVICE::doShutdown(l_errPlid, true);
                 }
                 break;
-             }
-
+            }
             case IPC_FREQ_ATTR_DATA:
             {
                 TRACFCOMP( g_trac_ipc,
