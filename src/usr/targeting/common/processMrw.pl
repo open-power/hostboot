@@ -212,9 +212,49 @@ sub addObusCfgToGpuSensors
     }
 }
 
+#  @brief Returns whether system has multiple possible TPMs or not
+#
+#  @par Detailed Description:
+#      Returns whether system has multiple possible TPMs or not.
+#      The MRW parser activates more complicated I2C master detection logic when
+#      a system blueprint defines more than one TPM, in order to avoid having to
+#      fix other non-compliant workbooks.  If every workbook is determined to
+#      model the TPM and its I2C connection properly, this special case can be
+#      removed.
+#
+#  @param[in] $targetsRef Reference to array of targets in the system
+#  @retval 0 System does not have multiple possible TPMs
+#  @retval 1 System has multiple possible TPMs
+#
+#  @TODO RTC: 189374 Remove API when all platforms' MRW supports dynamically
+#      determining the processor driving it.
+
+sub isMultiTpmSystem
+{
+    my $targetsRef = shift;
+
+    my $tpms=0;
+    foreach my $target (@$targetsRef)
+    {
+        my $type = $targetObj->getType($target);
+        if($type eq "TPM")
+        {
+            ++$tpms;
+            if($tpms >1)
+            {
+                last;
+            }
+        }
+    }
+
+    return ($tpms > 1) ? 1 : 0;
+}
+
 #--------------------------------------------------
 ## loop through all targets and do stuff
-foreach my $target (sort keys %{ $targetObj->getAllTargets() })
+my @targets = sort keys %{ $targetObj->getAllTargets() };
+my $isMultiTpmSys = isMultiTpmSystem(\@targets);
+foreach my $target (@targets)
 {
     my $type = $targetObj->getType($target);
     if ($type eq "SYS")
@@ -311,6 +351,12 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
         $targetObj->deleteAttribute($target,"SLOT_INDEX");
         $targetObj->deleteAttribute($target,"SLOT_NAME");
         $targetObj->deleteAttribute($target,"VENDOR_ID");
+    }
+    # @TODO RTC: 189374 Remove multiple TPMs filter when all platforms' MRW
+    # supports dynamically determining the processor driving it.
+    elsif (($type eq "TPM") && $isMultiTpmSys)
+    {
+        processTpm($targetObj, $target);
     }
 
     processIpmiSensors($targetObj,$target);
@@ -696,6 +742,60 @@ sub parseBitwise
         $targetObj->setAttribute($target,$attribute,$mask);
     }
 }
+
+#  @brief Processes a TPM target
+#
+#  @par Detailed Description:
+#      Processes a TPM target; notably determines the TPM's I2C master chip and
+#      updates the associated field in the TPM_INFO attribute, especially useful
+#      on multi-node or multi-TPM systems.
+#
+#  @param[in] $targetObj Object model reference
+#  @param[in] $target    Handle of the target to process
+
+sub processTpm
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    # Get any connection involving TPM target's child I2C slave targets
+    my $i2cBuses=$targetObj->findDestConnections($target,"I2C","");
+    if ($i2cBuses ne "")
+    {
+        foreach my $i2cBus (@{$i2cBuses->{CONN}})
+        {
+            # On the I2C master side of the connection, ascend one level to the
+            # parent chip
+            my $i2cMasterParentTarget=$i2cBus->{SOURCE_PARENT};
+            my $i2cMasterParentTargetType =
+                $targetObj->getType($i2cMasterParentTarget);
+
+            # Hostboot code assumes CEC TPMs are only connected to processors.
+            # Unless that assumption changes, this sanity check is required to
+            # catch modeling errors.
+            if($i2cMasterParentTargetType ne "PROC")
+            {
+                die   "Model integrity error; CEC TPM I2C connections must "
+                    . "originate at a PROC target, not a "
+                    . "$i2cMasterParentTargetType target.\n";
+            }
+
+            # Get its physical path
+            my $i2cMasterParentTargetPath = $targetObj->getAttribute(
+                $i2cMasterParentTarget,"PHYS_PATH");
+
+            # Set the TPM's I2C master path accordingly
+            $targetObj->setAttributeField(
+                $target, "TPM_INFO","i2cMasterPath",
+                $i2cMasterParentTargetPath);
+
+            # All TPM I2C buses must be driven from the same I2C master, so only
+            # process the first one
+            last;
+        }
+    }
+}
+
 #--------------------------------------------------
 ## Processor
 ##
