@@ -487,7 +487,10 @@ sub buildHierarchy
     {
         my $val=$settingptr->{$key}->{property}->
                        {$prop}->{value};
-        $self->setAttribute($key, $prop, $val);
+        if ($val ne "")
+        {
+            $self->setAttribute($key, $prop, $val);
+        }
     }
 
     ## Save busses
