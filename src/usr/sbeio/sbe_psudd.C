@@ -185,11 +185,12 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
     {
         // assign sequence ID and save to check that response matches
         i_pPsuRequest->seqID = ++l_seqID;
-        SBE_TRACF("Sending Req = %.16X %.16X %.16X %.16X",
+        SBE_TRACF("Sending Req = %.16X %.16X %.16X %.16X to %.8X",
                   i_pPsuRequest->mbxReg0,
                   i_pPsuRequest->mbxReg1,
                   i_pPsuRequest->mbxReg2,
-                  i_pPsuRequest->mbxReg3);
+                  i_pPsuRequest->mbxReg3,
+                  get_huid(i_target));
 
         // Read SBE doorbell to confirm ready to accept command.
         // Since the device driver single threads the requests, we should
