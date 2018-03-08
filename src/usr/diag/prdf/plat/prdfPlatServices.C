@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -441,10 +441,12 @@ uint32_t __startTdScrubMaster_mca( ExtensibleChip * i_mcaChip,
     // Get the address rank of the master rank.
     uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
     mss::mcbist::address saddr, eaddr;
-    mss::mcbist::address::get_mrank_range( port,
-                                           i_rank.getDimmSlct(),
-                                           i_rank.getRankSlct(),
-                                           saddr, eaddr );
+    FAPI_CALL_HWP_NORETURN(
+    mss::mcbist::address::get_mrank_range,
+                           port,
+                           i_rank.getDimmSlct(),
+                           i_rank.getRankSlct(),
+                           saddr, eaddr );
 
     return __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
 }

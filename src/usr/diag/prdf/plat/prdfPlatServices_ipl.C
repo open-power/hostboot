@@ -259,7 +259,9 @@ bool isBroadcastModeCapable<TYPE_MCBIST>( ExtensibleChip * i_chip )
 
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
-    return ( mss::states::YES == mss::mcbist::is_broadcast_capable(fapiTrgt) );
+    mss::states l_ret = mss::states::NO;
+    FAPI_CALL_HWP( l_ret, mss::mcbist::is_broadcast_capable, fapiTrgt );
+    return ( mss::states::YES == l_ret );
 }
 
 //------------------------------------------------------------------------------
@@ -296,12 +298,14 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     // Get the first address of the given rank.
     uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
     mss::mcbist::address saddr, eaddr;
-    mss::mcbist::address::get_srank_range( port,
-                                           i_rank.getDimmSlct(),
-                                           i_rank.getRankSlct(),
-                                           i_rank.getSlave(),
-                                           saddr,
-                                           eaddr );
+    FAPI_CALL_HWP_NORETURN(
+        mss::mcbist::address::get_srank_range,
+            port,
+            i_rank.getDimmSlct(),
+            i_rank.getRankSlct(),
+            i_rank.getSlave(),
+            saddr,
+            eaddr );
 
     do
     {
