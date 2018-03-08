@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,7 +168,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(USRR1    ,507 , N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(UEIR     ,509 , N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
     _op_(ACMCR    ,510 , N/A                                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
-    _op_(SEIDBAR  ,511 , ECP.LS.SEIDBAR                                   ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
+    _op_(SMFCTRL  ,511 , ECP.IFU.T<??T>_SMFCTRL                           ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SIER_RU  ,768 , ECP.PC.T<??T>_SIER                               ,FLAG_READ_ONLY  ,SPR_PER_PT         ,64)\
     _op_(MMCR2_RU ,769 , ECP.PC.T<??T>_MMCR2                              ,FLAG_READ_ONLY  ,SPR_PER_PT         ,64)\
     _op_(MMCRA_RU ,770 , ECP.PC.T<??T>_MMCRA                              ,FLAG_READ_ONLY  ,SPR_PER_PT         ,64)\
