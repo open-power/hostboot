@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <targeting/common/targetservice.H>
 #include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
 
 #include <runtime/rt_targeting.H>
 #include <runtime/interface.h>   // g_hostInterfaces, postInitCalls_t
@@ -44,6 +45,7 @@
 #include <config.h>
 #include "../pnor_utils.H"
 #include <runtime/common/runtime_utils.H>
+
 
 // Trace definition
 extern trace_desc_t* g_trac_pnor;
@@ -903,17 +905,20 @@ void initPnor()
     TRACFCOMP(g_trac_pnor, ENTER_MRK"initPnor");
     errlHndl_t l_errl = nullptr;
 
-    // call static init() function to save PNOR section into memory
-    RtPnor::init(l_errl);
-    if (l_errl)
+    // Only run PNOR init on non-FSP based systems
+    if ( !INITSERVICE::spBaseServicesEnabled() )
     {
-      TRACFCOMP(g_trac_pnor,ERR_MRK"initPnor: "
-                    "Failed RtPnor::init() with EID %.8X:%.4X",
-                    ERRL_GETEID_SAFE(l_errl),
-                    ERRL_GETRC_SAFE(l_errl) );
-      errlCommit (l_errl, PNOR_COMP_ID);
+      // call static init() function to save PNOR section into memory
+      RtPnor::init(l_errl);
+      if (l_errl)
+      {
+        TRACFCOMP(g_trac_pnor,ERR_MRK"initPnor: "
+                      "Failed RtPnor::init() with EID %.8X:%.4X",
+                      ERRL_GETEID_SAFE(l_errl),
+                      ERRL_GETRC_SAFE(l_errl) );
+        errlCommit (l_errl, PNOR_COMP_ID);
+      }
     }
-
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"initPnor");
 }
