@@ -117,31 +117,36 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0x3 );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_GROUP_ON = 0x1;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_GROUP_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_GROUP_ON = 0x1;
                 l_scom_buffer.insert<5, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_GROUP_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_VG_NOT_SYS_ON = 0x1;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_VG_NOT_SYS_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
+                    && (l_chip_ec == 0x23)) )
             {
                 constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_VG_NOT_SYS_ON = 0x1;
                 l_scom_buffer.insert<6, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_VG_NOT_SYS_ON );
@@ -151,8 +156,9 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         }
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x5012c1dull, l_scom_buffer ));
 
@@ -221,8 +227,9 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 constexpr auto l_NMMU_MM_CFG_NMMU_CTL_TW_LCO_RDX_EN_ON = 0x1;
                 l_scom_buffer.insert<44, 1, 63, uint64_t>(l_NMMU_MM_CFG_NMMU_CTL_TW_LCO_RDX_EN_ON );
@@ -244,8 +251,9 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         }
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x5012c54ull, l_scom_buffer ));
 
@@ -261,8 +269,9 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             l_scom_buffer.insert<53, 1, 63, uint64_t>(l_NMMU_MM_CFG_NMMU_CTL_TLB_ISS543B_FIX_EN_ON );
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 constexpr auto l_NMMU_MM_MPSS_MODE_MPSS_ENA_PREF_PGSZ_ENA_G_64KB_H_64KB = 0x155;
                 l_scom_buffer.insert<19, 1, 54, uint64_t>(l_NMMU_MM_MPSS_MODE_MPSS_ENA_PREF_PGSZ_ENA_G_64KB_H_64KB );
@@ -282,8 +291,9 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
-                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
+                        && (l_chip_ec == 0x10)) )
             {
                 constexpr auto l_NMMU_MM_CFG_TWSM_SPLIT_MODE_TWSM_SPLIT_08_TLB_04_SLB = 0x0;
                 l_scom_buffer.insert<57, 1, 63, uint64_t>(l_NMMU_MM_CFG_TWSM_SPLIT_MODE_TWSM_SPLIT_08_TLB_04_SLB );
