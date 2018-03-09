@@ -58,6 +58,8 @@ extern "C"
         PU_PHB_CHIPUNIT,     ///< PCIe (PHB)
         PU_MI_CHIPUNIT,      ///< MI (Cumulus only)
         PU_DMI_CHIPUNIT,     ///< DMI (Cumulus only)
+        PU_MCC_CHIPUNIT,     ///< MCC MC Channels (Axone only)
+        PU_OMIC_CHIPUNIT,    ///< OMI Cplt (Axone only)
         PU_OMI_CHIPUNIT,     ///< OMI (Axone only)
         PU_MCS_CHIPUNIT,     ///< MCS (Nimbus only)
         PU_MCA_CHIPUNIT,     ///< MCA (Nimbus only)
