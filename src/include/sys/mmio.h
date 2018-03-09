@@ -148,8 +148,10 @@ static const uint64_t MMIO_IBSCOM_UE_DETECTED = 0x53434F4D4641494C;
 
 /** Constants used to define IBSCOM MMIO address ranges
 */
-static const uint64_t MMIO_IBSCOM_BASE = 0x6030220000000;
-static const uint64_t MMIO_IBSCOM_SIZE = 0x0000020000000;
+static const uint64_t MMIO_IBSCOM_BASE_MASK  = 0x6030220000000;
+static const uint64_t MMIO_IBSCOM_DMI_MASK   = 0x000000001FFFFFFF;
+static const uint64_t MMIO_IBSCOM_CHIP_MASK  = 0x00001C0000000000;
+static const uint64_t MMIO_IBSCOM_GROUP_MASK = 0x0001700000000000;
 
 #ifdef __cplusplus
 }

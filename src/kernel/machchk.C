@@ -85,28 +85,21 @@ bool handleLoadUE(task_t* t)
 
             uint64_t phys = VmmManager::findPhysicalAddress(vaddr);
 
-            //Check if address is in IBSCOM MMIO Range.
-            uint64_t ibAddrStart = 0;
-            for(uint32_t l_groupId=0; l_groupId<4; l_groupId++)
+            // Check if address is in IBSCOM MMIO Range.
+            //   Base mask bits are always set for ibscom.
+            //   Combined mask bits could be set for ibscom.
+            //   ~Combined mask bits can not be set for ibscom.
+            uint64_t combMask = MMIO_IBSCOM_BASE_MASK  |
+                                MMIO_IBSCOM_DMI_MASK   |
+                                MMIO_IBSCOM_CHIP_MASK  |
+                                MMIO_IBSCOM_GROUP_MASK;
+
+            if(((phys & MMIO_IBSCOM_BASE_MASK) == MMIO_IBSCOM_BASE_MASK) &&
+               ((phys & ~combMask) == 0))
             {
-                for(uint32_t l_chipId=0; l_chipId<4; l_chipId++)
-                {
-                    ibAddrStart = computeMemoryMapOffset( MMIO_IBSCOM_BASE,
-                                                          l_groupId,
-                                                          l_chipId );
-                    if((phys >= ibAddrStart) &&
-                       (phys <= ibAddrStart + MMIO_IBSCOM_SIZE - 1))
-                    {
-                        ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
-                        break;
-                    }
-                }
-                if(ueMagicValue == MMIO_IBSCOM_UE_DETECTED)
-                {
-                    break;
-                }
+                ueMagicValue = MMIO_IBSCOM_UE_DETECTED;
             }
-            if(ueMagicValue != MMIO_IBSCOM_UE_DETECTED)
+            else
             {
                 printk("MachineCheck::handleUE: Unrecognized address %lx\n",
                        phys);
