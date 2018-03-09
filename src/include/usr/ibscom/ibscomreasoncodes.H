@@ -36,7 +36,7 @@ namespace IBSCOM
         IBSCOM_SANITY_CHECK          = 0x02,
         IBSCOM_GET_TARG_VIRT_ADDR    = 0x03,
         IBSCOM_DO_IBSCOM             = 0x04,
-        IBSCOM_GET_PARRENT_DMI       = 0x05,
+        IBSCOM_GET_PARENT_DMI       = 0x05,
     };
 
     enum ibscomReasonCode
