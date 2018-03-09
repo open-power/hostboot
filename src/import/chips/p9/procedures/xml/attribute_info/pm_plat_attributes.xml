@@ -31,14 +31,15 @@
   <attribute>
     <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
     <description>
       Step size (binary in microvolts) to take upon external VRM voltage
       transitions. The value set here must take into account where internal
       VRMs are enabled or not as, when they are enabled, the step size must
       account for the tracking (eg PFET strength recalculation) for the step.
+      Firmware provides a default value of 50mV if this attribute is zero.
 
       Consumer: p9_pstate_parameter_block ->
+                        p9_setup_evid
                         Pstate Parameter Block (PSPB) for PGPE
 
       Provided by the Machine Readable Workbook after system characterization.
@@ -50,14 +51,12 @@
   <attribute>
     <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
     <description>
-      Step delay (binary in microseconds) after a voltage change
-
-      Consumer: p9_pstate_parameter_block ->
-                        Pstate Parameter Block (PSPB) for PGPE
-
-      Provided by the Machine Readable Workbook after system characterization.
+    This attribute is deprecated and is not consumed.  See
+    ATTR_EXTERNAL_VRM_TRANSITION_START_NS,
+    ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US,
+    ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US, and
+    ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS
     </description>
     <valueType>uint32</valueType>
     <platInit/>
