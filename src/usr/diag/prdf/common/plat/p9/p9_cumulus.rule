@@ -4138,7 +4138,7 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[10]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_FIR, bit(10)) ? analyze(gNPU0FIR);
+    (rN3_CHIPLET_FIR, bit(10)) ? analyzeNPU0FIR;
 
     /** N3_CHIPLET_FIR[11]
      *  Attention from NPU1FIR
@@ -4232,7 +4232,7 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
     /** N3_CHIPLET_UCS_FIR[7]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyze(gNPU0FIR);
+    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyzeNPU0FIR;
 
     /** N3_CHIPLET_UCS_FIR[8]
      *  Attention from NPU1FIR
@@ -6807,7 +6807,7 @@ group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 
     /** NPU0FIR[19]
      *  CQ CTL/SM NVF NVLink fatal error
      */
-    (rNPU0FIR, bit(19)) ? nvLinkAssist;
+    (rNPU0FIR, bit(19)) ? self_th_1;
 
     /** NPU0FIR[20]
      *  spare
