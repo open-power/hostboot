@@ -215,8 +215,8 @@ extern "C"
     /// P9 N3 satellite ids
     typedef enum
     {
-        P9C_N3_MCS01_SAT_ID = 0,
-        P9C_N3_MCS23_SAT_ID = 2
+        P9_N3_MCS01_SAT_ID = 0,
+        P9_N3_MCS23_SAT_ID = 2
     } p9_n3_sat_id_t;
 
     /// P9 XBUS chiplet SCOM ring ID enumeration
@@ -397,6 +397,55 @@ extern "C"
         PPE_PB_SAT_ID = 0x0,
     } p9_n3_ppe_sat_id;
 
+    /// P9A MC chiplet SCOM ring ID enumeration
+    /// source: tpc_p9u_mc01_top.vhdl
+    typedef enum
+    {
+        P9A_MC_PSCM_RING_ID = 0x0,       ///< PSCOM
+        P9A_MC_PERV_RING_ID = 0x1,       ///< PERV
+        P9A_MC_CHAN_RING_ID = 0x2,       ///< Channel registers
+        P9A_MC_OMIC0_RING_ID = 0x4,      ///< OMIC0
+        P9A_MC_OMIC1_RING_ID = 0x5,      ///< OMIC1
+        P9A_MC_OMIC2_RING_ID = 0x6,      ///< OMIC2
+        P9A_MC_MC01_RING_ID = 0x8,       ///< MC01
+        P9A_MC_OMIC0_PPE_RING_ID = 0x9,  ///< OMIC0 PPE
+        P9A_MC_OMIC1_PPE_RING_ID = 0xA,  ///< OMIC1 PPE
+        P9A_MC_OMIC2_PPE_RING_ID = 0xB,  ///< OMIC2 PPE
+        P9A_MC_OMI_DL_RING_ID = 0xC,     ///< OMI DL rings
+    } p9a_mc_ring_id_t;
+
+    // P9A Sat id enumeration
+    typedef enum
+    {
+        P9A_MC_IND_SAT_ID = 0x0,          ///< Indirect sat_id
+        P9A_MC_DSTL_CHAN0_SAT_ID = 0x4,   ///< USTL registers channel 0
+        P9A_MC_DSTL_CHAN1_SAT_ID = 0x5,   ///< USTL registers channel 1
+        P9A_MC_DSTL_CHAN2_SAT_ID = 0x6,   ///< USTL registers channel 2
+        P9A_MC_DSTL_CHAN3_SAT_ID = 0x7,   ///< USTL registers channel 3
+        P9A_MC_USTL_CHAN0_SAT_ID = 0x8,   ///< USTL registers channel 0
+        P9A_MC_USTL_CHAN1_SAT_ID = 0x9,   ///< USTL registers channel 1
+        P9A_MC_USTL_CHAN2_SAT_ID = 0xA,   ///< USTL registers channel 2
+        P9A_MC_USTL_CHAN3_SAT_ID = 0xB,   ///< USTL registers channel 3
+        P9A_MC_DL_REG0_SAT_ID = 0xD,      ///< OMI reg0 (omi0..2)
+        P9A_MC_DL_REG1_SAT_ID = 0xE,      ///< OMI reg1 (omi3..5)
+        P9A_MC_DL_REG2_SAT_ID = 0xF,      ///< OMI reg2 (omi6..7)
+    } p9a_mc_sat_id_t;
+
+    typedef enum
+    {
+        P9A_MC_DL_OMI0_FRST_REG = 0x10,   ///< First register of OMI % 3 == 0
+        P9A_MC_DL_OMI1_FRST_REG = 0x20,   ///< First register of OMI % 3 == 1
+        P9A_MC_DL_OMI2_FRST_REG = 0x30,   ///< First register of OMI % 3 == 2
+        P9A_MC_IND_REG = 0x3F,            ///< Indirect regiser
+    } p9a_mc_reg_offsets_t;
+
+    typedef enum
+    {
+        P9A_MC_OMI0_FRST_LANE = 0x0,      ///< First lane of OMI % 3 = 0
+        P9A_MC_OMI1_FRST_LANE = 0x8,      ///< First lane of OMI % 3 = 1
+        P9A_MC_OMI2_FRST_LANE = 0x10,     ///< First lane of OMI % 3 = 2
+    } p9a_mc_lane_t;
+
 //        8             7             6             5             4             3          2         1
 //
 //  |0 1 2 3| |4 5 6 7| |8 9 10 11| |12 13 14 15| |16 17 18 19| |20 21 22 23| |24 25 26 27| |28 29 30 31|
@@ -556,13 +605,6 @@ extern "C"
                 return (iv_addr >> 37) & 0x3F;
             }
 
-            /// @brief Extract the indirect address field of a scom address
-            /// @retval uint16_t indirect address field
-            inline uint16_t get_ind_addr()
-            {
-                return (iv_addr >> 43) & 0x1FF;
-            }
-
             /// @brief Modify SCOM address, update the RX or TX Group ID
             /// @param[in] i_grp_id Group id to set
             /// @retval none
@@ -570,6 +612,29 @@ extern "C"
             {
                 iv_addr &= 0xFFFFF81FFFFFFFFFULL;
                 iv_addr |= (i_grp_id & 0x3FULL) << 37;
+            }
+
+            /// @brief Extract the RX or TX Group ID of an indirect scom address
+            /// @retval uint8_t RX/TX group id
+            inline uint8_t get_lane_id()
+            {
+                return (iv_addr >> 32) & 0x1F;
+            }
+
+            /// @brief Modify SCOM address, update the RX or TX Group ID
+            /// @param[in] i_grp_id Group id to set
+            /// @retval none
+            inline void set_lane_id(uint8_t i_grp_id)
+            {
+                iv_addr &= 0xFFFFFFE0FFFFFFFFULL;
+                iv_addr |= (i_grp_id & 0x1FULL) << 32;
+            }
+
+            /// @brief Extract the indirect address field of a scom address
+            /// @retval uint16_t indirect address field
+            inline uint16_t get_ind_addr()
+            {
+                return (iv_addr >> 43) & 0x1FF;
             }
 
             /// @brief Determine if SCOM address is valid/well-formed
