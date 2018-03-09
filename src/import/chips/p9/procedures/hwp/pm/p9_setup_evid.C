@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -261,6 +261,7 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     uint32_t l_ext_vcs_mv = sysparm_uplift(l_int_vcs_mv,
                                                            l_ics_ma,
                                                            attrs->r_loadline_vcs_uohm,
+
                                                            attrs->r_distloss_vcs_uohm,
                                                            attrs->vrm_voffset_vcs_uv);
 
@@ -392,6 +393,7 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                                 attrs.vdd_bus_num,
                                                 attrs.vdd_rail_select,
                                                 attrs.vdd_voltage_mv,
+                                                attrs.attr_ext_vrm_step_size_mv,
                                                 VDD_SETUP),
                      "Error from VDD setup function");
         }
@@ -402,6 +404,7 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                                 attrs.vdn_bus_num,
                                                 attrs.vdn_rail_select,
                                                 attrs.vdn_voltage_mv,
+                                                attrs.attr_ext_vrm_step_size_mv,
                                                 VDN_SETUP),
                      "error from VDN setup function");
         }
@@ -420,6 +423,7 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                                     attrs.vcs_bus_num,
                                                     attrs.vcs_rail_select,
                                                     attrs.vcs_voltage_mv,
+                                                    attrs.attr_ext_vrm_step_size_mv,
                                                     VCS_SETUP),
                          "error from VCS setup function");
             }
@@ -436,12 +440,36 @@ p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                            const uint8_t i_bus_num,
                            const uint8_t i_rail_select,
                            const uint32_t i_voltage_mv,
+                           const uint32_t i_ext_vrm_step_size_mv,
                            const P9_SETUP_EVID_CONSTANTS i_evid_value)
 
 {
-    uint8_t l_count = 1;
-    uint8_t l_goodResponse = 0;
-    uint8_t l_throwAssert = 0;
+
+    uint8_t     l_goodResponse = 0;
+    uint8_t     l_throwAssert = true;
+    uint32_t    l_present_voltage_mv;
+    uint32_t    l_target_mv;
+    uint32_t    l_count;
+    int32_t     l_delta_mv = 0;
+    char        rail_str[8];
+
+    switch (i_evid_value)
+    {
+        case VCS_SETUP:
+            strcpy(rail_str, "VCS");
+            break;
+
+        case VDD_SETUP:
+            strcpy(rail_str, "VDD");
+            break;
+
+        case VDN_SETUP:
+            strcpy(rail_str, "VDN");
+            break;
+
+        default:
+            ;
+    }
 
     if (i_evid_value != VCS_SETUP)
     {
@@ -451,31 +479,115 @@ p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                  "Initializing avsBus VDD/VDN, bridge %d", BRIDGE_NUMBER);
     }
 
+    FAPI_INF("Setting voltage for %s to %d mV", rail_str, i_voltage_mv);
+
+    // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
+    // initialize the AVS slave
+    FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+
+    // Read the present voltage
+
+    // This loop is to ensrue AVSBus Master and Slave are in sync
+    l_count = 0;
+
     do
     {
-        FAPI_INF("Sending an Idle frame before Voltage writes");
 
-        // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
-        // initialize the AVS slave
-        FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
-
-        // Set Boot voltage
-        FAPI_TRY(avsVoltageWrite(i_target,
-                                 i_bus_num,
-                                 BRIDGE_NUMBER,
-                                 i_rail_select,
-                                 i_voltage_mv),
-                 "Setting voltage via AVSBus %d, Bridge %d",
+        FAPI_TRY(avsVoltageRead(i_target, i_bus_num, BRIDGE_NUMBER,
+                                i_rail_select, l_present_voltage_mv),
+                 "AVS Voltage read transaction failed to %d, Bridge %d",
                  i_bus_num,
                  BRIDGE_NUMBER);
-
         // Throw an assertion if we don't get a good response.
-        l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
-        FAPI_TRY(avsValidateResponse(i_target,  i_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
+        l_throwAssert =  (l_count >= AVSBUS_RETRY_COUNT);
+        FAPI_TRY(avsValidateResponse(i_target,  i_bus_num, BRIDGE_NUMBER,
+                                     l_throwAssert, l_goodResponse));
+
+        if (!l_goodResponse)
+        {
+            FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+        }
 
         l_count++;
     }
-    while (l_goodResponse == 0);
+    while (!l_goodResponse);
+
+    // Compute the delta
+    l_delta_mv = l_present_voltage_mv - i_voltage_mv;
+
+    if (l_delta_mv > 0)
+    {
+        FAPI_DBG("Decreasing voltage - delta = %d", l_delta_mv );
+    }
+    else if (l_delta_mv < 0)
+    {
+        FAPI_DBG("Increasing voltage - delta = %d", l_delta_mv );
+    }
+    else
+    {
+        FAPI_DBG("Voltage to be set equals the initial voltage");
+    }
+
+    // Break into steps limited by attr.attr_ext_vrm_step_size_mv
+    while (l_delta_mv)
+    {
+        // Hostboot doesn't support abs()
+        uint32_t l_abs_delta_mv = l_delta_mv < 0 ? -l_delta_mv : l_delta_mv;
+
+        if (l_abs_delta_mv > i_ext_vrm_step_size_mv)
+        {
+            if (l_delta_mv > 0)  // Decreasing
+            {
+                l_target_mv = l_present_voltage_mv - i_ext_vrm_step_size_mv;
+            }
+            else
+            {
+                l_target_mv = l_present_voltage_mv + i_ext_vrm_step_size_mv;
+            }
+        }
+        else
+        {
+            l_target_mv = i_voltage_mv;
+        }
+
+        FAPI_INF("Target voltage = %d; Present voltage = %d",
+                 l_target_mv, l_present_voltage_mv);
+
+        l_count = 0;
+
+        do
+        {
+            FAPI_INF("Moving voltage to %d; retry count = %d", l_target_mv, l_count);
+            // Set Boot voltage
+            FAPI_TRY(avsVoltageWrite(i_target,
+                                     i_bus_num,
+                                     BRIDGE_NUMBER,
+                                     i_rail_select,
+                                     l_target_mv),
+                     "Setting voltage via AVSBus %d, Bridge %d",
+                     i_bus_num,
+                     BRIDGE_NUMBER);
+
+            // Throw an assertion if we don't get a good response.
+            l_throwAssert =  l_count >= AVSBUS_RETRY_COUNT;
+            FAPI_TRY(avsValidateResponse(i_target,
+                                         i_bus_num,
+                                         BRIDGE_NUMBER,
+                                         l_throwAssert,
+                                         l_goodResponse));
+
+            if (!l_goodResponse)
+            {
+                FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+            }
+
+            l_count++;
+        }
+        while (!l_goodResponse);
+
+        l_present_voltage_mv = l_target_mv;
+        l_delta_mv = l_present_voltage_mv - i_voltage_mv;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

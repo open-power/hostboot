@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ enum P9_SETUP_EVID_CONSTANTS
     BRIDGE_NUMBER = 1,
 
 // Default voltages if mailbox -> attributes are not setup
-    AVSBUS_VOLTAGE_WRITE_RETRY_COUNT = 5,
+    AVSBUS_RETRY_COUNT = 5,
     VDD_SETUP = 6,
     VDN_SETUP = 7,
     VCS_SETUP = 8,
@@ -114,6 +114,7 @@ extern "C"
 /// @param [in]  i_rail_select AVS bus rail select
 /// @param [in]  i_voltage_mv voltage value in mv
 /// @param [in]  i_evid_value EVID setup mode
+/// @param [in]  i_ext_vrm_step_size_mv Maximum VRM step size in mv
 //@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p9_setup_evid_voltageWrite(
@@ -121,8 +122,8 @@ extern "C"
         const uint8_t i_bus_num,
         const uint8_t i_rail_select,
         const uint32_t i_voltage_mv,
+        const uint32_t i_ext_vrm_step_size_mv,
         const P9_SETUP_EVID_CONSTANTS i_evid_value);
-
 
 } // extern C
 
