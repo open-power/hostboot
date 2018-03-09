@@ -449,6 +449,9 @@ errlHndl_t IStepDispatcher::executeAllISteps()
     uint32_t numReconfigs = 0;
     bool l_manufacturingMode = false;
 
+    // We are terminating in order to trigger a reconfig loop on the FSP
+    bool l_termToReconfig = false;
+
     // soft reconfig loops happen really fast
     // and since for scale-out systems it only happens for istep 7
     // there is no significant max time delay to recover the system
@@ -634,6 +637,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         // Return an error to cause termination on FSP systems
                         if (iv_spBaseServicesEnabled)
                         {
+                            l_termToReconfig = true;
                             err = failedDueToDeconfig(istep, substep,
                                                       newIstep, newSubstep);
                         }
@@ -781,10 +785,15 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
         if (err)
         {
-            // Ensure severity reflects IPL will be terminated
-            if (err->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
+            // If we are terminating the IPL to force a reconfig loop on the
+            //  FSP then leave the severity alone
+            if( !l_termToReconfig )
             {
-                err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                // Ensure severity reflects IPL will be terminated
+                if (err->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
+                {
+                    err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
             }
             break;
         }
@@ -2650,7 +2659,6 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
     /*@
      * @errortype
      * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
-     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
      * @moduleid         ISTEP_INITSVC_MOD_ID
      * @userdata1[00:15] Istep that failed
      * @userdata1[16:31] SubStep that failed
