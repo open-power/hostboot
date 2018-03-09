@@ -71,7 +71,7 @@ uint32_t avsCRCcalc(const uint32_t i_avs_cmd)
         l_msb = l_msb >> 1;
     }
 
-    FAPI_INF("The computed CRC Value is %d", o_crc_value)
+    FAPI_DBG("Computed CRC Value = %d", o_crc_value)
     return o_crc_value;
 }
 
