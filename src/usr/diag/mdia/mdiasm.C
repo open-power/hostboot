@@ -116,12 +116,11 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         MEM_SPA_FIR_MASK,
     };
 
-    const uint64_t mcsRegs[] = {
-        MCI_FIR,
-        MCI_FIR_MASK,
-        MCI_FIR_ACT0,
-        MCI_FIR_ACT1,
-        MCS_MODE4,
+    const uint64_t dmiRegs[] = {
+        CHI_FIR,
+        CHI_FIR_MASK,
+        CHI_FIR_ACT0,
+        CHI_FIR_ACT1,
     };
 
     const uint64_t mcbRegs[] = {
@@ -150,27 +149,27 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         // get the parent membuf
         ConstTargetHandle_t membuf = getParentChip(i_target);
 
-        // get the parent mcs
+        // get the parent dmi
         TargetHandleList targetList;
-        TargetHandle_t mcs = NULL;
+        TargetHandle_t dmi = NULL;
         if(membuf)
         {
             getParentAffinityTargets(
                     targetList,
                     membuf,
                     CLASS_UNIT,
-                    TYPE_MCS);
+                    TYPE_DMI);
         }
         if(targetList.size() == 1)
         {
-            mcs = targetList[0];
+            dmi = targetList[0];
         }
 
         // get the parent proc
         ConstTargetHandle_t proc = NULL;
-        if(mcs)
+        if(dmi)
         {
-            proc = getParentChip(mcs);
+            proc = getParentChip(dmi);
         }
 
         const struct Entry
@@ -182,7 +181,7 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
             {i_target, mbaRegs, mbaRegs + sizeof(mbaRegs)/sizeof(*mbaRegs)},
             {membuf, membufRegs,
              membufRegs + sizeof(membufRegs)/sizeof(*membufRegs)},
-            {mcs, mcsRegs, mcsRegs + sizeof(mcsRegs)/sizeof(*mcsRegs)},
+            {dmi, dmiRegs, dmiRegs + sizeof(dmiRegs)/sizeof(*dmiRegs)},
             {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
         };
 
@@ -241,6 +240,11 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
             }
         }
     }
+    else
+    {
+        assert( false, "addTimeoutFFDC: Invalid target type from i_target: %x",
+                get_huid(i_target) );
+    }
 
     // collect these traces for timeout debugging
     io_log->collectTrace("MDIA_FAST",512);
@@ -261,13 +265,19 @@ fapi2::TargetType getMdiaTargetType()
     TARGETING::targetService().masterProcChipTargetHandle(masterProc);
 
     if ( TARGETING::MODEL_CUMULUS ==
-            masterProc->getAttr<TARGETING::ATTR_MODEL>() )
+         masterProc->getAttr<TARGETING::ATTR_MODEL>() )
     {
         targetType = fapi2::TARGET_TYPE_MBA_CHIPLET;
     }
-    else
+    else if ( TARGETING::MODEL_NIMBUS ==
+              masterProc->getAttr<TARGETING::ATTR_MODEL>() )
     {
         targetType = fapi2::TARGET_TYPE_MCBIST;
+    }
+    else
+    {
+        assert( false, "getMdiaTargetType: Invalid model type from "
+                "masterProc: %x", get_huid(masterProc) );
     }
 
     return targetType;
@@ -327,7 +337,11 @@ uint64_t getTimeoutValue()
 }
 
 // Do the setup for CE thresholds
-errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
+template<TARGETING::TYPE T>
+errlHndl_t ceErrorSetup( TargetHandle_t i_mba );
+
+template<>
+errlHndl_t ceErrorSetup<TYPE_MBA>( TargetHandle_t i_mba )
 {
     errlHndl_t err = NULL;
 
@@ -347,6 +361,7 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         {
             MDIA_FAST("ceErrorSetup: deviceRead on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(membuf));
+            errlCommit( err, MDIA_COMP_ID );
             break;
         }
 
@@ -364,6 +379,7 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
         {
             MDIA_FAST("ceErrorSetup: deviceWrite on 0x%08X failed HUID:0x%08X",
                       addr, get_huid(i_mba));
+            errlCommit( err, MDIA_COMP_ID );
             break;
         }
     } while(0);
@@ -393,6 +409,11 @@ uint64_t getMemSize(TargetHandle_t i_target)
         targetService().getAssociated( targetList, i_target,
                                        TargetService::CHILD_BY_AFFINITY,
                                        TargetService::ALL, &predAnd );
+    }
+    else
+    {
+        assert( false, "getMemSize: Invalid target type from i_target: %x",
+                get_huid(i_target) );
     }
 
     for (auto trgt : targetList)
@@ -442,18 +463,31 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 uint64_t mskData = 0;
                 size_t sz_uint64 = sizeof(uint64_t);
 
-                // Init data for MCBIST.
-                uint64_t firAddr    = MCBIST_FIR;
-                uint64_t firAndAddr = MCBIST_FIR_AND;
-                uint64_t mskAddr    = MCBIST_FIR_MASK;
-                uint64_t bitMask    = 0x0028000000000000;
+                uint64_t firAddr    = 0;
+                uint64_t firAndAddr = 0;
+                uint64_t mskAddr    = 0;
+                uint64_t bitMask    = 0;
 
+                // Init data for MCBIST.
+                if ( TYPE_MCBIST == trgtType )
+                {
+                    firAddr    = MCBIST_FIR;
+                    firAndAddr = MCBIST_FIR_AND;
+                    mskAddr    = MCBIST_FIR_MASK;
+                    bitMask    = 0x0028000000000000;
+                }
                 // Change if target type is MBA.
-                if ( TYPE_MBA == trgtType )
+                else if ( TYPE_MBA == trgtType )
                 {
                     firAddr = MBA01_SPA;
                     mskAddr = MBA01_SPA_MASK;
                     bitMask = 0x8080000000000000; // bits 0 or 8
+                }
+                // Assert if unsupported type
+                else
+                {
+                    assert( false, "processCommandTimeout: Invalid target type "
+                            "from target: %x", get_huid(target) );
                 }
 
                 // Check for command complete. If set, don't time out.
@@ -564,7 +598,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 // If maint cmd complete bit is not on, time out
                 MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
-                //target type is MBA
+                // target type is MBA
                 if ( TYPE_MBA == trgtType )
                 {
                     fapi2::ReturnCode fapirc =
@@ -587,8 +621,8 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         errlCommit(err, MDIA_COMP_ID);
                     }
                 }
-                //target type is MCBIST
-                else
+                // target type is MCBIST
+                else if ( TYPE_MCBIST == trgtType )
                 {
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
                     FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
@@ -612,6 +646,12 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                                    "0x%08X", firAddr, get_huid(target) );
                         errlCommit(err, MDIA_COMP_ID);
                     }
+                }
+                // Assert if unsupported type
+                else
+                {
+                    assert( false, "processCommandTimeout: Invalid target type "
+                            "from timed out target: %x", get_huid(target) );
                 }
 
                 (*wit)->data = NULL;
@@ -899,7 +939,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
             {
-                TargetHandle_t target = getTarget( *i_wfp);
+                TargetHandle_t target = getTarget( *i_wfp );
                 TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
                 // MBA target
@@ -908,7 +948,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                     rc = PRDF::restoreDramRepairs<TYPE_MBA>( target );
                 }
                 // MCBIST target
-                else
+                else if ( TYPE_MCBIST == trgtType )
                 {
                     // Get the connected MCAs.
                     TargetHandleList mcaList;
@@ -921,7 +961,11 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                         rc |= PRDF::restoreDramRepairs<TYPE_MCA>( mca );
                     }
                 }
-
+                else
+                {
+                    assert( false, "executeWorkItem: Invalid target type from "
+                            "target: %x", get_huid(target) );
+                }
                 break;
             }
             case START_PATTERN_0:
@@ -953,13 +997,13 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             {
                 MDIA_FAST("Executing analyzeIplCEStats");
                 bool calloutMade = false;
-                TargetHandle_t mba = getTarget( *i_wfp);
-                rc = PRDF::analyzeIplCEStats( mba,
-                                              calloutMade);
-                if( rc)
+                TargetHandle_t target = getTarget( *i_wfp );
+                rc = PRDF::analyzeIplCEStats( target,
+                                              calloutMade );
+                if( rc )
                 {
                     MDIA_FAST("executeWorkItem: PRDF::analyzeIplCEStats failed "
-                      "rc:%d HUID:0x%08X", rc, get_huid(mba));
+                      "rc:%d HUID:0x%08X", rc, get_huid(target));
                 }
                 if( calloutMade )
                 {
@@ -1057,7 +1101,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
             // We will always do ce setup though CE calculation
             // is only done during MNFG. This will give use better ffdc.
-            err = ceErrorSetup( target );
+            err = ceErrorSetup<TYPE_MBA>( target );
             if( nullptr != err)
             {
                 MDIA_FAST("sm: ceErrorSetup failed for mba. HUID:0x%08X",
@@ -1174,7 +1218,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
         }
         //target type is MCBIST
-        else
+        else if (TYPE_MCBIST == trgtType)
         {
             fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
             mss::mcbist::stop_conditions stopCond;
@@ -1235,6 +1279,11 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 MDIA_FAST("sm: Running Maint Cmd failed");
                 i_wfp.data = nullptr;
             }
+        }
+        else
+        {
+            assert( false, "doMaintCommand: Invalid target type from "
+                    "target: %x", get_huid(target) );
         }
 
         if ( nullptr == err )
@@ -1391,7 +1440,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         }
 
         //target type is MBA
-        if(TYPE_MBA == trgtType)
+        if ( TYPE_MBA == trgtType )
         {
             mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
 
@@ -1429,7 +1478,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             }
         }
         //target type is MCBIST
-        else
+        else if ( TYPE_MCBIST == trgtType )
         {
             if(flags & STOP_CMD)
             {
@@ -1445,6 +1494,12 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 }
             }
         }
+        else
+        {
+            assert( false, "processMaintCommandEvent: Invalid target type "
+                    "from target: %x", get_huid(target) );
+        }
+
         // schedule the next work item
         if((flags & START_NEXT_CMD) && !iv_shutdown)
         {

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -53,7 +55,7 @@ int64_t WorkItem::compare(const WorkItem & i_r) const
     }
 
     // if the state machine computed priority is the same,
-    // give higher priority to mbas on different dmi busses
+    // give higher priority to mbas/mcbists on different dmi busses
 
     if(iv_chipUnit < i_r.iv_chipUnit)
     {

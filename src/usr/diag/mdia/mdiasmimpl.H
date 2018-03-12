@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ struct WorkFlowProperties
     void * data;
 
     /**
-     * @brief mba position on membuf (0/1)
+     * @brief mba/mcbist position on membuf/proc (0/1)
      */
     uint8_t chipUnit;
 

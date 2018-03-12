@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,11 +97,10 @@ enum
     MCBIST_FIR_ACT1         = 0x07012307,
 
     // mcs unit regs
-    MCI_FIR                 = 0x02011840,
-    MCI_FIR_MASK            = 0x02011843,
-    MCI_FIR_ACT0            = 0x02011846,
-    MCI_FIR_ACT1            = 0x02011847,
-    MCS_MODE4               = 0x0201181A,
+    CHI_FIR                 = 0x07010900,
+    CHI_FIR_MASK            = 0x07010903,
+    CHI_FIR_ACT0            = 0x07010906,
+    CHI_FIR_ACT1            = 0x07010907,
 
     // proc regs
     IPOLL_MASK              = 0x000F0033,
@@ -168,22 +167,22 @@ typedef std::vector<uint64_t> MonitorIDs;
  * @brief getDiagnosticMode get the mode (scrub, init, one, four, nine)
  *
  * @param[in] i_globals policy flags needed to determine the mode
- * @param[in] i_target the mba target for which the mode is determined
- * @param[out] o_mode the mode for the target mba
+ * @param[in] i_target the mba/mcbist target for which the mode is determined
+ * @param[out] o_mode the mode for the target mba/mcbist
  *
  * @retval 0 no error
  * @retval !0 unexpected error occurred
  */
 errlHndl_t getDiagnosticMode(
         const Globals & i_globals,
-        TARGETING::TargetHandle_t i_mba,
+        TARGETING::TargetHandle_t i_trgt,
         DiagMode & o_mode);
 
 /**
- * @brief getWorkFlow get the workflow for an mba target
+ * @brief getWorkFlow get the workflow for an mba/mcbist target
  *
  * @param[in] i_mode the diagnostic mode for the target
- * @param[out] o_wf the workflow for the mba target
+ * @param[out] o_wf the workflow for the mba/mcbist target
  * @param[in] i_globals policy flags needed to determine MNFG status
  *
  * @retval 0 no error
@@ -202,23 +201,23 @@ errlHndl_t getWorkFlow(
 void doStepCleanup(const Globals & i_globals);
 
 /**
- * @brief check if hw state has been changed for an mba's
- *        associated targets
+ * @brief check if hw state has been changed for an mba
+ *        or mcbist's associated targets
  *
- * @param[in] i_mba input mba target
+ * @param[in] i_trgt input mba/mcbist target
  *
  * @retval true if hw state has been changed or else
  */
-bool isHWStateChanged(TARGETING::TargetHandle_t i_mba);
+bool isHWStateChanged(TARGETING::TargetHandle_t i_trgt);
 
 /**
- * @brief clear hw changed state for an mba's
- *        associated targets
+ * @brief clear hw changed state for an mba
+ *        or mcbist's associated targets
  *
- * @param[in] i_mba input mba target
+ * @param[in] i_trgt input mba/mcbist target
  *
  */
-void clearHWStateChanged(TARGETING::TargetHandle_t i_mba);
+void clearHWStateChanged(TARGETING::TargetHandle_t i_trgt);
 
 }
 #endif

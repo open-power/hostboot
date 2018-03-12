@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -65,7 +67,7 @@ class WorkItem
          * @param[in] i_sm state machine to forward call to
          * @param[in] i_wfp state machine state snapshot
          * @param[in] i_priority work item priority
-         * @param[in] i_chipUnit mba position (0/1)
+         * @param[in] i_chipUnit mba/mcbist position (0/1)
          */
         WorkItem(StateMachine & i_sm, WorkFlowProperties * i_wfp,
                 uint64_t i_priority, uint8_t i_chipUnit);
@@ -88,7 +90,7 @@ class WorkItem
         uint64_t iv_priority;
 
         /**
-         * @brief the mba number on the membuf (0/1)
+         * @brief the mba/mcbist number on the membuf/proc (0/1)
          */
         uint8_t iv_chipUnit;
 

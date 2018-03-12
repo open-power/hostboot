@@ -224,14 +224,14 @@ errlHndl_t getWorkFlow(
 }
 
 /*
- *  Local helper function to return a list of Centaur
- *  DIMMs, and MCS associated with the input MBA target
+ *  Local helper function to return a list of DIMMs, MCS, and
+ *  MCA/Centaur associated with the input MBA/MCBIST target
  *
- *  If i_queryOnly = true (Query)
- *    - Return a list of DIMMs, Centaur, and
- *      MCS connected to this MBA
+ *  If i_queryOnly = true (Query) or MCBIST case
+ *    - Return a list of DIMMs, Centaur/MCA, and
+ *      MCS connected to this MBA/MCBIST
  *
- *  Else (Clear)
+ *  Else (Clear) - Centaur case only
  *   - Return a list of DIMMs and
  *     (Centaur + MCS) if all the DIMMs behind this
  *     Centaur have hwchangedState flags cleared
@@ -265,18 +265,21 @@ TargetHandleList getMemTargetsForQueryOrClear(
             // add associated MCBIST
             o_list.push_back( i_trgt );
 
+            // add associated MCSs
+            TargetHandleList mcsList;
+            getChildAffinityTargets( mcsList, i_trgt, CLASS_UNIT, TYPE_MCS );
+            if ( !mcsList.empty() )
+                o_list.insert( o_list.end(), mcsList.begin(), mcsList.end() );
+
             // add associated MCAs
             TargetHandleList mcaList;
-            getChildAffinityTargets(mcaList, i_trgt, CLASS_UNIT, TYPE_MCA);
-
+            getChildAffinityTargets( mcaList, i_trgt, CLASS_UNIT, TYPE_MCA );
             if ( !mcaList.empty() )
-            {
                 o_list.insert( o_list.end(), mcaList.begin(), mcaList.end() );
-            }
 
         }
         // MBA target
-        else
+        else if ( TYPE_MBA == trgtType )
         {
             // add associated Centaur
             TargetHandleList targetList;
@@ -371,6 +374,12 @@ TargetHandleList getMemTargetsForQueryOrClear(
                                targetList.end() );
             }
 
+        }
+        else
+        {
+            assert( false, "getMemTargetsForQueryOrClear: Invalid target "
+                    "type from i_trgt: %x", get_huid(i_trgt) );
+            break;
         }
 
     } while(0);
