@@ -165,7 +165,8 @@ void ErrlManager::setupPnorInfo()
                 }
                 // if this is 'my' type of plid (HB or HBRT) see if it's max
                 if (((l_id & FIRST_BYTE_ERRLOG) == ERRLOG_PLID_BASE ) &&
-                    (l_id > l_maxId ) && (l_id <= ERRLOG_PLID_POST_MAX))
+                    (l_id > l_maxId ) &&
+                    ((l_id & ERRLOG_PLID_MASK) <= ERRLOG_PLID_POST_MAX))
                 {
                     l_maxId = l_id;
 
