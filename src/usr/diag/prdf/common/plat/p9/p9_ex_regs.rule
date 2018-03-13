@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -31,7 +31,7 @@
     {
         name        "L3 PRD Purge Register";
         scomaddr    0x1001180E;
-        capture     group never;
+        capture     group default;
     };
 
     ############################################################################
@@ -76,13 +76,6 @@
     {
         name        "P9 EX target NCU ERROR REPORT REG";
         scomaddr    0x1001100e;
-        capture     group default;
-    };
-
-    register L3_PRD_PURGE_REG
-    {
-        name        "P9 EX target L3 PRD PURGE REG";
-        scomaddr    0x1001180e;
         capture     group default;
     };
 

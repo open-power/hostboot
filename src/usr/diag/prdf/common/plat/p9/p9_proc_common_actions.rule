@@ -122,6 +122,13 @@ actionclass analyzeNPU0FIR
     analyze(gNPU0FIR);
 };
 
+/** Special wrapper for INTCQFIR to collect extra FFDC */
+actionclass analyzeINTCQFIR
+{
+    capture(intcqfir_ffdc);
+    analyze(gINTCQFIR);
+};
+
 /** Callout connected XBUS 0 interface on first occurrence */
 actionclass calloutBusInterface_xbus0_th_1
 {

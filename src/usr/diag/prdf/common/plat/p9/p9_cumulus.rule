@@ -4173,7 +4173,7 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[17]
      *  Attention from INTCQFIR
      */
-    (rN3_CHIPLET_FIR, bit(17)) ? analyze(gINTCQFIR);
+    (rN3_CHIPLET_FIR, bit(17)) ? analyzeINTCQFIR;
 
     /** N3_CHIPLET_FIR[18]
      *  Attention from PBAFIR
