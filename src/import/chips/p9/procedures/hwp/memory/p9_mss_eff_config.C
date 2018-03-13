@@ -50,7 +50,7 @@
 #include <lib/shared/mss_kind.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 ///
 /// @brief Configure the attributes for each controller
