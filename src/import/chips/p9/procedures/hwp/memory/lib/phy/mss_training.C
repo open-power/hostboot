@@ -51,7 +51,7 @@
 #include <lib/workarounds/ccs_workarounds.H>
 
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/pda.H>
