@@ -38,7 +38,7 @@
 
 #include <lib/utils/poll.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
