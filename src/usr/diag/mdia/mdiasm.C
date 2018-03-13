@@ -601,20 +601,16 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 // target type is MBA
                 if ( TYPE_MBA == trgtType )
                 {
-                    fapi2::ReturnCode fapirc =
-                        static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd();
-                    err = fapi2::rcToErrl(fapirc);
-
+                    FAPI_INVOKE_HWP( err,
+                        static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd );
                     if( nullptr != err )
                     {
                         MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
                         errlCommit(err, MDIA_COMP_ID);
                     }
 
-                    fapirc =
-                        static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd();
-                    err = fapi2::rcToErrl(fapirc);
-
+                    FAPI_INVOKE_HWP( err,
+                        static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd );
                     if( nullptr != err )
                     {
                         MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
@@ -1109,13 +1105,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 break;
             }
 
-            fapi2::ReturnCode fapirc = mss_get_address_range(
-                    fapiMba,
-                    MSS_ALL_RANKS,
-                    startAddr,
-                    endAddr);
-            err = fapi2::rcToErrl(fapirc);
-
+            FAPI_INVOKE_HWP( err, mss_get_address_range, fapiMba, MSS_ALL_RANKS,
+                             startAddr, endAddr );
             if(err)
             {
                 MDIA_FAST("sm: get_address_range failed");
@@ -1203,9 +1194,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
             // Command and address configured.
             // Invoke the command.
-            fapirc = cmd->setupAndExecuteCmd();
-
-            err = fapi2::rcToErrl(fapirc);
+            FAPI_INVOKE_HWP( err, cmd->setupAndExecuteCmd );
             if( nullptr != err )
             {
                 MDIA_FAST("sm: setupAndExecuteCmd %p failed", target);
@@ -1411,8 +1400,6 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 // done with this maint command
 
                 flags = DELETE_CMD | START_NEXT_CMD;
-                wfp.data = NULL;
-
                 break;
 
             case STOP_TESTING:
@@ -1423,19 +1410,16 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
                 // done with this command
                 flags = DELETE_CMD | STOP_CMD | START_NEXT_CMD;
-                wfp.data = NULL;
 
                 break;
 
             case RESET_TIMER:
-                flags = CLEANUP_CMD;
+                flags = CLEANUP_CMD | DELETE_CMD;
                 break;
 
             default:
-                // this shouldn't happen, but if it does
-                // free up the memory
-                flags = DELETE_CMD;
-                wfp.data = NULL;
+                assert( false, "processMaintCommandEvent: unsupported event "
+                        "type" );
                 break;
         }
 
@@ -1444,13 +1428,22 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         {
             mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
 
-            if(cmd && (flags & STOP_CMD))
+            // It's possible PRD sent RESET_TIMER and started a command on this
+            // target so we need to use a dummy command here since cmd might be
+            // null. It is safe to create a dummy command object because the
+            // stopCmd() function is generic for all command types. Also, since
+            // we are only stopping the command, all of the parameters for the
+            // command object are junk except for the target.
+            if( flags & STOP_CMD )
             {
                 MDIA_FAST("sm: stopping command: %p", target);
 
-                fapi2::ReturnCode fapirc = cmd->stopCmd();
-                err = fapi2::rcToErrl(fapirc);
+                fapi2::buffer<uint64_t> i_startAddr, i_endAddr;
+                fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(target);
+                mss_SuperFastRead dummyCmd{ fapiMba, i_startAddr, i_endAddr, 0,
+                                            false };
 
+                FAPI_INVOKE_HWP( err, dummyCmd.stopCmd );
                 if (nullptr != err)
                 {
                     MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
@@ -1463,8 +1456,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 // restore any init settings that
                 // may have been changed by the command
 
-                fapi2::ReturnCode fapirc = cmd->cleanupCmd();
-                err = fapi2::rcToErrl(fapirc);
+                FAPI_INVOKE_HWP( err, cmd->cleanupCmd );
                 if(nullptr != err)
                 {
                     MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
@@ -1475,6 +1467,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
             if(cmd && (flags & DELETE_CMD))
             {
                 delete cmd;
+                wfp.data = NULL;
             }
         }
         //target type is MCBIST
