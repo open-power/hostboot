@@ -193,8 +193,10 @@ void* call_host_start_payload (void *io_pArgs)
     do{
 
         // Place a separator in the TPM to indicate we are passing control
-        //  to the next level of firmware in the stack
-        l_errl = TRUSTEDBOOT::pcrExtendSeparator();
+        //  to the next level of firmware in the stack. Send the synchronous
+        //  message to make sure that the traces are flushed prior to the daemon
+        //  shutdown.
+        l_errl = TRUSTEDBOOT::pcrExtendSeparator(false);
 
         if(l_errl)
         {
