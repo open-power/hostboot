@@ -56,11 +56,11 @@
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/phy/mss_training.H>
 
-#include <lib/utils/bit_count.H>
+#include <generic/memory/lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/dump_regs.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
 

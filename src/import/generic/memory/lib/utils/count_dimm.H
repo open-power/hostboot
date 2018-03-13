@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/count_dimm.H $ */
+/* $Source: src/import/generic/memory/lib/utils/count_dimm.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,18 @@ inline size_t count_dimm(const fapi2::Target<T>& i_target)
     size_t l_dimm_count = find_targets<fapi2::TARGET_TYPE_DIMM>(i_target).size();
     FAPI_INF("%d DIMM on %s", l_dimm_count, mss::c_str(i_target));
     return l_dimm_count;
+}
+
+///
+/// @brief Return the count of the number of DIMM attached to a target - DIMM speicalization
+/// @param[in] i_target a target
+/// @return size_t the count of DIMM attached
+///
+template< >
+inline size_t count_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    // You can only ever have one DIMM on a DIMM target
+    return 1;
 }
 
 }

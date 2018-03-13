@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <p9n_mca_scom.H>
 #include <p9n_mcbist_scom.H>
 #include <p9n_ddrphy_scom.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/mc/mc.H>

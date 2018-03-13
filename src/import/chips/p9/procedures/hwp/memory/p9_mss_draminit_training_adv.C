@@ -37,7 +37,7 @@
 #include <vector>
 
 #include <p9_mss_draminit_training_adv.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/shared/mss_const.H>
 #include <lib/phy/dp16.H>
 #include <lib/phy/seq.H>

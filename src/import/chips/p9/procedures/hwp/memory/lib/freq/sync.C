@@ -43,7 +43,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
 #include <lib/spd/spd_factory.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
