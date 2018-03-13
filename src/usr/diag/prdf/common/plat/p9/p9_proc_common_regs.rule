@@ -965,3 +965,224 @@
         capture     group npu0fir_ffdc;
     };
 
+    ############################################################################
+    # NPU CERR and debug registers for INTCQFIR
+    ############################################################################
+
+    register INT_CQ_WOF
+    {
+        name        "INT_CQ_WOF";
+        scomaddr    0x05013038;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_CQ_ERROR_HOLD_OUT
+    {
+        name        "INT CQ Error Report Hold Out";
+        scomaddr    0x05013039;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_CQ_ERR_INFO0
+    {
+        name        "INT CQ Error Information Register 0";
+        scomaddr    0x0501303A;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_CQ_ERR_INFO1
+    {
+        name        "INT CQ Error Information Register 1";
+        scomaddr    0x0501303B;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_CQ_ERR_INFO2
+    {
+        name        "INT CQ Error Information Register 2";
+        scomaddr    0x0501303C;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_CQ_ERR_INFO3
+    {
+        name        "INT CQ Error Information Register 3";
+        scomaddr    0x0501303D;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR0_WOF
+    {
+        name        "INT_PC_ERR0_WOF";
+        scomaddr    0x05013142;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR0_WOF_DETAIL
+    {
+        name        "INT_PC_ERR0_WOF_DETAIL";
+        scomaddr    0x05013143;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR0_FATAL
+    {
+        name        "INT PC Error0 Fatal Error Register";
+        scomaddr    0x05013144;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR0_RECOV
+    {
+        name        "INT PC Error0 Recoverable Error Register";
+        scomaddr    0x05013145;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR0_INFO
+    {
+        name        "INT PC Error0 Informational Error Register";
+        scomaddr    0x05013146;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR1_WOF
+    {
+        name        "INT_PC_ERR1_WOF";
+        scomaddr    0x0501314A;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR1_WOF_DETAIL
+    {
+        name        "INT_PC_ERR1_WOF_DETAIL";
+        scomaddr    0x0501314B;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR1_FATAL
+    {
+        name        "INT PC Error1 Fatal Error Register";
+        scomaddr    0x0501314C;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR1_RECOV
+    {
+        name        "INT PC Error1 Recoverable Error Register";
+        scomaddr    0x0501314D;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_ERR1_INFO
+    {
+        name        "INT PC Error1 Informational Error Register";
+        scomaddr    0x0501314E;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_VPC_ERR1_WOF
+    {
+        name        "INT_PC_VPC_ERR1_WOF";
+        scomaddr    0x0501317A;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_VPC_ERR1_WOF_DETAIL
+    {
+        name        "INT_PC_VPC_ERR1_WOF_DETAIL";
+        scomaddr    0x0501317B;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_VPC_FATAL_ERR
+    {
+        name        "INT PC VPC Fatal Errors Register";
+        scomaddr    0x0501317C;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_VPC_RECOV_ERR
+    {
+        name        "INT PC VPC Recoverable Errors Register";
+        scomaddr    0x0501317D;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_PC_VPC_INFO_ERR
+    {
+        name        "INT PC VPC Informational Errors Register";
+        scomaddr    0x0501317E;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_WOF_ERR_G0
+    {
+        name        "INT_VC_WOF_ERR_G0";
+        scomaddr    0x05013274;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_WOF_ERR_G0_DETAIL
+    {
+        name        "INT_VC_WOF_ERR_G0_DETAIL";
+        scomaddr    0x05013275;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_WOF_ERR_G1
+    {
+        name        "INT_VC_WOF_ERR_G1";
+        scomaddr    0x05013276;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_WOF_ERR_G1_DETAIL
+    {
+        name        "INT_VC_WOF_ERR_G1_DETAIL";
+        scomaddr    0x05013277;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_FATAL_ERR_G0
+    {
+        name        "INT VC Fatal Errors Group0 Register";
+        scomaddr    0x05013278;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_RECOV_ERR_G0
+    {
+        name        "INT VC Recoverable Error Group0 Register";
+        scomaddr    0x05013279;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_INFO_ERR_G0
+    {
+        name        "INT VC Informational Error Group0 Register";
+        scomaddr    0x0501327A;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_FATAL_ERR_G1
+    {
+        name        "INT VC Fatal Errors Group1 Register";
+        scomaddr    0x0501327B;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_RECOV_ERR_G1
+    {
+        name        "INT VC Recoverable Error Group1 Register";
+        scomaddr    0x0501327C;
+        capture     group intcqfir_ffdc;
+    };
+
+    register INT_VC_INFO_ERR_G1
+    {
+        name        "INT VC Informational Error Group1 Register";
+        scomaddr    0x0501327D;
+        capture     group intcqfir_ffdc;
+    };
+

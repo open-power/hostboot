@@ -417,6 +417,39 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x00040030, // TOD: Error and Interrupts
         0x00040032, // TOD: C_Err_Rpt
         0x00040033, // TOD: Route Errors to Core/FIR
+
+        // INTCQFIR c_err_rpt registers
+        0x05013038, // INT_CQ_WOF
+        0x05013039, // INT_CQ_ERROR_HOLD_OUT
+        0x0501303A, // INT_CQ_ERR_INFO0
+        0x0501303B, // INT_CQ_ERR_INFO1
+        0x0501303C, // INT_CQ_ERR_INFO2
+        0x0501303D, // INT_CQ_ERR_INFO3
+        0x05013142, // INT_PC_ERR0_WOF
+        0x05013143, // INT_PC_ERR0_WOF_DETAIL
+        0x05013144, // INT_PC_ERR0_FATAL
+        0x05013145, // INT_PC_ERR0_RECOV
+        0x05013146, // INT_PC_ERR0_INFO
+        0x0501314A, // INT_PC_ERR1_WOF
+        0x0501314B, // INT_PC_ERR1_WOF_DETAIL
+        0x0501314C, // INT_PC_ERR1_FATAL
+        0x0501314D, // INT_PC_ERR1_RECOV
+        0x0501314E, // INT_PC_ERR1_INFO
+        0x0501317A, // INT_PC_VPC_ERR1_WOF
+        0x0501317B, // INT_PC_VPC_ERR1_WOF_DETAIL
+        0x0501317C, // INT_PC_VPC_FATAL_ERR
+        0x0501317D, // INT_PC_VPC_RECOV_ERR
+        0x0501317E, // INT_PC_VPC_INFO_ERR
+        0x05013274, // INT_VC_WOF_ERR_G0
+        0x05013275, // INT_VC_WOF_ERR_G0_DETAIL
+        0x05013276, // INT_VC_WOF_ERR_G1
+        0x05013277, // INT_VC_WOF_ERR_G1_DETAIL
+        0x05013278, // INT_VC_FATAL_ERR_G0
+        0x05013279, // INT_VC_RECOV_ERR_G0
+        0x0501327A, // INT_VC_INFO_ERR_G0
+        0x0501327B, // INT_VC_FATAL_ERR_G1
+        0x0501327C, // INT_VC_RECOV_ERR_G1
+        0x0501327D, // INT_VC_INFO_ERR_G1
     };
 
     io_targMap[TRGT_EC][REG_GLBL] =
