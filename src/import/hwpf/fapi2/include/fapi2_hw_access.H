@@ -328,6 +328,12 @@ inline ReturnCode putSpy(const Target<K, V>& i_target,
                          const char* const i_spyId,
                          const variable_buffer& i_data);
 
+template<TargetType K, typename V >
+inline ReturnCode putSpyWithCare(const Target<K, V>& i_target,
+                                 const char* const i_spyId,
+                                 const variable_buffer& i_data,
+                                 const variable_buffer& i_care);
+
 template< TargetType K, typename V >
 inline ReturnCode putSpy(const Target<K, V>& i_target,
                          const char* const i_spyId,
