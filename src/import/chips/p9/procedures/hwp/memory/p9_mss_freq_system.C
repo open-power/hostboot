@@ -40,7 +40,7 @@
 
 #include <p9_mss_freq_system.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/freq/sync.H>
 
 
