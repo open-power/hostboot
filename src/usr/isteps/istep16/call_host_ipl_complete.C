@@ -39,7 +39,6 @@
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include   <p9_switch_rec_attn.H>
-#include   <p9_switch_cfsim.H>
 
 #include    <targeting/attrrp.H>
 #include    <sys/internode.h>
@@ -272,36 +271,6 @@ void* call_host_ipl_complete (void *io_pArgs)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS: p9_switch_rec_attn HWP( ) on target HUID %.8X",
-                    TARGETING::get_huid(l_procChip) );
-            }
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_switch_cfsim HWP on target HUID %.8X",
-                    TARGETING::get_huid(l_procChip) );
-
-            FAPI_INVOKE_HWP(l_err, p9_switch_cfsim, l_fapiProcTarget);
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_switch_cfsim HWP returned error",
-                          l_err->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_procChip).addToLog( l_err );
-
-                //Create IStep error log and cross reference error that occurred
-                l_stepError.addErrorDetails( l_err );
-
-
-                //break to end because if proc_switch_cfsim fails
-                //then FSP does not have FSI control again and system is toast
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS: proc_switch_cfsim HWP( ) on target HUID %.8X",
                     TARGETING::get_huid(l_procChip) );
             }
         }
