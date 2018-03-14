@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,13 +129,24 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                    " on processor target %.8X",
                    TARGETING::get_huid(l_cpu_target));
 
+        //Note no PLID passed in
         SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler(
                 SBEIO::SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
+        l_SBEobj.setSbeRestartMethod(SBEIO::SbeRetryHandler::
+                                     SBE_RESTART_METHOD::START_CBS);
+
+        // We want to tell the retry handler that we have just powered
+        // on the sbe, to distinguish this case from other cases where
+        // we have determine there is something wrong w/ the sbe and
+        // want to diagnose the problem
+        l_SBEobj.setInitialPowerOn(true);
+
         l_SBEobj.main_sbe_handler(l_cpu_target);
 
-        // No error and still functional
-        if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
+        // We will judge whether or not the SBE had a succesful
+        // boot or not depending on if it made it to runtime or not
+        if(l_SBEobj.isSbeAtRuntime())
         {
             // Set attribute indicating that SBE is started
             l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);
@@ -173,29 +184,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 "Running p9_extract_sbe_rc HWP"
                 " on processor target %.8X",
                   TARGETING::get_huid(l_cpu_target) );
-
-        //@TODO-RTC:100963-Do something with the RETURN_ACTION
-        P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction
-          = P9_EXTRACT_SBE_RC::RE_IPL;
-        FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
-                        l_fapi2ProcTarget,
-                        l_rcAction);
-        if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : proc_check_slave_sbe_seeprom_complete "
-                "failed, p9_extract_sbe_rc HWP returning errorlog PLID=0x%x",
-                l_errl->plid());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
 **/
     }   // end of going through all processors
 

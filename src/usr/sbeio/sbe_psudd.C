@@ -48,6 +48,7 @@
 #include <p9_extract_sbe_rc.H>
 #include <errl/errludlogregister.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <initservice/initserviceif.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -528,23 +529,45 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                   TARGETING::get_huid(i_target)),
                                 i_pPsuRequest->mbxReg0);
 
+                // log the failing proc as FFDC
+                ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+                l_respRegsFFDC.addToLog(l_errl);
+                l_errl->collectTrace(SBEIO_COMP_NAME);
+
+                // Keep a copy of the plid so we can pass it to the retry_handler
+                // so the error logs it creates will be linked
+                uint32_t l_errPlid = l_errl->plid();
+
+                // Commit errlor log now if this is a FSP system because
+                // we will not return from retry handler
+                if(INITSERVICE::spBaseServicesEnabled())
+                {
+                    l_errl->addHwCallout( i_target,
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::NO_DECONFIG,
+                                          HWAS::GARD_NULL );
+                    ERRORLOG::errlCommit( l_errl, SBEIO_COMP_ID );
+                }
+                //On open power systems we want to deconfigure the processor
+                else
+                {
+                    l_errl->addHwCallout( i_target,
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::DECONFIG,
+                                          HWAS::GARD_NULL );
+                }
+
                 // If the FFDC is empty, this error could be because the SBE
                 // isn't booted correctly. We need to check the state of the
-                // SBE, handle the SBE value, and potentionally try
-                // to restart the SBE
+                // SBE.
+                // If we are on a FSP based system we expect this to result in a TI
+                // If we are on a BMC based system we expect to return from this fail
                 SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                            SbeRetryHandler::SBE_MODE_OF_OPERATION::
-                            INFORMATIONAL_ONLY);
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+                    l_errPlid);
 
                 l_SBEobj.main_sbe_handler(i_target);
 
-                if(l_SBEobj.getPLID() != NULL)
-                {
-                    // If there is not an unrecovered error, we want to tie
-                    // the error from the sbe retry handler to this error.
-                    l_errl->plid(l_SBEobj.getPLID());
-                    l_errl->setSev(ERRL_SEV_UNRECOVERABLE);
-                }
             }
             else
             {
@@ -591,17 +614,16 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                     l_ffdc_parser = nullptr;
                 }
 
-
                 l_errl->addHwCallout( i_target,
                                 HWAS::SRCI_PRIORITY_HIGH,
                                 HWAS::NO_DECONFIG,
                                 HWAS::GARD_NULL );
-            }
 
-            // log the failing proc as FFDC
-            ErrlUserDetailsTarget(i_target).addToLog(l_errl);
-            l_respRegsFFDC.addToLog(l_errl);
-            l_errl->collectTrace(SBEIO_COMP_NAME);
+                // log the failing proc as FFDC
+                ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+                l_respRegsFFDC.addToLog(l_errl);
+                l_errl->collectTrace(SBEIO_COMP_NAME);
+            }
 
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),

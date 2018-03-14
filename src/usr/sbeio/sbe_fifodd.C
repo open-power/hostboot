@@ -47,6 +47,7 @@
 #include <sbeio/sbe_sp_intf.H>
 #include <xscom/piberror.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <initservice/initserviceif.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -657,14 +658,37 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
 
-            errl->addHwCallout(  i_target,
-                                 HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::NO_DECONFIG,
-                                 HWAS::GARD_NULL );
+            // Keep a copy of the plid so we can pass it to the retry_handler
+            // so the error logs it creates will be linked
+            uint32_t l_errPlid = errl->plid();
 
-            //It is likely that the SBE is in a failed state so set up retry handler
+            // Commit errlor log now if this is a FSP system because
+            // we will not return from retry handler
+            if(INITSERVICE::spBaseServicesEnabled())
+            {
+                errl->addHwCallout(  i_target,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL );
+                ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
+            }
+            //On open power systems we want to deconfigure the processor
+            else
+            {
+                errl->addHwCallout(  i_target,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL );
+            }
+
+
+            // Set the retry handler's mode to be informational, this will run
+            // p9_extract_rc then TI the system on fsp-systems.
+            // On open power systems if mode is set to informational we will run
+            // p9_extract_rc then return back to this function
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
-            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY);
+                SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+                l_errPlid);
 
             // Look at the scomSwitch attribute to tell what types
             // of scoms are going to be used. If the SMP is not yet up then we
@@ -683,12 +707,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
 
             l_SBEobj.main_sbe_handler(i_target);
 
-            if(l_SBEobj.getPLID())
-            {
-                //tie the error from the sbe retry handler to this error
-                errl->plid(l_SBEobj.getPLID());
-            }
-            errl->collectTrace(SBEIO_COMP_NAME);
+            //break out of continuous loop ( should only get here on openPower systems)
             break;
         }
 
