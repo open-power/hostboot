@@ -1321,6 +1321,7 @@ sub processDmi
                         $dmiOffset*$dmi)->as_hex(),2));
 
     $targetObj->setAttribute($target,"DMI_INBAND_BAR_BASE_ADDR_OFFSET",$value);
+    $targetObj->deleteAttribute($target,"DMI_INBAND_BAR_ENABLE");
 }
 
 
