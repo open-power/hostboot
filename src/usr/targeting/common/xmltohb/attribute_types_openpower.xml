@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1321,6 +1321,20 @@ ID for the sensor number returned with the elog. -->
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+</attribute>
+
+<attribute>
+    <id>HTMGT_SAVED_POWER_LIMIT</id>
+    <description>User power limit information from the BMC to be used if
+        communication with the BMC is lost after system is powered on.
+        Used internally by HTMGT.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 <!-- end HTMGT attributes -->
