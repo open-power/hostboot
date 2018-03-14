@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,12 +125,12 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             uint32_t l_sbeStarted = l_cpu_target->getAttr<
                                     TARGETING::ATTR_SBE_IS_STARTED>();
 
-            if(l_SBEobj.getSbeRestart() && !l_sbeStarted)
+            if(l_SBEobj.isSbeAtRuntime() && !l_sbeStarted)
             {
                 TS_FAIL("testSBEStarted: If the class element that "
                        "the SBE started is true, then the SBE attribute also "
                        "needs to be true");
-            }else if(!(l_SBEobj.getSbeRestart() && l_sbeStarted))
+            }else if(!(l_SBEobj.isSbeAtRuntime() && l_sbeStarted))
             {
                 TS_FAIL("testSBEStarted: If the class element "
                        "that the SBE started is false, then the SBE attribute "

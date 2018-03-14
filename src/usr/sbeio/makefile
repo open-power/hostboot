@@ -25,19 +25,11 @@
 ROOTPATH = ../../..
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 MODULE = sbeio
+
+# pull in .mk common between sbeio and sbeio_rt
 include common/common.mk
 
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib
-
-EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
-
+# sbeio's unique objects
 OBJS += sbe_psudd.o
 OBJS += sbe_utils.o
 OBJS += sbe_secureHwp.o
@@ -56,22 +48,8 @@ OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
-OBJS += ${SBEIO_COMMON_OBJS}
 
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
-VPATH += ${ROOTPATH}/src/usr/sbeio/common
-
-include ${ROOTPATH}/procedure.rules.mk
-
-#Not using the ekb mk file because it includes extra files
-# that we already include in libfapi2:
-# - p9_ppe_utils.o
-#include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_extract_sbe_rc.mk
-OBJS += p9_extract_sbe_rc.o
-OBJS += p9_ppe_common.o
-
-
+# sbeio's sub directories
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 

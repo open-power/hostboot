@@ -28,6 +28,7 @@
 #include <isteps/hwpisteperror.H>
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
+#include <sys/time.h>
 
 namespace SBEIO
 {
@@ -36,29 +37,43 @@ class SbeRetryHandler
 {
     public:
 
-        static const uint8_t MAX_SWITCH_SIDE_COUNT = 2;
+        //There are only 2 sides to the seeproms, so we only want to flip sides once
+        static constexpr uint8_t MAX_SWITCH_SIDE_COUNT = 1;
+        //We only want to attempt to boot with the same side seeprom twice
+        static constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS = 2;
+        // Currently we expect a maxiumum of 2 FFDC packets, the one
+        // that is useful to HB is the HWP FFDC. It is possible there is
+        //  a packet that details an internal sbe fail that hostboot will
+        // add to an errorlog but otherwise ignores
+        static constexpr uint8_t MAX_EXPECTED_FFDC_PACKAGES = 2;
+        // action_for_ffdc_rc will figure out what action we should do
+        // for each p9_extract_sbe_rc return code. If the RC does not match
+        // any return code from p9_extract_sbe_rc then we want to have a
+        // known "no action found" value which is defined here
+        static constexpr uint32_t NO_ACTION_FOUND_FOR_THIS_RC = 0xFFFF;
+
+        static constexpr uint64_t SBE_RETRY_TIMEOUT_HW     = 60*NS_PER_SEC;  // 60 seconds
+        static constexpr uint64_t SBE_RETRY_TIMEOUT_SIMICS = 600*NS_PER_SEC; // 600 seconds
+        static constexpr uint32_t SBE_RETRY_NUM_LOOPS      = 100;
 
         enum SBE_REG_RETURN
         {
-            HWP_ERROR           = 0, // Error returned from HWP
-            SBE_AT_RUNTIME      = 1, // SBE is at runtime and booted
-            SBE_FAILED_TO_BOOT  = 2, // SBE has failed to boot
-            PROC_DECONFIG       = 3, // Deconfig done on Proc with SBE
+            FAILED_COLLECTING_REG = 0, // Error returned from HWP
+            SBE_AT_RUNTIME        = 1, // SBE is at runtime and booted
+            SBE_NOT_AT_RUNTIME    = 2, // SBE has failed to boot
+            PROC_DECONFIG         = 3, // Deconfig done on Proc with SBE
         };
 
+        //Possible values of iv_sbeMode
         enum SBE_MODE_OF_OPERATION
         {
             INFORMATIONAL_ONLY = 0, // Get error logs from the SBE HWP's
-                    // This will not attempt a SBE restart, and it will only
-                    // run the steps to get the p9_extract_sbe_rc return value.
+                                    // This will not attempt an SBE restart
+                                    // On FSP systems if informational mode is set we will TI
+                                    // On BMC systems we will run extract_rc then bail out
             ATTEMPT_REBOOT     = 1, // Full SBE run, attempt to restart
-                    // This will run all the steps and HWP's to attempt
-                    // an SBE restart on both sides.
-            SBE_ACTION_SET     = 2, // Full SBE run, but with a set action
-                    // This will run all the steps and HWP's to attempt
-                    // an SBE restart, however in this case we are specifying
-                    // which SBE RETURN_ACTION we are attempting instead of
-                    // the action the SBE thinks we should attempt.
+                                    // This will run all the steps and HWP's to attempt
+                                    // an SBE restart on both sides.
         };
 
         enum SBE_RESTART_METHOD
@@ -95,82 +110,78 @@ class SbeRetryHandler
         ~SbeRetryHandler();
 
         /**************** Functions to return Class Elements ****************/
-        inline bool getSbeRestart()
+        inline bool isSbeAtRuntime()
         {
-            return this->iv_sbeRestarted;
-        }
-
-        inline uint8_t getSbeSide()
-        {
-            return this->iv_sbeSide;
-        }
-
-        inline uint32_t getPLID()
-        {
-            return this->iv_errorLogPLID;
+            return (iv_currentSBEState ==
+                        SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME);
         }
 
         inline uint32_t getCallerPLID()
         {
-            return this->iv_callerErrorLogPLID;
+            return iv_callerErrorLogPLID;
         }
 
         inline uint8_t getSwitchCount()
         {
-            return this->iv_switchSidesCount;
+            return iv_switchSidesCount;
         }
 
         inline sbeMsgReg_t getSbeRegister()
         {
-            return this->iv_sbeRegister;
+            return iv_sbeRegister;
         }
 
         inline P9_EXTRACT_SBE_RC::RETURN_ACTION getCurrentAction()
         {
-            return this->iv_currentAction;
+            return iv_currentAction;
         }
 
         inline SBE_REG_RETURN getCurrentSBEState()
         {
-            return this->iv_currentSBEState;
+            return iv_currentSBEState;
         }
         inline SBE_RESTART_METHOD getSbeRestartMethod()
         {
-            return this->iv_sbeRestartMethod;
+            return iv_sbeRestartMethod;
         }
         inline void setSbeRestartMethod(SBE_RESTART_METHOD i_method)
         {
-            this->iv_sbeRestartMethod = i_method;
+            iv_sbeRestartMethod = i_method;
         }
 
         inline SBE_MODE_OF_OPERATION getSBEMode()
         {
-            return this->iv_sbeMode;
+            return iv_sbeMode;
         }
 
         inline void setSBEMode(SBE_MODE_OF_OPERATION i_sbeMode)
         {
-            this->iv_sbeMode = i_sbeMode;
+            iv_sbeMode = i_sbeMode;
         }
 
         inline bool getUseSDB()
         {
-            return this->iv_useSDB;
+            return iv_useSDB;
         }
 
         inline void setUseSDB(bool i_useSDB)
         {
-            this->iv_useSDB = i_useSDB;
+            iv_useSDB = i_useSDB;
         }
 
         inline bool getSecureModeDisabled()
         {
-            return this->iv_secureModeDisabled;
+            return iv_secureModeDisabled;
         }
 
         inline void setSecureModeDisabled(bool i_secureModeDisabled)
         {
-            this->iv_secureModeDisabled = i_secureModeDisabled;
+            iv_secureModeDisabled = i_secureModeDisabled;
+        }
+
+        inline void setInitialPowerOn(bool i_isInitialPowerOn)
+        {
+            iv_initialPowerOn = i_isInitialPowerOn;
         }
 
         /**
@@ -183,6 +194,34 @@ class SbeRetryHandler
         void main_sbe_handler( TARGETING::Target * i_target);
 
     private:
+#ifndef __HOSTBOOT_RUNTIME
+        /**
+         * @brief  This function will look at the SBE status register and decide
+         *         whether to send the SBEIO_DEAD_SBE or SBEIO_HWSV_COLLECT_SBE_RC
+         *         along with the TI depending on if the asyncFFDC bit is set in
+         *         the status register
+         *
+         * @param[in]  i_target    - current proc target we are handling fail for
+         *
+         * @return - void
+         */
+        void handleFspIplTimeFail(TARGETING::Target * i_target);
+#endif
+
+        /**
+         * @brief  This function will look at what iv_currentAction is set to
+         *          and take into account how many times we have tried to boot
+         *          and how many times we have switched sides.
+         *          Note: no_recovery is only an acceptable answer if we have tried
+         *                all possibilities. That means that we must have attempted
+         *                two boots on both sides. If we have not hit our max attempts
+         *                for both sides then this procedure should change iv_currentAction
+         *                to either RESTART_SBE or REIPL_BKP_SEEPROM
+         *
+         *
+         * @return - void
+         */
+        void bestEffortCheck();
 
         /**
          * @brief  This function handles the SBE timeout and loops
@@ -193,7 +232,7 @@ class SbeRetryHandler
          * @return - error, NULL if no error
          */
 
-        errlHndl_t sbe_timeout_handler(TARGETING::Target * i_target);
+        errlHndl_t sbe_poll_status_reg(TARGETING::Target * i_target);
 
         /**
          * @brief  This function handles getting the SBE FFDC.
@@ -206,7 +245,7 @@ class SbeRetryHandler
          *           of loop or current iteration
          */
 
-        bool sbe_get_ffdc_handler(TARGETING::Target * i_target);
+        void sbe_get_ffdc_handler(TARGETING::Target * i_target);
 
         /**
          * @brief  This function handles the SBE failed to boot error.
@@ -219,22 +258,7 @@ class SbeRetryHandler
          *       set to TRUE
          */
 
-        bool sbe_boot_fail_handler(TARGETING::Target * i_target);
-
-        /**
-        * @brief  This function handles the SBE failed to boot error.
-        *
-        * @param[in]     i_target    - current proc target
-        * @param[in]     i_exposeLog - an error log is created at the top
-        *                              of this function, if we are doing retries
-        *                              we might not want to have this log show up
-        *                              i_exposeLog = true will make the elog PREDICTIVE
-        *
-        * @return - bool: true if we need to retry
-        */
-
-        bool sbe_boot_fail_handler(TARGETING::Target * i_target,
-                                   bool i_exposeLog);
+        void sbe_run_extract_rc(TARGETING::Target * i_target);
 
         /**
          * @brief  This function deals with the mask needed to switch
@@ -246,13 +270,6 @@ class SbeRetryHandler
          */
         errlHndl_t switch_sbe_sides(TARGETING::Target * i_target);
 
-        /**
-         * @brief This function handles the SBE register value and the actions
-         *        that go along with it.
-         *
-         * @param[in] i_target            - current proc target
-         */
-        void handle_sbe_reg_value( TARGETING::Target * i_target);
 
         /**
          * @brief This is the switch case that identifies the action needed
@@ -262,16 +279,20 @@ class SbeRetryHandler
          *
          * @return - pass(0) or specific returned SBE action
          */
-        P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc( uint32_t i_rc);
+        uint32_t action_for_ffdc_rc( uint32_t i_rc);
 
         /**
          * @brief This function handles the call to the p9_get_sbe_msg_handler.
-         *        It determines what state the SBE is in.
+         *        It will read the sbe msg register (Cfam 2809 or Scom 50009)
+         *        and update iv_currentSBEState to reflect the state that
+         *        the sbe's msg register is telling us
          *
          * @param[in] i_target - current proc target
          *
+         * @return - return true if reading the message register was a success
+         *           return false if there was an error getting the sbe msg register
          */
-        void get_sbe_reg(TARGETING::Target * i_target);
+        bool sbe_run_extract_msg_reg(TARGETING::Target * i_target);
 
         /************************** Class Elements **************************/
 
@@ -293,22 +314,6 @@ class SbeRetryHandler
         bool iv_secureModeDisabled;
 
         /*
-         * @brief True if we successfully restarted the SBE
-         */
-        bool iv_sbeRestarted;
-
-        /*
-         * @brief True if we switched to the other side of the SBE
-         */
-        uint8_t iv_sbeSide;
-
-        /*
-         * @brief PLID of the error logged. 0 if no error
-         *        was logged.
-         */
-        uint32_t iv_errorLogPLID;
-
-        /*
          * @brief PLID of the caller. 0 if caller does not
          *        provide one.  Not to be confused with the
          *        PLID when error log is created in the usage
@@ -317,7 +322,8 @@ class SbeRetryHandler
         uint32_t iv_callerErrorLogPLID;
 
         /*
-         * @brief Number of times we switch SBE sides. Max is 2
+         * @brief Number of times we switch SBE sides. Max is defined by
+         *        MAX_SWITCH_SIDE_COUNT
          */
         uint8_t iv_switchSidesCount;
 
@@ -337,11 +343,37 @@ class SbeRetryHandler
         SBE_REG_RETURN iv_currentSBEState;
 
         /*
-         * @brief There are a few situations in which we have to retrigger
-         *        the main function. This variable ensures we do not fall into
-         *        an infinite loop situation
+         * @brief Currently there are 3 options for what the shutdownReturnCode
+         *        will be. It can be 0 if there is no return code we wish to
+         *        send with shutdown. Then it can also be SBEIO_HWSV_COLLECT_SBE_RC
+         *        to notify that HWSV should collect FFDC or it can be SBEIO_DEAD_SBE
+         *        to tell HWSV that the SBE is dead.
          */
-        bool iv_retriggeredMain;
+        uint32_t iv_shutdownReturnCode;
+
+        /*
+        * @brief This value will keep track of how many times we have attempted
+        *        to boot the current side of the SBE's seeprom. In the ctor this
+        *        value should be 1, because if the retry handler has been called
+        *        that means that we have attempted to boot the current side at
+        *        least 1 time. When we switch seeprom sides this value should
+        *        drop back to 0. It will be incremeted each time we attempt
+        *        to call start_cbs or hreset depending on iv_sbeRestartMethod
+        */
+        uint8_t iv_currentSideBootAttempts;
+
+        /*
+        * @brief If the asyncFFDC bit is found to be set on the status register
+        *        this indicates to hostboot that the SBE was able to collect
+        *        FFDC about what went wrong in its attempt to boot itself
+        *        in this case Hostboot will send a FIFO chip op to the SBE
+        *        so the SBE will write the FFDC data out to memory where
+        *        Hostboot can parse it. Note that after the SBE writes
+        *        the data to memory the asyncFFDC bit on the status register
+        *        will be off.
+        */
+        bool iv_ffdcSetAction;
+
 
         /*
          * @brief The mode of operation that needs to be run through the
@@ -351,12 +383,31 @@ class SbeRetryHandler
         SBE_MODE_OF_OPERATION iv_sbeMode;
 
         /*
-         * @brief If true, use the HWP p9_start_cbs to restart the SBE. This
-         *        HWP kills the proc we're on, so there are some situations
-         *        where we want to use hreset instead. Each choice is noted
-         *        in the SBE_RESTART_METHOD enum
+         * @brief This instance variable will instruct the main_sbe_handler
+         *        loop on what method to use when attempting to restart the
+         *        sbe that we have detected an error on. Currently there are
+         *        two options to recover an sbe in a bad state. The first option
+         *        is to run "start_cbs", this essentially powers down the proc
+         *        and starts the boot sequence from the beginning. This is okay
+         *        to use when initially trying to poweron slave processor's sbe
+         *        but it is not as useful after that as it will blow away any fabric
+         *        initialization we have done on the slave proc chip. The other
+         *        option is to use HRESET. HRESET will attempt to restart the
+         *        sbe on the fly and does not require us to completely restart
+         *        the processor. HRESET can be used during runtime to attempt
+         *        to recover an sbe while not disrupting the rest of the proc
+         *        chips. Both choices are noted in the SBE_RESTART_METHOD enum
          */
         SBE_RESTART_METHOD iv_sbeRestartMethod;
+
+        /*
+        * @brief If true, this tells the retry_hanlder that the caller has recently
+        *        attempted to boot the sbe on processor passed to the ctor. This
+        *        tells us that the sbe_status register is not stale and that we
+        *        can use the curState value on the status register to determine
+        *        if the SBE made it to runtime or not
+        */
+        bool iv_initialPowerOn;
 
 }; // End of class SbeRetryHandler
 
