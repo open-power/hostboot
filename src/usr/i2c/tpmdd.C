@@ -42,6 +42,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/util.H>
 #include <devicefw/driverif.H>
 #include <i2c/tpmddif.H>
 #include <i2c/i2creasoncodes.H>
@@ -354,8 +355,27 @@ bool tpmPresence ( TARGETING::Target * i_target)
             break;
         }
 
-
-
+        // Treat TPM as not present if it is being driven by a processor that is
+        // not yet available via XSCOM.  The remote processor's FSI accessible
+        // I2C master does not have a path to the TPM, so defer discovery to
+        // after the point when the SMP is established.
+        if(   tpmInfo.i2cTarget->getAttr<TARGETING::ATTR_TYPE>()
+           == TARGETING::TYPE_PROC)
+        {
+            const auto scomSwitches = tpmInfo.i2cTarget->getAttr<
+                TARGETING::ATTR_SCOM_SWITCHES>();
+            if(!scomSwitches.useXscom)
+            {
+                TRACFCOMP(g_trac_tpmdd,
+                    INFO_MRK "tpmPresence: TPM with HUID 0x%08X not "
+                    "accessible, as the proc that drives it (HUID 0x%08X) "
+                    "is not XSCOM accessible",
+                    get_huid(tpmInfo.tpmTarget),
+                    get_huid(tpmInfo.i2cTarget));
+                l_present = false;
+                break;
+            }
+        }
 
         // Verify the TPM is supported by this driver by reading and
         //  comparing the vendorid
