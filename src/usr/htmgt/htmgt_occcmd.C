@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -856,6 +856,26 @@ namespace HTMGT
                     if (0xE1 == exceptionType)
                     {
                         iv_Occ->collectCheckpointScomData(l_excErr);
+                    }
+
+                    // Add processor callout
+                    TARGETING::ConstTargetHandle_t procTarget =
+                        TARGETING::getParentChip(iv_Occ->getTarget());
+                    if (nullptr != procTarget)
+                    {
+                        const unsigned long huid =
+                            procTarget->getAttr<TARGETING::ATTR_HUID>();
+                        TMGT_ERR("handleOccException: Adding processor "
+                                 "callout (HUID=0x%0lX)", huid);
+                        l_excErr->addHwCallout(procTarget,
+                                               HWAS::SRCI_PRIORITY_MED,
+                                               HWAS::NO_DECONFIG,
+                                               HWAS::GARD_NULL);
+                    }
+                    else
+                    {
+                        TMGT_ERR("handleOccException: Unable to determine "
+                                 "parent chip to add callout");
                     }
 
                     // Add OCC trace buffer to error log (ERR, IMP, INF)

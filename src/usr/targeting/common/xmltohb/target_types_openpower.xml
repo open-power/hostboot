@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -102,6 +102,7 @@
     <attribute><id>PROC_MHZ_PER_WATT</id></attribute>
     <attribute><id>ALLOW_CALLHOME_ESELS_TO_BMC</id></attribute>
     <attribute><id>REPORT_THROTTLE_BELOW_NOMINAL</id></attribute>
+    <attribute><id>HTMGT_SAVED_POWER_LIMIT</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@ namespace HTMGT
     uint8_t * G_simicsHomerBuffer = NULL;
 #endif
 
+#define BMC_LIMIT_WAS_READ 0xFF000000
 
     // Wait for all OCCs to reach ready state
     errlHndl_t waitForOccReady()
@@ -199,14 +200,38 @@ namespace HTMGT
             err = SENSOR::getUserPowerLimit(limit, active);
             if (err)
             {
-                TMGT_ERR("sendOccUserPowerCap: Error getting user "
-                         "power limit");
-                break;
+                const uint32_t saved_power_limit =
+                    sys->getAttr<ATTR_HTMGT_SAVED_POWER_LIMIT>();
+                if (saved_power_limit & BMC_LIMIT_WAS_READ)
+                {
+                    // Attribute has been written since the power on,
+                    //     use the saved limit/active.
+                    limit = saved_power_limit & 0x0000FFFF;
+                    active = (saved_power_limit >> 16) & 0x00FF;
+                    TMGT_INF("SENSOR::getUserPowerLimit failed with rc=0x%04X. "
+                             "Using prior values: limit %dW, active: %c",
+                             err->reasonCode(), limit, active?'Y':'N');
+                }
+                else
+                {
+                    TMGT_ERR("sendOccUserPowerCap: Error getting user "
+                             "power limit from BMC, rc=0x%04X",
+                             err->reasonCode());
+                    break;
+                }
+
+            }
+            else
+            {
+                // Write attribute with power limit and state
+                TMGT_INF("SENSOR::getUserPowerLimit returned %dW, active: %c",
+                         limit, active?'Y':'N');
+                const uint32_t saved_limit = BMC_LIMIT_WAS_READ |
+                    ((active?0x01:0x00) << 16) | limit;
+                sys->setAttr<TARGETING::ATTR_HTMGT_SAVED_POWER_LIMIT>
+                    (saved_limit);
             }
 #endif
-
-            TMGT_INF("SENSOR::getUserPowerLimit returned %d, active = %d",
-                     limit, active);
 
             if (active)
             {
@@ -216,17 +241,23 @@ namespace HTMGT
                 max = getMaxPowerCap(sys, is_redundant);
                 if ((limit != 0) && (limit < min))
                 {
-                    TMGT_INF("sendOccUserPowerCap:  User power cap %d is below"
+                    TMGT_INF("sendOccUserPowerCap:  User power cap %dW is below"
                              " the minimum of %d, clipping value",
                              limit, min);
                     limit = min;
                 }
                 else if (limit > max)
                 {
-                    TMGT_INF("sendOccUserPowerCap:  User power cap %d is above"
+                    TMGT_INF("sendOccUserPowerCap:  User power cap %dW is above"
                              " the maximum of %d, clipping value",
                              limit, min);
                     limit = max;
+                }
+                else if (limit == 0)
+                {
+                    TMGT_ERR("sendOccUserPowerCap: BMC is reporting that user "
+                             "cap is enabled, but the value is 0W!");
+                    active = false;
                 }
             }
             else
@@ -243,7 +274,7 @@ namespace HTMGT
                 data[0] = limit >> 8;
                 data[1] = limit & 0xFF;
 
-                TMGT_INF("sendOccUserPowerCap:  Sending power cap %d to OCC %d",
+                TMGT_INF("sendOccUserPowerCap: Sending power cap %dW to OCC %d",
                          limit, occ->getInstance());
                 if (limit > 0)
                 {
@@ -257,7 +288,7 @@ namespace HTMGT
                 if (err)
                 {
                     TMGT_ERR("sendOccUserPowerCap: Failed sending command "
-                             "to OCC %d with rc = 0x%04X",
+                             "to OCC%d with rc=0x%04X",
                              occ->getInstance(), err->reasonCode());
                     break;
                 }
