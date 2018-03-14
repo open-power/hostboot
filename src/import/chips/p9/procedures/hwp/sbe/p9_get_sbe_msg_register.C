@@ -40,13 +40,29 @@
 fapi2::ReturnCode p9_get_sbe_msg_register(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_chip,
         sbeMsgReg_t& o_sbeReg)
 {
-    fapi2::buffer<uint32_t> l_reg;
-
     FAPI_DBG("Entering ...");
 
-    FAPI_TRY(fapi2::getCfamRegister(i_chip, PERV_SB_MSG_FSI, l_reg));
+    fapi2::buffer<uint32_t> l_cfamReg;
+#ifdef __HOSTBOOT_MODULE
+    fapi2::buffer<uint64_t> l_scomReg;
+#ifndef __HOSTBOOT_RUNTIME
+    uint8_t l_is_master_chip = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_chip, l_is_master_chip));
 
-    o_sbeReg.reg = l_reg;
+    if(l_is_master_chip)
+#else
+    if(true)
+#endif
+    {
+        FAPI_TRY(fapi2::getScom(i_chip, PERV_SB_MSG_SCOM, l_scomReg));
+        l_scomReg.extract<0, 32>(o_sbeReg.reg);
+    }
+    else
+#endif
+    {
+        FAPI_TRY(fapi2::getCfamRegister(i_chip, PERV_SB_MSG_FSI, l_cfamReg));
+        o_sbeReg.reg = l_cfamReg;
+    }
 
     FAPI_DBG("Exiting ...");
 
