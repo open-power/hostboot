@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -146,6 +146,7 @@ enum vpdReasonCode
     VPD_RC_XXX                          = VPD_COMP_ID | 0x38,
     VPD_TARGET_CHIP_NOT_FOUND           = VPD_COMP_ID | 0x39,
     VPD_EEPROM_VPD_PRIMARY_INFO_MISSING = VPD_COMP_ID | 0x3a,
+    VPD_RT_NODE_TOO_LARGE               = VPD_COMP_ID | 0x3b,
 
 };
 

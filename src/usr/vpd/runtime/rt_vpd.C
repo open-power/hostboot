@@ -58,6 +58,7 @@ extern trace_desc_t* g_trac_vpd;
 // host interface get_reserved_mem function.  We only want to call the
 // function once as memory is allocated with every call.
 static uint64_t g_reserved_mem_addr[] = {0, 0, 0, 0};
+#define MAX_RSVD_MEM_ADDRS (sizeof(g_reserved_mem_addr) / sizeof(uint64_t))
 
 
 namespace VPD
@@ -103,8 +104,33 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
 {
     errlHndl_t err = NULL;
 
+    if( i_instance >= MAX_RSVD_MEM_ADDRS )
+    {
+        TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd: Node %d is too large for size "
+                  "of reserved memory address array %d",
+                  i_instance,
+                  MAX_RSVD_MEM_ADDRS);
+        /*@
+        * @errortype
+        * @moduleid     VPD::VPD_RT_GET_ADDR
+        * @reasoncode   VPD::VPD_RT_NODE_TOO_LARGE
+        * @userdata1    Node ID
+        * @userdata2    Rsvd Mem Address array size
+        * @devdesc      Node for VPD is too large
+        */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      VPD::VPD_RT_GET_ADDR,
+                                      VPD::VPD_RT_NODE_TOO_LARGE,
+                                      i_instance,
+                                      MAX_RSVD_MEM_ADDRS);
+
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                HWAS::SRCI_PRIORITY_HIGH);
+
+        err->collectTrace( "VPD", 256);
+    }
     // Get the reserved_mem_addr only once
-    if( g_reserved_mem_addr[i_instance] == 0 )
+    else if( g_reserved_mem_addr[i_instance] == 0 )
     {
         uint64_t l_vpdSize;
         g_reserved_mem_addr[i_instance] =

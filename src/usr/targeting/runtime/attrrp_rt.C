@@ -277,11 +277,6 @@ namespace TARGETING
             io_nodeCont.sectionCount = i_header->numSections;
             io_nodeCont.pSections =
                 new AttrRP_Section[io_nodeCont.sectionCount]();
-            if (i_nodeId == NODE0) // @TODO RTC:186585 remove
-            { // @TODO RTC:186585 remove
-                iv_sectionCount = io_nodeCont.sectionCount; // @TODO RTC:186585
-                iv_sections = io_nodeCont.pSections; // @TODO RTC:186585 remove
-            } // @TODO RTC:186585 remove
 
             // Find start to the first section:
             //          (header address + size of header + offset in header)

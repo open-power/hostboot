@@ -342,7 +342,7 @@ class AttrRP
               iv_isMpipl(false)
 #else
             : iv_isTempInstance(false), iv_instanceStatus(SINGLE_NODE),
-              iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
+              iv_isMpipl(false)
 #endif
         {
         };
@@ -546,6 +546,12 @@ class AttrRP
 
         // Message Queue for VMM requests
         msg_q_t iv_msgQ;
+
+        // Parsed structures of the attribute sections.
+        AttrRP_Section* iv_sections;
+
+        // Count of attribute sections.
+        size_t iv_sectionCount;
 #else
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;
@@ -556,11 +562,6 @@ class AttrRP
         // Node instance status
         NodeInstanceStatus iv_instanceStatus;
 #endif
-        // Parsed structures of the attribute sections.
-        AttrRP_Section* iv_sections; // @TODO RTC:186585 move to #ifndef clause
-
-        // Count of attribute sections.
-        size_t iv_sectionCount; // @TODO RTC:186585 move to #ifndef clause
 
         bool iv_isMpipl;
 };
