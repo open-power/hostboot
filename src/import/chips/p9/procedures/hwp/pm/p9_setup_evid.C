@@ -513,19 +513,19 @@ p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     while (!l_goodResponse);
 
     // Compute the delta
-    l_delta_mv = l_present_voltage_mv - i_voltage_mv;
+    l_delta_mv = (int32_t)l_present_voltage_mv - (int32_t)i_voltage_mv;
 
     if (l_delta_mv > 0)
     {
-        FAPI_DBG("Decreasing voltage - delta = %d", l_delta_mv );
+        FAPI_INF("Decreasing voltage - delta = %d", l_delta_mv );
     }
     else if (l_delta_mv < 0)
     {
-        FAPI_DBG("Increasing voltage - delta = %d", l_delta_mv );
+        FAPI_INF("Increasing voltage - delta = %d", l_delta_mv );
     }
     else
     {
-        FAPI_DBG("Voltage to be set equals the initial voltage");
+        FAPI_INF("Voltage to be set equals the initial voltage");
     }
 
     // Break into steps limited by attr.attr_ext_vrm_step_size_mv
@@ -534,7 +534,7 @@ p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // Hostboot doesn't support abs()
         uint32_t l_abs_delta_mv = l_delta_mv < 0 ? -l_delta_mv : l_delta_mv;
 
-        if (l_abs_delta_mv > i_ext_vrm_step_size_mv)
+        if (i_ext_vrm_step_size_mv > 0 && l_abs_delta_mv > i_ext_vrm_step_size_mv )
         {
             if (l_delta_mv > 0)  // Decreasing
             {
@@ -586,7 +586,8 @@ p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         while (!l_goodResponse);
 
         l_present_voltage_mv = l_target_mv;
-        l_delta_mv = l_present_voltage_mv - i_voltage_mv;
+        l_delta_mv = (int32_t)l_present_voltage_mv - (int32_t)i_voltage_mv;
+        FAPI_INF("New delta = %d", l_delta_mv );
     }
 
 fapi_try_exit:
