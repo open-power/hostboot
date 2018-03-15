@@ -97,6 +97,8 @@ const uint64_t MCS_MCFIRMASK_OR_ARR[NUM_MCS_MI_TARGETS] =
     MCS_3_MCFIRMASK_OR
 };
 
+const uint64_t MCS_MCMODE1_DISABLE_SPEC_OP_DCBF_BIT = 45;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -162,6 +164,10 @@ revert_mc_hb_dcbz_config(
             l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_ALL_SPEC_OPS>();
             l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_SPEC_OP,
                                MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
+
+            // We need to set dcbf bit
+            l_mcmode1.setBit<MCS_MCMODE1_DISABLE_SPEC_OP_DCBF_BIT>();
+
             l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_COMMAND_BYPASS,
                                MCS_MCMODE1_DISABLE_COMMAND_BYPASS_LEN>();
             l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_FP_COMMAND_BYPASS>();
