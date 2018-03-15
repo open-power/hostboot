@@ -742,6 +742,7 @@ fapi2::ReturnCode p9_sbe_common_configure_chiplet_FIR(
 {
     uint8_t l_unit_idx;
     fapi2::buffer<uint64_t> l_scom_data;
+
     FAPI_INF("p9_sbe_common_configure_chiplet_FIR: Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_chiplet, l_unit_idx),
@@ -770,7 +771,13 @@ fapi2::ReturnCode p9_sbe_common_configure_chiplet_FIR(
 
     if(l_unit_idx == 0) //TP chiplet
     {
-        l_scom_data.clearBit<26>(); //Clear LFIR Mask bit 26 of TP
+        auto l_target_chip = i_target_chiplet.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        fapi2::buffer<uint8_t> l_has_sp;
+        FAPI_DBG("Reading ATTR_IS_SP_MODE");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, l_target_chip, l_has_sp));
+
+        //Clear LFIR Mask bit 26 of TP only in FSP less system
+        l_scom_data.writeBit<26>(l_has_sp.getBit<7>());
     }
 
 #endif
