@@ -112,9 +112,13 @@ void* call_mss_memdiag (void* io_pArgs)
         {
             TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCBIST );
 
-            // Start Memory Diagnostics.
-            errl = __runMemDiags( trgtList );
-            if ( nullptr != errl ) break;
+            // @todo RTC 179458  Intermittent SIMICs action file issues
+            if ( Util::isSimicsRunning() == false )
+            {
+                // Start Memory Diagnostics.
+                errl = __runMemDiags( trgtList );
+                if ( nullptr != errl ) break;
+            }
 
             for ( auto & tt : trgtList )
             {
