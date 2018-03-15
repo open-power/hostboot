@@ -2374,6 +2374,11 @@ errlHndl_t populate_hbTpmInfo()
         // We will use it below to detect a multi-node scenario
         auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
+        // @TODO RTC: 167290
+        // Until TPM HDAT processing is multi-node aware, pretend the system is
+        // a single node system to get the HDAT partially populated
+        hb_images = 0;
+
         // if single node system
         if (!hb_images)
         {
