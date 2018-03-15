@@ -127,6 +127,11 @@ revert_mc_hb_dcbz_config(
         fapi2::buffer<uint64_t> l_mcperf1;
         fapi2::buffer<uint64_t> l_mcfirmask;
         uint8_t l_mc_pos = 0;
+        fapi2::ATTR_CHIP_EC_FEATURE_HW414958_Type l_hw414958 = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414958,
+                               i_target,
+                               l_hw414958),
+                 "Error from FAPI_ATTR_GET (fapi2::ATTR_CHIP_EC_FEATURE_HW414958)");
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_mc_target,
@@ -166,7 +171,10 @@ revert_mc_hb_dcbz_config(
                                MCS_MCMODE1_DISABLE_SPEC_OP_LEN>();
 
             // We need to set dcbf bit
-            l_mcmode1.setBit<MCS_MCMODE1_DISABLE_SPEC_OP_DCBF_BIT>();
+            if (l_hw414958)
+            {
+                l_mcmode1.setBit<MCS_MCMODE1_DISABLE_SPEC_OP_DCBF_BIT>();
+            }
 
             l_mcmode1.clearBit<MCS_MCMODE1_DISABLE_COMMAND_BYPASS,
                                MCS_MCMODE1_DISABLE_COMMAND_BYPASS_LEN>();
