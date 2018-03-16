@@ -284,6 +284,14 @@ sub printAttribute
     my $build      = shift;
     my $r          = "";
 
+    # Read the value right away so we can decide if it is even valid
+    my $value = $target_ptr->{$attribute}->{default};
+    if ($value eq "")
+    {
+        print " Targets.pm> WARNING: empty default tag for attribute : $attribute\n";
+        return;
+    }
+
     # TODO RTC: TBD
     # temporary until we converge attribute types
     my %filter;
@@ -297,9 +305,11 @@ sub printAttribute
     {
         print $fh "\t<compileAttribute>\n";
     }
-    else{   print $fh "\t<attribute>\n";}
+    else
+    {
+        print $fh "\t<attribute>\n";
+    }
     print $fh "\t\t<id>$attribute</id>\n";
-    my $value = $target_ptr->{$attribute}->{default};
 
     if (ref($value) eq "HASH")
     {
@@ -316,15 +326,17 @@ sub printAttribute
     }
     else
     {
-        if ($value ne "") {
-                print $fh "\t\t<default>$value</default>\n";
-        }
+        print $fh "\t\t<default>$value</default>\n";
     }
+
     if ( $build eq "fsp" && ($attribute eq "INSTANCE_PATH" || $attribute eq "PEER_HUID"))
     {
         print $fh "\t</compileAttribute>\n";
     }
-    else{    print $fh "\t</attribute>\n";}
+    else
+    {
+        print $fh "\t</attribute>\n";
+    }
 }
 
 ## stores TYPE enumeration values which is used to generate HUIDs
