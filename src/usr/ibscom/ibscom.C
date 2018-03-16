@@ -326,7 +326,7 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
 
             TRACUCOMP(g_trac_ibscom, INFO_MRK
                       "getTargetVirtualAddress: From Attribute query l_IBScomBaseAddrOffset=0x%llX, l_IBScomAddr=0x%llX, i_target=0x%.8x",
-                      l_IBScomBaseAddr,
+                      l_IBScomBaseAddrOffset,
                       l_IBScomAddr,
                       i_target->getAttr<ATTR_HUID>());
 
