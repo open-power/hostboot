@@ -3338,9 +3338,10 @@
         <default>0x00270000</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030220000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3422,9 +3423,10 @@
         <default>0x00270001</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030224000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3506,9 +3508,10 @@
         <default>0x00270002</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030228000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3590,9 +3593,10 @@
         <default>0x00270003</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x000003022c000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3668,9 +3672,10 @@
         <default>0x00270004</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030230000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3746,9 +3751,10 @@
         <default>0x00270005</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030234000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3824,9 +3830,10 @@
         <default>0x00270006</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x0000030238000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3902,9 +3909,10 @@
         <default>0x00270007</default>
     </attribute>
 
-
-
-
+    <attribute>
+        <id>DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <default>0x000003023c000000</default>
+    </attribute>
 
     <attribute>
         <id>ORDINAL_ID</id>
