@@ -27,6 +27,7 @@
 #include <initservice/isteps_trace.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <secureboot/service.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -36,6 +37,7 @@
 
 #include <p9_setup_bars.H>
 #include <p9_mss_setup_bars.H>
+#include <p9c_mss_secure_boot.H>
 
 // TODO: RTC 184860 Remove MCS acker workaround
 #include <initservice/initserviceif.H>
@@ -100,7 +102,7 @@ void* call_proc_setup_bars (void *io_pArgs)
     // *******************************
 
 
-    // Get all Centaur targets
+    // Get all processor targets
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TARGETING::TYPE_PROC );
 
@@ -185,6 +187,67 @@ void* call_proc_setup_bars (void *io_pArgs)
         }
 
     }   // end if !l_errl
+
+    // Assuming no errors, secure any Centaurs
+    if ( l_stepError.isNull() )
+    {
+        bool secureCentaurs = false;
+
+        if(SECUREBOOT::enabled())
+        {
+            secureCentaurs = true;
+        }
+
+        // Any feature that would add [force disable|force enable|no force]
+        // behavior would naturally go here
+
+        if(secureCentaurs)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_proc_setup_bars: Securing node's functional Centaurs");
+
+            TARGETING::TargetHandleList functionalCentaurs;
+            getAllChips(functionalCentaurs, TARGETING::TYPE_MEMBUF);
+            for (const auto & pCentaur: functionalCentaurs)
+            {
+                if(   pCentaur->getAttr<TARGETING::ATTR_MODEL>()
+                   != TARGETING::MODEL_CENTAUR)
+                {
+                    continue;
+                }
+
+                const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+                    fapiCentaurTarget(pCentaur);
+
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_proc_setup_bars: Invoking p9c_mss_secure_boot on "
+                    "Centaur with HUID of 0x%08X",
+                    TARGETING::get_huid(pCentaur));
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p9c_mss_secure_boot,
+                                fapiCentaurTarget);
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR : p9c_mss_secure_boot failure for "
+                              "Centaur with HUID of 0x%08X",
+                              TARGETING::get_huid(pCentaur));
+
+                    ErrlUserDetailsTarget(pCentaur).addToLog(l_errl);
+                    l_stepError.addErrorDetails(l_errl);
+                    errlCommit(l_errl, HWPF_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "SUCCESS : p9c_mss_secure_boot succeeded for "
+                              "Centaur with HUID of 0x%08X",
+                              TARGETING::get_huid(pCentaur));
+                }
+            }
+        }
+    }
 
     if ( l_errl )
     {

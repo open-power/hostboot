@@ -59,6 +59,7 @@ OBJS += call_host_mpipl_service.o
 include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_exit_cache_contained.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_mss_setup_bars.mk
+include ${CEN_PROC_PATH}/hwp/memory/p9c_mss_secure_boot.mk
 
 # TODO: RTC 159164: Multiple definition linker errors on HWPs that include the
 # same *.o file in their *.mk files
