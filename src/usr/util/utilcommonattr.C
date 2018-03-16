@@ -69,6 +69,9 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
             case 0x22:
                 l_freqList = OBUS_PLL_FREQ_LIST_P9N_22;
                 break;
+            case 0x23:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9N_23;
+                break;
             default:
                 TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for NIMBUS",
                     l_chipECLevel);
@@ -84,6 +87,9 @@ errlHndl_t getObusPllBucket(TARGETING::Target * i_chipTarget,
                 break;
             case 0x11:
                 l_freqList = OBUS_PLL_FREQ_LIST_P9C_11;
+                break;
+            case 0x12:
+                l_freqList = OBUS_PLL_FREQ_LIST_P9C_12;
                 break;
             default:
                 TRACFCOMP(g_util_trace, "Unknown EC level 0x%x for CUMULUS",
