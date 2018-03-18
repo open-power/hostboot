@@ -248,7 +248,7 @@ int p9_dd_add(
     memcpy(this_addr, i_buf, i_buf_size);
 
     // fill in meta data for new buf
-    memset(this_block, sizeof(struct p9_dd_block), 0);
+    memset(this_block, 0, sizeof(struct p9_dd_block));
     this_block->iv_offset = htobe32(this_offs);
     this_block->iv_size   = htobe32(i_buf_size);
     this_block->iv_dd     = i_dd;
