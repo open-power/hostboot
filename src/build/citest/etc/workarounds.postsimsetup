@@ -38,3 +38,6 @@ sbex -t 1051972
 cd $sb/sbei/sbfw/
 mk -a && mk install_all
 cd -
+
+#grab new action files for Centaur
+sbex -t 1055588

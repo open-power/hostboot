@@ -27,7 +27,7 @@
 /// @file mss_mcbist_common.C
 /// @brief mcbist procedures
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Steve Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -220,12 +220,66 @@ extern "C"
     }
 
     ///
+    /// @brief Resets the error flag registers
+    /// @param[in] i_target_mba Centaur input MBA
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode mcb_reset_error_flags(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
+    {
+        static const std::vector<uint32_t> MBA01_ERROR_TRAP =
+        {
+            CEN_MCBISTS01_MCBEMA1Q,
+            CEN_MCBISTS01_MCBEMA2Q,
+            CEN_MCBISTS01_MCBEMA3Q,
+            CEN_MCBISTS01_MCBEMB1Q,
+            CEN_MCBISTS01_MCBEMB2Q,
+            CEN_MCBISTS01_MCBEMB3Q,
+        };
+        static const std::vector<uint32_t> MBA23_ERROR_TRAP =
+        {
+            CEN_MCBISTS23_MCBEMA1Q,
+            CEN_MCBISTS23_MCBEMA2Q,
+            CEN_MCBISTS23_MCBEMA3Q,
+            CEN_MCBISTS23_MCBEMB1Q,
+            CEN_MCBISTS23_MCBEMB2Q,
+            CEN_MCBISTS23_MCBEMB3Q,
+        };
+
+        uint8_t l_mba_position = 0;
+        const auto i_target_centaur = i_target_mba.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_mba,  l_mba_position));
+
+        {
+            FAPI_INF("%s resetting the MCBIST error flags", mss::c_str(i_target_mba));
+
+            // So, the crappy thing about centaur is that not all registers tied to an MBA are on the MBA chiplet
+            // Certain registers are on an MBS chiplet.  MBS chiplet 0 is tied to MBA chiplet 0, while
+            // MBS chiplet 1 is tied to MBA chiplet 1.  However, as the scoms are on different chiplets,
+            // and the hardware implementation does not support an MBS chiplet, we need to figure out which scoms registers
+            // to hit.  We're assigning them below
+            const auto& l_trap_vector = l_mba_position == 0 ? MBA01_ERROR_TRAP : MBA23_ERROR_TRAP;
+
+            // Now, loop through and reset all of the error traps
+            for(const auto l_reg : l_trap_vector)
+            {
+                fapi2::buffer<uint64_t> l_data_buffer_64;
+                FAPI_TRY(fapi2::putScom(i_target_centaur, l_reg, l_data_buffer_64));
+            }
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+
+    }
+
+    ///
     /// @brief Clears all the trap registers in MCBIST engine
     /// @param[in] i_target_mba Centaur input mba
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
     fapi2::ReturnCode mcb_reset_trap(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
     {
+
         fapi2::buffer<uint64_t> l_data_buffer_64;
         uint8_t l_mba_position = 0;
         const auto i_target_centaur = i_target_mba.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
@@ -248,6 +302,10 @@ extern "C"
         FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMA1Q, l_data_buffer_64));
         FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMB1Q, l_data_buffer_64));
         FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer_64));
+
+        // Resets the error flags
+        FAPI_TRY(mcb_reset_error_flags(i_target_mba));
+
     fapi_try_exit:
         return fapi2::current_err;
     }
@@ -2503,7 +2561,8 @@ extern "C"
                 break;
 
             default:
-                FAPI_INF("%s:Wrong Data Pattern,so using default pattern",
+                o_mcbpatt = ABLE_FIVE;
+                FAPI_INF("%s:Wrong Data Pattern,so using default pattern of ABLE_FIVE",
                          mss::c_str(i_target_mba));
         }
     }

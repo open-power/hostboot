@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -27,4 +27,8 @@
 
 PROCEDURE=p9c_mss_ddr4_pda
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_mrs6_DDR4
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
 $(call BUILD_PROCEDURE)

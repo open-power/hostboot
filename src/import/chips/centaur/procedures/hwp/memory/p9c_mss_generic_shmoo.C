@@ -27,7 +27,7 @@
 /// @file p9c_mss_generic_shmoo.C
 /// @brief MSS Generic Shmoo Implementation
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -241,8 +241,8 @@ extern "C"
         FAPI_DBG("mss_generic_shmoo : run() l_attr_schmoo_test_type_u8 %d", l_attr_schmoo_test_type_u8);
         // Check if all bytes/bits are in a pass condition initially .Otherwise quit
 
-        //Value of l_attr_schmoo_test_type_u8 are  0x01,     0x02,   0x04,      0x08,   0x10 ===
-        //                                       "MCBIST","WR_EYE","RD_EYE","WRT_DQS","RD_DQS" resp.
+        //Value of l_attr_schmoo_test_type_u8 are  0x01,     0x02,   0x04,      0x08,   0x10  , 0x20 ===
+        //                                       "MCBIST","WR_EYE","RD_EYE","WRT_DQS","RD_DQS","BOX" resp.
 
         if (l_attr_schmoo_test_type_u8 == 0)
         {
@@ -256,6 +256,19 @@ extern "C"
             FAPI_TRY(sanity_check(i_target),
                      "generic_shmoo::run MSS Generic Shmoo failed initial Sanity Check. Memory not in an all pass Condition");
 
+        }
+
+        //runs the box shmoo
+        else if (l_attr_schmoo_test_type_u8 == BOX)
+        {
+            FAPI_TRY(get_all_noms(i_target));
+
+            if(l_attr_schmoo_multiple_setup_call_u8 == 0)
+            {
+                FAPI_TRY(schmoo_setup_mcb(i_target));
+            }
+
+            FAPI_TRY(do_box_shmoo(i_target));
         }
 
         else if (l_attr_schmoo_test_type_u8 == 8)
@@ -4584,6 +4597,170 @@ extern "C"
         }
 
         FAPI_TRY(setup_mcbist(i_target, i_mcbbytemask1, 0, 0x0ull , l_sub_info, l_str_cust_addr), "Failed setup_mcbist");
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Box shmoo error log helper
+    /// @param[in] i_target the MBA target
+    /// @param[in] i_fail true if MCBIST failed
+    /// @param[in] i_vref the VREF value
+    /// @param[in] i_delay delay offset value
+    /// @param[in] i_offset true if the delay is positive
+    ///
+    fapi2::ReturnCode box_shmoo_error_helper(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const bool i_fail,
+            const uint8_t i_vref,
+            const uint8_t i_delay,
+            const bool i_offset)
+    {
+        const bool l_pass = !i_fail;
+        FAPI_ASSERT(l_pass,
+                    fapi2::MSS_BOX_SHMOO_FAIL()
+                    .set_TARGET(i_target)
+                    .set_VREF(i_vref)
+                    .set_DELAY(i_delay)
+                    .set_OFFSET(i_offset),
+                    "%s FOUND FAILING MCBIST BIT AT %s 0x%02x DELAY and VREF 0x%02x!!!", mss::c_str(i_target), i_offset ? "+" : "-",
+                    i_delay, i_vref)
+
+        // Passing - send out an informational message and return success
+        FAPI_INF("%s FOUND PASSING MCBIST BIT AT %s 0x%02x DELAY and VREF 0x%02x!!!", mss::c_str(i_target),
+                 i_offset ? "+" : "-", i_delay, i_vref);
+        return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        // We're here, so we took a fail - log it as recovered, as we just want it to be informational
+        // Box shmoo is just used to collect data in case we take fails later
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    ///
+    /// @brief Does the box shmoo
+    /// @param[in] i_target Centaur input MBA
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode generic_shmoo::do_box_shmoo(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+    {
+        fapi2::buffer<uint64_t> data_buffer_64;
+        uint8_t l_p = 0;
+        uint8_t l_rank = 0;
+        uint8_t l_dq = 0;
+        uint8_t l_n = 0;
+        uint8_t rank = 0;
+        uint8_t l_SCHMOO_NIBBLES = 18;
+        input_type_t l_input_type_e = WR_DQ;
+        access_type_t l_access_type_e = WRITE;
+
+        uint8_t delay_train_step_size = 0;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_MRW_WR_VREF_CHECK_VREF_STEP_SIZE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                delay_train_step_size));
+
+        for(l_p = 0; l_p < MAX_PORT; l_p++)
+        {
+
+            for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
+            {
+                rank = valid_rank1[l_p][l_rank];
+
+                for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
+                {
+                    for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
+                    {
+                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
+                            (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq
+                                    + l_n * 4] + delay_train_step_size);
+                        FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
+                                                             0,
+                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                    }
+                }
+            }
+        }
+
+        FAPI_TRY(do_mcbist_reset(i_target), "%s generic_shmoo::find_bound do_mcbist_reset failed", mss::c_str(i_target));
+        FAPI_TRY(do_mcbist_test(i_target), "%s generic_shmoo::find_bound do_mcbist_test failed", mss::c_str(i_target));
+
+        FAPI_TRY(getScom(i_target, CEN_MBA_MCB_CNTLSTATQ, data_buffer_64));
+
+        // Note: the below function checks if we failed and logs an error if we did
+        // Box shmoo is a margins check, as such we want to just note the fail and move on in the IPL
+        // If we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+        // True for increasing delay
+        FAPI_TRY(box_shmoo_error_helper(i_target, data_buffer_64.getBit<2>(), iv_vref_mul, delay_train_step_size, true));
+
+        {
+
+            uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+            uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
+                                   count_bad_dq), "Failed mcb_error_map");
+        }
+
+        for(l_p = 0; l_p < MAX_PORT; l_p++)
+        {
+
+            for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
+            {
+                rank = valid_rank1[l_p][l_rank];
+
+                for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
+                {
+                    for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
+                    {
+                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
+                            (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq
+                                    + l_n * 4] - delay_train_step_size);
+
+                        FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
+                                                             0,
+                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                    }
+                }
+            }
+        }
+
+
+        FAPI_TRY(do_mcbist_reset(i_target), "%s generic_shmoo::find_bound do_mcbist_reset failed", mss::c_str(i_target));
+        FAPI_TRY(do_mcbist_test(i_target), "%s generic_shmoo::find_bound do_mcbist_test failed", mss::c_str(i_target));
+
+        FAPI_TRY(getScom(i_target, CEN_MBA_MCB_CNTLSTATQ, data_buffer_64));
+
+        // Note: the below function checks if we failed and logs an error if we did
+        // Box shmoo is a margins check, as such we want to just note the fail and move on in the IPL
+        // If we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+        // False for decreasing delay
+        FAPI_TRY(box_shmoo_error_helper(i_target, data_buffer_64.getBit<2>(), iv_vref_mul, delay_train_step_size, false));
+
+        {
+
+            uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+            uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
+                                   count_bad_dq), "Failed mcb_error_map");
+        }
+
+        for(l_p = 0; l_p < MAX_PORT; l_p++)
+        {
+            for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
+            {
+                rank = valid_rank1[l_p][l_rank];
+
+                for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
+                {
+                    for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
+                    {
+                        FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
+                                                             0,
+                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                    }
+                }
+            }
+        }
+
     fapi_try_exit:
         return fapi2::current_err;
     }

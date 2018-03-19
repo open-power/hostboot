@@ -121,11 +121,12 @@ Set by: PLL settings written by Dave Cadigan</description>
 <attribute>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training; 0x03=PORT Level Training; 0x04=MBA Level; 0x05=CENTAUR level;
-         Default Value = 0x03 for OpenPower platforms
-                      = 0x01 for others (TULETA, BRAZOS, ALPINE).
+    <description>Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training; 0x03=Box shmoo;
+         Default Value = 0x03 for box shmoo on all platforms
 </description>
     <valueType>uint8</valueType>
+    <enum>DISABLE = 0, DRAM = 1, RANK = 2, BOX = 3</enum>
+    <default>3</default>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
@@ -1636,7 +1637,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_MODE</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo mode to use during draminit_train_adv.</description>
+    <description>Specifies the shmoo mode to use during draminit_train_adv.</description>
     <valueType>uint8</valueType>
     <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
     <writeable/>
@@ -1647,7 +1648,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_ADDR_MODE</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo mode to use during draminit_train_adv</description>
+    <description>Specifies the shmoo mode to use during draminit_train_adv</description>
     <valueType>uint8</valueType>
     <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
     <writeable/>
@@ -1658,14 +1659,15 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_TEST_VALID</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo test to run during draminit_train_adv. Bit wise.</description>
+    <description>Specifies the shmoo test to run during draminit_train_adv. Bit wise.</description>
     <valueType>uint8</valueType>
     <enum> NONE = 0x00,
  MCBIST = 0x01,
  WR_EYE = 0x02,
  RD_EYE = 0x04,
  WR_DQS = 0x08,
- RD_DQS = 0x10</enum>
+ RD_DQS = 0x10,
+ BOX = 0x20</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1674,7 +1676,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_PARAM_VALID</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo parameters to use during draminit_train_adv. Bit wise.</description>
+    <description>Specifies the shmoo parameters to use during draminit_train_adv. Bit wise.</description>
     <valueType>uint8</valueType>
     <enum> PARAM_NONE = 0x00,
  DELAY_REG = 0x01,
@@ -1691,7 +1693,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
@@ -1701,7 +1703,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
@@ -1711,7 +1713,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
@@ -1721,7 +1723,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>
@@ -1731,7 +1733,7 @@ firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
+    <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
     <odmVisable/>

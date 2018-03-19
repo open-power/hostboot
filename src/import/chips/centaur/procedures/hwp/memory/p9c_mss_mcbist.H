@@ -27,7 +27,7 @@
 /// @file mss_mcbist.H
 /// @brief MCBIST execution procedures header
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Steve Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -50,59 +50,59 @@ extern "C"
     ///
     enum mcbist_test_mem
     {
-        USER_MODE,
-        CENSHMOO,
-        SUREFAIL,
-        MEMWRITE,
-        MEMREAD,
-        CBR_REFRESH,
-        MCBIST_SHORT,
-        SHORT_SEQ,
-        DELTA_I,
-        DELTA_I_LOOP,
-        SHORT_RAND,
-        LONG1,
-        BUS_TAT,
-        SIMPLE_FIX,
-        SIMPLE_RAND,
-        SIMPLE_RAND_2W,
-        SIMPLE_RAND_FIXD,
-        SIMPLE_RA_RD_WR,
-        SIMPLE_RA_RD_R,
-        SIMPLE_RA_FD_R,
-        SIMPLE_RA_FD_R_INF,
-        SIMPLE_SA_FD_R,
-        SIMPLE_RA_FD_W,
-        INFINITE,
-        WR_ONLY,
-        W_ONLY,
-        R_ONLY,
-        W_ONLY_RAND,
-        R_ONLY_RAND,
-        R_ONLY_MULTI,
-        SHORT,
-        SIMPLE_RAND_BARI,
-        W_R_INFINITE,
-        W_R_RAND_INFINITE,
-        R_INFINITE1,
-        R_INFINITE_RF,
-        MARCH,
-        SIMPLE_FIX_RF,
-        SHMOO_STRESS,
-        SIMPLE_RAND_RA,
-        SIMPLE_FIX_RA,
-        SIMPLE_FIX_RF_RA,
-        TEST_RR,
-        TEST_RF,
-        W_ONLY_INFINITE_RAND,
-        MCB_2D_CUP_SEQ,
-        MCB_2D_CUP_RAND,
-        SHMOO_STRESS_INFINITE,
-        HYNIX_1_COL,
-        RMWFIX,
-        RMWFIX_I,
-        W_INFINITE,
-        R_INFINITE
+        USER_MODE = 0,
+        CENSHMOO = 1,
+        SUREFAIL = 2,
+        MEMWRITE = 3,
+        MEMREAD = 4,
+        CBR_REFRESH = 5,
+        MCBIST_SHORT = 6,
+        SHORT_SEQ = 7,
+        DELTA_I = 8,
+        DELTA_I_LOOP = 9,
+        SHORT_RAND = 10,
+        LONG1 = 11,
+        BUS_TAT = 12,
+        SIMPLE_FIX = 13,
+        SIMPLE_RAND = 14,
+        SIMPLE_RAND_2W = 15,
+        SIMPLE_RAND_FIXD = 16,
+        SIMPLE_RA_RD_WR = 17,
+        SIMPLE_RA_RD_R = 18,
+        SIMPLE_RA_FD_R = 19,
+        SIMPLE_RA_FD_R_INF = 20,
+        SIMPLE_SA_FD_R = 21,
+        SIMPLE_RA_FD_W = 22,
+        INFINITE = 23,
+        WR_ONLY = 24,
+        W_ONLY = 25,
+        R_ONLY = 26,
+        W_ONLY_RAND = 27,
+        R_ONLY_RAND = 28,
+        R_ONLY_MULTI = 29,
+        SHORT = 30,
+        SIMPLE_RAND_BARI = 31,
+        W_R_INFINITE = 32,
+        W_R_RAND_INFINITE = 33,
+        R_INFINITE1 = 34,
+        R_INFINITE_RF = 35,
+        MARCH = 36,
+        SIMPLE_FIX_RF = 37,
+        SHMOO_STRESS = 38,
+        SIMPLE_RAND_RA = 39,
+        SIMPLE_FIX_RA = 40,
+        SIMPLE_FIX_RF_RA = 41,
+        TEST_RR = 42,
+        TEST_RF = 43,
+        W_ONLY_INFINITE_RAND = 44,
+        MCB_2D_CUP_SEQ = 45,
+        MCB_2D_CUP_RAND = 46,
+        SHMOO_STRESS_INFINITE = 47,
+        HYNIX_1_COL = 48,
+        RMWFIX = 49,
+        RMWFIX_I = 50,
+        W_INFINITE = 51,
+        R_INFINITE = 52,
     };
     // This is the number of tests in the enum above
     constexpr uint64_t MAX_MCBIST_TEST_INDEX = 52;
@@ -443,5 +443,12 @@ extern "C"
     void mss_conversion_data(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                              const uint8_t l_pattern,
                              mcbist_data_gen& o_mcbpatt);
+
+    ///
+    /// @brief Resets the error flag registers
+    /// @param[in] i_target_mba Centaur input MBA
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode mcb_reset_error_flags(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 }
 #endif

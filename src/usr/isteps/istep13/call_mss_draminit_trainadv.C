@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                 //  Make a local copy of the target for ease of use
                 TARGETING::Target*  l_mbaTarget = *l_mba_iter;
 
+#if 0 //TODO CQ:SW430659 re-enable when VPD supports 
                 // Dump current run on target
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "Running p9c_mss_draminit_training_advanced HWP on "
@@ -127,7 +128,11 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                 fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
 
                 FAPI_INVOKE_HWP(l_err, p9c_mss_draminit_training_advanced, l_fapi_mba_target);
-
+#else
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                          "SKIPPING p9c_mss_draminit_training_advanced HWP on "
+                          "target HUID %.8X till VPD ready", TARGETING::get_huid(l_mbaTarget));
+#endif
                 //  process return code.
                 if ( l_err )
                 {

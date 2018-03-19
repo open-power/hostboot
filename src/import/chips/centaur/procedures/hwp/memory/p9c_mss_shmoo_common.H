@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,8 @@
 /// @file mss_shmoo_common.H
 /// @brief Tools for DDR4 DIMMs centaur procedures
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
-/// *HWP HWP Backup: steve glancy <sglancy@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Steve Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
 /// *HWP Consumed by: HB:CI
@@ -43,13 +43,13 @@
 ///
 /// @brief shmoo type enums
 ///
-enum shmoo_type_t
+enum shmoo_type_t : uint8_t
 {
     TEST_NONE = 0,
     MCBIST    = 1,
     WR_EYE    = 2,
-    WRT_DQS   = 8,
     RD_EYE    = 4,
+    WRT_DQS   = 8,
     RD_GATE   = 16,
     BOX       = 32
 };

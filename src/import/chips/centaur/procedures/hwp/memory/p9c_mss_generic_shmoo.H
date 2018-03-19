@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file mss_generic_shmoo.H
 /// @brief Memory Subsystem Generic Shmoo -- abstraction for HB
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -140,6 +140,13 @@ class generic_shmoo
         ///
         fapi2::ReturnCode find_bound(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                      const bound_t);
+
+        ///
+        /// @brief Does the box shmoo
+        /// @param[in] i_target Centaur input MBA
+        /// @return FAPI2_RC_SUCCESS iff successful
+        ///
+        fapi2::ReturnCode do_box_shmoo(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
 
         ///
         /// @brief This is a key function is used to find right and left bound using new algorithm -- there is an option u can chose not to use it by setting a flag

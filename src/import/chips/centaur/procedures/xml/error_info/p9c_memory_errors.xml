@@ -26,8 +26,8 @@
 <!-- @file p9c_memory_errors.xml -->
 <!-- @brief Error xml for memory errors-->
 <!-- -->
-<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
-<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 1 -->
@@ -359,6 +359,23 @@
   <deconfigure>
     <target>TARGET</target>
   </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_BOX_SHMOO_FAIL</rc>
+  <description>Box shmoo failed at one corner</description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>VREF</ffdc>
+  <ffdc>DELAY</ffdc>
+  <ffdc>OFFSET</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
+  </callout>
 </hwpError>
 
 

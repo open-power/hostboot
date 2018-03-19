@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,57 +39,110 @@
 #include <fapi2.H>
 #include <vector>
 using namespace std;
+
+extern "C"
+{
 ///
 /// @brief PDA MRS storage structure
 ///
-class PDA_MRS_Storage
-{
-    private:
-        char pda_string[fapi2::MAX_ECMD_STRING_LEN];
-    public:
-        uint8_t attribute_data;
-        uint32_t attribute_name;
-        uint8_t MRS;
-        uint8_t dimm;
-        uint8_t dram;
-        uint8_t rank;
-        uint8_t port;
-        ///
-        /// @brief PDA MRS storage constructor
-        ///
-        PDA_MRS_Storage(const uint8_t ad, const uint32_t an, const uint8_t dr, const uint8_t di, const uint8_t r,
-                        const uint8_t p);
-        ~PDA_MRS_Storage();
-        bool operator> (const PDA_MRS_Storage& PDA2) const;
-        bool operator< (const PDA_MRS_Storage& PDA2) const;
-        void copy(PDA_MRS_Storage& temp);
-        fapi2::ReturnCode setMRSbyAttr(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
-        fapi2::ReturnCode checkPDAValid(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
-        char* c_str();
-        void generatePDAString();
-};
+    class PDA_MRS_Storage
+    {
+        private:
+            char pda_string[fapi2::MAX_ECMD_STRING_LEN];
+        public:
+            uint8_t attribute_data;
+            uint32_t attribute_name;
+            uint8_t MRS;
+            uint8_t dimm;
+            uint8_t dram;
+            uint8_t rank;
+            uint8_t port;
+
+            ///
+            /// @brief PDA MRS storage constructor
+            /// @param[in] ad attribute data
+            /// @param[in] ad attribute name/ID
+            /// @param[in] dr dram number
+            /// @param[in] di DIMM position
+            /// @param[in] r rank
+            /// @param[in] p port
+            ///
+            PDA_MRS_Storage(const uint8_t ad, const uint32_t an, const uint8_t dr, const uint8_t di, const uint8_t r,
+                            const uint8_t p);
+
+            ///
+            /// @brief Destructor
+            ///
+            ~PDA_MRS_Storage();
+
+            ///
+            /// @brief Greater than operator
+            /// @param[in] PDA2 object to compare to
+            /// @return bool true iff this object is greater than the one we're comparing against
+            ///
+            bool operator> (const PDA_MRS_Storage& PDA2) const;
+
+            ///
+            /// @brief Greater than operator
+            /// @param[in] PDA2 object to compare to
+            /// @return bool true iff this object is greater than the one we're comparing against
+            ///
+            bool operator< (const PDA_MRS_Storage& PDA2) const;
+
+            ///
+            /// @brief copies one PDA_MRS_Storage to this one
+            /// @param[in] temp MRS storage data structure
+            ///
+            void copy(PDA_MRS_Storage& temp);
+
+            ///
+            /// @brief sets the MRS variable based upon the inputted attribute name
+            /// @param[in] i_target Centaur MBA target
+            /// @return FAPI2_RC_SUCCESS
+            ///
+            fapi2::ReturnCode setMRSbyAttr(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+            ///
+            /// @brief Checks to make sure that
+            /// @param[in] i_target MBA target
+            /// @return FAPI2_RC_SUCCESS iff successful
+            ///
+            fapi2::ReturnCode checkPDAValid(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+            ///
+            /// @brief sends out the string
+            /// @return pda string
+            ///
+            char* c_str();
+            void generatePDAString();
+    };
 
 ///
 /// @brief PDA scom storage structure
 ///
-class PDA_Scom_Storage
-{
-    public:
-        uint64_t scom_addr;
-        uint32_t start_bit;
-        uint32_t num_bits;
-        ///
-        /// @brief PDA Scom storage constructor
-        ///
-        PDA_Scom_Storage(const uint64_t sa, const uint32_t sb, const uint32_t nb);
-        ~PDA_Scom_Storage();
-};
+    class PDA_Scom_Storage
+    {
+        public:
+            uint64_t scom_addr;
+            uint32_t start_bit;
+            uint32_t num_bits;
+            ///
+            /// @brief PDA_Scom_Storage constructor
+            /// @param[in] sa  Scom Address
+            /// @param[in] sb  Start Bit
+            /// @param[in] nb  Num Bits
+            ///
+            PDA_Scom_Storage(const uint64_t sa, const uint32_t sb, const uint32_t nb);
 
-typedef fapi2::ReturnCode (*mss_ddr4_pda_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-        vector<PDA_MRS_Storage> pda);
+            ///
+            /// @brief Default destructor
+            ///
+            ~PDA_Scom_Storage() = default;
+    };
 
-extern "C"
-{
+    typedef fapi2::ReturnCode (*mss_ddr4_pda_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            vector<PDA_MRS_Storage> pda);
+
     ///
     /// @brief runs through the vector of given PDA values and issues the PDA commands to the requested DRAMs
     /// @param[in]  i_target:  Reference to centaur.mba target,

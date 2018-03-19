@@ -27,7 +27,7 @@
 /// @file mss_mcbist_address.C
 /// @brief MCBIST address generation procedures
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Steve Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -53,6 +53,7 @@ extern "C"
     {
         uint8_t l_num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_num_master_ranks[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t l_dimm_eff_ibm_type[2][2] = {0};
         uint8_t l_dram_rows = 0;
         uint8_t l_dram_cols = 0;
         uint8_t l_addr_inter = 0;
@@ -70,6 +71,7 @@ extern "C"
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ROWS, i_target_mba,  l_dram_rows));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_COLS, i_target_mba,  l_dram_cols));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_ADDR_INTER, i_target_mba,  l_addr_inter));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_IBM_TYPE, i_target_mba,  l_dimm_eff_ibm_type));
 
         l_num_ranks_p0_dim0 = l_num_ranks_per_dimm[0][0];
         l_num_ranks_p0_dim1 = l_num_ranks_per_dimm[0][1];
@@ -86,6 +88,7 @@ extern "C"
         sl2_valid = 0;
         sl1_valid = 0;
         sl0_valid = 0;
+        FAPI_INF("%s Calling address generation!\n", mss::c_str(i_target_mba));
 
         if( (l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 1
                 && l_num_ranks_p1_dim1 == 0) )   //Single Rank case   -- default0
@@ -115,17 +118,37 @@ extern "C"
             mr3_valid = 1;
             mr1_valid = 1;
         }
+        else if ((l_num_ranks_p0_dim0 == 4 || l_num_ranks_p0_dim1 == 4 || l_num_ranks_p1_dim0 == 4 || l_num_ranks_p1_dim1 == 4)
+                 && (l_dimm_eff_ibm_type[0][0] == 8)) //Type 3A - 4R 2M2S, 2H 3DS TSV Stack, ISDIMM
+        {
+            FAPI_INF("%s - IBM Type 3A - 2M2S ISDIMM", mss::c_str(i_target_mba));
+            sl0_valid = 0;
+            sl1_valid = 0;
+            sl2_valid = 1;
+            mr3_valid = 1;
+        }
+        else if ((l_num_ranks_p0_dim0 == 8 || l_num_ranks_p0_dim1 == 8 || l_num_ranks_p1_dim0 == 8 || l_num_ranks_p1_dim1 == 8)
+                 && (l_dimm_eff_ibm_type[0][0] == 9)) //Type 3B - 8R 2M4S, 4H 3DS TSV Stack, ISDIMM
+        {
+            FAPI_INF("%s - IBM Type 3B - 2M4S ISDIMM", mss::c_str(i_target_mba));
+            sl0_valid = 0;
+            sl1_valid = 1;
+            sl2_valid = 1;
+            mr3_valid = 1;
+        }
 
         else if((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 0 ) || (l_num_ranks_p1_dim0 == 4
                 && l_num_ranks_p1_dim1 == 0 ))  //Rank 0123 on single dimm case
         {
+            FAPI_DBG("%s:--- INSIDE  --- 4R0R   0123", mss::c_str(i_target_mba));
             mr3_valid = 1;
             mr2_valid = 1;
         }
         else if (((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) || (l_num_ranks_p1_dim0 == 4
                   && l_num_ranks_p1_dim1 == 4)) && l_master_ranks_p0_dim0 == 1) //1r 4h stack
         {
-            mr1_valid = 0; //DDC
+            FAPI_DBG("%s:--- INSIDE  --- 4R4R - 4H", mss::c_str(i_target_mba));
+            mr1_valid = 1; //DDC
             sl1_valid = 1;
             sl2_valid = 1;
         }
@@ -134,6 +157,7 @@ extern "C"
                   && l_num_ranks_p1_dim1 == 0)) && ((l_master_ranks_p0_dim0 == 2) || (l_master_ranks_p0_dim1 == 0
                           && l_master_ranks_p1_dim0 == 2))) //2rx4 4h ddr4 3ds
         {
+            FAPI_DBG("%s:--- INSIDE  --- 8R0R - 8H 0123", mss::c_str(i_target_mba));
             l_addr_inter = 4;
             mr3_valid = 1; //DDC
             sl1_valid = 1;
@@ -142,6 +166,7 @@ extern "C"
         else if ((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) || (l_num_ranks_p1_dim0 == 4
                  && l_num_ranks_p1_dim1 == 4)) //Rank 0123 and 4567 case
         {
+            FAPI_DBG("%s:--- INSIDE  --- 4R4R - 01234567", mss::c_str(i_target_mba));
             mr3_valid = 1;
             mr2_valid = 1;
             mr1_valid = 1;
@@ -150,6 +175,7 @@ extern "C"
                   (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 2)) &&
                  (l_master_ranks_p0_dim0 == 1 && l_master_ranks_p0_dim1 == 1)) //1rx4 2h ddr4 3ds 2 dimm, CDIMM
         {
+            FAPI_DBG("%s:--- INSIDE  --- 2R2R - 2H 04", mss::c_str(i_target_mba));
             sl1_valid = 0;
             sl2_valid = 1;
             mr1_valid = 1;
@@ -220,6 +246,16 @@ extern "C"
         uint8_t l_num_cols = 0;
         uint8_t l_num_rows = 0;
         uint8_t l_dram_gen = 0;
+
+        FAPI_INF("Running parse address %u %u %u %u %u %u %u %u %u!", mr3_valid,
+                 mr2_valid,
+                 mr1_valid,
+                 l_dram_rows,
+                 l_dram_cols,
+                 l_addr_inter,
+                 sl2_valid,
+                 sl1_valid,
+                 sl0_valid);
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SCHMOO_ADDR_MODE, i_target_mba,  l_attr_addr_mode));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_ADDR_NUM_COLS, i_target_mba,  l_num_cols));

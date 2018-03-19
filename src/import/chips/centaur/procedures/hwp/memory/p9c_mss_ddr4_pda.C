@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,10 +60,9 @@ extern "C" {
         start_bit = sb;
         num_bits = nb;
     }
-    PDA_Scom_Storage::~PDA_Scom_Storage() {}
 
     ///
-    /// @brief PDA_Scom_Storage class constructor
+    /// @brief PDA_MRS_Storage class constructor
     /// @param[in] ad  Attribute Data
     /// @param[in] an  Attribute Name
     /// @param[in] dr  DRAM
