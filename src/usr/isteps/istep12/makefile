@@ -80,6 +80,9 @@ OBJS += call_cen_set_inband_addr.o
 # HWP objects needed to set inband addr in istep 12
 OBJS+=p9c_set_inband_addr.o
 
+# HWP objects need to unmask inband errors during framelock
+OBJS+=p9c_mss_unmask_errors.o
+
 #Required before all the <procedure>.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 

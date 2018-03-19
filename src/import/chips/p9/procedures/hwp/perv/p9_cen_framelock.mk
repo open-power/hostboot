@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,16 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+CEN_MSS_INCLUDES := $(GENPATH)
+CEN_MSS_INCLUDES += $(ROOTPATH)
+CEN_MSS_INCLUDES += $(ROOTPATH)/chips/centaur/common/include
+CEN_MSS_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
+CEN_MSS_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
+CEN_MSS_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
+CEN_MSS_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/initfiles/
+
 PROCEDURE=p9_cen_framelock
+lib${PROCEDURE}_DEPLIBS=p9c_mss_unmask_errors
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/centaur/common/include)
+$(eval $(call __ADD_MODULE_INCDIR,$(PROCEDURE),$(CEN_MSS_INCLUDES)))
 $(call BUILD_PROCEDURE)
