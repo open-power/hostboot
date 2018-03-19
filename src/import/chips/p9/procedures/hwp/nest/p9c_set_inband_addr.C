@@ -90,9 +90,9 @@ fapi2::ReturnCode p9c_set_inband_addr(
 
             // form SCOM register format
             l_scom_data.flush<0>();
-            // BAR address 8:38 into bits 4:34
+            // BAR address 8:37 into bits 4:33
             l_dmi_inband_addr = l_base_addr_mmio + l_bar_offset;
-            l_scom_data.insert<4, 31, 8>(l_dmi_inband_addr);
+            l_scom_data.insert<4, 30, 8>(l_dmi_inband_addr);
             // Set valid(bit0 = 1), P9 mode(bit3 = 0)
             l_scom_data.setBit<0>();
 
