@@ -205,6 +205,8 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_CHECKSTOP_COMMAND_ON );
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND_ON = 0x1;
             l_scom_buffer.insert<23, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_TRACESTOP_COMMAND_ON );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_SELECT_ERROR_LOG_SOURCE_ON = 0x1;
+            l_scom_buffer.insert<25, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_SELECT_ERROR_LOG_SOURCE_ON );
 
             if ((l_def_ENABLE_DYNAMIC_64_128B_READS == literal_1))
             {
