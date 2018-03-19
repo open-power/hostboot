@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,6 +209,13 @@ class BlToHbDataManager
         * @return keyAddrPair_t     Key Address Pairs Struct
         */
         const Bootloader::keyAddrPair_t getKeyAddrPairs() const;
+
+        /*
+        * @brief Returns the value of SBE security backdoor enabled bit
+        *
+        * @return bool true if enabled; false otherwise
+        */
+        const bool getSecBackdoor() const;
 };
 
 // Extern global instance of the class

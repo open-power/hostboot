@@ -180,6 +180,11 @@ printk("Version=%lX\n",i_data.version);
                sizeof(Bootloader::keyAddrPair_t));
     }
 
+    if(iv_data.version >= Bootloader::BLTOHB_BACKDOOR)
+    {
+        iv_data.secBackdoorBit = i_data.secBackdoorBit;
+    }
+
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
                                  iv_data.hwKeysHashSize +
@@ -376,5 +381,10 @@ const Bootloader::keyAddrPair_t BlToHbDataManager::getKeyAddrPairs() const
 const size_t BlToHbDataManager::getBlToHbDataSize() const
 {
     return iv_data.sizeOfStructure;
+}
+
+const bool BlToHbDataManager::getSecBackdoor() const
+{
+    return iv_data.secBackdoorBit;
 }
 

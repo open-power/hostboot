@@ -334,6 +334,12 @@ namespace SECUREBOOT
      */
     bool allowAttrOverrides();
 
+   /*
+    * @brief Determines if SBE security backdoor bit is set
+    * @return bool TRUE if SBE security backdoor is enabled; FALSE otherwise
+    */
+    bool getSbeSecurityBackdoor();
+
     /*
      *  @brief Gets the current SBE security mode value from the secureboot
      *         subsystem

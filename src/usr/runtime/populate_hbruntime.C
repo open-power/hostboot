@@ -1430,7 +1430,11 @@ errlHndl_t populate_hbSecurebootData ( void )
             uint16_t secureboot : 1;
             // bit 1: Measurements Extended to Secure Boot TPM
             uint16_t trustedboot : 1;
-            uint16_t reserved : 14;
+            // bit 2: SBE Security Backdoor bit.
+            // NOTE: This bit is labeled "Platform Security Overrides Allowed"
+            // in the section 6.1.1 of HDAT spec.
+            uint16_t sbeSecBackdoor : 1;
+            uint16_t reserved : 13;
         } SysSecSets;
 
         // populate system security settings in hdat
@@ -1450,6 +1454,9 @@ errlHndl_t populate_hbSecurebootData ( void )
         secure = SECUREBOOT::enabled();
 #endif
         l_sysSecSets->secureboot = secure? 1: 0;
+
+        // populate security override setting
+        l_sysSecSets->sbeSecBackdoor = SECUREBOOT::getSbeSecurityBackdoor();
 
         // populate TPM config bits in hdat
         bool tpmRequired = false;
@@ -1767,6 +1774,9 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
             // not present
             l_tpmInstInfo->hdatFunctionalStatus = HDAT::TpmNonPresent;
         }
+
+        // Set TPM configuration flag
+        l_tpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag = 0;
 
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);

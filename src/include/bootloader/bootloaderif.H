@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ enum BlToHbDataVersion
     BLTOHB_SECURE_OVERRIDES = 0x0000000900000004,
     BLTOHB_SIZE             = 0x0000000900000005,
     BLTOHB_KEYADDR          = 0x0000000900000006,
+    BLTOHB_BACKDOOR         = 0x0000000900000007,
 };
 
 enum
@@ -123,7 +124,8 @@ struct BlToHbData
                    xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
-                   sizeOfStructure(0), keyAddrStashData(0) {}
+                   sizeOfStructure(0), keyAddrStashData(0),
+                   secBackdoorBit(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -157,6 +159,8 @@ struct BlToHbData
     size_t sizeOfStructure;
     //keyAddr stash data
     keyAddrPair_t  keyAddrStashData;
+    // Secure Setting - SBE Security Backdoor
+    bool secBackdoorBit;
 } __attribute__((packed));
 
 /**
