@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/scom/scomif.H $                               */
+/* $Source: src/include/usr/scom/runtime/rt_scomif.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,39 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SCOMIF_H
-#define __SCOMIF_H
+#ifndef __RT_SCOMIF_H
+#define __RT_SCOMIF_H
+
+#include <devicefw/driverif.H>
 
 namespace SCOM
 {
 
 /**
- * @brief This function translates a relative scom address
- *        to an absolute scom address
+ * @brief This function sends the scom op to the Hypervisor
  *
- * @param[in]           i_target         SCom target
- * @param[in|out]       io_addr          SCom address
- * @param[out]          o_needsWakeup    Enable SW before scom
- * @param[in]           i_opMode         Defaults to 0 (Standard)
+ * @param[in]           i_opType         Scom operation type
+ * @param[in]           i_target         Scom target
+ * @param[in]           i_scomAddr       Scom address
+ * @param[in|out]       io_buffer        Pointer to scom data
  * @return              errlHndl_t
  */
-errlHndl_t scomTranslate(TARGETING::Target * &i_target,
-                         uint64_t & io_addr,
-                         bool & o_needsWakeup,
-                         uint64_t i_opMode = 0);
-
-#ifndef __HOSTBOOT_RUNTIME
-/**
- * @brief Enable scoms to all cores for multicast workaround
- */
-void enableSlaveCoreMulticast( void );
-
-/**
- * @brief Enable scoms to the memory chiplets for multicast workaround
- */
-void enableMemChipletMulticast( void );
-#endif
+errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
+                         TARGETING::Target * i_target,
+                         uint64_t i_scomAddr,
+                         void * io_buffer);
 
 };  // end namespace SCOM
 
-#endif  // end __SCOMIF_H
+#endif  // end __RT_SCOMIF_H
