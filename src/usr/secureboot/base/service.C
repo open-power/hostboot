@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -636,6 +636,23 @@ bool allowAttrOverrides()
     return retVal;
 };
 #endif
+
+bool getSbeSecurityBackdoor()
+{
+    bool l_backdoorEnabled = false;
+
+    if(g_BlToHbDataManager.getSecBackdoor())
+    {
+        l_backdoorEnabled = true;
+        SB_INF("getSbeSecurityBackdoor: SBE Security Backdoor is enabled.");
+    }
+    else
+    {
+        l_backdoorEnabled = false;
+        SB_INF("getSbeSecurityBackdoor: SBE Security Backdoor is disabled.");
+    }
+    return l_backdoorEnabled;
+}
 
 uint8_t getSbeSecurityMode()
 {

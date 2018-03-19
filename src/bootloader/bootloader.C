@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,6 +85,12 @@ namespace Bootloader{
                 l_blConfigData->secureSettings.allowAttrOverrides;
         }
 
+        if(l_blConfigData->version >= SBE_BACKDOOR_BIT_ADDED)
+        {
+            g_blData->blToHbData.secBackdoorBit =
+                                 l_blConfigData->secureSettings.secBackdoorBit;
+        }
+
         // Find secure ROM addr
         // Get starting address of ROM size and code which is the next 8 byte
         // aligned address after the bootloader end.
@@ -112,6 +118,9 @@ namespace Bootloader{
             // Add cases as additional versions are created
             case ADDR_STASH_SUPPORT_ADDED:
                 g_blData->blToHbData.version = BLTOHB_KEYADDR;
+                break;
+            case SBE_BACKDOOR_BIT_ADDED:
+                g_blData->blToHbData.version = BLTOHB_BACKDOOR;
                 break;
             default:
                 g_blData->blToHbData.version = BLTOHB_SIZE;

@@ -86,6 +86,17 @@ struct hdatTpmData_t
 } __attribute__ ((packed));
 
 /**
+ * @brief Structure definition for TPM Configuration Flags
+ *
+ */
+struct hdatTpmConfigFlags_t
+{
+    uint8_t pcrPoisonedFlag : 1; // Intentionally break remote attestation
+                                 // of this TPM
+    uint8_t reserved : 7;
+} __attribute__ ((packed));
+
+/**
  *  @brief Structure definition for Secureboot TPM Instance Info
  */
 struct hdatSbTpmInstInfo_t
@@ -97,7 +108,8 @@ struct hdatSbTpmInstInfo_t
     uint8_t hdatLocality3Addr;
     uint8_t hdatLocality4Addr;
     uint8_t hdatFunctionalStatus;
-    uint8_t reserved[3];
+    struct hdatTpmConfigFlags_t hdatTpmConfigFlags;
+    uint8_t reserved[2];
     uint32_t hdatTpmSrtmEventLogOffset;
     uint32_t hdatTpmSrtmEventLogEntrySize;
     uint32_t hdatTpmDrtmEventLogOffset;
