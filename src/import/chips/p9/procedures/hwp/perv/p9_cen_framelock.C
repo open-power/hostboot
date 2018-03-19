@@ -43,6 +43,7 @@
 #include <p9_cen_framelock.H>
 #include <p9_mc_scom_addresses.H>
 #include <cen_gen_scom_addresses.H>
+#include <p9c_mss_unmask_errors.H>
 
 fapi2::ReturnCode p9_cen_framelock_cloned(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_pu_target,
         const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_mem_target,
@@ -1497,7 +1498,6 @@ fapi_try_exit:
 //
 //
 
-
 //------------------------------------------------------------------------------
 fapi2::ReturnCode p9_cen_framelock(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_pu_target,
                                    const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_mem_target,
@@ -1509,7 +1509,7 @@ fapi2::ReturnCode p9_cen_framelock(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& 
     // it will commit the passed in rc (if non-zero), and return it's own bad rc.
     // Else if mss_unmask_inband_errors runs clean,
     // it will just return the passed in rc.
-    //l_rc = mss_unmask_inband_errors(i_mem_target, l_rc);
+    FAPI_TRY(mss_unmask_inband_errors(i_mem_target));
 
 fapi_try_exit:
     return fapi2::current_err;
