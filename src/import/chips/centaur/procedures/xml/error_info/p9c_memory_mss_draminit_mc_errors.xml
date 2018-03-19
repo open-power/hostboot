@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -100,6 +100,22 @@
     <deconfigure><target>DIMM</target></deconfigure>
     <!-- Create GARD record for DIMM -->
     <gard><target>DIMM</target></gard>
+    <!-- Callout MBA LOW -->
+    <callout><target>MBA</target><priority>LOW</priority></callout>
+    <!-- Deconfigure MBA -->
+    <deconfigure><target>MBA</target></deconfigure>
+    <!-- Create GARD record for MBA -->
+    <gard><target>MBA</target></gard>
+</hwpError>
+
+
+<hwpError>
+    <rc>RC_CEN_MSS_DRAMINIT_MC_PARITY_CHECKING_DISABLED</rc>
+    <description>Parity checking is disabled on this MBA, when it is expected to be enabled</description>
+    <!-- FFDC: Capture register with the RCD retry settings -->
+    <ffdc>MBA_FARB0</ffdc>
+    <!-- Callout FW HIGH -->
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>
     <!-- Callout MBA LOW -->
     <callout><target>MBA</target><priority>LOW</priority></callout>
     <!-- Deconfigure MBA -->

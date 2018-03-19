@@ -1238,6 +1238,8 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
         uint64_t l_def_IS7C = (l_def_7c_1socket || l_def_7c_2socket);
+        uint64_t l_def_IS3A = (l_def_3a_1socket || l_def_3a_2socket);
+        uint64_t l_def_IS3B = (l_def_3b_1socket || l_def_3b_2socket);
         uint64_t l_def_7b_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
                                         && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)))
@@ -1253,7 +1255,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                  && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
         uint64_t l_def_IS3b_IS7b = ((((l_def_3b_1socket || l_def_3b_2socket) || l_def_4b_ddr4_cdimm) || l_def_7b_1socket)
                                     || l_def_7b_2socket);
-        uint64_t l_def_IS3B = (l_def_3b_1socket || l_def_3b_2socket);
         fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type l_TGT0_ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA, TGT0,
                                l_TGT0_ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA));
@@ -5404,7 +5405,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
             }
 
-            if ((l_def_IS3A_IS3B == literal_1))
+            if ((l_def_IS3A == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3B == literal_1))
             {
                 l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
             }
@@ -5461,7 +5466,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
             }
 
-            if ((l_def_IS3A_IS3B == literal_1))
+            if ((l_def_IS3A == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3B == literal_1))
             {
                 l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
             }
@@ -5880,7 +5889,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b101100 );
             }
 
-            if ((l_def_IS3A_IS3B == literal_1))
+            if ((l_def_IS3A == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3B == literal_1))
             {
                 l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b100100 );
             }
@@ -5921,7 +5934,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
             }
 
-            if ((l_def_IS3A_IS3B == literal_1))
+            if ((l_def_IS3A == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3B == literal_1))
             {
                 l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b101100 );
             }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,124 @@ extern "C"
     ///@return FAPI2_RC_SUCCESS iff function complete
     ///
     fapi2::ReturnCode mss_ccs_mode_reset(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Checks parity error reporting and sets up RCD recovery
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode check_parity_and_enable_rcd_recovery(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Sets up the firs for the RCD response time calibration
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode setup_firs_for_rcd_response_time_calibration(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Finds the maximum allowable RCD protect time
+    /// @param[in] i_target MBA target
+    /// @param[out] o_max_rcd_protect maximum allowable RCD protect time
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode find_max_rcd_protect_time(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            uint8_t& o_max_rcd_protect);
+
+    ///
+    /// @brief Loads the RCD protection maint commands
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode load_rcd_protect_maint_cmd(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Clears the RCD parity FIR bit
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode clear_rcd_parity_fir(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Clears the RCD parity errors in the MBACAL FIR register
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode clear_rcd_parity_mbacal_fir(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Sets up the RCD protect time
+    /// @param[in] i_time the RCD protect time
+    /// @param[in,out] io_data the data buffer to modify
+    ///
+    void set_rcd_protect_time(const uint8_t i_time, fapi2::buffer<uint64_t>& io_data);
+
+    ///
+    /// @brief Sets up the RCD parity inject
+    /// @param[in] i_port the port on which to do the inject
+    /// @param[in,out] io_data the data buffer to modify
+    ///
+    void set_rcd_inject(const uint8_t i_port, fapi2::buffer<uint64_t>& io_data);
+
+    ///
+    /// @brief Setup RCD parity inject and time
+    /// @param[in] i_target MBA target
+    /// @param[in] i_time the RCD protect time
+    /// @param[in] i_port the port on which to operate
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode setup_rcd_protect_inject_time(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_time,
+            const uint8_t i_port);
+
+    ///
+    /// @brief Setup RCD parity inject and time
+    /// @param[in] i_target MBA target
+    /// @param[in] i_dimm the DIMM number on which to operate
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode start_single_address_maint(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_dimm);
+
+    ///
+    /// @brief Checks the maintenance engine's address FIR for errors
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode check_maint_fir(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Checks the maintenance engine's address FIR for errors
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode check_maint_timeout(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+    ///
+    /// @brief Processes the RCD timeout results
+    /// @param[in] i_target MBA target
+    /// @param[in] i_port the port on which the code is operating
+    /// @param[in] i_dimm the DIMM on which the code is operating
+    /// @param[in] i_max_cfg_rcd_protection_time maximum allowable configuration time
+    /// @param[in,out] io_cfg_rcd_protection_time current RCD protection time
+    /// @param[in,out] io_highest_cfg_rcd_protection_time highest configuration time from all calibrated ports
+    /// @param[out] o_loop_done true if the RCD error was found and the current loop is done
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode process_rcd_timeout_results(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_port,
+            const uint8_t i_dimm,
+            const uint8_t i_max_cfg_rcd_protection_time,
+            uint8_t& io_cfg_rcd_protection_time,
+            uint8_t& io_highest_cfg_rcd_protection_time,
+            bool& o_loop_done);
+
+    ///
+    /// @brief Sets up the FIR mask for the RCD parity error in mainline
+    /// @param[in] i_target MBA target
+    /// @return FAPI2_RC_SUCCESS iff function complete
+    ///
+    fapi2::ReturnCode setup_firs_mask_rcd_parity_mainline(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
 
     ///
     ///@brief validate RCD protect time
