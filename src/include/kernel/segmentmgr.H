@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,10 @@ class SegmentManager
          */
         static int devUnmap(void* ea);
 
+        /**
+         * Add pointers to the global debug area
+         */
+        static void addDebugPointers();
 
 
     private:
@@ -187,6 +191,9 @@ class SegmentManager
         {
             return i_addr >> SLBE_s;
         }
+
+        /** See addDebugPointers */
+        void _addDebugPointers();
 
         /** Array of segment objects to associated segment IDs. */
         Segment* iv_segments[MAX_SEGMENTS];

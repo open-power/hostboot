@@ -41,13 +41,16 @@
 #include <securerom/sha512.H>
 #include <kernel/bltohbdatamgr.H>
 #include <kernel/cpuid.H>
+#include <usr/debugpointers.H>
+#include <kernel/segmentmgr.H>
+#include <kernel/block.H>
 
 #include <stdlib.h>
 
 extern "C" void kernel_dispatch_task();
 extern void* init_main(void* unused);
 extern uint64_t kernel_other_thread_spinlock;
-
+extern char hbi_ImageId[];
 
 class Kernel
 {
@@ -101,7 +104,8 @@ const Bootloader::BlToHbData* getBlToHbData()
 extern "C"
 int main()
 {
-    printk("Booting %s kernel...\n\n", "Hostboot");
+    printk("Booting %s kernel...\n", "Hostboot");
+    printk("%s\n\n", hbi_ImageId);
     printk("CPU=%s  PIR=%ld\n",
            ProcessorCoreTypeStrings[CpuID::getCpuType()],
            static_cast<uint64_t>(getPIR()));
@@ -134,6 +138,18 @@ int main()
 
     // Let FSP/BMC know that Hostboot is now running
     KernelMisc::setHbScratchStatus(KernelMisc::HB_RUNNING);
+
+    // Initialize the debug pointer area
+    debug_pointers = new DEBUG::DebugPointers_t();
+    DEBUG::add_debug_pointer(DEBUG::PRINTK,
+                             kernel_printk_buffer,
+                             sizeof(kernel_printk_buffer));
+    printk("Debug @ %p\n", debug_pointers);
+    HeapManager::addDebugPointers();
+    PageManager::addDebugPointers();
+    TaskManager::addDebugPointers();
+    SegmentManager::addDebugPointers();
+    Block::addDebugPointers();
 
     kernel.inittaskBootstrap();
 
@@ -193,3 +209,34 @@ void Kernel::inittaskBootstrap()
     TaskManager::setCurrentTask(t);
 }
 
+
+namespace DEBUG
+{
+void add_debug_pointer( uint64_t i_label,
+                        void* i_ptr,
+                        size_t i_size )
+{
+    if( debug_pointers != nullptr )
+    {
+        for( auto i = 0; i < MAX_ENTRIES; i++ )
+        {
+            if( 0 == ((DebugPointers_t*)debug_pointers)->pairs[i].label_num )
+            {
+                ((DebugPointers_t*)debug_pointers)->pairs[i].label_num
+                  = i_label;
+                ((DebugPointers_t*)debug_pointers)->pairs[i].pointer =
+                  (uint32_t)((uint64_t)i_ptr); //using forced cast on purpose
+                ((DebugPointers_t*)debug_pointers)->pairs[i].size =
+                  static_cast<uint32_t>(i_size);
+                break;
+            }
+        }
+    }
+    else
+    {
+        printk("No debug pointer set for %.16lX\n",i_label);
+        MAGIC_INSTRUCTION(MAGIC_BREAK);
+    }
+    //NOTE: This is called by kernel code so do not add any traces
+}
+};

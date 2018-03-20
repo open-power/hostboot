@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -84,7 +84,8 @@ sub main
         }
     }
 
-    my ($symAddr, $symSize) = ::findSymbolAddress("ERRORLOG::g_ErrlStorage");
+    my ($symAddr, $symSize) = ::findPointer("ERRORLOG",
+                                            "ERRORLOG::g_ErrlStorage");
     if (not defined $symAddr)
     {
         ::userDisplay "Couldn't find symbol ERRORLOG::g_ErrlStorage\n";

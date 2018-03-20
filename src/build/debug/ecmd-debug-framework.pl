@@ -67,6 +67,11 @@ if (not $self)
     $tool = basename $0;
 }
 
+#   "" : Default - Try to use memory, fall-back to symbol files
+#   "usefile" : Only use the symbol files
+#   "usemem" : Only use the data from memory
+my $useSymsMode = "";
+
 GetOptions("tool:s" => \$tool,
            "tool-options:s" => \$toolOptions,
            "test" => \$testImage,
@@ -77,6 +82,7 @@ GetOptions("tool:s" => \$tool,
            "node:i" => \$node,
            "proc:i" => \$proc,
            "memmode:s" => \$memMode,
+           "symsmode:s" => \$useSymsMode,
            "man" => \$cfgMan) || pod2usage(-verbose => 0);
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
@@ -123,6 +129,15 @@ sub userDisplay
 sub getImgPath
 {
     return $imgPath;
+}
+
+# @sub getSymsMode
+#
+# Return whether we should use symbol files or pointers from memory.
+#
+sub getSymsMode
+{
+    return $useSymsMode;
 }
 
 # @sub getIsTest

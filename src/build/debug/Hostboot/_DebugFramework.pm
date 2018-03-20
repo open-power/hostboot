@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -56,6 +56,7 @@ our @EXPORT = ( 'setBootloader', 'clearBootloader', 'callToolModule',
                 'getIstepList',
                 'findSymbolWithinAddrRange',
                 'alignUp',
+                'findDebugPointer', 'findPointer',
               );
 
 our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
@@ -63,6 +64,11 @@ our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
 our ($parsedModuleFile, %moduleAddress);
 our (%toolOpts);
 our ($bootloaderDebug);
+our (%debugPointerAddrs, %debugPointerSizes, $parsedDebugPointers);
+
+#  HOSTBOOT eyecatcher at HRMOR+8K+16
+use constant DEBUG_PTR_ADDR => 8208;
+
 
 BEGIN
 {
@@ -71,6 +77,9 @@ BEGIN
     %symbolTOC = ();
     %addressSymbol = ();
     %addrRangeHash = ();
+    %debugPointerAddrs = ();
+    %debugPointerSizes = ();
+    $parsedDebugPointers = 0;
 
     %symbolSize = ();
 
@@ -365,9 +374,103 @@ sub parseSymbolFile
     $parsedSymbolFile = 1;
 }
 
+# @sub parseDebugPointers <INTERNAL ONLY>
+#
+# Parses the debug pointers area of memory.
+#    See debugpointers.H for implementation details
+#
+# @return array of (address, size) or (not-defined, not-defined).
+#
+sub parseDebugPointers
+{
+    if ($parsedDebugPointers) { return; }
+
+    # The pointer to the DebugPointers_t sits right behind the
+    #my $debugptr = translateHRMOR(DEBUG_PTR_ADDR);
+    #::userDisplay("Reading $debugptr\n");
+    my $mainptr = ::read64(DEBUG_PTR_ADDR);
+    #::userDisplay("mainptr=$mainptr\n");
+    if( $mainptr == 0 )
+    {
+        ::userDisplay("No debug pointer set at 0x2010\n");
+    }
+    elsif( $mainptr > 0x4000000 )
+    {
+        ::userDisplay("Debug pointer area appears invalid - $mainptr\n");
+    }
+    else
+    {
+        #::userDisplay("Found debug pointer at $mainptr\n");
+        #uint64_t eyecatcher;
+        #uint16_t version;
+        #uint16_t numEntries;
+        #uint32_t reserved;
+        #PointerPair_t pairs[MAX_ENTRIES];
+
+        # Pull down the metadata
+        my $eyecatcher = ::read64($mainptr);
+        #::userDisplay("eyecatcher=$eyecatcher\n");
+        my $version = ::read16($mainptr+8);
+        #::userDisplay("version=$version\n");
+        my $numentries = ::read16($mainptr+10);
+        #::userDisplay("numentries=$numentries\n");
+        if( $eyecatcher != 0x4445425547505452 ) #DEBUGPTR
+        {
+            ::userDisplay("Invalid debug pointer at $mainptr\n");
+        }
+
+        # Walk through all of the pointers
+        #char label[8];
+        #uint32_t size;
+        #uint32_t pointer;
+
+        my $curentry = $mainptr+16;
+        for(my $i = 0; $i < $numentries; $i++)
+        {
+            #::userDisplay("i=$i, curentry=$curentry\n");
+            my $cur_label = ::read64($curentry);
+            my $cur_label2 = sprintf("%X",$cur_label);
+            my $cur_size = ::read32($curentry+8);
+            my $cur_ptr = ::read32($curentry+12);
+            if( $cur_label != 0 )
+            {
+                #my $cur_ascii = pack( "A*", $cur_label2 );
+                #::userDisplay(
+                #  "$cur_label2 / $cur_ascii is at $cur_ptr for $cur_size\n");
+                $debugPointerAddrs{$cur_label2} = $cur_ptr;
+                $debugPointerSizes{$cur_label2} = $cur_size;
+            }
+
+            $curentry = $curentry+16;
+        }
+    }
+
+    $parsedDebugPointers = 1;
+}
+
+# @sub findDebugPointer
+#
+# Searches a syms file for the address of a particular symbol name.
+#
+# @param string - Symbol to search for.
+# @return array of (address, size) or (not-defined, not-defined).
+#
+sub findDebugPointer
+{
+    my $name = shift;
+
+    parseDebugPointers();
+    #::userDisplay("name=$name\n");
+    # need to turn this string into hex digits
+    my $name2 = uc(unpack( "H*", $name ));
+    #::userDisplay("name2=$name2\n");
+
+    return ($debugPointerAddrs{$name2}, $debugPointerSizes{$name2} );
+}
+
 # @sub findSymbolAddress
 #
-# Searchs a syms file for the address of a particular symbol name.
+# Searches a syms file for the address of a particular symbol name.
 #
 # @param string - Symbol to search for.
 # @return array of (address, size) or (not-defined, not-defined).
@@ -379,6 +482,39 @@ sub findSymbolAddress
     parseSymbolFile();
 
     return ($symbolAddress{$name}, $symbolSize{$name} );
+}
+
+# @sub findPointer
+#
+# Searches for a pointer wherever it can be found.
+#  Looks in the debug pointer section of memory first, then
+#  tries to use the symbols
+#
+# @param string - Debug pointer to search for.
+# @param string - Symbol to search for.
+# @return array of (address, size) or (not-defined, not-defined).
+#
+sub findPointer
+{
+    my $dbgptrstr = shift;  #Debug Pointer
+    my $sym = shift;  #Symbol
+    my $addr;
+    my $size;
+
+    my $symsmode = ::getSymsMode();
+    if( ($symsmode =~ "") || ($symsmode =~ "usemem") )
+    {
+        ($addr, $size ) = findDebugPointer( $dbgptrstr );
+    }
+
+    if( (($symsmode =~ "") && (not defined $addr))
+        || ($symsmode =~ "usefile") )
+    {
+        #::userDisplay( "*Using Symbol File*\n" );
+        ($addr, $size ) = findSymbolAddress( $sym );
+    }
+
+    return ( $addr, $size );
 }
 
 # @sub findSymbolTOCAddress

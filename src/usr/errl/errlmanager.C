@@ -54,6 +54,7 @@
 #include <functional>
 #include <hwas/common/deconfigGard.H>
 #include <kernel/terminate.H>
+#include <debugpointers.H>
 
 namespace ERRORLOG
 {
@@ -152,6 +153,10 @@ ErrlManager::ErrlManager() :
     l_pMarker->offsetNext = 0;
     l_pMarker->length     = 0;
 #endif
+
+    DEBUG::add_debug_pointer(DEBUG::ERRORLOGS,
+                             &g_ErrlStorage,
+                             4);
 
     // to determine the starting log ID, we need to do this in 2 steps
     // first, determine our node

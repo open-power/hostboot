@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +32,8 @@ our @EXPORT_OK = ('main');
 
 sub main
 {
-    my ($symAddr, $symSize) = ::findSymbolAddress("kernel_printk_buffer");
+    my ($symAddr, $symSize) = ::findPointer("PRINTK  ",
+                                            "kernel_printk_buffer");
     if (not defined $symAddr) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $data = ::readData($symAddr,$symSize);
     $data =~ s/\0+//g; #strip off nulls

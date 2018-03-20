@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <kernel/pagemgr.H>
 #include <util/align.H>
 #include <arch/ppc.H>
+#include <usr/debugpointers.H>
 
 #ifdef HOSTBOOT_DEBUG
 #define SMALL_HEAP_PAGES_TRACKED 64
@@ -73,6 +74,11 @@ uint32_t HeapManager::cv_largeheap_page_max = 0;
 void HeapManager::init()
 {
     Singleton<HeapManager>::instance();
+}
+
+void HeapManager::addDebugPointers()
+{
+    Singleton<HeapManager>::instance()._addDebugPointers();
 }
 
 void * HeapManager::allocate(size_t i_sz)
@@ -620,5 +626,30 @@ bool HeapManager::_freeBig(void* i_ptr)
     crit_assert(result);
 
     return result;
+}
+
+void HeapManager::_addDebugPointers()
+{
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGER,
+                             this,
+                             sizeof(HeapManager));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERLARGEPAGECOUNT,
+                             &cv_largeheap_page_count,
+                             sizeof(HeapManager::cv_largeheap_page_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERLARGEPAGEMAX,
+                             &cv_largeheap_page_max,
+                             sizeof(HeapManager::cv_largeheap_page_max));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLPAGECOUNT,
+                             &cv_smallheap_page_count,
+                             sizeof(HeapManager::cv_smallheap_page_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERCOALESCECOUNT,
+                             &cv_coalesce_count,
+                             sizeof(HeapManager::cv_coalesce_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERFREEBYTES,
+                             &cv_free_bytes,
+                             sizeof(HeapManager::cv_free_bytes));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERFREECHUNKS,
+                             &cv_free_chunks,
+                             sizeof(HeapManager::cv_free_chunks));
 }
 

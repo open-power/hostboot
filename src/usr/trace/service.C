@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <util/sprintf.H>
+#include <debugpointers.H>
 
 
 namespace TRACE
@@ -55,6 +56,10 @@ namespace TRACE
 
         // initialize tracelite setting to off
         iv_traceLite = 0;
+
+        DEBUG::add_debug_pointer(DEBUG::TRACESERVICE,
+                                 this,
+                                 sizeof(TRACE::Service));
     }
 
     Service::~Service()

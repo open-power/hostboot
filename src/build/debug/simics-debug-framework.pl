@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -155,6 +155,17 @@ my $imgPath = "";
 sub getImgPath
 {
     return $imgPath;
+}
+
+# @sub getSymsMode
+#
+# Return whether we should use symbol files or pointers from memory.
+#   "usefile" : Only use the symbol files
+#
+sub getSymsMode
+{
+    # We're always running from a build of some sort in simics
+    return "usefile";
 }
 
 # Tool location override.
