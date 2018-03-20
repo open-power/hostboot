@@ -50,6 +50,14 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
 
+#include <config.h>
+
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <scom/centaurScomCache.H>
+#endif
+#endif
 
 // Trace definition
 trace_desc_t* g_trac_scom = NULL;
@@ -161,7 +169,6 @@ errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
 {
     errlHndl_t l_err = NULL;
 
-
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
     l_err = checkIndirectAndDoScom(i_opType,
@@ -219,6 +226,39 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do {
+
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_SECUREBOOT
+    if(   (i_opType == DeviceFW::READ)
+       && (i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+       && SECUREBOOT::enabled()
+       && SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().cacheEnabled()
+       && (i_target->getAttr<TARGETING::ATTR_TYPE>()==TARGETING::TYPE_MEMBUF))
+    {
+        bool skipScom=true;
+        uint64_t cacheData=0;
+        l_err=SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
+            read(i_target,i_addr,skipScom,cacheData);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_scom, ERR_MRK
+                "checkIndirectAndDoScom: failed in call to ScomCache::read() "
+                "for HUID = 0x%08X, address = 0x%016llX",
+                TARGETING::get_huid(i_target),
+                i_addr);
+            break;
+        }
+
+        if(skipScom)
+        {
+            *reinterpret_cast<uint64_t*>(io_buffer) = cacheData;
+            io_buflen=sizeof(cacheData);
+            break;
+        }
+    }
+#endif
+#endif
+
         // Do we need to do the indirect logic or not?
         bool l_runIndirectLogic = true;
 
@@ -328,6 +368,30 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         }
 
     } while(0);
+
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_SECUREBOOT
+    if(   !l_err
+       && (i_opType == DeviceFW::WRITE)
+       && (i_target!=TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+       && SECUREBOOT::enabled()
+       && SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().cacheEnabled()
+       && (i_target->getAttr<TARGETING::ATTR_TYPE>()==TARGETING::TYPE_MEMBUF) )
+    {
+        l_err = SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
+            write(i_target,i_addr,
+            *reinterpret_cast<uint64_t*>(io_buffer));
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_scom, ERR_MRK
+                "checkIndirectAndDoScom: failed in call to ScomCache::write() "
+                "for HUID = 0x%08X, address = 0x%016llX",
+                TARGETING::get_huid(i_target),
+                i_addr);
+        }
+    }
+#endif
+#endif
 
     return l_err;
 }

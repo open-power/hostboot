@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -28,8 +28,38 @@ MODULE = scom
 #include common ojects between hostboot and runtime hostboot
 include scom.mk
 
-#include unique object modules - currently none
-# OBJS +=
+# Configure virtual paths
+GENDIR = ${ROOTPATH}/obj/genfiles
+VPATH += ${ROOTPATH}/src/import/chips/p9/security/
+VPATH += ${GENDIR}
+
+# Defines for targets/prereqs
+CENTAUR_SCOM_REG_DEF_SCRIPT=genCentaurScomCacheRegDefs.pl
+CENTAUR_SCOM_REG_DEF_BASE=centaurScomCacheRegDefs
+CENTAUR_SCOM_REG_DEF_OBJ=${CENTAUR_SCOM_REG_DEF_BASE}.o
+CENTAUR_SCOM_REG_DEF_SRC=${CENTAUR_SCOM_REG_DEF_BASE}.C
+CENTAUR_SCOM_REG_DEF_CSV=Centaur_Register_List.csv
+
+#include unique object modules
+OBJS += $(if $(CONFIG_SECUREBOOT),centaurScomCache.o,)
+OBJS += $(if $(CONFIG_SECUREBOOT),${CENTAUR_SCOM_REG_DEF_OBJ},)
+OBJS += $(if $(CONFIG_SECUREBOOT),errlud_cache.o,)
+
+# Build rules
+all: GENPASS
+
+GENPASS: ${GENDIR}/${CENTAUR_SCOM_REG_DEF_SRC}
+
+# Bring the Centaur SCOM cache register definition initialization source file
+# up to date by executing the generation script (first dependency), passing
+# it the input .csv file (second dependency) and passing it the output dir
+# (the directory part of the rule target .. namely obj/genfiles)
+${GENDIR}/${CENTAUR_SCOM_REG_DEF_SRC}: \
+    ${CENTAUR_SCOM_REG_DEF_SCRIPT} \
+    ${CENTAUR_SCOM_REG_DEF_CSV}
+	./$< \
+    --csv=$(word 2,$^) \
+    --output-dir=$(@D)
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

@@ -42,6 +42,9 @@ namespace SCOM
         SCOM_TRANSLATE_CENTAUR          = 0x08,
         SCOM_RT_SEND_SCOM_TO_HYP        = 0x09,
         SCOM_OP_SANITY_CHECK            = 0x0A,
+        SCOM_VERIFY_CENTAUR_CACHE       = 0x0B,
+        SCOM_WRITE_CENTAUR_CACHE        = 0x0C,
+        SCOM_READ_CENTAUR_CACHE         = 0x0D,
     };
 
     enum scomReasonCode
@@ -69,11 +72,22 @@ namespace SCOM
         SCOM_RUNTIME_HYP_ERR           = SCOM_COMP_ID | 0x15,
         SCOM_INVALID_DATA_BUFFER       = SCOM_COMP_ID | 0x16,
         SCOM_INVALID_OP_TYPE           = SCOM_COMP_ID | 0x17,
+        SCOM_BAD_CACHE_VERIFY_SEQ      = SCOM_COMP_ID | 0x18,
+        SCOM_CACHE_VERIFY_FAILURE      = SCOM_COMP_ID | 0x19,
+        SCOM_SENSITIVE_REG_READ_FAIL   = SCOM_COMP_ID | 0x1A,
+        SCOM_BAD_TARGET                = SCOM_COMP_ID | 0x1B,
+        SCOM_CACHE_SEQ_ERROR           = SCOM_COMP_ID | 0x1C,
     };
 
     enum UserDetailsTypes
     {
-        SCOM_UDT_PIB                = 0x1
+        SCOM_UDT_PIB                    = 0x01,
+        SCOM_UDT_CENTAUR_CACHE_MISMATCH = 0x02,
+    };
+
+    enum UserDetailsVersions
+    {
+        SCOM_UDT_VERSION_1              = 0x01,
     };
 };
 

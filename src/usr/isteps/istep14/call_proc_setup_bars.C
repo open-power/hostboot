@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <config.h>
 #include <errl/errlentry.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
@@ -47,6 +48,10 @@
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include   <attribute_ids.H>
+
+#ifdef CONFIG_SECUREBOOT
+#include <scom/centaurScomCache.H>
+#endif
 
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -188,6 +193,7 @@ void* call_proc_setup_bars (void *io_pArgs)
 
     }   // end if !l_errl
 
+#ifdef CONFIG_SECUREBOOT
     // Assuming no errors, secure any Centaurs
     if ( l_stepError.isNull() )
     {
@@ -247,7 +253,16 @@ void* call_proc_setup_bars (void *io_pArgs)
                 }
             }
         }
+
+        if(SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
+                cacheEnabled())
+        {
+            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance().
+                disableCache();
+        }
+
     }
+#endif
 
     if ( l_errl )
     {

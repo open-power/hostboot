@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 
 #include "errludparserfactory.H"
 #include "errludP_scom.H"
+#include "errludP_cache.H"
 
 namespace SCOM
 {
@@ -37,7 +38,10 @@ namespace SCOM
             UserDetailsParserFactory()
             {
                 registerParser<SCOM::UdParserPib>
-                (SCOM_UDT_PIB);
+                    (SCOM_UDT_PIB);
+                registerParser<
+                   ::SECUREBOOT::CENTAUR_SECURITY::UdParserCentaurCacheMismatch>
+                        (SCOM_UDT_CENTAUR_CACHE_MISMATCH);
             }
 
 

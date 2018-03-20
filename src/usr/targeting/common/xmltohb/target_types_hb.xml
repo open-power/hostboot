@@ -186,6 +186,7 @@
     <attribute>
         <id>HBRT_HYP_ID</id>
     </attribute>
+    <attribute><id>CENTAUR_REGISTER_CACHE_PTR</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
