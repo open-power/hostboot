@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -149,6 +151,11 @@ class Block
         void updateRefCount( uint64_t i_vaddr,
 			     PageTableManager::UsageStats_t i_stats );
 
+        /**
+         * Add pointers to the global debug area
+         */
+        static void addDebugPointers();
+
         friend class Segment;
         friend class BaseSegment;
         friend class StackSegment;
@@ -283,7 +290,6 @@ class Block
          */
         int removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                         uint64_t i_size, task_t* i_task);
-
 
 
     private:

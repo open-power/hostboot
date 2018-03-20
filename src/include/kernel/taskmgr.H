@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -144,6 +146,11 @@ class TaskManager
         static void waitTask(task_t* t, int64_t tid,
                              int* status, void** retval);
 
+        /**
+         * Add pointers to the global debug area
+         */
+        static void addDebugPointers();
+
 	friend class CpuManager;
 
     protected:
@@ -173,6 +180,11 @@ class TaskManager
          *        responsibility of the caller.
          */
         void removeTracker(task_tracking_t* t);
+
+        /**
+         * Add pointers to the global debug area
+         */
+        void _addDebugPointers();
 
             /** Atomic monotonically increasing counter to use for TIDs. */
         Util::Lockfree::Counter<tid_t> iv_nextTid;

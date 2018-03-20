@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -75,11 +75,11 @@ sub main
     my $foundBuffer = 0;
     print $fh "\2";
 
-    my ($daemonAddr, $daemonSize) =
-        ::findSymbolAddress("Singleton<TRACEDAEMON::Daemon>::instance()::instance");
+    my ($daemonAddr, $daemonSize) =::findPointer("TRACEDMN",
+           "Singleton<TRACEDAEMON::Daemon>::instance()::instance");
 
-    my ($serviceAddr, $serviceSize) =
-        ::findSymbolAddress("Singleton<TRACE::Service>::instance()::instance");
+    my ($serviceAddr, $serviceSize) = ::findPointer("TRACESVC",
+           "Singleton<TRACE::Service>::instance()::instance");
 
     if ((not defined $daemonAddr) || (not defined $serviceAddr))
     {
