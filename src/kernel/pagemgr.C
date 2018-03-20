@@ -38,6 +38,7 @@
 #include <kernel/memstate.H>
 #include <kernel/bltohbdatamgr.H>
 #include <kernel/misc.H>
+#include <usr/debugpointers.H>
 
 
 size_t PageManager::cv_coalesce_count = 0;
@@ -203,6 +204,11 @@ uint64_t PageManager::queryAvail()
 uint64_t PageManager::availPages()
 {
     return Singleton<PageManager>::instance()._availPages();
+}
+
+void PageManager::addDebugPointers()
+{
+    return Singleton<PageManager>::instance()._addDebugPointers();
 }
 
 PageManager::PageManager()
@@ -477,4 +483,17 @@ void PageManager::_addMemory(size_t i_addr, size_t i_pageCount)
     __sync_add_and_fetch(&iv_pagesTotal, i_pageCount);
 
     return;
+}
+
+void PageManager::_addDebugPointers()
+{
+    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGER,
+                             this,
+                             sizeof(PageManager));
+    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERLOWPAGECOUNT,
+                             &PageManager::cv_low_page_count,
+                             sizeof(PageManager::cv_low_page_count));
+    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERCOALESCECOUNT,
+                             &PageManager::cv_coalesce_count,
+                             sizeof(PageManager::cv_coalesce_count));
 }

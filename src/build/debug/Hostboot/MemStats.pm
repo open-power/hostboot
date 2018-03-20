@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +30,8 @@ our @EXPORT_OK = ('main');
 
 use constant HEAPMGR_INSTANCE_NAME =>
                 "Singleton<HeapManager>::instance()::instance";
+use constant PAGEMGR_INSTANCE_NAME =>
+                "Singleton<PageManager>::instance()::instance";
 use constant HEAPMGR_CHUNK_OFFSET => 0;
 #use constant HEAPMGR_BIGCHUNK_OFFSET => 0;
 use constant HEAPMGR_NUMBER_OF_BUCKETS => 12;
@@ -51,11 +55,11 @@ sub main
         $showchunks = 1;
     }
 
-    my ($heap_manager_addr, $symSize) =
-        ::findSymbolAddress(HEAPMGR_INSTANCE_NAME);
+    my ($heap_manager_addr, $symSize) = ::findPointer("HEAPMGR ",
+                                                      HEAPMGR_INSTANCE_NAME);
 
-    my @page_manager_addr =
-        ::findSymbolAddress("Singleton<PageManager>::instance()::instance");
+    my @page_manager_addr = ::findPointer("PAGEMGR ",
+                                          PAGEMGR_INSTANCE_NAME);
 
     my $free_pages =
         ::read64 @page_manager_addr;
@@ -63,39 +67,49 @@ sub main
     my $total_pages =
         ::read64 ($page_manager_addr[0] + 8, 8);
 
-    my $free_min =
-        ::read64 ::findSymbolAddress("PageManager::cv_low_page_count");
+    my $free_min = ::read64
+      ::findPointer("PAGEMLPC",
+                    "PageManager::cv_low_page_count");
 
-    my $page_coal =
-        ::read64 ::findSymbolAddress("PageManager::cv_coalesce_count");
+    my $page_coal = ::read64
+      ::findPointer("PAGEMCNT",
+                    "PageManager::cv_coalesce_count");
 
-    my $big_heap_pages_used =
-        ::read32 ::findSymbolAddress("HeapManager::cv_largeheap_page_count");
+    my $big_heap_pages_used = ::read32
+      ::findPointer("HEAPMLPC",
+                    "HeapManager::cv_largeheap_page_count");
 
-    my $big_heap_max =
-        ::read32 ::findSymbolAddress("HeapManager::cv_largeheap_page_max");
+    my $big_heap_max = ::read32
+      ::findPointer("HEAPMLPM",
+                    "HeapManager::cv_largeheap_page_max");
 
-    my $small_heap_pages_used =
-        ::read32 ::findSymbolAddress("HeapManager::cv_smallheap_page_count");
+    my $small_heap_pages_used = ::read32
+      ::findPointer("HEAPMSPC",
+                    "HeapManager::cv_smallheap_page_count");
 
-    my $heap_coal =
-        ::read32 ::findSymbolAddress("HeapManager::cv_coalesce_count");
+    my $heap_coal = ::read32
+      ::findPointer("HEAPMCNT",
+                    "HeapManager::cv_coalesce_count");
 
-    my $heap_free =
-        ::read32 ::findSymbolAddress("HeapManager::cv_free_bytes");
+    my $heap_free = ::read32
+      ::findPointer("HEAPBYTE",
+                    "HeapManager::cv_free_bytes");
 
-    my $heap_free_chunks =
-        ::read32 ::findSymbolAddress("HeapManager::cv_free_chunks");
+    my $heap_free_chunks = ::read32
+      ::findPointer("HEAPCHNK",
+                    "HeapManager::cv_free_chunks");
 
     my $heap_total = $big_heap_pages_used + $small_heap_pages_used;
     my $heap_max = $big_heap_max + $small_heap_pages_used;
 
 
-    my $castout_ro =
-        ::read32 ::findSymbolAddress("Block::cv_ro_evict_req");
+    my $castout_ro = ::read32
+      ::findPointer("BLOCKROE",
+                    "Block::cv_ro_evict_req");
 
-    my $castout_rw =
-        ::read32 ::findSymbolAddress("Block::cv_rw_evict_req");
+    my $castout_rw = ::read32
+      ::findPointer("BLOCKRWE",
+                    "Block::cv_rw_evict_req");
 
 
     ::userDisplay "===================================================\n";

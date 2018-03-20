@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -400,8 +400,8 @@ sub getPhysicalAddr
     #}
 
     # Get the device segment address
-    my @segment_manager_addr =
-      ::findSymbolAddress("Singleton<SegmentManager>::instance()::instance");
+    my @segment_manager_addr = ::findPointer("SGMNTMGR",
+                   "Singleton<SegmentManager>::instance()::instance");
 
 
     if (not defined @segment_manager_addr)

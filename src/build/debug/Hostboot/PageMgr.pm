@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -54,7 +54,8 @@ sub main
     }
 
     # Find the PageManager
-    my ($symAddr, $symSize) = ::findSymbolAddress(PAGEMGR_INSTANCE_NAME);
+    my ($symAddr, $symSize) = ::findPointer("PAGEMGR ",
+                                          PAGEMGR_INSTANCE_NAME);
     if (not defined $symAddr)
     {
         ::userDisplay "Couldn't find ".PAGEMGR_INSTANCE_NAME;

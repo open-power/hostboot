@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <usr/debugpointers.H>
 
 extern "C" void userspace_task_entry();
 extern "C" void task_end_stub();
@@ -78,6 +79,11 @@ void TaskManager::endTask(task_t* t, void* retval, int status)
 void TaskManager::waitTask(task_t* t, int64_t tid, int* status, void** retval)
 {
     Singleton<TaskManager>::instance()._waitTask(t,tid,status,retval);
+}
+
+void TaskManager::addDebugPointers()
+{
+    Singleton<TaskManager>::instance()._addDebugPointers();
 }
 
 task_t* TaskManager::_createIdleTask()
@@ -372,4 +378,11 @@ void TaskManager::removeTracker(task_tracking_t* t)
 
     // Delete tracker object.
     delete t;
+}
+
+void TaskManager::_addDebugPointers()
+{
+    DEBUG::add_debug_pointer(DEBUG::TASKMANAGER,
+                             this,
+                             sizeof(TaskManager));
 }

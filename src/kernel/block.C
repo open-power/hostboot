@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,6 +44,7 @@
 #include <usr/vmmconst.h>
 
 #include <new>
+#include <usr/debugpointers.H>
 
 // Track eviction requests due to aging pages
 uint32_t Block::cv_ro_evict_req = 0;
@@ -707,4 +710,14 @@ void Block::releaseSPTE(ShadowPTE* i_pte)
     }
 
     i_pte->setPageAddr(NULL);
+}
+
+void Block::addDebugPointers()
+{
+    DEBUG::add_debug_pointer(DEBUG::BLOCKREADONLYEVICT,
+                             &cv_ro_evict_req,
+                             sizeof(cv_ro_evict_req));
+    DEBUG::add_debug_pointer(DEBUG::BLOCKREADWRITEEVICT,
+                             &cv_rw_evict_req,
+                             sizeof(cv_rw_evict_req));
 }

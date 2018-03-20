@@ -276,6 +276,14 @@ kernel_descriptor:
     .byte 'H', 'O', 'S', 'T', 'B', 'O', 'O', 'T'
     .quad kernel_hbDescriptor
 
+;// Hostboot debug pointers.
+;//
+;// This points to a table of pointers to be used by the debug tools
+;// See debugpointers.H for details
+.global debug_pointers
+debug_pointers:
+    .space 8
+
 
 ;// _main:
 ;//     Set up stack and TOC and call kernel's main.

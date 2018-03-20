@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,10 @@ class HeapManager
          */
         static void  free(void * i_ptr);
 
+        /**
+         * Add pointers to the global debug area
+         */
+        static void addDebugPointers();
 
     protected:
 
@@ -223,6 +227,11 @@ class HeapManager
          * Walk through all the allocated pages and verify coherency
          */
         void test_pages();
+
+        /**
+         * Add pointers to the global debug area
+         */
+        void _addDebugPointers();
 
     private: // data
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <kernel/segmentmgr.H>
 #include <kernel/segment.H>
 #include <kernel/devicesegment.H>
+#include <usr/debugpointers.H>
 
 bool SegmentManager::handlePageFault(task_t* i_task, uint64_t i_addr,
                                      bool i_store)
@@ -75,6 +76,11 @@ void* SegmentManager::devMap(void* ra, uint64_t i_devDataSize, bool i_nonCI,
 int SegmentManager::devUnmap(void* ea)
 {
     return Singleton<SegmentManager>::instance()._devUnmap(ea);
+}
+
+void SegmentManager::addDebugPointers()
+{
+    Singleton<SegmentManager>::instance()._addDebugPointers();
 }
 
 bool SegmentManager::_handlePageFault(task_t* i_task, uint64_t i_addr,
@@ -200,4 +206,9 @@ int SegmentManager::_devUnmap(void* ea)
     return reinterpret_cast<DeviceSegment*>(iv_segments[segId])->devUnmap(ea);
 }
 
-
+void SegmentManager::_addDebugPointers()
+{
+    DEBUG::add_debug_pointer(DEBUG::SEGMENTMANAGER,
+                             this,
+                             sizeof(SegmentManager));
+}

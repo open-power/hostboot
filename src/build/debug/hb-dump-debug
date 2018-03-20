@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,17 +52,23 @@ if (defined ($hbDir))
     }
 }
 
+#   "both" : Try to use memory, fall-back to symbol files
+#   "usefile" : Only use the symbol files
+#   "usemem" : Only use the data from memory
+my $useSymsMode = "both";
+
 GetOptions("tool:s" => \$tool,
            "tool-options:s" => \$toolOptions,
            "file:s" => \$dumpfile,
            "test" => \$testImage,
            "img-path:s" => \$imgPath,
+           "symsmode:s" => \$useSymsMode,
            "help" => \$cfgHelp,
            "toolhelp" => \$toolHelp,
            "man" => \$cfgMan) || pod2usage(-verbose => 0);
 pod2usage(-verbose => 1) if $cfgHelp;
 pod2usage(-verbose => 2) if $cfgMan;
-pod2usage(-verbose => 0) if (($tool eq "") || 
+pod2usage(-verbose => 0) if (($tool eq "") ||
                              (($dumpfile eq "") && (!$toolHelp)));
 
 if ($toolHelp)
@@ -131,6 +139,15 @@ sub userDisplay
 sub getImgPath
 {
     return $imgPath;
+}
+
+# @sub getSymsMode
+#
+# Return whether we should use symbol files or pointers from memory.
+#
+sub getSymsMode
+{
+    return $useSymsMode;
 }
 
 # @sub getIsTest

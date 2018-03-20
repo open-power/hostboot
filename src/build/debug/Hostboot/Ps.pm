@@ -67,7 +67,8 @@ sub main
 
     # Find symbol containing kernel list of task objects.
     #   (Tasks who's parent is the kernel)
-    my ($symAddr, $symSize) = ::findSymbolAddress(PS_TASKMGR_SYMBOLNAME);
+    my ($symAddr, $symSize) = ::findPointer("TASKLIST",
+                                            PS_TASKMGR_SYMBOLNAME);
     if (not defined $symAddr)
     {
         ::userDisplay "Couldn't find ".PS_TASKMGR_SYMBOLNAME;

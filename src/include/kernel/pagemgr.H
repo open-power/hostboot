@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,6 +181,11 @@ class PageManager
          */
         static void addMemory(size_t i_addr, size_t i_pageCount);
 
+        /**
+         * Add pointers to the global debug area
+         */
+        static void addDebugPointers();
+
         enum
         {
             KERNEL_HEAP_RESERVED_PAGES = 4,
@@ -208,6 +213,7 @@ class PageManager
         void _freePage(void*, size_t);       //!< see freePage()
         void _coalesce( void );              //!< see coalesce()
         void _addMemory(size_t, size_t);     //!< see addMemory()
+        void _addDebugPointers();           //!< see addDebugPointers()
 
         /** see queryAvail() */
         ALWAYS_INLINE uint64_t _queryAvail() const

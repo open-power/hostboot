@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <config.h>
 #include <console/consoleif.H>
 #include <util/utilmbox_scratch.H>
+#include <debugpointers.H>
 
 namespace TRACE
 {
@@ -75,6 +76,10 @@ namespace TRACEDAEMON
     Daemon::Daemon() : iv_service(NULL), iv_totalPruned(0)
     {
         iv_first = iv_last = BufferPage::allocate(true);
+
+        DEBUG::add_debug_pointer(DEBUG::TRACEDAEMON,
+                                 this,
+                                 sizeof(TRACEDAEMON::Daemon));
     }
 
     Daemon::~Daemon()
