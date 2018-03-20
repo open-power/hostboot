@@ -4366,8 +4366,8 @@ sub getAttributeIdEnumeration {
             # attribute_types_hb.xml or attributes_types_fsp.
             else
             {
-               croak("Error: AttributeId $attribute->{id} "
-                     . "defined multiple times");
+                croak("Error: AttributeId $attribute->{id} "
+                    . "defined multiple times");
             }
         }
         else

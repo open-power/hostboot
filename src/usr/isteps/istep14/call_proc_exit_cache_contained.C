@@ -51,6 +51,11 @@
 #include <util/misc.H>
 #include <hwas/common/hwas.H>
 
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <scom/centaurScomCache.H>
+#endif
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -69,6 +74,24 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained entry" );
+    errlHndl_t  l_errl = nullptr;
+
+#ifdef CONFIG_SECUREBOOT
+    if(SECUREBOOT::enabled())
+    {
+        SECUREBOOT::CENTAUR_SECURITY::ScomCache& centaurCache =
+            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance();
+
+        l_errl = centaurCache.verify();
+        if(l_errl)
+        {
+            l_stepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, HWPF_COMP_ID );
+        }
+
+        centaurCache.destroy();
+    }
+#endif
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
     //  figure out what targets we need
@@ -87,7 +110,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     //Check that minimum hardware requirement is meet.
     //If not, log error and do not proceed
     bool l_bootable;
-    errlHndl_t  l_errl = nullptr;
     l_errl = HWAS::checkMinimumHardware(l_sys, &l_bootable);
     if (!l_bootable && !l_errl)
     {

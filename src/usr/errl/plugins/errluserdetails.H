@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -35,6 +37,54 @@
 
 namespace ERRORLOG
 {
+
+/**
+ *  @brief Returns the uint64_t at the pointed to location in host byte order
+ *
+ *  @param[in] i_pUint64 Pointer to a uint64_t in network byte order
+ *
+ *  @return uint64_t The uint64_t at the pointed to location in host byte order
+ */
+inline uint64_t NTH_UINT64(const void* i_pUint64)
+{
+    return (ntohll(*(reinterpret_cast<const uint64_t*>(i_pUint64))));
+}
+
+/**
+ *  @brief Returns the uint32_t at the pointed to location in host byte order
+ *
+ *  @param[in] i_pUint32 Pointer to a uint32_t in network byte order
+ *
+ *  @return uint32_t The uint32_t at the pointed to location in host byte order
+ */
+inline uint32_t NTH_UINT32(const void* i_pUint32)
+{
+    return (ntohl(*(reinterpret_cast<const uint32_t*>(i_pUint32))));
+}
+
+/**
+ *  @brief Returns the uint16_t at the pointed to location in host byte order
+ *
+ *  @param[in] i_pUint16 Pointer to a uint16_t in network byte order
+ *
+ *  @return uint16_t The uint16_t at the pointed to location in host byte order
+ */
+inline uint16_t NTH_UINT16(const void* i_pUint16)
+{
+    return (ntohs(*(reinterpret_cast<const uint16_t*>(i_pUint16))));
+}
+
+/**
+ *  @brief Returns the uint8_t at the pointed to location in host byte order
+ *
+ *  @param[in] i_pUint8 Pointer to a uint8_t in network byte order
+ *
+ *  @return uint8_t The uint8_t at the pointed to location in host byte order
+ */
+inline uint8_t NTH_UINT8(const void* i_pUint8)
+{
+    return (*(reinterpret_cast<const uint8_t*>(i_pUint8)));
+}
 
 /**
  *

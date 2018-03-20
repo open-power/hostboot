@@ -102,6 +102,11 @@
 #include "../../secureboot/common/errlud_secure.H"
 #include <sbe/sbe_update.H>
 
+#ifdef CONFIG_SECUREBOOT
+#include <secureboot/service.H>
+#include <scom/centaurScomCache.H>
+#endif
+
 // end includes for post sbe secureboot steps
 
 const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
@@ -816,6 +821,16 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
                "call_proc_cen_ref_clock_enable enter" );
 
     validateSecuritySettings();
+
+#ifdef CONFIG_SECUREBOOT
+    if(SECUREBOOT::enabled())
+    {
+        SECUREBOOT::CENTAUR_SECURITY::ScomCache& centaurCache =
+            SECUREBOOT::CENTAUR_SECURITY::ScomCache::getInstance();
+        centaurCache.init();
+        centaurCache.enableCache();
+    }
+#endif
 
     TARGETING::TargetHandleList functionalProcChipList;
 
