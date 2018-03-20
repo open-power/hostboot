@@ -688,16 +688,16 @@
     </attribute>
 
     <attribute>
-        <id>CEN_MSS_CACHE_ENABLE</id>
+        <id>ATTR_CEN_MSS_CACHE_ENABLE</id>
         <no_export/>
         <default>0x1</default>
     </attribute>
     <attribute>
-        <id>LINK_TRAIN</id>
+        <id>ATTR_LINK_TRAIN</id>
         <writeable/>
     </attribute>
     <attribute>
-        <id>SKIP_WAKEUP</id>
+        <id>ATTR_SKIP_WAKEUP</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
 
