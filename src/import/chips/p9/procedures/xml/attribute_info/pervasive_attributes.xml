@@ -754,7 +754,7 @@
 
 <attribute>
   <id>ATTR_PROC_CHIP_MEM_TO_USE</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>This attribute denotes where our master proc's memory is
     located. In the case that the master-proc does not have usable memory,
     we are going to use another proc's memory to boot. The attribute will be
