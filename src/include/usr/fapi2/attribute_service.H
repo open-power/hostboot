@@ -329,6 +329,17 @@ ReturnCode platGetDQSAttrISDIMM(
                                );
 
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the CEN_VPD_DRAM_ADDRESS_MIRRORING attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_dramAddressMirroring   The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdDramAddressMirroring(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                    ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING_Type& o_dramAddressMirroring
+                                        );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
 //  the DRAM_2N_MODE_ENABLED attribute. It should not be called directly.
 //
 //  @param[in] i_fapiTarget The target for the attribute operation.
@@ -608,6 +619,15 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetDQSAttrISDIMM(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING access to the correct
+// HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdDramAddressMirroring(TARGET, VAL)
 
 //-----------------------------------------------------------------------------
 // MACRO to route ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED access to the correct

@@ -71,6 +71,7 @@
 #include<vpd_accessors/getDQAttrISDIMM.H>
 #include<vpd_accessors/getDQSAttrISDIMM.H>
 #include<vpd_accessors/getISDIMMTOC4DAttrs.H>
+#include<vpd_accessors/getMBvpdAddrMirrorData.H>
 #include<vpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include<vpd_accessors/getMBvpdMemoryDataVersion.H>
 #include<vpd_accessors/getMBvpdSPDXRecordVersion.H>
@@ -1686,6 +1687,37 @@ ReturnCode platGetDQSAttrISDIMM(
     {
         fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
         rc = getDQSAttrISDIMM(l_fapiTarget,o_vpdIsDimmTOC4DQSVal);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdDramAddressMirroring(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING_Type& o_dramAddressMirroring
+                                        )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdDramAddressMirroring: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> l_fapiTarget(l_pTarget);
+        rc = getMBvpdAddrMirrorData(l_fapiTarget, o_dramAddressMirroring);
     }
 
     return rc;
