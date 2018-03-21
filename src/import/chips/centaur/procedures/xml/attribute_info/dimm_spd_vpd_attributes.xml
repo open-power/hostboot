@@ -1821,7 +1821,6 @@ The following attributes are from Centaur VPD.
     </enum>
     <platInit/>
     <array> 2 2</array>
-    <writeable/>
 </attribute>
 
 <!-- Attributes added to support the VPD which was formally using the EFF settings -->
