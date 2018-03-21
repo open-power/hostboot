@@ -508,6 +508,15 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
                 resultsTableEntry->destAddr =
                   VmmManager::FORCE_PHYS_ADDR|curDestTableAddr;
                 resultsTableEntry->dataSize = sizeToCopy;
+                // Size field in source/destination table is of 4 bytes.
+                // So result table size field will never cross 4 bytes.
+                // Hence use top 2 bytes to copy data_type from source
+                // table to result table (see HDAT spec for details).
+                if (TARGETING::is_sapphire_load())
+                {
+                    uint64_t data_type = srcTableEntry[curSourceIndex].data_type;
+                    resultsTableEntry->dataSize |= (data_type << 48);
+                }
                 resultsTableEntry++;
                 l_resultCount++;
                 curResultIndex++;
