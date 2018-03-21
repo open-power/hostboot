@@ -32,10 +32,12 @@
 #include <util/align.H>
 #include <sys/mmio.h>
 #include <sys/mm.h>
+#include <sys/misc.h>
 #include <arch/ppc.H>
 #include <errno.h>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/targplatutil.H>
 #include <kernel/console.H>
 #include "utiltcemgr.H"
 #include <util/util_reasoncodes.H>
@@ -128,14 +130,19 @@ errlHndl_t utilSetupPayloadTces(void)
     uint64_t addr=0x0;
     size_t   size=0x0;
     uint32_t token=0x0;
+    uint8_t  nodeId = TARGETING::UTIL::getCurrentNodePhysId();
 
     do{
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces()");
+    TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces(): nodeId=0x%X", nodeId);
 
     // Allocate TCEs for PAYLOAD to Temporary Space
-    addr = MCL_TMP_ADDR;
+    // -- Address must be HRMOR-specific
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    addr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
     size = MCL_TMP_SIZE;
+    TRACUCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hrmorVal, size);
+
     errl = utilAllocateTces(addr, size, token);
     if (errl)
     {
@@ -148,23 +155,31 @@ errlHndl_t utilSetupPayloadTces(void)
     }
 
     // Set attribute to tell FSP what the PAYLOAD token is
-    // Get Target Service and the system target to set attributes
-    TARGETING::TargetService& tS = TARGETING::targetService();
-    TARGETING::Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "utilSetupPayloadTces() system target is NULL");
-
-    sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
-
-    // Save for internal use since we can't trust FSP won't change the attribute
-    Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::PAYLOAD_TOKEN,
-                                               token);
+    TARGETING::Target* pNodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
+    pNodeTgt->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
 
     // For PSI Diagnostics Test the FSP writes and reads back patterns to the
     // PAYLOAD section via PSI and FSI so it needs to know the starting memory
     // address of this section and have an unsecure read-write memory region
     // opened for it
-    sys->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
+    pNodeTgt->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
+
+    // Legacy Support: Also set System Level Attributes on Node 0
+    // @TODO RTC 190014 Can Be Removed Once FSP Switches To Node Attributes
+    // Get Target Service and the system target to set attributes
+    TARGETING::TargetService& tS = TARGETING::targetService();
+    TARGETING::Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys, "utilSetupPayloadTces() system target is NULL");
+    if (nodeId == 0)
+    {
+        sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
+        sys->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
+    }
+
+    // Save for internal use since can't trust FSP won't change attribute
+    Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::PAYLOAD_TOKEN,
+                                               token);
 
     // Open Read-Write Unsecure Memory Region
     errl = SBEIO::openUnsecureMemRegion(addr,
@@ -179,8 +194,10 @@ errlHndl_t utilSetupPayloadTces(void)
     }
 
     // Allocate TCEs for HDAT
-    addr = HDAT_TMP_ADDR;
+    // -- Address must be HRMOR-specific
+    addr = hrmorVal - VMM_HRMOR_OFFSET + HDAT_TMP_ADDR;
     size = HDAT_TMP_SIZE;
+
     errl = utilAllocateTces(addr, size, token);
     if (errl)
     {
@@ -193,7 +210,14 @@ errlHndl_t utilSetupPayloadTces(void)
     }
 
     // Set attribute to tell FSP what the HDAT token is
-    sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
+    pNodeTgt->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
+
+    // Legacy Support: Also set System Level Attributes on Node 0
+    // @TODO RTC 190014 Can Be Removed Once FSP Switches To Node Attributes
+    if (nodeId == 0)
+    {
+         sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
+    }
 
     // Save for internal use since we can't trust FSP won't change the attribute
     Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::HDAT_TOKEN,
@@ -211,10 +235,11 @@ errlHndl_t utilClosePayloadTces(void)
     errlHndl_t errl = nullptr;
 
     uint32_t token=0x0;
+    uint8_t  nodeId = TARGETING::UTIL::getCurrentNodePhysId();
 
     do{
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces()");
+    TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces(): nodeId=0x%X", nodeId);
 
     // Close PAYLOAD TCEs
     token = Singleton<UtilTceMgr>::instance().getToken(UtilTceMgr::PAYLOAD_TOKEN);
@@ -270,9 +295,14 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
   ,iv_payloadToken(INVALID_TOKEN_VALUE)
   ,iv_hdatToken(INVALID_TOKEN_VALUE)
 {
+
+    // Need to set up TCE Table with HRMOR-specific Address
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    iv_tceTablePhysAddr = hrmorVal - VMM_HRMOR_OFFSET + TCE_TABLE_ADDR;
+
     // Table Address must be 4MB Aligned and default input is TCE_TABLE_ADDR
     static_assert( TCE_TABLE_ADDR % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary");
-    assert( i_tableAddr % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary: 0x%.16llX", i_tableAddr);
+    assert( iv_tceTablePhysAddr % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary: 0x%.16llX", iv_tceTablePhysAddr);
 
     // TCE Entry counts are based on the following assumption
     static_assert((sizeof(uint64_t) == sizeof(TceEntry_t)), "TceEntry_t struct must be size of uint64_t)");
@@ -282,7 +312,8 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
 
     iv_tceEntryCount = iv_tceTableSize/(sizeof (uint64_t));
 
-    TRACUCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr: iv_tceTableVaAddr=0x%.16llX, iv_tceTablePhysAddr=0x%.16llX, iv_tceTableSize=0x%llX, iv_tceEntryCount=0x%X, iv_allocatedAddrs,size=%d", iv_tceTableVaAddr, iv_tceTablePhysAddr, iv_tceTableSize, iv_tceEntryCount, iv_allocatedAddrs.size());
+
+    TRACUCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr: iv_tceTableVaAddr=0x%.16llX, iv_tceTablePhysAddr=0x%.16llX, iv_tceTableSize=0x%llX, iv_tceEntryCount=0x%X, iv_allocatedAddrs,size=%d, hrmorVal=0x%.16llX", iv_tceTableVaAddr, iv_tceTablePhysAddr, iv_tceTableSize, iv_tceEntryCount, iv_allocatedAddrs.size(), hrmorVal);
 
     // Initialize HW without Initializing Table so that FSP cannot DMA
     // to memory without Hostboot control

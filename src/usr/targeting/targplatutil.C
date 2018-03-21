@@ -123,6 +123,31 @@ bool isCurrentMasterNode()
     return (isMaster == 1);
 }
 
+#ifndef __HOSTBOOT_RUNTIME
+Target* getCurrentNodeTarget(void)
+{
+    // Get node target
+    TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+    assert(l_nodelist.size() == 1, "ERROR, only expect one node.");
+
+    Target* pTgt =  l_nodelist[0];
+    assert(pTgt != nullptr, "getCurrentNodeTarget found nullptr");
+
+    return pTgt;
+}
+
+uint8_t getCurrentNodePhysId(void)
+{
+    Target* pNodeTgt = getCurrentNodeTarget();
+    EntityPath epath = pNodeTgt->getAttr<TARGETING::ATTR_PHYS_PATH>();
+    const TARGETING::EntityPath::PathElement pe =
+              epath.pathElementOfType(TARGETING::TYPE_NODE);
+    return pe.instance;
+}
+#endif
+
 // return the sensor number from the passed in target
 uint32_t getSensorNumber( const TARGETING::Target* i_pTarget,
                           TARGETING::SENSOR_NAME i_name )

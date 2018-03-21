@@ -455,6 +455,9 @@ void* call_host_runtime_setup (void *io_pArgs)
                 // break from do loop if error occurred
                 break;
             }
+
+            // @TODO RTC 187335 Close TCEs on non-master nodes
+
         }
 
         // Need to load up the runtime module if it isn't already loaded
