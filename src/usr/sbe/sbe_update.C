@@ -47,6 +47,7 @@
 #include <sys/misc.h>
 #include <sys/msg.h>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwas.H>
 #include <initservice/initserviceif.H>
 #include <console/consoleif.H>
 #include <config.h>
@@ -1013,6 +1014,11 @@ namespace SBE
                             i_maxImgSize, io_imgPtr);
 
         do{
+
+            // Before doing any customization, we need to ensure that the
+            // ATTR_EC/EQ_GARD attributes are setup to reflect the
+            // current state of our targets
+            HWAS::setChipletGardsOnProc(i_target);
 
             // cast OUR type of target to a FAPI type of target.
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
