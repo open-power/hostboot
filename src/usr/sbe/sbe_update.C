@@ -5845,7 +5845,7 @@ errlHndl_t secureKeyTransition()
         l_errl = l_nestedConHdr.setHeader(l_pVaddr);
         if(l_errl)
         {
-             TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - setheader failed");
+            TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - setheader failed");
             break;
         }
         // Get pointer to first element of hwKeyHash from header.
@@ -5855,6 +5855,18 @@ errlHndl_t secureKeyTransition()
                sizeof(g_hw_keys_hash_transition_data));
         // Indicate a key transition is required
         g_do_hw_keys_hash_transition = true;
+
+        bool l_hw_lab_override_flag = l_nestedConHdr.sb_flags()->hw_lab_override;
+        TRACFCOMP(g_trac_sbe, "Overriding the Lab Security Backdoor Bit due to"
+                  " key transition; new Security Backdoor Enabled bit is %d",
+                  l_nestedConHdr.sb_flags()->hw_lab_override);
+        l_errl = SECUREBOOT::setSbeSecurityMode(!l_hw_lab_override_flag);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_sbe, ERR_MRK"secureKeyTransition() - could not"
+                      " set SBE security mode.");
+            break;
+        }
     }
     if(l_loaded)
     {
