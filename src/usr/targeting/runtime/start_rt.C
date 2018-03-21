@@ -50,6 +50,9 @@ namespace RT_TARG
         TargetService& l_targetService = targetService();
         l_targetService.init(Singleton<AttrRP>::instance().getNodeCount());
 
+        // Reset hb mutex attributes in case they got stuck in a locked state
+        l_targetService.resetMutexAttributes();
+
         adjustTargeting4Runtime();
 
         // set global that TARG is ready

@@ -191,6 +191,12 @@ static void initTargeting(errlHndl_t& io_pError)
         (void)l_targetService.init();
 
         initializeAttributes(l_targetService, l_isMpipl, l_isIstepMode, l_scratch);
+        //Ensure all mutex attributes are reset on MPIPL
+        if(l_isMpipl)
+        {
+            l_targetService.resetMutexAttributes();
+        }
+
         checkProcessorTargeting(l_targetService);
 
         // Print out top-level model value from loaded targeting values.
@@ -483,8 +489,6 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 tpm->setAttr<ATTR_HB_TPM_INIT_ATTEMPTED>(0);
                 tpm->setAttr<ATTR_HB_TPM_LOG_MGR_PTR>(0);
-                auto tpmMutex=tpm->getHbMutexAttr<ATTR_HB_TPM_MUTEX>();
-                mutex_init(tpmMutex);
             }
 
             //Assemble list of membuf and zero out some virtual address attributes
