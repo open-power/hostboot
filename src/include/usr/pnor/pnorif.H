@@ -226,16 +226,6 @@ const char * SectionIdToString( uint32_t i_secIdIndex );
 bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
 
 /**
- *  @brief Determines whether requested PNOR section has a recognized header
- *  @param[in]  i_vaddr: vaddr of the beginning of the secureboot header.
- *  @param[in]  o_magicNumber: the read value of the header's magic number.
-                Used for error logging purposes. Always populated.
- *  @return     bool: True if the header was recognized, false otherwise.
- */
-bool hasKnownHeader(const uint8_t* i_vaddr,
-                          uint64_t& o_magicNumber);
-
-/**
  * @brief  Determine if a PNOR section is empty by checking if first PAGE
  *         is all 0xFF's or 0x00's depending on ECC or not.
  *
