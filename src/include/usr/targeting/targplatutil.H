@@ -198,6 +198,34 @@ inline bool isThisMasterNodeTarget(const Target* const i_pTarget)
  */
 bool isCurrentMasterNode();
 
+#ifndef __HOSTBOOT_RUNTIME
+/* @brief - returns the Target of the current Node
+ *
+ * @par Detailed Description:
+ * Hostboot only runs on one node at a time and this interface returns
+ * the target of this node.
+ *
+ * NOTE: Assert if more or less than 1 node is found in targeting information.
+ * NOTE: Assert if Node Target is nullptr.
+ *
+ * @return Pointer to Target of current Node
+ */
+Target* getCurrentNodeTarget(void);
+
+/* @brief - returns the physical Node Id of the current Node
+ *
+ * @par Detailed Description:
+ * Hostboot only runs on one node at a time and this interface returns
+ * the Node Id of this node as defined in its entity path.
+ *
+ * NOTE: Assert if more or less than 1 node is found in targeting information.
+ * NOTE: Assert if Node Target is nullptr.
+ *
+ * @return unit8_t indicating the Node Id of the current Node
+ */
+uint8_t getCurrentNodePhysId(void);
+#endif
+
 /* @brief - Syncs the master system target's attribute with non-master system
  * targets.
  *
