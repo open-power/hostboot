@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: system_attributes.xml,v 1.28 2015/05/28 20:44:22 jmcgill Exp $ -->
+<!-- $Id: system_attributes.xml,v 1.29 2018-01-09 18:33:10 jmcgill Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
@@ -467,6 +467,18 @@
     </description>
     <valueType>uint32</valueType>
     <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FAVOR_PERF_OVER_SECURITY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Default/base inits enable all security hardening features.  If this attribute
+	is set, the SLW image will instead apply override rings which favor performance
+	over security hardening.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>

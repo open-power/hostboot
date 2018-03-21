@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -318,6 +318,7 @@
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_US</id></attribute>
     <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
     <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
+    <attribute><id>FAVOR_PERF_OVER_SECURITY</id></attribute>
     <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
     <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
 </targetType>

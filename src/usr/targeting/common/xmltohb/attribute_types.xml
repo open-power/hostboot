@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -6453,6 +6453,26 @@ firmware notes: Used as override attribute for pstate procedure
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_SECURITY_SETUP_VECTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FAVOR_PERF_OVER_SECURITY</id>
+    <description>
+       Default/base inits enable all security hardening features.  If this attribute
+       is set, the SLW image will instead apply override rings which favor performance
+       over security hardening.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FAVOR_PERF_OVER_SECURITY</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.77 2015/07/27 00:31:05 jmcgill Exp $
+// $Id: p8_xip_customize.C,v 1.78 2018-01-09 18:35:38 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -2448,9 +2448,11 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   //                                     *-----*
   // ==========================================================================
   // ==========================================================================
-  
+
   if (i_sysPhase==1)  {
-  
+    uint8_t attrFavorPerfOverSecSupported = 0;
+    uint8_t attrFavorPerfOverSec = 0;
+
   // ==========================================================================
   // INITIALIZE item:   .slw section (aka runtime section).
   // Retrieval method:  N/A
@@ -2524,6 +2526,63 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
   
 	}  // End of switch (i_modeBuild)
 
+  // ==========================================================================
+  // CUSTOMIZE item:    Selective application of HW security hardening inits
+  // Retrieval method:  Attribute.
+  // System phase:      SLW sysPhase.
+  // ==========================================================================
+
+  // determine if chip type/EC supportssecurity hardening HW inits
+  // if not, we're done here
+  rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FAVOR_PERF_OVER_SECURITY_SUPPORTED,
+                     &i_target,
+                     attrFavorPerfOverSecSupported);
+  if (rc) {
+    FAPI_ERR("FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_FAVOR_PERF_OVER_SECURITY_SUPPORTED) returned error.\n");
+    return rc;
+  }
+
+  if (attrFavorPerfOverSecSupported)
+  {
+      FAPI_DBG("Chip supports favor performance over security switch...");
+      // read global attribute which indicates performace versus
+      // security init choice
+      rc = FAPI_ATTR_GET(ATTR_FAVOR_PERF_OVER_SECURITY, NULL, attrFavorPerfOverSec);
+      if (rc) {
+          FAPI_ERR("FAPI_ATTR_GET(ATTR_FAVOR_PERF_OVER_SECURITY) returned error.\n");
+          return rc;
+      }
+
+      // the base inits favor security, to favor performance we need to
+      // apply override rings (by default, FW reference images are built with the
+      // switch set to prohibit application of override rings)
+      // clear the switch in the customized output image to enable scanning of
+      // the override rings
+      FAPI_DBG("Attribute set to favor: %s",
+               (attrFavorPerfOverSec)?("performance"):("security"));
+      if (attrFavorPerfOverSec)
+      {
+          void *skipEXOverrideScans;
+          uint64_t skipEXOverrideScansValue = 0;
+
+          FAPI_DBG("Clearing skip_ex_override_ring_scans");
+          rcLoc = sbe_xip_find( o_imageOut, SKIP_EX_OVERRIDE_SCANS_TOC_NAME, &xipTocItem);
+          if (rcLoc)  {
+              FAPI_ERR("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+              FAPI_ERR("Probable cause:");
+              FAPI_ERR("\tThe keyword (=%s) was not found.",SKIP_EX_OVERRIDE_SCANS_TOC_NAME);
+              uint32_t & RC_LOCAL = rcLoc;
+              FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+              return rc;
+          }
+
+          sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &skipEXOverrideScans);
+          FAPI_INF("Dumping [initial] global variable content of skip_ex_override_ring_scans, then the updated value:\n");
+          FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)skipEXOverrideScans));
+          *(uint64_t*)skipEXOverrideScans = myRev64(skipEXOverrideScansValue);
+          FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)skipEXOverrideScans));
+      }
+  }
 
   // ==========================================================================
   // CUSTOMIZE item:    L2 and L3 Epsilon config register SCOM table updates.

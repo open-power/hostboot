@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.63 2015/11/10 19:38:14 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.64 2018-01-09 18:29:54 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -1607,6 +1607,38 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_FAVOR_PERF_OVER_SECURITY_SUPPORTED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Use to prohibit application of override rings on chips which
+	use already use override rings for LE mode switching
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_MURANO</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_VENICE</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>

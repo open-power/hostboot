@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.55 2015/05/28 20:28:31 jmcgill Exp $
+// $Id: p8_delta_scan_rw.h,v 1.56 2018-01-09 18:31:19 jmcgill Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -44,6 +44,7 @@
 #define AB_BNDY_PLL_REFCLK_SEL_TOC_NAME   "ab_bndy_pll_refclk_sel_mod"
 #define AB_BNDY_PLL_PFD360_TOC_NAME       "ab_bndy_pll_pfd360_mod"
 #define VALID_BOOT_CORES_MASK_TOC_NAME    "valid_boot_cores_mask"
+#define SKIP_EX_OVERRIDE_SCANS_TOC_NAME   "skip_ex_override_ring_scans"
 #define PERV_BNDY_PLL_RING_SIZE           128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
