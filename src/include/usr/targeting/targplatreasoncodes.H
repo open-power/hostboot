@@ -61,6 +61,7 @@ enum PlatTargetingModuleId
     TARG_RT_HBRT_UPDATE_PREP                      = 0x85,
     TARG_RT_VALIDATEDATA                          = 0x86,
     TARG_RT_SAVERESTOREATTRS                      = 0x87,
+    TARG_SVC_RESET_MUTEX                          = 0x88,
 };
 
 /**
@@ -80,6 +81,7 @@ enum PlatTargetingReasonCode
     TARG_RT_SECTION_MISMATCH       = TARG_COMP_ID | 0x86,
     TARG_RT_MISSING_ATTR           = TARG_COMP_ID | 0x87,
     TARG_RT_BAD_ATTR_SIZES         = TARG_COMP_ID | 0x88,
+    TARG_SVC_MISSING_ATTR          = TARG_COMP_ID | 0x89,
 };
 
 } // End TARGETING namespace

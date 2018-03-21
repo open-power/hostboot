@@ -776,8 +776,24 @@ class TargetService
                                      AttrRP *i_attrRP,
                                      ATTRIBUTE_ID* &o_pAttrId,
                                      AbstractPointer<void>* &o_ppAttrAddr);
-
-
+#ifdef __HOSTBOOT_MODULE
+        /**
+         *  @brief Reset all hostboot mutex attributes
+         *
+         *  @par Detailed Description:
+         *  Iterates through all targets and check each of their attributes to
+         *  see if they are of type hbmutex. If we find a mutex attribute we will
+         *  run mutex_init on it to reset it.
+         *
+         *  @pre TargetService must be initialized.
+         *       AttrRp must be initialized
+         *
+         *  @post All hb mutex attributes on all targets have been reset
+         *
+         *  @return void
+         */
+        void resetMutexAttributes();
+#endif
     private:
 
         /**

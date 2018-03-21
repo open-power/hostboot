@@ -53,6 +53,11 @@
 #include <attributetraits.H>
 #include <targeting/common/utilFilter.H>
 
+#ifdef __HOSTBOOT_MODULE
+// Generated
+#include <mutexattributes.H>
+#endif
+
 #undef EXTRA_SANITY_CHECKING
 
 //******************************************************************************
@@ -1569,6 +1574,74 @@ uint32_t TargetService::getTargetAttributes(Target*i_target,
     // Return the number of attributes for this target
     return i_target->iv_attrs;
 }
+#ifdef __HOSTBOOT_MODULE
+void TargetService::resetMutexAttributes()
+{
+    #define TARG_FN "resetMutexAttributes(...)"
+    TARGETING::AttrRP *l_pAttrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
+    ATTRIBUTE_ID* l_pAttrIds = nullptr;
+    AbstractPointer<void>* l_ppAttrAddrs = nullptr;
+    for( auto targ_iter = targetService().begin();
+        targ_iter != targetService().end();
+         targ_iter++)
+    {
+        uint32_t l_attrCount = 0;
+        Target* l_pTarget = *targ_iter;
+        l_attrCount = targetService().getTargetAttributes(l_pTarget, l_pAttrRP,
+                                            l_pAttrIds, l_ppAttrAddrs );
+
+        // Make sure that attributes were found
+        if(l_attrCount == 0)
+        {
+            TRACFCOMP( g_trac_targeting,
+                       "Target 0x%X has no attributes", get_huid(l_pTarget) );
+            // Continue to next target if there were no attributes
+            continue;
+        }
+
+        for ( uint32_t l_attrIndex = 0; l_attrIndex < l_attrCount; l_attrIndex++)
+        {
+            const ATTRIBUTE_ID l_attrId = l_pAttrIds[l_attrIndex];
+            for( const auto mutexId : hbMutexAttrIds)
+            {
+                if(l_attrId == mutexId)
+                {
+                    mutex_t* l_mutex;
+                    if(l_pTarget->_tryGetHbMutexAttr(l_attrId, l_mutex))
+                    {
+                        mutex_init(l_mutex);
+                    }
+                    else
+                    {
+                        /*@
+                        *   @errortype         ERRORLOG::ERRL_SEV_PREDICTIVE
+                        *   @moduleid          TARG_SVC_RESET_MUTEX
+                        *   @reasoncode        TARG_SVC_MISSING_ATTR
+                        *   @userdata1         Attribute Id we attempted to read
+                        *   @userdata2         Huid of target we attempted to read
+                        *
+                        *   @devdesc   For some reason attr IDs in hbMutexAttrIds list
+                        *              are not matching the attribute IDs that target
+                        *              service is seeing. This is causing incorrect matching
+                        *              Make sure mutexattribute.H in genfiles has good values
+                        *
+                        *   @custdesc  Attempted to perform an invalid attribute look up
+                        */
+                        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                          TARG_SVC_RESET_MUTEX,
+                                                          TARG_SVC_MISSING_ATTR,
+                                                          l_attrId,
+                                                          get_huid(l_pTarget),
+                                                          true); // software error
+                        errlCommit(l_errl, TARG_COMP_ID);
+                    }
+                }
+            }
+        }
+    }
+    #undef TARG_FN
+}
+#endif
 
 #undef TARG_CLASS
 
