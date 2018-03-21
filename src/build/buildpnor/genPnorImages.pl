@@ -194,17 +194,29 @@ elsif ($key_transition ne "")
 }
 
 my $labSecurityOverrideFlag = 0;
+my $ktSecurityOverrideFlag = 0;
 if($labSecurityOverride)
 {
     if($signMode{$DEVELOPMENT})
     {
         $labSecurityOverrideFlag = LAB_SECURITY_OVERRIDE_FLAG;
+        if($keyTransition{$IMPRINT})
+        {
+            $ktSecurityOverrideFlag = LAB_SECURITY_OVERRIDE_FLAG;
+        }
+        elsif($keyTransition{$PRODUCTION})
+        {
+            # Key Transition flag will take precedence over the
+            # lab override flag.
+            $ktSecurityOverrideFlag = 0;
+        }
     }
     else
     {
         $labSecurityOverride = 0;
-        print "WARNING! Lab security override only valid in development/"
-            . "imprint mode, continuing with lab security override disabled.\n";
+        print "WARNING! Lab security override only valid in development-"
+            . "signed mode or during a key transition that installs development"
+            . " keys. Continuing with lab security override disabled.\n";
     }
 }
 
@@ -322,7 +334,7 @@ my %sb_hdrs = (
             file => "$bin_dir/$randPrefix.sbkt.outer.secureboot.hdr.bin"
         },
         inner => {
-            flags => sprintf("0x%08X", $buildFlag),
+            flags => sprintf("0x%08X", $buildFlag | $ktSecurityOverrideFlag),
             file => "$bin_dir/$randPrefix.sbkt.inner.secureboot.hdr.bin"
         }
     }

@@ -1283,7 +1283,7 @@ errlHndl_t SPnorRP::processLabOverride(
         break;
     }
 
-    TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to %s.",
+    TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to \"%s\"",
         securityMode ? "*NO* override" : "override if requested");
     } while(0);
 
