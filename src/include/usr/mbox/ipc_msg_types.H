@@ -39,6 +39,7 @@ namespace IPC
         IPC_START_PAYLOAD,
         IPC_QUERY_CHIPINFO,
         IPC_SET_SBE_CHIPINFO,
+        IPC_CLOSE_TCES,
     };
 
 }; // namespace IPC

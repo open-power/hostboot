@@ -253,7 +253,12 @@ errlHndl_t utilClosePayloadTces(void)
     // Close the Unsecure Memory Region that was opened for the FSP to run
     // PSI Diagnostics Test using the PAYLOAD section
     // -- addr is a constant for PAYLOAD
-    errl = SBEIO::closeUnsecureMemRegion(MCL_TMP_ADDR,
+    // -- Address must be HRMOR-specific
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    uint64_t addr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+    TRACUCOMP(g_trac_tce,"utilClosePayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX", addr, hrmorVal);
+
+    errl = SBEIO::closeUnsecureMemRegion(addr,
                                          nullptr); //Master Processor
     if(errl)
     {
