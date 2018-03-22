@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,14 +72,18 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
     FAPI_TRY(fapi2::putScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
 
     FAPI_INF("Writing I2C bit rate divisor into mailbox_reg_2");
+#ifndef __HOSTBOOT_RUNTIME
 
     if (i_masterProc)
+#endif
     {
         FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM, l_data64));
         l_data64.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
         FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Master proc Scratch2 0x%.16llX", l_data64);
         FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM, l_data64));
     }
+
+#ifndef __HOSTBOOT_RUNTIME
     else
     {
         FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI, l_data32));
@@ -87,6 +91,8 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
         FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Slave proc Scratch2 0x%.8X", l_data32);
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI, l_data32));
     }
+
+#endif
 
 fapi_try_exit:
     FAPI_INF("Exiting p9_sbe_i2c_bit_rate_divisor_setting...");
@@ -134,7 +140,10 @@ fapi2::ReturnCode p9_sbe_hreset(
     }
 
     // Must do SCOM access for master; CFAM access for slaves
+#ifndef __HOSTBOOT_RUNTIME
+
     if (l_masterProc)
+#endif
     {
         // Clear Self Boot message reg
         l_data64.flush<0>();
@@ -153,7 +162,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(fapi2::getScom(i_target, PERV_SB_CS_SCOM, l_data64),
                  "Error from getScom to PERV_SB_CS_SCOM");
 
-        FAPI_TRY(l_data64.clearBit(l_startVectorBit));
+        FAPI_TRY(l_data64.clearBit(PERV_SB_CS_START_RESTART_VECTOR0));
+        FAPI_TRY(l_data64.clearBit(PERV_SB_CS_START_RESTART_VECTOR1));
         FAPI_TRY(fapi2::putScom(i_target, PERV_SB_CS_SCOM, l_data64),
                  "Error from putScom to PERV_SB_CS_SCOM (1)");
 
@@ -165,6 +175,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(fapi2::putScom(i_target, PERV_SB_CS_SCOM, l_data64),
                  "Error from putScom to PERV_SB_CS_SCOM (3)");
     }
+
+#ifndef __HOSTBOOT_RUNTIME
     else
     {
         // Clear Self Boot message reg
@@ -182,7 +194,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         // HRESET
         FAPI_TRY(fapi2::getCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
                  "Error from getCfamRegister to PERV_SB_CS_FSI");
-        FAPI_TRY(l_data32.clearBit(l_startVectorBit));
+        FAPI_TRY(l_data32.clearBit(PERV_SB_CS_START_RESTART_VECTOR0));
+        FAPI_TRY(l_data32.clearBit(PERV_SB_CS_START_RESTART_VECTOR1));
         FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to PERV_SB_CS_FSI (1)");
 
@@ -194,6 +207,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to PERV_SB_CS_FSI (3)");
     }
+
+#endif
 
 fapi_try_exit:
     FAPI_INF("p9_sbe_hreset: Exiting ...");
