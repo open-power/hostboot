@@ -32,8 +32,9 @@
 #include <mbox/mbox_reasoncodes.H>
 #include <intr/interrupt.H>
 #include <initservice/initserviceif.H>
-#include    <sbeio/sbeioif.H>
-
+#include <sbeio/sbeioif.H>
+#include <util/utiltce.H>
+#include <targeting/targplatutil.H>
 
 namespace ISTEP_21
 {
@@ -321,6 +322,73 @@ void IpcSp::msgHandler()
 
                 break;
             }
+
+            case IPC_CLOSE_TCES:
+            {
+               TRACFCOMP( g_trac_ipc,
+                          "Closing TCEs on this node (%d)",
+                          TARGETING::UTIL::getCurrentNodePhysId());
+
+                // make sure util module is loaded
+                const char * libutil = "libutil.so";
+                if ( !VFS::module_is_loaded( libutil ) )
+                {
+                    err = VFS::module_load( libutil );
+
+                    if ( err )
+                    {
+                        TRACFCOMP( g_trac_ipc,
+                                   "Could not load util module" );
+                    }
+                    else
+                    {
+                        mod_loaded = true;
+                    }
+                }
+
+                if(!err)
+                {
+                    err = TCE::utilClosePayloadTces();
+                }
+
+                if(!err)
+                {
+                    err = TCE::utilDisableTces();
+                }
+
+                if(err)
+                {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err, IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+
+                if(mod_loaded)
+                {
+                    err = VFS::module_unload( libutil );
+
+                    if (err)
+                    {
+                        errlCommit(err, IPC_COMP_ID);
+                    }
+                    else
+                    {
+                        mod_loaded = false;
+                    }
+                }
+
+                // Respond
+                err = MBOX::send(MBOX::HB_CLOSE_TCES_MSGQ, msg, msg->data[1] );
+                if (err)
+                {
+                    uint32_t l_errPlid = err->plid();
+                    errlCommit(err,IPC_COMP_ID);
+                    INITSERVICE::doShutdown(l_errPlid, true);
+                }
+
+                break;
+            }
+
             default:
 
                 TRACFCOMP( g_trac_ipc,

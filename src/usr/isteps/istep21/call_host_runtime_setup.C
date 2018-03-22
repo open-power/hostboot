@@ -36,10 +36,13 @@
 #include <runtime/runtime.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <targeting/common/util.H>
+#include <targeting/targplatutil.H>
 #include <vpd/vpd_if.H>
 #include <util/utiltce.H>
 #include <util/utilmclmgr.H>
 #include <map>
+#include <sys/internode.h>
+#include <mbox/ipc_msg_types.H>
 
 #include <secureboot/service.H>
 #include <secureboot/containerheader.H>
@@ -62,6 +65,117 @@ using   namespace   TARGETING;
 
 namespace ISTEP_21
 {
+
+
+// Direct non-master nodes to close and disable their TCEs
+errlHndl_t closeNonMasterTces(void)
+{
+    errlHndl_t l_err = nullptr;
+    uint64_t nodeid = TARGETING::UTIL::getCurrentNodePhysId();
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"closeNonMasterTces(): nodeid=%d", nodeid);
+
+    // keep track of the number of messages we send so we
+    // know how many responses to expect
+    uint64_t msg_count = 0;
+
+    do{
+
+        TARGETING::Target * sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != nullptr, "closeNonMasterTces() system target is nullptr");
+
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
+            sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+        // This msgQ catches the node responses from the commands
+        msg_q_t msgQ = msg_q_create();
+        l_err = MBOX::msgq_register(MBOX::HB_CLOSE_TCES_MSGQ,msgQ);
+
+        if(l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "closeNonMasterTces(): MBOX::msgq_register failed!" );
+            break;
+        }
+
+        // loop thru rest all nodes -- sending msg to each
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
+          ((sizeof(TARGETING::ATTR_HB_EXISTING_IMAGE_type) * 8) -1);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "closeNonMasterTces(): HB_EXISTING_IMAGE (mask) = 0x%X, "
+                   "(hb_images=0x%X)",
+                   mask, hb_images);
+
+        for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
+        {
+            if (l_node == nodeid)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "closeNonMasterTces(): don't send IPC_CLOSE_TCES "
+                           "message to master node %d",
+                           nodeid );
+                continue;
+            }
+
+            if( 0 != ((mask >> l_node) & hb_images ) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "closeNonMasterTces(): send IPC_CLOSE_TCES message "
+                           "to node %d",
+                           l_node );
+
+                msg_t * msg = msg_allocate();
+                msg->type = IPC::IPC_CLOSE_TCES;
+                msg->data[0] = l_node;      // destination node
+                msg->data[1] = nodeid;      // respond to this node
+
+                // send the message to the slave hb instance
+                l_err = MBOX::send(MBOX::HB_IPC_MSGQ, msg, l_node);
+
+                if( l_err )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "closeNonMasterTces(): MBOX::send to node %d "
+                               "failed",
+                               l_node);
+                    break;
+                }
+
+                ++msg_count;
+
+            } // end of node to process
+        } // end for loop on nodes
+
+        // wait for a response to each message we sent
+        if( l_err == nullptr )
+        {
+            //$TODO RTC:189356 - need timeout here
+            while(msg_count)
+            {
+                msg_t * response = msg_wait(msgQ);
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "closeNonMasterTces(): IPC_CLOSE_TCES : node %d "
+                           "completed",
+                           response->data[0]);
+                msg_free(response);
+                --msg_count;
+            }
+        }
+
+        MBOX::msgq_unregister(MBOX::HB_CLOSE_TCES_MSGQ);
+        msg_q_destroy(msgQ);
+
+    } while(0);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               EXIT_MRK"closeNonMasterTces(): l_err rc = 0x%X, msg_count=%d",
+               ERRL_GETRC_SAFE(l_err), msg_count );
+
+    return l_err;
+}
+
 
 // Verify PAYLOAD and Move PAYLOAD+HDAT from Temporary TCE-related
 // memory region to the proper location
@@ -446,7 +560,6 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Close PAYLOAD TCEs
         if (TCE::utilUseTcesForDmas())
         {
-
             l_err = TCE::utilClosePayloadTces();
             if ( l_err )
             {
@@ -456,8 +569,15 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
 
-            // @TODO RTC 187335 Close TCEs on non-master nodes
-
+            // Close TCEs on non-master nodes
+            l_err = closeNonMasterTces();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed closeNonMasterTces" );
+                // break from do loop if error occurred
+                break;
+            }
         }
 
         // Need to load up the runtime module if it isn't already loaded
