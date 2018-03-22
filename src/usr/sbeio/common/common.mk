@@ -25,8 +25,9 @@
 
 #Common .mk files to include
 include ${ROOTPATH}/procedure.rules.mk
-include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/p9_get_sbe_msg_register.mk
-include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_start_cbs.mk
+include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
+include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
+include ${PROCEDURES_PATH}/hwp/perv/p9_sbe_hreset.mk
 
 #Common Include Paths
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/ffdc

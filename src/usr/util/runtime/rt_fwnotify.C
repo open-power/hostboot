@@ -132,19 +132,15 @@ void sbeAttemptRecovery(uint64_t i_data)
             break;
         }
 
-
-        // Get the recovery results
-        // TODO SW415675 Need to attempt sbe retry if requested
         // Get the SBE Retry Handler, propagating the supplied PLID
-//         SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
-//                         SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-//                         l_sbeRetryData->plid);
+        SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
+                                    SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                                    l_sbeRetryData->plid);
 
-        // Retry the recovery of the SBE
-//         l_SBEobj.main_sbe_handler(l_target);
-//         //bool l_recoverySuccessful = l_SBEobj.getSbeRestart();
+        //Attempt to recover the SBE
+        l_SBEobj.main_sbe_handler(l_target);
 
-        bool l_recoverySuccessful = false;
+
         if (nullptr == g_hostInterfaces ||
             nullptr == g_hostInterfaces->firmware_request)
         {
@@ -183,8 +179,8 @@ void sbeAttemptRecovery(uint64_t i_data)
         l_req_fw_msg.generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
         l_req_fw_msg.generic_msg.data = i_data;
 
-        // Set msgType based on recovery success or failure
-        if (l_recoverySuccessful)
+        // Set msgType based on recovery success or failure (If sbe made it back to runtime)
+        if (l_SBEobj.isSbeAtRuntime())
         {
             l_req_fw_msg.generic_msg.msgType =
                              GenericFspMboxMessage_t::MSG_SBE_RECOVERY_SUCCESS;

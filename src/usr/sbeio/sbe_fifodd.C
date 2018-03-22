@@ -662,7 +662,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             // so the error logs it creates will be linked
             uint32_t l_errPlid = errl->plid();
 
-            // Commit errlor log now if this is a FSP system because
+            // Commit error log now if this is a FSP system because
             // we will not return from retry handler
             if(INITSERVICE::spBaseServicesEnabled())
             {

@@ -49,6 +49,7 @@
 #include <ipmi/ipmiwatchdog.H>
 
 #include <p9_start_cbs.H>
+#include <p9_sbe_hreset.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_perv_scom_addresses.H>
 #include <sbe/sbe_update.H>
@@ -183,7 +184,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         else if(!this->iv_sbeRegister.sbeBooted)
         {
             SBE_TRACF("main_sbe_handler(): SBE reports it was never booted, calling p9_sbe_extract_rc will fail. Setting action to be RESTART_SBE");
-            //Maybe commit log here saying initial start_cbs didnt run
             this->iv_currentAction = P9_EXTRACT_SBE_RC::RESTART_SBE;
         }
 
@@ -326,6 +326,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 // switching seeprom sides
             }
 
+            // Both of the retry methods require a FAPI2 version of the target because they
+            // are fapi2 HWPs
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target (i_target);
             if(this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS)
             {
                 /*@
@@ -365,8 +368,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             else if(this->iv_sbeRestartMethod == SBE_RESTART_METHOD::START_CBS)
             {
                 SBE_TRACF("Invoking p9_start_cbs HWP on processor %.8X", get_huid(i_target));
-                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                        l_fapi2_proc_target (i_target);
 
                 FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
                                 l_fapi2_proc_target, true);
@@ -400,56 +401,41 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     // will work so we will break out of the retry loop
                     break;
                 }
-            }else
+            }
+            // The only other type of reset method is HRESET
+            else
             {
-                //@todo RTC:180242 Right now we don't have the support
-                //  to perform an hreset, when we do remove this error
-                //  log and perform the hreset.
-
-                //Increment attempt count for this side
                 this->iv_currentSideBootAttempts++;
-                /*@
-                * @errortype
-                * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-                * @reasoncode SBEIO_UNSUPPORTED_REQUEST
-                * @userdata1  HUID of proc that had the SBE timeout
-                * @userdata2  SBE failing code
-                *
-                * @devdesc SBE did not start, this function is looking at
-                *          the error to determine next course of action
-                *
-                * @custdesc The SBE did not start, we will attempt a reboot
-                *           if possible
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                    SBEIO_EXTRACT_RC_HANDLER,
-                                                    SBEIO_UNSUPPORTED_REQUEST,
-                                                    TARGETING::get_huid(i_target),
-                                                    this->iv_currentAction);
 
-                l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
-
-                // Gard the proc, when SBE Retry fails
-                l_errl->addHwCallout(i_target,
-                                        HWAS::SRCI_PRIORITY_HIGH,
-                                        HWAS::NO_DECONFIG,
-                                        HWAS::GARD_Predictive);
-
-                // Set the PLID of the error log to caller's PLID,
-                // if provided
-                if (iv_callerErrorLogPLID)
+                // For now we only use HRESET during runtime, the bool param
+                // we are passing in is supposed to be FALSE if runtime, TRUE is ipl time
+                FAPI_INVOKE_HWP(l_errl, p9_sbe_hreset,
+                                l_fapi2_proc_target, false);
+                if(l_errl)
                 {
-                    l_errl->plid(iv_callerErrorLogPLID);
+                    SBE_TRACF("ERROR: call p9_sbe_hreset, PLID=0x%x",
+                                l_errl->plid() );
+                    l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
+
+                    // Gard the target, when SBE Retry fails
+                    l_errl->addHwCallout(i_target,
+                                            HWAS::SRCI_PRIORITY_HIGH,
+                                            HWAS::NO_DECONFIG,
+                                            HWAS::GARD_Predictive);
+
+                    // Set the PLID of the error log to caller's PLID,
+                    // if provided
+                    if (iv_callerErrorLogPLID)
+                    {
+                        l_errl->plid(iv_callerErrorLogPLID);
+                    }
+
+                    errlCommit( l_errl, ISTEP_COMP_ID);
+                    // If we got an errlog while attempting p9_sbe_hreset
+                    // we will assume that no future retry actions
+                    // will work so we will exit
+                    break;
                 }
-
-                errlCommit(l_errl, ISTEP_COMP_ID);
-
-                // If we got an errlog while attempting hreset
-                // we will assume that no future retry actions
-                // will work so we will exit
-                break;
             }
 
             // We have performed the action, so make sure that ffdcSetAction is set back to 0
@@ -1193,7 +1179,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
                             DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
             if( l_errl )
             {
-                SBE_TRACF( ERR_MRK"switch_sbe_sides: FSI device write "
+                SBE_TRACF( ERR_MRK"switch_sbe_sides: SCOM device write "
                         "PERV_SB_CS_SCOM (0x%.4X), proc target = %.8X, "
                         "RC=0x%X, PLID=0x%lX",
                         PERV_SB_CS_SCOM, // 0x50008
