@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,13 +30,83 @@
 #include <errl/errlmanager.H>
 #include <fsi/fsiif.H>
 #include <i2c/i2cif.H>
+#include <i2c/tpmddif.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
+#include <attributeenums.H>
+#include <secureboot/trustedbootif.H>
+#include <config.h>
+
+//Targeting
+#include    <targeting/common/commontargeting.H>
+#include    <targeting/common/util.H>
+#include    <targeting/common/utilFilter.H>
+#include    <targeting/common/target.H>
+
+using namespace TARGETING;
+using namespace I2C;
+using namespace TRUSTEDBOOT;
 
 namespace ISTEP_06
 {
+
+/* @brief Find Processor I2C Engines Connected to TPMs
+ *
+ * This helper function loops through all of the TPMs in the system
+ * blueprint and finds all of the Processors that serve as their I2C
+ * Masters.  It then keeps track of which processor I2C engine(s) are
+ * used.
+ *
+ * @return i2cEngineSelect - bit-wise enum indicating which processor engine(s)
+ *                           were found
+ */
+i2cEngineSelect find_proc_i2c_engines_for_tpm ( void )
+{
+    int engineSelect = static_cast<int>(I2C_ENGINE_SELECT_NONE);
+
+#ifdef CONFIG_TPMDD
+    // Get all TPMs to setup our array
+    TargetHandleList tpmList;
+    getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
+
+    TPMDD::tpm_info_t tpmData;
+    for (auto tpm : tpmList)
+    {
+        memset(&tpmData, 0, sizeof(tpmData));
+        errlHndl_t readErr = tpmReadAttributes(tpm,
+                                               tpmData,
+                                               TPMDD::TPM_LOCALITY_0);
+
+        if (nullptr != readErr)
+        {
+            // We are just looking for configured TPMs here
+            //  so we ignore any errors
+            delete readErr;
+            readErr = nullptr;
+        }
+        else
+        {
+            // If TPM is connected to a processor then keep track
+            // of what engine needs to be reset
+            if (tpmData.i2cTarget->getAttr<ATTR_TYPE>() == TYPE_PROC)
+            {
+                engineSelect |= static_cast<int>(i2cEngineToEngineSelect(tpmData.engine));
+            }
+        }
+    }
+
+    // There should only be 1 such bus per processor.  So if we found multiple
+    // engines then we know that there are different proc/engine combinations
+    // and we'd need a I2C reset intferace to support that.  This check here
+    // makes sure we add that support when its necessary.
+    assert(__builtin_popcount(engineSelect)==1, "find_proc_i2c_engines_for_tpm: Only one engine should be found");
+
+#endif
+    return static_cast<i2cEngineSelect>(engineSelect);
+}
+
 
 void* host_init_fsi( void *io_pArgs )
 {
@@ -55,10 +125,25 @@ void* host_init_fsi( void *io_pArgs )
             break;
         }
 
-        // Only reset the I2C Masters if FSP is not running
+        // Reset all I2C Masters if FSP is not running
         if ( !INITSERVICE::spBaseServicesEnabled() )
         {
-            l_err = I2C::i2cResetActiveMasters(I2C::I2C_ALL, false);
+            l_err = i2cResetActiveMasters(I2C_ALL, false);
+            if (l_err)
+            {
+                // Commit this error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+        }
+        // FSP cannot access I2C buses where the TPMs and PCIe Hot Plug
+        // devices are due to a lack of a FSI connection to this bus.
+        // Therefore, reset all host-mode I2C engines connected to these buses
+        else
+        {
+            l_err = i2cResetActiveMasters(
+                             I2C_PROC_HOST,
+                             false,
+                             find_proc_i2c_engines_for_tpm());
             if (l_err)
             {
                 // Commit this error

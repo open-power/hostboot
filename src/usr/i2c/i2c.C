@@ -3346,16 +3346,18 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 {
                     TRACUCOMP( g_trac_i2c,INFO_MRK
                                "i2cProcessActiveMasters: skipping tgt=0x%X "
-                               "due to FSI::isSlavePresent returned=%d",
-                               TARGETING::get_huid(tgt), check );
+                               "due to FSI::isSlavePresent returned=%s (%d)",
+                               TARGETING::get_huid(tgt),
+                               check ? "true" : "false", check );
                     continue;
                 }
                 else
                 {
                     TRACUCOMP( g_trac_i2c,INFO_MRK
                              "i2cProcessActiveMasters: keeping tgt=0x%X due "
-                             "to FSI::isSlavePresent returned=%d",
-                             TARGETING::get_huid(tgt), check );
+                             "to FSI::isSlavePresent returned=%s (%d)",
+                             TARGETING::get_huid(tgt),
+                             check ? "true" : "false", check );
                 }
             }
 

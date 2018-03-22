@@ -93,6 +93,8 @@ enum i2cEngineSelect : uint8_t
                                I2C_ENGINE_SELECT_ONLY_1 |
                                I2C_ENGINE_SELECT_ONLY_2 |
                                I2C_ENGINE_SELECT_ONLY_3,
+
+   I2C_ENGINE_SELECT_NONE   =  0x00,
 };
 
 /**
