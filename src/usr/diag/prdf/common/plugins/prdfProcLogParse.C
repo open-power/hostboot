@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,44 +51,6 @@ using namespace PARSER;
 using namespace TOD;
 
 //------------------------------------------------------------------------------
-
-bool parseSlwFfdcData( uint8_t * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser )
-{
-    char hdr[HEADER_SIZE] = "";
-    char data[DATA_SIZE]  = "";
-
-    snprintf( hdr, HEADER_SIZE, " %s", SLW_FFDC_DATA::title );
-    i_parser.PrintString( hdr, "" );
-
-    const size_t sz_word = sizeof(uint32_t);
-
-    uint32_t idx = 0;
-    while ( idx + SLW_FFDC_DATA::ENTRY_SIZE < i_buflen )
-    {
-        uint32_t addr, val0, val1;
-
-        memcpy( &addr, &i_buffer[idx            ], sz_word );
-        memcpy( &val0, &i_buffer[idx+(1*sz_word)], sz_word );
-        memcpy( &val1, &i_buffer[idx+(2*sz_word)], sz_word );
-
-        addr = htonl(addr);
-        val0 = htonl(val0);
-        val1 = htonl(val1);
-
-        snprintf(hdr,  HEADER_SIZE, "  Address: 0x%08x", addr );
-        snprintf(data, DATA_SIZE,   "Value: 0x%08x 0x%08x", val0, val1 );
-
-        i_parser.PrintString( hdr, data );
-
-        idx += SLW_FFDC_DATA::ENTRY_SIZE;
-    }
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-
 bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
                         ErrlUsrParser & i_parser )
 {
@@ -130,9 +92,6 @@ bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
         i_parser.PrintString( "Active Topology",
                               errorData.activeTopology ?
                               "Primary Config" : "Secondary Config" );
-
-        i_parser.PrintNumber( "Functional TOD Osc", "0x%08x",
-                              errorData.todOscCnt );
 
         snprintf(data,  DATA_SIZE, "0x%08x", errorData.activeMdmt );
         i_parser.PrintString( "Active MDMT", data );

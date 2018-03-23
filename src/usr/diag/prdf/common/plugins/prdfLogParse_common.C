@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -478,15 +478,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }
-/*TODO: RTC 136050
-            else if ( Util::hashString(SLW_FFDC_DATA::title) == sigId )
-            {
-                 parseSlwFfdcData( sigData, sigDataSize, i_parser );
-            }
             else if ( Util::hashString("TOD_ERROR_DATA") == sigId)
             {
                 parseTodFfdcData( sigData, sigDataSize, i_parser );
             }
+/*
             else if ( Util::hashString("OCC_CS_FFDC") == sigId)
             {
                 parsePnorFirData( sigData, sigDataSize, i_parser );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,28 +35,6 @@ namespace PRDF
 
 namespace TOD
 {
-
-//NOTE: Position at which strings representing names of TOD control registers
-//are placed in regStatList cannot be changed independently. Position of string
-//in the array must match value of corresponding enum member e.g. value
-//of MPCR is zero, therefore, TOD_MPCR can only be placed at regStatList[0]
-
-// following enum represents all the tod control and status registers which
-// need to be read and restored during data parity errors.
-
-enum Register
-{
-    MPCR            = 0,
-    PCRP0           = 1,
-    PCRP1           = 2,
-    SCRP0           = 3,
-    SCRP1           = 4,
-    SPCR            = 5,
-    IPCR            = 6,
-    PSMSCR          = 7,
-    LAST_TOD_REG    = 8,
-};
-
 /**
  * @brief summarizes error analysis for a TOD topology.
  */
@@ -77,12 +55,11 @@ struct TodErrorSummary
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
-    uint32_t reserved               :13;
+    uint32_t reserved               :17;
     uint32_t backUpTopologyMastPath :2; //master path for backup topology
     uint32_t activeTopologyMastPath :2; // master path for active topology
     uint32_t backUpTopologySummary  :3; // backup topology error status
     uint32_t activeTopologySummary  :3; // active topology error status
-    uint32_t todOscCnt              :4; // functional TOD OSC count in system
     uint32_t activeTopology         :1; // Topology acting as Active
     uint32_t topologyResetRequested :1; // topology reset request status
     uint32_t topologySwitchByPhyp   :1; // topology switch event detected
@@ -96,12 +73,11 @@ struct TodErrorSummary
     uint32_t topologySwitchByPhyp   :1; // topology switch event detected
     uint32_t topologyResetRequested :1; // topology reset request status
     uint32_t activeTopology         :1; // Topology acting as Active
-    uint32_t todOscCnt              :4; // functional TOD OSC count in system
     uint32_t activeTopologySummary  :3; // active topology error status
     uint32_t backUpTopologySummary  :3; // backup topology error status
     uint32_t activeTopologyMastPath :2; // master path for active topology
     uint32_t backUpTopologyMastPath :2; //master path for backup topology
-    uint32_t reserved               :13;
+    uint32_t reserved               :17;
 
 #endif
     uint32_t activeMdmt;       // HUID of active mdmt

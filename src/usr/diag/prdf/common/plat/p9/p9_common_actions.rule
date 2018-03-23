@@ -151,6 +151,12 @@ actionclass self_th_1
     threshold1;
 };
 
+actionclass self_H_th_1
+{
+    calloutSelfHigh;
+    threshold1;
+};
+
 actionclass self_th_5perHour
 {
     calloutSelfMed;

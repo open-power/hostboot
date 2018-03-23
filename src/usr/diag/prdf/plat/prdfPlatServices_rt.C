@@ -48,6 +48,7 @@
 #include <p9_proc_gettracearray.H>
 #include <pm_common_ext.H>
 #include <p9_stop_api.H>
+#include <rt_todintf.H>
 
 //------------------------------------------------------------------------------
 
@@ -481,6 +482,76 @@ int32_t pmCallout( TargetHandle_t i_tgt,
 
     o_deadCores = (uint32_t) deadCores;
     return SUCCESS;
+}
+
+void requestNewTODTopology( uint32_t i_oscPos,
+                            const TargetHandle_t& i_procOscTgt,
+                            const TargetHandleList& i_badChipList,
+                            bool i_informPhyp)
+{
+    #define PRDF_FUNC "[PlatServices::requestNewTODTopology] "
+    if ( i_badChipList.size() > 0 || i_procOscTgt != NULL )
+    {
+        errlHndl_t err = TOD::resetBackupTopology( i_oscPos, i_procOscTgt,
+                                               i_badChipList, i_informPhyp );
+
+        if (nullptr != err)
+        {
+            PRDF_ERR( PRDF_FUNC " failed. oscPos: %d "
+                      "oscTgt: 0x%08x, chip blacklist size: %d",
+                      i_oscPos, getHuid(i_procOscTgt), i_badChipList.size() );
+            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        }
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "No chips in black list");
+    }
+    #undef PRDF_FUNC
+}
+
+int32_t getTodPortControlReg ( const TARGETING::TargetHandle_t& i_procTgt,
+                               bool i_slvPath0,  uint32_t &o_regValue )
+{
+    #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
+    errlHndl_t err = nullptr;
+    int32_t l_rc = SUCCESS;
+    TOD::TodChipDataContainer todRegData;
+    bool foundChip = false;
+    uint32_t ordId = i_procTgt->getAttr<ATTR_ORDINAL_ID>();
+
+    do {
+        err = TOD::readTodProcDataFromFile( todRegData );
+        if ( err )
+        {
+            PRDF_ERR( PRDF_FUNC"failed to get TOD reg data from hwsv. "
+                               "i_procTgt 0x%08x", getHuid(i_procTgt) );
+            l_rc = FAIL;
+            PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+            break;
+        }
+
+        for ( auto &chip : todRegData )
+        {
+            if ( chip.header.chipID == ordId )
+            {
+                o_regValue = i_slvPath0 ? chip.regs.pcrp0 : chip.regs.scrp1;
+                foundChip = true;
+                break;
+            }
+        }
+
+        if ( !foundChip )
+        {
+            PRDF_ERR( PRDF_FUNC"Could not find TOD chip Data for "
+                               "i_procTgt 0x%08x with ordId %d",
+                                getHuid(i_procTgt), ordId );
+            l_rc = FAIL;
+        }
+    } while (0);
+
+    return l_rc;
+    #undef PRDF_FUNC
 }
 //------------------------------------------------------------------------------
 
