@@ -2132,17 +2132,17 @@ group gTP_LFIR filter singlebit, cs_root_cause
     /** TP_LFIR[18]
      *  TOD Logic: Summerized internal errors
      */
-    (rTP_LFIR, bit(18)) ? defaultMaskedError;
+    (rTP_LFIR, bit(18)) ? analyzeTodBackupTopology;
 
     /** TP_LFIR[19]
      *  TOD Logic: PIB Slave access errors
      */
-    (rTP_LFIR, bit(19)) ? defaultMaskedError;
+    (rTP_LFIR, bit(19)) ? analyzePibError;
 
     /** TP_LFIR[20]
-     *  TOD Logic: UNUSED in P9
+     *  TOD Logic: Error report from PHYP
      */
-    (rTP_LFIR, bit(20)) ? defaultMaskedError;
+    (rTP_LFIR, bit(20)) ? analyzePhypTodError;
 
     /** TP_LFIR[21]
      *  PCB slave Unmasked err summary
