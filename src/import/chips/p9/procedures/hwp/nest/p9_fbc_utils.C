@@ -67,6 +67,12 @@ const uint8_t FABRIC_ADDR_LS_GROUP_ID_END_BIT = 18;
 // chip ID (large system)
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_START_BIT = 19;
 const uint8_t FABRIC_ADDR_LS_CHIP_ID_END_BIT = 21;
+// memory group/chip ID
+const uint8_t FABRIC_ADDR_MEMORY_GROUP_ID_START_BIT = 0;
+const uint8_t FABRIC_ADDR_MEMORY_GROUP_ID_LEN       = 3;
+const uint8_t FABRIC_ADDR_MEMORY_CHIP_ID_START_BIT  = 3;
+const uint8_t FABRIC_ADDR_MEMORY_CHIP_ID_LEN        = 3;
+
 
 
 //------------------------------------------------------------------------------
@@ -158,6 +164,7 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address_no_aliases(
     uint8_t l_fabric_chip_id = 0;
     uint8_t l_mirror_policy;
     fapi2::buffer<uint64_t> l_base_address;
+    fapi2::buffer<uint8_t> l_proc_chip_mem_to_use = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_DBG("Start");
@@ -167,34 +174,28 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address_no_aliases(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target, l_fabric_system_id),
              "Error from FAPI_ATTR_GET (ATTR_FABRIC_SYSTEM_ID)");
 
-    // set group ID
-    if ((i_addr_mode == ABS_FBC_GRP_CHIP_IDS) ||
-        (i_addr_mode == ABS_FBC_GRP_ID_ONLY))
+    if (i_addr_mode == HB_GRP_CHIP_IDS)
     {
-        // absolute
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
+        // HB group/chip ID
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEM_TO_USE,
+                               i_target,
+                               l_proc_chip_mem_to_use),
                  "Error from FAPI_ATTR_GET (ATTR_FABRIC_GROUP_ID)");
-    }
-    else
-    {
-        // effective
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
-                 "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_GROUP_ID)");
-    }
 
-    // set chip ID
-    if (i_addr_mode == ABS_FBC_GRP_CHIP_IDS)
-    {
-        // absolute
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
-                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
+        l_proc_chip_mem_to_use.extract<FABRIC_ADDR_MEMORY_GROUP_ID_START_BIT,
+                                       FABRIC_ADDR_MEMORY_GROUP_ID_LEN,
+                                       0>(l_fabric_group_id);
+        l_proc_chip_mem_to_use.extract<FABRIC_ADDR_MEMORY_CHIP_ID_START_BIT,
+                                       FABRIC_ADDR_MEMORY_CHIP_ID_LEN,
+                                       0>(l_fabric_chip_id);
     }
     else if (i_addr_mode == EFF_FBC_GRP_CHIP_IDS)
     {
         // effective
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_GROUP_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
                  "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_CHIP_ID)");
-
     }
 
     // else, leave chip ID=0 for the purposes of establishing drawer base address
