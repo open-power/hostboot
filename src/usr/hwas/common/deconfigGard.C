@@ -1320,6 +1320,7 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
             HWAS_INF( "_invokeDeconfigureAssocProc> %.8X : G=%d, C=%d, D=%d, M=%d", l_ProcInfo.procHUID, l_ProcInfo.procFabricGroup, l_ProcInfo.procFabricChip, l_ProcInfo.iv_deconfigured, l_ProcInfo.iv_masterCapable );
             l_procInfo.push_back(l_ProcInfo);
         }
+        HWAS_INF("----------------------------------------------------------");
         // Iterate through l_procInfo and populate child bus endpoint
         // chiplet information
         for (ProcInfoVector::iterator
@@ -1359,14 +1360,30 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
                 if ((!l_pDstTarget) ||
                     (!(l_pDstTarget->getAttr<ATTR_HWAS_STATE>().present)))
                 {
+                    if (l_pDstTarget == nullptr)
+                    {
+                      HWAS_INF("Proc %.8X Skipping non-peer endpt of BUS %.8X",
+                        get_huid((*l_procInfoIter).iv_pThisProc),
+                        l_pTarget->getAttr<ATTR_HUID>());
+                    }
+                    else
+                    {
+                      HWAS_INF("Proc %.8X Skipping non-present endpt target %.8X of %.8X BUS",
+                          get_huid((*l_procInfoIter).iv_pThisProc),
+                          l_pDstTarget->getAttr<ATTR_HUID>(),
+                          l_pTarget->getAttr<ATTR_HUID>());
+                    }
+
                     continue;
                 }
+
                 // Chiplet has a valid (present) peer
                 // Handle iv_pA/XProcs[]:
                 // Define target for peer proc
                 const Target* l_pPeerProcTarget;
                 // Get parent chip from xbus chiplet
                 l_pPeerProcTarget = getParentChip(l_pDstTarget);
+
                 // Find matching ProcInfo struct
                 for (ProcInfoVector::iterator
                      l_matchProcInfoIter = l_procInfo.begin();
@@ -1388,8 +1405,8 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
                             // HWAS state
                             (*l_procInfoIter).iv_XDeconfigured[xBusIndex] =
                                 !(isFunctional(*l_busIter));
+                            HWAS_INF( "%.8X add X[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, xBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
                             xBusIndex++;
-                            HWAS_DBG( "add X> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
                         }
                         // If subsystem owns abus deconfigs consider them
                         else if (i_doAbusDeconfig &&
@@ -1400,8 +1417,8 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
                             // HWAS state
                             (*l_procInfoIter).iv_ADeconfigured[aBusIndex] =
                                !(isFunctional(*l_busIter));
+                            HWAS_INF( "%.8X add A[%d]> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_procInfoIter).procHUID, aBusIndex, (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
                             aBusIndex++;
-                            HWAS_DBG( "add A> %.8X : G=%d, C=%d, D=%d, M=%d", (*l_matchProcInfoIter).procHUID, (*l_matchProcInfoIter).procFabricGroup, (*l_matchProcInfoIter).procFabricChip, (*l_matchProcInfoIter).iv_deconfigured, (*l_matchProcInfoIter).iv_masterCapable );
                         }
                         break;
                     }
@@ -2558,7 +2575,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         }// STEP 4
 
         // STEP 5:
-        // If a deconfigured bus conects two procs on different logical groups,
+        // If a deconfigured bus connects two procs on different logical groups,
         // and neither proc is the master proc: If current proc's xbus peer
         // proc is marked as deconfigured, mark current proc. Else, mark
         // abus peer proc.
@@ -2645,6 +2662,20 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
     // Perform SMP group balancing
     do
     {
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT(pSys, "HWAS _symmetryValidation: no TopLevelTarget");
+        if ( pSys->getAttr<ATTR_PROC_FABRIC_PUMP_MODE>() ==
+             TARGETING::PROC_FABRIC_PUMP_MODE_CHIP_IS_GROUP )
+        {
+          // When CHIP_IS_GROUP is set, that means a single fabric CHIP
+          // per GROUP (or NODE). If we apply symmetry deconfig, it will
+          // deconfig all the other chips because they all have the same
+          // relative position to group.
+
+          break;
+        }
+
         // STEP 1:
         // If a proc is deconfigured in a logical group
         // containing the master proc, iterate through all procs
@@ -2697,8 +2728,9 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
                         (*l_posProcInfoIter).procFabricChip)
                     {
                         HWAS_INF("symmetryValidation step 1 marked proc: "
-                             "%.8X for deconfiguration.",
-                             (*l_posProcInfoIter).procHUID);
+                             "%.8X for deconfiguration. Previously marked %d",
+                           (*l_posProcInfoIter).procHUID,
+                           (*l_posProcInfoIter).iv_deconfigured?1:0);
                         (*l_posProcInfoIter).iv_deconfigured = true;
                     }
                 }
