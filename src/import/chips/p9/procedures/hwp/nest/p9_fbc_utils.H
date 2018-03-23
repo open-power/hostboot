@@ -52,9 +52,7 @@
 enum p9_fbc_utils_addr_mode_t
 {
     EFF_FBC_GRP_CHIP_IDS,  // effective FBC group/chip ID attributes
-    EFF_FBC_GRP_ID_ONLY,   // effective FBC group ID attribute (chip ID=0)
-    ABS_FBC_GRP_CHIP_IDS,  // absolute FBC group/chip ID attributes
-    ABS_FBC_GRP_ID_ONLY    // absolute FBC group ID attribute (chip ID=0)
+    HB_GRP_CHIP_IDS,      // group/chip ID of the memory
 };
 
 //------------------------------------------------------------------------------
