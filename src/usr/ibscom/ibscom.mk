@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/ibscom/makefile $
+# $Source: src/usr/ibscom/ibscom.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,15 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = ibscom
 
-#include common ojects between hostboot and runtime hostboot
-include ibscom.mk
+OBJS += ibscom_multicast.o
 
-OBJS += ibscom.o
-
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
