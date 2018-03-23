@@ -45,6 +45,7 @@
 #include <errl/errludtarget.H>
 #include <xscom/piberror.H>
 #include <diag/attn/attn.H>
+#include <scom/scomif.H>
 #include <ibscom/ibscomif.H>
 #include <targeting/common/utilFilter.H>
 #include <arch/memorymap.H>
@@ -73,112 +74,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::IBSCOM,
                       TYPE_MEMBUF,
                       ibscomPerformOp);
-
-/**
- * @brief Internal routine that verifies the validity of input parameters
- * for an inband scom access.
- *
- * @param[in]   i_opType       Operation type, see DeviceFW::OperationType
- *                             in driverif.H
- * @param[in]   i_target       inband scom target
- * @param[in] i_buffer         Read: Pointer to output data storage
- *                             Write: Pointer to input data storage
- * @param[in] i_buflen         Input: size of io_buffer (in bytes)
- * @param[in] i_addr           Address being accessed (Used for FFDC)
- * @return  errlHndl_t
- */
-errlHndl_t ibscomOpSanityCheck(const DeviceFW::OperationType i_opType,
-                              const Target* i_target,
-                              const void* i_buffer,
-                              const size_t& i_buflen,
-                              const uint64_t i_addr)
-{
-    errlHndl_t l_err = NULL;
-    TRACDCOMP(g_trac_ibscom, INFO_MRK
-              ">>ibscomOpSanityCheck: Entering Function");
-
-    do
-    {
-        // Verify address is somewhat valid (not over 32-bits long)
-        if(0 != (i_addr & 0xFFFFFFFF00000000))
-        {
-            TRACFCOMP(g_trac_ibscom, ERR_MRK"ibscomOpSanityCheck: Impossible address.  i_addr=0x%.16X",
-                      i_buflen);
-            /*@
-             * @errortype
-             * @moduleid     IBSCOM_SANITY_CHECK
-             * @reasoncode   IBSCOM_INVALID_ADDRESS
-             * @userdata1    Inband Scom  address
-             * @userdata2    <none>
-             * @devdesc      The provided address is over 32 bits long
-             *               which makes it invalid.
-             */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  IBSCOM_SANITY_CHECK,
-                                  IBSCOM_INVALID_ADDRESS,
-                                  i_addr,
-                                  0);
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
-            break;
-        }
-
-        // Verify data buffer
-        if ( (i_buflen < IBSCOM_BUFFER_SIZE) ||
-             (i_buffer == NULL) )
-        {
-            TRACFCOMP(g_trac_ibscom, ERR_MRK
-                      "ibscomOpSanityCheck: Invalid buffer.  i_buflen=0x%X",
-                      i_buflen);
-            /*@
-             * @errortype
-             * @moduleid     IBSCOM_SANITY_CHECK
-             * @reasoncode   IBSCOM_INVALID_DATA_BUFFER
-             * @userdata1    Buffer size
-             * @userdata2    Inband Scom  address
-             * @devdesc      Inband  buffer size < 8 bytes or NULL
-             *               data buffer
-             */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  IBSCOM_SANITY_CHECK,
-                                  IBSCOM_INVALID_DATA_BUFFER,
-                                  i_buflen,
-                                  i_addr);
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
-            break;
-        }
-
-        // Verify OP type
-        if ( (i_opType != DeviceFW::READ) &&
-             (i_opType != DeviceFW::WRITE) )
-        {
-            TRACFCOMP(g_trac_ibscom, ERR_MRK
-                      "ibscomOpSanityCheck: Invalid opType.  i_opType=0x%X",
-                      i_opType);
-            /*@
-             * @errortype
-             * @moduleid     IBSCOM_SANITY_CHECK
-             * @reasoncode   IBSCOM_INVALID_OP_TYPE
-             * @userdata1    Operation type
-             * @userdata2    inband scom address
-             * @devdesc      inband scom invalid operation type
-             */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                  IBSCOM_SANITY_CHECK,
-                                  IBSCOM_INVALID_OP_TYPE,
-                                  i_opType,
-                                  i_addr);
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
-            break;
-        }
-
-
-    } while(0);
-
-    return l_err;
-}
 
 
 /**
@@ -520,10 +415,12 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                   i_addr);
 
         // inband scom operation sanity check
-        l_err = ibscomOpSanityCheck(i_opType, i_target, io_buffer,
-                                    io_buflen, i_addr);
+        l_err = SCOM::scomOpSanityCheck(i_opType, i_target, io_buffer,
+                                        io_buflen, i_addr, IBSCOM_BUFFER_SIZE);
         if (l_err)
         {
+            // Trace here - sanity check does not know scom type
+            TRACFCOMP(g_trac_ibscom,"IBScom sanity check failed");
             break;
         }
         // Set to buffer len to 0 until successfully access
@@ -955,114 +852,6 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
     return l_err;
 }
 
-/**
- * @brief Multicast this ibscom address
- *
- * @param[in]    i_opType         read/write
- * @param[in]    i_target         target membuf
- * @param[inout] io_buffer        return data
- * @param[inout] io_buflen        return data length
- * @param[in]    i_addr           inband scom address
- * @param[out]   o_didWorkaround  return indicator
- *
- * @return     error log on fail
- */
-errlHndl_t doIBScomMulticast( DeviceFW::OperationType i_opType,
-                              Target* i_target,
-                              void* io_buffer,
-                              size_t& io_buflen,
-                              uint64_t i_addr,
-                              bool& o_didWorkaround )
-{
-    errlHndl_t l_err = nullptr;
-    uint64_t* l_summaryReg = reinterpret_cast<uint64_t*>(io_buffer);
-
-    // Chiplet byte info masks
-    constexpr uint64_t IS_MULTICAST         = 0x40000000;
-    constexpr uint64_t MULTICAST_GROUP      = 0x07000000;
-    constexpr uint64_t MULTICAST_OP         = 0x38000000;
-    constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
-    constexpr uint64_t CHIPLET_BYTE         = 0xFF000000;
-
-    // Valid groups
-    constexpr uint64_t GROUP_0 = 0x00000000;
-    constexpr uint64_t GROUP_3 = 0x03000000;
-
-    uint64_t l_group = MULTICAST_GROUP & i_addr;
-
-    // Only perform this workaround for:
-    //  - reads
-    //  - multicast registers
-    //  - multicast read option 'bit-wise'
-    //  - multicast group 0 or 3
-    if( !((DeviceFW::READ == i_opType)
-          && ((IS_MULTICAST & i_addr) == IS_MULTICAST)
-          && ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE)
-          && ((GROUP_0 == l_group) || (GROUP_3 == l_group)) ) )
-    {
-        o_didWorkaround = false;
-        return nullptr;
-    }
-
-    TRACFCOMP( g_trac_ibscom, "doIBScomMulticast on %.8X for %.8X", TARGETING::get_huid(i_target), i_addr );
-
-    // Chiplet numbers
-    constexpr uint64_t CHIPLET_PRV = 1;
-    constexpr uint64_t CHIPLET_NST = 2;
-    constexpr uint64_t CHIPLET_MEM = 3;
-
-    // Start chiplet depends on group, end chiplet is always MEM
-    //   - Multicast group 0: PRV NST MEM, chiplets 1 2 3
-    //   - Multicast group 3: NST MEM, chiplets 2 3
-    uint64_t l_start_chplt = 0;
-    uint64_t l_end_chplt = CHIPLET_MEM;
-    if( GROUP_0 == l_group )
-    {
-        l_start_chplt = CHIPLET_PRV;
-    }
-    else // Must be group 3
-    {
-        l_start_chplt = CHIPLET_NST;
-    }
-
-    // Do the ibscom for each chiplet and return the combined value
-    for( uint64_t l_chplt = l_start_chplt; l_chplt <= l_end_chplt; l_chplt++ )
-    {
-        // Remove the chiplet byte info from the address
-        uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
-        uint64_t l_data = 0;
-
-        // Add the chiplet to the address
-        l_addr |= (l_chplt << 24);
-        io_buflen = sizeof(uint64_t);
-
-        l_err = doIBScom(i_opType,
-                         i_target,
-                         &l_data,
-                         io_buflen,
-                         l_addr,
-                         false);
-        if( l_err )
-        {
-            break;
-        }
-        // If any bits are set, set this unit's bit in summary reg
-        //   note: just check the first bit,
-        //         this is good enough for the use-case we have now
-        //         but a better implementation would be to actually
-        //         check the select regs as well so we know which bit(s)
-        //         are the trigger
-        if( l_data & 0x8000000000000000 )
-        {
-            *l_summaryReg |= (0x8000000000000000 >> l_chplt);
-        }
-
-    }
-
-    o_didWorkaround = true;
-
-    return l_err;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errl/errludlogregister.H>
 #include <xscom/piberror.H>
+#include <scom/scomif.H>
 #include <arch/pirformat.H>
 #include <lpc/lpcif.H>
 #include <sys/mm.h>
@@ -111,82 +112,6 @@ HMER waitForHMERStatus()
     return hmer;
 }
 
-
-/**
- * @brief Internal routine that verifies the validity of input parameters
- * for an XSCOM access.
- *
- * @param[in]   i_opType       Operation type, see DeviceFW::OperationType
- *                             in driverif.H
- * @param[in]   i_target       XSCom target
- * @param[in/out] i_buffer     Read: Pointer to output data storage
- *                             Write: Pointer to input data storage
- * @param[in/out] i_buflen     Input: size of io_buffer (in bytes)
- *                              Output:
- *                                  Read: Size of output data
- *                                  Write: Size of data written
- * @param[in]   i_args         This is an argument list for DD framework.
- *                             In this function, there's only one argument,
- *                             which is the MMIO XSCom address
- * @return  errlHndl_t
- */
-errlHndl_t xscomOpSanityCheck(const DeviceFW::OperationType i_opType,
-                              const TARGETING::Target* i_target,
-                              const void* i_buffer,
-                              const size_t& i_buflen,
-                              const va_list i_args)
-{
-    errlHndl_t l_err = NULL;
-
-    do
-    {
-        // Verify data buffer
-        if ( (i_buflen < XSCOM_BUFFER_SIZE) ||
-             (i_buffer == NULL) )
-        {
-            /*@
-             * @errortype
-             * @moduleid     XSCOM_SANITY_CHECK
-             * @reasoncode   XSCOM_INVALID_DATA_BUFFER
-             * @userdata1    Buffer size
-             * @userdata2    XSCom address
-             * @devdesc      XSCOM buffer size < 8 bytes or NULL data buffer
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            XSCOM_SANITY_CHECK,
-                                            XSCOM_INVALID_DATA_BUFFER,
-                                            i_buflen,
-                                            va_arg(i_args,uint64_t),
-                                            true /*Add HB Software Callout*/);
-            break;
-        }
-
-        // Verify OP type
-        if ( (i_opType != DeviceFW::READ) &&
-             (i_opType != DeviceFW::WRITE) )
-        {
-            /*@
-             * @errortype
-             * @moduleid     XSCOM_SANITY_CHECK
-             * @reasoncode   XSCOM_INVALID_OP_TYPE
-             * @userdata1    Operation type
-             * @userdata2    XSCom address
-             * @devdesc      XSCOM invalid operation type
-             */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            XSCOM_SANITY_CHECK,
-                                            XSCOM_INVALID_OP_TYPE,
-                                            i_opType,
-                                            va_arg(i_args,uint64_t),
-                                            true /*Add HB Software Callout*/);
-            break;
-        }
-
-
-    } while(0);
-
-    return l_err;
-}
 
 /**
  * @brief Get the virtual address of the input target
@@ -752,10 +677,12 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     do
     {
         // XSCOM operation sanity check
-        l_err = xscomOpSanityCheck(i_opType, i_target, io_buffer,
-                                   io_buflen, i_args);
+        l_err = SCOM::scomOpSanityCheck(i_opType, i_target, io_buffer,
+                                        io_buflen, l_addr, XSCOM_BUFFER_SIZE);
         if (l_err)
         {
+            // Trace here - sanity check does not know scom type
+            TRACFCOMP(g_trac_xscom,"XScom sanity check failed");
             break;
         }
 

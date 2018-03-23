@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 OBJS += scom.o
 OBJS += scomtrans.o
 OBJS += errlud_pib.o
+OBJS += preopchecks.o
 OBJS += postopchecks.o
 OBJS += DmiScomWorkaround.o
 OBJS += ibscom_retry.o

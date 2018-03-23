@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/xscom/runtime/rt_xscom.C $                            */
+/* $Source: src/usr/ibscom/runtime/rt_ibscom.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,40 +26,30 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
-#include <xscom/xscomreasoncodes.H>
-#include "../xscom.H"
+#include <ibscom/ibscomreasoncodes.H>
+#include "../ibscom.H"
 #include <scom/scomif.H>
 #include <scom/runtime/rt_scomif.H>
+#include <ibscom/ibscomif.H>
 
 // Trace definition
-trace_desc_t* g_trac_xscom = NULL;
-TRAC_INIT(&g_trac_xscom, "XSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
+trace_desc_t* g_trac_ibscom = NULL;
+TRAC_INIT(&g_trac_ibscom, "IBSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
-namespace XSCOM
+namespace IBSCOM
 {
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::XSCOM,
-                      TARGETING::TYPE_PROC,
-                      xscomPerformOp);
-
-// Also direct fsi scom calls though this interface at runtime
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::FSISCOM,
-                      TARGETING::TYPE_PROC,
-                      xscomPerformOp);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::FSISCOM,
+                      DeviceFW::IBSCOM,
                       TARGETING::TYPE_MEMBUF,
-                      xscomPerformOp);
+                      ibscomPerformOp);
 
 
 /**
- * @brief Complete the xscom op
+ * @brief Complete the ibscom op
  *
  * @param[in]     i_opType    Operation type, see driverif.H
- * @param[in]     i_target    XSCom target
+ * @param[in]     i_target    IBSCom target
  * @param[in/out] io_buffer   Read: Pointer to output data storage
  *                            Write: Pointer to input data storage
  * @param[in/out] io_buflen   Input: size of io_buffer (in bytes)
@@ -68,41 +58,57 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
  * @param[in]   i_accessType  Access type
  * @param[in]   i_args        This is an argument list for DD framework.
  *                            In this function, there's only one argument,
- *                               which is the MMIO XSCom address
+ *                               which is the MMIO IBSCom address
  * @return  errlHndl_t
  */
-errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
-                          TARGETING::Target* i_target,
-                          void* io_buffer,
-                          size_t& io_buflen,
-                          int64_t i_accessType,
-                          va_list i_args)
+errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
+                           TARGETING::Target* i_target,
+                           void* io_buffer,
+                           size_t& io_buflen,
+                           int64_t i_accessType,
+                           va_list i_args)
 {
-    TRACDCOMP(g_trac_xscom,ENTER_MRK"xscomPerformOp");
+    TRACDCOMP(g_trac_ibscom,ENTER_MRK"ibscomPerformOp");
     errlHndl_t l_err = NULL;
     uint64_t l_addr = va_arg(i_args,uint64_t);
 
-    l_err = SCOM::scomOpSanityCheck(i_opType,
-                                    i_target,
-                                    io_buffer,
-                                    io_buflen,
-                                    l_addr,
-                                    XSCOM_BUFFER_SIZE);
+    do
+    {
+        l_err = SCOM::scomOpSanityCheck(i_opType,
+                                        i_target,
+                                        io_buffer,
+                                        io_buflen,
+                                        l_addr,
+                                        IBSCOM_BUFFER_SIZE);
+        if( l_err )
+        {
+            // Trace here - sanity check does not know scom type
+            TRACFCOMP(g_trac_ibscom,"Runtime IBScom sanity check failed");
+            break;
+        }
 
-    if (l_err)
-    {
-        // Trace here - sanity check does not know scom type
-        TRACFCOMP(g_trac_xscom,"Runtime XScom sanity check failed");
-    }
-    else
-    {
+        // Multicast is not handled correctly by inband scom
+        // Call workaround to complete manually
+        bool l_didWorkaround = false;
+        l_err = doIBScomMulticast(i_opType,
+                                i_target,
+                                io_buffer,
+                                io_buflen,
+                                l_addr,
+                                l_didWorkaround);
+        if( l_err || l_didWorkaround )
+        {
+            break;
+        }
+
         l_err = SCOM::sendScomToHyp(i_opType, i_target, l_addr, io_buffer);
-    }
 
-    TRACDCOMP(g_trac_xscom,EXIT_MRK"xscomPerformOp");
+    } while(0);
+
+    TRACDCOMP(g_trac_ibscom,EXIT_MRK"ibscomPerformOp");
 
     return l_err;
 }
 
-}; // end namespace XSCOM
+}; // end namespace IBSCOM
 

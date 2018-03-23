@@ -25,6 +25,8 @@
 #ifndef __SCOMIF_H
 #define __SCOMIF_H
 
+#include <devicefw/driverif.H>
+
 namespace SCOM
 {
 
@@ -42,6 +44,24 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
                          uint64_t & io_addr,
                          bool & o_needsWakeup,
                          uint64_t i_opMode = 0);
+
+/**
+ * @brief Common routine that verifies input parameters for *scom accesses.
+ *
+ * @param[in]   i_opType       Operation type, see driverif.H
+ * @param[in]   i_target       Scom target
+ * @param[in]   i_buffer       Read: Pointer to output data storage
+ *                             Write: Pointer to input data storage
+ * @param[in]   i_buflen       Input: size of io_buffer (in bytes)
+ * @param[in]   i_addr         Address being accessed (Used for FFDC)
+ * @return  errlHndl_t
+ */
+errlHndl_t scomOpSanityCheck(const DeviceFW::OperationType i_opType,
+                             const TARGETING::Target* i_target,
+                             const void* i_buffer,
+                             const size_t i_buflen,
+                             const uint64_t i_addr,
+                             const size_t i_minbufsize);
 
 #ifndef __HOSTBOOT_RUNTIME
 /**

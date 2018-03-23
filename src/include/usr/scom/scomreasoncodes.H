@@ -41,6 +41,7 @@ namespace SCOM
         SCOM_HANDLE_SPECIAL_WAKEUP      = 0x07,
         SCOM_TRANSLATE_CENTAUR          = 0x08,
         SCOM_RT_SEND_SCOM_TO_HYP        = 0x09,
+        SCOM_OP_SANITY_CHECK            = 0x0A,
     };
 
     enum scomReasonCode
@@ -66,6 +67,8 @@ namespace SCOM
         SCOM_SPCWKUP_COUNT_ERR         = SCOM_COMP_ID | 0x13,
         SCOM_CEN_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x14,
         SCOM_RUNTIME_HYP_ERR           = SCOM_COMP_ID | 0x15,
+        SCOM_INVALID_DATA_BUFFER       = SCOM_COMP_ID | 0x16,
+        SCOM_INVALID_OP_TYPE           = SCOM_COMP_ID | 0x17,
     };
 
     enum UserDetailsTypes
