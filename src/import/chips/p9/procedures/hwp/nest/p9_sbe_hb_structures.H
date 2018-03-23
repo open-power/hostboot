@@ -60,6 +60,7 @@ enum SbeBootloaderVersion
     SAB_ADDED = 0x00090002,
     MMIO_BARS_ADDED = 0x00090003,
     ADDR_STASH_SUPPORT_ADDED = 0x00090004,
+    SBE_BACKDOOR_BIT_ADDED = 0x00090005,
 };
 
 union BootloaderSecureSettings
@@ -68,7 +69,8 @@ union BootloaderSecureSettings
     struct
     {
         // Bit Breakdown - sync with ATTR_SECURE_SETTINGS
-        uint8_t reserved           : 5; // reserved
+        uint8_t reserved           : 4; // reserved
+        uint8_t secBackdoorBit     : 1; // SBE Security Backdoor Bit
         uint8_t allowAttrOverrides : 1; // Allow Attribute Overrides in
         // Secure Mode
         uint8_t securityOverride   : 1; // Security Override
