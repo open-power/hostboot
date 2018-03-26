@@ -66,6 +66,8 @@ fapi2::ReturnCode mpipl_clear_tod_node(
     fapi2::buffer<uint64_t> l_rx_ttype_ctrl_reg = 0;
     fapi2::buffer<uint64_t> l_tx_ttype5_reg = 0;
     fapi2::buffer<uint64_t> l_tod_load_reg = 0;
+    fapi2::buffer<uint64_t> l_m_path_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_s_path_ctrl_reg = 0;
 
     FAPI_INF("MPIPL: stop step checkers");
     //Stop step checkers
@@ -97,6 +99,19 @@ fapi2::ReturnCode mpipl_clear_tod_node(
                             PERV_TOD_LOAD_TOD_REG,
                             l_tod_load_reg),
              "Error from putScom (PERV_TOD_TX_TTYPE_5_REG)");
+
+    FAPI_INF("Clearing PERV_TOD_M_PATH_CTRL_REG");
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_M_PATH_CTRL_REG,
+                            l_m_path_ctrl_reg),
+             "Error in clearing PERV_TOD_M_PATH_CTRL_REG");
+
+    FAPI_INF("Clearing PERV_TOD_S_PATH_CTRL_REG");
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_S_PATH_CTRL_REG,
+                            l_s_path_ctrl_reg),
+             "Error in clearing PERV_TOD_S_PATH_CTRL_REG");
+
 
     for(auto l_child = (i_tod_node->i_children).begin();
         l_child != (i_tod_node->i_children).end();
@@ -1512,7 +1527,7 @@ fapi2::ReturnCode p9_tod_setup(
         // topology is configured and not repeat it to prevent overwriting
         // the configuration.
         FAPI_TRY(mpipl_clear_tod_node(i_tod_node, i_tod_sel),
-                 "Error from clear_tod_node!");
+                 "Error from mpipl_clear_tod_node!");
     }
 
     // Start configuring each node
