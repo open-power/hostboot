@@ -30,6 +30,7 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
+#include <prdfMemUeTable.H>
 #include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_MODULE
@@ -51,7 +52,7 @@ class MbaDataBundle : public DataBundle
      * @param i_chip The MBA chip.
      */
     explicit MbaDataBundle( ExtensibleChip * i_chip ) :
-        iv_chip(i_chip)
+        iv_chip(i_chip), iv_ueTable(i_chip)
     {}
 
     /** @brief Destructor. */
@@ -98,6 +99,8 @@ class MbaDataBundle : public DataBundle
     #endif
 
   public: // instance variables
+
+    MemUeTable iv_ueTable;                      ///< UE table for FFDC
 
     #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 

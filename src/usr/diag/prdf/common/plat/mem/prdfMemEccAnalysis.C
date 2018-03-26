@@ -26,6 +26,7 @@
 #include <prdfMemEccAnalysis.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemDqBitmap.H>
@@ -137,7 +138,6 @@ uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
     #undef PRDF_FUNC
 }
 
-/* TODO RTC 157888
 template<>
 uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                                 UE_TABLE::Type i_type,
@@ -146,10 +146,9 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    return __handleMemUe<TYPE_MBA,CenMbaDataBundle *>( i_chip, i_addr,
-                                                       i_type, io_sc );
+    return __handleMemUe<TYPE_MBA,MbaDataBundle *>( i_chip, i_addr,
+                                                    i_type, io_sc );
 }
-*/
 
 //------------------------------------------------------------------------------
 
