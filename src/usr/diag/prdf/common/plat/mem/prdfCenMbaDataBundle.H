@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/mem/prdfCenMbaDataBundle.H $           */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfCenMbaDataBundle.H $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,8 +30,13 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
-#include <prdfMemTdCtlr.H>
 #include <prdfPlatServices.H>
+
+#ifdef __HOSTBOOT_MODULE
+
+  #include <prdfMemTdCtlr.H>
+
+#endif
 
 namespace PRDF
 {
@@ -43,21 +48,25 @@ class MbaDataBundle : public DataBundle
 
     /**
      * @brief Constructor.
-     * @param i_mbaChip The MBA chip.
+     * @param i_chip The MBA chip.
      */
-    explicit MbaDataBundle( ExtensibleChip * i_mbaChip ) :
-        iv_chip(i_mbaChip)
+    explicit MbaDataBundle( ExtensibleChip * i_chip ) :
+        iv_chip(i_chip)
     {}
 
     /** @brief Destructor. */
     ~MbaDataBundle()
     {
+        #ifdef __HOSTBOOT_MODULE
         delete iv_tdCtlr; iv_tdCtlr = nullptr;
+        #endif
     }
 
     // Don't allow copy or assignment.
     MbaDataBundle( const MbaDataBundle & ) = delete;
     const MbaDataBundle & operator=( const MbaDataBundle & ) = delete;
+
+    #ifdef __HOSTBOOT_MODULE
 
     /** @return The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MBA> * getTdCtlr()
@@ -70,13 +79,19 @@ class MbaDataBundle : public DataBundle
         return iv_tdCtlr;
     }
 
+    #endif
+
   private: // instance variables
 
     /** The MBA chip associated with this data bundle. */
     ExtensibleChip * const iv_chip;
 
+    #ifdef __HOSTBOOT_MODULE
+
     /** The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MBA> * iv_tdCtlr = nullptr;
+
+    #endif
 };
 
 /**
