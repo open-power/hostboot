@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,27 @@
 constexpr uint32_t MSS_EFF_EMPTY = 0;
 constexpr uint32_t MSS_EFF_VALID = 255;
 constexpr uint32_t TWO_MHZ = 2000000;
+//----------------------------------------------------------------------
+// ENUMs
+//----------------------------------------------------------------------
+enum DDR4_3DS_SPEEDBIN
+{
+    MSS_EFF_CL_12_11_10 = 0x0C,
+    MSS_EFF_CL_13_12_11 = 0x0D,
+    MSS_EFF_CL_14_13_12 = 0x0E,
+    MSS_EFF_TRCD_12_11_10 = 0x0B,
+    MSS_EFF_TRCD_13_12_11 = 0x0C,
+    MSS_EFF_TRCD_14_13_12 = 0x0D,
+    MSS_EFF_TRP_12_11_10 = 0x0A,
+    MSS_EFF_TRP_13_12_11 = 0x0B,
+    MSS_EFF_TRP_14_13_12 = 0x0C,
+    MSS_EFF_TRAS_12_11_10 = 0x0000001C,
+    MSS_EFF_TRAS_13_12_11 = 0x0000001C,
+    MSS_EFF_TRAS_14_13_12 = 0x0000001C,
+    MSS_EFF_TRC_12_11_10 = 0x00000026,
+    MSS_EFF_TRC_13_12_11 = 0x00000027,
+    MSS_EFF_TRC_14_13_12 = 0x00000028,
+};
 
 extern "C"
 {
@@ -741,6 +762,7 @@ extern "C"
         mss_eff_config_spd_data* i_data,
         mss_eff_config_atts* o_atts)
     {
+        uint8_t l_eff_dram_cl = 0;
         uint8_t l_vpd_dram_address_mirroring[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_mss_dram_2n_mode_enable = 0;
         uint8_t l_attr_vpd_dram_wrddr4_vref[MAX_PORTS_PER_MBA] = {0};
@@ -765,6 +787,7 @@ extern "C"
         // Transfer powerdown request from system attr to DRAM attr
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                l_mss_power_control_requested));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_CL, i_target_mba, l_eff_dram_cl));
 
         if ( l_mss_power_control_requested == fapi2::ENUM_ATTR_CEN_MRW_POWER_CONTROL_REQUESTED_FASTEXIT)
         {
@@ -1400,6 +1423,7 @@ extern "C"
 
                 if (i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR3)
                 {
+
                     i_mss_eff_config_data->dram_twtr = calc_timing_in_clk
                                                        (
                                                            i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
@@ -1982,15 +2006,41 @@ extern "C"
                         }
                     }
 
-                    //Adding timer overrides for 1600 DDR4 TSV DIMMs
-                    //TSV tRCD Override when requiring 1600 freq override (i.e. using 2666 parts)
+                    // DDR4-1600 3DS CL-RCD-RP Settings
                     if ((i_mss_eff_config_data->mss_freq == 1600)
-                        && (o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS))
+                        && (o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+                        && (o_atts->eff_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
                     {
-                        o_atts->eff_dram_trcd = 0x0C;
-                        o_atts->eff_dram_trp = 0x0B;
-                        o_atts->eff_dram_tras_u32 = 0x0000001C;
-                        o_atts->eff_dram_trc_u32 = 0x00000027;
+                        switch(l_eff_dram_cl)
+                        {
+                            case MSS_EFF_CL_12_11_10:
+                                o_atts->eff_dram_trcd = MSS_EFF_TRCD_12_11_10;
+                                o_atts->eff_dram_trp = MSS_EFF_TRP_12_11_10;
+                                o_atts->eff_dram_tras_u32 = MSS_EFF_TRAS_12_11_10;
+                                o_atts->eff_dram_trc_u32 = MSS_EFF_TRC_12_11_10;
+                                break;
+
+                            case MSS_EFF_CL_13_12_11:
+                                o_atts->eff_dram_trcd = MSS_EFF_TRCD_13_12_11;
+                                o_atts->eff_dram_trp = MSS_EFF_TRP_13_12_11;
+                                o_atts->eff_dram_tras_u32 = MSS_EFF_TRAS_13_12_11;
+                                o_atts->eff_dram_trc_u32 = MSS_EFF_TRC_13_12_11;
+                                break;
+
+                            case MSS_EFF_CL_14_13_12:
+                                o_atts->eff_dram_trcd = MSS_EFF_TRCD_14_13_12;
+                                o_atts->eff_dram_trp = MSS_EFF_TRP_14_13_12;
+                                o_atts->eff_dram_tras_u32 = MSS_EFF_TRAS_14_13_12;
+                                o_atts->eff_dram_trc_u32 = MSS_EFF_TRC_14_13_12;
+                                break;
+
+                            default:
+                                FAPI_ASSERT(false,
+                                            fapi2::CEN_MSS_EFF_CONFIG_DIMM_INVALID_3DS_CL().
+                                            set_TARGET_MBA(i_target_mba).
+                                            set_UNSUPPORTED_VAL(l_eff_dram_cl),
+                                            "Invalid CAS Latency for 3DS DIMM Type on %s!", mss::c_str(i_target_mba));
+                        }
                     }
 
                     // AST HERE: Needed SPD byte33[7,1:0], for expanded IBM_TYPE

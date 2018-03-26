@@ -59,7 +59,28 @@ constexpr uint8_t DDR4_MTB_DIVISOR = 8;
 constexpr uint8_t DDR4_FTB_DIVIDEND = 1;
 constexpr uint8_t DDR4_FTB_DIVISOR = 1;
 constexpr uint8_t NUM_CL_SUPPORTED = 21;
+constexpr uint8_t DDR3_CL_SUPPORT_OFFSET = 4;
+constexpr uint8_t DDR4_CL_SUPPORT_OFFSET = 7;
+constexpr uint8_t MAX_CL_SUPPORTED = 14;
+constexpr uint64_t DDR3_TAA_MAX = 20000;
+constexpr uint64_t DDR4_TAA_MAX = 18000;
+constexpr uint64_t DDR4_3DS_TAA_MAX = 21500;
 
+///Bool function for DDR3/DDR4 CL Supported Check
+///
+/// @brief Checks calculated CL against supported list in SPD
+/// @param[in] i_spd_cas_lat_supported_all List of CL supported in SPD
+/// @param[in] i_cl_support_offset Offset for DDR3/DDR4 decode
+/// @param[in] i_cas_latency Calculated CAS Latency
+/// @return 1 if unsupported, 0 if supported
+///
+bool mss_freq_unsupported_cl(
+    const uint32_t i_spd_cas_lat_supported_all,
+    const uint8_t  i_cl_support_offset,
+    const uint8_t  i_cas_latency)
+{
+    return (!( i_spd_cas_lat_supported_all & (0x00000001 << (i_cas_latency - i_cl_support_offset))));
+}
 
 ///
 /// @brief DIMM SPD attributes are read to determine optimal DRAM frequency
@@ -114,6 +135,10 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
     uint8_t l_highest_cl_count = 0;
     uint8_t l_lowest_common_cl = 0;
     uint32_t l_lowest_cl_count = 0xFFFFFFFF;
+    uint8_t l_cl_support_offset = 0;
+    uint64_t l_taa_max = 0;
+    uint8_t l_spd_sdram_dev_type = 0;
+    uint8_t l_spd_sdram_dev_type_sig_loading = 0;
 
     for(uint8_t i = 0; i < NUM_CL_SUPPORTED; i++)
     {
@@ -132,6 +157,9 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
         for (const auto& l_dimm : l_dimm_targets)
         {
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_DRAM_DEVICE_TYPE, l_dimm,  l_spd_dram_dev_type));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_SDRAM_DEVICE_TYPE, l_dimm, l_spd_sdram_dev_type));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING, l_dimm, l_spd_sdram_dev_type_sig_loading));
+
 
             if (l_spd_dram_dev_type == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4)
             {
@@ -604,25 +632,44 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
         FAPI_INF( "After rounding up ... CL: %d", l_cas_latency);
     }
 
-    //Setting Max CL = 13 for 1600 DDR4 TSV
-    if (l_dimm_freq_min == 1600 && l_cas_latency > 13)
+    l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
+
+
+    l_cl_support_offset = (l_spd_dram_dev_type == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR3) ?
+                          DDR3_CL_SUPPORT_OFFSET : DDR4_CL_SUPPORT_OFFSET;
+
+    if(l_spd_dram_dev_type == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4)
     {
-        FAPI_INF( "Setting CL to 13 from %d", l_cas_latency);
-        l_cas_latency = 13;
+        if((l_spd_sdram_dev_type == fapi2::ENUM_ATTR_CEN_SPD_SDRAM_DEVICE_TYPE_NON_STANDARD)
+           && (l_spd_sdram_dev_type_sig_loading == fapi2::ENUM_ATTR_CEN_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK))
+        {
+            l_taa_max = DDR4_3DS_TAA_MAX;
+        }
+        else
+        {
+            l_taa_max = DDR4_TAA_MAX;
+        }
+    }
+    else
+    {
+        l_taa_max = DDR3_TAA_MAX;
     }
 
-    l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
+    FAPI_INF("taa_max = %d", l_taa_max);
 
     // If the CL proposed is not supported or the TAA exceeds TAA max
     // Spec defines tAAmax as 20 ns for all DDR3 speed grades.
     // Break loop if we have an override condition without a solution.
-    while (    ( (!( l_spd_cas_lat_supported_all & (0x00000001 << (l_cas_latency - 4)))) || (l_cl_mult_tck > 20000) )
-               && ( l_override_path == 0 ) )
+
+    while ( ( ( mss_freq_unsupported_cl(l_spd_cas_lat_supported_all, l_cl_support_offset, l_cas_latency) )
+              || (l_cl_mult_tck > l_taa_max) )
+            && ( l_override_path == 0) )
     {
         FAPI_INF( "Warning calculated CL is not supported in VPD.  Searching for a new CL.");
 
         // If not supported, increment the CL up to 18 (highest supported CL) looking for Supported CL
-        while ((!( l_spd_cas_lat_supported_all & (0x00000001 << (l_cas_latency - 4)))) && (l_cas_latency < 18))
+        while ( ( mss_freq_unsupported_cl(l_spd_cas_lat_supported_all, l_cl_support_offset, l_cas_latency) )
+                && (l_cas_latency < MAX_CL_SUPPORTED) )
         {
             l_cas_latency++;
         }
@@ -631,9 +678,11 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
         l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
 
         // Do not move freq if using an override freq.  Just continue.  Hence the overide in this if statement
-        if ( ( (!( l_spd_cas_lat_supported_all & (0x00000001 << (l_cas_latency - 4)))) || (l_cl_mult_tck > 20000) )
+        if ( ( ( mss_freq_unsupported_cl(l_spd_cas_lat_supported_all, l_cl_support_offset, l_cas_latency) )
+               || (l_cl_mult_tck > l_taa_max) )
              && ( l_freq_override == 0) )
         {
+
             FAPI_INF( "No Supported CL works for calculating frequency.  Lowering frequency and trying CL Algorithm again.");
 
             if (l_spd_min_tck_max < 1500)
@@ -655,6 +704,7 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
             {
                 //This is minimum frequency and cannot be lowered
                 //Therefore we will deconfig the minority dimms.
+                //Any CL 20+ is unsupported speed bin for Centaur
                 for(uint8_t i = 0; i < 20; i++)
                 {
                     if (l_cl_count_array[i] > l_lowest_cl_count)
@@ -700,7 +750,8 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
 
         // Need to break the loop in case we reach this condition because no longer modify freq and CL
         // With an overrride
-        if ( ( (!( l_spd_cas_lat_supported_all & (0x00000001 << (l_cas_latency - 4)))) || (l_cl_mult_tck > 20000) )
+        if ( ( ( mss_freq_unsupported_cl(l_spd_cas_lat_supported_all, l_cl_support_offset, l_cas_latency) )
+               || (l_cl_mult_tck > l_taa_max) )
              && ( l_freq_override != 0) )
         {
             FAPI_INF( "No Supported CL works for override frequency.  Using override frequency with an unsupported CL.");

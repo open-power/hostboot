@@ -956,6 +956,33 @@
 
 <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_CEN_MSS_EFF_CONFIG_DIMM_INVALID_3DS_CL</rc>
+    <description>Invalid CAS Latency for 3DS DIMM Type
+        </description>
+    <ffdc>UNSUPPORTED_VAL</ffdc>
+    <FFDC>TARGET_MBA</FFDC>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <callout>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+    </deconfigure>
+
+</hwpError>
+
+<!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_CEN_MSS_EFF_CONFIG_MSS_FREQ</rc>
     <description>Invalid ATTR_MSS_FREQ
         </description>
