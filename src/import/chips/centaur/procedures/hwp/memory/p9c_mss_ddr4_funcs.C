@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,12 +75,16 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
     uint32_t l_ccs_inst_cnt = 0;
     uint16_t l_num_ranks = 0;
     uint8_t l_mpr_pattern = 0xAA;
-    uint8_t l_num_ranks_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; //[port][dimm]
-    uint8_t l_num_master_ranks_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; //[port][dimm]
+    uint8_t l_num_ranks_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //[port][dimm]
+    uint8_t l_num_master_ranks_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //[port][dimm]
     uint8_t l_is_sim = 0;
-    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; //address_mirror_map[port][dimm]
-    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
+    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
+    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    uint8_t l_dram_al = 0;
+    uint8_t l_dram_cl = 0;
+    uint8_t l_mpr_write_delay = 0;
     constexpr uint32_t NUM_POLL = 100;
+    constexpr uint8_t TMOD = 24;
     fapi2::buffer<uint64_t> l_data_64;
     FAPI_TRY(l_casn_1.clearBit(0));
     FAPI_TRY(l_wen_1.clearBit(0));
@@ -95,6 +99,8 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba, l_dram_stack));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_CL, i_target_mba, l_dram_cl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_AL, i_target_mba, l_dram_al));
 
     for (uint8_t l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++)
     {
@@ -255,8 +261,10 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
                     FAPI_TRY(l_activate_1.setBit(0), " Error setting up buffers");
 
 
+                    //Calculate tWR_MPR
+                    l_mpr_write_delay = TMOD + (l_dram_cl - l_dram_al);
                     //CCS Array 1 Setup
-                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 24, 0, 16), " Error setting up buffers");
+                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) l_mpr_write_delay, 0, 16), " Error setting up buffers");
                     l_num_repeat_16.flush<0>();
                     l_data_20.flush<0>();
                     l_read_compare_1.flush<0>();
