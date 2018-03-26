@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2716,7 +2716,7 @@ const initFlags_t initFlagArray[]=
 {"needs-l1d-flush-msr-hv-1-to-0",               0x8000000000000000},
 {"needs-l1d-flush-msr-pr-0-to-1",               0x8000000000000000},
 {"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
-{"fw-l1d-thread-split",                         0x8000000000000000},
+{"fw-l1d-thread-split",                         0x0000000000000000},
 {"fw-bcctrl-serialized",                        0x0000000000000000},
 {"speculation-policy-favor-security",           0x8000000000000000}};
 
