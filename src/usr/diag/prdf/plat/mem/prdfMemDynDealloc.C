@@ -224,13 +224,6 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
 template<TYPE T>
 int32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
                        uint64_t & o_addr );
-template<>
-int32_t getSystemAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
-                                 uint64_t & o_addr )
-{
-    // TODO - RTC: 157588
-    return SUCCESS;
-}
 
 template<>
 int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
@@ -371,6 +364,22 @@ int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     #undef PRDF_FUNC
 }
 
+template<>
+int32_t getSystemAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                 uint64_t & o_addr )
+{
+    #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
+
+    // TODO - RTC: 190115
+    PRDF_ERR( PRDF_FUNC "not supported on MBA yet: i_chip=0x%08x",
+              i_chip->getHuid() );
+    return FAIL; // Returning FAIL will prevent us from sending any false
+                 // messages to the hypervisor.
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template<TYPE T>
 int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
