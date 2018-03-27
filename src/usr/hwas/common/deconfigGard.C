@@ -1957,30 +1957,6 @@ void DeconfigGard::_deconfigureByAssoc(
                         _deconfigureByAssoc(*l_parentPEC,
                                             i_errlEid,i_deconfigRule);
                     }
-
-                    // Due to shared resources, need to deconfig any PHB
-                    //  with a higher unit position as the one that we just
-                    //  lost
-                    ATTR_CHIP_UNIT_type l_myUnit =
-                      i_target.getAttr<ATTR_CHIP_UNIT>();
-                    TargetHandleList pChildList;
-                    targetService().getAssociated(pChildList,
-                                                  l_parentPEC,
-                                                  TargetService::CHILD,
-                                                  TargetService::ALL,
-                                                  &isFunctional);
-
-                    for (const auto & l_pChild: pChildList)
-                    {
-                        if( l_pChild->getAttr<ATTR_CHIP_UNIT>() > l_myUnit )
-                        {
-                            _deconfigureTarget(*l_pChild,
-                                               i_errlEid, NULL,
-                                               i_deconfigRule);
-                            _deconfigureByAssoc(*l_pChild,
-                                                i_errlEid,i_deconfigRule);
-                        }
-                    }
                 }
 
                 break;
