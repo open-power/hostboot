@@ -61,19 +61,37 @@ bool check_str_non_tsv_parity_workaround(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint64_t i_idle_power_control)
 {
     const auto l_less_than_dd2 = chip_ec_nimbus_lt_2_0(i_target);
+    uint8_t l_hybrid[MAX_DIMM_PER_PORT] = {};
+    uint8_t l_stack_type[MAX_DIMM_PER_PORT] = {};
+    bool l_tsv = false;
+    bool l_str_enabled = false;
+    bool l_is_nvdimm = false;
+
+    // Figure out if any hybrid memory is plugged
+    FAPI_TRY(mss::eff_hybrid(i_target, l_hybrid));
+
+    // If hybrid memory is plugged, what kind?
+    // Checking the first dimm here is enough as the plug rules
+    // only allow single drop for NVDIMM
+    if (l_hybrid[0] == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID)
+    {
+        uint8_t l_hybrid_mem_type[MAX_DIMM_PER_PORT] = {};
+        FAPI_TRY(mss::eff_hybrid_memory_type(i_target, l_hybrid_mem_type));
+        l_is_nvdimm = (l_hybrid_mem_type[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM);
+    }
 
     // If either STR is enabled, STR is enabled for the whole system
     // Per the power thermal team, we only need to check PD_AND_STR and PD_AND_STR_CLK_STOP
-    const bool l_str_enabled = (i_power_control == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR ||
-                                i_power_control == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP) ||
-                               (i_idle_power_control == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR ||
-                                i_idle_power_control == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP);
+    // If nvdimm is plugged, STR is also needed
+    l_str_enabled = (i_power_control == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR ||
+                     i_power_control == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP) ||
+                    (i_idle_power_control == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR ||
+                     i_idle_power_control == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP) ||
+                    l_is_nvdimm;
 
     // Now checks whether the DIMM's are TSV
     // Note: eff_config plug rules will require that the whole MCA either have TSV or non-TSV DIMMs
     // As such, it is fine to just check DIMM0 for if it is a TSV DIMM or not
-    uint8_t l_stack_type[MAX_DIMM_PER_PORT] = {};
-    bool l_tsv = false;
     FAPI_TRY(mss::eff_prim_stack_type(i_target, l_stack_type));
 
     // If DIMM0 is a TSV, set to true (DIMM0 has to exist and needs to equal DIMM0 if it's 3DS)
