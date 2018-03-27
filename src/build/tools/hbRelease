@@ -502,6 +502,9 @@ sub execute_pre_release
     #Complete Fix Records
     run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
 
+    #Integrate the track
+    run_system_command("Track -integrate -feature $feature -release $release -verbose");
+
     #Get ClearQuest ID
     my $response = run_system_command("Feature -view $feature");
     my ($cq_id) = $response =~ /CQID\s+(.*)/;
@@ -704,6 +707,9 @@ sub execute_checkinBuildToTrack
     print "#####-> run_system_command(\"Fix -complete -feature $feature -release $release -component esw_hbfw -verbose\")\n";
     run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
 
+    #Integrate the track
+    run_system_command("Track -integrate -feature $feature -release $release -verbose");
+
     #Get ClearQuest ID
     my $response = run_system_command("Feature -view $feature");
     my ($cq_id) = $response =~ /CQID\s+(.*)/;
@@ -732,9 +738,6 @@ sub execute_post_release
 
     #Check for HW image coreq and prereq
     hw_req_check($level, $released);
-
-    #Integrate the track
-    run_system_command("Track -integrate -feature $feature -release $release -verbose");
 
     #Get ClearQuest ID
     my $response = run_system_command("Feature -view $feature");
