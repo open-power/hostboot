@@ -6424,7 +6424,7 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[9]
      *  dob01 ce
      */
-    (rPBIOOFIR, bit(9)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(9)) ? self_th_32perDay;
 
     /** PBIOOFIR[10]
      *  dob01 sue
@@ -6439,7 +6439,7 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[12]
      *  dob23 ce
      */
-    (rPBIOOFIR, bit(12)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(12)) ? self_th_32perDay;
 
     /** PBIOOFIR[13]
      *  dob23 sue
@@ -6454,7 +6454,7 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[15]
      *  dob45 ce
      */
-    (rPBIOOFIR, bit(15)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(15)) ? self_th_32perDay;
 
     /** PBIOOFIR[16]
      *  dob45 sue
@@ -6469,7 +6469,7 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[18]
      *  dob67 ce
      */
-    (rPBIOOFIR, bit(18)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(18)) ? self_th_32perDay;
 
     /** PBIOOFIR[19]
      *  dob67 sue
@@ -6519,42 +6519,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[28]
      *  parser00 attn
      */
-    (rPBIOOFIR, bit(28)) ? self_th_1;
+    (rPBIOOFIR, bit(28)) ? calloutBusInterface_obus0_th_1;
 
     /** PBIOOFIR[29]
      *  parser01 attn
      */
-    (rPBIOOFIR, bit(29)) ? self_th_1;
+    (rPBIOOFIR, bit(29)) ? calloutBusInterface_obus0_th_1;
 
     /** PBIOOFIR[30]
      *  parser02 attn
      */
-    (rPBIOOFIR, bit(30)) ? self_th_1;
+    (rPBIOOFIR, bit(30)) ? calloutBusInterface_obus1_th_1;
 
     /** PBIOOFIR[31]
      *  parser03 attn
      */
-    (rPBIOOFIR, bit(31)) ? self_th_1;
+    (rPBIOOFIR, bit(31)) ? calloutBusInterface_obus1_th_1;
 
     /** PBIOOFIR[32]
      *  parser04 attn
      */
-    (rPBIOOFIR, bit(32)) ? self_th_1;
+    (rPBIOOFIR, bit(32)) ? calloutBusInterface_obus2_th_1;
 
     /** PBIOOFIR[33]
      *  parser05 attn
      */
-    (rPBIOOFIR, bit(33)) ? self_th_1;
+    (rPBIOOFIR, bit(33)) ? calloutBusInterface_obus2_th_1;
 
     /** PBIOOFIR[34]
      *  parser06 attn
      */
-    (rPBIOOFIR, bit(34)) ? self_th_1;
+    (rPBIOOFIR, bit(34)) ? calloutBusInterface_obus3_th_1;
 
     /** PBIOOFIR[35]
      *  parser07 attn
      */
-    (rPBIOOFIR, bit(35)) ? self_th_1;
+    (rPBIOOFIR, bit(35)) ? calloutBusInterface_obus3_th_1;
 
     /** PBIOOFIR[36]
      *  mailbox 00 special attention
@@ -6639,42 +6639,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[52]
      *  data outbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(52)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(52)) ? calloutBusInterface_obus0_th_1;
 
     /** PBIOOFIR[53]
      *  data outbound switch internal - links 23
      */
-    (rPBIOOFIR, bit(53)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(53)) ? calloutBusInterface_obus1_th_1;
 
     /** PBIOOFIR[54]
      *  data outbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(54)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(54)) ? calloutBusInterface_obus2_th_1;
 
     /** PBIOOFIR[55]
      *  data outbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(55)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(55)) ? calloutBusInterface_obus3_th_1;
 
     /** PBIOOFIR[56]
      *  data inbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(56)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(56)) ? calloutBusInterface_obus0_th_1;
 
     /** PBIOOFIR[57]
      *  data inbound switch internal-links 23
      */
-    (rPBIOOFIR, bit(57)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(57)) ? calloutBusInterface_obus1_th_1;
 
     /** PBIOOFIR[58]
      *  data inbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(58)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(58)) ? calloutBusInterface_obus2_th_1;
 
     /** PBIOOFIR[59]
      *  data inbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(59)) ? defaultMaskedError;
+    (rPBIOOFIR, bit(59)) ? calloutBusInterface_obus3_th_1;
 
     /** PBIOOFIR[60:61]
      *  spare

@@ -543,9 +543,9 @@ group gIOMCFIR filter singlebit, cs_root_cause
     (rIOMCFIR, bit(1)) ? defaultMaskedError;
 
     /** IOMCFIR[2]
-     *  presumed spare
+     *  GCR_HANG_ERROR
      */
-    (rIOMCFIR, bit(2)) ? defaultMaskedError;
+    (rIOMCFIR, bit(2)) ? self_th_1;
 
     /** IOMCFIR[3:7]
      *  spare

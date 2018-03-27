@@ -150,3 +150,31 @@ actionclass calloutBusInterface_xbus2_th_1
     threshold1;
 };
 
+/** Callout connected OBUS 0 interface on first occurrence */
+actionclass calloutBusInterface_obus0_th_1
+{
+    funccall("calloutBusInterface_OBUS0");
+    threshold1;
+};
+
+/** Callout connected OBUS 1 interface on first occurrence */
+actionclass calloutBusInterface_obus1_th_1
+{
+    funccall("calloutBusInterface_OBUS1");
+    threshold1;
+};
+
+/** Callout connected OBUS 2 interface on first occurrence */
+actionclass calloutBusInterface_obus2_th_1
+{
+    funccall("calloutBusInterface_OBUS2");
+    threshold1;
+};
+
+/** Callout connected OBUS 3 interface on first occurrence */
+actionclass calloutBusInterface_obus3_th_1
+{
+    funccall("calloutBusInterface_OBUS3");
+    threshold1;
+};
+
