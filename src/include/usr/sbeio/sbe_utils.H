@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,32 @@
 
 namespace SBEIO
 {
+    /**
+    * @brief Struct for the SBE Capabilities
+    *
+    * Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
+    */
+    static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
+    static constexpr uint8_t SBE_MAX_CAPABILITIES = 20;
+
+    struct sbeCapabilities_t
+    {
+        uint16_t majorVersion;
+        uint16_t minorVersion;
+        uint32_t commitId;
+        char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
+        uint32_t capabilities[SBE_MAX_CAPABILITIES];
+
+        sbeCapabilities_t() :
+              majorVersion(0)
+            , minorVersion(0)
+            , commitId(0)
+            , releaseTag{ 0 }
+            , capabilities{ 0 }
+        {
+        }
+    } PACKED;  // end struct sbeCapabilities_t
+
 
     enum SBE_TARGET_TYPES {
         SBE_TARGET_TYPE_PROC     = 0x00,
@@ -53,7 +79,6 @@ namespace SBEIO
     /// @param[in] i_hbTarget includes the HB target type
     /// @return: ChipletID for i_hbTarget target
     uint8_t getChipletIDForSBE(TARGETING::Target * i_hbTarget);
-
 }
 
 #endif  // __SBE_UTILS_H

@@ -65,6 +65,7 @@
 #include <p9_get_sbe_msg_register.H>
 #include <p9_getecid.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <sbeio/sbeioif.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -82,7 +83,7 @@ namespace ISTEP_08
 //******************************************************************************
 void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
-    errlHndl_t  l_errl = NULL;
+    errlHndl_t  l_errl(nullptr);
     IStepError  l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -150,6 +151,15 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         {
             // Set attribute indicating that SBE is started
             l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);
+
+            // Make the FIFO call to get and apply the SBE Capabilities
+            l_errl = SBEIO::getFifoSbeCapabilities(l_cpu_target);
+
+            if (l_errl)
+            {
+                // Commit Error
+                errlCommit (l_errl, ISTEP_COMP_ID);
+            }
 
             // Switch to using SBE SCOM
             ScomSwitches l_switches =
