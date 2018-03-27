@@ -279,6 +279,15 @@
   <attribute>
     <id>LOCATION_CODE</id>
   </attribute>
+  <attribute>
+    <id>SBE_COMMIT_ID</id>
+  </attribute>
+   <attribute>
+    <id>SBE_VERSION_INFO</id>
+  </attribute>
+   <attribute>
+    <id>SBE_RELEASE_TAG</id>
+  </attribute>
 </targetType>
 
 <targetType>

@@ -127,6 +127,7 @@ enum sbeioReasonCode
     SBEIO_EXCEED_MAX_SIDE_SWITCHES     = SBEIO_COMP_ID | 0x5C,
     SBEIO_EXCEED_MAX_SIDE_BOOTS        = SBEIO_COMP_ID | 0x5D,
     SBEIO_SLAVE_FAILED_TO_BOOT         = SBEIO_COMP_ID | 0x5E,
+    SBEIO_RECEIVED_UNEXPECTED_MSG      = SBEIO_COMP_ID | 0x5F,
 
     // SBE Vital Attention error codes
     SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,

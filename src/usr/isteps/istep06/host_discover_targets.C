@@ -57,8 +57,8 @@
 #include <fapi2/target.H>
 
 //SBE interfacing
-#include    <sbeio/sbeioif.H>
-#include    <sys/misc.h>
+#include <sbeio/sbeioif.H>
+#include <sys/misc.h>
 
 #include <p9_query_core_access_state.H>
 #include <p9_setup_sbe_config.H>
@@ -467,7 +467,7 @@ void* host_discover_targets( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_discover_targets entry" );
 
-    errlHndl_t l_err = nullptr;
+    errlHndl_t l_err(nullptr);
     ISTEP_ERROR::IStepError l_stepError;
 
     // Check whether we're in MPIPL mode
@@ -586,6 +586,20 @@ void* host_discover_targets( void *io_pArgs )
     SENSOR::updateBMCSensorStatus();
 #endif
 
+
+    // Retrieve the master processor chip
+    TARGETING::TargetHandle_t l_pMasterProcChip(nullptr);
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+    if (l_pMasterProcChip)
+    {
+        // Make the PSU call to get and apply the SBE Capabilities
+        l_err = SBEIO::getPsuSbeCapabilities(l_pMasterProcChip);
+        if (l_err)
+        {
+            // Commit Error
+            errlCommit (l_err, ISTEP_COMP_ID);
+        }
+    }  // end if (l_pMasterProcChip)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "host_discover_targets exit" );
 

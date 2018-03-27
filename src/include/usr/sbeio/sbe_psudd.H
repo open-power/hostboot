@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,11 @@ class SbePsu
     public:
 
         /**
+         * @brief The alignment boundary for sending an SBE Capabilities message
+         */
+        static constexpr uint32_t SBE_CAPABILITIES_ALIGNMENT_SIZE_IN_BYTES = 128;
+
+        /**
          * @brief get the instance of this class
          *
          * @return the (one and only) instance of SbePsu
@@ -102,6 +107,7 @@ class SbePsu
         //BYTE 7 options
         enum psuGenericMessageCommands
         {
+            SBE_PSU_MSG_GET_CAPABILITIES     = 0x02,
             SBE_PSU_READ_SEEPROM             = 0x03,
             SBE_PSU_SET_FFDC_ADDRESS         = 0x04,
             SBE_PSU_GENERIC_MSG_QUIESCE      = 0x05,
@@ -212,6 +218,25 @@ class SbePsu
         {
             SBE_QUIESCE_REQ_USED_REGS     = 0x01,
             SBE_QUIESCE_RSP_USED_REGS     = 0x01,
+        };
+
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuGetCapabilitiesNonReservedMsgs
+        {
+            SBE_GET_CAPABILITIES_REQ_USED_REGS  = 0x07,  // Use Reg 0 ... Reg 2 (0x1 + 0x2 + 0x4)
+            SBE_GET_CAPABILITIES_RSP_USED_REGS  = 0x07,  // Use Reg 0 ... Reg 2 (0x1 + 0x2 + 0x4)
         };
 
         /**
@@ -407,6 +432,19 @@ class SbePsu
                 uint64_t cd7_stashKeyAddr_MbxReg3Reserved;  //Mbx Reg 3
             } PACKED;
 
+            // Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
+            struct // getSbeCapabilities
+            {
+                uint16_t cd7_getSbeCapabilities_Reserved;      //Mbx Reg 0
+                uint16_t cd7_getSbeCapabilities_ControlFlags;  //Mbx Reg 0
+                uint16_t cd7_getSbeCapabilities_SeqID;         //Mbx Reg 0
+                uint8_t  cd7_getSbeCapabilities_CommandClass;  //Mbx Reg 0: 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  cd7_getSbeCapabilities_Command;       //Mbx Reg 0: 0x02 (SBE_PSU_MSG_GET_CAPABILITIES)
+                uint64_t cd7_getSbeCapabilities_CapabilitiesSize; //Mbx Reg 1
+                uint64_t cd7_getSbeCapabilities_CapabilitiesAddr; //Mbx Reg 2
+                uint64_t cd7_getSbeCapabilities_MbxReg3Reserved;  //Mbx Reg 3
+            } PACKED;
+
             struct //setUnsecureMemoryRegion
             {
                 uint16_t cd6_memRegion_Reserved;        //Mbx Reg 0
@@ -475,7 +513,7 @@ class SbePsu
             {
             }
 
-        };
+        };  // end union psuCommand
 
         /**
          * @brief Struct for PSU response message format
@@ -526,6 +564,27 @@ class SbePsu
                 uint32_t indirect_reserved;
                 uint32_t indirect_size;  //Size in dbl words for Indirect data
             } PACKED;
+
+            // Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
+            struct // fields for the SBE Capabilities response
+            {
+                // mbxReg 4
+                uint16_t sbe_primaryStatus;
+                uint16_t sbe_secondaryStatus;
+                uint16_t sbe_seqID;
+                uint8_t  sbe_commandClass;  // 0xD7 (SBE_PSU_GENERIC_MESSAGE)
+                uint8_t  sbe_command;       // 0x02 (SBE_PSU_MSG_GET_CAPABILITIES)
+                // mbxReg 5
+                uint32_t sbe_reserved1;
+                uint32_t sbe_capabilities_size;  // Size of Capabilities data returned in bytes
+                // mbxReg 6
+                uint16_t sbe_major_version;
+                uint16_t sbe_minor_version;
+                uint32_t sbe_commit_id;
+                // mbxReg 7
+                uint64_t sbe_reserved2;
+            } PACKED;
+
             psuResponse() :
                 primaryStatus (0xffff),   //invalid status
                 secondaryStatus (0xffff), //invalid status
@@ -541,7 +600,7 @@ class SbePsu
             {
             }
 
-        };
+        };  // end struct psuResponse
 
         /**
          * @brief timeout values
