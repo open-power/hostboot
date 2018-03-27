@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,8 +182,8 @@ int32_t ErrorRegister::Analyze( STEP_CODE_DATA_STRUCT & io_sdc )
         // Make sure forward progress is made.
         if ( tmp_bl == remaining_bl ) break;
 
-    } while ( (PRD_SCAN_COMM_REGISTER_ZERO == res_rc) &&
-              (0 != remaining_bl.size()) );
+    } while ( (PRD_SCAN_COMM_REGISTER_ZERO == res_rc ||
+               PRD_SCANCOM_FAILURE == res_rc) && (0 != remaining_bl.size()) );
 
     if ( SUCCESS == rc ) rc = res_rc; // previous rc has prioity over res_rc
 
