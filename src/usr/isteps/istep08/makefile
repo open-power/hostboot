@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/include/registers
 
 OBJS += call_host_slave_sbe_config.o

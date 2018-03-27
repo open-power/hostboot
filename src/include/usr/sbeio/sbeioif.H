@@ -96,6 +96,26 @@ namespace SBEIO
      */
     errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target);
 
+     /**
+     * @brief Get the capabilities of the SBE via PSU
+     *
+     * @param[in]  i_target Target with SBE to get capabilities from
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t getPsuSbeCapabilities(TARGETING::TargetHandle_t i_target);
+
+     /**
+     * @brief Get the capabilities of the SBE via FIFO
+     *
+     * @param[in]  i_target Target with SBE to get capabilities from
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t getFifoSbeCapabilities(TARGETING::TargetHandle_t i_target);
+
     /**
     * @brief Sends a PSU chipOp to stash away a key,addr pair on the SBE
     *

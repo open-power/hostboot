@@ -6364,6 +6364,55 @@
 </attribute>
 
 <attribute>
+    <id>SBE_COMMIT_ID</id>
+    <description>
+        A hexadecimal value of the commit ID associated
+        with the SBE.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SBE_VERSION_INFO</id>
+    <description>
+        A hexadecimal value of the major and minor
+        version of the SBE.  The major info is in the
+        first 16 bits followed by the minor.
+        0:15: Major Version
+        16:31: Minor Version
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SBE_RELEASE_TAG</id>
+    <description>
+        An ascii value of the SBE release tag
+    </description>
+    <simpleType>
+        <string>
+            <default></default>
+            <sizeInclNull>21</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>PROC_PCIE_REFCLOCK_ENABLE</id>
     <description>PCIE refclock enable valid mask
       PCIE refclock enable valid mask

@@ -48,6 +48,7 @@ OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
+OBJS += sbe_getCapabilities.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

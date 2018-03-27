@@ -38,6 +38,7 @@
 #include <errl/errlentry.H>
 #include <util/singleton.H>
 #include <error_info_defs.H>
+#include <sbeio/sbe_utils.H>
 
 namespace SBEIO
 {
@@ -119,6 +120,7 @@ class SbeFifo
         enum fifoGenericMessage
         {
             SBE_FIFO_CMD_GET_SBE_FFDC        = 0x01,
+            SBE_FIFO_CMD_GET_CAPABILITIES    = 0x02,
         };
 
         /**
@@ -271,6 +273,27 @@ class SbeFifo
         } PACKED;
 
         /**
+        * @brief Struct for FIFO Get Capabilities Request
+        *
+        * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
+        */
+        struct fifoGetCapabilitiesRequest
+        {
+            uint32_t wordCnt;       // 0x02 (The number of 32 bits in msg)
+            uint16_t reserved;
+            uint8_t  commandClass;  // 0xA8 (SBE_FIFO_CLASS_GENERIC_MESSAGE)
+            uint8_t  command;       // 0x02 (SBE_FIFO_CMD_GET_CAPABILITIES)
+            fifoGetCapabilitiesRequest() :
+                  wordCnt(2)
+                , reserved(0)
+                , commandClass(SBE_FIFO_CLASS_GENERIC_MESSAGE)
+                , command(SBE_FIFO_CMD_GET_CAPABILITIES)
+            {
+            }
+        } PACKED;
+
+
+        /**
         * @brief enums for FIFO Magic values
         */
         enum fifoMagic
@@ -383,6 +406,29 @@ class SbeFifo
             struct       fapi2::ffdc_struct ffdc;  // ffdc data
             uint32_t     status_distance; // distance to status
             fifoContinueMpiplResponse() {}
+        } PACKED;
+
+
+        /**
+        * @brief Struct for FIFO Get Capabilities response
+        *
+        * The actual number of returned words varies based on whether there was
+        * an error.
+        *
+        * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
+        */
+        struct fifoGetCapabilitiesResponse
+        {
+            SBEIO::sbeCapabilities_t capabilities;
+            statusHeader status;
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
+            uint32_t     status_distance; // distance to status
+            fifoGetCapabilitiesResponse() :
+                  capabilities()
+                , status{ 0 }
+                , status_distance(0)
+             {
+             }
         } PACKED;
 
         /**
