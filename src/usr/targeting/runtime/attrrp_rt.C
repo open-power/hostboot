@@ -532,7 +532,7 @@ namespace TARGETING
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const Target* i_pTarget)
     {
-        void* o_pTransAddr = nullptr;
+        void* o_pTransAddr = i_pAddress;
         if(i_pTarget != NULL)
         {
             NODE_ID l_nodeId = NODE0;
@@ -545,7 +545,7 @@ namespace TARGETING
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const TARGETING::NODE_ID i_nodeId)
     {
-        void* l_address = nullptr;
+        void* l_address = i_pAddress;
         do
         {
             if (i_nodeId >= AttrRP::INVALID_NODE_ID)
