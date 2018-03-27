@@ -189,7 +189,7 @@ group gIOXBFIR filter singlebit, cs_root_cause
     /** IOXBFIR[2]
      *  GCR_HANG_ERROR
      */
-    (rIOXBFIR, bit(2)) ? calloutBusInterface_th_32perDay;
+    (rIOXBFIR, bit(2)) ? self_th_1;
 
     /** IOXBFIR[3:7]
      *  spare

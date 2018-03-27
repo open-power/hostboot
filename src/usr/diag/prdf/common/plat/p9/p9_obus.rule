@@ -414,7 +414,7 @@ rule rIOOLFIR
     IOOLFIR & ~IOOLFIR_MASK & ~IOOLFIR_ACT0 &  IOOLFIR_ACT1;
 };
 
-group gIOOLFIR filter singlebit, cs_root_cause
+group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
 {
     /** IOOLFIR[0]
      *  link0 trained
@@ -626,30 +626,35 @@ group gIOOLFIR filter singlebit, cs_root_cause
      */
     (rIOOLFIR, bit(41)) ? defaultMaskedError;
 
-    /** IOOLFIR[42:43]
-     *  spare
+    /** IOOLFIR[42]
+     *  link0 no spare lane available
      */
-    (rIOOLFIR, bit(42|43)) ? defaultMaskedError;
+    (rIOOLFIR, bit(42)) ? maxSparesExceeded_obus_clkgrp0;
+
+    /** IOOLFIR[43]
+     *  link1 no spare lane available
+     */
+    (rIOOLFIR, bit(43)) ? maxSparesExceeded_obus_clkgrp1;
 
     /** IOOLFIR[44]
      *  link0 spare done
      */
-    (rIOOLFIR, bit(44)) ? defaultMaskedError;
+    (rIOOLFIR, bit(44)) ? spareDeployed_obus_clkgrp0;
 
     /** IOOLFIR[45]
      *  link1 spare done
      */
-    (rIOOLFIR, bit(45)) ? defaultMaskedError;
+    (rIOOLFIR, bit(45)) ? spareDeployed_obus_clkgrp1;
 
     /** IOOLFIR[46]
      *  link0 too many crc errors
      */
-    (rIOOLFIR, bit(46)) ? defaultMaskedError;
+    (rIOOLFIR, bit(46)) ? tooManyBusErrors_obus_clkgrp0;
 
     /** IOOLFIR[47]
      *  link1 too many crc errors
      */
-    (rIOOLFIR, bit(47)) ? defaultMaskedError;
+    (rIOOLFIR, bit(47)) ? tooManyBusErrors_obus_clkgrp1;
 
     /** IOOLFIR[48]
      *  link0 npu error
@@ -674,52 +679,52 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[52]
      *  link0 correctable array error
      */
-    (rIOOLFIR, bit(52)) ? self_th_32perDay;
+    (rIOOLFIR, bit(52)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[53]
      *  link1 correctable array error
      */
-    (rIOOLFIR, bit(53)) ? self_th_32perDay;
+    (rIOOLFIR, bit(53)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOOLFIR, bit(54)) ? self_th_32perDay;
+    (rIOOLFIR, bit(54)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOOLFIR, bit(55)) ? self_th_32perDay;
+    (rIOOLFIR, bit(55)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[56]
      *  link0 training failed
      */
-    (rIOOLFIR, bit(56)) ? defaultMaskedError;
+    (rIOOLFIR, bit(56)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[57]
      *  link1 training failed
      */
-    (rIOOLFIR, bit(57)) ? defaultMaskedError;
+    (rIOOLFIR, bit(57)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[58]
      *  link0 unrecoverable error
      */
-    (rIOOLFIR, bit(58)) ? defaultMaskedError;
+    (rIOOLFIR, bit(58)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[59]
      *  link1 unrecoverable error
      */
-    (rIOOLFIR, bit(59)) ? defaultMaskedError;
+    (rIOOLFIR, bit(59)) ? calloutBusInterface_th_32perDay;
 
     /** IOOLFIR[60]
      *  link0 internal error
      */
-    (rIOOLFIR, bit(60)) ? self_th_1;
+    (rIOOLFIR, bit(60)) ? self_th_32perDay;
 
     /** IOOLFIR[61]
      *  link1 internal error
      */
-    (rIOOLFIR, bit(61)) ? self_th_1;
+    (rIOOLFIR, bit(61)) ? self_th_32perDay;
 
     /** IOOLFIR[62]
      *  fir scom err dup
@@ -762,7 +767,7 @@ group gIOOBFIR filter singlebit, cs_root_cause
     /** IOOBFIR[2]
      *  The per-bus GCR ring hang detector error
      */
-    (rIOOBFIR, bit(2)) ? chip_to_chip;
+    (rIOOBFIR, bit(2)) ? self_th_1;
 
     /** IOOBFIR[3:47]
      *  spare
@@ -800,7 +805,7 @@ group gOBPPEFIR filter singlebit, cs_root_cause
     /** OBPPEFIR[0:3]
      *  PPE general error.
      */
-    (rOBPPEFIR, bit(0|1|2|3)) ? self_th_1;
+    (rOBPPEFIR, bit(0|1|2|3)) ? threshold_and_mask_self;
 
     /** OBPPEFIR[4]
      *  PPE halted.
