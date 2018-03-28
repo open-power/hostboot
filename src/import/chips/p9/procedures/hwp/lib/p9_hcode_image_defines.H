@@ -103,6 +103,7 @@ HCD_HDR_UINT32( stopFfdcOffset, 0);
 HCD_HDR_UINT32( stopFfdcLength, 0);
 HCD_HDR_UINT32( sgpeBootProgCode, 0 );
 HCD_HDR_UINT32( sgpeSramImageSize, 0 );
+HCD_HDR_UINT32( maxQuadScomRestoreEntry, 0 );
 HCD_HDR_PAD(512);
 #ifdef __ASSEMBLER__
 .endm
@@ -145,6 +146,9 @@ HCD_HDR_UINT32( coreSpecRingOffset, 0);
 HCD_HDR_UINT32( coreSpecRingLength, 0);
 HCD_HDR_UINT32( coreScomOffset, 0);
 HCD_HDR_UINT32( coreScomLength, 0);
+HCD_HDR_UINT32( coreSelfRestoreOffset, 0);
+HCD_HDR_UINT32( coreSelfRestoreLength, 0);
+HCD_HDR_UINT32( coreMaxScomEntry, 0);
 HCD_HDR_PAD(CPMR_HEADER_SIZE);
 #ifdef __ASSEMBLER__
 .endm

@@ -1186,6 +1186,7 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     pCpmrHdr->cmeImgLength              =   pCmeHdr->g_cme_hcode_length;// already swizzled
     pCpmrHdr->coreScomOffset            =   SWIZZLE_4_BYTE(CORE_SCOM_RESTORE_CPMR_OFFSET);
     pCpmrHdr->coreScomLength            =   SWIZZLE_4_BYTE(CORE_SCOM_RESTORE_SIZE_TOTAL);
+    pCpmrHdr->coreMaxScomEntry          =   SWIZZLE_4_BYTE(MAX_CORE_SCOM_ENTRIES);
 
     if( pCmeHdr->g_cme_common_ring_length )
     {
@@ -1249,6 +1250,7 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     FAPI_INF(" CSR Length       : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreSpecRingLength));
     FAPI_INF(" Core SCOM Offset : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomOffset));
     FAPI_INF(" Core SCOM Length : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreScomLength ));
+    FAPI_INF(" Max SCOM Entries : 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->coreMaxScomEntry));
     FAPI_INF("==================================CPMR Ends=====================================");
 
     FAPI_INF("<< updateCpmrCmeRegion");
@@ -1298,6 +1300,8 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
                                    SWIZZLE_4_BYTE(io_qpmrHdr.quadCommonRingLength) +
                                    SWIZZLE_4_BYTE(io_qpmrHdr.quadSpecRingLength);
 
+    io_qpmrHdr.maxQuadScomRestoreEntry  =   SWIZZLE_4_BYTE(QUAD_SCOM_RESTORE_REGS_PER_QUAD - 1);
+
     io_qpmrHdr.sgpeSramImageSize = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeSramImageSize);
     memcpy( pQpmrHdr, &io_qpmrHdr, sizeof( QpmrHeaderLayout_t ) );
     pSgpeHdr->g_sgpe_scom_mem_offset        =   SWIZZLE_4_BYTE(QPMR_HOMER_OFFSET + QUAD_SCOM_RESTORE_QPMR_OFFSET );
@@ -1319,6 +1323,7 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
     FAPI_INF("  Quad SCOM Offset        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomOffset) );
     FAPI_INF("  Quad SCOM Length        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomLength) );
     FAPI_DBG("  SGPE SRAM Img Size      : 0x%08x", SWIZZLE_4_BYTE(pQpmrHdr->sgpeSramImageSize ) );
+    FAPI_DBG("  Max SCOM Rest Entry     : 0x%08x", SWIZZLE_4_BYTE(pQpmrHdr->maxQuadScomRestoreEntry ) );
     FAPI_DBG("==============================QPMR Ends==============================");
 
     FAPI_DBG("===========================SGPE Image Hdr=============================");
