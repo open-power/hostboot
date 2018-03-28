@@ -426,6 +426,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DIS_HW419330</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable fix for HW419330 on Cumulus-based (PHYP) systems
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW430233</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -7284,5 +7301,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
-
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW440920</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Revert to ordered ("p8") TLBIE mode, disable NMMU snoop of TLBIE.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x13</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
