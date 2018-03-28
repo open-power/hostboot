@@ -806,17 +806,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
-#if 0 //@TODO-RTC:147565-Core checkstop escalation
-        // Revert back to standard runtime mode where core checkstops
-        //  do not escalate to system checkstops
-        // Workaround for HW286670
-        l_err = enableCoreCheckstops();
-        if ( l_err )
-        {
-            break;
-        }
-#endif
-
         // Fill in Hostboot runtime data for all nodes
         // (adjunct partition)
         // Write the HB runtime data into mainstore

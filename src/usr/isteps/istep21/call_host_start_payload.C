@@ -30,6 +30,7 @@
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
 #include <isteps/istep_reasoncodes.H>
+#include <pm/pm_common.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <secureboot/trustedbootif.H>
@@ -50,12 +51,14 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9n2_quad_scom_addresses_fld.H>
+#include <p9_quad_scom_addresses.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
 #include <errno.h>
 #include <p9_int_scom.H>
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
+#include <p9_stop_api.H>
 
 #ifdef CONFIG_DRTM_TRIGGERING
 #include <secureboot/drtm.H>
@@ -289,6 +292,37 @@ void* call_host_start_payload (void *io_pArgs)
 
         // calculate lowest addressable memory location to be used as COMM base
         uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+
+        // About to call shutdown, if we're running on a PHYP system, we need
+        // to switch back to running unit checkstops
+        if(! is_sapphire_load() )
+        {
+            TARGETING::TargetHandleList l_coreTargetList;
+            getAllChips(l_coreTargetList, TYPE_CORE);
+
+            for( auto l_core_target : l_coreTargetList)
+            {
+                l_errl = HBPM::core_checkstop_helper_hwp( l_core_target,
+                                                          false);
+
+                if(l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "p9_core_checkup_handler_hwp ERROR : Returning "
+                        "errorlog, reason=0x%x",l_errl->reasonCode() );
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+
+                    break;
+                }
+            }
+        }
+
+        if(l_errl)
+        {
+            break;
+        }
 
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes

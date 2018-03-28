@@ -30,6 +30,7 @@
 #include <util/utillidmgr.H>
 #include <diag/prdf/prdfWriteHomerFirData.H>
 #include <isteps/pm/pm_common_ext.H>
+#include <istepHelperFuncs.H>
 
 namespace HBPM
 {
@@ -153,6 +154,26 @@ namespace HBPM
      * @return errlHndl_t  Error log if resetPMComplex failed
      */
     errlHndl_t resetPMComplex(TARGETING::Target * i_target);
+
+    //
+    // @brief - Handles the core_checkstop_handler HWP
+    //
+    // @param[in] i_core_target      - Core Target ID
+    // @param[in] i_override_restore - settings for the HWP. Are we overriding
+    //                                 the xstop settings (true) or restoring
+    //                                 the original settings (false)
+    //
+    // @return errlHndl_t
+
+    errlHndl_t core_checkstop_helper_hwp(
+                                const TARGETING::Target* i_core_target,
+                                bool i_override_restore);
+    //
+    // @brief - Turns off unit xstops in the homer image
+    //
+    // @return errlHndl_t
+
+    errlHndl_t core_checkstop_helper_homer();
 
 } //namespace HBPM ends
 

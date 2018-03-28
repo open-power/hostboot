@@ -30,6 +30,7 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 #include    <errl/errlreasoncodes.H>
+#include    <errl/errludtarget.H>
 
 // attn/prd call
 #include    <runtime/attnsvc.H>
@@ -74,6 +75,12 @@
 #include <isteps/pm/occAccess.H>
 
 #include <isteps/pm/occCheckstop.H>
+
+#include    <p9_core_checkstop_handler.H>
+#include    <p9_stop_api.H>
+#include    <scom/scomif.H>
+#include    <p9_quad_scom_addresses.H>
+
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -967,39 +974,92 @@ namespace HBPM
         uint64_t l_homerPhysAddr = 0x0;
         uint64_t l_commonPhysAddr = 0x0;
 
-        for (const auto & l_procChip: l_procChips)
+        do
         {
-            // This attr was set during istep15 HCODE build
-            l_homerPhysAddr = l_procChip->
-                    getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-            l_commonPhysAddr = l_sys->
-                    getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+            // Switching core checkstops from unit to system
+            TARGETING::TargetHandleList l_coreTargetList;
+            getAllChips(l_coreTargetList, TYPE_CORE);
 
-            l_errl = loadPMComplex(l_procChip,
-                                   l_homerPhysAddr,
-                                   l_commonPhysAddr,
-                                   i_mode);
-            if( l_errl )
+            if(is_sapphire_load())
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadAndStartPMAll: "
-                           "load PM complex failed!" );
-                o_failTarget = l_procChip;
+                for( auto l_core_target : l_coreTargetList )
+                {
+                    l_errl = core_checkstop_helper_hwp(l_core_target, true);
+
+                    if( l_errl )
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "loadPM complex, switching core checkstops "
+                               "from unit to system ERROR: reason=0x%x",
+                               l_errl->reasonCode() );
+
+                        // Capture the target data in the elog
+                        ERRORLOG::ErrlUserDetailsTarget(l_core_target).
+                                addToLog(l_errl);
+                        break;
+
+                    }
+                }
+            }
+            if(l_errl)
+            {
                 break;
             }
 
-            l_errl = startPMComplex(l_procChip);
+            for (const auto & l_procChip: l_procChips)
+            {
+                // This attr was set during istep15 HCODE build
+                l_homerPhysAddr = l_procChip->
+                        getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+                l_commonPhysAddr = l_sys->
+                        getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+
+                l_errl = loadPMComplex(l_procChip,
+                                       l_homerPhysAddr,
+                                       l_commonPhysAddr,
+                                       i_mode);
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"loadAndStartPMAll: "
+                               "load PM complex failed!" );
+                    o_failTarget = l_procChip;
+                    break;
+                }
+
+                l_errl = startPMComplex(l_procChip);
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"loadAndStartPMAll: "
+                               "start PM complex failed!" );
+                    o_failTarget = l_procChip;
+                    break;
+                }
+            }
+
             if( l_errl )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadAndStartPMAll: "
-                           "start PM complex failed!" );
-                o_failTarget = l_procChip;
                 break;
             }
-        }
+
+            if(is_sapphire_load())
+            {
+                l_errl = core_checkstop_helper_homer();
+
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "loadPM complex switching homer xstops from unit "
+                           "to system error. ERROR: reaso=0x%x",
+                           l_errl->reasonCode() );
+                }
+            }
+
+        }while(0);
 
         return l_errl;
+
     } // loadAndStartPMAll
 
 
@@ -1207,6 +1267,168 @@ namespace HBPM
 
         return l_err;
     } // end getRingOvd
+
+//
+//  Helper function to enable or disable core checkstops with the HWP
+//
+errlHndl_t core_checkstop_helper_hwp( const TARGETING::Target* i_core_target,
+                            bool i_override_restore)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK
+               "core_checkstop_helper_hwp");
+
+    errlHndl_t l_errl = NULL;
+    TARGETING::Target* l_sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert( l_sys != NULL );
+
+    do
+    {
+        assert( i_core_target != NULL );
+
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
+                const_cast<TARGETING::Target*> ( i_core_target ));
+
+        FAPI_INVOKE_HWP( l_errl, p9_core_checkstop_handler,
+                         l_fapi2_coreTarget, i_override_restore);
+
+        if( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "p9_core_checkstop_handler ERROR: returning "
+                       "errorlog, reason=0x%x", l_errl->reasonCode() );
+
+            // Capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(i_core_target).
+                   addToLog( l_errl );
+            break;
+        }
+    }while(0);
+
+    if( l_errl )
+    {
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK
+               "core_checkstop_helper_hwp");
+
+    return l_errl;
+}
+
+//
+//  Helper function to disable core checkstops with the HOMER
+//
+errlHndl_t core_checkstop_helper_homer()
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK
+               "core_checkstop_helper_homer");
+
+    errlHndl_t l_errl = NULL;
+    TARGETING::Target* l_sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert( l_sys != NULL );
+
+    do{
+
+        uint64_t l_action0 = l_sys->getAttr<
+                    TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION0>();
+        uint64_t l_action1 = l_sys->getAttr<
+                    TARGETING::ATTR_ORIG_FIR_SETTINGS_ACTION1>();
+
+        uint64_t l_local_xstop = l_action0 & l_action1;
+        l_action0 &= ~l_local_xstop;
+        l_action1 &= ~l_local_xstop;
+
+        TARGETING::TargetHandleList l_coreIds;
+        getAllChiplets( l_coreIds, TYPE_CORE, true );
+
+        for(TARGETING::Target* l_core : l_coreIds)
+        {
+            const TARGETING::Target* l_procChip =
+                        TARGETING::getParentChip(l_core);
+
+            const uint64_t l_homerAddr = l_procChip->getAttr<
+                        TARGETING::ATTR_HOMER_PHYS_ADDR>();
+
+            void* l_homerVAddr = HBPM::convertHomerPhysToVirt(
+                                (TARGETING::Target*) l_procChip,
+                                l_homerAddr);
+
+            // Translate the scom address
+            uint64_t l_scomAddr = C_CORE_ACTION0;
+            bool l_needsWakeup = false; // Ignored - SW already enabled
+
+            l_errl = SCOM::scomTranslate( l_core, l_scomAddr,
+                                          l_needsWakeup );
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "core_checkstop_helper: scomTranslate ERROR");
+                break;
+            }
+
+            stopImageSection::StopReturnCode_t l_srErrl =
+                                p9_stop_save_scom( l_homerVAddr,
+                                l_scomAddr, l_action0,
+                                stopImageSection::P9_STOP_SCOM_REPLACE,
+                                stopImageSection::P9_STOP_SECTION_CORE_SCOM );
+
+            if( l_srErrl != stopImageSection::StopReturnCode_t::
+                                STOP_SAVE_SUCCESS )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "core_checkstop_helper: Returning errorlog, "
+                           "reason=0x%x",l_srErrl );
+
+                break;
+            }
+
+            // Translate the scom address
+            l_scomAddr = C_CORE_ACTION1;
+
+            l_errl = SCOM::scomTranslate(l_core, l_scomAddr,
+                                l_needsWakeup);
+
+            if( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "core_checkstop_helper: scomTranslate ERROR");
+                break;
+            }
+
+            l_srErrl = p9_stop_save_scom( l_homerVAddr,
+                                l_scomAddr, l_action1,
+                                stopImageSection::P9_STOP_SCOM_REPLACE,
+                                stopImageSection::P9_STOP_SECTION_CORE_SCOM );
+
+            if( l_srErrl != stopImageSection::StopReturnCode_t::
+                                STOP_SAVE_SUCCESS )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "core_checkstop_helper: Returning errorlog, "
+                           "reason=0x%x",l_srErrl );
+
+                break;
+            }
+
+        }
+    } while(0);
+
+    if( l_errl )
+    {
+        // Commit Error
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK
+               "core_checkstop_helper_homer");
+
+    return l_errl;
+
+}
+
 
 }  // end HBPM namespace
 

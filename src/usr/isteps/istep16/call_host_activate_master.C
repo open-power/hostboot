@@ -32,7 +32,6 @@
 #include    <errl/errludtarget.H>
 #include    <intr/interrupt.H>
 #include    <console/consoleif.H>
-
 #include <arch/pirformat.H>
 #include <arch/pvrformat.H>
 #include <sys/task.h>
@@ -48,9 +47,12 @@
 //SBE interfacing
 #include    <sbeio/sbeioif.H>
 #include    <sys/misc.h>
+#include    <pm/pm_common.H>
 
 //Import directory (EKB)
 #include    <p9_block_wakeup_intr.H>
+
+#include <scom/scomif.H>
 
 //HWP invoker
 #include    <fapi2/plat_hwp_invoker.H>
@@ -361,8 +363,27 @@ void* call_host_activate_master (void *io_pArgs)
                    "Call proc_stop_deadman_timer. Target %.8X",
                    TARGETING::get_huid(l_proc_target) );
 
-        TARGETING::Target* sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
+
+        // Save off original checkstop values and override them
+        // to disable core xstops and enable sys xstops.
+        l_errl = HBPM::core_checkstop_helper_hwp(l_masterCore, true);
+
+        if( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "core_checkstop_helper_hwp ERROR: returning.");
+            break;
+        }
+
+        // Take new checkstop values and insert them into the homer image
+        l_errl = HBPM::core_checkstop_helper_homer();
+
+        if( l_errl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "core_checkstop_helper_homer ERROR: returning.");
+            break;
+        }
 
     }   while ( 0 );
 

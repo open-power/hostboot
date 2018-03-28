@@ -27,7 +27,7 @@
 
 #include    <trace/interface.H>
 #include    <errl/errlentry.H>
-
+#include    <errl/errlmanager.H>
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 #include    <errl/errlmanager.H>
@@ -41,6 +41,11 @@
 #include    <config.h>
 #include    <util/align.H>
 #include    <util/algorithm.H>
+
+using namespace ISTEP;
+using namespace ISTEP_ERROR;
+using namespace TARGETING;
+using namespace ERRORLOG;
 
 //
 //  Helper function to set _EFF_CONFIG attributes for HWPs
@@ -317,7 +322,4 @@ void captureError(errlHndl_t                        &io_err,
         errlCommit( io_err, i_componentId );
     } // end if ( i_err )
 }
-
-
-
 

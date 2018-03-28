@@ -171,11 +171,6 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     l_lpcrVal   &=  ~(0x0000000000002000) ;
     l_lpcrVal   |=    0x0000400000000000  ;  //Allow Hyp virt to exit STOP
 
-//@TODO RTC:147565
-//Force Core Checkstops by telling ACTION1 Reg after coming out of winkle
-// Core FIR Action1 Register value from Nick
-//     const uint64_t action1_reg = 0xEA5C139705980000;
-
     //Get top-lvl system target with TARGETING code to find the enabled threads
     TARGETING::Target* sys = NULL;
     TARGETING::targetService().getTopLevelTarget(sys);
@@ -320,27 +315,6 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
         {
             break;
         }
-//@TODO RTC:147565
-//Force Core Checkstops by telling ACTION1 Reg after coming out of winkle
-//@fixme HACK in place for OPAL
-          // Need to force core checkstops to escalate to a system checkstop
-          //  by telling the HCODE to update the ACTION1 register when it
-          //  comes out of winkle  (see HW286670)
-//         l_rc = p8_pore_gen_scom_fixed( io_image,
-//                                        P8_SLW_MODEBUILD_IPL,
-//                                        EX_CORE_FIR_ACTION1_0x10013107,
-//                                        l_coreId,
-//                                        action1_reg,
-//                                        P8_PORE_SCOM_REPLACE,
-//                                        P8_SCOM_SECTION_NC );
-//         if( l_rc )
-//         {
-//             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-//                        "ERROR: ACTION1: core=0x%x,l_rc=0x%x",
-//                        l_coreId, l_rc );
-//             l_failAddr = EX_CORE_FIR_ACTION1_0x10013107;
-//             break;
-//         }
 
     }   // end for l_coreIds
 

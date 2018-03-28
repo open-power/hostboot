@@ -24,15 +24,18 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istep21
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 
 OBJS += call_host_runtime_setup.o
 OBJS += freqAttrData.o
