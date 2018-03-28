@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,7 @@ MODULE = pm
 SUBDIRS+=runtime.d
 
 ## Objects unique to HB IPL
-
+OBJS += ../istepHelperFuncs.o
 ## Objects common to HB IPL and HBRT
 include pm.mk
 

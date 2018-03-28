@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 
 OBJS += call_host_activate_master.o
 OBJS += call_host_activate_slave_cores.o

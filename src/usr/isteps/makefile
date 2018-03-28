@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH=../../..
 MODULE = isteps
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 SUBDIRS+=istep06.d
 SUBDIRS+=istep07.d
@@ -50,16 +51,12 @@ SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
 SUBDIRS+=io.d
 
-OBJS += hwpisteperror.o
-OBJS += hwpistepud.o
-OBJS += istepHelperFuncs.o
-OBJS += pbusLinkSvc.o
-
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-
-OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
-
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
+EXTRAINCDIR += ${PROCEDURES_PATH}/utils/stopreg/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
@@ -67,4 +64,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 
+OBJS += hwpisteperror.o
+OBJS += hwpistepud.o
+OBJS += istepHelperFuncs.o
+OBJS += pbusLinkSvc.o
+
+OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
+
+include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/config.mk
+

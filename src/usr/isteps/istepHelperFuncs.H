@@ -70,13 +70,11 @@ enum MSS_PROGRAM_TYPE
     DEFAULT_TYPE = 3,
 };
 
-
 //
 //  Helper function to set _EFF_CONFIG attributes for HWPs
 //
 void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
                                   bool & o_post_dram_inits_found);
-
 
 /**
  *  @brief Compares two mcbist targets based on the voltage domain ID for

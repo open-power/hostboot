@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip
 HWP_LIB_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 HWP_PM_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 EXTRAINCDIR += ${HWP_PM_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 HWP_STOPUTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
 EXTRAINCDIR += ${HWP_STOPUTIL_PATH}
 NEST_UTIL_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
@@ -70,6 +71,7 @@ OBJS += p9_avsbus_lib.o
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}
 VPATH += ${HWP_LIB_PATH} ${HWP_STOPUTIL_PATH}
 VPATH += ${NEST_UTIL_PATH}
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 
 # TODO RTC: 164237
 # Take another look at PM lib
@@ -114,3 +116,4 @@ include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_qppm.mk
 include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_occ.mk
 include ${HWP_PM_PATH}/p9_cme_sram_access.mk
 include ${HWP_PM_PATH}/p9_pm_callout.mk
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_core_checkstop_handler.mk
