@@ -32,6 +32,7 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
+#include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_RUNTIME
     #include <prdfMemDynDealloc.H>
@@ -91,7 +92,7 @@ uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                                 UE_TABLE::Type i_type,
                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemEcc::handleMemUe] "
+    #define PRDF_FUNC "[MemEcc::handleMemUe<TYPE_MCA>] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
@@ -143,11 +144,91 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                                 UE_TABLE::Type i_type,
                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #define PRDF_FUNC "[MemEcc::handleMemUe<TYPE_MBA>] "
+
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    return __handleMemUe<TYPE_MBA,MbaDataBundle *>( i_chip, i_addr,
-                                                    i_type, io_sc );
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        #if !defined(__HOSTBOOT_RUNTIME) && defined(__HOSTBOOT_MODULE)
+
+        // At IPL time we want to try avoiding calling out both DIMMs on a
+        // rank if possible, so we use mssIplUeIsolation to just callout
+        // the dimms with bad bits instead of calling out the entire rank. At
+        // runtime we can't do this to preserve data integrity.
+
+        MbaDataBundle * mbadb = getMbaDataBundle( i_chip );
+
+        MemDqBitmap<DIMMS_PER_RANK::MBA> l_dqBitmap;
+        o_rc = mssIplUeIsolation<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
+            i_addr.getRank(), l_dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mssIplUeIsolation(0x%08x, 0x%02x) failed",
+                      i_chip->getHuid(), i_addr.getRank().getKey() );
+            break;
+        }
+
+        // Add UE data to capture data
+        l_dqBitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
+
+        // Add all DIMMs with bad bits to the callout list.
+        for ( uint8_t ps = 0; ps < DIMMS_PER_RANK::MBA; ps++ )
+        {
+            bool badDqs = false;
+            o_rc = l_dqBitmap.badDqs( badDqs, ps );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "badDqs(%d) failed", ps );
+                break;
+            }
+
+            if ( !badDqs ) continue;
+
+            TargetHandle_t l_dimm = getConnectedDimm( i_chip->getTrgt(),
+                                                      i_addr.getRank(), ps );
+            if ( l_dimm == nullptr ) continue;
+
+            io_sc.service_data->SetCallout( l_dimm, MRU_HIGH );
+
+            if ( isMfgCeCheckingEnabled() )
+            {
+                // As we are doing callout for UE, we dont need to do callout
+                // during CE for this rank on given port
+                mbadb->getIplCeStats()->banAnalysis(
+                    i_addr.getRank().getDimmSlct(), ps );
+            }
+        }
+
+        // Make the error log predictive.
+        io_sc.service_data->setServiceCall();
+
+        // Add entry to UE table.
+        MbaDataBundle * db =
+            static_cast<MbaDataBundle *>(i_chip->getDataBundle());
+        db->iv_ueTable.addEntry( i_type, i_addr );
+
+        #else
+
+        o_rc =  __handleMemUe<TYPE_MBA, MbaDataBundle *>( i_chip, i_addr,
+                                                          i_type, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
+                      i_chip->getHuid(), i_type );
+            break;
+        }
+
+        #endif
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -439,6 +520,9 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 // To resolve template linker errors.
 template
 uint32_t handleMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch );
+template
+uint32_t handleMpe<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
     const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch );
 
 //------------------------------------------------------------------------------

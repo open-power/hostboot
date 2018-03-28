@@ -37,6 +37,9 @@
 
   #include <prdfMemTdCtlr.H>
 
+  #ifndef __HOSTBOOT_RUNTIME
+    #include <prdfMemIplCeStats.H>
+  #endif
 #endif
 
 namespace PRDF
@@ -64,6 +67,7 @@ class MbaDataBundle : public DataBundle
 
         #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
         delete iv_sfCmd; iv_sfCmd = nullptr;
+        delete iv_iplCeStats; iv_iplCeStats = nullptr;
         #endif
     }
 
@@ -84,6 +88,19 @@ class MbaDataBundle : public DataBundle
         return iv_tdCtlr;
     }
 
+    #ifndef __HOSTBOOT_RUNTIME
+    /** @return The IPL CE statistics object. */
+    MemIplCeStats<TARGETING::TYPE_MBA> * getIplCeStats()
+    {
+        if ( nullptr == iv_iplCeStats )
+        {
+            iv_iplCeStats = new MemIplCeStats<TARGETING::TYPE_MBA>( iv_chip );
+        }
+
+        return iv_iplCeStats;
+    }
+    #endif
+
     #endif
 
   private: // instance variables
@@ -95,6 +112,11 @@ class MbaDataBundle : public DataBundle
 
     /** The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MBA> * iv_tdCtlr = nullptr;
+
+    #ifndef __HOSTBOOT_RUNTIME
+    /** MNFG IPL CE statistics. */
+    MemIplCeStats<TARGETING::TYPE_MBA> * iv_iplCeStats = nullptr;
+    #endif
 
     #endif
 

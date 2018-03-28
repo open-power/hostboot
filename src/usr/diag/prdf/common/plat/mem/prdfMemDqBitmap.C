@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -500,7 +500,7 @@ uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
                                             const MemRank & i_rank,
                                             MemSymbol i_symbol )
 {
-    #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
+    #define PRDF_FUNC "[MemDqBitmap::setDramInVpd] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -546,7 +546,7 @@ uint32_t setDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                             const MemRank & i_rank,
                                             MemSymbol i_symbol )
 {
-    #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
+    #define PRDF_FUNC "[MemDqBitmap::setDramInVpd] "
 
     uint32_t o_rc = SUCCESS;
 

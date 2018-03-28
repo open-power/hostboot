@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,22 +122,30 @@ uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-// Avoid linker errors with the template.
-template class VcmEvent<TYPE_MCA>;
-template class VcmEvent<TYPE_MBA>;
-
-//##############################################################################
-//
-//                          Specializations for MCA
-//
-//##############################################################################
+template<TARGETING::TYPE T>
+bool __iueCheck( uint32_t i_eccAttns );
 
 template<>
-uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+bool __iueCheck<TYPE_MCA>( uint32_t i_eccAttns )
 {
-    #define PRDF_FUNC "[VcmEvent<TYPE_MCA>::checkEcc] "
+    return ( 0 != (i_eccAttns & MAINT_IUE) );
+}
+
+template<>
+bool __iueCheck<TYPE_MBA>( uint32_t i_eccAttns )
+{
+    // IUES are reported via RCE ETE on Centaur
+    return ( 0 != (i_eccAttns & MAINT_RCE_ETE) );
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
+                                STEP_CODE_DATA_STRUCT & io_sc,
+                                bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent<T>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -146,7 +154,7 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
         // IUEs are reported as UEs during read operations. Therefore, we will
         // treat IUEs like UEs for these scrub operations simply to maintain
         // consistency during all of Memory Diagnostics.
-        if ( (i_eccAttns & MAINT_UE) || (i_eccAttns & MAINT_IUE) )
+        if ( (i_eccAttns & MAINT_UE) || __iueCheck<T>(i_eccAttns) )
         {
             PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
                        iv_chip->getHuid(), getKey() );
@@ -159,7 +167,7 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
             // At this point we don't actually have an address for the UE. The
             // best we can do is get the address in which the command stopped.
             MemAddr addr;
-            o_rc = getMemMaintAddr<TYPE_MCA>( iv_chip, addr );
+            o_rc = getMemMaintAddr<T>( iv_chip, addr );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -167,8 +175,8 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
-            o_rc = MemEcc::handleMemUe<TYPE_MCA>( iv_chip, addr,
-                                                  UE_TABLE::SCRUB_UE, io_sc );
+            o_rc = MemEcc::handleMemUe<T>( iv_chip, addr, UE_TABLE::SCRUB_UE,
+                                           io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
@@ -187,55 +195,11 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
     #undef PRDF_FUNC
 }
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
-
-template<>
-uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
-                                       STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
-{
-    #define PRDF_FUNC "[VcmEvent<TYPE_MBA>::checkEcc] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // IUEs (reported via RCE ETE) are reported as UEs during read
-        // operations. Therefore, we will treat IUEs like UEs for these scrub
-        // operations simply to maintain consistency during all of Memory
-        // Diagnostics.
-        if ( (i_eccAttns & MAINT_UE) || (i_eccAttns & MAINT_RCE_ETE) )
-        {
-            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
-                       iv_chip->getHuid(), getKey() );
-
-            io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                              (i_eccAttns & MAINT_UE)
-                                                    ? PRDFSIG_MaintUE
-                                                    : PRDFSIG_MaintRETRY_CTE );
-            // TODO: RTC 157888
-            // - Call mssIplUeIsolation() and add all DIMMs with bad bits to the
-            //   callout list.
-            // - Make the error log predictive.
-            // - Might be able to tuck this into MemEcc::handleMemUe().
-            PRDF_ERR( PRDF_FUNC "function not implemented yet" );
-
-            // Leave the mark in place and abort this procedure.
-            o_done = true;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class VcmEvent<TYPE_MCA>;
+template class VcmEvent<TYPE_MBA>;
 
 } // end namespace PRDF
 
