@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -260,11 +260,13 @@ errlHndl_t InitService::startTask(
              *
              */
             const bool hbSwError = true;
+            const bool hbDump = true;
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_TASK_FAILED,
-                                    l_tidretrc, l_childsts, hbSwError);
+                                    l_tidretrc, l_childsts, hbSwError,
+                                    hbDump);
 
             // Add Printk Buffer for FFDC.
             ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
@@ -392,11 +394,13 @@ errlHndl_t InitService::executeFn(
              *
              */
             const bool hbSwError = true;
+            const bool hbDump = true;
             l_errl = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                                     INITSERVICE::BASE_INITSVC_MOD_ID,
                                     INITSERVICE::WAIT_FN_FAILED,
-                                    l_tidretrc, l_childsts, hbSwError);
+                                    l_tidretrc, l_childsts, hbSwError,
+                                    hbDump);
 
             // Add Printk Buffer for FFDC.
             ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
@@ -775,6 +779,7 @@ void InitService::doShutdown(uint64_t i_status,
     // Ensure no one is manpulating the registry lists and that only one
     // thread actually executes the shutdown path.
     mutex_lock(&iv_registryMutex);
+
     if (iv_shutdownInProgress)
     {
         // switch the failing status if an RC comes in after

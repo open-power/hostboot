@@ -53,6 +53,7 @@
 #include <config.h>
 #include <functional>
 #include <hwas/common/deconfigGard.H>
+#include <kernel/terminate.H>
 
 namespace ERRORLOG
 {
@@ -193,7 +194,7 @@ ErrlManager::~ErrlManager()
 
     // Singleton destructor gets run when module gets unloaded.
     // This errorlog module never gets unloaded. So rather to send a
-    // message to error log daemon and tell it to shutdow and delete
+    // message to error log daemon and tell it to shutdown and delete
     // the queue we will assert here because the destructor never gets
     // call.
     assert(0);
@@ -735,6 +736,13 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 
         //Ask ErrlEntry to check for any special deferred deconfigure callouts
         io_err->deferredDeconfigure();
+
+        // Is error flagged for doing HB Dump during a shutdown / TI?
+        if (io_err->getDoHbDump() == true)
+        {
+            // Then set flag in TI data
+            termSetHbDump();
+        }
 
         //Offload the error log to the errlog message queue
         sendErrlogToMessageQueue ( io_err, i_committerComp );
