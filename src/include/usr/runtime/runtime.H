@@ -328,10 +328,12 @@ void rediscover_hdat( void );
  *             1. CPU controls SP ATTN areas
  *             2. SP_HOST_UNTRUSTED_COMM_AREA_ADDR
  *             3. SBE FFDC
+ * @param[in] i_commBase The lowest addressable location in the system,
+ *            derived from the HRMOR of the master node.
  *
  * @return errlHndl_t Returns nullptr on success; otherwise errlog
  */
-errlHndl_t openUntrustedSpCommArea();
+errlHndl_t openUntrustedSpCommArea(uint64_t i_commbase);
 
 /**
  * @brief Locates the offset of the HDAT structure as directed by the PAYLOAD

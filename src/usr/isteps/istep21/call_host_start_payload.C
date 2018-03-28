@@ -76,11 +76,15 @@ namespace ISTEP_21
  *
  * @param[in] Host boot master instance number (logical node number)
  * @param[in] Is this the master HB instance [true|false]
+ * @param[in] The lowest addressable location in the system, derived from the
+ *            HRMOR of the master node.
  *
  * @return errlHndl_t - nullptr if succesful, otherwise a pointer to the error
  *      log.
  */
-errlHndl_t callShutdown ( uint64_t i_hbInstance, bool i_masterIntance );
+errlHndl_t callShutdown ( uint64_t i_hbInstance,
+                          bool i_masterIntance,
+                          const uint64_t i_commBase);
 
 /**
  * @brief This function will send an IPC message to all other HB instances
@@ -309,11 +313,14 @@ void* call_host_start_payload (void *io_pArgs)
         }
 #endif
 
+        // calculate lowest addressable memory location to be used as COMM base
+        uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
         // NOTE: this call will not return if successful.
-        l_errl = callShutdown(this_node, true);
+        l_errl = callShutdown(this_node, true, l_commBase);
         if(l_errl)
         {
             break;
@@ -345,7 +352,8 @@ void* call_host_start_payload (void *io_pArgs)
 // Call shutdown
 //
 errlHndl_t callShutdown ( uint64_t i_masterInstance,
-                          bool i_isMaster)
+                          bool i_isMaster,
+                          const uint64_t i_commBase)
 {
     errlHndl_t err = nullptr;
     uint64_t payloadBase = 0x0;
@@ -364,7 +372,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         if (err)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       ERR_MRK "call_host_start_payload: Failed SBEIO::closeAllUnsecureMemRegions" );
+                       ERR_MRK "callShutdown: Failed SBEIO::closeAllUnsecureMemRegions" );
             break;
         }
 
@@ -448,21 +456,21 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         TARGETING::SpFunctions spFuncs =
                 sys->getAttr<TARGETING::ATTR_SP_FUNCTIONS>();
 
+        // Open untrusted SP communication area if there is a PAYLOAD
+        // NOTE: Must be after all HDAT processing
+        if( !(TARGETING::is_no_load()) )
+        {
+            err = RUNTIME::openUntrustedSpCommArea(i_commBase);
+            if (err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"callShutdown: Failed openUntrustedSpCommArea" );
+                break;
+            }
+        }
+
         if(i_isMaster)
         {
-            // Open untrusted SP communication area if there is a PAYLOAD
-            // NOTE: Must be after all HDAT processing
-            if( !(TARGETING::is_no_load()) )
-            {
-                err = RUNTIME::openUntrustedSpCommArea();
-                if (err)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               ERR_MRK"call_host_start_payload: Failed openUntrustedSpCommArea" );
-                    break;
-                }
-            }
-
             // Notify Fsp with appropriate mailbox message.
             err = notifyFsp( istepModeFlag,
                              spFuncs );
@@ -603,6 +611,10 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
         KernelIpc::start_payload_data_area.node_count = node_count;
 
+        // calculate lowest addressable memory location from the master node
+        // hrmor value and send to slave nodes
+        const uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+
         // send message to all other existing hb instances except this one.
         for(uint64_t drawer = 0; drawer < sizeof(node_map); ++drawer)
         {
@@ -625,6 +637,7 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
                     msg_t * msg = msg_allocate();
                     msg->type = IPC::IPC_START_PAYLOAD;
                     msg->data[0] = i_hbInstance;
+                    msg->data[1] = l_commBase;
                     err = MBOX::send(MBOX::HB_IPC_MSGQ, msg, node);
                     if (err)
                     {

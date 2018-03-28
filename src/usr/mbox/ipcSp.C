@@ -39,7 +39,8 @@
 namespace ISTEP_21
 {
     extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
-                                     bool i_masterInstance );
+                                     bool i_masterInstance,
+                                     const uint64_t i_commBase );
 };
 
 trace_desc_t* g_trac_ipc = NULL;
@@ -357,7 +358,8 @@ void IpcSp::msgHandler()
                 if(!err)
                 {
                     //  Function will not return unless error
-                    err = ISTEP_21::callShutdown(msg->data[0],false);
+                    err = ISTEP_21::callShutdown(msg->data[0],false,
+                                                                  msg->data[1]);
                 }
 
                 if(err)

@@ -3224,7 +3224,7 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
     return l_err;
 } // end persistent_rwAttrRuntimeCheck
 
-errlHndl_t openUntrustedSpCommArea()
+errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK "openUntrustedSpCommArea()");
     errlHndl_t l_err = nullptr;
@@ -3300,7 +3300,7 @@ errlHndl_t openUntrustedSpCommArea()
         if(TARGETING::is_phyp_load())
         {
             l_err = SBEIO::openUnsecureMemRegion(
-                                        RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_ADDR,
+                                        i_commBase,
                                         RUNTIME::SP_HOST_UNTRUSTED_COMM_AREA_SIZE,
                                         true, //true=Read-Write
                                         l_procChip);
