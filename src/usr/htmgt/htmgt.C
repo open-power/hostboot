@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -248,7 +248,7 @@ namespace HTMGT
     // Notify HTMGT that an OCC has an error to report
     void processOccError(TARGETING::Target * i_procTarget)
     {
-        TMGT_INF(">>processOccError(0x%p)", i_procTarget);
+        TMGT_INF(">>processOccAttn(0x%p)", i_procTarget);
 
         TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
@@ -271,7 +271,7 @@ namespace HTMGT
             {
                 const uint32_t l_huid =
                     i_procTarget->getAttr<TARGETING::ATTR_HUID>();
-                TMGT_INF("processOccError(HUID=0x%08X) called", l_huid);
+                TMGT_INF("processOccAttn(HUID=0x%08X) called", l_huid);
 
                 TARGETING::TargetHandleList pOccs;
                 getChildChiplets(pOccs, i_procTarget, TARGETING::TYPE_OCC);
@@ -299,13 +299,13 @@ namespace HTMGT
 
             if (OccManager::occNeedsReset())
             {
-                TMGT_ERR("processOccError(): OCCs need to be reset");
+                TMGT_ERR("processOccAttn(): OCCs need to be reset");
                 // Don't pass failed target as OCC should have already
                 // been marked as failed during the poll.
                 errlHndl_t err = OccManager::resetOccs(nullptr);
                 if(err)
                 {
-                    TMGT_ERR("processOccError(): Error when attempting"
+                    TMGT_ERR("processOccAttn(): Error when attempting"
                              " to reset OCCs");
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
@@ -314,10 +314,10 @@ namespace HTMGT
         else
         {
             // OCC build failed...
-            TMGT_ERR("processOccError() called, but unable to find OCCs");
+            TMGT_ERR("processOccAttn() called, but unable to find OCCs");
             ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
         }
-        TMGT_INF("<<processOccError()");
+        TMGT_INF("<<processOccAttn()");
 
     } // end processOccError()
 
