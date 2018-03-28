@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,5 +67,16 @@ void termWriteSRC(uint16_t i_source,
 void termModifySRC(uint8_t i_moduleID,
                    uint32_t i_word7 = 0,
                    uint32_t i_word8 = 0);
+
+/** @fn termSetHbDump
+ *
+ *  @brief Set flag for system to get an HB dump during processing of the TI.
+ *
+ *  @param[in] NONE
+ *  @param[out] NONE:
+ *
+ *  @return Nothing
+ */
+void termSetHbDump(void);
 
 #endif

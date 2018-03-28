@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,8 @@ struct HB_TI_DataArea
         struct {
             uint64_t type:16;       /**< indicates either plid or src  */
             uint64_t source:16;     /**< Caller of the TI  */
-            uint64_t reserved2:16;  /**< Reserved space */
+            uint64_t hbDumpFlag:1;  /**< get HB dump flag */
+            uint64_t reserved2:15;  /**< Reserved space */
             uint64_t reserved3:16;  /**< Reserved space  */
         };
         uint64_t flag;              /**< Full word - flag */

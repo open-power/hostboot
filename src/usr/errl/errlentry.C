@@ -79,7 +79,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
                      const uint16_t i_reasonCode,
                      const uint64_t i_user1,
                      const uint64_t i_user2,
-                     const bool i_hbSwError ) :
+                     const bool i_hbSwError,
+                     const bool i_hbDump ) :
     iv_Private( static_cast<compId_t>(i_reasonCode & 0xFF00)),
     iv_User( i_sev ),
     // The SRC_ERR_INFO becomes part of the SRC; example, B1 in SRC B180xxxx
@@ -88,7 +89,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false),
     iv_skipShowingLog(true),
-    iv_eselCallhomeInfoEvent(false)
+    iv_eselCallhomeInfoEvent(false),
+    iv_doHbDump(i_hbDump)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX", plid(), i_reasonCode, i_modId, i_user1, i_user2 );

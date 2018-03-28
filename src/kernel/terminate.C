@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,6 @@ HB_Descriptor kernel_hbDescriptor =
     0
 };
 #endif // BOOTLOADER
-
 
 
 void terminateExecuteTI()
@@ -98,3 +97,13 @@ void termModifySRC(uint8_t i_moduleID, uint32_t i_word7, uint32_t i_word8)
     kernel_TIDataArea.src.word7 = i_word7;
     kernel_TIDataArea.src.word8 = i_word8;
 }
+
+#ifndef BOOTLOADER
+void termSetHbDump(void)
+{
+    // Set indicator flag for doing HB dump
+    kernel_TIDataArea.hbDumpFlag = 1;
+
+    return;
+}
+#endif // BOOTLOADER

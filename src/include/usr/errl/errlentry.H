@@ -127,6 +127,9 @@ public:
      *                              in the primary SRC
      * @param[in]   i_hbSwError     if true, will automatically add a HIGH
      *                              severity callout for EPUB_PRC_HB_CODE
+     * @param[in]   i_hbDump        if true, will flag error log as a candidate
+     *                              for an HB dump if log is committed and is
+     *                              used as status for a shutdown
      * @return  None
      */
     ErrlEntry(const errlSeverity_t i_sev,
@@ -134,7 +137,8 @@ public:
               const uint16_t i_reasonCode,
               const uint64_t i_user1 = 0,
               const uint64_t i_user2 = 0,
-              const bool i_hbSwError = false );
+              const bool i_hbSwError = false,
+              const bool i_hbDump = false );
 
     /**
      * @brief   Destructor
@@ -632,6 +636,14 @@ public:
      */
     bool getEselCallhomeInfoEvent();
 
+    /**
+     * @brief get iv_doHbDump
+     *
+     * @return true if this log should result in a HB dump during a shutdown,
+     *         false otherwise
+     */
+    bool getDoHbDump();
+
 private:
 
      /**
@@ -862,6 +874,10 @@ private:
    // when true, send this special type of eSEL to the BMC
    // This is used to send OCC informational errors up to BMC
    bool iv_eselCallhomeInfoEvent;
+
+   // when true, if error log is committed, then the error log is tracked so
+   // doShutdown can request that a HB dump be done.
+   bool iv_doHbDump;
 };
 
 
@@ -1021,6 +1037,13 @@ inline void ErrlEntry::setEselCallhomeInfoEvent(bool i_valid)
 inline bool ErrlEntry::getEselCallhomeInfoEvent()
 {
     return iv_eselCallhomeInfoEvent;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::getDoHbDump()
+{
+    return iv_doHbDump;
 }
 
 } // End namespace
