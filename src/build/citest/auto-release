@@ -112,10 +112,10 @@ function buildrel-create-track {
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus \
             || exit -1
 
-        echo -e "[$(date)]\n#####-> make clean\n"
-        #make clean
+        echo -e "[$(date)]\n#####-> make clobber\n"
+        #
         make clobber
-
+        #
         # Now build the FSP-based images
         export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
 
@@ -143,22 +143,10 @@ function buildrel-create-track {
     echo -e "[$(date)]\n##### -> \
         git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME\n"
     git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
-
-    #!--------Remove these lines of codes after merging hostboot commit,
-    #! this temporary adj is to reinstate the files---!#
-    cp src/build/citest/auto-release src/build/citest/auto-release.save
-    cp src/build/tools/hbRelease src/build/tools/hbRelease.save
-    #!--------------------------------------------------!#
-
+    #
     echo -e "[$(date)]\n##### -> git checkout gerrit/master || exit -1\n"
     git checkout gerrit/master || exit -1
-
-    #!--------Remove these lines of codes after merging hostboot commit,
-    #! this temporary adj is to reinstate the files---!#
-    cp src/build/citest/auto-release.save  src/build/citest/auto-release
-    cp src/build/tools/hbRelease.save  src/build/tools/hbRelease
-    #!--------------------------------------------------!#
-
+    # 
     echo -e "[$(date)]\n#####->  hbRelease create-track --level $RELEASE_NAME\
         --release $FIPS_RELEASE --released $PREVIOUS_RELEASE --track \
         $EXISTING_TRACK || exit -1\n"
@@ -319,8 +307,7 @@ function build {
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus || exit -1
         cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
-
-        #make clean
+        #
         make clobber
         # Now build the FSP-based images
         export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
