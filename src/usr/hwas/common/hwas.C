@@ -2980,12 +2980,11 @@ errlHndl_t validateProcessorEcLevels()
                                   userdata2);
 
                 //  call out the procedure to find the deconfigured part.
-                //TODO SW410022 Add HWSV support for platHwasErrorAddHWCallout
-//                 platHwasErrorAddHWCallout( l_err,
-//                                        l_chip,
-//                                        SRCI_PRIORITY_HIGH,
-//                                        NO_DECONFIG,
-//                                        GARD_NULL);
+                platHwasErrorAddHWCallout( l_err,
+                                       l_chip,
+                                       SRCI_PRIORITY_HIGH,
+                                       NO_DECONFIG,
+                                       GARD_NULL);
                 //  if we already have an error, link this one to the earlier;
                 //  if not, set the common plid
                 hwasErrorUpdatePlid(l_err, l_commonPlid);
