@@ -91,11 +91,10 @@ uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
  * @param  o_bitmap DQ bitmap container.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 157888
-int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
-                           const CenRank & i_rank,
-                           CenDqBitmap & o_bitmap );
-*/
+template<DIMMS_PER_RANK D>
+uint32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
+                           const MemRank & i_rank,
+                           MemDqBitmap<D> & o_bitmap );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

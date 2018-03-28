@@ -210,20 +210,20 @@ uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
 
 
 //------------------------------------------------------------------------------
-
-/* TODO RTC 157888
-int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
-                           CenDqBitmap & o_bitmap )
+template<>
+uint32_t mssIplUeIsolation( TargetHandle_t i_mba, const MemRank & i_rank,
+    MemDqBitmap<DIMMS_PER_RANK::MBA> & o_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::mssIplUeIsolation] "
 
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    uint8_t data[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE];
+    uint8_t data[DIMMS_PER_RANK::MBA][DQ_BITMAP::BITMAP_SIZE];
 
     errlHndl_t errl = NULL;
-    FAPI_INVOKE_HWP( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),
-                     i_rank.getMaster(), data );
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba( i_mba );
+    FAPI_INVOKE_HWP( errl, mss_IPL_UE_isolation, fapiMba, i_rank.getMaster(),
+                     data );
     if ( NULL != errl )
     {
         PRDF_ERR( PRDF_FUNC "mss_IPL_UE_isolation() failed: MBA=0x%08x "
@@ -233,14 +233,13 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
     }
     else
     {
-        o_bitmap = CenDqBitmap ( i_mba, i_rank, data );
+        o_bitmap = MemDqBitmap<DIMMS_PER_RANK::MBA>( i_mba, i_rank, data );
     }
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-*/
 
 //##############################################################################
 //##                    Nimbus Maintenance Command wrappers
