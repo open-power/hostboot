@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,8 @@ extern "C"
         W_INFINITE,
         R_INFINITE
     };
+    // This is the number of tests in the enum above
+    constexpr uint64_t MAX_MCBIST_TEST_INDEX = 52;
     ///
     /// @brief mcbist data enums
     ///
@@ -156,6 +158,8 @@ extern "C"
         PSEUDORANDOM,
         CASTLE
     };
+    // This is the number of patterns in the enum above
+    constexpr uint64_t MAX_MCBIST_PATTERN_INDEX = 45;
 
     ///
     /// @brief mcbist operation enums
