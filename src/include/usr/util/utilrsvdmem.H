@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,9 @@ namespace Util
     // Ascii label "HYPCOMM " in hex
     constexpr hbrt_mem_label_t HBRT_MEM_LABEL_HYPCOMM  = 0x485950434f4d4d20;
 
+    // Ascii label "TRACEBUF" in hex
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_TRACEBUF  = 0x5452414345425546;
+
     /** @brief A 32 byte table of contents entry */
     struct hbrtTableOfContentsEntry_t
     {
@@ -61,6 +64,9 @@ namespace Util
     // MAX ENTRIES = (4 KB - 64 byte header) / 32 bytes per entry = 126
     #define HBRT_TOC_MAX_ENTRIES \
                 (((4*KILOBYTE) - 64) / sizeof(hbrtTableOfContentsEntry_t))
+
+    // HBRT Reserved memory size for TRACEBUF
+    constexpr uint64_t HBRT_RSVD_TRACEBUF_SIZE = (64*KILOBYTE);
 
     /** @brief A 4KB Table of Contents */
     struct hbrtTableOfContents_t

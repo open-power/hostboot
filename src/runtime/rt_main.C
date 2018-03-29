@@ -128,8 +128,16 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // Initialize all modules.
     vfs_module_init();
 
-    // apply temp overrides
+    // Call rtPost functions
     postInitCalls_t* rtPost = getPostInitCalls();
+
+    // Call InitRsvdTraceBufService
+    // NOTE: This function has pre-req of vfs_module_init() for using
+    //   hb_get_rt_rsvd_mem(). Due to pre-req of rtPost->callInitErrlManager()
+    //   committing ERRL is moved to callCommitRsvdTraceBufErrl().
+    rtPost->callInitRsvdTraceBufService();
+
+    // apply temp overrides
     rtPost->callApplyTempOverrides();
 
     // load FIRDATA section into memory so PRD can access
@@ -138,6 +146,11 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 
     // Make sure errlmanager is ready
     rtPost->callInitErrlManager();
+
+    // Call commitRsvdTraceBufErrl
+    // NOTE: This function has pre-req of rtPost->callInitErrlManager()
+    //   for committing ERRL, which was created in InitRsvdTraceBufService().
+    rtPost->callCommitRsvdTraceBufErrl();
 
     // check for possible missed in-flight messages/interrupts
     rtPost->callClearPendingSbeMsgs();

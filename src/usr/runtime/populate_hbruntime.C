@@ -462,12 +462,14 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
  *  @param[in]      i_startAddressValid Is io_start_address valid?
  *  @param[out]     io_size if not zero, maxSize in bytes allowed
  *                          returns Total 64kb aligned size for all the data
+ *  @param[in]      i_master_node = true if we are the master hb instance
  *  @return Error handle if error
  */
 errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                               uint64_t & io_end_address,
                               bool i_startAddressValid,
-                              uint64_t & io_size)
+                              uint64_t & io_size,
+                              bool i_master_node)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,startAddressValid=%d",
                 io_start_address, io_end_address, i_startAddressValid?1:0 );
@@ -563,6 +565,17 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
 
+    // Fill in the TRACEBUF only for Master Node
+    if(i_master_node == true )
+    {
+        // Fill in TRACEBUF size
+        l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_TRACEBUF;
+        l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+        l_hbTOC.entry[l_hbTOC.total_entries].size = Util::HBRT_RSVD_TRACEBUF_SIZE;
+        l_totalSectionSize +=
+            ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+        l_hbTOC.total_entries++;
+    }
     l_totalSectionSize += sizeof(l_hbTOC);  // Add 4KB Table of Contents
 
     // Fill in PADDING size
@@ -758,6 +771,14 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     }
                     break;
                 }
+
+                case Util::HBRT_MEM_LABEL_TRACEBUF:
+
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TRACEBUF v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    //Nothing much to do here, except zero-ing the memory
+                    memset(reinterpret_cast<uint8_t*>(l_prevDataAddr),0,aligned_size);
+                    break;
+
                 default:
                     break;
             }
@@ -1103,7 +1124,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         // fills in the reserved memory with HB Data and
         // will update addresses and totalSize
         l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
-                startAddressValid, l_totalSizeAligned);
+                startAddressValid, l_totalSizeAligned,i_master_node);
 
         if (l_elog)
         {
@@ -3114,7 +3135,7 @@ errlHndl_t populate_hbRuntimeData( void )
                 bool startAddressValid = true;
 
                 l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
-                                startAddressValid, l_totalSizeAligned);
+                                startAddressValid, l_totalSizeAligned,true);
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData failed" );

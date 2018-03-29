@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ uint64_t hb_get_rt_rsvd_mem(Util::hbrt_mem_label_t i_label,
         case Util::HBRT_MEM_LABEL_ATTROVER:
         case Util::HBRT_MEM_LABEL_PADDING:
         case Util::HBRT_MEM_LABEL_HYPCOMM:
+        case Util::HBRT_MEM_LABEL_TRACEBUF:
             if( (g_hostInterfaces != NULL) &&
                 (g_hostInterfaces->get_reserved_mem) )
             {

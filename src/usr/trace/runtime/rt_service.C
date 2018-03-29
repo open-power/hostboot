@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <util/align.H>
 #include <runtime/interface.h>
 #include <util/singleton.H>
+#include "rt_rsvdtracebufservice.H"
 
 namespace TRACE
 {
@@ -51,6 +52,9 @@ namespace TRACE
         iv_daemon = new TRACEDAEMON::Daemon();
         iv_buffers[BUFFER_SLOW] = nullptr;
         iv_buffers[BUFFER_FAST] = new Buffer(iv_daemon);
+
+        // Force create the Reserved Trace Buffer Service object
+        iv_rsvdtracebufservice = &(Singleton<RsvdTraceBufService>::instance());
 
         iv_compList = &(Singleton<ComponentList>::instance());
     }
@@ -240,6 +244,11 @@ namespace TRACE
             // "Commit" entry to buffer.
             l_buffer->commitEntry(l_entry);
 
+            // Copy the trace entry in to the Reserved Trace Buffer too
+            iv_rsvdtracebufservice->writeEntry(i_td,
+                            reinterpret_cast<char*>(&l_entry->data[0]),
+                            l_realSize);
+
         } while(0);
     }
 
@@ -383,6 +392,11 @@ namespace TRACE
 
             // "Commit" entry to buffer.
             l_buffer->commitEntry(l_entry);
+
+            // Copy the trace entry in to the Reserved Trace Buffer too
+            iv_rsvdtracebufservice->writeEntry(i_td,
+                            reinterpret_cast<char*>(&l_entry->data[0]),
+                            l_realSize);
 
         } while(0);
 
