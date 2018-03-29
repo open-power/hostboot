@@ -55,22 +55,6 @@ void sendPageGardRequest( uint64_t i_systemAddress );
  */
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
 
-/**
- * @brief  Returns the start and end maintenance address of the given rank. By
- *         default, will return the address range of the master rank.
- * @param  i_tgt       Target MBA/MCA.
- * @param  i_rank      Target rank.
- * @param  i_dimmSlct  Target dimm select.
- * @param  o_startAddr The return start address.
- * @param  o_endAddr   The return end address.
- * @param  i_slaveOnly true = slave rank only, false = master rank (default).
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-int32_t getMemAddrRange( TARGETING::TargetHandle_t i_tgt, uint8_t i_mrank,
-                         uint8_t i_dimmSlct, MemAddr & o_startAddr,
-                         MemAddr & o_endAddr, uint8_t i_srank = 0,
-                         bool i_slaveOnly = false );
-
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################

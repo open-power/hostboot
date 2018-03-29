@@ -271,6 +271,159 @@ TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
 }
 
 //##############################################################################
+//##                        Memory specific functions
+//##############################################################################
+
+template<>
+uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    mss::mcbist::address & o_startAddr,
+                                    mss::mcbist::address & o_endAddr,
+                                    AddrRangeType i_rangeType )
+{
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MCA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    uint32_t port = i_chip->getPos() % MAX_MCA_PER_MCBIST;
+
+    if ( SLAVE_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_srank_range,
+                                port, i_rank.getDimmSlct(),
+                                i_rank.getRankSlct(), i_rank.getSlave(),
+                                o_startAddr, o_endAddr );
+    }
+    else if ( MASTER_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_mrank_range,
+                                port, i_rank.getDimmSlct(),
+                                i_rank.getRankSlct(), o_startAddr, o_endAddr );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "unsupported range type %d", i_rangeType );
+        PRDF_ASSERT(false);
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    fapi2::buffer<uint64_t> & o_startAddr,
+                                    fapi2::buffer<uint64_t> & o_endAddr,
+                                    AddrRangeType i_rangeType )
+{
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+    if ( SLAVE_RANK == i_rangeType )
+    {
+        FAPI_INVOKE_HWP( errl, mss_get_slave_address_range, fapiTrgt,
+                         i_rank.getMaster(), i_rank.getSlave(),
+                         o_startAddr, o_endAddr );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_get_slave_address_range(0x%08x,0x%02x) "
+                      "failed", i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+    }
+    else if ( MASTER_RANK == i_rangeType )
+    {
+        FAPI_INVOKE_HWP( errl, mss_get_address_range, fapiTrgt,
+                         i_rank.getMaster(), o_startAddr, o_endAddr );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_get_address_range(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "unsupported range type %d", i_rangeType );
+        PRDF_ASSERT(false);
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+MemAddr __convertMssMcbistAddr( const mss::mcbist::address & i_addr )
+{
+    uint64_t dslct = i_addr.get_dimm();
+    uint64_t rslct = i_addr.get_master_rank();
+    uint64_t srnk  = i_addr.get_slave_rank();
+    uint64_t bnk   = i_addr.get_bank();
+    uint64_t row   = i_addr.get_row();
+    uint64_t col   = i_addr.get_column();
+
+    uint64_t mrnk  = (dslct << 2) | rslct;
+
+    return MemAddr ( MemRank ( mrnk, srnk ), bnk, row, col );
+}
+
+template<>
+uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    MemAddr & o_startAddr,
+                                    MemAddr & o_endAddr,
+                                    AddrRangeType i_rangeType )
+{
+    mss::mcbist::address saddr, eaddr;
+    uint32_t o_rc = getMemAddrRange<TYPE_MCA>( i_chip, i_rank, saddr, eaddr,
+                                               i_rangeType );
+    if ( SUCCESS == o_rc )
+    {
+        o_startAddr = __convertMssMcbistAddr( saddr );
+        o_endAddr   = __convertMssMcbistAddr( eaddr );
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    MemAddr & o_startAddr,
+                                    MemAddr & o_endAddr,
+                                    AddrRangeType i_rangeType )
+{
+    fapi2::buffer<uint64_t> saddr, eaddr;
+    uint32_t o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                               i_rangeType );
+    if ( SUCCESS == o_rc )
+    {
+        o_startAddr = MemAddr::fromMaintAddr<TYPE_MBA>( (uint64_t)saddr );
+        o_endAddr   = MemAddr::fromMaintAddr<TYPE_MBA>( (uint64_t)eaddr );
+    }
+
+    return o_rc;
+}
+
+//##############################################################################
 //##                    Nimbus Maintenance Command wrappers
 //##############################################################################
 
@@ -327,18 +480,19 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     mss::mcbist::speed scrubSpeed = enableFastBgScrub() ? mss::mcbist::LUDICROUS
                                                         : mss::mcbist::BG_SCRUB;
 
-    // Get the first address of the given rank.
-    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
-    mss::mcbist::address saddr, eaddr;
-    mss::mcbist::address::get_srank_range( port,
-                                           i_rank.getDimmSlct(),
-                                           i_rank.getRankSlct(),
-                                           i_rank.getSlave(),
-                                           saddr,
-                                           eaddr );
-
     do
     {
+        // Get the first address of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MCA>( i_mcaChip, i_rank, saddr, eaddr,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_mcaChip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
         // Clear all of the counters and maintenance ECC attentions.
         o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
         if ( SUCCESS != o_rc )
@@ -434,39 +588,28 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
 
 //------------------------------------------------------------------------------
 
-uint32_t __startTdScrubMaster_mca( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank,
-                                   mss::mcbist::stop_conditions & i_stopCond )
+uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip, const MemRank & i_rank,
+                             mss::mcbist::stop_conditions & i_stopCond,
+                             AddrRangeType i_rangeType )
 {
-    // Get the address rank of the master rank.
-    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
+    #define PRDF_FUNC "[PlatServices::__startTdScrub_mca] "
+
     mss::mcbist::address saddr, eaddr;
-    FAPI_CALL_HWP_NORETURN(
-    mss::mcbist::address::get_mrank_range,
-                           port,
-                           i_rank.getDimmSlct(),
-                           i_rank.getRankSlct(),
-                           saddr, eaddr );
+    uint32_t o_rc = getMemAddrRange<TYPE_MCA>( i_mcaChip, i_rank, saddr, eaddr,
+                                               i_rangeType );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                  i_mcaChip->getHuid(), i_rank.getKey() );
+    }
+    else
+    {
+        o_rc = __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
+    }
 
-    return __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
-}
+    return o_rc;
 
-//------------------------------------------------------------------------------
-
-uint32_t __startTdScrubSlave_mca( ExtensibleChip * i_mcaChip,
-                                  const MemRank & i_rank,
-                                  mss::mcbist::stop_conditions & i_stopCond )
-{
-    // Get the address rank of the slave rank.
-    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
-    mss::mcbist::address saddr, eaddr;
-    mss::mcbist::address::get_srank_range( port,
-                                           i_rank.getDimmSlct(),
-                                           i_rank.getRankSlct(),
-                                           i_rank.getSlave(),
-                                           saddr, eaddr );
-
-    return __startTdScrub_mca( i_mcaChip, saddr, eaddr, i_stopCond );
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -477,7 +620,7 @@ uint32_t startVcmPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 {
     mss::mcbist::stop_conditions stopCond;
 
-    return __startTdScrubMaster_mca( i_mcaChip, i_rank, stopCond );
+    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, MASTER_RANK );
 }
 
 //------------------------------------------------------------------------------
@@ -488,7 +631,7 @@ uint32_t startVcmPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 {
     mss::mcbist::stop_conditions stopCond;
 
-    return __startTdScrubMaster_mca( i_mcaChip, i_rank, stopCond );
+    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, MASTER_RANK );
 }
 
 //------------------------------------------------------------------------------
@@ -501,7 +644,7 @@ uint32_t startTpsPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     stopCond.set_nce_soft_symbol_count_enable(mss::ON)
             .set_nce_inter_symbol_count_enable(mss::ON);
 
-    return __startTdScrubSlave_mca( i_mcaChip, i_rank, stopCond );
+    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
 }
 
 //------------------------------------------------------------------------------
@@ -513,7 +656,7 @@ uint32_t startTpsPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     mss::mcbist::stop_conditions stopCond;
     stopCond.set_nce_hard_symbol_count_enable(mss::ON);
 
-    return __startTdScrubSlave_mca( i_mcaChip, i_rank, stopCond );
+    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
 }
 
 //------------------------------------------------------------------------------
@@ -534,7 +677,7 @@ uint32_t startTpsRuntime<TYPE_MCA>( ExtensibleChip * i_mcaChip,
                 .set_nce_inter_symbol_count_enable(mss::ON);
     }
 
-    return __startTdScrubSlave_mca( i_mcaChip, i_rank, stopCond );
+    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
 }
 
 //##############################################################################

@@ -300,22 +300,6 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
 */
 
 /**
- * @brief  Returns the start and end maintenance address of the given rank. By
- *         default, will return the address range of the master rank.
- * @param  i_mba       Target MBA.
- * @param  i_rank      Target rank.
- * @param  o_startAddr The return start address.
- * @param  o_endAddr   The return end address.
- * @param  i_slaveOnly true = slave rank only, false = master rank (default).
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 157888
-int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
-                         const CenRank & i_rank, CenAddr & o_startAddr,
-                         CenAddr & o_endAddr, bool i_slaveOnly = false );
-*/
-
-/**
  * @brief   Get spare DRAM information on a DIMM.
  * @param   i_mba MBA target.
  * @param   i_rank Rank.

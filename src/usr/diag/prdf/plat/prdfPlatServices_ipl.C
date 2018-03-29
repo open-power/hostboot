@@ -295,20 +295,19 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     // Stop on hard CEs if MNFG CE checking is enable.
     if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
 
-    // Get the first address of the given rank.
-    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
-    mss::mcbist::address saddr, eaddr;
-    FAPI_CALL_HWP_NORETURN(
-        mss::mcbist::address::get_srank_range,
-            port,
-            i_rank.getDimmSlct(),
-            i_rank.getRankSlct(),
-            i_rank.getSlave(),
-            saddr,
-            eaddr );
-
     do
     {
+        // Get the first address of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MCA>( i_mcaChip, i_rank, saddr, eaddr,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_mcaChip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
         // Clear all of the counters and maintenance ECC attentions.
         o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
         if ( SUCCESS != o_rc )
