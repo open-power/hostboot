@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1060,6 +1060,122 @@ public:
 #endif
     }
 
+    /**
+     *  @brief Test Deconfiguring by Association
+     */
+    void testDeconfigureAssoc5()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc5: Started");
+#if 1
+        // these tests deconfigure and gard targets. and even though they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversely affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE(" - SKIPPING -- other tests could be adversely affected");
+#else
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find a MBA, deconfigure the attached DIMMs
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMba(CLASS_UNIT, TYPE_MBA);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr funcMbas;
+            funcMbas.push(&predMba).push(&predFunctional).And();
+
+            TargetHandleList pMbaList;
+            targetService().getAssociated(pMbaList, pSys,
+                TargetService::CHILD, TargetService::ALL,
+                &funcMbas);
+
+            if (pMbaList.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc5: empty MBA list");
+                break;
+            }
+            TargetHandle_t l_pMba = pMbaList[0];
+
+            // Get the original HWAS_STATE of the MBA
+            HwasState l_origState = l_pMba->getAttr<ATTR_HWAS_STATE>();
+
+            // find all DIMM targets
+            PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicatePostfixExpr funcDimms;
+            funcDimms.push(&predDimm).push(&predFunctional).And();
+            TargetHandleList pDimmList;
+            targetService().getAssociated(pDimmList, l_pMba,
+                    TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                    &funcDimms);
+            if (pDimmList.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc5: empty DIMM list");
+                break;
+            }
+
+            // deconfigure all but one DIMM
+            for (auto i = pDimmList.size() - 1;i > 0;--i)
+            {
+                TargetHandle_t l_pDimm = pDimmList[i];
+
+                // Deconfigure the DIMM.
+                l_pErr = theDeconfigGard().
+                        deconfigureTarget(*l_pDimm, 0xA5);
+                if (l_pErr)
+                {
+                    TS_FAIL("testDeconfigureAssoc5: Error from deconfigureTarget");
+                    break;
+                }
+            }
+            // Check the HWAS_STATE of the MBA
+            HwasState l_state = l_pMba->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc5: MBA not functional after deconfiguring most DIMMS");
+                break;
+            }
+
+            // deconfigure last functional DIMM
+            TargetHandle_t l_pLastDimm = pDimmList[0];
+            l_pErr = theDeconfigGard().deconfigureTarget(*l_pLastDimm, 0xA6);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc5: Error from deconfigureTarget");
+                break;
+            }
+            // Check the HWAS_STATE of the MBA
+            l_state = l_pMba->getAttr<ATTR_HWAS_STATE>();
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc5: MBA functional after deconfiguring all DIMMS");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the DIMMs and MBA
+            ATTR_HWAS_STATE_type functionalHwasState = {0};
+            functionalHwasState.functional = true;
+            for (auto l_pDimm: pDimmList)
+                l_pDimm->setAttr<ATTR_HWAS_STATE>(functionalHwasState);
+            l_pMba->setAttr<ATTR_HWAS_STATE>(l_origState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc5: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+#endif
+    }
 
     /**
      *  @brief Test EX with no good cores should be deconfigured

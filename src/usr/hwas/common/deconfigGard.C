@@ -1806,12 +1806,30 @@ void DeconfigGard::_deconfigureByAssoc(
                 if (!pParentMbaList.empty())
                 {
                     const Target *l_parentMba = pParentMbaList[0];
-                    HWAS_INF("_deconfigureByAssoc DIMM parent MBA: %.8X",
-                        get_huid(l_parentMba));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
-                        i_errlEid, i_deconfigRule);
+
+                    // get children DIMM that are functional
+                    // NOTE cannot use anyChildFunctional to determine this
+                    // because we need to look at affinity path
+                    TargetHandleList pDimmList;
+                    PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+                    PredicatePostfixExpr funcDimms;
+                    funcDimms.push(&predDimm).push(&isFunctional).And();
+                    targetService().getAssociated(pDimmList,
+                                               l_parentMba,
+                                               TargetService::CHILD_BY_AFFINITY,
+                                               TargetService::ALL,
+                                               &funcDimms);
+
+                    // if parent MBA has no functional memory
+                    if (pDimmList.empty())
+                    {
+                        HWAS_INF("_deconfigureByAssoc DIMM parent MBA: %.8X",
+                            get_huid(l_parentMba));
+                        _deconfigureTarget(const_cast<Target &> (*l_parentMba),
+                            i_errlEid, NULL, i_deconfigRule);
+                        _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
+                            i_errlEid, i_deconfigRule);
+                    }
                 }
 
                 TargetHandleList pParentMcaList;
