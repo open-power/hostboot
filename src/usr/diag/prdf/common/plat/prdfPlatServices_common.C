@@ -257,80 +257,6 @@ int32_t setVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
 //##                        Memory specific functions
 //##############################################################################
 
-/* TODO RTC 157888
-// Helper function for the for several other memory functions.
-int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
-                         ecmdDataBufferBase & o_startAddr,
-                         ecmdDataBufferBase & o_endAddr,
-                         uint8_t i_srank = 0, bool i_slaveOnly = false )
-{
-    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Check parameters.
-        if ( TYPE_MBA != getTargetType(i_mba) )
-        {
-            PRDF_ERR( PRDF_FUNC "The given target is not TYPE_MBA" );
-            o_rc = FAIL; break;
-        }
-
-        if ( (MSS_ALL_RANKS != i_mrank && MASTER_RANKS_PER_PORT <= i_mrank) ||
-             (SLAVE_RANKS_PER_MASTER_RANK <= i_srank) )
-        {
-            PRDF_ERR( PRDF_FUNC "The given rank is not valid" );
-            o_rc = FAIL; break;
-        }
-
-        errlHndl_t errl = NULL;
-
-        if ( i_slaveOnly )
-        {
-            FAPI_INVOKE_HWP( errl, mss_get_slave_address_range,
-                             getFapiTarget(i_mba),
-                             i_mrank, i_srank, o_startAddr, o_endAddr );
-        }
-        else
-        {
-            FAPI_INVOKE_HWP( errl, mss_get_address_range, getFapiTarget(i_mba),
-                             i_mrank, o_startAddr, o_endAddr );
-        }
-
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "mss_get_address_range() failed" );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-        // Verify addresses are of the valid register size.
-        if ( 64 != o_startAddr.getBitLength() ||
-             64 != o_endAddr.getBitLength() )
-        {
-            PRDF_ERR( PRDF_FUNC "Addresses returned from "
-                      "mss_get_address_range() are not 64-bit" );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x i_mrank=%d i_srank=%d "
-                  "i_slaveOnly=%s", getHuid(i_mba), i_mrank, i_srank,
-                  i_slaveOnly ? "true" : "false" );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
-
-//------------------------------------------------------------------------------
-
 template <DIMMS_PER_RANK T>
 int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
                         MemDqBitmap<T> & o_bitmap )
@@ -654,37 +580,6 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x", getHuid(i_mba) );
-    }
-    else
-    {
-        o_startAddr = CenAddr::fromMaintStartAddr( startAddr.getDoubleWord(0) );
-        o_endAddr   = CenAddr::fromMaintEndAddr(   endAddr.getDoubleWord(0)   );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
-
-//------------------------------------------------------------------------------
-
-/* TODO RTC 157888
-int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
-                         CenAddr & o_startAddr, CenAddr & o_endAddr,
-                         bool i_slaveOnly )
-{
-    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
-
-    ecmdDataBufferBase startAddr(64), endAddr(64);
-    int32_t o_rc = getMemAddrRange( i_mba, i_rank.getMaster(),
-                                    startAddr, endAddr,
-                                    i_rank.getSlave(), i_slaveOnly );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x i_rank=M%dS%d i_slaveOnly=%s",
-                  getHuid(i_mba), i_rank.getMaster(), i_rank.getSlave(),
-                  i_slaveOnly ? "true" : "false" );
     }
     else
     {

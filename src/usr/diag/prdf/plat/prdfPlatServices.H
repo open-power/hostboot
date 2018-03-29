@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,8 +34,8 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <lib/mcbist/memdiags.H> ///< MCBIST command interfaces
-//#include <utility_procedures/mss_maint_cmds.H> TODO: RTC 157888
+#include <lib/mcbist/memdiags.H> // MCBIST command interfaces
+#include <p9c_mss_maint_cmds.H>  // MBA command interfaces
 
 // This must be included after all Hostboot specific includes. This will take
 // care of cases where a file must be included in the common code, but the
@@ -103,6 +103,70 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address);
 
 //##############################################################################
+//##                        Memory specific functions
+//##############################################################################
+
+enum AddrRangeType
+{
+    SLAVE_RANK,  ///< Target slave rank only.
+    MASTER_RANK, ///< Target entire master rank.
+};
+
+/**
+ * @brief  Returns the start and end address of the given rank.
+ * @note   The end addresses returned from the MCBIST HWPs give a maximum
+ *         possible address and do not take into account the actual configured
+ *         address range. The MCBIST HW logic tolerates this unlike the MBA HW
+ *         logic. Functions like Dynamic Memory Deallocation may need to adjust
+ *         the actual address based on the actual HW config.
+ * @param  i_chip      An MCA.
+ * @param  i_rank      The target rank.
+ * @param  o_startAddr The returned start address.
+ * @param  o_endAddr   The returned end address.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          mss::mcbist::address & o_startAddr,
+                          mss::mcbist::address & o_endAddr,
+                          AddrRangeType i_rangeType );
+
+/**
+ * @brief  Returns the start and end address of the given rank.
+ * @param  i_chip      An MBA.
+ * @param  i_rank      The target rank.
+ * @param  o_startAddr The returned start address.
+ * @param  o_endAddr   The returned end address.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          fapi2::buffer<uint64_t> & o_startAddr,
+                          fapi2::buffer<uint64_t> & o_endAddr,
+                          AddrRangeType i_rangeType );
+
+/**
+ * @brief  Returns the start and end address of the given rank.
+ * @note   The end addresses returned from the MCBIST HWPs give a maximum
+ *         possible address and do not take into account the actual configured
+ *         address range. The MCBIST HW logic tolerates this unlike the MBA HW
+ *         logic. Functions like Dynamic Memory Deallocation may need to adjust
+ *         the actual address based on the actual HW config.
+ * @param  i_chip      An MCA or MBA.
+ * @param  i_rank      The target rank.
+ * @param  o_startAddr The returned start address.
+ * @param  o_endAddr   The returned end address.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          MemAddr & o_startAddr, MemAddr & o_endAddr,
+                          AddrRangeType i_rangeType );
+
+//##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################
 
@@ -163,6 +227,10 @@ uint32_t startTpsPhase2( ExtensibleChip * i_chip, const MemRank & i_rank );
 template<TARGETING::TYPE T>
 uint32_t startTpsRuntime( ExtensibleChip * i_chip, const MemRank & i_rank,
                           bool i_countAllCes );
+
+//##############################################################################
+//##                  Core/cache trace array functions
+//##############################################################################
 
 /**
  * @brief Restarts Trace arrays after having stopped on error

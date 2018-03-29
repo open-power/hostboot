@@ -419,9 +419,8 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
     do
     {
         MemAddr startAddr, endAddr;
-        TargetHandle_t tgt = i_chip->GetChipHandle();
-        o_rc = getMemAddrRange( tgt, i_rank.getRankSlct(), i_rank.getDimmSlct(),
-                                 startAddr, endAddr );
+        o_rc = getMemAddrRange<T>( i_chip, i_rank, startAddr, endAddr,
+                                   SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
@@ -479,9 +478,8 @@ int32_t port( ExtensibleChip * i_chip )
         for ( std::vector<MemRank>::iterator it = masterRanks.begin();
               it != masterRanks.end(); it++ )
         {
-            o_rc = getMemAddrRange( tgt, it->getRankSlct(),
-                                    it->getDimmSlct(),
-                                    startAddr, endAddr );
+            o_rc = getMemAddrRange<T>( i_chip, *it, startAddr, endAddr,
+                                       MASTER_RANK );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
@@ -553,8 +551,8 @@ int32_t dimmSlct( TargetHandle_t  i_dimm )
         for ( std::vector<MemRank>::iterator it = masterRanks.begin();
               it != masterRanks.end(); it++ )
         {
-            o_rc = getMemAddrRange( tgt, it->getRankSlct(), dimmSlct,
-                                    startAddr, endAddr );
+            o_rc = getMemAddrRange<T>( chip, *it, startAddr, endAddr,
+                                       MASTER_RANK );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
