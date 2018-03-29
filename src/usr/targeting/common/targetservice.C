@@ -72,9 +72,9 @@ namespace TARGETING
 #define TARG_CLASS "targetService"
 
 // It is defined here to limit the scope
-#define MAX_NODE_ID  iv_nodeInfo.size()
+#define MAX_NODE_ID  iv_nodeData.size()
 
-#define MAX_ENABLED_NODE_ID iv_nodeInfo.size()
+#define MAX_ENABLED_NODE_ID iv_nodeData.size()
 
 //******************************************************************************
 // targetService
@@ -159,8 +159,8 @@ void TargetService::init(const size_t i_maxNodes)
 
         for(uint8_t l_nodeCnt=0; l_nodeCnt<i_maxNodes; l_nodeCnt++)
         {
-            NodeSpecificInfo l_nodeInfo;
-            l_nodeInfo.nodeId = static_cast<NODE_ID>(l_nodeCnt);
+            NodeSpecificInfo l_nodeData;
+            l_nodeData.nodeId = static_cast<NODE_ID>(l_nodeCnt);
 
             // Cache location of RO section containing all the attribute
             // metadata
@@ -182,21 +182,21 @@ void TargetService::init(const size_t i_maxNodes)
                      "expected 0x%08X but got 0x%08X",
                       PNOR_TARG_EYE_CATCHER,l_pHdr->eyeCatcher);
 
-                l_nodeInfo.pPnor = reinterpret_cast<uint32_t*>(
+                l_nodeData.pPnor = reinterpret_cast<uint32_t*>(
                         (reinterpret_cast<char*>(l_pHdr) + l_pHdr->headerSize));
 
-                (void)_configureTargetPool(l_nodeInfo);
+                (void)_configureTargetPool(l_nodeData);
 
-                l_nodeInfo.initialized = true;
+                l_nodeData.initialized = true;
             }
 
-            Target* l_pFirstTarget = &(*(l_nodeInfo.targets))[0];
+            Target* l_pFirstTarget = &(*(l_nodeData.targets))[0];
             TARG_INF("TargetService::init: Pushing info for node %d with first "
                      "target huid 0x%.8x and %d total targets",
-                      l_nodeInfo.nodeId,
+                      l_nodeData.nodeId,
                       get_huid(l_pFirstTarget),
-                      l_nodeInfo.maxTargets);
-            iv_nodeInfo.push_back(l_nodeInfo);
+                      l_nodeData.maxTargets);
+            iv_nodeData.push_back(l_nodeData);
         }
 
         bool masterNodeCapable = false;
@@ -250,15 +250,15 @@ void TargetService::_getFirstTargetForIterators(Target*& o_firstTargetPtr) const
     {
         /* This will come inside for initialized node only.. Just for safety we
          * are checking for maxTargets & whether it is initialized or not */
-        if((iv_nodeInfo[l_nodeCnt].initialized == true) &&
-            (iv_nodeInfo[l_nodeCnt].maxTargets > 0))
+        if((iv_nodeData[l_nodeCnt].initialized == true) &&
+            (iv_nodeData[l_nodeCnt].maxTargets > 0))
         {
             /* Assumption -
              * Here we are assuming that the first target of any binary is not
              * the system target, to make sure this ithe binary compiler needs
              * to compile the binary in this specific order.
              */
-            o_firstTargetPtr = &(*(iv_nodeInfo[l_nodeCnt].targets))[0];
+            o_firstTargetPtr = &(*(iv_nodeData[l_nodeCnt].targets))[0];
 
             TARG_ASSERT(o_firstTargetPtr != NULL, TARG_ERR_LOC
                    "FATAL: Could not find any targets");
@@ -283,15 +283,15 @@ void TargetService::_getFirstTargetForIterators(Target*& o_firstTargetPtr,
     /* This will come inside for initialized node only.. Just for safety we
      * are checking for maxTargets & whether it is initialized or not */
     if( (i_nodeId < MAX_NODE_ID) &&
-        (iv_nodeInfo[i_nodeId].initialized == true) &&
-        (iv_nodeInfo[i_nodeId].maxTargets > 0))
+        (iv_nodeData[i_nodeId].initialized == true) &&
+        (iv_nodeData[i_nodeId].maxTargets > 0))
     {
         /* Assumption -
          * Here we are assuming that the first target of any binary is not
          * the system target, to make sure this ithe binary compiler needs
          * to compile the binary in this specific order.
          */
-        o_firstTargetPtr = &(*(iv_nodeInfo[i_nodeId].targets))[0];
+        o_firstTargetPtr = &(*(iv_nodeData[i_nodeId].targets))[0];
 
         TARG_ASSERT(o_firstTargetPtr != NULL, TARG_ERR_LOC
                "FATAL: Could not find any targets");
@@ -481,8 +481,8 @@ uint8_t TargetService::getNextInitializedNode(const NODE_ID i_node) const
     {
         for(l_nodeCnt=(i_node +1); l_nodeCnt<MAX_NODE_ID; ++l_nodeCnt)
         {
-            if((iv_nodeInfo[l_nodeCnt].initialized) &&
-                    (iv_nodeInfo[l_nodeCnt].maxTargets > 0))
+            if((iv_nodeData[l_nodeCnt].initialized) &&
+                    (iv_nodeData[l_nodeCnt].maxTargets > 0))
             {
                 l_foundNode = true;
                 break;
@@ -511,13 +511,13 @@ Target* TargetService::getNextTarget(const Target* i_pTarget) const
     {
         for(uint8_t i_node=0; i_node<MAX_NODE_ID; ++i_node)
         {
-            if((iv_nodeInfo[i_node].initialized) &&
-                (iv_nodeInfo[i_node].maxTargets > 0) &&
-                ((l_pTarget >= &(*(iv_nodeInfo[i_node]).targets)[0]) &&
-                    (l_pTarget <= &(*(iv_nodeInfo[i_node]).targets)[
-                                iv_nodeInfo[i_node].maxTargets - 1])))
+            if((iv_nodeData[i_node].initialized) &&
+                (iv_nodeData[i_node].maxTargets > 0) &&
+                ((l_pTarget >= &(*(iv_nodeData[i_node]).targets)[0]) &&
+                    (l_pTarget <= &(*(iv_nodeData[i_node]).targets)[
+                                iv_nodeData[i_node].maxTargets - 1])))
             {
-                if( l_pTarget == &(*(iv_nodeInfo[i_node]).targets)[iv_nodeInfo[
+                if( l_pTarget == &(*(iv_nodeData[i_node]).targets)[iv_nodeData[
                             i_node].maxTargets - 1] )
                 {
                     // Go for next node
@@ -525,7 +525,7 @@ Target* TargetService::getNextTarget(const Target* i_pTarget) const
                                             static_cast<NODE_ID>(i_node));
                     if(l_nextNode != MAX_NODE_ID)
                     {
-                        l_pTarget = &(*(iv_nodeInfo[l_nextNode].targets))[0];
+                        l_pTarget = &(*(iv_nodeData[l_nextNode].targets))[0];
                         l_targetFound = true;
                         break;
                     }
@@ -1154,7 +1154,7 @@ void TargetService::readSectionData(
 //******************************************************************************
 
 void TargetService::_configureTargetPool(
-    NodeSpecificInfo& i_nodeInfoContainer,
+    NodeSpecificInfo& i_nodeContainer,
     AttrRP *i_attrRP)
 {
 #define TARG_FN "_configureTargetPool(...)"
@@ -1164,21 +1164,21 @@ void TargetService::_configureTargetPool(
     AttrRP *l_attrRP = (i_attrRP == NULL)
                      ? &TARG_GET_SINGLETON(TARGETING::theAttrRP) : i_attrRP;
 
-    _maxTargets(i_nodeInfoContainer);
+    _maxTargets(i_nodeContainer);
 
     // iv_pPnor--> points to uint32_t* --> points to --> uint32_t, targets[]
     //                   (uint32_t*)+1 --> points to ------------> targets[]
     const AbstractPointer<uint32_t>* ppNumTargets
         = static_cast<const AbstractPointer<uint32_t>*>(
-              i_nodeInfoContainer.pPnor);
+              i_nodeContainer.pPnor);
 
-    i_nodeInfoContainer.targets =
+    i_nodeContainer.targets =
            reinterpret_cast< Target(*)[] > (
                (TARG_TO_PLAT_PTR_AND_INC(*ppNumTargets,1)));
 
-    TARG_ASSERT(i_nodeInfoContainer.targets, TARG_ERR_LOC
+    TARG_ASSERT(i_nodeContainer.targets, TARG_ERR_LOC
                 "FATAL: Could not determine location of targets");
-    TARG_INF("i_nodeInfoContainer.targets = %p", i_nodeInfoContainer.targets);
+    TARG_INF("i_nodeContainer.targets = %p", i_nodeContainer.targets);
 
     // Only translate addresses on platforms where addresses are 4 bytes wide
     // (FSP). The compiler should perform dead code elimination of this path on
@@ -1186,14 +1186,14 @@ void TargetService::_configureTargetPool(
     // can be statically computed at compile time.
     if(TARG_ADDR_TRANSLATION_REQUIRED)
     {
-        i_nodeInfoContainer.targets = static_cast<Target(*)[]>(
+        i_nodeContainer.targets = static_cast<Target(*)[]>(
              l_attrRP->translateAddr(
-                    i_nodeInfoContainer.targets, i_nodeInfoContainer.nodeId));
-        TARG_ASSERT(i_nodeInfoContainer.targets, TARG_ERR_LOC
+                    i_nodeContainer.targets, i_nodeContainer.nodeId));
+        TARG_ASSERT(i_nodeContainer.targets, TARG_ERR_LOC
                     "FATAL: Could not determine location of targets after "
                     "address translation");
-        TARG_INF("i_nodeInfoContainer.targets after translation = %p",
-                 i_nodeInfoContainer.targets);
+        TARG_INF("i_nodeContainer.targets after translation = %p",
+                 i_nodeContainer.targets);
     }
 
     TARG_EXIT();
@@ -1205,7 +1205,7 @@ void TargetService::_configureTargetPool(
 // TargetService::_maxTargets
 //******************************************************************************
 
-void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer,
+void TargetService::_maxTargets(NodeSpecificInfo& io_nodeContainer,
                                 AttrRP *i_attrRP)
 {
     #define TARG_FN "_maxTargets(...)"
@@ -1217,7 +1217,7 @@ void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer,
     // pointer.
     const AbstractPointer<uint32_t>* pNumTargetsPtr
         = static_cast<const AbstractPointer<uint32_t>*>(
-                io_nodeInfoContainer.pPnor);
+                io_nodeContainer.pPnor);
     uint32_t* pNumTargets = TARG_TO_PLAT_PTR(*pNumTargetsPtr);
 
     // Only translate addresses on platforms where addresses are 4 bytes wide
@@ -1228,16 +1228,16 @@ void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer,
     {
         pNumTargets =
             static_cast<uint32_t*>(l_attrRP->translateAddr(
-                        pNumTargets, io_nodeInfoContainer.nodeId));
+                        pNumTargets, io_nodeContainer.nodeId));
     }
 
     TARG_ASSERT(pNumTargets, TARG_ERR_LOC
                 "FATAL: Could not determine location of targets after "
                 "address translation");
 
-    io_nodeInfoContainer.maxTargets = *pNumTargets;
+    io_nodeContainer.maxTargets = *pNumTargets;
 
-    TARG_INF("Max targets = %d", io_nodeInfoContainer.maxTargets);
+    TARG_INF("Max targets = %d", io_nodeContainer.maxTargets);
 
     #undef TARG_FN
 }
@@ -1348,20 +1348,20 @@ void TargetService::initDefaultMasterNode()
         // over.
         for(uint8_t l_nodeCnt=0; l_nodeCnt<MAX_NODE_ID; ++l_nodeCnt)
         {
-            if((iv_nodeInfo[l_nodeCnt].initialized) &&
-                    (iv_nodeInfo[l_nodeCnt].maxTargets > 0))
+            if((iv_nodeData[l_nodeCnt].initialized) &&
+                    (iv_nodeData[l_nodeCnt].maxTargets > 0))
             {
                 for(uint32_t l_targetCnt=0;
-                        l_targetCnt<iv_nodeInfo[l_nodeCnt].maxTargets;
+                        l_targetCnt<iv_nodeData[l_nodeCnt].maxTargets;
                         ++l_targetCnt)
                 {
-                    if(((*(iv_nodeInfo[l_nodeCnt].targets))[
+                    if(((*(iv_nodeData[l_nodeCnt].targets))[
                             l_targetCnt].getAttr<ATTR_CLASS>() == CLASS_ENC) &&
-                            ((*(iv_nodeInfo[l_nodeCnt].targets))[
+                            ((*(iv_nodeData[l_nodeCnt].targets))[
                              l_targetCnt].getAttr<ATTR_TYPE>() == TYPE_NODE))
                     {
                         if(UTIL::isThisMasterNodeTarget(
-                           &((*(iv_nodeInfo[l_nodeCnt].targets))[l_targetCnt])))
+                           &((*(iv_nodeData[l_nodeCnt].targets))[l_targetCnt])))
                         {
                             // We have found a previous instance of master node
                             // target, no need for sync here, since it would
@@ -1385,25 +1385,25 @@ void TargetService::initDefaultMasterNode()
             TARG_INF("No previous master node found.. Setting a default one");
             for(uint8_t l_nodeCnt=0; l_nodeCnt<MAX_NODE_ID; ++l_nodeCnt)
             {
-                if((iv_nodeInfo[l_nodeCnt].initialized) &&
-                        (iv_nodeInfo[l_nodeCnt].maxTargets > 0))
+                if((iv_nodeData[l_nodeCnt].initialized) &&
+                        (iv_nodeData[l_nodeCnt].maxTargets > 0))
                 {
                     // Need to go over each target to search for Node, cannot
                     // use rangefilter here since targeting is yet not
                     // initialized.
                     for(uint32_t l_targetCnt=0;
-                            l_targetCnt<iv_nodeInfo[l_nodeCnt].maxTargets;
+                            l_targetCnt<iv_nodeData[l_nodeCnt].maxTargets;
                             ++l_targetCnt)
                     {
-                        if(((*(iv_nodeInfo[l_nodeCnt].targets))[
+                        if(((*(iv_nodeData[l_nodeCnt].targets))[
                              l_targetCnt].getAttr<ATTR_CLASS>() == CLASS_ENC) &&
-                              ((*(iv_nodeInfo[l_nodeCnt].targets))[
+                              ((*(iv_nodeData[l_nodeCnt].targets))[
                                l_targetCnt].getAttr<ATTR_TYPE>() == TYPE_NODE))
                         {
                             // Just do bare minimum stuff i.e. just set the
                             // Master Node Attribute
                             pError = UTIL::setDefaultMasterNodeWithoutSync(
-                                &((*(iv_nodeInfo[l_nodeCnt].targets))[
+                                &((*(iv_nodeData[l_nodeCnt].targets))[
                                     l_targetCnt]));
                             if(pError)
                             {

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -76,14 +78,14 @@ void _TargetIterator<T>::advance()
         // iterator performance path that assumes only one node's worth of data
         if(!PLAT::PROPERTIES::MULTINODE_AWARE)
         {
-            if (   likely( (!l_targetService.iv_nodeInfo.empty()) )
-                && likely( (l_targetService.iv_nodeInfo[0].maxTargets > 0)  ) )
+            if (   likely( (!l_targetService.iv_nodeData.empty()) )
+                && likely( (l_targetService.iv_nodeData[0].maxTargets > 0)  ) )
             {
                 // If at or past last element, advance to end() else advance
                 if(unlikely (
                        iv_pCurrent >=
-                           &(*(l_targetService.iv_nodeInfo[0]).targets)
-                               [l_targetService.iv_nodeInfo[0].maxTargets-1]
+                           &(*(l_targetService.iv_nodeData[0]).targets)
+                               [l_targetService.iv_nodeData[0].maxTargets-1]
                    ))
                 {
                    iv_pCurrent = NULL;
