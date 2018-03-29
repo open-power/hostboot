@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/trace/runtime/makefile $
+# $Source: src/usr/trace/runtime/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,24 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = trace_rt
+ROOTPATH = ../../../../..
 
-SUBDIRS += test.d
+MODULE = testrsvdtracebuf_rt
+TESTS =  testrsvdtracebuf.H
 
-OBJS += interface.o
-OBJS += assert.o
-OBJS += compdesc.o
-OBJS += complist.o
-OBJS += rt_service.o
-OBJS += bufferpage.o
-OBJS += rt_daemon.o
-OBJS += rt_buffer.o
-OBJS += rt_rsvdtracebuffer.o
-OBJS += rt_rsvdtracebufservice.o
-
-
-VPATH += ..
-VPATH += ../daemon
-
-include $(ROOTPATH)/config.mk
+include ${ROOTPATH}/config.mk

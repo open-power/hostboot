@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ namespace TRACE
     class DaemonIf;
     class ComponentList;
     class trace_entry_stamp_t;
+    class RsvdTraceBufService;
 
     /** @class Service
      *
@@ -189,6 +190,9 @@ namespace TRACE
 #else
                 /** Runtime daemon **/
             TRACEDAEMON::Daemon * iv_daemon;
+
+                /** Runtime Reserved Trace Buffer Service **/
+            RsvdTraceBufService * iv_rsvdtracebufservice;
 #endif
     };
 }
