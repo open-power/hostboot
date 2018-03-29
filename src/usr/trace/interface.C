@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,10 +34,14 @@
 #include <util/singleton.H>
 #include <stdarg.h>
 #include <limits.h>
+#include <string.h>
 
 #include "compdesc.H"
 #include "service.H"
 
+#if  __HOSTBOOT_RUNTIME
+#include "runtime/rt_rsvdtracebufservice.H"
+#endif
 
 namespace TRACE
 {
@@ -105,15 +109,31 @@ namespace TRACE
                        void * o_data,
                        size_t i_bufferSize )
     {
+        size_t l_bufferSize(0);
+
         ComponentDesc* l_comp =
             Singleton<ComponentList>::instance().getDescriptor(i_comp, 0);
 
         if (NULL == l_comp)
         {
-            return 0;
+#if  __HOSTBOOT_RUNTIME
+            // All the components will have a corresponding CompDescriptor,
+            // if buffer is created. RSVD_MEM_TRACE is a speacial case without
+            // a corresponding compDescriptor. Check for RSVD_MEM_TRACE, if
+            // not RSVD_MEM_TRACE then return 0.
+            if(strcmp( i_comp, "RSVD_MEM_TRACE") == 0)
+            {
+                l_bufferSize =  Singleton<RsvdTraceBufService>::
+                                     instance().getBuffer(o_data,i_bufferSize);
+            }
+#endif
         }
-        return Singleton<Service>::instance().getBuffer(l_comp,
+        else
+        {
+            l_bufferSize = Singleton<Service>::instance().getBuffer(l_comp,
                                                         o_data, i_bufferSize);
+        }
+        return l_bufferSize;
     }
 
     void flushBuffers()

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,7 @@ namespace Util
             case HBRT_MEM_LABEL_ATTROVER:
             case HBRT_MEM_LABEL_PADDING:
             case HBRT_MEM_LABEL_HYPCOMM:
+            case HBRT_MEM_LABEL_TRACEBUF:
                 // Find offset of label section
                 for (uint16_t i = 0; i < toc_ptr->total_entries; i++)
                 {

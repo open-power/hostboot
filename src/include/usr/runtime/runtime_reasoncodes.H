@@ -63,7 +63,8 @@ namespace RUNTIME
         MOD_RT_FIRMWARE_NOTIFY           = 0x23,  /**< rt_fwnotify.C */
         MOD_RT_FIRMWARE_REQUEST          = 0x24,  /**< rt_fwreq_helper.C */
         MOD_RT_ATTR_SYNC_REQUEST         = 0x25,  /**< rt_fwnotify.C */
-        MOD_CHECK_HB_RES_MEM_LIMIT       = 0x26,  /**<populate_hbruntime.C */
+        MOD_CHECK_HB_RES_MEM_LIMIT       = 0x26,  /**< populate_hbruntime.C */
+        MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
     };
 
     enum RuntimeReasonCode
@@ -132,6 +133,8 @@ namespace RUNTIME
         RC_HB_RES_MEM_EXCEEDED         = RUNTIME_COMP_ID | 0x3D,
         RC_SEND_SBE_TIMER_EXPIRED      = RUNTIME_COMP_ID | 0x3E,
         RC_HOST_TIMER_THREAD_FAIL      = RUNTIME_COMP_ID | 0x3F,
+        RC_RT_RES_TRACE_BUF_DUMPED     = RUNTIME_COMP_ID | 0x40,
+        RC_RT_RES_TRACE_BUF_INVALID    = RUNTIME_COMP_ID | 0x41,
     };
 
     enum UserDetailsTypes

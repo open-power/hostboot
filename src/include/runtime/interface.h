@@ -989,6 +989,18 @@ struct postInitCalls_t
      */
     void (*callClearPendingOccMsgs)();
 
+    /** @brief Calls RsvdTraceBufService::init() which maps
+     *      the Reserved Memory section to the circular buffer, which will keep
+     *      track of all runtime traces
+     */
+    void (*callInitRsvdTraceBufService)();
+
+    /** @brief Calls RsvdTraceBufService::commitRsvdMemTraceErrl(), which commits
+     *      the ERRL with Rsved Mem Traces from previous boot, if created in
+     *      RsvdTraceBufService::init()
+     */
+    void (*callCommitRsvdTraceBufErrl)();
+
 };
 
 extern hostInterfaces_t* g_hostInterfaces;
