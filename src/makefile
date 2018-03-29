@@ -206,6 +206,7 @@ EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
 EXTENDED_MODULES += tod
 EXTENDED_MODULES += nestmemutils
 EXTENDED_MODULES += fab_iovalid
+EXTENDED_MODULES += isteps_nest
 
 #***************************************
 # Working test modules

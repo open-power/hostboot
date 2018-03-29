@@ -299,6 +299,7 @@ const   TaskInfo    g_istep10[]  =   {
 const DepModInfo g_istep10Dependancies = {
     {
         DEP_LIB(libistep10.so),
+        DEP_LIB(libisteps_nest.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libimageprocs.so),

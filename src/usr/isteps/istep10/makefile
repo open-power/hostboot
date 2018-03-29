@@ -94,30 +94,8 @@ include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp2_scom.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp3_scom.mk
 include ${PERV_HWP_PATH}/p9_update_security_ctrl.mk
 
-# proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
-include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
-include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_psi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_tl_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_fbc_ioo_dl_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_nx_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_vas_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_dmi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mi_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mc_scom.mk
 # Note that p9_int_scom.mk is included in fapi2.mk for
 # workaround reasons so we are not including it here
-
-# proc_obus_scominit : Apply scom inits to Obus
-include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
-
-# proc_npu_scominit : Apply scom inits to NPU bus
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
-include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
 
 # proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
@@ -127,9 +105,6 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
 
 # proc_scomoverride_chiplets : Apply sequenced scom inits
 include ${PROCEDURES_PATH}/hwp/nest/p9_scomoverride_chiplets.mk
-
-# proc_chiplet_enable_ridi : Apply RI/DI chip wide
-include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 
 # host_rng_bist : Trigger Built In Self Test
 # HWP not ready - p9_trigger_rng_bist.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,9 @@
 
 // fapi2 HWP invoker
 #include  <fapi2/plat_hwp_invoker.H>
+
+// IStep Error support
+#include  <isteps/hwpisteperror.H>
 
 /**
  *  @brief Enum specifying what attributes should be used to set the
@@ -353,5 +356,46 @@ errlHndl_t computeDynamicMemoryVoltage()
   return pError;
 }
 
+
+/**
+ *  @brief
+ *      This functions captures the user details of the given targets,
+ *      if given any, and is added to the error log handle. Once the error
+ *      log has the user data, for the given targets, the details of error
+ *      log or added to the io_stepError.  The error log is then committed
+ *      with the given component ID, leaving the error log handle NULL.
+ *
+ *      If no valid targets are given, everything is the same as above -
+ *      io_stepError will contain the io_err info and the io_err will be
+ *      committed - except the io_stepError will not contain any info
+ *      collected from targets.
+ *
+ *  @param[in/out] io_err
+ *      An error log handle, that contains the error log info. Can be NULL.  If
+ *      NULL then this function becomes a no-op.  BEWARE: Upon exit of
+ *      this function, the handle will be NULL.
+ *
+ *  @param[out] io_stepError
+ *      The details from the error handle, io_err, which will be added to this.
+ *
+ *  @param[in] i_componentId
+ *      The component ID that will be associated with the error handler, io_err,
+ *      when the error is committed.
+ *
+ *  @param[in] i_target, i_targetList
+ *      The list of target(s) that will be assimilated and have their knowledge
+ *      added to the collective and when I say collective, I mean the error log
+ *      handle, io_err ... resistance is futile. If not target is given, then
+ *      target data will not be collected.
+ */
+void captureError(errlHndl_t               &io_err,
+                  ISTEP_ERROR::IStepError  &io_stepError,
+                  compId_t                  i_componentId,
+                  const TARGETING::Target*  i_target = nullptr);
+
+void captureError(errlHndl_t                        &io_err,
+                  ISTEP_ERROR::IStepError           &io_stepError,
+                  compId_t                           i_componentId,
+                  const TARGETING::TargetHandleList &i_targetList);
 
 #endif

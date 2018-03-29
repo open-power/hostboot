@@ -47,6 +47,7 @@ SUBDIRS+=cpuWkup.d
 SUBDIRS+=p9_phbPerst.d
 SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
+SUBDIRS+=nest.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
