@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,6 +190,12 @@ int32_t setVpdFailedLanesXbus(TARGETING::TargetHandle_t i_rxBusTgt,
                               bool & o_thrExceeded,
                               uint8_t i_clkGrp);
 
+/**
+ * @brief Checks if OBUS target is configured in SMP (ABUS) mode
+ * @param obusTgt OBUS target to check
+ * @return true if SMP mode
+ */
+bool obusInSmpMode(TARGETING::TargetHandle_t obusTgt);
 
 //##############################################################################
 //##                        Memory specific functions

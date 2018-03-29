@@ -26,7 +26,7 @@
 /** Callout the OBUS interface */
 actionclass calloutObusInterface
 {
-#    funccall("calloutInterface_obus"); RTC 174485
+    funccall("calloutBusInterfacePlugin");
 };
 
 /** Callout the OBUS interface, threshold 32 per day */
@@ -40,7 +40,7 @@ actionclass calloutBusInterface_th_32perDay
 actionclass spareDeployed
 {
     calloutObusInterface;
-#    funccall("spareDeployed"); RTC 174485
+    funccall("spareDeployed");
 };
 
 /** Lane Repair: max spares exceeded */
@@ -48,7 +48,7 @@ actionclass maxSparesExceeded
 {
     calloutObusInterface;
     threshold1;
-#    funccall("maxSparesExceeded"); RTC 174485
+    funccall("maxSparesExceeded");
 };
 
 /** Lane Repair: too many bus errors */
@@ -56,7 +56,7 @@ actionclass tooManyBusErrors
 {
     calloutObusInterface;
     threshold1;
-#    funccall("tooManyBusErrors"); RTC 174485
+    funccall("tooManyBusErrors");
 };
 
 # Currently handling each OBUS clock group with the same plugins. May optimize
