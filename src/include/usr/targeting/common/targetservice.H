@@ -823,7 +823,7 @@ class TargetService
         /**
          *  @brief Node Specific information container
          */
-        typedef std::vector< NodeSpecificInfo > NodeInfo_t;
+        typedef std::vector< NodeSpecificInfo > NodeData_t;
 
         /**
          *  @brief Returns the first Target from the first initialized node
@@ -867,7 +867,7 @@ class TargetService
          *  on the PNOR (or override) image, and updates the target service to
          *  point to the start of the target array, wherever it may reside
          *
-         *  @param[in] i_nodeInfoContainer, struct to contain all node
+         *  @param[in] i_nodeContainer, struct to contain all node
          *  specific information of the type NodeSpecificInfo. May refer to
          *  structure definition
          *
@@ -878,7 +878,7 @@ class TargetService
          *
          *  @post Target service target pool configured for access
          */
-        void _configureTargetPool(NodeSpecificInfo& i_nodeInfoContainer,
+        void _configureTargetPool(NodeSpecificInfo& i_nodeContainer,
                                   AttrRP *i_attrRP = NULL);
 
         /**
@@ -888,7 +888,7 @@ class TargetService
          *  Computes the maximum number of targets possible based on the PNOR
          *  (or override) image and returns it to the caller
          *
-         *  @param[in/out] io_nodeInfoContainer, struct to contain all node
+         *  @param[in/out] io_nodeContainer, struct to contain all node
          *  specific information of the type NodeSpecificInfo. May refer to
          *  structure definition
          *
@@ -901,7 +901,7 @@ class TargetService
          *  nodeContainer.
          *
          */
-        void _maxTargets(NodeSpecificInfo & io_nodeInfoContainer,
+        void _maxTargets(NodeSpecificInfo & io_nodeContainer,
                          AttrRP *i_attrRP = NULL);
 
 
@@ -971,7 +971,7 @@ class TargetService
         bool        iv_initialized; ///< Is service initialized or not
         Target      * iv_pSys;      // Top Level Target
 
-        NodeInfo_t iv_nodeInfo;
+        NodeData_t iv_nodeData;
 
         // Disable copy constructor / assignment operator
 
