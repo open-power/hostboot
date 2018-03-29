@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -1171,9 +1171,11 @@ sub getReasonCodeFiles
                 getReasonCodeFiles($dirEntryPath);
             }
         }
-        elsif(($dirEntry =~ /reasoncodes/i) ||
-              ($dirEntry =~ /service_codes/i) ||
-              ($dirEntry =~ /examplerc/i))
+        elsif( (($dirEntry =~ /reasoncodes/i) ||
+                ($dirEntry =~ /service_codes/i) ||
+                ($dirEntry =~ /examplerc/i))
+              # Only look at header files (protects against scratch files)
+              && ($dirEntry =~ /[Hh]$/) )
         {
             # Found reason-codes file
             push(@reasonCodeFiles, $dirEntryPath);
