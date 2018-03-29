@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,6 +251,11 @@ int32_t setVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
 
     #endif
     return o_rc;
+}
+
+bool obusInSmpMode( TargetHandle_t obus )
+{
+    return obus->getAttr<ATTR_OPTICS_CONFIG_MODE>() == OPTICS_CONFIG_MODE_SMP;
 }
 
 //##############################################################################

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,8 @@
 #include <prdfLaneRepair.H>
 
 // Framework includes
+#include <prdfPluginDef.H>
+#include <prdfLaneRepair.H>
 #include <prdfPlatServices.H>
 #include <iipconst.h>
 #include <prdfGlobal.H>
@@ -53,7 +55,8 @@ TargetHandle_t getTxBusEndPt( TargetHandle_t i_rxTrgt)
 
     PRDF_ASSERT(nullptr != i_rxTrgt);
 
-    if ( TYPE_XBUS == getTargetType(i_rxTrgt) )
+    TYPE busType = getTargetType(i_rxTrgt);
+    if ( TYPE_XBUS == busType || TYPE_OBUS == busType )
     {
         o_txTrgt = getConnectedPeerTarget( i_rxTrgt );
     }
@@ -72,6 +75,27 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     TargetHandle_t rxBusTgt = i_chip->getTrgt();
     TargetHandle_t txBusTgt = nullptr;
     TYPE busType = getTargetType(rxBusTgt);
+
+    // RTC 174485
+    // Need HWPs for this. Just callout bus interface for now.
+    if (busType == TYPE_OBUS)
+    {
+        if ( obusInSmpMode(rxBusTgt) )
+        {
+            calloutBusInterface( i_chip, i_sc, MRU_LOW );
+            i_sc.service_data->setServiceCall();
+        }
+        else
+        {
+            PRDF_ERR( PRDF_FUNC "Lane repair only supported in SMP mode "
+                      "obus: 0x%08x", getHuid(rxBusTgt) );
+            i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
+            i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
+            i_sc.service_data->setServiceCall(); 
+        }
+        return SUCCESS;
+    }
+
     bool thrExceeded;
     // Number of clock groups on this interface. (2 for xbus, 1 for all others)
     uint8_t clkGrps = (busType == TYPE_XBUS) ? 2 : 1;
@@ -261,22 +285,42 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
 
     do {
         // Get both endpoints
-        TargetHandle_t i_rxTrgt = i_chip->getTrgt();
-        TargetHandle_t i_txTrgt = getTxBusEndPt(i_rxTrgt);
+        TargetHandle_t rxTrgt = i_chip->getTrgt();
+        TYPE rxType = getTargetType(rxTrgt);
+
+        if ( rxType == TYPE_OBUS && !obusInSmpMode( rxTrgt ) )
+        {
+            // There is no support in hostboot for calling out the other end of
+            // an NV or openCAPI bus. By design, any FIR bits associated with
+            // those bus types should not be taking a CalloutBusInterface
+            // action. So if we hit this case, just make a default callout.
+
+            PRDF_ERR( PRDF_FUNC "Lane repair only supported in SMP mode "
+                      "obus: 0x%08x", getHuid(rxTrgt) );
+
+            i_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_MED, NO_GARD );
+            i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
+            i_sc.service_data->setServiceCall();
+            break;
+        }
+
+        TargetHandle_t txTrgt = getTxBusEndPt(rxTrgt);
+        TYPE txType = getTargetType(txTrgt);
 
         // Add the endpoint target callouts
-        i_sc.service_data->SetCallout( i_rxTrgt, MRU_MEDA );
-        i_sc.service_data->SetCallout( i_txTrgt, MRU_MEDA);
+        i_sc.service_data->SetCallout( rxTrgt, MRU_MEDA );
+        i_sc.service_data->SetCallout( txTrgt, MRU_MEDA);
 
         // Get the HWAS bus type.
-        HWAS::busTypeEnum hwasType;
-
-        TYPE rxType = getTargetType(i_rxTrgt);
-        TYPE txType = getTargetType(i_txTrgt);
+        HWAS::busTypeEnum hwasType = HWAS::X_BUS_TYPE;
 
         if ( TYPE_XBUS == rxType && TYPE_XBUS == txType )
         {
             hwasType = HWAS::X_BUS_TYPE;
+        }
+        else if ( TYPE_OBUS == rxType && TYPE_OBUS == txType )
+        {
+            hwasType = HWAS::O_BUS_TYPE;
         }
         else
         {
@@ -293,7 +337,7 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
         }
 
         // Callout this bus interface.
-        PRDF_ADD_BUS_CALLOUT( errl, i_rxTrgt, i_txTrgt, hwasType, i_priority );
+        PRDF_ADD_BUS_CALLOUT( errl, rxTrgt, txTrgt, hwasType, i_priority );
 
     } while(0);
 
@@ -302,5 +346,75 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
+// Lane Repair Rule Plugins
+
+/**
+ * @brief  Handles Spare Lane Deployed Event
+ * @param  i_chip XBUS chip.
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t spareDeployed( ExtensibleChip * i_chip,
+                       STEP_CODE_DATA_STRUCT & io_sc )
+{
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+        return handleLaneRepairEvent(i_chip, io_sc, true);
+    else
+        return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, spareDeployed );
+PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, spareDeployed );
+
+/**
+ * @brief  Handles Max Spares Exceeded Event
+ * @param  i_chip XBUS chip.
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t maxSparesExceeded( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+        return handleLaneRepairEvent(i_chip, io_sc, false);
+    else
+        return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, maxSparesExceeded );
+PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, maxSparesExceeded );
+
+/**
+ * @brief  Handles Too Many Bus Errors Event
+ * @param  i_chip XBUS chip.
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t tooManyBusErrors( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+        return handleLaneRepairEvent(i_chip, io_sc, false);
+    else
+        return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, tooManyBusErrors );
+PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, tooManyBusErrors );
+
+/**
+ * @brief Add callouts for a BUS interface
+ * @param  i_chip Bus endpt chip
+ * @param  io_sc  Step code data struct.
+ * @return SUCCESS always
+ */
+int32_t calloutBusInterfacePlugin( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    calloutBusInterface(i_chip, io_sc, MRU_LOW);
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_xbus, LaneRepair, calloutBusInterfacePlugin );
+PRDF_PLUGIN_DEFINE_NS( p9_obus, LaneRepair, calloutBusInterfacePlugin );
+
 } // end namespace LaneRepair
+
 } // end namespace PRDF
+

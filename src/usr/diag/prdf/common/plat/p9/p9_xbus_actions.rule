@@ -26,7 +26,7 @@
 /** Callout the XBUS interface */
 actionclass calloutXbusInterface
 {
-    funccall("calloutInterface_xbus");
+    funccall("calloutBusInterfacePlugin");
 };
 
 /** Callout the XBUS interface, threshold 32 per day */
