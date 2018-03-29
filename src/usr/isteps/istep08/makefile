@@ -79,9 +79,6 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_getecid.mk
 # host_p9_fbc_eff_config
 include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config.mk
 
-# host_p9_fbc_eff_config_links
-include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk
-
 # proc_attr_update: Proc ATTR Update
 include ${PROCEDURES_PATH}/hwp/nest/p9_attr_update.mk
 

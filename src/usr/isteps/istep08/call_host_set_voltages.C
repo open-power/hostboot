@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,45 +26,50 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include <stdint.h>
-#include <trace/interface.H>
-#include <errl/errlentry.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
-#include <isteps/hwpisteperror.H>
-// targeting support
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/utilFilter.H>
-#include <errl/errlmanager.H>
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
 
+//  Component ID support
+#include <hbotcompid.H>                // HWPF_COMP_ID
+
+//  TARGETING support
+#include <attributeenums.H>            // TYPE_PROC
+
+//  Error handling support
+#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
+#include <errl/errlentry.H>            // errlHndl_t
+#include <istepHelperFuncs.H>          // captureError
+
+//  Tracing support
+#include <trace/interface.H>           // TRACFCOMP
+#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
+
+//  HWP call support
 #include <p9_setup_evid.H>
+#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
+#include <hbToHwsvVoltageMsg.H>        // platform_set_nest_voltages
 
-
-#include <hbToHwsvVoltageMsg.H>
-
-using namespace TARGETING;
-using namespace ERRORLOG;
-using namespace ISTEP_ERROR;
+//  Init Service support
+#include <initservice/initserviceif.H> // INITSERVICE::spBaseServicesEnabled
 
 namespace ISTEP_08
 {
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ISTEPS_TRACE;
+using   namespace   TARGETING;
 
 //*****************************************************************************
-// call_host_set_voltages()
+// Wrapper function to call host_set_voltages
 //*****************************************************************************
 void* call_host_set_voltages(void *io_pArgs)
 {
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_host_set_voltages enter");
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_host_set_voltages enter");
 
-    errlHndl_t l_err = NULL;
-    TargetHandleList l_procList;
+    errlHndl_t l_err(nullptr);
     IStepError l_stepError;
-    bool l_noError = true;
+
     do
     {
+        TargetHandleList l_procList;
         // Get the system's procs
         getAllChips( l_procList,
                      TYPE_PROC,
@@ -77,58 +82,76 @@ void* call_host_set_voltages(void *io_pArgs)
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                         l_fapiProcTarget( l_procTarget );
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Running p9_setup_evid HWP on processor target %.8X",
-                        get_huid( l_procTarget ) );
+            TRACFCOMP(g_trac_isteps_trace,
+                      "Running p9_setup_evid HWP on processor target %.8X",
+                      get_huid( l_procTarget ) );
 
-            FAPI_INVOKE_HWP( l_err,
-                             p9_setup_evid,
-                             l_fapiProcTarget,
-                             APPLY_VOLTAGE_SETTINGS);
+            FAPI_INVOKE_HWP(l_err,
+                            p9_setup_evid,
+                            l_fapiProcTarget,
+                            APPLY_VOLTAGE_SETTINGS);
 
             if( l_err )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "Error running p9_setup_evid on processor target %.8X",
                         get_huid( l_procTarget ) );
-                l_stepError.addErrorDetails( l_err );
 
-                errlCommit( l_err, HWPF_COMP_ID );
-                l_noError = false;
+                // Capture error and continue
+                captureError(l_err,
+                             l_stepError,
+                             HWPF_COMP_ID,
+                             l_procTarget);
             }
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Done with p9_setup_evid" );
+            TRACFCOMP(g_trac_isteps_trace, "Done with p9_setup_evid" );
         } // Processor Loop
 
-        if( l_noError )
+        // Exit if FAPI call failed or returned an error
+        if (!l_stepError.isNull())
         {
-            //If FSP is present, send voltage information to HWSV
-            if( INITSERVICE::spBaseServicesEnabled() )
+            break;
+        }
+
+        // If no error occurred and FSP is present,
+        // send voltage information to HWSV
+        if (INITSERVICE::spBaseServicesEnabled())
+        {
+            l_err = platform_set_nest_voltages();
+
+            if( l_err )
             {
-                l_err = platform_set_nest_voltages();
+                TRACFCOMP(g_trac_isteps_trace,
+                 "Error in call_host_set_voltages::platform_set_nest_voltages()")
 
-                if( l_err )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Error in call_host_set_voltages::platform_set_nest_voltages()")
-
-                    // Create IStep error log and cross reference occurred error
-                    l_stepError.addErrorDetails( l_err );
-
-                    //Commit Error
-                    errlCommit( l_err, ISTEP_COMP_ID );
-
-                }
+                // Capture error and continue
+                captureError(l_err,
+                             l_stepError,
+                             ISTEP_COMP_ID);
             }
         }
+
+        // Exit if setting voltage failed or returned an error
+        if (!l_stepError.isNull())
+        {
+            break;
+        }
+
+#ifdef CONFIG_SMP_WRAP_TEST
+        // Make the FAPI call to p9_fbc_eff_config_links
+        // Make the FAPI call to p9_sys_chiplet_scominit, if previous call succeeded
+        fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_F_T, l_stepError,
+                                  HWPF_COMP_ID, TYPE_PROC)                  &&
+        fapiHWPCallWrapperHandler(P9_SYS_CHIPLET_SCOMINIT, l_stepError,
+                                       HWPF_COMP_ID, TYPE_PROC);
+#endif
     }while( 0 );
 
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_host_set_voltages exit");
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_host_set_voltages exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }
 
-}; // end namespace
+};   // end namespace ISTEP_08

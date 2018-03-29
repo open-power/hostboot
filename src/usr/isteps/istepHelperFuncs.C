@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
+#include    <errl/errlmanager.H>
 
 #include    <initservice/isteps_trace.H>
 
@@ -264,4 +265,59 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
                "attributes exit");
 
 }
+
+//
+//  Helper functions to capture and log errors
+//  @note I have no idea how to succinctly create a single function for a
+//        null target, a valid target and target list.  I could have shoved
+//        a single target into a target list and then call the target list
+//        over loaded function but that seem heavy handed and I did not want
+//        all that overhead for one target, so I settled for two functions with
+//        practically duplicated code ... sigh ... head hung low.
+//
+void captureError(errlHndl_t               &io_err,
+                  ISTEP_ERROR::IStepError  &io_stepError,
+                  compId_t                  i_componentId,
+                  const TARGETING::Target  *i_target)
+{
+    if ( io_err )
+    {
+        if ( i_target )
+        {
+            // Capture the target data in the error log
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(io_err);
+        }
+
+        // Create IStep error log and cross reference error that occurred
+        io_stepError.addErrorDetails(io_err);
+
+        // Commit error. Log should be deleted and set to NULL in errlCommit.
+        errlCommit( io_err, i_componentId );
+    } // end if ( i_err )
+}
+
+void captureError(errlHndl_t                        &io_err,
+                  ISTEP_ERROR::IStepError           &io_stepError,
+                  compId_t                           i_componentId,
+                  const TARGETING::TargetHandleList &i_targetList)
+{
+    if ( io_err )
+    {
+        // iterate thru the input targets, if any, and capture user details of the target
+        for (const auto & l_target: i_targetList)
+        {
+            // Capture the target data in the error log
+            ERRORLOG::ErrlUserDetailsTarget(l_target).addToLog(io_err);
+        }
+
+        // Create IStep error log and cross reference error that occurred
+        io_stepError.addErrorDetails(io_err);
+
+        // Commit error. Log should be deleted and set to NULL in errlCommit.
+        errlCommit( io_err, i_componentId );
+    } // end if ( i_err )
+}
+
+
+
 

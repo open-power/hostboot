@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,53 +22,53 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
-#include <trace/interface.H>
-#include <errl/errlentry.H>
-#include <errl/errlmanager.H>
-#include <initservice/taskargs.H>
-#include <initservice/isteps_trace.H>
-#include <initservice/initserviceif.H>
-#include <isteps/hwpisteperror.H>
-#include <fapi2/plat_hwp_invoker.H>
-#include <fapi2/target.H>
-#include <p9_fbc_eff_config_links.H>
+
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+
+//  Component ID support
+#include <hbotcompid.H>                // HWPF_COMP_ID
+
+//  TARGETING support
+#include <attributeenums.H>            // TYPE_PROC
+
+//  Error handling support
+#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
+
+//  Tracing support
+#include <trace/interface.H>           // TRACFCOMP
+#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
+
+//  HWP call support
+#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 
 namespace ISTEP_08
 {
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ISTEPS_TRACE;
+using   namespace   TARGETING;
 
+//*****************************************************************************
+// Wrapper function to call host_p9_fbc_eff_config_links
+//*****************************************************************************
 void* call_host_p9_fbc_eff_config_links( void *io_pArgs )
 {
-    errlHndl_t l_errl = NULL;
     ISTEP_ERROR::IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_p9_fbc_eff_config_links entry" );
+    TRACFCOMP(g_trac_isteps_trace,
+              ENTER_MRK"call_host_p9_fbc_eff_config_links entry" );
 
-    TARGETING::TargetHandleList l_procChips;
-    getAllChips( l_procChips, TARGETING::TYPE_PROC);
-    for (const auto & l_procChip: l_procChips)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget(l_procChip);
-        FAPI_INVOKE_HWP(l_errl,p9_fbc_eff_config_links,l_fapi2CpuTarget,
-                        SMP_ACTIVATE_PHASE1,
-                        true,false);
-        if(l_errl)
-        {
-            l_stepError.addErrorDetails(l_errl);
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR : call call_host_p9_fbc_eff_config_links, "
-                       "PLID=0x%x",
-                       l_errl->plid() );
-            errlCommit(l_errl, HWPF_COMP_ID);
-        }
-    }
+    // Make the FAPI call to p9_fbc_eff_config_links
+    // process electrical = true and process optical = false
+    fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_T_F, l_stepError,
+                              HWPF_COMP_ID, TYPE_PROC);
 
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_p9_fbc_eff_config_links exit" );
+    TRACFCOMP(g_trac_isteps_trace,
+              EXIT_MRK"call_host_p9_fbc_eff_config_links exit" );
 
     return l_stepError.getErrorHandle();
 }
 
-};
+};   // end namespace ISTEP_08

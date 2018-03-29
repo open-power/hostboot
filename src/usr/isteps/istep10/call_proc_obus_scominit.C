@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
    @file call_proc_obus_scominit.C
  *
@@ -31,93 +32,51 @@
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
+
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+//  Component ID support
+#include <hbotcompid.H>                // HWPF_COMP_ID
 
-#include    <isteps/hwpisteperror.H>
+//  TARGETING support
+#include <attributeenums.H>            // TYPE_PROC
 
-#include    <errl/errludtarget.H>
+//  Error handling support
+#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
 
-#include    <initservice/isteps_trace.H>
-#include    <initservice/initserviceif.H>
+//  Tracing support
+#include <trace/interface.H>           // TRACFCOMP
+#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
+//  HWP call support
+#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 
-#include  <pbusLinkSvc.H>
-#include  <fapi2/target.H>
-#include  <fapi2/plat_hwp_invoker.H>
-
-//  MVPD
-#include <devicefw/userif.H>
-#include <vpd/mvpdenums.H>
-
-#include <config.h>
-#include <p9_io_obus_scominit.H>
-
-namespace   ISTEP_10
+namespace ISTEP_10
 {
-
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
 //******************************************************************************
-// wrapper function to call proc_obus_scominit
+// Wrapper function to call proc_obus_scominit
 //******************************************************************************
 void* call_proc_obus_scominit( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
-    IStepError l_StepError;
+    IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_obus_scominit entry" );
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_obus_scominit entry");
 
-    do {
+#ifndef CONFIG_SMP_WRAP_TEST
+    // Make the FAPI call to p9_io_obus_scominit
+    fapiHWPCallWrapperHandler(P9_IO_OBUS_SCOMINIT, l_stepError,
+                              HWPF_COMP_ID, TYPE_OBUS);
+#endif
 
-        // Get all OBUS targets
-        TARGETING::TargetHandleList l_obusTargetList;
-        getAllChiplets(l_obusTargetList, TYPE_OBUS);
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_obus_scominit exit");
 
-        for (const auto & l_obusTarget: l_obusTargetList)
-        {
-
-            const fapi2::Target<fapi2::TARGET_TYPE_OBUS>
-                l_obusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_obusTarget)));
-
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                     "Running p9_io_obus_scominit HWP on "
-                     "This OBUS target %.8X",
-                       TARGETING::get_huid(l_obusTarget));
-
-            FAPI_INVOKE_HWP(l_err, p9_io_obus_scominit,
-                            l_obusFapi2Target);
-
-            if(l_err)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR 0x%x: returned from p9_io_obus_scominit on "
-                         "OBUS target %.8X, PLID=0x%x",
-                        TARGETING::get_huid(l_obusTarget),
-                        l_err->plid());
-                l_StepError.addErrorDetails(l_err);
-                errlCommit(l_err, HWPF_COMP_ID);
-            }
-        } // end of looping through Obus pairs
-    } while (0);
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-             "call_proc_obus_scominit exit" );
-
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
-};
+};   // end namespace ISTEP_10

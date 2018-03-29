@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
    @file call_proc_chiplet_enable_ridi.C
  *
@@ -31,81 +32,55 @@
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
+
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+//  Component ID support
+#include <hbotcompid.H>                // HWPF_COMP_ID
 
-#include    <isteps/hwpisteperror.H>
+//  TARGETING support
+#include <attributeenums.H>            // TYPE_PROC
 
-#include    <errl/errludtarget.H>
+//  Error handling support
+#include <isteps/hwpisteperror.H>      // ISTEP_ERROR::IStepError
 
-#include    <initservice/isteps_trace.H>
-#include    <initservice/initserviceif.H>
+//  Tracing support
+#include <trace/interface.H>           // TRACFCOMP
+#include <initservice/isteps_trace.H>  // g_trac_isteps_trace
 
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include <fapi2/target.H>
-#include <fapi2/plat_hwp_invoker.H>
+//  HWP call support
+#include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 
-#include <p9_chiplet_enable_ridi.H>
-
-
-namespace   ISTEP_10
+namespace ISTEP_10
 {
-
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 
 //******************************************************************************
-// wrapper function to call proc_chiplet_enable_ridi
+// Wrapper function to call proc_chiplet_enable_ridi
 //******************************************************************************
 void* call_proc_chiplet_enable_ridi( void *io_pArgs )
 {
-    errlHndl_t l_err = NULL;
-    IStepError l_StepError;
+    IStepError l_stepError;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_chiplet_enable_ridi entry" );
-    //
-    //  get a list of all the procs in the system
-    //
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
+    TRACFCOMP(g_trac_isteps_trace,
+              ENTER_MRK"call_proc_chiplet_enable_ridi entry");
 
-    // Loop through all processors including master
-    for (const auto & l_cpu_target: l_cpuTargetList)
-    {
-      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
-                l_cpu_target);
 
-      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-          "Running p9_chiplet_enable_ridi HWP on processor target %.8X",
-          TARGETING::get_huid(l_cpu_target) );
+#ifndef CONFIG_SMP_WRAP_TEST
+    // Make the FAPI call to p9_chiplet_enable_ridi
+    fapiHWPCallWrapperHandler(P9_CHIPLET_ENABLE_RIDI, l_stepError,
+                              HWPF_COMP_ID, TYPE_PROC);
+#endif
 
-      FAPI_INVOKE_HWP(l_err, p9_chiplet_enable_ridi, l_fapi2_proc_target);
-      if(l_err)
-      {
-          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR: call p9_chiplet_enable_ridi, PLID=0x%x",
-                    l_err->plid());
-          l_StepError.addErrorDetails(l_err);
-          errlCommit(l_err, HWPF_COMP_ID);
-      }
+    TRACFCOMP(g_trac_isteps_trace,
+              EXIT_MRK"call_proc_chiplet_enable_ridi exit");
 
-    } // end of going through all processors
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_chiplet_enable_ridi exit");
-
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
 
-};   // end namespace
+};   // end namespace ISTEP_10
