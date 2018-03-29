@@ -59,8 +59,8 @@
 // Constant definitions
 //------------------------------------------------------------------------------
 const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FIR_ACTION1 = 0x0068686868000000ULL;
-const uint64_t FIR_MASK    = 0xFF97979797FFC000ULL;
+const uint64_t FIR_ACTION1 = 0x2068686868000000ULL;
+const uint64_t FIR_MASK    = 0xDF97979797FFC000ULL;
 
 const uint64_t DMI_FIR_ACTION0_REG = 0x07011006;
 const uint64_t DMI_FIR_ACTION1_REG = 0x07011007;
