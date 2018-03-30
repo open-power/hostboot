@@ -416,37 +416,43 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
     #define PRDF_FUNC "[MemDealloc::rank] "
 
     int32_t o_rc = SUCCESS;
+
     do
     {
+        if ( !isEnabled() ) break; // nothing to do
+
+        // Get the address range of i_rank.
         MemAddr startAddr, endAddr;
         o_rc = getMemAddrRange<T>( i_chip, i_rank, startAddr, endAddr,
                                    SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
-                      i_chip->GetId() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
             break;
         }
 
-        // Get the system addresses
+        // Get the system addresses.
         uint64_t ssAddr = 0;
         uint64_t seAddr = 0;
-        o_rc  = getSystemAddr<T>( i_chip, startAddr, ssAddr);
-        o_rc |= getSystemAddr<T>( i_chip, endAddr, seAddr );
+        o_rc  = getSystemAddr<T>( i_chip, startAddr, ssAddr );
+        o_rc |= getSystemAddr<T>( i_chip, endAddr,   seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
-                      i_chip->GetId() );
+            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+                      i_chip->getHuid() );
             break;
         }
-        // Send the address range to HV
+
+        // Send the address range to the hypervisor.
         sendDynMemDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "Rank dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
 
-    } while( 0 );
+    } while (0);
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 template int32_t rank<TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank );
@@ -455,53 +461,36 @@ template<TYPE T>
 int32_t port( ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "[MemDealloc::port] "
+
     int32_t o_rc = SUCCESS;
 
     do
     {
         if ( !isEnabled() ) break; // nothing to do
 
-        TargetHandle_t tgt = i_chip->GetChipHandle();
+        // Get the address range of i_chip.
+        MemAddr startAddr, endAddr;
+        o_rc = getMemAddrRange<T>( i_chip, startAddr, endAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
 
-        // Find the largest address range
-        uint64_t smallestAddr = 0xffffffffffffffffll;
-        uint64_t largestAddr  = 0;
+        // Get the system addresses.
         uint64_t ssAddr = 0;
         uint64_t seAddr = 0;
-        MemAddr startAddr, endAddr;
-        std::vector<MemRank> masterRanks;
-
-        // Get Master ranks
-        getMasterRanks<T>( tgt, masterRanks);
-
-        // Iterate all ranks to get start and end address.
-        for ( std::vector<MemRank>::iterator it = masterRanks.begin();
-              it != masterRanks.end(); it++ )
+        o_rc  = getSystemAddr<T>( i_chip, startAddr, ssAddr );
+        o_rc |= getSystemAddr<T>( i_chip, endAddr,   seAddr );
+        if ( SUCCESS != o_rc )
         {
-            o_rc = getMemAddrRange<T>( i_chip, *it, startAddr, endAddr,
-                                       MASTER_RANK );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
-                          i_chip->GetId() );
-                break;
-            }
-
-            // Get the system addresses
-            o_rc = getSystemAddr<T>( i_chip, startAddr, ssAddr);
-            o_rc |= getSystemAddr<T>( i_chip, endAddr, seAddr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
-                          i_chip->GetId() );
-                break;
-            }
-            if ( ssAddr < smallestAddr ) smallestAddr = ssAddr;
-            if ( seAddr > largestAddr  ) largestAddr  = seAddr;
+            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
         }
-        if( SUCCESS != o_rc ) break;
 
-        // Send the address range to PHYP
+        // Send the address range to the hypervisor.
         sendDynMemDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "Port dealloc for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llx", ssAddr, seAddr );
@@ -509,86 +498,65 @@ int32_t port( ExtensibleChip * i_chip )
     } while (0);
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 template int32_t port<TYPE_MCA>( ExtensibleChip * i_chip );
 
 template <TYPE T>
-int32_t dimmSlct( TargetHandle_t  i_dimm )
+int32_t dimmSlct( TargetHandle_t i_dimm )
 {
     #define PRDF_FUNC "[MemDealloc::dimmSlct] "
+
     int32_t o_rc = SUCCESS;
 
     do
     {
         if ( !isEnabled() ) break; // nothing to do
 
-        TargetHandle_t tgt = getConnectedParent( i_dimm, T );
-
-        if ( tgt == NULL )
+        // Get the MCA, MBA, etc. connected to this DIMM.
+        TargetHandle_t trgt = getConnectedParent( i_dimm, T );
+        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( trgt );
+        if ( nullptr == chip )
         {
-            PRDF_ERR( PRDF_FUNC "Failed to get parent for dimm 0x%08X",
-                      getHuid( i_dimm ) );
+            PRDF_ERR( PRDF_FUNC "No chip connected to DIMM" );
             o_rc = FAIL; break;
         }
 
-        ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( tgt );
-        if ( NULL == chip )
-        {
-            PRDF_ERR( PRDF_FUNC "No MBA/MCA chip behind DIMM" );
-            o_rc = FAIL; break;
-        }
-        // Find the largest address range
-        uint64_t smallestAddr = 0xffffffffffffffffll;
-        uint64_t largestAddr  = 0;
-        MemAddr startAddr, endAddr;
-        std::vector<MemRank> masterRanks;
+        // Get the DIMM select.
         uint8_t dimmSlct = getDimmSlct<T>( i_dimm );
 
-        getMasterRanks<T>( tgt, masterRanks, dimmSlct );
-
-        // Iterate all ranks to get start and end address.
-        for ( std::vector<MemRank>::iterator it = masterRanks.begin();
-              it != masterRanks.end(); it++ )
+        // Get the address range of i_dimm.
+        MemAddr startAddr, endAddr;
+        o_rc = getMemAddrRange<T>( chip, startAddr, endAddr, dimmSlct );
+        if ( SUCCESS != o_rc )
         {
-            o_rc = getMemAddrRange<T>( chip, *it, startAddr, endAddr,
-                                       MASTER_RANK );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
-                          chip->GetId() );
-                break;
-            }
-
-            // Get the system addresses
-            uint64_t ssAddr = 0;
-            uint64_t seAddr = 0;
-            o_rc = getSystemAddr<T>( chip, startAddr, ssAddr);
-            o_rc |= getSystemAddr<T>( chip, endAddr, seAddr );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
-                          chip->GetId() );
-                break;
-            }
-            if ( ssAddr < smallestAddr ) smallestAddr = ssAddr;
-            if ( seAddr > largestAddr  ) largestAddr  = seAddr;
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,%d) failed",
+                      chip->getHuid(), dimmSlct );
+            break;
         }
-        if( SUCCESS != o_rc ) break;
 
-        // Send the address range to PHYP
-        sendDynMemDeallocRequest( smallestAddr, largestAddr );
+        // Get the system addresses.
+        uint64_t ssAddr = 0;
+        uint64_t seAddr = 0;
+        o_rc  = getSystemAddr<T>( chip, startAddr, ssAddr );
+        o_rc |= getSystemAddr<T>( chip, endAddr,   seAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+                      chip->getHuid() );
+            break;
+        }
+
+        // Send the address range to the hypervisor.
+        sendDynMemDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "DIMM Slct dealloc for Start Addr: 0x%016llx "
-                   "End Addr: 0x%016llx", smallestAddr, largestAddr );
+                   "End Addr: 0x%016llx", ssAddr, seAddr );
 
     } while (0);
 
-    if( FAIL == o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "failed. DIMM:0x%08X", getHuid( i_dimm ) );
-    }
-
     return o_rc;
+
     #undef PRDF_FUNC
 }
 

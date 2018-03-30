@@ -294,18 +294,6 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
 */
 
 /**
- * @brief  Returns the start and end maintenance address of the given MBA.
- * @param  i_mba       Target MBA.
- * @param  o_startAddr The return start address.
- * @param  o_endAddr   The return end address.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 157888
-int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
-                         CenAddr & o_endAddr );
-*/
-
-/**
  * @brief   Get spare DRAM information on a DIMM.
  * @param   i_mba MBA target.
  * @param   i_rank Rank.
