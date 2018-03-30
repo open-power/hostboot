@@ -423,6 +423,76 @@ uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
     return o_rc;
 }
 
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE TT, typename VT>
+uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
+                          VT & o_endAddr, uint8_t i_dimmSlct )
+{
+    #define PRDF_FUNC "[PlatServices::__getMemAddrRange] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the rank list.
+        std::vector<MemRank> rankList;
+        getMasterRanks<TT>( i_chip->getTrgt(), rankList, i_dimmSlct );
+        if ( rankList.empty() )
+        {
+            PRDF_ERR( PRDF_FUNC "i_chip=0x%08x configured with no ranks",
+                      i_chip->getHuid() );
+            o_rc = FAIL;
+            break;
+        }
+
+        // rankList is guaranteed to be sorted. So get the first and last rank.
+        MemRank firstRank = rankList.front();
+        MemRank lastRank  = rankList.back();
+
+        // Get the address range of the first rank.
+        o_rc = getMemAddrRange<TT>( i_chip, firstRank, o_startAddr, o_endAddr,
+                                    MASTER_RANK );
+        if ( SUCCESS != o_rc ) break;
+
+        // Check if there is only one rank configured.
+        if ( firstRank == lastRank ) break;
+
+        // Get the end address of the last rank.
+        VT junk;
+        o_rc = getMemAddrRange<TT>( i_chip, lastRank, junk, o_endAddr,
+                                    MASTER_RANK );
+        if ( SUCCESS != o_rc ) break;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
+uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    mss::mcbist::address & o_startAddr,
+                                    mss::mcbist::address & o_endAddr,
+                                    uint8_t i_dimmSlct );
+
+template
+uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    fapi2::buffer<uint64_t> & o_startAddr,
+                                    fapi2::buffer<uint64_t> & o_endAddr,
+                                    uint8_t i_dimmSlct );
+
+template
+uint32_t getMemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    MemAddr & o_startAddr, MemAddr & o_endAddr,
+                                    uint8_t i_dimmSlct );
+
+template
+uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    MemAddr & o_startAddr, MemAddr & o_endAddr,
+                                    uint8_t i_dimmSlct );
+
 //##############################################################################
 //##                    Nimbus Maintenance Command wrappers
 //##############################################################################

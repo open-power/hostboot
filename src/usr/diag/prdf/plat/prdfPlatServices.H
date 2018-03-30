@@ -119,32 +119,16 @@ enum AddrRangeType
  *         address range. The MCBIST HW logic tolerates this unlike the MBA HW
  *         logic. Functions like Dynamic Memory Deallocation may need to adjust
  *         the actual address based on the actual HW config.
- * @param  i_chip      An MCA.
+ * @param  i_chip      An MCA or MBA.
  * @param  i_rank      The target rank.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
  * @param  i_rangeType See enum AddrRangeType.
  * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T>
+template<TARGETING::TYPE TT, typename VT>
 uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          mss::mcbist::address & o_startAddr,
-                          mss::mcbist::address & o_endAddr,
-                          AddrRangeType i_rangeType );
-
-/**
- * @brief  Returns the start and end address of the given rank.
- * @param  i_chip      An MBA.
- * @param  i_rank      The target rank.
- * @param  o_startAddr The returned start address.
- * @param  o_endAddr   The returned end address.
- * @param  i_rangeType See enum AddrRangeType.
- * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          fapi2::buffer<uint64_t> & o_startAddr,
-                          fapi2::buffer<uint64_t> & o_endAddr,
+                          VT & o_startAddr, VT & o_endAddr,
                           AddrRangeType i_rangeType );
 
 /**
@@ -155,16 +139,17 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
  *         logic. Functions like Dynamic Memory Deallocation may need to adjust
  *         the actual address based on the actual HW config.
  * @param  i_chip      An MCA or MBA.
- * @param  i_rank      The target rank.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
- * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_dimmSlct  When used, this function will only return the address
+ *                     range for the target DIMM select. Otherwise, the default
+ *                     is to return the  address range for all DIMM selects.
  * @return Non-SUCCESS if internal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T>
-uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          MemAddr & o_startAddr, MemAddr & o_endAddr,
-                          AddrRangeType i_rangeType );
+template<TARGETING::TYPE TT, typename VT>
+uint32_t getMemAddrRange( ExtensibleChip * i_chip,
+                          VT & o_startAddr, VT & o_endAddr,
+                          uint8_t i_dimmSlct = MAX_DIMM_PER_PORT );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

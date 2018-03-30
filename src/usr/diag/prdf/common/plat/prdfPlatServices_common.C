@@ -574,32 +574,6 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 157888
-int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
-                         CenAddr & o_endAddr )
-{
-    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
-
-    ecmdDataBufferBase startAddr(64), endAddr(64);
-    int32_t o_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, startAddr, endAddr );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x", getHuid(i_mba) );
-    }
-    else
-    {
-        o_startAddr = CenAddr::fromMaintStartAddr( startAddr.getDoubleWord(0) );
-        o_endAddr   = CenAddr::fromMaintEndAddr(   endAddr.getDoubleWord(0)   );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
-
-//------------------------------------------------------------------------------
-
 /* TODO RTC
 int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig )
