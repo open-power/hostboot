@@ -37,6 +37,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemDqBitmap.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMfgThresholdMgr.H>
@@ -286,7 +287,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
             .set_nce_soft_symbol_count_enable( mss::ON)
             .set_nce_hard_symbol_count_enable( mss::ON);
 
-    // Stop on hard CEs if MNFG CE checking is enable.
+    // Stop on hard CEs if MNFG CE checking is enabled.
     if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
 
     do
@@ -313,8 +314,8 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
         // Start the super fast read command.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond, saddr );
-
+        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond,
+                         saddr );
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
@@ -341,6 +342,14 @@ uint32_t startSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
     return startSfRead<TYPE_MCA>( i_mcaChip, i_rank );
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t cleanupSfRead<TYPE_MCBIST>( ExtensibleChip * i_mcbChip )
+{
+    return SUCCESS; // Not needed for MCBIST commands.
+}
+
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
@@ -359,13 +368,50 @@ uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,
 {
     #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_MBA>] "
 
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
     PRDF_ASSERT( nullptr != i_mbaChip );
     PRDF_ASSERT( TYPE_MBA == i_mbaChip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_mbaChip->getTrgt() );
+
+    // Get the stop conditions.
+    uint32_t stopCond = mss_MaintCmd::STOP_END_OF_RANK              |
+                        mss_MaintCmd::STOP_ON_MPE                   |
+                        mss_MaintCmd::STOP_ON_UE                    |
+                        mss_MaintCmd::STOP_ON_END_ADDRESS           |
+                        mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Stop on hard CEs if MNFG CE checking is enabled.
+    if ( isMfgCeCheckingEnabled() )
+        stopCond |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+
     do
     {
+        fapi2::buffer<uint64_t> saddr, eaddr, junk;
+
+        // Get the first address of the given rank.
+        o_rc = getMemAddrRange<TYPE_MBA>( i_mbaChip, i_rank, saddr, junk,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_mbaChip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Get the last address of the chip.
+        o_rc = getMemAddrRange<TYPE_MBA>( i_mbaChip, junk, eaddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x) failed",
+                      i_mbaChip->getHuid() );
+            break;
+        }
+
         // Clear all of the counters and maintenance ECC attentions.
         o_rc = prepareNextCmd<TYPE_MBA>( i_mbaChip );
         if ( SUCCESS != o_rc )
@@ -375,10 +421,63 @@ uint32_t startSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip,
             break;
         }
 
-        // Start the background scrub command.
-        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 157888
+        // Create the new command. Store a pointer to the command in the MBA
+        // data bundle so that we can call the cleanup function after the
+        // command has completed.
+        MbaDataBundle * db = getMbaDataBundle( i_mbaChip );
+        PRDF_ASSERT( nullptr == db->iv_sfCmd ); // Code bug.
+        db->iv_sfCmd = new mss_SuperFastRead { fapiTrgt, saddr, eaddr,
+                                               stopCond, false };
+
+        // Start the super fast read command.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_mbaChip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
 
     } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t cleanupSfRead<TYPE_MBA>( ExtensibleChip * i_mbaChip )
+{
+    #define PRDF_FUNC "[PlatServices::cleanupSfRead<TYPE_MBA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_mbaChip );
+    PRDF_ASSERT( TYPE_MBA == i_mbaChip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Cleanup the super fast read command, if it exists.
+    MbaDataBundle * db = getMbaDataBundle( i_mbaChip );
+    if ( nullptr != db->iv_sfCmd )
+    {
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->cleanupCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "cleanupCmd() on 0x%08x failed",
+                      i_mbaChip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+
+        // Delete the command because we don't need it any more.
+        delete db->iv_sfCmd; db->iv_sfCmd = nullptr;
+    }
 
     return o_rc;
 
