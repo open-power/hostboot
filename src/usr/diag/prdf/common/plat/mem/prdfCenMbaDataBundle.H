@@ -60,6 +60,10 @@ class MbaDataBundle : public DataBundle
         #ifdef __HOSTBOOT_MODULE
         delete iv_tdCtlr; iv_tdCtlr = nullptr;
         #endif
+
+        #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+        delete iv_sfCmd; iv_sfCmd = nullptr;
+        #endif
     }
 
     // Don't allow copy or assignment.
@@ -90,6 +94,17 @@ class MbaDataBundle : public DataBundle
 
     /** The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MBA> * iv_tdCtlr = nullptr;
+
+    #endif
+
+  public: // instance variables
+
+    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+    /** Super fast commands during Memory Diagnostics require a cleanup after
+     *  the command has finished. After starting the command, we have to store
+     *  the command object until we get the command complete attention. */
+    mss_SuperFastRead * iv_sfCmd = nullptr;
 
     #endif
 };

@@ -109,10 +109,22 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Inform MDIA the command has completed and PRD is starting analysis.
+        // If MDIA started the command, the reset message will do the cleanup
+        // for the super fast command.
         o_rc = mdiaSendEventMsg( iv_chip->getTrgt(), MDIA::RESET_TIMER );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(RESET_TIMER) failed" );
+            break;
+        }
+
+        // If PRD started a super fast command, this will do the cleanup for the
+        // super fast command.
+        o_rc = cleanupSfRead<T>( iv_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "cleanupSfRead(0x%08x) failed",
+                      iv_chip->getHuid() );
             break;
         }
 
