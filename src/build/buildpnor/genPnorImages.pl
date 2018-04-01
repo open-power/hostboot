@@ -98,6 +98,7 @@ use constant RAND_PREFIX => "rand-";
 my $DEVELOPMENT = "development";
 my $IMPRINT = "imprint";
 my $PRODUCTION = "production";
+my $INDEPENDENT = "independent";
 
 ################################################################################
 # I/O parsing
@@ -161,13 +162,21 @@ if ($buildType eq "fspbuild")
 
 # Put mode transition input into a hash and ensure a valid signing mode
 my %signMode = ( $DEVELOPMENT => 1,
-                 $PRODUCTION => 0 );
+                 $PRODUCTION => 0,
+                 $INDEPENDENT => 0 );
 if ($sign_mode =~ m/^$DEVELOPMENT/i)
 {}
 elsif ($sign_mode =~ m/^$PRODUCTION/i)
 {
     $signMode{$PRODUCTION} = 1;
     $signMode{$DEVELOPMENT} = 0;
+    $signMode{$INDEPENDENT} = 0;
+}
+elsif ($sign_mode =~ m/^$INDEPENDENT/i)
+{
+    $signMode{$PRODUCTION} = 0;
+    $signMode{$DEVELOPMENT} = 0;
+    $signMode{$INDEPENDENT} = 1;
 }
 else
 {
@@ -267,20 +276,21 @@ my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
 # Production signing parameters
 my $OPEN_PRD_SIGN_PARAMS = "--mode production "
-    . "--hwPrivKeyA __get "
-    . "--hwPrivKeyB __get "
-    . "--hwPrivKeyC __get "
-    . "--swPrivKeyP __get ";
+    . "--hwKeyA __get "
+    . "--hwKeyB __get "
+    . "--hwKeyC __get "
+    . "--swKeyP __get ";
 
 # Imprint key signing parameters.  In a non-secure compile, omit the keys to
 # generate a secure header without signatures
 my $OPEN_DEV_SIGN_PARAMS = "";
 if($secureboot)
 {
-    $OPEN_DEV_SIGN_PARAMS = " --hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
-    . "--hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
-    . "--hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
-    . "--swPrivKeyP $DEV_KEY_DIR/sw_key_a.key";
+    $OPEN_DEV_SIGN_PARAMS = "--mode $sign_mode "
+    . "--hwKeyA $DEV_KEY_DIR/hw_key_a.key "
+    . "--hwKeyB $DEV_KEY_DIR/hw_key_b.key "
+    . "--hwKeyC $DEV_KEY_DIR/hw_key_c.key "
+    . "--swKeyP $DEV_KEY_DIR/sw_key_a.key";
 }
 
 # Handle key transition and production signing logic
