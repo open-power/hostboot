@@ -137,14 +137,13 @@ enum TorMagicNum
 //
 enum ChipId
 {
-    CID_P9N,
-    CID_P9C,
-    CID_P9A,
-    CID_P10,
-    NUM_CHIP_IDS = 4
+    CID_P9N = 0x5,
+    CID_P9C = 0x6,
+    CID_P9A = 0x7,
+    CID_EXPLORER = 0x8,
+    CID_P10 = 0xA,
 };
 
-//
 // Ring classes
 // - Specified whether root ring:            ROOT (only applied in RING_PROPERTIES list)
 // - Specifies origination repo:             EKB or MVPD
@@ -283,6 +282,7 @@ typedef struct
 #define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_NOOF_RCS + 18
 #define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 19
 #define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
+#define TOR_NO_RINGS_FOR_CHIP                 INFRASTRUCT_NOOF_RCS + 21
 
 #ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
 int ringid_get_raw_ring_file_path( uint32_t       i_magic,
@@ -302,7 +302,7 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
                              uint8_t*           o_numVariants);
 
 int ringid_get_num_ring_ids( ChipId_t   i_chipId,
-                             RingId_t*  o_numRingIds);
+                             RingId_t*  o_numRingIds );
 
 int ringid_get_num_chiplets( ChipId_t  i_chipId,
                              uint32_t  i_torMagic,
@@ -328,17 +328,15 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
                              ChipletType_t   i_chipletType,
                              ChipletType_t*  o_chipletIndex );
 
-#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
 
-// The following prototypes are needed by the initCompiler and so it's practical to use C++
-// features.
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
 
 #include <map>
 #include <string>
 
-extern std::map <ChipId_t, std::string> chipIdIsMap;
-extern std::map <std::string, ChipId_t> chipTypeIsMap;
-extern std::map <uint8_t, ChipId_t> chipIdIcToIsMap;
+// The following two maps replaces all chipId/chipType maps defined various places in initCompiler codes
+extern std::map <ChipId_t, std::string> chipIdToTypeMap;
+extern std::map <std::string, ChipId_t> chipTypeToIdMap;
 
 // This function returns the root ringId of a given scanScomAddr.
 // Notes:
@@ -347,9 +345,14 @@ extern std::map <uint8_t, ChipId_t> chipIdIcToIsMap;
 // - In IS's ring list, we can have multiple ringId for the same scanScomAddr since a ring may have
 //   multiple variations of itself, e.g. due to different frequency, filter or FSM settings, and
 //   which are identified through an "_bucket" extension on their ringName.  All those rings,
-//   however, are non-ROOT_RINGs.
+//   however, are classified as non-ROOT_RINGs.
 // - If the fully "qualified" unique ringId is required, then use ringidGetRingId1() and supply
 //   the ringName instead of the scanScomAddr.
+// - Setting bTest=true will test if more than one root ring exist for a given scanScomAddr and
+//   produce an error.
+// - We have a special case for the mc_{omi,iom} rings which are both listed in our ring Id lists
+//   but which share scanScomAddr. However, the mc_iom rings are only in effect for P9N/C and the
+//   mc_omi rings are only in effect for P9A.
 //
 int ringidGetRootRingId( ChipId_t   i_chipId,
                          uint32_t   i_scanScomAddr,
@@ -357,6 +360,10 @@ int ringidGetRootRingId( ChipId_t   i_chipId,
                          bool       i_bTest = false );
 
 // This function returns the ringId associated with the ringName.
+// Notes:
+// - Setting bTest=true will test if more than one ring exist for a given ringName and
+//   produce an error.
+//
 int ringidGetRingId1( ChipId_t     i_chipId,
                       std::string  i_ringName,
                       RingId_t&    o_ringId,
