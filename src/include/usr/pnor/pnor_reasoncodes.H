@@ -187,6 +187,7 @@ namespace PNOR
         RC_SECURE_SIZE_MISMATCH      = PNOR_COMP_ID | 0x3A,
         RC_NOT_PAGE_ALIGNED          = PNOR_COMP_ID | 0x3B,
         RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
+        RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x3D,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
