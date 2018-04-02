@@ -27,8 +27,8 @@
 <!-- @file memory_attributes.xml -->
 <!-- @brief Attribute xml for memory attributes -->
 <!-- -->
-<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
-<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 2 -->
@@ -3147,66 +3147,6 @@ Will be set at an MBA level with one policy to be used</description>
 
 <!--
 <attribute>
-    <id>ATTR_CEN_MSS_AVDD_OFFSET_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_VDD_OFFSET_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_VCS_OFFSET_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_VPP_OFFSET_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_VDDR_OFFSET_DISABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
--->
-
-<!--
-<attribute>
     <id>ATTR_CEN_MSS_AVDD_SLOPE_ACTIVE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Slope value used to determine the dynamic VID AVDD adjustment for ACTIVE parts. In uV/Centaur.</description>
@@ -3326,7 +3266,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DDR3_VDDR_SLOPE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3334,10 +3273,9 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x000000FA</default>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DDR3_VDDR_INTERCEPT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3345,10 +3283,9 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x00000556</default>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DDR4_VDDR_SLOPE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3356,10 +3293,9 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x000000FA</default>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_DDR4_VDDR_INTERCEPT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3367,8 +3303,8 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x000004C4</default>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_VOLT_OVERRIDE</id>
@@ -3390,7 +3326,7 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
 </attribute>
 
-<!--
+
 <attribute>
     <id>ATTR_CEN_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3400,8 +3336,9 @@ Will be set at an MBA level with one policy to be used</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
--->
 
+
+<!-- Dynamic voltage attributes below are commented out as they are unneeded for the current code -->
 <!--
 <attribute>
     <id>ATTR_CEN_MSS_AVDD_OFFSET</id>
@@ -3446,7 +3383,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_VDDR_OFFSET</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3455,7 +3391,6 @@ Will be set at an MBA level with one policy to be used</description>
     <writeable/>
     <odmVisable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3504,7 +3439,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_DDR3_VDDR_MAX_LIMIT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3512,10 +3446,9 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x00000591</default>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_DDR4_VDDR_MAX_LIMIT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3523,8 +3456,8 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint32</valueType>
     <platInit/>
     <odmVisable/>
+    <default>0x000004f6</default>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
@@ -3566,4 +3499,5 @@ Will be set at an MBA level with one policy to be used</description>
     <persistRuntime/>
 </attribute>
 -->
+
 </attributes>

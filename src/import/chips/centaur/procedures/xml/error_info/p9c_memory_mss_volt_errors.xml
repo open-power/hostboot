@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,8 +27,8 @@
 <!-- @file p9c_memory_mss_volt_errors.xml -->
 <!-- @brief Error xml for mss volt errors-->
 <!-- -->
-<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
-<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
 <!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 1 -->
@@ -115,6 +115,78 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VDDR_FUNCTIONAL_DIMM_VPD_READ_ERROR</rc>
+    <description>Unable to read the VPD from a non-functional dimm.</description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>MBA_TARGET</ffdc>
+    <callout>
+      <target>MBA_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MBA_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VOLT_VDDR_OFFSET_DRAM_GEN_MISCOMPARE</rc>
+    <description>One or more DIMMs has a different generation of DRAM technology level.</description>
+    <ffdc>DRAM_GEN_MISCOMPARE</ffdc>
+    <ffdc>DRAM_GEN_START</ffdc>
+    <ffdc>MBA_TARGET</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VOLT_VDDR_FUNCTIONAL_CENTAUR_NOT_FOUND</rc>
+    <description>Code did not find a functional centaur.</description>
+    <ffdc>CEN_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VOLT_VDDR_DRAM_GEN_NOT_FOUND</rc>
+    <description>Code did not find a DIMM with a readable attribute for DRAM_GEN.</description>
+    <ffdc>CEN_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VOLT_VDDR_OFFSET_VALUE_ERROR</rc>
+    <ffdc>VDDR_UTIL_ACTIVE</ffdc>
+    <ffdc>VDDR_SLOPE</ffdc>
+    <ffdc>VDDR_INTERCEPT</ffdc>
+    <ffdc>CEN_TARGET</ffdc>
+    <ffdc>VDDR_MAX_LIMIT</ffdc>
+    <description>One or more dynamic VDDR attributes is 0.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_VOLT_VDDR_OFFSET_VPD_VALUE_ERROR</rc>
+    <description>one or more VPD voltage attributes is 0.</description>
+    <ffdc>VPD_MASTER_POWER_SLOPE</ffdc>
+    <ffdc>VPD_MASTER_POWER_INTERCEPT</ffdc>
+    <ffdc>CEN_TARGET</ffdc>
+    <deconfigure>
+      <target>CEN_TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>

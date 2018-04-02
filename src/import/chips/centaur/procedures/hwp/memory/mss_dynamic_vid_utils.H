@@ -22,3 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/// @file mss_dynamic_vid_utils.H
+/// @brief Utility procedures for dyanamic voltage
+///
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 3
+/// *HWP Consumed by: HB
+
+#ifndef MSS_DYNAMIC_VID_UTILS_H
+#define MSS_DYNAMIC_VID_UTILS_H
+
+#include <fapi2.H>
+
+///
+/// @brief Checks centaur configurations and outputs DRAM device type
+/// @param[in]  std::vector<fapi2::Target> l_targets  Reference to vector of Centaur Targets in a particular power domain
+/// @param[out] o_dram_type the DRAM device type (DDR3 or DDR4)
+/// @return ReturnCode success IFF everything passes
+///
+fapi2::ReturnCode check_dram_gen_plug(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>& i_targets,
+                                      uint8_t& o_dram_gen);
+
+
+#endif // MSS_DYNAMIC_VID_UTILS_H

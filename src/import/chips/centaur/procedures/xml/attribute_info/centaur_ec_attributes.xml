@@ -489,7 +489,6 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
     </chipEcFeature>
   </attribute>
 
-<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_DISABLE_VDDR_DYNAMIC_VID</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -506,7 +505,6 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
--->
 
   <!-- ********************************************************************* -->
 

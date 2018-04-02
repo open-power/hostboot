@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/// @file p9c_mss_mss_volt_vddr_offset.H
+/// @brief Creates VDDR voltage offsets
+///
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 3
+/// *HWP Consumed by: HB
+
+#ifndef P9C_MSS_VOLT_VDDR_OFFSET_H
+#define P9C_MSS_VOLT_VDDR_OFFSET_H
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*p9c_mss_volt_vddr_offset_FP_t)(const
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief mss_volt_vddr_offset procedure. Determines operating vddr voltage for dimms behind a vddr voltage domain
+    /// @param[in] i_targets  Reference to vector of Centaur Targets in a particular vddr power domain
+    /// @return ReturnCode
+    ///
+
+    fapi2::ReturnCode p9c_mss_volt_vddr_offset(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>& i_targets);
+
+} // extern "C"
+
+#endif // P9C_MSS_VOLT_VDDR_OFFSET_H

@@ -243,6 +243,26 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
 }
 
 ///
+/// @brief find all the DIMM connected to a centaur
+/// @param[in] i_target a fapi2::Target TARGET_TYPE_MEMBUF_CHIP
+/// @return a vector of fapi2::TARGET_TYPE_DIMM
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
+
+    for (const auto& l_mba : i_target.getChildren<fapi2::TARGET_TYPE_MBA>())
+    {
+        auto l_these_dimms( l_mba.getChildren<fapi2::TARGET_TYPE_DIMM>() );
+        l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
+    }
+
+    return l_dimms;
+}
+
+///
 /// @brief find all the dimm connected to an MCS
 /// @param[in] i_target a fapi2::Target MCS
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
