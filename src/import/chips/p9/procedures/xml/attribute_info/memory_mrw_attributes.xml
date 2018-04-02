@@ -335,63 +335,63 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_AVDD_OFFSET_DISABLE</id>
+    <id>ATTR_MSS_MRW_AVDD_OFFSET_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_avdd_offset_disable</mssAccessorName>
+    <mssAccessorName>mrw_avdd_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_VDD_OFFSET_DISABLE</id>
+    <id>ATTR_MSS_MRW_VDD_OFFSET_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vdd_offset_disable</mssAccessorName>
+    <mssAccessorName>mrw_vdd_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_VCS_OFFSET_DISABLE</id>
+    <id>ATTR_MSS_MRW_VCS_OFFSET_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vcs_offset_disable</mssAccessorName>
+    <mssAccessorName>mrw_vcs_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_VPP_OFFSET_DISABLE</id>
+    <id>ATTR_MSS_MRW_VPP_OFFSET_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vpp_offset_disable</mssAccessorName>
+    <mssAccessorName>mrw_vpp_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
-    <id>ATTR_MSS_MRW_VDDR_OFFSET_DISABLE</id>
+    <id>ATTR_MSS_MRW_VDDR_OFFSET_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 1, ENABLE = 0</enum>
+    <enum>ENABLE = 1, DISABLE = 0</enum>
     <platInit/>
     <initToZero/>
     <!-- little comment to tell us this might change during power/thermal implemetation -->
-    <mssAccessorName>mrw_vddr_offset_disable</mssAccessorName>
+    <mssAccessorName>mrw_vddr_offset_enable</mssAccessorName>
   </attribute>
 
   <attribute>
