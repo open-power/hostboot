@@ -209,6 +209,7 @@ if($labSecurityOverride)
             # Key Transition flag will take precedence over the
             # lab override flag.
             $ktSecurityOverrideFlag = 0;
+            $labSecurityOverride = 0;
         }
     }
     else
