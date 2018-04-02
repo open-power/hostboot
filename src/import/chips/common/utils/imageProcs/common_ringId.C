@@ -529,41 +529,24 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
 
 #if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
 
-// The following defines are needed by the initCompiler and so it's practical to use C++
-// features.
-
-// ** Important **
-// If updates are made to the below three maps, corresponding updates to the two
-// maps in ./tools/ifCompiler/initCompiler/initCompiler.y may also have to be made.
-
-// Mapping from our [InfraStructure's} chipId to the chipType name
-std::map <ChipId_t, std::string> chipIdIsMap
+// Mapping from the shared [initCompiler] chipId to the chipType name
+std::map <ChipId_t, std::string> chipIdToTypeMap
 {
-    { UNDEFINED_CHIP_ID, ""    },
     { (ChipId_t)CID_P9N, "p9n" },
     { (ChipId_t)CID_P9C, "p9c" },
     { (ChipId_t)CID_P9A, "p9a" },
-    { (ChipId_t)CID_P10, "p10" }
+    { (ChipId_t)CID_P10, "p10" },
+    { (ChipId_t)CID_EXPLORER, "explorer" }
 };
 
-// Mapping from chipType name to our [InfraStructure's} chipId (revers of above map)
-std::map <std::string, ChipId_t> chipTypeIsMap
+// Mapping from chipType name to the shared [initCompiler] chipId (reverse of above map)
+std::map <std::string, ChipId_t> chipTypeToIdMap
 {
-    { "",    UNDEFINED_CHIP_ID },
     { "p9n", (ChipId_t)CID_P9N },
     { "p9c", (ChipId_t)CID_P9C },
     { "p9a", (ChipId_t)CID_P9A },
-    { "p10", (ChipId_t)CID_P10 }
-};
-
-// Mapping from InitCompiler's chipId to InfraStructure's chipId
-std::map <uint8_t, ChipId_t> chipIdIcToIsMap
-{
-    { 0x0, UNDEFINED_CHIP_ID },
-    { 0x5, (ChipId_t)CID_P9N },
-    { 0x6, (ChipId_t)CID_P9C },
-    { 0x7, (ChipId_t)CID_P9A },
-    { 0xA, (ChipId_t)CID_P10 }
+    { "p10", (ChipId_t)CID_P10 },
+    { "explorer", (ChipId_t)CID_EXPLORER }
 };
 
 int ringidGetRootRingId( ChipId_t    i_chipId,
@@ -588,6 +571,11 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
             numRingIds = P9_RID::NUM_RING_IDS;
             break;
 
+        case CID_EXPLORER:
+            // No ring support
+            rc = TOR_NO_RINGS_FOR_CHIP;
+            break;
+
         default:
             MY_ERR("ringidGetRootRingId(): Unsupported chipId (=%d) supplied\n", i_chipId);
             rc = TOR_INVALID_CHIP_ID;
@@ -604,13 +592,49 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
                 {
                     if (bFound)
                     {
-                        MY_ERR("ringidGetRootRingId(): Two rings w/same addr cannot both be"
-                               " ROOT_RING.  Fix RING_PROPERTIES list for chipId=%d at ringId=0x%x"
-                               " and ringId=0x%x\n",
-                               i_chipId, l_ringId, iRingId);
-                        rc = INFRASTRUCT_RC_CODE_BUG;
-                        l_ringId = UNDEFINED_RING_ID;
-                        break;
+                        // Special allowance for multiple addr match for mc_{iom,omi} rings
+                        // - mc_iom rings are in effect only for P9N/C
+                        // - mc_omi rings are in effect only for P9A
+                        if ( ( strncmp("mc_iom", ringProps[iRingId].ringName, 6) == 0 ) &&
+                             ( strncmp("mc_omi", ringProps[l_ringId].ringName, 6) == 0 ) )
+                        {
+                            if (i_chipId == CID_P9A)
+                            {
+                                // Return mc_omi ring and thus current l_ringId
+                                break;
+                            }
+                            else
+                            {
+                                // Return mc_iom ring and thus iRingId
+                                l_ringId = iRingId;
+                                break;
+                            }
+                        }
+                        else if ( ( strncmp("mc_iom", ringProps[l_ringId].ringName, 6) == 0 ) &&
+                                  ( strncmp("mc_omi", ringProps[iRingId].ringName, 6) == 0 ) )
+                        {
+                            if (i_chipId == CID_P9A)
+                            {
+                                // Return mc_omi ring and thus iRingId
+                                l_ringId = iRingId;
+                                break;
+                            }
+                            else
+                            {
+                                // Return mc_iom ring and thus iRingId
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            MY_ERR("ringidGetRootRingId(): Two rings w/same addr cannot both be"
+                                   " ROOT_RING.  Fix RING_PROPERTIES list for chipId=%d at"
+                                   " ringId=0x%x and ringId=0x%x\n",
+                                   i_chipId, l_ringId, iRingId);
+                            rc = INFRASTRUCT_RC_CODE_BUG;
+                            l_ringId = UNDEFINED_RING_ID;
+                            break;
+                        }
                     }
                     else
                     {
@@ -885,6 +909,7 @@ int ringidGetRingName( ChipId_t     i_chipId,
 
     return rc;
 }
+
 
 int ringidGetRingClass( ChipId_t      i_chipId,
                         RingId_t      i_ringId,
