@@ -44,6 +44,7 @@ my $debug          = 0;
 my $report         = 0;
 my $sdr_file       = "";
 my $build          = "hb";
+my $system_nodes    = "";
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
@@ -53,6 +54,7 @@ GetOptions(
     "f"   => \$force,             # numeric
     "x=s" => \$serverwiz_file,    # string
     "d"   => \$debug,
+    "n=s" => \$system_nodes,       #string
     "v"   => \$version,
     "r"   => \$report,
   )                               # flag
@@ -386,11 +388,26 @@ foreach my $target (keys %{ $targetObj->getAllTargets() })
 ## write out final XML
 my $xml_fh;
 my $filename;
-if ( $build eq "fsp" ){
-    $filename = $xmldir . "/" . $targetObj->getSystemName() . "_fsp.mrw.xml";
+if ( $build eq "fsp" )
+{
+    if($system_nodes eq "")
+    {
+      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_fsp.mrw.xml";
+    }
+    else
+    {
+      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_" . $system_nodes . "_fsp.mrw.xml";
+    }
 }
 else{
-    $filename = $xmldir . "/" . $targetObj->getSystemName() . "_hb.mrw.xml";
+    if($system_nodes eq "")
+    {
+      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_hb.mrw.xml";
+    }
+    else
+    {
+      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_" . $system_nodes . "_hb.mrw.xml";
+    }
 }
 print "Creating XML: $filename\n";
 open($xml_fh, ">$filename") || die "Unable to create: $filename";
@@ -1416,6 +1433,7 @@ sub processObus
                }
             }
      }
+   }
 }
 #--------------------------------------------------
 ## XBUS
@@ -1463,42 +1481,82 @@ sub processAbus
     my $abusdest   = $aBus->{DEST};
     my $abus_dest_parent = $aBus->{DEST_PARENT};
     my $bustype = $targetObj->getBusType($abussource);
+    my $updatePeerTargets = 0;
 #       print"Found bus from $abussource to $abus_dest_parent and $bustype\n";
 
-    ## set attributes for both directions
-    my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
-    my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
 
-    $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
-    $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
-    $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
-    $targetObj->setAttribute($target, "PEER_PATH", $phys2);
+    my $config = $targetObj->getBusAttribute($aBus->{SOURCE},$aBus->{BUS_NUM},"CONFIG_APPLY");
+    my $twonode = "2";
+    my $threenode = "3";
+    my $fournode = "4";
+    my @configs = split(',',$config);
 
-    $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
+    # The CONFIG_APPLY bus attribute carries a comma seperated values for each 
+    # A-bus connection. For eg., 
+    # "2,3,4" - This connection is applicable in 2,3 and 4 node config
+    # "w" - This connection is applicable only in wrap config
+    # "2" - This connection is applicable only in 2 node config
+    # "4" - This connection is applicable only in 4 node config
+    # The below logic looks for these tokens and decides whether a certain
+    # A-bus connection has to be conisdered or not
+    # If user has passed 2N as argument, then we consider only those
+    # A-bus connections where token "2" is present
+
+    if($system_nodes eq "2N")
+    {
+      #Looking for Abus connections pertaining to 2 node system only
+      if($config =~ /$twonode/)
+      {
+        $updatePeerTargets = 1;
+      }
+    }
+    else
+    {
+      #Looking for Abus connections pertaining to 2,3,4 node systems
+      #This will skip any connections specific to ONLY 2 node
+      if($config =~ /$threenode/ || $config =~ /$fournode/)
+      {
+        $updatePeerTargets = 1;
+      }
+    }
+
+
+    if($updatePeerTargets eq 1)
+    {
+      ## set attributes for both directions
+      my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
+      my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
+
+      $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
+      $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
+      $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
+      $targetObj->setAttribute($target, "PEER_PATH", $phys2);
+      
+      $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
          $targetObj->getAttribute($target, "HUID"));
-    $targetObj->setAttribute($target, "PEER_HUID",
+      $targetObj->setAttribute($target, "PEER_HUID",
          $targetObj->getAttribute($abus_dest_parent, "HUID"));
 
-    $targetObj->setAttribute($abussource, "PEER_TARGET",
+      $targetObj->setAttribute($abussource, "PEER_TARGET",
                $targetObj->getAttribute($abusdest, "PHYS_PATH"));
-    $targetObj->setAttribute($abusdest, "PEER_TARGET",
+      $targetObj->setAttribute($abusdest, "PEER_TARGET",
                $targetObj->getAttribute($abussource, "PHYS_PATH"));
 
-    $targetObj->setAttribute($abussource, "PEER_PATH",
+      $targetObj->setAttribute($abussource, "PEER_PATH",
                $targetObj->getAttribute($abusdest, "PHYS_PATH"));
-    $targetObj->setAttribute($abusdest, "PEER_PATH",
+      $targetObj->setAttribute($abusdest, "PEER_PATH",
                $targetObj->getAttribute($abussource, "PHYS_PATH"));
 
-    $targetObj->setAttribute($abussource, "PEER_HUID",
+      $targetObj->setAttribute($abussource, "PEER_HUID",
          $targetObj->getAttribute($abusdest, "HUID"));
-    $targetObj->setAttribute($abusdest, "PEER_HUID",
+      $targetObj->setAttribute($abusdest, "PEER_HUID",
          $targetObj->getAttribute($abussource, "HUID"));
 
-        # copy Abus attributes to proc
-        my $abus = $targetObj->getFirstConnectionBus($target);
-        $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
+       # copy Abus attributes to proc
+      my $abus = $targetObj->getFirstConnectionBus($target);
+      $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
-        $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
+      $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
             $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
     }
 }
@@ -2643,6 +2701,7 @@ processMrwl.pl -x [XML filename] [OPTIONS]
 Options:
         -f = force output file creation even when errors
         -d = debug mode
+        -n = Node configuration [2N]
         -s [SDR XML file] = import SDRs
         -r = create report and save to [system_name].rpt
         -v = version
