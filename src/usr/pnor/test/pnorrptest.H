@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <sys/msg.h>
 #include <limits.h>
 #include <sys/mm.h>
+#include <sys/task.h>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
 #include <config.h>
@@ -625,81 +626,52 @@ class PnorRpTest : public CxxTest::TestSuite
     }
 
     /**
-     * @brief PNOR RP test - ReadOnlyTag
-     *        Tests if readOnly tag on a section is being processed correctly
+     * @brief PNOR RP test - read_ReadOnly_partition
+     *        Tests if we can read a readOnly partition
      *
      */
-    void test_ReadOnlyTag(void)
+    void test_read_ReadOnly_partition(void)
     {
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag Start" );
-        PNOR::SectionInfo_t l_info;
-        errlHndl_t l_errhdl = NULL;
-        uint64_t chip_select = 0xF;
-        bool needs_ecc = false;
+        TRACFCOMP(g_trac_pnor,"PnorRpTest::test_read_ReadOnly_partition Start");
 
-        l_errhdl = PNOR::getSectionInfo(PNOR::TESTRO, l_info);
-        if( l_errhdl )
-        {
-            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : getSectionInfo returned error for %d : RC=%X",
-                      PNOR::TESTRO, l_errhdl->reasonCode());
-            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
-            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : could not read pnor section %d", PNOR::TESTRO);
-        }
+        int l_status = TASK_STATUS_EXITED_CLEAN;
+        PNOR::SectionId l_testroSecId = PNOR::TESTRO;
+        tid_t l_childTask =
+                         task_create(readFromReadOnlyPartition, &l_testroSecId);
 
-        // Write some data
-        const uint64_t l_writeData = 0x1122334455667788;
-        uint64_t* l_dataptr = reinterpret_cast<uint64_t*> (l_info.vaddr);
-        l_dataptr[0] = l_writeData;
-
-        // Flush the page to make sure it gets out to the device
-        // Due to ReadOnly permissions set on TESTRO should be a no-op
-        int rc = mm_remove_pages( RELEASE, l_dataptr, PAGESIZE );
-        if( rc )
+        if((l_childTask != task_wait_tid(l_childTask, &l_status, nullptr)) ||
+           (l_status != TASK_STATUS_EXITED_CLEAN))
         {
-            TRACFCOMP( g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE : rc=%X", rc );
-            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : error on RELEASE" );
+            TS_FAIL("Could not read from readOnly partition.");
         }
-
-        // Get physical address of pnor section
-        uint64_t l_address = 0;
-        l_errhdl = PnorRP::getInstance().computeDeviceAddr((void*)l_info.vaddr,
-                                                        l_address,
-                                                        chip_select,
-                                                        needs_ecc);
-        if(l_errhdl)
-        {
-            TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
-            errlCommit(l_errhdl,PNOR_COMP_ID);
-            TS_FAIL( "PnorRpTest::test_ReadOnlyTag> ERROR : computeDeviceAddr vaddr = 0x%X",l_info.vaddr);
-        }
-
-        // Read pnor section and check if write did not occur
-        uint64_t l_readData = 0;
-        size_t l_size = sizeof(uint64_t);
-        l_errhdl = deviceRead(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                              &l_readData,
-                              l_size,
-                              DEVICE_PNOR_ADDRESS(0, l_address));
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag> Read Data = 0x%X",l_readData);
-        if(l_errhdl)
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() failed! Error committed.");
-            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
-        }
-        if(l_readData == l_writeData)
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: Data was written to readOnly section = %s",
-                     l_info.name);
-        }
-        if(l_size != sizeof(uint64_t))
-        {
-            TS_FAIL("PnorRpTest::test_ReadOnlyTag: deviceRead() Read length not expected value. Addr: 0x%llx, Exp: %d, Act: %d",
-                    l_address, sizeof(uint64_t), l_size);
-        }
-
-        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_ReadOnlyTag End");
+        TRACFCOMP(g_trac_pnor,"PnorRpTest::test_read_ReadOnly_partition End");
     }
 
+    /**
+     * @brief PNOR RP test - write_ReadOnly_partition
+     *        Tests if we can write to a readOnly partition (fail expected)
+     *
+     */
+    void test_write_ReadOnly_partition(void)
+    {
+        TRACFCOMP(g_trac_pnor,
+                             "PnorRpTest::test_write_ReadOnly_partition Start");
+
+        int l_status = TASK_STATUS_EXITED_CLEAN;
+        PNOR::SectionId l_testroSecId = PNOR::TESTRO;
+
+        printk("Test case: Expect to see uncaught exception! ");
+        tid_t l_childTask =
+                          task_create(writeToReadOnlyPartition, &l_testroSecId);
+
+        if((l_childTask != task_wait_tid(l_childTask, &l_status, nullptr)) ||
+           (l_status != TASK_STATUS_CRASHED))
+        {
+            TS_FAIL("Write to readOnly partition exception not caught.");
+        }
+
+        TRACFCOMP(g_trac_pnor, "PnorRpTest::test_write_ReadOnly_partition End");
+    }
 
     //@todo - import config data from build and compare to section info
 
@@ -913,7 +885,97 @@ class PnorRpTest : public CxxTest::TestSuite
 
         } while (0);
 #endif
-     }
+    }
+
+    private:
+    static void* readFromReadOnlyPartition(void* i_section)
+    {
+        TRACFCOMP(g_trac_pnor, "readFromReadOnlyPartition Start");
+        PNOR::SectionId* l_section =
+                                reinterpret_cast<PNOR::SectionId*>(i_section);
+        PNOR::SectionInfo_t l_info;
+        errlHndl_t l_errhdl = nullptr;
+
+        do {
+
+        if(isEnforcedSecureSection(*l_section))
+        {
+            TS_FAIL("readFromReadOnlyPartition: section %d is secure."
+                    " readFromReadOnlyPartition does not support testing"
+                    " secure sections.", *l_section);
+            break;
+        }
+
+        l_errhdl = PNOR::getSectionInfo(*l_section, l_info);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "readFromReadOnlyPartition: getSectionInfo "
+                      " returned an error for section %d : RC = 0x%.04x",
+                      *l_section, l_errhdl->reasonCode());
+            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
+            TS_FAIL("readFromReadOnlyPartition: failed to getSectionInfo"
+                    " for section %d", *l_section);
+            break;
+        }
+
+        uint64_t l_data = 0;
+        memcpy(&l_data, (void*)l_info.vaddr, sizeof(l_data));
+        // For this testing purpose, it doesn't actually matter what the data is
+        } while(0);
+        TRACFCOMP(g_trac_pnor, "readFromReadOnlyPartition End");
+        return nullptr;
+    }
+
+    static void* writeToReadOnlyPartition(void* i_section)
+    {
+        TRACFCOMP(g_trac_pnor, "writeToReadOnlyPartition Start");
+        PNOR::SectionId* l_section =
+                                reinterpret_cast<PNOR::SectionId*>(i_section);
+        PNOR::SectionInfo_t l_info;
+        errlHndl_t l_errhdl = nullptr;
+
+        do {
+
+        if(isEnforcedSecureSection(*l_section))
+        {
+            TS_FAIL("writeToReadOnlyPartition: section %d is secure."
+                    " writeToReadOnlyPartition does not support testing secure"
+                    " sections.", *l_section);
+            break;
+        }
+
+        l_errhdl = PNOR::getSectionInfo(*l_section, l_info);
+        if(l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, "writeToReadOnlyPartition:"
+                      " getSectionInfo returned"
+                      " an error for section %d : RC=0x%.04x",
+                      *l_section, l_errhdl->reasonCode());
+            ERRORLOG::errlCommit(l_errhdl, PNOR_COMP_ID);
+            TS_FAIL("writeToReadOnlyPartition: could not read pnor section %d",
+                                                                    *l_section);
+            break;
+        }
+
+        // Write some data; should cause a task crash
+        const uint64_t l_writeData = 0x1122334455667788;
+        uint64_t* l_dataptr = reinterpret_cast<uint64_t*> (l_info.vaddr);
+        l_dataptr[0] = l_writeData;
+
+        int rc = mm_remove_pages(RELEASE, l_dataptr, PAGESIZE);
+        if(!rc)
+        {
+            TRACFCOMP(g_trac_pnor, "writeToReadOnlyPartition : uncaught "
+                      "exception - write to a readOnly partition succeeded");
+            TS_FAIL("writeToReadOnlyPartition : no error returned on writing to"
+                    " a readOnly partition");
+            break;
+        }
+
+        } while(0);
+        TRACFCOMP(g_trac_pnor, "writeToReadOnlyPartition End");
+        return nullptr;
+    }
 };
 
 
