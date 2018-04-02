@@ -1776,32 +1776,31 @@ errlHndl_t PnorRP::setVirtAddrs(void)
           // Handle section permissions
         if (iv_TOC[i].misc & FFS_MISC_READ_ONLY)
         {
-            // Need to set permissions to allow writing to virtual
-            // addresses, but prevents the kernel from ejecting
-            // dirty pages (no WRITE_TRACKED).
+            // Partitions marked with readOnly flag should be
+            // READ_ONLY and not WRITABLE.
             int rc = mm_set_permission(
                                     (void*)iv_TOC[i].virtAddr,
                                     iv_TOC[i].size,
-                                    WRITABLE);
+                                    READ_ONLY);
             if (rc)
             {
-                TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE for section %s.",
+                TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to READ_ONLY for section %s.",
                           SectionIdToString(i));
                 /*@
                 * @errortype
                 * @moduleid PNOR::MOD_PNORRP_READTOC
-                * @reasoncode PNOR::RC_WRITABLE_PERM_FAIL
+                * @reasoncode PNOR::RC_READ_ONLY_PERM_FAIL
                 * @userdata1 PNOR section id
                 * @userdata2 PNOR section vaddr
                 * @devdesc Could not set permissions of the
-                *          given PNOR section to WRITABLE
+                *          given PNOR section to READ_ONLY
                 * @custdesc A problem occurred while reading
                 *           Processor NOR flash partition table
                 */
                 l_errhdl = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 PNOR::MOD_PNORRP_READTOC,
-                                PNOR::RC_WRITABLE_PERM_FAIL,
+                                PNOR::RC_READ_ONLY_PERM_FAIL,
                                 i,
                                 iv_TOC[i].virtAddr,
                                 true /*Add HB SW Callout*/);
