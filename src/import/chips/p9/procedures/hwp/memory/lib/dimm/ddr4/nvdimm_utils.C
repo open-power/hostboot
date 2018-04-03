@@ -42,7 +42,7 @@
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
 #include <lib/utils/poll.H>
-#include <lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
