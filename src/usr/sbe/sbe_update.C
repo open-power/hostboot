@@ -35,6 +35,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/target.H>
+#include <targeting/targplatutil.H>
 #include <util/align.H>
 #include <util/crc32.H>
 #include <util/misc.H>
@@ -271,6 +272,25 @@ namespace SBE
                 TRACFBIN(g_trac_sbe, "updateProcessorSbeSeeproms(): Key transition new hw key hash",
                          g_hw_keys_hash_transition_data,
                          sizeof(g_hw_keys_hash_transition_data));
+
+                if(INITSERVICE::spBaseServicesEnabled())
+                {
+                    // Sync all attributes to FSP before we quiesce all the
+                    // SBEs.
+                    err = syncAllAttributesToFsp();
+                    if( err )
+                    {
+                        // Failed to sync all attributes to FSP; this is not
+                        // necessarily fatal.  The key transition will continue,
+                        // but this issue will be logged.
+                        TRACFCOMP(g_trac_sbe, ERR_MRK
+                            "updateProcessorSbeSeeproms: Error syncing "
+                            "attributes to FSP, RC=0x%04X, PLID=0x%08X",
+                            ERRL_GETRC_SAFE(err),
+                            ERRL_GETPLID_SAFE(err));
+                        errlCommit(err,SBE_COMP_ID );
+                    }
+                }
             }
 
             for(uint32_t i=0; i<procList.size(); i++)
@@ -541,6 +561,32 @@ namespace SBE
                                "rc=0x%.4X", err_cleanup->reasonCode() );
                     err = err_cleanup;
                 }
+            }
+        }
+
+        if(err && g_do_hw_keys_hash_transition)
+        {
+            // In theory it's possible to end up here if Hostboot fails to send
+            // the key transition started/succeeded message.  Hostboot will
+            // treat that as a failure of the key transition process to call
+            // attention to the unexpected sequence.
+            errlHndl_t pError = updateKeyTransitionState(
+                TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_FAILED);
+            if(pError)
+            {
+                TRACFCOMP(g_trac_sbe,
+                    ERR_MRK"updateProcessorSbeSeeproms(): Failed in call to "
+                    "updateKeyTransitionState with state of "
+                    "KEY_TRANSITION_STATE_KEY_TRANSITION_FAILED. "
+                    "Error log's EID=0x%08X, PLID=0x%08X, RC=0x%04X. ",
+                    "Changing error log's PLID to 0x%08X.",
+                    pError->eid(),pError->plid(),pError->reasonCode(),
+                    err->plid());
+
+                pError->plid(err->plid());
+                err->collectTrace(SBE_COMP_NAME);
+                err->collectTrace(SBEIO_COMP_NAME);
+                errlCommit(pError,SBE_COMP_ID);
             }
         }
 
@@ -5383,6 +5429,21 @@ errlHndl_t sbeDoReboot( void )
     TRACFCOMP( g_trac_sbe, ENTER_MRK"sbeDoReboot");
 
     do{
+
+        if(g_do_hw_keys_hash_transition)
+        {
+            err = updateKeyTransitionState(
+                      TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED);
+            if(err)
+            {
+                TRACFCOMP(g_trac_sbe,
+                    ERR_MRK"sbeDoReboot(): Failed in call to "
+                    "updateKeyTransitionState with state of "
+                    "KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED");
+                break;
+            }
+        }
+
 #ifdef CONFIG_BMC_IPMI
         uint16_t count = SENSOR::DEFAULT_REBOOT_COUNT;
         SENSOR::RebootCountSensor l_sensor;
@@ -5412,7 +5473,8 @@ errlHndl_t sbeDoReboot( void )
 
 #else //non-IPMI
 
-        if( INITSERVICE::spBaseServicesEnabled() )
+        if(   INITSERVICE::spBaseServicesEnabled()
+           && !g_do_hw_keys_hash_transition)
         {
             // Sync all attributes to the FSP before doing the Shutdown
             err = syncAllAttributesToFsp();
@@ -5420,11 +5482,11 @@ errlHndl_t sbeDoReboot( void )
             {
                 // Something failed on the sync.  Commit the error here
                 // and continue with the Re-IPL Request
-                TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"sbeDoReboot() - Error "
-                           "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
+                TRACFCOMP(g_trac_sbe, ERR_MRK
+                    "sbeDoReboot: Error syncing attributes to FSP.  "
+                    "RC=0x%04X, PLID=0x%08X",
+                    ERRL_GETRC_SAFE(err),
+                    ERRL_GETPLID_SAFE(err));
                 errlCommit( err, SBE_COMP_ID );
             }
             else
@@ -5451,7 +5513,6 @@ errlHndl_t sbeDoReboot( void )
             CONSOLE::flush();
         }
 #endif
-
 
 #ifdef CONFIG_BMC_IPMI
         if(g_do_hw_keys_hash_transition)
@@ -5862,6 +5923,16 @@ errlHndl_t secureKeyTransition()
         // Indicate a key transition is required
         g_do_hw_keys_hash_transition = true;
 
+        l_errl = updateKeyTransitionState(
+                     TARGETING::KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED);
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_sbe,ERR_MRK "secureKeyTransition(): Failed in "
+                "call to updateKeyTransitionState() with state of "
+                "KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED");
+            break;
+        }
+
         bool l_hw_lab_override_flag = l_nestedConHdr.sb_flags()->hw_lab_override;
         TRACFCOMP(g_trac_sbe, "Overriding the Lab Security Backdoor Bit due to"
                   " key transition; new Security Backdoor Enabled bit is %d",
@@ -5957,6 +6028,50 @@ errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
     } while(0);
 
     return l_errl;
+}
+
+errlHndl_t updateKeyTransitionState(
+    const TARGETING::KEY_TRANSITION_STATE i_keyTransitionState)
+{
+    errlHndl_t pError = nullptr;
+
+    do {
+
+    TRACFCOMP(g_trac_sbe,
+        INFO_MRK "updateKeyTransitionState: new key transition state of "
+        "0x%08X",
+        i_keyTransitionState);
+
+    TARGETING::UTIL::getCurrentNodeTarget()->setAttr<
+        TARGETING::ATTR_KEY_TRANSITION_STATE>(i_keyTransitionState);
+
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        auto * pMsg = msg_allocate();
+        pMsg->type = SBE::MSG_KEY_TRANSITION_EVENT_OCCURRED;
+        pMsg->data[0] = i_keyTransitionState;
+        pMsg->data[1] = 0;
+        pMsg->extra_data = nullptr;
+
+        pError = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE,pMsg);
+        if (pError)
+        {
+            TRACFCOMP(g_trac_sbe,
+                ERR_MRK "updateKeyTransitionState: "
+                "Failed in call to MBOX::sendrecv attempting to send a "
+                "MSG_KEY_TRANSITION_EVENT_OCCURRED event with key transition "
+                "state of 0x%08X",
+                i_keyTransitionState);
+        }
+
+        // Error or not, always have to free the memory
+        msg_free(pMsg);
+        pMsg=nullptr;
+    }
+
+    } while(0);
+
+    return pError;
 }
 
 } //end SBE Namespace

@@ -76,8 +76,9 @@ namespace SBE
     const uint8_t SITUATION_BOOT_SIDE_1   = 0x02;
 
     // For mbox messages to FSP
-    const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE = 0x40000012;
-    const uint32_t MSG_IPL_MASTER_CORE       = 0x40000005;
+    const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE         = 0x40000012;
+    const uint32_t MSG_IPL_MASTER_CORE               = 0x40000005;
+    const uint32_t MSG_KEY_TRANSITION_EVENT_OCCURRED = 0x40000017;
 
     /******************************************/
     /*  Enums                                 */
@@ -607,6 +608,24 @@ namespace SBE
     errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
                                       uint32_t i_SourceBfrLen,
                                       void * & o_pHbblIdStringBfr );
+
+    /**
+     *  @brief Updates the key transition state for the node
+     *
+     *  @par Detailed Description:
+     *      Updates the specified key transition state for the node and sends a
+     *      synchronous key transition state change alert to FSP (if
+     *      applicable).
+     *
+     *  @param[in] i_keyTransitionState Key transition state to update
+     *
+     *  @return errlHndl_t Error log handle
+     *  @retval nullptr Successfully updated node key transition state and
+     *      sent the new key transition state to FSP
+     *  @retval !nullptr Failed to send new key transition state to FSP
+     */
+    errlHndl_t updateKeyTransitionState(
+        TARGETING::KEY_TRANSITION_STATE i_keyTransitionState);
 
 } //end namespace SBE
 #endif
