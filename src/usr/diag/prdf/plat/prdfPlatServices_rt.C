@@ -63,56 +63,44 @@ namespace PlatServices
 //##                        Memory specific functions
 //##############################################################################
 
-void sendPageGardRequest( uint64_t i_systemAddress )
+void __dyndealloc( uint64_t i_saddr, uint64_t i_eaddr, MemoryError_t i_type )
 {
-    #define PRDF_FUNC "[PlatServices::sendPageGardRequest] "
+    #define PRDF_FUNC "[PlatServices::__dyndealloc] "
 
     do
     {
-        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
+        if ( !g_hostInterfaces || !g_hostInterfaces->memory_error )
         {
-            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
+            PRDF_ERR( PRDF_FUNC "memory_error() interface is not defined" );
             break;
         }
 
-        int32_t rc = g_hostInterfaces->memory_error( i_systemAddress,
-                                                      i_systemAddress,
-                                                      MEMORY_ERROR_CE );
-        if( SUCCESS != rc )
+        int32_t rc = g_hostInterfaces->memory_error( i_saddr, i_eaddr, i_type );
+        if ( SUCCESS != rc )
         {
-            PRDF_ERR(PRDF_FUNC " memory_error() failed");
+            PRDF_ERR( PRDF_FUNC "memory_error() failed" );
             break;
         }
-    }while(0);
+
+    } while (0);
 
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
+void sendPageGardRequest( uint64_t i_saddr )
 {
-    #define PRDF_FUNC "[PlatServices::sendDynMemDeallocRequest] "
+    // Note that both addresses will be the same for a page gard.
+    __dyndealloc( i_saddr, i_saddr, MEMORY_ERROR_CE );
+}
 
-    do
-    {
-        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
-        {
-            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
-            break;
-        }
+void sendDynMemDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr )
+{
+    __dyndealloc( i_saddr, i_eaddr, MEMORY_ERROR_UE );
+}
 
-        int32_t rc = g_hostInterfaces->memory_error( i_startAddr,
-                                                     i_endAddr,
-                                                     MEMORY_ERROR_UE );
-        if( SUCCESS != rc )
-        {
-            PRDF_ERR(PRDF_FUNC " memory_error() failed");
-            break;
-        }
-    }while(0);
-
-    #undef PRDF_FUNC
+void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr )
+{
+    __dyndealloc( i_saddr, i_eaddr, MEMORY_ERROR_PREDICTIVE );
 }
 
 //##############################################################################

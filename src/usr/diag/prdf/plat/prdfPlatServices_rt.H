@@ -42,18 +42,27 @@ namespace PlatServices
 //##############################################################################
 
 /**
- * @brief Communicates a page gard request to the hypervisor.
- * @param i_systemAddress Any address in the target page.
+ * @brief Sends a page gard request to the hypervisor.
+ * @param i_addr Any address in the target page.
  */
-void sendPageGardRequest( uint64_t i_systemAddress );
+void sendPageGardRequest( uint64_t i_addr );
 
 /**
- * @brief Communicates to the hypervisor a range of address to remove from the
- *        available memory space.
- * @param i_startAddr First address in the range.
- * @param i_endAddr   Last address in the range.
+ * @brief Sends a dynamic memory deallocation message to the hypervisor. This
+ *        message is intended for memory UEs, channel/port failures, etc.
+ * @param i_saddr The first address in the range.
+ * @param i_eaddr The last address in the range.
  */
-void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
+void sendDynMemDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
+
+/**
+ * @brief Sends a predictive dynamic memory deallocation message to the
+ *        hypervisor. This message is intended to be send whenever there is a
+ *        predictive callout of any part in the memory subsystem.
+ * @param i_saddr The first address in the range.
+ * @param i_eaddr The last address in the range.
+ */
+void sendPredDeallocRequest( uint64_t i_saddr, uint64_t i_eaddr );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
