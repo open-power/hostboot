@@ -82,6 +82,7 @@ my $cfgBigEndian = 1;
 my $cfgIncludeFspAttributes = 0;
 my $CfgSMAttrFile = "";
 my $cfgAddVersionPage = 0;
+my $nonSyncAttribFile = "";
 
 my $cfgBiosXmlFile = undef;
 my $cfgBiosSchemaFile = undef;
@@ -103,6 +104,7 @@ GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "bios-xml-file:s" => \$cfgBiosXmlFile,
            "bios-schema-file:s" => \$cfgBiosSchemaFile,
            "bios-output-file:s" => \$cfgBiosOutputFile,
+           "non-sync-attrib-file:s" => \$nonSyncAttribFile,
            "help" => \$cfgHelp,
            "man" => \$cfgMan,
            "verbose" => \$cfgVerbose ) || pod2usage(-verbose => 0);
@@ -135,6 +137,7 @@ if($cfgVerbose)
     print STDOUT "bios-schema-file = $cfgBiosSchemaFile\n";
     print STDOUT "bios-xml-file = $cfgBiosXmlFile\n";
     print STDOUT "bios-output-file = $cfgBiosOutputFile\n";
+    print STDOUT "Non Sync Attributes file = $nonSyncAttribFile\n";
 }
 
 ################################################################################
@@ -199,6 +202,15 @@ if ($cfgFapiAttributesXmlFile ne "")
     $fapiAttributes = $xml->XMLin($cfgFapiAttributesXmlFile,
         forcearray => ['attribute']);
 }
+
+my @nonSyncAttributes = {};
+if ($nonSyncAttribFile ne "")
+{
+    my $nsa = $xml->XMLin($nonSyncAttribFile,
+       KeyAttr => 'id', ForceArray=>1);
+    @nonSyncAttributes = values %$nsa;
+}
+
 # save attributes defined as Target_t type
 my %Target_t = ();
 
@@ -2487,6 +2499,11 @@ sub writeTraitFileTraits {
         else
         {
             $traits .= " notFspMutex,";
+        }
+
+        if (!($attribute->{id} ~~ @nonSyncAttributes))
+        {
+            $traits .= " fspAccessible,";
         }
 
         chop($traits);
@@ -7009,6 +7026,11 @@ print SM_TARGET_FILE "
 <attributes>";
     for (my $i = 0; $i < $Count; $i++)
     {
+        if ($attrDataforSM[$i][ATTRNAME] ~~ @nonSyncAttributes)
+        {
+            next;
+        }
+
         print SM_TARGET_FILE "
 <attribute>
     <id>0x$attrDataforSM[$i][ATTRID]</id>

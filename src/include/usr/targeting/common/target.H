@@ -159,6 +159,30 @@ class Target
         bool tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const;
 
         /**
+         *  @brief Try to get the target's specified not synced attribute value
+         *
+         *  A special tryGetAttr function for getting the attribute values
+         *  of the attributes which are not synced to system model on FSP.
+         *  It returns false (with invalid o_attrValue) if the specified
+         *  attribute does not exist for the associated target, true (with a
+         *  valid o_attrValue) otherwise.
+         *
+         *  @param[out] o_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post See "return"
+         *
+         *  @return bool indicating whether the specified attribute was returned
+         *      or not
+         *
+         *  @retval true Attribute returned in o_attrValue
+         *  @retval false Attribute not found; o_attValue not valid
+         */
+        template<const ATTRIBUTE_ID A>
+        bool tryGetAttrNotSynced(
+            typename AttributeTraits<A>::Type& o_attrValue) const;
+        /**
          *  @brief Get the target's specified attribute value
          *
          *  Returns the target's specified attribute value.  If the specified
@@ -248,6 +272,31 @@ class Target
          */
         template<const ATTRIBUTE_ID A>
         bool trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue);
+
+        /**
+         *  @brief Tries to set the target's specified not synced attribute value
+         *
+         *  This special function need to be used on FSP to set the value of
+         *  an attribute which is not synced to system model.
+         *  It returns false if the specified attribute does not exist for the
+         *  associated target, true otherwise.
+         *
+         *  @param[in] i_attrValue Value of the attribute
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post Target's attribute value updated (if it exists), and caller
+         *      notified whether the update occurred or not.
+         *
+         *  @return bool indicating whether the specified attribute was updated
+         *      or not
+         *
+         *  @retval true Attribute updated
+         *  @retval false Attribute not updated
+         */
+        template<const ATTRIBUTE_ID A>
+        bool trySetAttrNotSynced(
+            typename AttributeTraits<A>::Type const& i_attrValue);
 
         /**
          *  @brief Returns pointer to a mutex attribute associated with the
@@ -795,7 +844,8 @@ class Target
 } PACKED;
 
 template<const ATTRIBUTE_ID A>
-bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
+bool Target::tryGetAttrNotSynced(
+    typename AttributeTraits<A>::Type& o_attrValue) const
 {
     if(AttributeTraits<A>::readable) { }
     if(AttributeTraits<A>::notHbMutex) { }
@@ -804,13 +854,36 @@ bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
 }
 
 template<const ATTRIBUTE_ID A>
+bool Target::tryGetAttr(typename AttributeTraits<A>::Type& o_attrValue) const
+{
+    if(AttributeTraits<A>::readable) { }
+    if(AttributeTraits<A>::notHbMutex) { }
+#if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+    if(AttributeTraits<A>::notFspMutex) { }
+#endif //!defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+    if(AttributeTraits<A>::fspAccessible) { }
+    return _tryGetAttr(A,sizeof(o_attrValue),&o_attrValue);
+}
+
+template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
+{
+    if(AttributeTraits<A>::writeable) { }
+    if(AttributeTraits<A>::notHbMutex) { }
+#if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+    if(AttributeTraits<A>::fspAccessible) { }
+#endif //!defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+    return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
+}
+
+template<const ATTRIBUTE_ID A>
+bool Target::trySetAttrNotSynced(
+    typename AttributeTraits<A>::Type const& i_attrValue)
 {
     if(AttributeTraits<A>::writeable) { }
     if(AttributeTraits<A>::notHbMutex) { }
     return _trySetAttr(A,sizeof(i_attrValue),&i_attrValue);
 }
-
 
 template<const ATTRIBUTE_ID A>
 typename AttributeTraits<A>::Type Target::getAttr() const
