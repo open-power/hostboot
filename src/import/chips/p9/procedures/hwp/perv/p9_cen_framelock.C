@@ -1658,9 +1658,6 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
         .clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                             // Bit 61
     }
 
-    //TODO: To be removed, see SW413273
-    l_dataPathFirMask.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
-
     // Write to ACTION0 reg
     l_writeMask = l_action0_data;
     FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact0_reg(i_pu_target, l_action0_data, l_writeMask),
