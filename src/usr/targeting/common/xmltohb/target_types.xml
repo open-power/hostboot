@@ -997,6 +997,9 @@
     <id>FRU_ID</id>
   </attribute>
   <attribute>
+    <id>KEY_TRANSITION_STATE</id>
+  </attribute>
+  <attribute>
     <id>EEPROM_VPD_PRIMARY_INFO</id>
   </attribute>
   <attribute>

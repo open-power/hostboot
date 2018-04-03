@@ -6294,6 +6294,63 @@
     </enumerator>
 </enumerationType>
 
+<enumerationType>
+    <id>KEY_TRANSITION_STATE</id>
+    <description>
+        Enum indicating the current Secure Boot key transition state for the
+        node.
+    </description>
+    <enumerator>
+        <description>
+            Secure Boot key transition not yet requested for the node
+        </description>
+        <name>KEY_TRANSITION_NOT_REQUESTED</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <description>
+            About to write new system Secure Boot key to first SBE SEEPROM
+            side in the node
+        </description>
+        <name>KEY_TRANSITION_STARTED</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <description>
+            Failed to apply new system Secure Boot key to one or more functional
+            SBE SEEPROM sides in the node
+        </description>
+        <name>KEY_TRANSITION_FAILED</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <description>
+            Successfully applied new system Secure Boot key to every functional
+            SBE SEEPROM side in the node
+        </description>
+        <name>KEY_TRANSITION_SUCCEEDED</name>
+        <value>3</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+  <description>
+    Attribute indicating the status of the Secure Boot key transition for
+    the node
+  </description>
+  <hasStringConversion></hasStringConversion>
+  <id>KEY_TRANSITION_STATE</id>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <simpleType>
+    <enumeration>
+      <id>KEY_TRANSITION_STATE</id>
+      <default>KEY_TRANSITION_NOT_REQUESTED</default>
+    </enumeration>
+  </simpleType>
+</attribute>
+
 <attribute>
     <id>FUSED_CORE_MODE_HB</id>
     <description>
