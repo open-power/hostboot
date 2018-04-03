@@ -410,6 +410,8 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
 }
 template int32_t page<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr );
 
+//------------------------------------------------------------------------------
+
 template<TYPE T>
 int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
 {
@@ -457,6 +459,8 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
 }
 template int32_t rank<TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank );
 
+//------------------------------------------------------------------------------
+
 template<TYPE T>
 int32_t port( ExtensibleChip * i_chip )
 {
@@ -503,17 +507,20 @@ int32_t port( ExtensibleChip * i_chip )
 }
 template int32_t port<TYPE_MCA>( ExtensibleChip * i_chip );
 
+//------------------------------------------------------------------------------
+
 template <TYPE T>
-int32_t dimmSlct( TargetHandle_t i_dimm )
+int32_t __getDimmRange( TargetHandle_t i_dimm,
+                        uint64_t & o_ssAddr, uint64_t & o_seAddr )
 {
-    #define PRDF_FUNC "[MemDealloc::dimmSlct] "
+    #define PRDF_FUNC "[MemDealloc::__getDimmRange] "
 
     int32_t o_rc = SUCCESS;
 
+    o_ssAddr = o_seAddr = 0;
+
     do
     {
-        if ( !isEnabled() ) break; // nothing to do
-
         // Get the MCA, MBA, etc. connected to this DIMM.
         TargetHandle_t trgt = getConnectedParent( i_dimm, T );
         ExtensibleChip * chip = (ExtensibleChip *)systemPtr->GetChip( trgt );
@@ -537,14 +544,42 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
         }
 
         // Get the system addresses.
-        uint64_t ssAddr = 0;
-        uint64_t seAddr = 0;
-        o_rc  = getSystemAddr<T>( chip, startAddr, ssAddr );
-        o_rc |= getSystemAddr<T>( chip, endAddr,   seAddr );
+        o_rc  = getSystemAddr<T>( chip, startAddr, o_ssAddr );
+        o_rc |= getSystemAddr<T>( chip, endAddr,   o_seAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
                       chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TYPE T>
+int32_t dimmSlct( TargetHandle_t i_dimm )
+{
+    #define PRDF_FUNC "[MemDealloc::dimmSlct] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( !isEnabled() ) break; // nothing to do
+
+        // Get the system addresses.
+        uint64_t ssAddr = 0, seAddr = 0;
+        o_rc = __getDimmRange<T>( i_dimm, ssAddr, seAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__getDimmRange(0x%08x) failed",
+                      getHuid(i_dimm) );
             break;
         }
 
@@ -559,6 +594,8 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
 
 template <TYPE T>
 bool isDimmPair( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
@@ -601,11 +638,13 @@ bool compareDimms( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
 
 template <TYPE T>
 int32_t dimmList( TargetHandleList  & i_dimmList )
 {
     #define PRDF_FUNC "[MemDealloc::dimmList] "
+
     int32_t o_rc = SUCCESS;
 
     // Find unique dimm slct.
@@ -617,16 +656,26 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
     for( TargetHandleList::iterator it = i_dimmList.begin();
          it != uniqueDimmEndIt; it++ )
     {
-        int32_t l_rc = dimmSlct<T>( *it );
-        if( SUCCESS != l_rc )
+        // Get the system addresses.
+        uint64_t ssAddr = 0, seAddr = 0;
+        if ( SUCCESS != __getDimmRange<T>(*it, ssAddr, seAddr) )
         {
-            PRDF_ERR(PRDF_FUNC "Failed for DIMM 0x:%08X", getHuid( *it ) );
-            o_rc |= l_rc;
+            PRDF_ERR( PRDF_FUNC "__getDimmRange(0x%08x) failed", getHuid(*it) );
+            o_rc = FAIL; continue; // Continue to the next DIMM.
         }
+
+        // Send the address range to the hypervisor.
+        sendPredDeallocRequest( ssAddr, seAddr );
+        PRDF_TRAC( PRDF_FUNC "Predictive dealloc for start addr: 0x%016llx "
+                   "end addr: 0x%016llx", ssAddr, seAddr );
     }
+
     return o_rc;
+
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
 
 int32_t dimmList( TargetHandleList  & i_dimmList )
 {
