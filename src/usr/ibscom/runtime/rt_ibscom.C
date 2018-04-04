@@ -34,7 +34,7 @@
 
 // Trace definition
 trace_desc_t* g_trac_ibscom = NULL;
-TRAC_INIT(&g_trac_ibscom, "IBSCOM", 2*KILOBYTE, TRACE::BUFFER_SLOW);
+TRAC_INIT(&g_trac_ibscom, IBSCOM_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
 
 namespace IBSCOM
 {

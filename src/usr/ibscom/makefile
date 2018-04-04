@@ -25,7 +25,7 @@
 ROOTPATH = ../../..
 MODULE = ibscom
 
-#include common ojects between hostboot and runtime hostboot
+#include common objects between hostboot and runtime hostboot
 include ibscom.mk
 
 OBJS += ibscom.o
