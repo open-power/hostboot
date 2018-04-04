@@ -122,6 +122,20 @@ uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
     return i_val & ~mask;
 }
 
+uint64_t __countBits( uint64_t i_val )
+{
+    uint64_t o_count = 0;
+
+    while ( 0 != i_val )
+    {
+        if ( 1 == (i_val & 0x1) )
+            o_count++;
+        i_val >>= 1;
+    }
+
+    return o_count;
+}
+
 int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
                           uint64_t & o_addr )
 {
@@ -221,6 +235,129 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
 
 //------------------------------------------------------------------------------
 
+// Converts a 2-bit number into the binned (one-hot) 3-modulus format (B3MF).
+//    mod(0) = 0b00 = 0b100
+//    mod(1) = 0b01 = 0b010
+//    mod(2) = 0b10 = 0b001
+//    mod(3) = 0b00 = 0b100
+uint8_t __b3mf( uint8_t i_val )
+{
+    return 4 >> (i_val % 3);
+}
+
+// Rotates i_b3mf right by i_num bits.
+uint8_t __rrotate( uint8_t i_b3mf, uint8_t i_num )
+{
+    uint8_t o_b3mf = i_b3mf;
+    for ( uint8_t n = 0; n < i_num; n++ )
+    {
+        o_b3mf = ((o_b3mf & 0x6) >> 1) | ((o_b3mf & 0x1) << 2);
+    }
+    return o_b3mf;
+}
+
+// Rotates i_b3mf left by i_num bits.
+uint8_t __lrotate( uint8_t i_b3mf, uint8_t i_num )
+{
+    uint8_t o_b3mf = i_b3mf;
+    for ( uint8_t n = 0; n < i_num; n++ )
+    {
+        o_b3mf = ((o_b3mf & 0x3) << 1) | ((o_b3mf & 0x4) >> 2);
+    }
+    return o_b3mf;
+}
+
+// See the description below on the significance of these components.
+void __getRAComps( uint64_t i_ra, uint8_t & o_r2, uint8_t & o_ra_55_56 )
+{
+    uint8_t r0 = __b3mf(        (i_ra >> 15) & 0x3 ); // RA[47:48]
+    uint8_t r1 = __rrotate( r0, (i_ra >> 17) & 0x3 ); // RA[45:46]
+    o_r2       = __rrotate( r1, (i_ra >> 19) & 0x3 ); // RA[43:44]
+    o_ra_55_56 =                (i_ra >>  7) & 0x3;   // RA[55:56]
+}
+
+// Returns the two MSB bits that need to be added to the port address. This will
+// be shifted to the correct position so it simply needs to be OR'd to the port
+// address.
+uint64_t __getMSB( uint32_t i_grpId, uint8_t i_ra_55_56, uint8_t i_r2,
+                   uint32_t i_grpSize )
+{
+    // Get the mod3 hash. There are some nice tables in sections 2.12.1 and
+    // 2.12.2 of the Cumulus MC workbook. Fortunately, those tables can be
+    // boiled down to some bit shifting.
+    uint8_t r3 = __lrotate( __b3mf(i_grpId), i_ra_55_56 );
+
+    // Given r2 and r3, calculate the MSBs for the port address by counting the
+    // number of lrotates on r3 it takes to match r2.
+    uint64_t o_msb = 0;
+    while ( i_r2 != r3 )
+    {
+        r3 = __lrotate( r3, 1 );
+        o_msb++;
+    }
+
+    // Now shift the MSBs by the group size.
+    o_msb <<= ( 30 + __countBits(i_grpSize) );
+
+    return o_msb;
+}
+
+// The hardware uses a mod3 hashing algorithm to calculate which memory channel
+// an address belongs to. This is calulated with the following:
+//      r0 = B3MF(RA[47:48])
+//      r1 = rrotate(r0, RA[45:46])
+//      r2 = rrotate(r1, RA[43:44])
+//      r3 = rrotate(r2, m[0:1])
+// RA is the real address, m[0:1] is the two most significant bits of the port
+// address, and r3 is the mod3 hash. Since we are translating from the phyiscal
+// address to the real address, we don't have m[0:1]. So the goal here is to
+// calculate that. Fortunately, we have the 40-bit port address, which is where
+// we can get RA[43:48] to calculate r2. We can also do a reverse lookup with
+// the group ID and RA[55:56] to find r3. From there, we just need to solve for
+// m[0:1] and add it to the beginning of the port address.
+
+uint64_t __insertGrpId_3mcpg( uint64_t i_pa, uint32_t i_grpId,
+                              uint32_t i_grpSize )
+{
+    // For 3 MC/grp config, we don't need to insert any bits into the port
+    // address (similar handling as the 1 MC/grp config).
+    uint64_t ra = i_pa;
+
+    // From here we can calculate r2 and extract RA[55:56].
+    uint8_t r2, ra_55_56;
+    __getRAComps( ra, r2, ra_55_56 );
+
+    // Given the components, we can now calculate the MBS.
+    uint64_t msb = __getMSB( i_grpId, ra_55_56, r2, i_grpSize );
+
+    // Now combine the current real address and the MSBs.
+    return ( ra | msb );
+}
+
+uint64_t __insertGrpId_6mcpg( uint64_t i_pa, uint32_t i_grpId,
+                              uint32_t i_grpSize )
+{
+    // For 6 MC/grp config, RA[56] is the LSB of the group ID (similar handling
+    // as the 2 MC/grp config).
+    uint64_t upper33 = i_pa & 0xFFFFFFFF80ull;
+    uint64_t lower7  = i_pa & 0x000000007full;
+    uint64_t ra = (upper33 << 1) | ((i_grpId & 0x1) << 7) | lower7;
+
+    // From here we can calculate r2 and extract RA[55:56].
+    uint8_t r2, ra_55_56;
+    __getRAComps( ra, r2, ra_55_56 );
+
+    // Given the components, we can now calculate the MBS. Note that the LSB of
+    // the group ID has already been inserted into RA[56]. That bit should not
+    // be used to calculate the mod 3 hash.
+    uint64_t msb = __getMSB( (i_grpId & 0x6), (ra_55_56 & 0x2), r2, i_grpSize );
+
+    // Now combine the current real address and the MSBs.
+    return ( ra | msb );
+}
+
+//------------------------------------------------------------------------------
+
 template<TYPE T>
 int32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
                        uint64_t & o_addr );
@@ -280,15 +417,11 @@ int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
         // some crafty mod3 logic to evenly distribute the addresses among the
         // 3 channels. The mod3 hashing is based on the address itself so there
         // isn't a traditional group select like we are used to in the 2, 4, and
-        // 8 channel group configs. In fact, 3 channel group configs do not need
-        // a group select and are treated like 1 channel group configs. The 6
-        // channel group configs will also use the mod3 hashing and a 1-bit
-        // group select to handle all 6 channels. Fortunately, this group select
-        // is far easier to calculate than expected because it is always the
-        // last bit of the group ID from the MCFGP (just like 2 channel group
-        // configs).
+        // 8 channel group configs. This will require special handling to insert
+        // the appropriate bits based on the group ID.
 
-        uint8_t grpId = mcfgp->GetBitFieldJustified((0 == mcaPos) ? 5 : 8, 3);
+        uint32_t grpId = mcfgp->GetBitFieldJustified((0 == mcaPos) ? 5 : 8, 3);
+        uint32_t grpSize = mcfgp->GetBitFieldJustified( 13, 11 );
 
         uint64_t upper33 = o_addr & 0xFFFFFFFF80ull;
         uint64_t lower7  = o_addr & 0x000000007full;
@@ -296,16 +429,22 @@ int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
         switch ( chnls )
         {
             case 1:
-            case 3: // no shifting
                 break;
 
-            case 2:
-            case 6: // insert 1 bit
+            case 2: // insert 1 bit
                 o_addr = (upper33 << 1) | ((grpId & 0x1) << 7) | lower7;
+                break;
+
+            case 3: // Special handling for 3 MC/grp
+                o_addr = __insertGrpId_3mcpg( o_addr, grpId, grpSize );
                 break;
 
             case 4: // insert 2 bits
                 o_addr = (upper33 << 2) | ((grpId & 0x3) << 7) | lower7;
+                break;
+
+            case 6: // Special handling for 6 MC/grp
+                o_addr = __insertGrpId_6mcpg( o_addr, grpId, grpSize );
                 break;
 
             case 8: // insert 3 bits
