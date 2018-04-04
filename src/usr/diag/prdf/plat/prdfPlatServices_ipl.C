@@ -492,17 +492,64 @@ uint32_t startVcmPhase1<TYPE_MBA>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[PlatServices::startVcmPhase1<TYPE_MBA>] "
 
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    // TODO RTC 157888
-    //  - Start a targeted steer cleanup.
-    //  - Stop on RCE ETE (threshold 1).
-    //  - The command should always stop at the end of the master rank.
+    uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
 
-    return SUCCESS;
+    // Get the stop conditions.
+    uint32_t stopCond = mss_MaintCmd::STOP_ON_RETRY_CE_ETE          |
+                        mss_MaintCmd::STOP_ON_END_ADDRESS           |
+                        mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Note that we set the stop on RCE ETE flag. This requires us to set a
+    // threshold in the MBSTR. Fortunately, MDIA sets the threshold for us when
+    // it starts the first command on this MBA.
+
+    do
+    {
+        // Get the address range of the master rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          MASTER_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start a steer cleanup command.
+        mss_TimeBaseSteerCleanup cmd { fapiTrgt, saddr, eaddr,
+                                       mss_MaintCmd::FAST_MAX_BW_IMPACT,
+                                       stopCond, false };
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }
@@ -515,19 +562,254 @@ uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[PlatServices::startVcmPhase2<TYPE_MBA>] "
 
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    // TODO RTC 157888
-    //  - Start a targeted super fast read.
-    //  - No stop-on-error conditions. Note that RCEs will report as UEs during
-    //    read operations. You can still set stop-on-RCE-ETE to be consistent
-    //    with phase 1, but it will not have any effect and is not required.
-    //  - The command should always stop at the end of the master rank.
+    uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
 
-    return SUCCESS;
+    // Get the stop conditions.
+    uint32_t stopCond = mss_MaintCmd::STOP_ON_END_ADDRESS           |
+                        mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    do
+    {
+        // Get the address range of the master rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          MASTER_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Create the new command. Store a pointer to the command in the MBA
+        // data bundle so that we can call the cleanup function after the
+        // command has completed.
+        MbaDataBundle * db = getMbaDataBundle( i_chip );
+        PRDF_ASSERT( nullptr == db->iv_sfCmd ); // Code bug.
+        db->iv_sfCmd = new mss_SuperFastRead { fapiTrgt, saddr, eaddr,
+                                               stopCond, false };
+
+        // Start the super fast read command.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase1<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startTpsPhase1<TYPE_MBA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+    // Get the stop conditions.
+    uint32_t stopCond = mss_MaintCmd::STOP_ON_RETRY_CE_ETE          |
+                        mss_MaintCmd::STOP_ON_END_ADDRESS           |
+                        mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Note that we set the stop on RCE ETE flag. This requires us to set a
+    // threshold in the MBSTR. Fortunately, MDIA sets the threshold for us when
+    // it starts the first command on this MBA.
+
+    do
+    {
+        // Set up the per-symbol counters to capture soft CEs.
+        ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+        const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSTR"
+                                                       : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
+            break;
+        }
+
+        //  Enable per-symbol error counters to count soft CEs
+        mbstr->SetBit(55);
+        mbstr->SetBit(56);
+        // Disable per-symbol error counters to count hard CEs
+        mbstr->ClearBit(57);
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+            break;
+        }
+
+        // Get the address range of the master rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start a steer cleanup command.
+        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr,
+                                mss_MaintCmd::FAST_MAX_BW_IMPACT,
+                                stopCond, false };
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTpsPhase2<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::startTpsPhase2<TYPE_MBA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+    // Get the stop conditions.
+    uint32_t stopCond = mss_MaintCmd::STOP_ON_RETRY_CE_ETE          |
+                        mss_MaintCmd::STOP_ON_END_ADDRESS           |
+                        mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Note that we set the stop on RCE ETE flag. This requires us to set a
+    // threshold in the MBSTR. Fortunately, MDIA sets the threshold for us when
+    // it starts the first command on this MBA.
+
+    do
+    {
+        // Set up the per-symbol counters to capture soft CEs.
+        ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+        const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSTR"
+                                                       : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
+            break;
+        }
+
+        //  Disable per-symbol error counters to count soft CEs
+        mbstr->ClearBit(55);
+        mbstr->ClearBit(56);
+        //  Enable per-symbol error counters to count hard CEs
+        mbstr->SetBit(57);
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+            break;
+        }
+
+        // Get the address range of the master rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start a steer cleanup command.
+        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr,
+                                mss_MaintCmd::FAST_MAX_BW_IMPACT,
+                                stopCond, false };
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }

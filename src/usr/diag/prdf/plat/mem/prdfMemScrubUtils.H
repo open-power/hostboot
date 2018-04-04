@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,6 +151,16 @@ uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
  */
 template<TARGETING::TYPE T>
 uint32_t isBgScrubConfig( ExtensibleChip * i_chip, bool & o_isBgScrub );
+
+/**
+ * @brief  Sets the ETE thresholds needed for background scrubbing.
+ * @param  i_chip An MBA.
+ * @param  i_rank A rank on the target DIMM.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t setBgScrubThresholds( ExtensibleChip * i_chip,
+                               const MemRank & i_rank );
 
 } //end namespace PRDF
 

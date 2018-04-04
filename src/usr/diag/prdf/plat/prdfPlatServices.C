@@ -574,13 +574,13 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
         // Start the background scrub command.
         errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, mss::memdiags::background_scrub, fapiTrgt, stopCond,
-                         scrubSpeed, saddr );
+        FAPI_INVOKE_HWP( errl, mss::memdiags::background_scrub, fapiTrgt,
+                         stopCond, scrubSpeed, saddr );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "mss::memdiags::background_scrub(0x%08x,%d) failed",
-                      mcbChip->getHuid(), i_rank.getMaster() );
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::background_scrub(0x%08x,%d) "
+                      "failed", mcbChip->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
@@ -755,55 +755,90 @@ uint32_t startTpsRuntime<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 //##############################################################################
 
 template<>
-uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_mbaChip,
+uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
                                  const MemRank & i_rank )
 {
     #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_MBA>] "
 
-    PRDF_ASSERT( nullptr != i_mbaChip );
-    PRDF_ASSERT( TYPE_MBA == i_mbaChip->getType() );
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
+    // Get the MBA fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+    // Get the stop conditions.
+    // NOTE: If HBRT_PRD is not configured, we want to use the defaults so that
+    //       background scrubbing never stops.
+    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
+
+    #ifdef CONFIG_HBRT_PRD
+
+    stopCond = mss_MaintCmd::STOP_ON_HARD_NCE_ETE           |
+               mss_MaintCmd::STOP_ON_INT_NCE_ETE            |
+               mss_MaintCmd::STOP_ON_SOFT_NCE_ETE           |
+               mss_MaintCmd::STOP_ON_RETRY_CE_ETE           |
+               mss_MaintCmd::STOP_ON_MPE                    |
+               mss_MaintCmd::STOP_ON_UE                     |
+               mss_MaintCmd::STOP_IMMEDIATE                 |
+               mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    #endif
+
+    // Get the command speed.
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = enableFastBgScrub()
+                                            ? mss_MaintCmd::FAST_MED_BW_IMPACT
+                                            : mss_MaintCmd::BG_SCRUB;
     do
     {
+        // Get the first address of the given rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          SLAVE_RANK );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Set the required thresholds for background scrubbing.
+        o_rc = setBgScrubThresholds<TYPE_MBA>( i_chip, i_rank );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBgScrubThresholds(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
         // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_MBA>( i_mbaChip );
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_mbaChip->getHuid() );
+                      i_chip->getHuid() );
             break;
         }
 
         // Start the background scrub command.
-        PRDF_ERR( PRDF_FUNC "function not implemented yet" ); // TODO RTC 157888
+        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
+                                stopCond, false };
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
 
     } while (0);
 
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsPhase1<TYPE_MBA>( ExtensibleChip * i_mbaChip,
-                                   const MemRank & i_rank )
-{
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
-    return SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
-                                   const MemRank & i_rank )
-{
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
-    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -817,7 +852,9 @@ uint32_t startTpsRuntime<TYPE_MBA>( ExtensibleChip * i_mbaChip,
     return SUCCESS;
 }
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//##                  Core/cache trace array functions
+//##############################################################################
 
 int32_t restartTraceArray(TargetHandle_t i_tgt)
 {
