@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,152 +35,98 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
-#include    <map>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+//  Integral and component ID support
+#include <stdint.h>                     // uint32_t
+#include <hbotcompid.H>                 // HWPF_COMP_ID
 
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
+//  Tracing support
+#include <trace/interface.H>            // TRACFCOMP
+#include <initservice/isteps_trace.H>   // g_trac_isteps_trace
 
-#include    <initservice/isteps_trace.H>
+//  Error handling support
+#include <errl/errlentry.H>             // errlHndl_t
+#include <isteps/hwpisteperror.H>       // IStepError
 
-#include    <hwas/common/deconfigGard.H>
-#include    <hwas/common/hwasCommon.H>
+//  Pbus link service support
+#include <pbusLinkSvc.H>                // TargetPairs_t, PbusLinkSvc
 
-#include    <sbe/sbeif.H>
-
-//  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/common/trace.H>
-
-#include  <pbusLinkSvc.H>
-#include  <fapi2/target.H>
-#include  <fapi2/plat_hwp_invoker.H>
-
-// HWP
-#include    <p9_io_xbus_pre_trainadv.H>
+//  HWP call support
+#include <istepHelperFuncs.H>           // captureError
+#include <istep09/istep09HelperFuncs.H> // trainBusHandler
 
 namespace   ISTEP_09
 {
-
-
-using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
-using   namespace   ERRORLOG;
+using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
-using   namespace   HWAS;
 
-//
-//  Wrapper function to call fabric_pre_trainadv
-//
-void*    call_fabric_pre_trainadv( void    *io_pArgs )
+//******************************************************************************
+// Wrapper function to call fabric_pre_trainadv
+//******************************************************************************
+void* call_fabric_pre_trainadv( void *io_pArgs )
 {
-    IStepError  l_StepError;
-    errlHndl_t  l_errl  =   NULL;
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_fabric_pre_trainadv entry" );
+    errlHndl_t  l_err(nullptr);
+    IStepError  l_stepError;
 
-    EDI_EI_INITIALIZATION::TargetPairs_t l_PbusConnections;
-    const uint32_t MaxBusSet = 1;
-    TYPE busSet[MaxBusSet] = { TYPE_XBUS }; // TODO RTC:152304 - add TYPE_OBUS
+    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_fabric_pre_trainadv entry" );
 
-    for (uint32_t ii = 0; (!l_errl) && (ii < MaxBusSet); ii++)
+    EDI_EI_INITIALIZATION::TargetPairs_t l_pbusConnections;
+    TYPE l_busSet[] = { TYPE_XBUS, TYPE_OBUS };
+    constexpr uint32_t l_maxBusSet = sizeof(l_busSet)/sizeof(TYPE);
+
+    for (uint32_t ii = 0; (!l_err) && (ii < l_maxBusSet); ii++)
     {
-        l_errl = EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().
-                    getPbusConnections(l_PbusConnections, busSet[ii]);
-        if (l_errl)
+        l_err = EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().
+                    getPbusConnections(l_pbusConnections, l_busSet[ii]);
+
+        if (l_err)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACFCOMP(g_trac_isteps_trace,
                 "ERROR 0x%.8X : getPbusConnections TYPE_%cBUS returns error",
-                l_errl->reasonCode(), (ii ? 'X':'O') );
+                l_err->reasonCode(), (ii ? 'O':'X') );
 
-            // Create IStep error log and cross reference to error that occurred
-            l_StepError.addErrorDetails( l_errl );
-
-            // Commit the error log
-            // Log should be deleted and set to NULL in errlCommit.
-            errlCommit(l_errl, HWPF_COMP_ID);
+            // Capture error and then exit
+            captureError(l_err,
+                         l_stepError,
+                         HWPF_COMP_ID);
 
             // Don't continue with a potential bad connection set
             break;
         }
 
-        for (const auto & l_PbusConnection: l_PbusConnections)
+        if (TYPE_XBUS == l_busSet[ii])
         {
-            const TARGETING::Target* l_thisPbusTarget = l_PbusConnection.first;
-            const TARGETING::Target* l_connectedPbusTarget =
-                                                    l_PbusConnection.second;
-
-            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
-                l_thisPbusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_thisPbusTarget)));
-
-            const fapi2::Target <fapi2::TARGET_TYPE_XBUS>
-                l_connectedPbusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_connectedPbusTarget)));
-
-            // group is either 0 or 1,
-            // need to train both groups and allow for them to differ
-            uint8_t l_this_group = 0;
-            uint8_t l_connected_group = 0;
-            uint8_t l_group_loop = 0;
-            for (l_group_loop = 0; l_group_loop < 4; l_group_loop++)
+            // Make the FAPI call to p9_io_xbus_pre_trainadv
+            if (!trainBusHandler(l_busSet[ii],
+                                 P9_IO_XBUS_PRE_TRAINADV,
+                                 l_stepError,
+                                 HWPF_COMP_ID,
+                                 l_pbusConnections))
             {
-                l_this_group = l_group_loop / 2;      // 0, 0, 1, 1
-                l_connected_group = l_group_loop % 2; // 0, 1, 1, 0
+                break;
+            }
+        }  // end if (TYPE_XBUS == l_busSet[ii])
+#ifdef CONFIG_SMP_WRAP_TEST
+        else if (TYPE_OBUS == l_busSet[ii])
+        {
+            // Make the FAPI call to p9_io_obus_pre_trainadv
+            if (!trainBusHandler(l_busSet[ii],
+                                 P9_IO_OBUS_PRE_TRAINADV,
+                                 l_stepError,
+                                 HWPF_COMP_ID,
+                                 l_pbusConnections))
+            {
+                break;
+            }
+        }  // end else if (TYPE_OBUS == l_busSet[ii])
+#endif
+    } // end for (uint32_t ii = 0; (!l_err) && (ii < l_maxBusSet); ii++)
 
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                         "Running p9_io_xbus_pre_trainadv HWP on "
-                         "this %cbus target %.8X (group %d) and connected "
-                         "target %.8X (group %d)",
-                         (ii ? 'X' : 'O'),
-                         TARGETING::get_huid(l_thisPbusTarget), l_this_group,
-                         TARGETING::get_huid(l_connectedPbusTarget),
-                         l_connected_group );
-
-                FAPI_INVOKE_HWP( l_errl, p9_io_xbus_pre_trainadv,
-                                 l_thisPbusFapi2Target, l_this_group,
-                                 l_connectedPbusFapi2Target,
-                                 l_connected_group );
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "%s : %cbus connection p9_io_xbus_pre_trainadv "
-                    "Target 0x%.8X using group %d, connected target 0x%.8X "
-                    "using group %d",
-                    (l_errl ? "ERROR" : "SUCCESS"), (ii ? 'X' : 'O'),
-                    TARGETING::get_huid(l_thisPbusTarget), l_this_group,
-                    TARGETING::get_huid(l_connectedPbusTarget),
-                    l_connected_group );
-
-                if ( l_errl )
-                {
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_thisPbusTarget).addToLog(l_errl);
-                    ErrlUserDetailsTarget(l_connectedPbusTarget).addToLog
-                        (l_errl);
-
-                    // Create IStep error log and cross ref error that occurred
-                    l_StepError.addErrorDetails( l_errl );
-
-                    // Commit Error
-                    errlCommit( l_errl, HWPF_COMP_ID );
-                    // We want to continue the training despite the error, so
-                    // no break
-                    l_errl = NULL;
-                }
-
-            } // end of groups
-        } // end of connection TYPE combinations
-    } // end of connection set loop
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_fabric_pre_trainadv exit" );
+    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_fabric_pre_trainadv exit" );
 
     // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
+    return l_stepError.getErrorHandle();
 }
-};
+
+};  // end namespace   ISTEP_09

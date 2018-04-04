@@ -44,6 +44,7 @@ OBJS += call_fabric_post_trainadv.o
 OBJS += call_proc_smp_link_layer.o
 OBJS += call_proc_fab_iovalid.o
 OBJS += call_host_fbc_eff_config_aggregate.o
+OBJS += istep09HelperFuncs.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/nest/ ${PROCEDURES_PATH}/hwp/io/
 
@@ -61,16 +62,24 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_erepairSetFailedLanesHwp.mk
 OBJS+= p9_io_xbus_dccal.o
 include ${PROCEDURES_PATH}/hwp/io/p9_io_common.mk
 
-# fabric_pre_trainadv
+# fabric_pre_trainadv: p9_io_xbus_pre_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pre_trainadv.mk
+
+# fabric_pre_trainadv: p9_io_obus_pre_trainadv
+include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_pre_trainadv.mk
+
+# fabric_pre_trainadv: p9_io_obus_dccal
+include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_dccal.mk
 
 # fabric_io_run_training
 #p9_io_xbus_linktrain.mk has includes we dont need so manually add the .o
 OBJS+= p9_io_xbus_linktrain.o
+OBJS+= p9_io_obus_linktrain.o
 #Skipping p9_io_xbus_clear_firs, already included by libprdf.so
 
-# fabric_post_trainadv
+# fabric_post_trainadv: xbus & obus
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_post_trainadv.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_post_trainadv.mk
 
 # proc_smp_link_layer : Start SMP link layer
 include ${PROCEDURES_PATH}/hwp/nest/p9_smp_link_layer.mk
