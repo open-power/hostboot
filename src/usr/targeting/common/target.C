@@ -154,9 +154,9 @@ bool Target::_trySetAttr(
     // Get the node ID associated with the input target
     NODE_ID l_nodeId = NODE0;
     l_attrRP->getNodeId(this, l_nodeId);
-    bool isSysTarget = ((this->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
+    bool isSysTarget = /* ((this->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
                         (this->getAttr<ATTR_TYPE>() == TYPE_SYS))
-                     ? true : false;
+                     ? true : @TODO RTC:190816 */ false;
 #endif
 
     // Figure out if effort should be expended figuring out the target's type/
