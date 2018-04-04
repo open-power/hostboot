@@ -30,7 +30,8 @@
 #define P9_LPC_UTILS_H_
 
 const uint32_t LPC_CMD_TIMEOUT_DELAY_NS = 1000000;
-const uint32_t LPC_CMD_TIMEOUT_COUNT = 4;
+const uint32_t LPC_CMD_TIMEOUT_DELAY_CYCLE = 80000000;
+const uint32_t LPC_CMD_TIMEOUT_COUNT = 20;
 
 static fapi2::ReturnCode lpc_rw(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
@@ -63,7 +64,7 @@ static fapi2::ReturnCode lpc_rw(
                 break;
             }
 
-            fapi2::delay(LPC_CMD_TIMEOUT_DELAY_NS, LPC_CMD_TIMEOUT_DELAY_NS);
+            fapi2::delay(LPC_CMD_TIMEOUT_DELAY_NS, LPC_CMD_TIMEOUT_DELAY_CYCLE);
         }
 
         if (LPC_UTILS_TIMEOUT_FFDC)
