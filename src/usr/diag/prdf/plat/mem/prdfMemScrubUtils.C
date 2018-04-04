@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,9 @@
 #include <prdfTargetServices.H>
 #include <prdfRegisterCache.H>
 #include <lib/mcbist/memdiags.H>
+
+// Platform includes
+#include <prdfMemThresholds.H>
 
 using namespace TARGETING;
 
@@ -463,6 +466,66 @@ uint32_t isBgScrubConfig<TYPE_MBA>( ExtensibleChip * i_chip,
         // background scrub, to determine if it has been configured.
 
         // TODO RTC 157888
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
+                                         const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[setBgScrubThresholds] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+        const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSTR"
+                                                       : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
+            break;
+        }
+
+        uint32_t softIntCe = getScrubCeThreshold<TYPE_MBA>( i_chip, i_rank );
+
+        // Only care about retry CEs if there are a lot of them. So the
+        // threshold will be high in the field. However, in MNFG the retry CEs
+        // will be handled differently by putting every occurrence in the RCE
+        // table and doing targeted diagnostics when needed.
+        uint16_t retryCe = mfgMode() ? 1 : 2047;
+
+        uint16_t hardCe = 1; // Always stop on first occurrence.
+
+        mbstr->SetBitFieldJustified(  4, 12, softIntCe );
+        mbstr->SetBitFieldJustified( 16, 12, softIntCe );
+        mbstr->SetBitFieldJustified( 28, 12, hardCe    );
+        mbstr->SetBitFieldJustified( 40, 12, retryCe   );
+
+        // Set the per symbol counters to count hard CEs only. This is so that
+        // when the scrub stops on the first hard CE, we can use the per symbol
+        // counters to tell us which symbol reported the hard CE.
+        mbstr->SetBitFieldJustified( 55, 3, 0x1 );
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+            break;
+        }
 
     } while(0);
 

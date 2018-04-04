@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,14 +146,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     int32_t signalMdiaCmdComplete();
-
-    /**
-     * @brief  Does mnfg setup for CE threshold.
-     * @note   Before calling this function, set current state to new
-     *         value (TPS_PHASE_1/ TPS_PHASE_2).
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t mnfgCeSetup();
 
   private: // instance variables
 

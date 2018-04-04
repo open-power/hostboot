@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -625,56 +625,13 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlrCommon::setRtEteThresholds()
 {
-    #define PRDF_FUNC "[CenMbaTdCtlrCommon::setRtEteThresholds] "
-
     int32_t o_rc = SUCCESS;
 
-    do
-    {
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
-
-        // MBSTR's content could be modified from cleanupCmd()
-        // so we need to refresh
-        o_rc = mbstr->ForceRead();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s", reg_str );
-            break;
-        }
-
-        uint32_t softIntCe = getScrubCeThreshold( iv_mbaChip, iv_rank );
-
-        // Only care about retry CEs if there are a lot of them. So the
-        // threshold will be high in the field. However, in MNFG the retry CEs
-        // will be handled differently by putting every occurrence in the RCE
-        // table and doing targeted diagnostics when needed.
-        uint16_t retryCe = mfgMode() ? 1 : 2047;
-
-        uint16_t hardCe = 1; // Always stop on first occurrence.
-
-        mbstr->SetBitFieldJustified(  4, 12, softIntCe );
-        mbstr->SetBitFieldJustified( 16, 12, softIntCe );
-        mbstr->SetBitFieldJustified( 28, 12, hardCe    );
-        mbstr->SetBitFieldJustified( 40, 12, retryCe   );
-
-        // Set the per symbol counters to count hard CEs only. This is so that
-        // when the scrub stops on the first hard CE, we can use the per symbol
-        // counters to tell us which symbol reported the hard CE.
-        mbstr->SetBitFieldJustified( 55, 3, 0x1 );
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
-            break;
-        }
-
-    } while(0);
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to setBgScrubThresholds() in prdfMemScrubUtils.C
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return o_rc;
-
-    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------

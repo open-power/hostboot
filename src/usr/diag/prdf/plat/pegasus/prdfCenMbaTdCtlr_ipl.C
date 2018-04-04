@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -243,75 +243,9 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
             break;
         }
 
-        // Cleanup hardware before starting the maintenance command. This will
-        // clear the ECC counters, which must be done before setting the ETE
-        // thresholds.
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Set the default thresholds for all ETE attentions.
-        o_rc = setRtEteThresholds();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setRtEteThresholds() failed" );
-            break;
-        }
-
-        // Need the first rank in memory.
-        CenAddr startAddr, junk;
-        o_rc = getMemAddrRange( iv_mbaTrgt, startAddr, junk );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange() failed" );
-            break;
-        }
-
-        mss_MaintCmd::TimeBaseSpeed cmdSpeed = enableFastBgScrub()
-                                            ? mss_MaintCmd::FAST_MED_BW_IMPACT
-                                            : mss_MaintCmd::FAST_MIN_BW_IMPACT;
-
-        uint32_t stopCond = COND_FAST_SCRUB;
-
-        // TODO: RTC 123338: There are some OpenPOWER companies that do not want
-        //       to run with HBRT PRD enabled. Currently the only option right
-        //       now is to use the compile flag. Eventually, we may want to add
-        //       this as MRW/BIOS option.
-        #ifndef CONFIG_HBRT_PRD
-
-        // HBRT PRD is not enabled. Check if this system has an FSP.
-        if ( !isSpConfigFsp() )
-        {
-            // No runtime PRD will be present. Do not start the initial fast
-            // scrub. Instead, simply start continuous background scrubbing with
-            // no stop-on-error conditions.
-            cmdSpeed = enableFastBgScrub() ? mss_MaintCmd::FAST_MED_BW_IMPACT
-                                           : mss_MaintCmd::BG_SCRUB;
-            stopCond = 0;
-        }
-
-        #endif // ifdef CONFIG_HBRT_PRD
-
-        // Start the initial fast scrub.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  iv_mbaTrgt, startAddr.getRank(),
-                                  stopCond, cmdSpeed,
-                                  mss_MaintCmdWrapper::END_OF_MEMORY );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed" );
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // Moved to startBgScrub() in prdfPlatServices.C
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     } while (0);
 
@@ -322,10 +256,6 @@ int32_t CenMbaTdCtlr::startInitialBgScrub()
 
         PRDF_ERR( PRDF_FUNC "iv_mbaChip:0x%08x iv_initialized:%c",
                   iv_mbaChip->GetId(), iv_initialized ? 'T' : 'F' );
-
-        int32_t l_rc = cleanupPrevCmd(); // Just in case.
-        if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC "cleanupPrevCmd() failed" );
     }
 
     return o_rc;
@@ -880,32 +810,9 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase1 );
     iv_tdState = VCM_PHASE_1;
 
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Start phase 1.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to startVcmPhase1() in prdfPlatServices_ipl.C
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return o_rc;
 
@@ -923,32 +830,9 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase2 );
     iv_tdState = VCM_PHASE_2;
 
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Start phase 2.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to startVcmPhase2() in prdfPlatServices_ipl.C
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return o_rc;
 
@@ -1061,43 +945,9 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase1 );
     iv_tdState = TPS_PHASE_1;
 
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // We are using current state as input parameter in mnfgCeSetup.
-        // So it is mandatory to set iv_tdState before calling this function.
-        o_rc = mnfgCeSetup();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mnfgCeSetup() failed" );
-            break;
-        }
-
-        // Start phase 1.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
-                                  mss_MaintCmd::FAST_MAX_BW_IMPACT,
-                                  mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to startTpsPhase1() in prdfPlatServices_ipl.C
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return o_rc;
 
@@ -1115,43 +965,9 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase2 );
     iv_tdState = TPS_PHASE_2;
 
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // We are using current state as input parameter in mnfgCeSetup.
-        // So it is mandatory to set iv_tdState before calling this function.
-        o_rc = mnfgCeSetup();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mnfgCeSetup() failed" );
-            break;
-        }
-
-        // Start phase 2.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_SCRUB,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD,
-                                  mss_MaintCmd::FAST_MAX_BW_IMPACT,
-                                  mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to startTpsPhase2() in prdfPlatServices_ipl.C
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     return o_rc;
 
@@ -1397,64 +1213,6 @@ int32_t CenMbaTdCtlr::signalMdiaCmdComplete()
         mbadb->iv_cmdCompleteMsgData =
                         (allEndAddr == stoppedAddr) ? MDIA::COMMAND_COMPLETE
                                                     : MDIA::COMMAND_STOPPED;
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// Do the setup for mnfg IPL CE
-int32_t CenMbaTdCtlr::mnfgCeSetup()
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::mnfgCeSetup] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
-        // MBSTR's content could be modified from cleanupCmd()
-        // so we need to refresh
-        o_rc = mbstr->ForceRead();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
-            break;
-        }
-
-        if ( TPS_PHASE_1 == iv_tdState )
-        {
-            //  Enable per-symbol error counters to count soft CEs
-            mbstr->SetBit(55);
-            mbstr->SetBit(56);
-            // Disable per-symbol error counters to count hard CEs
-            mbstr->ClearBit(57);
-        }
-        else if ( TPS_PHASE_2 == iv_tdState )
-        {
-            //  Disable per-symbol error counters to count soft CEs
-            mbstr->ClearBit(55);
-            mbstr->ClearBit(56);
-            //  Enable per-symbol error counters to count hard CEs
-            mbstr->SetBit(57);
-        }
-        else
-        {
-            PRDF_ERR( PRDF_FUNC "Inavlid State:%u", iv_tdState );
-            o_rc = FAIL; break;
-        }
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
-            break;
-        }
 
     } while(0);
 
