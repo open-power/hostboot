@@ -442,14 +442,22 @@ static void set_is_master_drawer(TARGETING::EntityPath *master)
     const TARGETING::EntityPath::PathElement mpe =
         master->pathElementOfType(TARGETING::TYPE_NODE);
 
+    // get current node
+    TARGETING::Target *current = nullptr;
+    TARGETING::TargetHandleList l_nodelist;
+    getEncResources(l_nodelist, TARGETING::TYPE_NODE,
+                    TARGETING::UTIL_FILTER_FUNCTIONAL);
+    assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
+    current = l_nodelist[0];
     if (pe.instance == mpe.instance)
     {
         // Current node is master, set IS_MASTER_DRAWER
-        TARGETING::TargetHandleList l_nodelist;
-        getEncResources(l_nodelist, TARGETING::TYPE_NODE,
-                        TARGETING::UTIL_FILTER_FUNCTIONAL);
-        assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
-        l_nodelist[0]->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(1);
+        current->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(1);
+    }
+    else
+    {
+        // Current node is not master, unset IS_MASTER_DRAWER
+        current->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(0);
     }
 }
 

@@ -123,10 +123,10 @@
     <description>1 = is master node, 0 = is not master node</description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
+            <default>1</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
