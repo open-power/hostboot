@@ -189,7 +189,7 @@ inline bool isThisMasterNodeTarget(const Target* const i_pTarget)
  * @par Detailed Description:
  * Checks whether the current node is the master node. If yes, returns
  * true to the user, else false.  Master node is not determined until
- * istep 18.9, so this function will return false before then except
+ * istep 18.9, so this function will return true before then except
  * in the case of a MPIPL (second pass).
  *
  * @return boolean indicating whether request was successful or not

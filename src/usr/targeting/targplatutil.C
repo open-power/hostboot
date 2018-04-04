@@ -113,6 +113,7 @@ void getMasterNodeTarget(Target*& o_masterNodeTarget)
 
 bool isCurrentMasterNode()
 {
+#if 0
     // Get node target
     TARGETING::TargetHandleList l_nodelist;
     getEncResources(l_nodelist, TARGETING::TYPE_NODE,
@@ -121,6 +122,8 @@ bool isCurrentMasterNode()
     auto isMaster = l_nodelist[0]->getAttr<TARGETING::ATTR_IS_MASTER_DRAWER>();
 
     return (isMaster == 1);
+#endif
+    return true;
 }
 
 #ifndef __HOSTBOOT_RUNTIME
