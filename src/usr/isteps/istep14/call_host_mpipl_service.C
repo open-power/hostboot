@@ -65,7 +65,7 @@ void* call_host_mpipl_service (void *io_pArgs)
     if (!TARGETING::UTIL::isCurrentMasterNode())
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "call_host_mpipl_service cannot run on slave node, skipping");
+              "call_host_mpipl_service cannot run on slave node, skipping");
     }
     else
     {

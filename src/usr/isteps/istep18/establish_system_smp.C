@@ -449,15 +449,16 @@ static void set_is_master_drawer(TARGETING::EntityPath *master)
                     TARGETING::UTIL_FILTER_FUNCTIONAL);
     assert(l_nodelist.size() == 1, "ERROR, only looking for one node.");
     current = l_nodelist[0];
+
     if (pe.instance == mpe.instance)
     {
-        // Current node is master, set IS_MASTER_DRAWER
-        current->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(1);
+        // Current node is master, unset IS_SLAVE_DRAWER
+        current->setAttr<TARGETING::ATTR_IS_SLAVE_DRAWER>(0);
     }
     else
     {
-        // Current node is not master, unset IS_MASTER_DRAWER
-        current->setAttr<TARGETING::ATTR_IS_MASTER_DRAWER>(0);
+        // Current node is not master, set IS_SLAVE_DRAWER
+        current->setAttr<TARGETING::ATTR_IS_SLAVE_DRAWER>(1);
     }
 }
 

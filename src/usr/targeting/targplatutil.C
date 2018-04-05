@@ -113,17 +113,14 @@ void getMasterNodeTarget(Target*& o_masterNodeTarget)
 
 bool isCurrentMasterNode()
 {
-#if 0
     // Get node target
     TARGETING::TargetHandleList l_nodelist;
     getEncResources(l_nodelist, TARGETING::TYPE_NODE,
                     TARGETING::UTIL_FILTER_FUNCTIONAL);
     assert(l_nodelist.size() == 1, "ERROR, only expect one node.");
-    auto isMaster = l_nodelist[0]->getAttr<TARGETING::ATTR_IS_MASTER_DRAWER>();
+    auto isSlave = l_nodelist[0]->getAttr<TARGETING::ATTR_IS_SLAVE_DRAWER>();
 
-    return (isMaster == 1);
-#endif
-    return true;
+    return (isSlave == 0);
 }
 
 #ifndef __HOSTBOOT_RUNTIME
