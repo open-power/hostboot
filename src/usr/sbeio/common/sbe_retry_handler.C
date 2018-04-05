@@ -82,6 +82,32 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
+// Define constant expressions to be used
+
+//There are only 2 sides to the seeproms, so we only want to flip sides once
+constexpr uint8_t MAX_SWITCH_SIDE_COUNT         = 1;
+
+//We only want to attempt to boot with the same side seeprom twice
+constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS        = 2;
+
+// Currently we expect a maxiumum of 2 FFDC packets, the one
+// that is useful to HB is the HWP FFDC. It is possible there is
+//  a packet that details an internal sbe fail that hostboot will
+// add to an errorlog but otherwise ignores
+constexpr uint8_t MAX_EXPECTED_FFDC_PACKAGES    = 2;
+
+// action_for_ffdc_rc will figure out what action we should do
+// for each p9_extract_sbe_rc return code. If the RC does not match
+// any return code from p9_extract_sbe_rc then we want to have a
+// known "no action found" value which is defined here
+constexpr uint32_t NO_ACTION_FOUND_FOR_THIS_RC  = 0xFFFF;
+
+// Set up constants that will be used for setting up the timeout for
+// reading the sbe message register
+constexpr uint64_t SBE_RETRY_TIMEOUT_HW_SEC     = 60;  // 60 seconds
+constexpr uint64_t SBE_RETRY_TIMEOUT_SIMICS_SEC = 600; // 600 seconds
+constexpr uint32_t SBE_RETRY_NUM_LOOPS          = 60;
+
 SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode)
 : SbeRetryHandler(i_sbeMode, 0)
 {
@@ -121,7 +147,8 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         errlHndl_t l_errl = nullptr;
 
         // Only set the secure debug bit (SDB) if we are not using xscom yet
-        if(!i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom)
+        if(!i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom &&
+            !i_target->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
         {
             this->iv_useSDB = true;
         }
@@ -256,7 +283,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 l_errl->collectTrace( SBEIO_COMP_NAME, 256);
                 l_errl->addHwCallout( i_target,
                                         HWAS::SRCI_PRIORITY_HIGH,
-                                        HWAS::DECONFIG,
+                                        HWAS::DELAYED_DECONFIG,
                                         HWAS::GARD_NULL );
 
                 // Set the PLID of the error log to caller's PLID,
@@ -584,14 +611,15 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
 
     // Each sbe gets 60s to respond with the fact that it's
     // booted and at runtime (stable state)
-    uint64_t l_sbeTimeout = SBE_RETRY_TIMEOUT_HW;  // 60 seconds
+    uint64_t l_sbeTimeout = SBE_RETRY_TIMEOUT_HW_SEC;  // 60 seconds
     // Bump this up really high for simics, things are slow there
     if( Util::isSimicsRunning() )
     {
-        l_sbeTimeout = SBE_RETRY_TIMEOUT_SIMICS; // 600 seconds
+        l_sbeTimeout = SBE_RETRY_TIMEOUT_SIMICS_SEC; // 600 seconds
     }
 
-    const uint64_t SBE_WAIT_SLEEP = (l_sbeTimeout/SBE_RETRY_NUM_LOOPS);
+    //Sleep time should be 1 second on HW, 10 seconds on simics
+    const uint64_t SBE_WAIT_SLEEP_SEC = (l_sbeTimeout/SBE_RETRY_NUM_LOOPS);
 
     SBE_TRACF("Running p9_get_sbe_msg_register HWP on proc target %.8X",
                TARGETING::get_huid(i_target));
@@ -646,7 +674,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
             // reset watchdog before performing the nanosleep
             INITSERVICE::sendProgressCode();
 #endif
-            nanosleep(0,SBE_WAIT_SLEEP);
+            nanosleep(SBE_WAIT_SLEEP_SEC,0);
         }
     }
 
@@ -1055,8 +1083,6 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
     SBE_TRACF(ENTER_MRK "switch_sbe_sides()");
 
     errlHndl_t l_errl = nullptr;
-    TARGETING::ATTR_PROC_SBE_MASTER_CHIP_type l_isMaster =
-                    i_target->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>();
 
 #ifdef __HOSTBOOT_RUNTIME
     const bool l_isRuntime = true;
@@ -1066,7 +1092,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
 
     do{
 
-        if(!l_isRuntime && !l_isMaster)
+        if(!l_isRuntime && !i_target->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
         {
             const uint32_t l_sbeBootSelectMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
             // Read PERV_SB_CS_FSI_BYTE 0x2820 for target proc

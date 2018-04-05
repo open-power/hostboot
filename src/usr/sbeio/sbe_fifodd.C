@@ -677,7 +677,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             {
                 errl->addHwCallout(  i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
+                                     HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
             }
 

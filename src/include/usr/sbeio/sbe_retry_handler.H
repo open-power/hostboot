@@ -36,26 +36,6 @@ namespace SBEIO
 class SbeRetryHandler
 {
     public:
-
-        //There are only 2 sides to the seeproms, so we only want to flip sides once
-        static constexpr uint8_t MAX_SWITCH_SIDE_COUNT = 1;
-        //We only want to attempt to boot with the same side seeprom twice
-        static constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS = 2;
-        // Currently we expect a maxiumum of 2 FFDC packets, the one
-        // that is useful to HB is the HWP FFDC. It is possible there is
-        //  a packet that details an internal sbe fail that hostboot will
-        // add to an errorlog but otherwise ignores
-        static constexpr uint8_t MAX_EXPECTED_FFDC_PACKAGES = 2;
-        // action_for_ffdc_rc will figure out what action we should do
-        // for each p9_extract_sbe_rc return code. If the RC does not match
-        // any return code from p9_extract_sbe_rc then we want to have a
-        // known "no action found" value which is defined here
-        static constexpr uint32_t NO_ACTION_FOUND_FOR_THIS_RC = 0xFFFF;
-
-        static constexpr uint64_t SBE_RETRY_TIMEOUT_HW     = 60*NS_PER_SEC;  // 60 seconds
-        static constexpr uint64_t SBE_RETRY_TIMEOUT_SIMICS = 600*NS_PER_SEC; // 600 seconds
-        static constexpr uint32_t SBE_RETRY_NUM_LOOPS      = 100;
-
         enum SBE_REG_RETURN
         {
             FAILED_COLLECTING_REG = 0, // Error returned from HWP

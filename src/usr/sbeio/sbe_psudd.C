@@ -553,7 +553,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 {
                     l_errl->addHwCallout( i_target,
                                           HWAS::SRCI_PRIORITY_HIGH,
-                                          HWAS::DECONFIG,
+                                          HWAS::DELAYED_DECONFIG,
                                           HWAS::GARD_NULL );
                 }
 

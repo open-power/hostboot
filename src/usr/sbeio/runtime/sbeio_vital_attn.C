@@ -52,17 +52,21 @@ namespace RT_SBEIO
                 /*@
                  * @errortype
                  * @severity      ERRL_SEV_INFORMATIONAL
-                 * @moduleid      SBEIO_RUNTIME_HANDLE_VITAL_ATTN
+                 * @moduleid      SBEIO_HANDLE_VITAL_ATTN
                  * @reasoncode    SBEIO_RT_NULL_FIRMWARE_REQUEST_PTR
                  * @userdata1     HUID of target
                  * @userdata2     none
                  * @devdesc       Unable to inform OPAL of SBE failure
                  */
                  l_err = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
-                                        SBEIO_RUNTIME_HANDLE_VITAL_ATTN,
+                                        SBEIO_HANDLE_VITAL_ATTN,
                                         SBEIO_RT_NULL_FIRMWARE_REQUEST_PTR,
                                         get_huid(i_procTarg),
-                                        0, true);
+                                        0, false);
+
+                l_err->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
+                            HWAS::SRCI_PRIORITY_HIGH);
+
                  break;
             }
 
