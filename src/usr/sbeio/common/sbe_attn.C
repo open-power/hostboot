@@ -30,6 +30,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludcallout.H>
 #include <sbeio/sbe_attn.H>
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
@@ -53,44 +54,117 @@ namespace SBEIO
         TRACFCOMP( g_trac_sbeio,
                    ENTER_MRK "handleVitalAttn> i_procTarg=",
                    TARGETING::get_huid(i_procTarg) );
-        errlHndl_t l_errhdl = nullptr;
+        errlHndl_t l_err = nullptr;
 
-        // TODO 167191 Full SBE Belly-Up Handling for OP
 #ifdef __HOSTBOOT_RUNTIME
         // Inform OPAL, SBE is currently disabled
         if (TARGETING::is_sapphire_load())
         {
             // Inform OPAL of the inoperable SBE
-            l_errhdl = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
+            l_err = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
                                                         RT_SBEIO::SBE_DISABLED);
-        }
-#endif
 
-        // @todo - RTC:180242 - Restart SBE
+            if(l_err)
+            {
+                errlCommit(l_err, SBEIO_COMP_ID);
+            }
+        }
 
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
                       SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
-        //l_sbeObj.main_sbe_handler(i_procTarg);
+        l_sbeObj.main_sbe_handler(i_procTarg);
 
+        // Check if the SBE made it back to runtime, this tells us if the retry was a
+        // success or not
+        if (!l_sbeObj.isSbeAtRuntime())
+        {
+            /*@
+            * @errortype  ERRL_SEV_PREDICTIVE
+            * @moduleid   SBEIO_HANDLE_VITAL_ATTN
+            * @reasoncode SBEIO_NO_RECOVERY_ACTION
+            * @userdata1  Huid of processor
+            * @userdata2  Unused
+            * @devdesc    PRD detected an error with the SBE and HB failed to
+            *             recover
+            * @custdesc   Processor Error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                SBEIO_HANDLE_VITAL_ATTN,
+                                SBEIO_NO_RECOVERY_ACTION,
+                                TARGETING::get_huid(i_procTarg),
+                                0);
 
-#ifdef __HOSTBOOT_RUNTIME
-        // Inform OPAL the state of the SBE after a retry
-        if (l_sbeObj.isSbeAtRuntime())
+            l_err->addProcedureCallout( HWAS::EPUB_PRC_SUE_PREVERROR,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+
+            l_err->addHwCallout( i_procTarg,
+                                  HWAS::SRCI_PRIORITY_LOW,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL );
+
+            l_err->collectTrace( SBEIO_COMP_NAME, 256);
+            // @todo - RTC:180244 - Disable the OCC
+        }
+        // Inform OPAL the state of the SBE after a retry is successful
+        else
         {
             if (TARGETING::is_sapphire_load())
             {
-                l_errhdl = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
+                l_err = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
                                                          RT_SBEIO::SBE_ENABLED);
+                if(l_err)
+                {
+                    errlCommit(l_err, SBEIO_COMP_ID);
+                }
             }
-
-            // @todo - RTC:180244 - Disable the OCC
         }
+#else
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                            const_cast<TARGETING::Target*> (i_procTarg));
+
+        //Unused in the context, but required for p9_extract_sbe_rc
+        P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+                P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+
+        FAPI_INVOKE_HWP(l_err, p9_extract_sbe_rc,
+                        l_fapi2ProcTarget, l_ret);
+
+        // p9_extract_sbe_rc should always return w/ an error
+        // make sure at least some sort of error gets returned
+        // because we are not attempting to recover anything
+        if(!l_err)
+        {
+           /*@
+            * @errortype  ERRL_SEV_PREDICTIVE
+            * @moduleid   SBEIO_HANDLE_VITAL_ATTN
+            * @reasoncode SBEIO_EXTRACT_RC_ERROR
+            * @userdata1  Huid of processor
+            * @userdata2  Return action from extract_rc
+            * @devdesc    We expected an error log to be returned from
+                          p9_extract_rc but there wasn't one
+            * @custdesc   Processor Error
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                SBEIO_HANDLE_VITAL_ATTN,
+                                SBEIO_EXTRACT_RC_ERROR,
+                                TARGETING::get_huid(i_procTarg),
+                                l_ret);
+        }
+
+        //We want to deconfigure the processor where the error was detected
+        l_err->addHwCallout( i_procTarg,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::DELAYED_DECONFIG,
+                                HWAS::GARD_NULL );
 #endif
+
 
         TRACFCOMP( g_trac_sbeio,
                    EXIT_MRK "handleVitalAttn> ");
-        return l_errhdl;
+        return l_err;
     }
 
 };

@@ -56,7 +56,7 @@ enum sbeioModuleId
     SBEIO_HANDLE_SBE_REG_VALUE          = 0x0B,
     SBEIO_GET_FFDC_HANDLER              = 0x0C,
     SBEIO_GET_SBE_RC                    = 0x0D,
-    SBEIO_RUNTIME_HANDLE_VITAL_ATTN     = 0x0E,
+    SBEIO_HANDLE_VITAL_ATTN             = 0x0E,
 };
 
 /**
