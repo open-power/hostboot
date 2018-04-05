@@ -119,14 +119,14 @@
 </attribute>
 
 <attribute>
-    <id>IS_MASTER_DRAWER</id>
-    <description>1 = is master node, 0 = is not master node</description>
+    <id>IS_SLAVE_DRAWER</id>
+    <description>0 = is master node, 1 = is slave node</description>
     <simpleType>
         <uint8_t>
-            <default>1</default>
+            <default>0</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
 </attribute>

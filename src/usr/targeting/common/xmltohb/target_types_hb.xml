@@ -55,7 +55,7 @@
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
     <attribute><id>VPD_SWITCHES</id></attribute>
-    <attribute><id>IS_MASTER_DRAWER</id></attribute>
+    <attribute><id>IS_SLAVE_DRAWER</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
