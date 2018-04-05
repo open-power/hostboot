@@ -329,10 +329,8 @@ void validateSecuritySettings()
         ERRORLOG::errlCommit( err, SECURE_COMP_ID );
     }
 
-    // Start of update procedure
-    #ifdef CONFIG_SECUREBOOT
-
-    bool l_force = false;
+    // Always lock SBE SEEPROM
+    bool l_force = true;
 
     TARGETING::TargetHandleList l_procList;
     getAllChips(l_procList,TARGETING::TYPE_PROC,true);
@@ -383,7 +381,7 @@ void validateSecuritySettings()
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(*pProcItr);
 
-        FAPI_INVOKE_HWP(err, p9_update_security_ctrl, l_fapiTarg);
+        FAPI_INVOKE_HWP(err, p9_update_security_ctrl, l_fapiTarg, l_force);
 
         if (err)
         {
@@ -459,6 +457,7 @@ void validateSecuritySettings()
     } while(0);
     // end of p9_update_security_ctrl procedure
 
+    #ifdef CONFIG_SECUREBOOT
     // Enforce Synchronized Proc Security State
     do {
 
