@@ -134,7 +134,8 @@ void  PNOR::physicalToMmioOffset(uint64_t  i_hbbAddress,
  *  @brief: parse the TOCs read from memory and store section information
  *          from one of the verified TOCs
  */
-errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
+errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
+                           bool i_pnorInitialized )
 {
     TRACUCOMP(g_trac_pnor,"PNOR::parseTOC>");
     errlHndl_t l_errhdl = NULL;
@@ -153,6 +154,11 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         if(l_errCode != NO_ERROR)
         {
             TRACFCOMP(g_trac_pnor, "Null TOC Buffer found while checking TOC" );
+
+            // prevent hang between ErrlManager and Pnor
+            assert(i_pnorInitialized,
+                   "Null TOC Buffer found while checking TOC"
+                   " during pnor initialization");
             /*@
             * @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
@@ -185,6 +191,12 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         if (l_errCode != NO_ERROR)
         {
             TRACFCOMP(g_trac_pnor, "PNOR::parseTOC Checksum error in TOC's header");
+
+            // prevent hang between ErrlManager and Pnor
+            assert(i_pnorInitialized,
+                      "PNOR::parseTOC Found checksum error in TOC's header"
+                      " during pnor initialization");
+
             /* @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_TOC_HDR_CHECKSUM_ERR
@@ -212,7 +224,12 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
         if(l_errCode != NO_ERROR)
         {
-            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC Error found parsing hdr of TOC " );
+            TRACFCOMP(g_trac_pnor, "PNOR::parseTOC Error found parsing hdr of TOC" );
+
+            // prevent hang between ErrlManager and Pnor
+            assert(i_pnorInitialized,
+                      "PNOR::parseTOC Error found parsing hdr of TOC"
+                      " during pnor initialization");
             /* @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_BAD_TOC_HEADER
@@ -253,6 +270,12 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         {
             TRACFCOMP(g_trac_pnor, "PNOR::parseTOC parseEntries returned an error code");
             o_TOC = NULL;
+
+            // prevent hang between ErrlManager and Pnor
+            assert(i_pnorInitialized,
+                    "PNOR::parseTOC parseEntries returned an error code"
+                    " during pnor initialization");
+
             /* @errortype
             * @moduleid PNOR::MOD_PNORRP_READTOC
             * @reasoncode PNOR::RC_PNOR_PARSE_ENTRIES_ERR
