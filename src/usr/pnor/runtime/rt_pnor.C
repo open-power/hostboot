@@ -128,15 +128,25 @@ void RtPnor::init(errlHndl_t &io_taskRetErrl)
     {
       TRACFCOMP(g_trac_pnor, "Rtnor: failed to read FIRDATA section" );
     }
+    else
+    {
+      Singleton<RtPnor>::instance().setInitialized(true);
+    }
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::init()");
+}
+
+/**************************************************************/
+void RtPnor::setInitialized(bool i_initialized)
+{
+  iv_initialized = i_initialized;
 }
 
 /**************************************************************/
 errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                               PNOR::SectionInfo_t& o_info)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::getSectionInfo %d", i_section);
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::getSectionInfo %d, initialized = %d", i_section, iv_initialized?1:0);
     errlHndl_t l_err = nullptr;
     do
     {
@@ -199,6 +209,11 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         {
             TRACFCOMP(g_trac_pnor,"RtPnor::getSectionInfo: Section %d"
                     " size is 0", static_cast<int>(i_section));
+
+            // prevent hang between ErrlManager and rt_pnor
+            assert(iv_initialized,
+                   "RtPnor::getSectionInfo: Section size 0 returned"
+                   " before completing PNOR initialization");
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
@@ -366,6 +381,7 @@ errlHndl_t RtPnor::flush( PNOR::SectionId i_section)
 /*******Protected Methods**************/
 RtPnor::RtPnor()
 {
+    iv_initialized = false;
     do {
         errlHndl_t l_err = getMasterProcId();
         if (l_err)
@@ -430,6 +446,12 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                         " failed proc:%d, part:%s, offset:0x%X, size:0x%X,"
                         " dataPt:0x%X, rc:%d", i_procId, l_partitionName,
                         l_offset, l_readSize, l_dataToRead, l_rc);
+
+                // prevent hang between ErrlManager and rt_pnor
+                assert(iv_initialized,
+                      "RtPnor::readFromDevice: pnor_read returned an error"
+                      " during initialization");
+
                 /*@
                  * @errortype
                  * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -464,6 +486,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                 }
                 else // everything else should have a known size
                 {
+                  // prevent hang between ErrlManager and rt_pnor
+                  assert(iv_initialized,
+                      "RtPnor::readFromDevice: pnor_read failed to read "
+                      "expected amount before rt_pnor initialization");
+
                     /*@
                      * @errortype
                      * @moduleid            PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -491,20 +518,25 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
         {
             TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice: This version of"
                     " OPAL does not support pnor_read");
-                /*@
-                 * @errortype
-                 * @moduleid           PNOR::MOD_RTPNOR_READFROMDEVICE
-                 * @reasoncode         PNOR::RC_PNOR_READ_NOT_SUPPORTED
-                 * @devdesc            g_hostInterfaces->pnor_read not supported
-                 * @custdesc           Error accessing system firmware flash
-                 */
-                //@todo Add PNOR callout RTC:116145
-                l_err = new ERRORLOG::ErrlEntry(
-                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                 PNOR::MOD_RTPNOR_READFROMDEVICE,
-                                 PNOR::RC_PNOR_READ_NOT_SUPPORTED,
-                                 0,0,true);
-                break;
+
+            // prevent hang between ErrlManager and rt_pnor
+            assert(iv_initialized,
+                      "RtPnor::readFromDevice: OPAL version does NOT support"
+                      "pnor_read during initialization");
+            /*@
+             * @errortype
+             * @moduleid           PNOR::MOD_RTPNOR_READFROMDEVICE
+             * @reasoncode         PNOR::RC_PNOR_READ_NOT_SUPPORTED
+             * @devdesc            g_hostInterfaces->pnor_read not supported
+             * @custdesc           Error accessing system firmware flash
+             */
+            //@todo Add PNOR callout RTC:116145
+            l_err = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             PNOR::MOD_RTPNOR_READFROMDEVICE,
+                             PNOR::RC_PNOR_READ_NOT_SUPPORTED,
+                             0,0,true);
+            break;
         }
         // remove the ECC data
         if( i_ecc )
@@ -524,6 +556,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                 TRACFCOMP(g_trac_pnor,"RtPnor::readFromDevice>"
                     " Uncorrectable ECC error : chip=%d,offset=0x%.X",
                     i_procId, i_offset );
+
+                // prevent hang between ErrlManager and rt_pnor
+                assert(iv_initialized,
+                      "RtPnor::readFromDevice: UNCORRECTABLE_ECC encountered"
+                      " during initialization");
                 /*@
                  * @errortype
                  * @moduleid    PNOR::MOD_RTPNOR_READFROMDEVICE
@@ -555,6 +592,11 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                     {
                         TRACFCOMP(g_trac_pnor, "RtPnor::readFromDevice> Error"
                         " writing corrected data back to device");
+
+                        // prevent hang between ErrlManager and rt_pnor
+                        assert(iv_initialized,
+                            "RtPnor::readFromDevice: pnor_write returned an"
+                            " error during initialization");
 
                         /*@
                          * @errortype
@@ -712,7 +754,7 @@ errlHndl_t RtPnor::readTOC ()
             //Pass along TOC buffer to be parsed, parseTOC will parse through
             // the buffer and store needed information in iv_TOC
             // Note: that Opal should always return a valid TOC
-            l_err = PNOR::parseTOC(l_toc0Buffer, iv_TOC);
+            l_err = PNOR::parseTOC(l_toc0Buffer, iv_TOC, iv_initialized);
             if (l_err)
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");
@@ -912,7 +954,6 @@ void initPnor()
         errlCommit (l_errl, PNOR_COMP_ID);
       }
     }
-
     TRACFCOMP(g_trac_pnor, EXIT_MRK"initPnor");
 }
 

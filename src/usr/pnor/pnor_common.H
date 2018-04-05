@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,10 +39,12 @@ namespace PNOR {
      * @brief parse the TOC read from memory and store section
      *        information if the TOC is valid
      * @param[in] i_tocBuffer      Pointer to buffer containing a TOC
+     * @param[in] i_pnorInitialized PNOR::init() has completed
      * @param[out] o_TOC            sectionInformation of the TOC used
      * @return Error
      */
-    errlHndl_t parseTOC(uint8_t* i_tocBuffer, PNOR::SectionData_t * o_TOC);
+    errlHndl_t parseTOC(uint8_t* i_tocBuffer, PNOR::SectionData_t * o_TOC,
+                        bool i_pnorInitialized = true);
 
     /**
      *  @brief: determine the physical offset of ffs entry
