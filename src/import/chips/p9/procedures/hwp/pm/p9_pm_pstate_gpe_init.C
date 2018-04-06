@@ -42,6 +42,7 @@
 #include <p9_ppe_utils.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
+#include <p9n2_misc_scom_addresses.H>
 #include <vector>
 
 // -----------------------------------------------------------------------------
@@ -302,6 +303,22 @@ fapi2::ReturnCode pstate_gpe_reset(
 
 
     FAPI_IMP(">> pstate_gpe_reset...");
+
+
+    //Disable CME monitoring of PGPE heart beat loss before halting PGPE
+    auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
+                        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    // For each functional EQ chiplet
+    for (auto l_quad_chplt : l_eqChiplets)
+    {
+        l_data64.flush<0>()
+        .setBit<EQ_QPPM_QPMMR_ENABLE_PCB_INTR_UPON_HEARTBEAT_LOSS>();
+
+        FAPI_TRY(fapi2::putScom(l_quad_chplt, EQ_QPPM_QPMMR_CLEAR, l_data64),
+                 "ERROR: Failed to setup Quad PPM register");
+
+    }
 
     // Program XCR to HALT PGPE
     FAPI_INF("   Send HALT command via XCR...");
