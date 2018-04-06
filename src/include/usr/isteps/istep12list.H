@@ -55,7 +55,7 @@
  * 12.11 host_startprd_dmi
  *       : Load prd for DMI domain
  * 12.12 host_attnlisten_memb
- *       : Start attention poll for membuf 
+ *       : Start attention poll for membuf
  * 12.13 cen_set_inband_addr
  *       : Set the Inband base addresses
  *
@@ -79,7 +79,7 @@ namespace   ISTEP_12
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_mss_getecid( void    *io_pArgs );
@@ -89,7 +89,7 @@ void*  call_mss_getecid( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_attr_update( void    *io_pArgs );
@@ -99,7 +99,7 @@ void*  call_dmi_attr_update( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_proc_dmi_scominit( void    *io_pArgs );
@@ -109,7 +109,7 @@ void*  call_proc_dmi_scominit( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_cen_dmi_scominit( void    *io_pArgs );
@@ -119,7 +119,7 @@ void*  call_cen_dmi_scominit( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_erepair( void    *io_pArgs );
@@ -129,7 +129,7 @@ void*  call_dmi_erepair( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_io_dccal( void    *io_pArgs );
@@ -139,7 +139,7 @@ void*  call_dmi_io_dccal( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_pre_trainadv( void    *io_pArgs );
@@ -149,7 +149,7 @@ void*  call_dmi_pre_trainadv( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_io_run_training( void    *io_pArgs );
@@ -159,7 +159,7 @@ void*  call_dmi_io_run_training( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_dmi_post_trainadv( void    *io_pArgs );
@@ -169,7 +169,7 @@ void*  call_dmi_post_trainadv( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_proc_cen_framelock( void    *io_pArgs );
@@ -179,7 +179,7 @@ void*  call_proc_cen_framelock( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_host_startprd_dmi( void    *io_pArgs );
@@ -189,7 +189,7 @@ void*  call_host_startprd_dmi( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_host_attnlisten_memb( void    *io_pArgs );
@@ -199,7 +199,7 @@ void*  call_host_attnlisten_memb( void    *io_pArgs );
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any errlogs to istep 
+ *  return any errlogs to istep
  *
  */
 void*  call_cen_set_inband_addr( void    *io_pArgs );
@@ -288,6 +288,7 @@ const DepModInfo g_istep12Dependancies = {
     {
         DEP_LIB(libistep12.so),
         DEP_LIB(libnestmemutils.so),
+        DEP_LIB(libisteps_io.so),
         NULL
     }
 };
