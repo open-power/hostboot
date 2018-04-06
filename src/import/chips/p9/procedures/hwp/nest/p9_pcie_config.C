@@ -74,6 +74,13 @@ const uint64_t PCI_PFIR_ACTION0_REG = 0xB000000000000000ULL;
 const uint64_t PCI_PFIR_ACTION1_REG = 0xB000000000000000ULL;
 const uint64_t PCI_PFIR_MASK_REG    = 0x0E00000000000000ULL;
 
+// PEC IOVALID constants
+const uint8_t PEC0_IOP_IOVALID_PHB0_MASK = 1;
+const uint8_t PEC1_IOP_IOVALID_PHB1_MASK = 2;
+const uint8_t PEC1_IOP_IOVALID_PHB2_MASK = 1;
+const uint8_t PEC2_IOP_IOVALID_PHB3_MASK = 4;
+const uint8_t PEC2_IOP_IOVALID_PHB4_MASK = 2;
+const uint8_t PEC2_IOP_IOVALID_PHB5_MASK = 1;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -93,6 +100,9 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     fapi2::buffer<uint64_t> l_buf = 0;
+    uint8_t pec0_iovalid_bits = 0;
+    uint8_t pec1_iovalid_bits = 0;
+    uint8_t pec2_iovalid_bits = 0;
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
     std::vector<uint64_t> l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m;
     uint64_t l_base_addr_mmio;
@@ -162,6 +172,21 @@ fapi2::ReturnCode p9_pcie_config(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOVALID_ENABLE, l_pec_chiplet,
                                l_attr_proc_pcie_iovalid_enable));
         FAPI_DBG("l_attr_proc_pcie_iovalid_enable: %#x", l_attr_proc_pcie_iovalid_enable);
+
+        if (l_pec_id == 0)
+        {
+            pec0_iovalid_bits = l_attr_proc_pcie_iovalid_enable;
+        }
+
+        if (l_pec_id == 1)
+        {
+            pec1_iovalid_bits = l_attr_proc_pcie_iovalid_enable;
+        }
+
+        if (l_pec_id == 2)
+        {
+            pec2_iovalid_bits = l_attr_proc_pcie_iovalid_enable;
+        }
 
         // configure extended addressing facility
         if (l_extended_addressing_mode)
@@ -278,7 +303,7 @@ fapi2::ReturnCode p9_pcie_config(
         l_buf.setBit<PEC_PBAIBHWCFG_REG_PE_PCIE_CLK_TRACE_EN>();
         l_buf.insertFromRight<PEC_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT,
                               PEC_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT_LEN>(PEC_AIB_HWCFG_OSBM_HOL_BLK_CNT);
-        FAPI_DBG("PECc%i: %#lx", l_pec_id, l_buf());
+        FAPI_DBG("PEC%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplet, PEC_PBAIBHWCFG_REG, l_buf));
     }
 
@@ -296,6 +321,37 @@ fapi2::ReturnCode p9_pcie_config(
                                l_phb_chiplet,
                                l_phb_id),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        // Initialize PHBs with IOVALID set (SW417485)
+        if ((l_phb_id == 0) && !(pec0_iovalid_bits & PEC0_IOP_IOVALID_PHB0_MASK))
+        {
+            continue;
+        }
+
+        if ((l_phb_id == 1) && !(pec1_iovalid_bits & PEC1_IOP_IOVALID_PHB1_MASK))
+        {
+            continue;
+        }
+
+        if ((l_phb_id == 2) && !(pec1_iovalid_bits & PEC1_IOP_IOVALID_PHB2_MASK))
+        {
+            continue;
+        }
+
+        if ((l_phb_id == 3) && !(pec2_iovalid_bits & PEC2_IOP_IOVALID_PHB3_MASK))
+        {
+            continue;
+        }
+
+        if ((l_phb_id == 4) && !(pec2_iovalid_bits & PEC2_IOP_IOVALID_PHB4_MASK))
+        {
+            continue;
+        }
+
+        if ((l_phb_id == 5) && !(pec2_iovalid_bits & PEC2_IOP_IOVALID_PHB5_MASK))
+        {
+            continue;
+        }
 
         if (!l_hw363246)
         {
