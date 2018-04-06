@@ -118,7 +118,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 
 : iv_useSDB(false)
 , iv_secureModeDisabled(false) //Per HW team this should always be 0
-, iv_callerErrorLogPLID(i_plid)
+, iv_masterErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
 , iv_currentAction(P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
@@ -286,12 +286,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                         HWAS::DELAYED_DECONFIG,
                                         HWAS::GARD_NULL );
 
-                // Set the PLID of the error log to caller's PLID,
-                // if provided
-                if (iv_callerErrorLogPLID)
-                {
-                    l_errl->plid(iv_callerErrorLogPLID);
-                }
+                // Set the PLID of the error log to master PLID
+                // if the master PLID is set
+                updatePlids(l_errl);
 
                 errlCommit(l_errl, ISTEP_COMP_ID);
                 this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
@@ -328,12 +325,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                 TARGETING::get_huid(i_target));
                     l_errl->collectTrace( SBEIO_COMP_NAME, 256);
 
-                    // Set the PLID of the error log to caller's PLID,
-                    // if provided
-                    if (iv_callerErrorLogPLID)
-                    {
-                        l_errl->plid(iv_callerErrorLogPLID);
-                    }
+                    // Set the PLID of the error log to master PLID
+                    // if the master PLID is set
+                    updatePlids(l_errl);
+
                     errlCommit(l_errl, SBEIO_COMP_ID);
                     // Break out of loop, something bad happened and we dont want end
                     // up in a endless loop
@@ -378,12 +373,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
                 l_errl->collectTrace( SBEIO_COMP_NAME, 256);
 
-                // Set the PLID of the error log to caller's PLID,
-                // if provided
-                if (iv_callerErrorLogPLID)
-                {
-                    l_errl->plid(iv_callerErrorLogPLID);
-                }
+                // Set the PLID of the error log to master PLID
+                // if the master PLID is set
+                updatePlids(l_errl);
+
                 errlCommit(l_errl, SBEIO_COMP_ID);
                 // Break out of loop, something bad happened and we dont want end
                 // up in a endless loop
@@ -415,12 +408,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                             HWAS::NO_DECONFIG,
                                             HWAS::GARD_Predictive);
 
-                    // Set the PLID of the error log to caller's PLID,
-                    // if provided
-                    if (iv_callerErrorLogPLID)
-                    {
-                        l_errl->plid(iv_callerErrorLogPLID);
-                    }
+                    // Set the PLID of the error log to master PLID
+                    // if the master PLID is set
+                    updatePlids(l_errl);
 
                     errlCommit( l_errl, ISTEP_COMP_ID);
                     // If we got an errlog while attempting start_cbs
@@ -450,12 +440,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                             HWAS::NO_DECONFIG,
                                             HWAS::GARD_Predictive);
 
-                    // Set the PLID of the error log to caller's PLID,
-                    // if provided
-                    if (iv_callerErrorLogPLID)
-                    {
-                        l_errl->plid(iv_callerErrorLogPLID);
-                    }
+                    // Set the PLID of the error log to master PLID
+                    // if the master PLID is set
+                    updatePlids(l_errl);
 
                     errlCommit( l_errl, ISTEP_COMP_ID);
                     // If we got an errlog while attempting p9_sbe_hreset
@@ -514,12 +501,9 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             l_errl->collectTrace("ISTEPS_TRACE",256);
             l_errl->collectTrace(SBEIO_COMP_NAME,256);
 
-            // Set the PLID of the error log to caller's PLID,
-            // if provided
-            if (iv_callerErrorLogPLID)
-            {
-                l_errl->plid(iv_callerErrorLogPLID);
-            }
+            // Set the PLID of the error log to master PLID
+            // if the master PLID is set
+            updatePlids(l_errl);
 
             errlCommit(l_errl, ISTEP_COMP_ID);
         }
@@ -570,12 +554,9 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg(TARGETING::Target * i_target)
         SBE_TRACF("ERROR: call sbe_run_extract_msg_reg, PLID=0x%x", l_errl->plid() );
 
         l_errl->collectTrace(SBEIO_COMP_NAME,256);
-        // Set the PLID of the error log to caller's PLID,
-        // if provided
-        if (iv_callerErrorLogPLID)
-        {
-            l_errl->plid(iv_callerErrorLogPLID);
-        }
+        // Set the PLID of the error log to master PLID
+        // if the master PLID is set
+        updatePlids(l_errl);
 
         // capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
@@ -924,12 +905,9 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             l_errl->collectTrace( SBEIO_COMP_NAME, KILOBYTE/4);
             l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
 
-            // Set the PLID of the error log to caller's PLID,
-            // if provided
-            if (iv_callerErrorLogPLID)
-            {
-                l_errl->plid(iv_callerErrorLogPLID);
-            }
+            // Set the PLID of the error log to master PLID
+            // if the master PLID is set
+            updatePlids(l_errl);
 
             errlCommit(l_errl, ISTEP_COMP_ID);
         }
@@ -972,7 +950,7 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
                   l_ret, iv_useSDB, iv_secureModeDisabled);
 
     // Convert the returnCode into an UNRECOVERABLE error log which we will
-    // associated w/ the caller's errlog via plid
+    // associate w/ the caller's errlog via plid
     l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     this->iv_currentAction = l_ret;
 
@@ -1003,12 +981,9 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
         // Capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
 
-        // Set the PLID of the error log to caller's PLID,
-        // if provided
-        if (iv_callerErrorLogPLID)
-        {
-           l_errl->plid(iv_callerErrorLogPLID);
-        }
+        // Set the PLID of the error log to master PLID
+        // if the master PLID is set
+        updatePlids(l_errl);
 
         // Commit error log
         errlCommit( l_errl, HWPF_COMP_ID );
@@ -1227,11 +1202,11 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
         this->iv_currentSideBootAttempts = 0;
     }while(0);
 
-    // Set the PLID of the error log to caller's PLID,
-    // if provided
-    if (l_errl && iv_callerErrorLogPLID)
+    if (l_errl)
     {
-       l_errl->plid(iv_callerErrorLogPLID);
+        // Set the PLID of the error log to master PLID
+        // if the master PLID is set
+        updatePlids(l_errl);
     }
 
     SBE_TRACF(EXIT_MRK "switch_sbe_sides()");
