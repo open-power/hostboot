@@ -64,6 +64,9 @@ const uint8_t PEC2_IOP_SWAP_START_BIT = 7;
 const uint8_t PEC0_IOP_IOVALID_ENABLE_START_BIT = 4;
 const uint8_t PEC1_IOP_IOVALID_ENABLE_START_BIT = 4;
 const uint8_t PEC2_IOP_IOVALID_ENABLE_START_BIT = 4;
+const uint8_t PEC_IOP_IOVALID_ENABLE_STACK0_BIT = 4;
+const uint8_t PEC_IOP_IOVALID_ENABLE_STACK1_BIT = 5;
+const uint8_t PEC_IOP_IOVALID_ENABLE_STACK2_BIT = 6;
 const uint8_t PEC_IOP_REFCLOCK_ENABLE_START_BIT = 32;
 const uint8_t PEC_IOP_PMA_RESET_START_BIT = 29;
 const uint8_t PEC_IOP_PIPE_RESET_START_BIT = 28;
@@ -256,6 +259,14 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                          PEC0_IOP_IOVALID_ENABLE_START_BIT, PEC0_IOP_BIT_COUNT,
                          PEC1_IOP_IOVALID_ENABLE_START_BIT, PEC1_IOP_BIT_COUNT,
                          PEC2_IOP_IOVALID_ENABLE_START_BIT, PEC2_IOP_BIT_COUNT));
+        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+
+        // Set IOVALID for base PHB if PHB2, or PHB4, or PHB5 are set (SW417485)
+        if ((l_buf.getBit(PEC_IOP_IOVALID_ENABLE_STACK1_BIT)) || (l_buf.getBit(PEC_IOP_IOVALID_ENABLE_STACK2_BIT)))
+        {
+            l_buf.setBit<PEC_IOP_IOVALID_ENABLE_STACK0_BIT>();
+        }
+
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf),
                  "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_OR");
