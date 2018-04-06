@@ -96,9 +96,9 @@ class SbeRetryHandler
                         SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME);
         }
 
-        inline uint32_t getCallerPLID()
+        inline uint32_t getMasterPLID()
         {
-            return iv_callerErrorLogPLID;
+            return iv_masterErrorLogPLID;
         }
 
         inline uint8_t getSwitchCount()
@@ -204,6 +204,30 @@ class SbeRetryHandler
         void bestEffortCheck();
 
         /**
+        * @brief  It is possible that multiple error logs will get created throughout
+        *         the process of trying to recover the SBE. We want all of these logs
+        *         to share the same platform log id (PLID). This function will check
+        *         if iv_masterErrorLogPLID is non-zero, if it is we will set the PLID
+        *         of the error log passed into this function to be iv_masterErrorLogPLID.
+        *         If iv_masterErrorLogPLID is zero, we will update iv_masterErrorLogPLID
+        *         to be whatever the PLID is of the error log passed to this function
+        *
+        *
+        * @return - void
+        */
+        inline void updatePlids(errlHndl_t & i_errl)
+        {
+            if(iv_masterErrorLogPLID)
+            {
+                i_errl->plid(iv_masterErrorLogPLID);
+            }
+            else
+            {
+                iv_masterErrorLogPLID = i_errl->plid();
+            }
+        }
+
+        /**
          * @brief  This function handles the SBE timeout and loops
          *         required to start it.
          *
@@ -219,10 +243,6 @@ class SbeRetryHandler
          *
          * @param[in]     i_target        - current proc target
          *
-         * @return - bool for flow control on return to caller, if false,
-         *           caller should go on with the processing flow, if true,
-         *           caller should interrupt the processing flow and get out
-         *           of loop or current iteration
          */
 
         void sbe_get_ffdc_handler(TARGETING::Target * i_target);
@@ -294,12 +314,13 @@ class SbeRetryHandler
         bool iv_secureModeDisabled;
 
         /*
-         * @brief PLID of the caller. 0 if caller does not
-         *        provide one.  Not to be confused with the
-         *        PLID when error log is created in the usage
-         *        of this class.
+         * @brief If the caller of this class sets the PLID in the ctor
+                  then the ctor will set that PLID to this instance variable.
+                  If the caller does not pass a PLID into the ctor then the
+                  first error log created while doing the retry will set this
+                  PLID.
          */
-        uint32_t iv_callerErrorLogPLID;
+        uint32_t iv_masterErrorLogPLID;
 
         /*
          * @brief Number of times we switch SBE sides. Max is defined by
