@@ -207,6 +207,7 @@ EXTENDED_MODULES += tod
 EXTENDED_MODULES += nestmemutils
 EXTENDED_MODULES += fab_iovalid
 EXTENDED_MODULES += isteps_nest
+EXTENDED_MODULES += isteps_io
 
 #***************************************
 # Working test modules

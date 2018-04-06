@@ -48,6 +48,7 @@ SUBDIRS+=p9_phbPerst.d
 SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
+SUBDIRS+=io.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
