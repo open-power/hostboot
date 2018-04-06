@@ -1555,6 +1555,15 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
+    //Verify ivdd_all_cores_off_caches_off has MSB bit is set
+    //if yes then initialized to 0
+    for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
+    {
+       if ( io_iddqt->ivdd_all_cores_off_caches_off[i] & 0x8000) 
+       {
+           io_iddqt->ivdd_all_cores_off_caches_off[i] = 0;
+       }
+    }
     // Put out the structure to the trace
     iddq_print(io_iddqt);
 
