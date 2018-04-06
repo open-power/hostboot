@@ -235,6 +235,176 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
 
 //------------------------------------------------------------------------------
 
+template<TYPE T>
+uint32_t __getGrpInfo( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
+                       uint64_t & o_grpId, uint64_t & o_grpSize,
+                       uint64_t & o_grpBar );
+
+template<>
+uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
+                                 uint64_t & o_grpId, uint64_t & o_grpSize,
+                                 uint64_t & o_grpBar )
+{
+    #define PRDF_FUNC "[MemDealloc::__getGrpInfo] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the connecte MCS chip and MCA target position.
+        ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
+        uint8_t mcaPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+
+        SCAN_COMM_REGISTER_CLASS * mcfgp  = mcs_chip->getRegister("MCFGP");
+        SCAN_COMM_REGISTER_CLASS * mcfgpm = mcs_chip->getRegister("MCFGPM");
+        o_rc = mcfgp->Read();  if ( SUCCESS != o_rc ) break;
+        o_rc = mcfgpm->Read(); if ( SUCCESS != o_rc ) break;
+
+        // Get the number of channels in this group.
+        uint8_t mcGrpCnfg = mcfgp->GetBitFieldJustified( 1, 4 );
+        switch ( mcGrpCnfg )
+        {
+            case 0: o_grpChnls = 1;                     break; // 11
+            case 1: o_grpChnls = (0 == mcaPos) ? 1 : 3; break; // 13
+            case 2: o_grpChnls = (0 == mcaPos) ? 3 : 1; break; // 31
+            case 3: o_grpChnls = 3;                     break; // 33
+            case 4: o_grpChnls = 2;                     break; // 2D
+            case 5: o_grpChnls = 2;                     break; // 2S
+            case 6: o_grpChnls = 4;                     break; // 4
+            case 7: o_grpChnls = 6;                     break; // 6
+            case 8: o_grpChnls = 8;                     break; // 8
+            default:
+                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
+                          "on 0x%08x port %d", mcGrpCnfg, mcs_chip->getHuid(),
+                          mcaPos );
+                o_rc = FAIL;
+        }
+        if ( SUCCESS != o_rc ) break;
+
+        // Get the group ID and group size.
+        o_grpId   = mcfgp->GetBitFieldJustified( (0 == mcaPos) ? 5 : 8, 3 );
+        o_grpSize = mcfgp->GetBitFieldJustified( 13, 11 );
+
+        // Get the base address (BAR).
+        if ( 0 == mcaPos ) // MCS channel 0
+        {
+            // Channel 0 is always from the MCFGP.
+            o_grpBar = mcfgp->GetBitFieldJustified(24, 24);
+        }
+        else // MCS channel 1
+        {
+            switch ( mcGrpCnfg )
+            {
+                // Each channel is in an different group. Use the MCFGPM.
+                case 0: // 11
+                case 1: // 13
+                case 2: // 31
+                case 3: // 33
+                case 4: // 2D
+                    o_grpBar = mcfgpm->GetBitFieldJustified(24, 24);
+                    break;
+
+                // Both channels are in the same group. Use the MCFGP.
+                case 5: // 2S
+                case 6: // 4
+                case 7: // 6
+                case 8: // 8
+                    o_grpBar = mcfgp->GetBitFieldJustified(24, 24);
+                    break;
+
+                default:
+                    PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: "
+                              "0x%x on 0x%08x port %d", mcGrpCnfg,
+                              mcs_chip->getHuid(), mcaPos );
+                    o_rc = FAIL;
+            }
+        }
+        if ( SUCCESS != o_rc ) break;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TYPE T>
+uint32_t __insertGrpId( uint64_t & io_addr, uint64_t i_grpChnls,
+                        uint64_t i_grpId );
+
+template<>
+uint32_t __insertGrpId<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpChnls,
+                                  uint64_t i_grpId )
+{
+    #define PRDF_FUNC "[MemDealloc::__insertGrpId] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Notes on 3 and 6 channel per group configs:
+    //      Let's use an example of 3 channels in a group with 4 GB per channel.
+    //      The group size will be configured like there are 4 channels (16 GB
+    //      total). However, only the first 12 GB of the 16 GB are used because
+    //      there are only three channels. Since we need a contiguous address
+    //      space and can't have holes every fourth address, the hardware uses
+    //      some crafty mod3 logic to evenly distribute the addresses among the
+    //      3 channels. The mod3 hashing is based on the address itself so there
+    //      isn't a traditional group select like we are used to in the 2, 4,
+    //      and 8 channel group configs. For 3 MC/group configs, there is no
+    //      shifting (same as 1 MC/group). For 6 MC/group configs, we need to
+    //      insert the least significant bit of the group ID into RA[56] (same
+    //      as 2 MC/group).
+
+    uint64_t upper33 = io_addr & 0xFFFFFFFF80ull;
+    uint64_t lower7  = io_addr & 0x000000007full;
+
+    switch ( i_grpChnls )
+    {
+        case 1:
+        case 3: // no shifting
+            break;
+
+        case 2:
+        case 6: // insert 1 bit
+            io_addr = (upper33 << 1) | ((i_grpId & 0x1) << 7) | lower7;
+            break;
+
+        case 4: // insert 2 bits
+            io_addr = (upper33 << 2) | ((i_grpId & 0x3) << 7) | lower7;
+            break;
+
+        case 8: // insert 3 bits
+            io_addr = (upper33 << 3) | ((i_grpId & 0x7) << 7) | lower7;
+            break;
+
+        default:
+            PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value %d",
+                      i_grpChnls );
+            o_rc = FAIL;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// The hardware uses a mod3 hashing algorithm to calculate which memory channel
+// an address belongs to. This is calulated with the following:
+//      r0 = B3MF(RA[47:48])
+//      r1 = rrotate(r0, RA[45:46])
+//      r2 = rrotate(r1, RA[43:44])
+//      r3 = rrotate(r2, m[0:1])
+// RA is the real address, m[0:1] is the two most significant bits of the port
+// address, and r3 is the mod3 hash. Since we are translating from the phyiscal
+// address to the real address, we don't have m[0:1]. So the goal here is to
+// calculate that. Fortunately, we have the 40-bit port address, which is where
+// we can get RA[43:48] to calculate r2. We can also do a reverse lookup with
+// the group ID and RA[55:56] to find r3. From there, we just need to solve for
+// m[0:1] and add it to the beginning of the port address.
+
 // Converts a 2-bit number into the binned (one-hot) 3-modulus format (B3MF).
 //    mod(0) = 0b00 = 0b100
 //    mod(1) = 0b01 = 0b010
@@ -267,247 +437,205 @@ uint8_t __lrotate( uint8_t i_b3mf, uint8_t i_num )
     return o_b3mf;
 }
 
-// See the description below on the significance of these components.
-void __getRAComps( uint64_t i_ra, uint8_t & o_r2, uint8_t & o_ra_55_56 )
-{
-    uint8_t r0 = __b3mf(        (i_ra >> 15) & 0x3 ); // RA[47:48]
-    uint8_t r1 = __rrotate( r0, (i_ra >> 17) & 0x3 ); // RA[45:46]
-    o_r2       = __rrotate( r1, (i_ra >> 19) & 0x3 ); // RA[43:44]
-    o_ra_55_56 =                (i_ra >>  7) & 0x3;   // RA[55:56]
-}
+template<TYPE T>
+uint64_t __getMsb( uint64_t i_addr, uint64_t i_grpChnls, uint64_t i_grpId );
 
-// Returns the two MSB bits that need to be added to the port address. This will
-// be shifted to the correct position so it simply needs to be OR'd to the port
-// address.
-uint64_t __getMSB( uint32_t i_grpId, uint8_t i_ra_55_56, uint8_t i_r2,
-                   uint32_t i_grpSize )
+template<>
+uint64_t __getMsb<TYPE_MCA>( uint64_t i_addr, uint64_t i_grpChnls,
+                             uint64_t i_grpId )
 {
-    // Get the mod3 hash. There are some nice tables in sections 2.12.1 and
-    // 2.12.2 of the Cumulus MC workbook. Fortunately, those tables can be
-    // boiled down to some bit shifting.
-    uint8_t r3 = __lrotate( __b3mf(i_grpId), i_ra_55_56 );
+    uint64_t o_msb = 0;
+
+    // Start by calculating r2 (see description above) and extracting RA[55:56].
+    uint8_t r0       = __b3mf(        (i_addr >> 15) & 0x3 ); // RA[47:48]
+    uint8_t r1       = __rrotate( r0, (i_addr >> 17) & 0x3 ); // RA[45:46]
+    uint8_t r2       = __rrotate( r1, (i_addr >> 19) & 0x3 ); // RA[43:44]
+    uint8_t ra_55_56 =                (i_addr >>  7) & 0x3;   // RA[55:56]
+
+    // Special case for 6 MC/grp configs.
+    if ( 6 == i_grpChnls )
+    {
+        // Note that the LSB of the group ID has already been inserted into
+        // RA[56] (via __insertGrpId()). That bit should not be used to
+        // calculate the mod 3 hash.
+        i_grpId  = i_grpId  & 0x6; // Top two bits of the group ID.
+        ra_55_56 = ra_55_56 & 0x2; // Only bit 55.
+    }
+
+    // Get the mod3 hash. There are some tables in sections 2.12.1 and 2.12.2 of
+    // the Cumulus MC workbook. Fortunately, those tables can be boiled down to
+    // some bit shifting.
+    uint8_t r3 = __lrotate( __b3mf(i_grpId), ra_55_56 );
 
     // Given r2 and r3, calculate the MSBs for the port address by counting the
     // number of lrotates on r3 it takes to match r2.
-    uint64_t o_msb = 0;
-    while ( i_r2 != r3 )
+    while ( r2 != r3 )
     {
         r3 = __lrotate( r3, 1 );
         o_msb++;
     }
 
-    // Now shift the MSBs by the group size.
-    o_msb <<= ( 30 + __countBits(i_grpSize) );
-
     return o_msb;
-}
-
-// The hardware uses a mod3 hashing algorithm to calculate which memory channel
-// an address belongs to. This is calulated with the following:
-//      r0 = B3MF(RA[47:48])
-//      r1 = rrotate(r0, RA[45:46])
-//      r2 = rrotate(r1, RA[43:44])
-//      r3 = rrotate(r2, m[0:1])
-// RA is the real address, m[0:1] is the two most significant bits of the port
-// address, and r3 is the mod3 hash. Since we are translating from the phyiscal
-// address to the real address, we don't have m[0:1]. So the goal here is to
-// calculate that. Fortunately, we have the 40-bit port address, which is where
-// we can get RA[43:48] to calculate r2. We can also do a reverse lookup with
-// the group ID and RA[55:56] to find r3. From there, we just need to solve for
-// m[0:1] and add it to the beginning of the port address.
-
-uint64_t __insertGrpId_3mcpg( uint64_t i_pa, uint32_t i_grpId,
-                              uint32_t i_grpSize )
-{
-    // For 3 MC/grp config, we don't need to insert any bits into the port
-    // address (similar handling as the 1 MC/grp config).
-    uint64_t ra = i_pa;
-
-    // From here we can calculate r2 and extract RA[55:56].
-    uint8_t r2, ra_55_56;
-    __getRAComps( ra, r2, ra_55_56 );
-
-    // Given the components, we can now calculate the MBS.
-    uint64_t msb = __getMSB( i_grpId, ra_55_56, r2, i_grpSize );
-
-    // Now combine the current real address and the MSBs.
-    return ( ra | msb );
-}
-
-uint64_t __insertGrpId_6mcpg( uint64_t i_pa, uint32_t i_grpId,
-                              uint32_t i_grpSize )
-{
-    // For 6 MC/grp config, RA[56] is the LSB of the group ID (similar handling
-    // as the 2 MC/grp config).
-    uint64_t upper33 = i_pa & 0xFFFFFFFF80ull;
-    uint64_t lower7  = i_pa & 0x000000007full;
-    uint64_t ra = (upper33 << 1) | ((i_grpId & 0x1) << 7) | lower7;
-
-    // From here we can calculate r2 and extract RA[55:56].
-    uint8_t r2, ra_55_56;
-    __getRAComps( ra, r2, ra_55_56 );
-
-    // Given the components, we can now calculate the MBS. Note that the LSB of
-    // the group ID has already been inserted into RA[56]. That bit should not
-    // be used to calculate the mod 3 hash.
-    uint64_t msb = __getMSB( (i_grpId & 0x6), (ra_55_56 & 0x2), r2, i_grpSize );
-
-    // Now combine the current real address and the MSBs.
-    return ( ra | msb );
 }
 
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                       uint64_t & o_addr );
+void __insertMsb( uint64_t & io_addr, uint64_t i_grpSize, uint64_t i_msb );
 
 template<>
-int32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
-                                 uint64_t & o_addr )
+void __insertMsb<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpSize,
+                            uint64_t i_msb )
+{
+    // i_grpSize is a mask for the BAR. All we have to do is count the number
+    // of bits in that value to determine how many extra bits we need to shift
+    // in order to get the MSB in the correct position. Refer to the MC workbook
+    // for details of the bit positions based on the group size.
+    io_addr |= i_msb << ( 30 + __countBits(i_grpSize) );
+}
+
+//------------------------------------------------------------------------------
+
+template<TYPE T>
+void __addBar( uint64_t & io_addr, uint64_t i_grpBar );
+
+template<>
+void __addBar<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpBar )
+{
+    // The BAR field is 24 bits and always starts at bit 8 of the real address.
+    io_addr |= (i_grpBar << 32);
+}
+
+//------------------------------------------------------------------------------
+
+template<TYPE T>
+uint32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
+                        uint64_t & o_addr );
+
+template<>
+uint32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                  uint64_t & o_addr )
 {
     #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
 
-    int32_t l_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    do {
+    do
+    {
+        // Get the group information.
+        uint64_t grpChnls, grpId, grpSize, grpBar;
+        o_rc = __getGrpInfo<TYPE_MCA>(i_chip, grpChnls, grpId, grpSize, grpBar);
+        if ( SUCCESS != o_rc ) break;
+
         // Get the 40-bit port address (right justified).
-        l_rc = __getMcaPortAddr( i_chip, i_addr, o_addr );
-        if (l_rc) break;
+        o_rc = __getMcaPortAddr( i_chip, i_addr, o_addr );
+        if ( SUCCESS != o_rc ) break;
 
-        // Construct the 56-bit Powerbus address
+        // Insert the group ID.
+        o_rc = __insertGrpId<TYPE_MCA>( o_addr, grpChnls, grpId );
+        if ( SUCCESS != o_rc ) break;
 
-        // Get MCA target position
-        ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
-        uint8_t mcaPos = i_chip->getPos() % MAX_MCA_PER_MCS;
-
-        SCAN_COMM_REGISTER_CLASS * mcfgp =  mcs_chip->getRegister("MCFGP");
-        SCAN_COMM_REGISTER_CLASS * mcfgpm = mcs_chip->getRegister("MCFGPM");
-        l_rc = mcfgp->Read(); if (l_rc) break;
-        l_rc = mcfgpm->Read(); if (l_rc) break;
-
-        // Get the number of channels in this group.
-        uint8_t mcGrpCnfg = mcfgp->GetBitFieldJustified( 1, 4 );
-        uint32_t chnls = 0;
-        switch ( mcGrpCnfg )
+        // Notes on 3 and 6 channel per group configs:
+        //      Now that the group ID has been inserted, if applicable, we need
+        //      to add the two most significant (MSB) bits to the beginning of
+        //      the port address. These bits are calculated with a special mod3
+        //      hashing algorithm.
+        if ( 3 == grpChnls || 6 == grpChnls )
         {
-            case 0: chnls = 1;                     break; // 11
-            case 1: chnls = (0 == mcaPos) ? 1 : 3; break; // 13
-            case 2: chnls = (0 == mcaPos) ? 3 : 1; break; // 31
-            case 3: chnls = 3;                     break; // 33
-            case 4: chnls = 2;                     break; // 2D
-            case 5: chnls = 2;                     break; // 2S
-            case 6: chnls = 4;                     break; // 4
-            case 7: chnls = 6;                     break; // 6
-            case 8: chnls = 8;                     break; // 8
-            default:
-                PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
-                          "on 0x%08x port %d", mcGrpCnfg, mcs_chip->getHuid(),
-                          mcaPos );
-                l_rc = FAIL;
-        }
-        if ( SUCCESS != l_rc ) break;
-
-        // Insert the group select.
-        // Notes on 3 and 6 channel per group configs. Let's use an example of 3
-        // channels in a group with 4 GB per channel. The group will be
-        // configured think there are 4 channels with 16 GB. However, only the
-        // first 12 GB of the 16 GB are used. Since we need a contiguous address
-        // space and can't have holes every fourth address, the hardware uses
-        // some crafty mod3 logic to evenly distribute the addresses among the
-        // 3 channels. The mod3 hashing is based on the address itself so there
-        // isn't a traditional group select like we are used to in the 2, 4, and
-        // 8 channel group configs. This will require special handling to insert
-        // the appropriate bits based on the group ID.
-
-        uint32_t grpId = mcfgp->GetBitFieldJustified((0 == mcaPos) ? 5 : 8, 3);
-        uint32_t grpSize = mcfgp->GetBitFieldJustified( 13, 11 );
-
-        uint64_t upper33 = o_addr & 0xFFFFFFFF80ull;
-        uint64_t lower7  = o_addr & 0x000000007full;
-
-        switch ( chnls )
-        {
-            case 1:
-                break;
-
-            case 2: // insert 1 bit
-                o_addr = (upper33 << 1) | ((grpId & 0x1) << 7) | lower7;
-                break;
-
-            case 3: // Special handling for 3 MC/grp
-                o_addr = __insertGrpId_3mcpg( o_addr, grpId, grpSize );
-                break;
-
-            case 4: // insert 2 bits
-                o_addr = (upper33 << 2) | ((grpId & 0x3) << 7) | lower7;
-                break;
-
-            case 6: // Special handling for 6 MC/grp
-                o_addr = __insertGrpId_6mcpg( o_addr, grpId, grpSize );
-                break;
-
-            case 8: // insert 3 bits
-                o_addr = (upper33 << 3) | ((grpId & 0x7) << 7) | lower7;
-                break;
-
-            default:
-                PRDF_ASSERT(false); // Definitely a code bug.
+            uint64_t msb = __getMsb<TYPE_MCA>( o_addr, grpChnls, grpId );
+            __insertMsb<TYPE_MCA>( o_addr, grpSize, msb );
         }
 
-        // Get the base address (BAR).
-        uint64_t bar = 0;
-        if ( 0 == mcaPos ) // MCS channel 0
-        {
-            // Channel 0 is always from the MCFGP.
-            bar = mcfgp->GetBitFieldJustified(24, 24);
-        }
-        else // MCS channel 1
-        {
-            switch ( mcGrpCnfg )
-            {
-                // Each channel is in an different group. Use the MCFGPM.
-                case 0: // 11
-                case 1: // 13
-                case 2: // 31
-                case 3: // 33
-                case 4: // 2D
-                    bar = mcfgpm->GetBitFieldJustified(24, 24);
-                    break;
-
-                // Both channels are in the same group. Use the MCFGP.
-                case 5: // 2S
-                case 6: // 4
-                case 7: // 6
-                case 8: // 8
-                    bar = mcfgp->GetBitFieldJustified(24, 24);
-                    break;
-
-                default:
-                    PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: "
-                              "0x%x on 0x%08x port %d", mcGrpCnfg,
-                              mcs_chip->getHuid(), mcaPos );
-                    l_rc = FAIL;
-            }
-        }
-        if ( SUCCESS != l_rc ) break;
-
-        // Add the BAR to the rest of the address. The BAR field is 24 bits and
-        // always starts at bit 8 of the real address.
-        o_addr |= (bar << 32);
+        // Add the BAR to the rest of the address.
+        __addBar<TYPE_MCA>( o_addr, grpBar );
 
     } while (0);
 
-    return l_rc;
+    return o_rc;
 
     #undef PRDF_FUNC
 }
 
 template<>
-int32_t getSystemAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
-                                 uint64_t & o_addr )
+uint32_t getSystemAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                  uint64_t & o_addr )
 {
     #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
+
+    // TODO - RTC: 190115
+    PRDF_ERR( PRDF_FUNC "not supported on MBA yet: i_chip=0x%08x",
+              i_chip->getHuid() );
+    return FAIL; // Returning FAIL will prevent us from sending any false
+                 // messages to the hypervisor.
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TYPE T>
+uint32_t getSystemAddrRange( ExtensibleChip * i_chip,
+                             MemAddr    i_saddr, MemAddr    i_eaddr,
+                             uint64_t & o_saddr, uint64_t & o_eaddr );
+
+template<>
+uint32_t getSystemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
+                                       MemAddr    i_saddr, MemAddr    i_eaddr,
+                                       uint64_t & o_saddr, uint64_t & o_eaddr )
+{
+    #define PRDF_FUNC "[MemDealloc::getSystemAddrRange] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the group information.
+        uint64_t grpChnls, grpId, grpSize, grpBar;
+        o_rc = __getGrpInfo<TYPE_MCA>(i_chip, grpChnls, grpId, grpSize, grpBar);
+        if ( SUCCESS != o_rc ) break;
+
+        // Get the 40-bit port addresses (right justified).
+        o_rc  = __getMcaPortAddr( i_chip, i_saddr, o_saddr );
+        o_rc |= __getMcaPortAddr( i_chip, i_eaddr, o_eaddr );
+        if ( SUCCESS != o_rc ) break;
+
+        // Insert the group ID.
+        o_rc  = __insertGrpId<TYPE_MCA>( o_saddr, grpChnls, grpId );
+        o_rc |= __insertGrpId<TYPE_MCA>( o_eaddr, grpChnls, grpId );
+        if ( SUCCESS != o_rc ) break;
+
+        // Notes on 3 and 6 channel per group configs:
+        //   It turns out that with 3 and 6 MC/group configs every address is
+        //   interleaved, meaning that three consecutive physical addresses have
+        //   three different MSBs. In addition, that hashing is not so simple.
+        //   The given i_saddr and i_eaddr may be on MSB b10 and MSB b00,
+        //   respectively. This really mucks things up when the start address is
+        //   larger than the end address. To circumvent this issue, we have to
+        //   bypass the actual MSBs and force o_saddr and o_eaddr to have
+        //   MSB b00 and MSB b10, respectively.
+        if ( 3 == grpChnls || 6 == grpChnls )
+        {
+            __insertMsb<TYPE_MCA>( o_saddr, grpSize, 0 );
+            __insertMsb<TYPE_MCA>( o_eaddr, grpSize, 2 );
+        }
+
+        // Add the BAR to the rest of the address.
+        __addBar<TYPE_MCA>( o_saddr, grpBar );
+        __addBar<TYPE_MCA>( o_eaddr, grpBar );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t getSystemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
+                                       MemAddr    i_saddr, MemAddr    i_eaddr,
+                                       uint64_t & o_saddr, uint64_t & o_eaddr )
+{
+    #define PRDF_FUNC "[MemDealloc::getSystemAddrRange] "
 
     // TODO - RTC: 190115
     PRDF_ERR( PRDF_FUNC "not supported on MBA yet: i_chip=0x%08x",
@@ -577,11 +705,11 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
         // Get the system addresses.
         uint64_t ssAddr = 0;
         uint64_t seAddr = 0;
-        o_rc  = getSystemAddr<T>( i_chip, startAddr, ssAddr );
-        o_rc |= getSystemAddr<T>( i_chip, endAddr,   seAddr );
+        o_rc = getSystemAddrRange<T>( i_chip, startAddr, endAddr,
+                                              ssAddr,    seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getSystemAddrRange(0x%08x) failed",
                       i_chip->getHuid() );
             break;
         }
@@ -626,11 +754,11 @@ int32_t port( ExtensibleChip * i_chip )
         // Get the system addresses.
         uint64_t ssAddr = 0;
         uint64_t seAddr = 0;
-        o_rc  = getSystemAddr<T>( i_chip, startAddr, ssAddr );
-        o_rc |= getSystemAddr<T>( i_chip, endAddr,   seAddr );
+        o_rc = getSystemAddrRange<T>( i_chip, startAddr, endAddr,
+                                              ssAddr,    seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getSystemAddrRange(0x%08x) failed",
                       i_chip->getHuid() );
             break;
         }
@@ -686,11 +814,11 @@ int32_t __getDimmRange( TargetHandle_t i_dimm,
         }
 
         // Get the system addresses.
-        o_rc  = getSystemAddr<T>( chip, startAddr, o_ssAddr );
-        o_rc |= getSystemAddr<T>( chip, endAddr,   o_seAddr );
+        o_rc = getSystemAddrRange<T>( chip, startAddr, endAddr,
+                                            o_ssAddr,  o_seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getSystemAddr(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getSystemAddrRange(0x%08x) failed",
                       chip->getHuid() );
             break;
         }
