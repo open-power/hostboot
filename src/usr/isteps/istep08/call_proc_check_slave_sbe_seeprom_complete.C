@@ -173,6 +173,32 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                       " completed ok for proc 0x%.8X",
                       TARGETING::get_huid(l_cpu_target));
         }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "FAILURE : proc_check_slave_sbe_seeprom_complete"
+                      "SBE for proc 0x%.8X did not reach runtime",
+                      TARGETING::get_huid(l_cpu_target));
+           /*@
+            * @reasoncode RC_FAILED_TO_BOOT_SBE
+            * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid   MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
+            * @userdata1  HUID of proc that failed to boot its SBE
+            * @userdata2  Unused
+            * @devdesc    Failed to boot a slave SBE
+            * @custdesc   Processor Error
+            */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
+                                            RC_FAILED_TO_BOOT_SBE,
+                                            TARGETING::get_huid(l_cpu_target),
+                                            0);
+            l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+            l_stepError.addErrorDetails( l_errl);
+            errlCommit(l_errl, ISTEP_COMP_ID);
+
+
+        }
 
 /* @TODO-RTC:100963 This should only be called when the SBE has completely
               crashed. There is a path in OpenPower where HB may get an
