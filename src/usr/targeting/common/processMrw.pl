@@ -37,14 +37,15 @@ use constant MAX_MCS_PER_PROC => 4; # 4 MCS per Nimbus
 
 my $VERSION = "1.0.0";
 
-my $force          = 0;
-my $serverwiz_file = "";
-my $version        = 0;
-my $debug          = 0;
-my $report         = 0;
-my $sdr_file       = "";
-my $build          = "hb";
-my $system_nodes    = "";
+my $force           = 0;
+my $serverwiz_file  = "";
+my $version         = 0;
+my $debug           = 0;
+my $report          = 0;
+my $sdr_file        = "";
+my $build           = "hb";
+my $system_config    = "";
+my $output_filename = "";
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
@@ -54,7 +55,8 @@ GetOptions(
     "f"   => \$force,             # numeric
     "x=s" => \$serverwiz_file,    # string
     "d"   => \$debug,
-    "n=s" => \$system_nodes,       #string
+    "c=s" => \$system_config,      #string
+    "o=s" => \$output_filename,   #string
     "v"   => \$version,
     "r"   => \$report,
   )                               # flag
@@ -389,27 +391,24 @@ foreach my $target (keys %{ $targetObj->getAllTargets() })
 ## write out final XML
 my $xml_fh;
 my $filename;
-if ( $build eq "fsp" )
+my $config_str = $system_config;
+
+#If user did not specify the output filename, then build one up by using
+#config and build parameters
+if ($output_filename eq "")
 {
-    if($system_nodes eq "")
+    if ($config_str ne "")
     {
-      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_fsp.mrw.xml";
+        $config_str = "_" . $config_str;
     }
-    else
-    {
-      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_" . $system_nodes . "_fsp.mrw.xml";
-    }
+
+    $filename = $xmldir . "/" . $targetObj->getSystemName() . $config_str . "_" . $build . ".mrw.xml";
 }
-else{
-    if($system_nodes eq "")
-    {
-      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_hb.mrw.xml";
-    }
-    else
-    {
-      $filename = $xmldir . "/" . $targetObj->getSystemName() . "_" . $system_nodes . "_hb.mrw.xml";
-    }
+else
+{
+    $filename = $output_filename;
 }
+
 print "Creating XML: $filename\n";
 open($xml_fh, ">$filename") || die "Unable to create: $filename";
 
@@ -1089,6 +1088,49 @@ sub processProcessor
                                                       "FABRIC_CHIP_ID"));
 
     processMembufVpdAssociation($targetObj,$target);
+    #TODO RTC: 191762 -- Need a generic way to source FABRIC_GROUP_ID and
+    #FABRIC_CHIP_ID from the MRW and select the right value in processMRW
+    #based on the system configuration we are compiling for.
+    if ($system_config eq "w")
+    {
+        my $huid_str = $targetObj->getAttribute($target, "HUID");
+        my $huid     = hex $huid_str;
+        my $grp_id   = $targetObj->getAttribute($target,"FABRIC_GROUP_ID");
+        my $chip_id  = $targetObj->getAttribute($target,"FABRIC_CHIP_ID");
+
+        if    ($huid eq 0x50000)
+        {
+            $grp_id  = 1;
+            $chip_id = 1;
+        }
+        elsif ($huid eq 0x50001)
+        {
+            $grp_id  = 1;
+            $chip_id = 0;
+        }
+        elsif ($huid eq 0x50002)
+        {
+            $grp_id  = 0;
+            $chip_id = 1;
+        }
+        elsif ($huid eq 0x50003)
+        {
+            $grp_id  = 0;
+            $chip_id = 0;
+        }
+        else
+        {
+            #This is super ugly hack to make sure FABRIC_GROUP_ID and
+            #FABRIC_CHIP_ID are unique in the entire system. But, it
+            #doesn't matter what they are for other drawers as for
+            #wrap config we only care about one drawer
+            $grp_id += 1;
+        }
+
+        $targetObj->setAttribute($target,"FABRIC_GROUP_ID",$grp_id);
+        $targetObj->setAttribute($target,"FABRIC_CHIP_ID",$chip_id);
+    }
+
     setupBars($targetObj,$target);
 
     $targetObj->setAttribute($target,
@@ -1450,22 +1492,47 @@ sub processXbus
     my $target    = shift;
 
     my $found_xbus = 0;
-
+    my $default_config = "d";
+    my $wrap_config    = "w";
     my $xbus_child_conn = $targetObj->getFirstConnectionDestination($target);
     if ($xbus_child_conn ne "")
     {
-        ## set attributes for both directions
-        $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET",
-        $targetObj->getAttribute($target, "PHYS_PATH"));
-        $targetObj->setAttribute($target, "PEER_TARGET",
-        $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
+        # The CONFIG_APPLY bus attribute carries a comma seperated values for each 
+        # X-bus connection. It can currently take the following values.
+        # "w" - This connection is applicable only in wrap config
+        # "d" - This connection is applicable in default config (non-wrap mode).
+        my $config = $default_config;
+        if ($targetObj->isBusAttributeDefined($target,0,"CONFIG_APPLY"))
+        {
+            $config = $targetObj->getBusAttribute($target,0,"CONFIG_APPLY");
+        }
 
-        $targetObj->setAttribute($xbus_child_conn, "PEER_HUID",
-        $targetObj->getAttribute($target, "HUID"));
-        $targetObj->setAttribute($target, "PEER_HUID",
-        $targetObj->getAttribute($xbus_child_conn, "HUID"));
+        #If CONFIG_APPLY doesn't match the system configuration we are
+        #running for, then mark the peers null.
+        #For example, in wrap config, CONFIG_APPLY is expected to have "w"
+        #If "w" is not there, then we skip the connection and mark peers
+        #as NULL
+        if (($system_config eq $wrap_config && $config =~ /$wrap_config/) ||
+           ($system_config ne $wrap_config && $config =~ /$default_config/))
+        {
+            ## set attributes for both directions
+            $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET",
+                $targetObj->getAttribute($target, "PHYS_PATH"));
+            $targetObj->setAttribute($target, "PEER_TARGET",
+                $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
 
-        $found_xbus = 1;
+            $targetObj->setAttribute($xbus_child_conn, "PEER_HUID",
+                $targetObj->getAttribute($target, "HUID"));
+            $targetObj->setAttribute($target, "PEER_HUID",
+                $targetObj->getAttribute($xbus_child_conn, "HUID"));
+
+            $found_xbus = 1;
+        }
+        else
+        {
+            $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET", "NULL");
+            $targetObj->setAttribute($target, "PEER_TARGET","NULL");
+        }
     }
 
 }
@@ -1486,7 +1553,6 @@ sub processAbus
     my $abus_dest_parent = $aBus->{DEST_PARENT};
     my $bustype = $targetObj->getBusType($abussource);
     my $updatePeerTargets = 0;
-#       print"Found bus from $abussource to $abus_dest_parent and $bustype\n";
 
 
     my $config = $targetObj->getBusAttribute($aBus->{SOURCE},$aBus->{BUS_NUM},"CONFIG_APPLY");
@@ -1506,62 +1572,79 @@ sub processAbus
     # If user has passed 2N as argument, then we consider only those
     # A-bus connections where token "2" is present
 
-    if($system_nodes eq "2N")
+    if($system_config eq "2N" && $config =~ /$twonode/)
     {
-      #Looking for Abus connections pertaining to 2 node system only
-      if($config =~ /$twonode/)
-      {
+        #Looking for Abus connections pertaining to 2 node system only
         $updatePeerTargets = 1;
-      }
     }
-    else
+    elsif ($system_config eq "")
     {
       #Looking for Abus connections pertaining to 2,3,4 node systems
       #This will skip any connections specific to ONLY 2 node
       if($config =~ /$threenode/ || $config =~ /$fournode/)
       {
-        $updatePeerTargets = 1;
+          $updatePeerTargets = 1;
       }
+
+    }
+    elsif ($config =~ /$system_config/)
+    {
+        #If system configuration we are building for matches the config
+        #this ABUS connection is for, then update. Ex: wrap config
+        $updatePeerTargets = 1;
+    }
+    else
+    {
+        $updatePeerTargets = 0;
     }
 
 
     if($updatePeerTargets eq 1)
     {
-      ## set attributes for both directions
-      my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
-      my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
-
-      $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
-      $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
-      $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
-      $targetObj->setAttribute($target, "PEER_PATH", $phys2);
-      
-      $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
-         $targetObj->getAttribute($target, "HUID"));
-      $targetObj->setAttribute($target, "PEER_HUID",
-         $targetObj->getAttribute($abus_dest_parent, "HUID"));
-
-      $targetObj->setAttribute($abussource, "PEER_TARGET",
-               $targetObj->getAttribute($abusdest, "PHYS_PATH"));
-      $targetObj->setAttribute($abusdest, "PEER_TARGET",
-               $targetObj->getAttribute($abussource, "PHYS_PATH"));
-
-      $targetObj->setAttribute($abussource, "PEER_PATH",
-               $targetObj->getAttribute($abusdest, "PHYS_PATH"));
-      $targetObj->setAttribute($abusdest, "PEER_PATH",
-               $targetObj->getAttribute($abussource, "PHYS_PATH"));
-
-      $targetObj->setAttribute($abussource, "PEER_HUID",
-         $targetObj->getAttribute($abusdest, "HUID"));
-      $targetObj->setAttribute($abusdest, "PEER_HUID",
-         $targetObj->getAttribute($abussource, "HUID"));
-
-       # copy Abus attributes to proc
-      my $abus = $targetObj->getFirstConnectionBus($target);
-      $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
-            $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
-      $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
-            $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
+        ## set attributes for both directions
+        my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
+        my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
+ 
+        $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
+        $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
+        $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
+        $targetObj->setAttribute($target, "PEER_PATH", $phys2);
+        
+        $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
+           $targetObj->getAttribute($target, "HUID"));
+        $targetObj->setAttribute($target, "PEER_HUID",
+           $targetObj->getAttribute($abus_dest_parent, "HUID"));
+ 
+        $targetObj->setAttribute($abussource, "PEER_TARGET",
+                 $targetObj->getAttribute($abusdest, "PHYS_PATH"));
+        $targetObj->setAttribute($abusdest, "PEER_TARGET",
+                 $targetObj->getAttribute($abussource, "PHYS_PATH"));
+ 
+        $targetObj->setAttribute($abussource, "PEER_PATH",
+                 $targetObj->getAttribute($abusdest, "PHYS_PATH"));
+        $targetObj->setAttribute($abusdest, "PEER_PATH",
+                 $targetObj->getAttribute($abussource, "PHYS_PATH"));
+ 
+        $targetObj->setAttribute($abussource, "PEER_HUID",
+           $targetObj->getAttribute($abusdest, "HUID"));
+        $targetObj->setAttribute($abusdest, "PEER_HUID",
+           $targetObj->getAttribute($abussource, "HUID"));
+ 
+         # copy Abus attributes from the connection to the chiplet
+        my $abus = $targetObj->getFirstConnectionBus($target);
+ 
+        $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
+              $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
+        $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
+              $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
+ 
+        # copy attributes for wrap config
+        my $link_set = "SET_NONE";
+        if ($targetObj->isBusAttributeDefined($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET"))
+        {
+            $link_set = $targetObj->getBusAttribute($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET");
+        }
+        $targetObj->setAttribute($target, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
     }
 }
 
@@ -2705,7 +2788,10 @@ processMrwl.pl -x [XML filename] [OPTIONS]
 Options:
         -f = force output file creation even when errors
         -d = debug mode
-        -n = Node configuration [2N]
+        -c = special configurations we want to run for [2N, w]
+             2N = special 2 node config with extra ABUS links
+             w = Special MST wrap config
+        -o = output filename
         -s [SDR XML file] = import SDRs
         -r = create report and save to [system_name].rpt
         -v = version
