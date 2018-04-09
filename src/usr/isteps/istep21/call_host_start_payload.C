@@ -56,7 +56,6 @@
 #include <p9_int_scom.H>
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
-#include "freqAttrData.H"
 
 #ifdef CONFIG_DRTM_TRIGGERING
 #include <secureboot/drtm.H>
@@ -192,19 +191,6 @@ void* call_host_start_payload (void *io_pArgs)
             "call_host_start_payload entry" );
 
     do{
-
-        // Synchronize the frequency attribute across drawers
-        l_errl = ISTEP_21::sendFreqAttrData();
-
-        if(l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call_host_start_payload: ERROR: sendFreqAttrData Failed");
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-                errlCommit(l_errl, ISTEP_COMP_ID );
-
-            break;
-        }
 
         // Place a separator in the TPM to indicate we are passing control
         //  to the next level of firmware in the stack. Send the synchronous
