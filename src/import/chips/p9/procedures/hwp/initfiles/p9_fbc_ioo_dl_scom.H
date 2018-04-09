@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,13 +32,13 @@
 
 
 typedef fapi2::ReturnCode (*p9_fbc_ioo_dl_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT0,
-                                         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1);
+                                         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2);
 
 }
 

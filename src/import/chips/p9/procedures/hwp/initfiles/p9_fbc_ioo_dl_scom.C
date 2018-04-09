@@ -43,7 +43,7 @@ constexpr uint64_t literal_0x6 = 0x6;
 constexpr uint64_t literal_0x7 = 0x7;
 
 fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT0,
-                                     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1)
+                                     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2)
 {
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
@@ -65,6 +65,9 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
         fapi2::ATTR_CHIP_EC_FEATURE_HW419022_Type l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW419022, TGT1, l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022));
         uint64_t l_def_DLL_DD10_TRAIN = (l_TGT1_ATTR_CHIP_EC_FEATURE_HW419022 != literal_0x00);
+        fapi2::ATTR_IS_SIMULATION_Type l_TGT2_ATTR_IS_SIMULATION;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT2, l_TGT2_ATTR_IS_SIMULATION));
+        uint64_t l_def_IS_SIM = (l_TGT2_ATTR_IS_SIMULATION == literal_1);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
@@ -195,7 +198,11 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
                         && (l_chip_ec == 0x12)) )
             {
-                if (( ! l_def_DLL_DD10_TRAIN))
+                if (l_def_IS_SIM)
+                {
+                    l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x0 );
+                }
+                else if (( ! l_def_DLL_DD10_TRAIN))
                 {
                     l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0xF );
                 }
