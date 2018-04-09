@@ -434,10 +434,19 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             {
                 this->iv_currentSideBootAttempts++;
 
-                // For now we only use HRESET during runtime, the bool param
-                // we are passing in is supposed to be FALSE if runtime, TRUE is ipl time
-                FAPI_INVOKE_HWP(l_errl, p9_sbe_hreset,
-                                l_fapi2_proc_target, false);
+                // Prior to performing the hreset we want to zero out the scratch registers
+                // this will force the SBE to use its own image to populate the values it
+                // is expecting from the scratch regs.
+                l_errl = clearSbeScratchRegisters(i_target);
+
+                if(!l_errl)
+                {
+                    // For now we only use HRESET during runtime, the bool param
+                    // we are passing in is supposed to be FALSE if runtime, TRUE is ipl time
+                    FAPI_INVOKE_HWP(l_errl, p9_sbe_hreset,
+                                    l_fapi2_proc_target, false);
+                }
+
                 if(l_errl)
                 {
                     SBE_TRACF("ERROR: call p9_sbe_hreset, PLID=0x%x",
@@ -1169,7 +1178,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             if( l_errl )
             {
                 SBE_TRACF( ERR_MRK"switch_sbe_sides: SCOM device read "
-                        "PERV_SB_CS_SCOM (0x%.4X), proc target = %.8X, "
+                        "PERV_SB_CS_SCOM (0x%.8X), proc target = %.8X, "
                         "RC=0x%X, PLID=0x%lX",
                         PERV_SB_CS_SCOM, // 0x50008
                         TARGETING::get_huid(i_target),
@@ -1206,7 +1215,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
             if( l_errl )
             {
                 SBE_TRACF( ERR_MRK"switch_sbe_sides: SCOM device write "
-                        "PERV_SB_CS_SCOM (0x%.4X), proc target = %.8X, "
+                        "PERV_SB_CS_SCOM (0x%.8X), proc target = %.8X, "
                         "RC=0x%X, PLID=0x%lX",
                         PERV_SB_CS_SCOM, // 0x50008
                         TARGETING::get_huid(i_target),
@@ -1235,6 +1244,39 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
     }
 
     SBE_TRACF(EXIT_MRK "switch_sbe_sides()");
+    return l_errl;
+}
+
+errlHndl_t SbeRetryHandler::clearSbeScratchRegisters(TARGETING::Target * i_target)
+{
+    SBE_TRACF(ENTER_MRK "clearSbeScratchRegisters()");
+    errlHndl_t l_errl = nullptr;
+
+    uint64_t l_writeVal = 0;
+    size_t l_opSize = sizeof(uint64_t);
+
+    // Loop through all 8 SBE scratch registers writing 0's to each
+    // one via SCOM
+    for(uint64_t l_reg = PERV_SCRATCH_REGISTER_1_SCOM;
+        l_reg <= PERV_SCRATCH_REGISTER_8_SCOM;
+        l_reg++)
+    {
+        l_errl = DeviceFW::deviceOp(
+                DeviceFW::WRITE,
+                i_target,
+                &l_writeVal,
+                l_opSize,
+                DEVICE_SCOM_ADDRESS(l_reg) );
+        if(l_errl)
+        {
+            SBE_TRACF( "clearSbeScratchRegisters: Error attempting to zero out 0x%.8X via SCOM on proc w/ HUID: 0x%.8X",
+                       l_reg,
+                       TARGETING::get_huid(i_target));
+            break;
+        }
+    }
+
+    SBE_TRACF(EXIT_MRK "clearSbeScratchRegisters()");
     return l_errl;
 }
 
