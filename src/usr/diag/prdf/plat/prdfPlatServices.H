@@ -106,12 +106,6 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 //##                        Memory specific functions
 //##############################################################################
 
-enum AddrRangeType
-{
-    SLAVE_RANK,  ///< Target slave rank only.
-    MASTER_RANK, ///< Target entire master rank.
-};
-
 /**
  * @brief  Returns the start and end address of the given rank.
  * @note   The end addresses returned from the MCBIST HWPs give a maximum
@@ -165,6 +159,18 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
  */
 template<TARGETING::TYPE T>
 uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+/**
+ * @brief  Starts a scrub command on the target rank.
+ * @param  i_chip      MCA or MBA chip.
+ * @param  i_rank      Target rank.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE TT, typename SCT>
+uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       AddrRangeType i_rangeType, SCT i_stopCond );
 
 /**
  * @brief  Starts a targeted scrub command on the target rank for VCM phase 1.

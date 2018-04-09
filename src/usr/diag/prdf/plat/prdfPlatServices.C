@@ -605,6 +605,70 @@ uint32_t startBgScrub<TYPE_MCBIST>( ExtensibleChip * i_mcaChip,
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t startTdScrub<TYPE_MCA>( ExtensibleChip * i_chip,
+                                 const MemRank & i_rank,
+                                 AddrRangeType i_rangeType,
+                                 mss::mcbist::stop_conditions i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MCA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Set stop-on-AUE for all target scrubs. See explanation in startBgScrub()
+    // for the reasons why.
+    i_stopCond.set_pause_on_aue(mss::ON);
+
+    do
+    {
+        // Get the address range of the given rank.
+        mss::mcbist::address saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MCA>( i_chip, i_rank, saddr, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Get the MCBIST fapi target.
+        ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
+        fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt (mcbChip->getTrgt());
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MCBIST>( mcbChip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start targeted scrub command.
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, mss::memdiags::targeted_scrub, fapiTrgt,
+                         i_stopCond, saddr, eaddr, mss::mcbist::NONE );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::targeted_scrub(0x%08x,0x%02x) "
+                      "failed", mcbChip->getHuid(),  i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
                              mss::mcbist::address i_saddr,
                              mss::mcbist::address i_eaddr,
@@ -824,6 +888,105 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
         // Start the background scrub command.
         mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
                                 stopCond, false };
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t startTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
+                                 const MemRank & i_rank,
+                                 AddrRangeType i_rangeType,
+                                 uint32_t i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdScrub<TYPE_MBA>] "
+
+    #ifndef __HOSTBOOT_RUNTIME // IPL only
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+    #endif
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Make sure there is a command complete attention when the command stops.
+    i_stopCond |= mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Make sure the command stops on the end address if there are no errors.
+    i_stopCond |= mss_MaintCmd::STOP_ON_END_ADDRESS;
+
+    // IPL:
+    //   IUEs (reported via RCE ETE) are reported as UEs during read operations.
+    //   Therefore, we will treat IUEs like UEs for scrub operations simply to
+    //   maintain consistency during all of Memory Diagnostics. Note that MDIA
+    //   sets the threshold to 1 when it starts the first command on this MBA
+    //   and that threshold should never change throughout all of Memory
+    //   Diagnostics.
+    // Runtime:
+    //   The runtime strategy for IUEs (reported via RCE ETE) is slightly
+    //   different than IPL. For the most part we want to ignore them. However,
+    //   we must have a threshold just incase they are causing problems. Note
+    //   that the threshold this is set (field:2047, mnfg:1) when background
+    //   scrubbing is started and that threshold should never change throughout
+    //   all of runtime diagnostics.
+
+    i_stopCond |= mss_MaintCmd::STOP_ON_RETRY_CE_ETE;
+
+    // Default speed is to run as fast as possible.
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // There is a Centaur bug preventing us from running at full speed because
+    // it will reduce mainline bandwidth to almost 10%. Customers won't like
+    // this. So we will have to use a slower speed.
+    if ( !enableFastBgScrub() ) cmdSpeed = mss_MaintCmd::FAST_MIN_BW_IMPACT;
+
+    #endif
+
+    do
+    {
+        // Get the address range of the given rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Get the MBA fapi target.
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+
+        // Start the background scrub command.
+        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
+                                i_stopCond, false };
         errlHndl_t errl = nullptr;
         FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
         if ( nullptr != errl )

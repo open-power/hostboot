@@ -34,6 +34,7 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
+#include <prdfMemAddress.H>
 #include <diag/mdia/mdia.H>
 
 //------------------------------------------------------------------------------
@@ -130,6 +131,30 @@ uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
  */
 template<TARGETING::TYPE T>
 uint32_t cleanupSfRead( ExtensibleChip * i_chip );
+
+/**
+ * @brief  Starts a super fast read command on the target rank.
+ * @param  i_chip      MBA chip.
+ * @param  i_rank      Target rank.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE TT, typename VT>
+uint32_t startTdSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
+                        AddrRangeType i_rangeType, VT i_stopCond );
+
+/**
+ * @brief  Starts a steer cleanup scrub command on the target rank.
+ * @param  i_chip      MBA chip.
+ * @param  i_rank      Target rank.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE TT, typename VT>
+uint32_t startTdSteerCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
+                              AddrRangeType i_rangeType, VT i_stopCond );
 
 } // end namespace PlatServices
 
