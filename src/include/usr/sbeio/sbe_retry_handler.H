@@ -189,6 +189,21 @@ class SbeRetryHandler
 #endif
 
         /**
+        * @brief  There are 8 scratch registers that the SBE will look at during initialization.
+                  After we bring up the slave SBE in istep 8, hostboot will begin to repurpose
+                  these registers. If we restart the SBE during runtime with HRESET the SBE will
+                  look at these registers which hostboot has repurposed. We do not want the SBE
+                  to use this data as it is no longer valid. If the registers are all zero's then
+                  the SBE will use data from its image. This will work because hostboot has customized
+                  the image with the correct values during the IPL. This function will zero out all
+                  of the scratch registers to make sure the SBE uses its own copy of the values it
+                  is looking for in these registers.
+        *
+        * @param[in]  i_target    - Proc we are clearing scratch regs for
+        */
+        errlHndl_t clearSbeScratchRegisters(TARGETING::Target * i_target);
+
+        /**
          * @brief  This function will look at what iv_currentAction is set to
          *          and take into account how many times we have tried to boot
          *          and how many times we have switched sides.
