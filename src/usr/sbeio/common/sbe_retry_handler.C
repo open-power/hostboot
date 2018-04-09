@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file sbe_extract_dd.C
+ * @file sbe_retry_handler.C
  *
  * Handle a SBE extract rc error.  We use a switch-case to determine
  * what action to take, and a finite state machine to control the
@@ -402,11 +402,11 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     l_errl->collectTrace( "ISTEPS_TRACE", 256 );
                     l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
 
-                    // Gard the target, when SBE Retry fails
+                    // Deconfig the target when SBE Retry fails
                     l_errl->addHwCallout(i_target,
-                                            HWAS::SRCI_PRIORITY_HIGH,
-                                            HWAS::NO_DECONFIG,
-                                            HWAS::GARD_Predictive);
+                                            HWAS::SRCI_PRIORITY_LOW,
+                                            HWAS::DELAYED_DECONFIG,
+                                            HWAS::GARD_NULL);
 
                     // Set the PLID of the error log to master PLID
                     // if the master PLID is set
@@ -434,11 +434,11 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                                 l_errl->plid() );
                     l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
 
-                    // Gard the target, when SBE Retry fails
+                    // Deconfig the target when SBE Retry fails
                     l_errl->addHwCallout(i_target,
-                                            HWAS::SRCI_PRIORITY_HIGH,
-                                            HWAS::NO_DECONFIG,
-                                            HWAS::GARD_Predictive);
+                                            HWAS::SRCI_PRIORITY_LOW,
+                                            HWAS::DELAYED_DECONFIG,
+                                            HWAS::GARD_NULL);
 
                     // Set the PLID of the error log to master PLID
                     // if the master PLID is set
