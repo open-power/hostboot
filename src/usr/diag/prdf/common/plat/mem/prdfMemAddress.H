@@ -43,6 +43,13 @@ namespace PRDF
 
 class ExtensibleChip;
 
+/** Used to specify target address ranges for functions input. */
+enum AddrRangeType
+{
+    SLAVE_RANK,  ///< Target slave rank only.
+    MASTER_RANK, ///< Target entire master rank.
+};
+
 //------------------------------------------------------------------------------
 //  Class MemAddr
 //------------------------------------------------------------------------------
