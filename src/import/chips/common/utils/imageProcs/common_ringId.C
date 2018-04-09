@@ -45,81 +45,81 @@ const char* ringVariantName[] = { "BASE",
                                   "CC",
                                   "RL",
                                   "RL2",
+                                  "RL3",
+                                  "RL4",
+                                  "RL5"
                                 };
 
 #ifndef __HOSTBOOT_MODULE  // This is only used by ring_apply in EKB
 
-static int get_ipl_base_param( char*& l_ringPath )
+static int get_ipl_ring_path_param( RingVariant_t i_ringVariant, char*& o_ringPath)
 {
-    l_ringPath = getenv("IPL_BASE");
-
-    if (l_ringPath == NULL)
+    switch (i_ringVariant)
     {
-        MY_ERR("p9_ring_apply.C: ring path: IPL_BASE environment parameter not set.\n");
+        case RV_BASE:
+            o_ringPath = getenv("IPL_BASE");
+            break;
+
+        case RV_CC:
+            o_ringPath = getenv("IPL_CACHE_CONTAINED");
+            break;
+
+        case RV_RL:
+            o_ringPath = getenv("IPL_RISK");
+            break;
+
+        default:
+            o_ringPath = NULL;
+            break;
+    }
+
+    if (o_ringPath == NULL)
+    {
+        MY_ERR("get_ipl_ring_path_param(): IPL env parm for ringVariant=0x%x not set.\n",
+               i_ringVariant);
         return INFRASTRUCT_RC_ENV_ERROR;
     }
 
     return INFRASTRUCT_RC_SUCCESS;
 }
 
-static int get_ipl_cache_contained_param( char*& l_ringPath)
+static int get_runtime_ring_path_param( RingVariant_t i_ringVariant, char*& o_ringPath)
 {
-    l_ringPath = getenv("IPL_CACHE_CONTAINED");
-
-    if (l_ringPath == NULL)
+    switch (i_ringVariant)
     {
-        MY_ERR("p9_ring_apply.C: ring path: IPL_CACHE_CONTAINED environment parameter not set.\n");
-        return INFRASTRUCT_RC_ENV_ERROR;
+        case RV_BASE:
+            o_ringPath = getenv("RUNTIME_BASE");
+            break;
+
+        case RV_RL:
+            o_ringPath = getenv("RUNTIME_RISK");
+            break;
+
+        case RV_RL2:
+            o_ringPath = getenv("RUNTIME_RISK2");
+            break;
+
+        case RV_RL3:
+            o_ringPath = getenv("RUNTIME_RISK3");
+            break;
+
+        case RV_RL4:
+            o_ringPath = getenv("RUNTIME_RISK4");
+            break;
+
+        case RV_RL5:
+            o_ringPath = getenv("RUNTIME_RISK5");
+            break;
+
+        default:
+            o_ringPath = NULL;
+            break;
     }
 
-    return INFRASTRUCT_RC_SUCCESS;
-}
-
-static int get_ipl_risk_param( char*& l_ringPath)
-{
-    l_ringPath = getenv("IPL_RISK");
-
-    if (l_ringPath == NULL)
+    if (o_ringPath == NULL)
     {
-        MY_ERR("p9_ring_apply.C: ring path: IPL_RISK environment parameter not set.\n");
-        return INFRASTRUCT_RC_ENV_ERROR;
-    }
-
-    return INFRASTRUCT_RC_SUCCESS;
-}
-
-static int get_runtime_base_param( char*& l_ringPath)
-{
-    l_ringPath = getenv("RUNTIME_BASE");
-
-    if (l_ringPath == NULL)
-    {
-        MY_ERR("p9_ring_apply.C: ring path: RUNTIME_BASE environment parameter not set.\n");
-        return INFRASTRUCT_RC_ENV_ERROR;
-    }
-
-    return INFRASTRUCT_RC_SUCCESS;
-}
-static int get_runtime_risk_param( char*& l_ringPath)
-{
-    l_ringPath = getenv("RUNTIME_RISK");
-
-    if (l_ringPath == NULL)
-    {
-        MY_ERR("p9_ring_apply.C: ring path: RUNTIME_RISK environment parameter not set.\n");
-        return INFRASTRUCT_RC_ENV_ERROR;
-    }
-
-    return INFRASTRUCT_RC_SUCCESS;
-}
-
-static int get_runtime_risk2_param( char*& l_ringPath)
-{
-    l_ringPath = getenv("RUNTIME_RISK2");
-
-    if (l_ringPath == NULL)
-    {
-        MY_ERR("p9_ring_apply.C: ring path: RUNTIME_RISK2 environment parameter not set.\n");
+        MY_ERR("get_runtime_ring_path_param(): RUNTIME env parm for ringVariant=0x%x not set.\n",
+               i_ringVariant);
         return INFRASTRUCT_RC_ENV_ERROR;
     }
 
@@ -138,23 +138,19 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
 
         if ( i_magic == TOR_MAGIC_SBE )
         {
-            if ( i_ringVariant == RV_BASE )
+            if ( i_ringVariant == RV_BASE ||
+                 i_ringVariant == RV_CC ||
+                 i_ringVariant == RV_RL )
             {
-                rc = get_ipl_base_param(l_ringDir);
+                rc = get_ipl_ring_path_param(i_ringVariant, l_ringDir);
             }
-            else if ( i_ringVariant == RV_CC )
+            else if ( i_ringVariant == RV_RL2 ||
+                      i_ringVariant == RV_RL3 ||
+                      i_ringVariant == RV_RL4 ||
+                      i_ringVariant == RV_RL5 )
             {
-                rc = get_ipl_cache_contained_param(l_ringDir);
-            }
-            else if ( i_ringVariant == RV_RL )
-            {
-                rc = get_ipl_risk_param(l_ringDir);
-            }
-            else if ( i_ringVariant == RV_RL2 )
-            {
-                // Valid RV for Quad chiplets but there's just no RL2 rings for SBE phase (by convention).
+                // No IPL rings for these variants
                 rc = TOR_NO_RINGS_FOR_VARIANT;
-                break;
             }
             else
             {
@@ -174,23 +170,19 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
         else if ( i_magic == TOR_MAGIC_CME ||
                   i_magic == TOR_MAGIC_SGPE )
         {
-            if ( i_ringVariant == RV_BASE )
+            if ( i_ringVariant == RV_BASE ||
+                 i_ringVariant == RV_RL ||
+                 i_ringVariant == RV_RL2 ||
+                 i_ringVariant == RV_RL3 ||
+                 i_ringVariant == RV_RL4 ||
+                 i_ringVariant == RV_RL5 )
             {
-                rc = get_runtime_base_param(l_ringDir);
+                rc = get_runtime_ring_path_param(i_ringVariant, l_ringDir);
             }
             else if ( i_ringVariant == RV_CC )
             {
-                // Valid RV for Quad chiplets but there's just no CC rings for runtime phases (by convention).
+                // No Runtime rings for this variant
                 rc = TOR_NO_RINGS_FOR_VARIANT;
-                break;
-            }
-            else if ( i_ringVariant == RV_RL )
-            {
-                rc = get_runtime_risk_param(l_ringDir);
-            }
-            else if ( i_ringVariant == RV_RL2 )
-            {
-                rc = get_runtime_risk2_param(l_ringDir);
             }
             else
             {
@@ -209,13 +201,10 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
         }
         else if ( i_magic == TOR_MAGIC_CEN )
         {
-            if ( i_ringVariant == RV_BASE )
+            if ( i_ringVariant == RV_BASE ||
+                 i_ringVariant == RV_RL )
             {
-                rc = get_ipl_base_param(l_ringDir);
-            }
-            else if ( i_ringVariant == RV_RL )
-            {
-                rc = get_ipl_risk_param(l_ringDir);
+                rc = get_ipl_ring_path_param(i_ringVariant, l_ringDir);
             }
             else
             {
@@ -389,12 +378,12 @@ int  ringid_get_properties( ChipType_t         i_chipType,
                     o_ringIdListCommon,
                     o_ringIdListInstance,
                     o_ringVariantOrder,
-                    o_numVariants );
+                    o_numVariants);
 
-                if ( i_torVersion < 6 &&
+                if ( i_torVersion < 7 &&
                      (i_chipletType == P9_RID::EQ_TYPE || i_chipletType == P9_RID::EC_TYPE) )
                 {
-                    *o_numVariants = *o_numVariants - 1;
+                    *o_numVariants = *o_numVariants - 3;
                 }
 
                 if ( i_torMagic == TOR_MAGIC_OVRD ||
@@ -409,11 +398,11 @@ int  ringid_get_properties( ChipType_t         i_chipType,
                 *o_ringIdListCommon   = (GenRingIdList*)P9_RID::EC::RING_ID_LIST_COMMON;
                 *o_ringIdListInstance = (GenRingIdList*)P9_RID::EC::RING_ID_LIST_INSTANCE;
                 *o_ringVariantOrder   = (RingVariantOrder*)P9_RID::EC::RING_VARIANT_ORDER;
-                *o_numVariants        = P9_RID::EC::g_chipletData.iv_num_ring_variants;
+                *o_numVariants        = P9_RID::EC::g_chipletData.iv_num_common_ring_variants;
 
-                if (i_torVersion < 6)
+                if (i_torVersion < 7)
                 {
-                    *o_numVariants = *o_numVariants - 1;
+                    *o_numVariants = *o_numVariants - 3;
                 }
             }
             else if ( i_torMagic == TOR_MAGIC_SGPE )
@@ -422,11 +411,11 @@ int  ringid_get_properties( ChipType_t         i_chipType,
                 *o_ringIdListCommon   = (GenRingIdList*)P9_RID::EQ::RING_ID_LIST_COMMON;
                 *o_ringIdListInstance = (GenRingIdList*)P9_RID::EQ::RING_ID_LIST_INSTANCE;
                 *o_ringVariantOrder   = (RingVariantOrder*)P9_RID::EQ::RING_VARIANT_ORDER;
-                *o_numVariants        = P9_RID::EQ::g_chipletData.iv_num_ring_variants;
+                *o_numVariants        = P9_RID::EQ::g_chipletData.iv_num_common_ring_variants;
 
-                if (i_torVersion < 6)
+                if (i_torVersion < 7)
                 {
-                    *o_numVariants = *o_numVariants - 1;
+                    *o_numVariants = *o_numVariants - 3;
                 }
             }
             else
@@ -449,7 +438,7 @@ int  ringid_get_properties( ChipType_t         i_chipType,
                     o_ringIdListCommon,
                     o_ringIdListInstance,
                     o_ringVariantOrder,
-                    o_numVariants );
+                    o_numVariants);
 
                 if ( i_torMagic == TOR_MAGIC_OVRD)
                 {

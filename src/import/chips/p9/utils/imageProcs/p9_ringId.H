@@ -214,7 +214,7 @@ static const ChipletData_t g_chipletData =
     19, // 19 common rings for pervasive chiplet
     2,  // 2 instance specific rings for pervasive chiplet
     2,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace PERV
 
@@ -244,7 +244,7 @@ static const ChipletData_t g_chipletData =
     9,  // 9 common rings for N0 Chiplet
     3,  // 3 instance specific rings for N0 chiplet
     3,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -278,7 +278,7 @@ static const ChipletData_t g_chipletData =
     12, // 12 common rings for N1 Chiplet
     4,  // 4 instance specific rings for N1 chiplet
     4,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -308,7 +308,7 @@ static const ChipletData_t g_chipletData =
     9, // 9 common rings for N2 Chiplet
     3, // 3 instance specific rings for N2 chiplet
     3,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -339,7 +339,7 @@ static const ChipletData_t g_chipletData =
     10,// 10 common rings for N3 Chiplet
     3, // 3 instance specific rings for N3 chiplet
     3,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -376,7 +376,7 @@ static const ChipletData_t g_chipletData =
     15, // 15 common rings for X-Bus Chiplet
     4,  // 4 instance specific rings for XB chiplet
     4,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace XB
 
@@ -414,7 +414,7 @@ static const ChipletData_t g_chipletData =
     16, // 16 common rings for MC Chiplet
     3,  // 3 instance specific rings for each MC instance
     3,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace MC
 
@@ -441,7 +441,7 @@ static const ChipletData_t g_chipletData =
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace OB0
 
@@ -468,7 +468,7 @@ static const ChipletData_t g_chipletData =
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace OB1
 
@@ -496,7 +496,7 @@ static const ChipletData_t g_chipletData =
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace OB2
 
@@ -523,7 +523,7 @@ static const ChipletData_t g_chipletData =
     7,  // 7 common rings for OB Chiplet
     1,  // 1 instance specific rings for each OB chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace OB2
 
@@ -547,7 +547,7 @@ static const ChipletData_t g_chipletData =
     5,  // 5 common rings for PCI0 chiplet
     1,  // 1 instance specific rings for PCI0 chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -571,7 +571,7 @@ static const ChipletData_t g_chipletData =
     5,  // 5 common rings for PCI1 chiplet
     1,  // 1 instance specific rings for PCI1 chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -595,7 +595,7 @@ static const ChipletData_t g_chipletData =
     5,  // 5 common rings for PCI2 chiplet
     1,  // 1 instance specific rings for PCI2 chiplet
     1,
-    2,  // 2 ring variants: BASE, RL
+    2,  // 2 common ring variants: BASE, RL
 };
 };
 
@@ -686,7 +686,7 @@ static const ChipletData_t g_chipletData =
     66, // 66 common rings for Quad chiplet.
     5,  // 5 instance specific rings for each EQ chiplet
     9,  // 9 different rings since 2 per EX ring and 1 per EQ
-    4,  // 4 ring variants: BASE, CC, RL, RL2
+    7,  // 7 common ring variants: BASE, CC, RL, RL2/3/4/5
 };
 }; // end of namespace EQ
 
@@ -711,7 +711,7 @@ static const ChipletData_t g_chipletData =
     6,  // 6 common rings for Core chiplet
     1,  // 1 instance specific ring for each Core chiplet
     1,
-    4,  // 4 ring variants: BASE, CC, RL, RL2
+    7,  // 7 common ring variants: BASE, CC, RL, RL2/3/4/5
 };
 }; // end of namespace EC
 
@@ -1257,7 +1257,7 @@ ringid_get_chiplet_properties(
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
-    uint8_t*           o_varNumb);
+    uint8_t*           o_numVariants);
 
 // Returns properties of a ring as determined by ringId
 GenRingIdList*

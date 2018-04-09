@@ -54,6 +54,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
     uint8_t           iInst, iRing, iVariant;
     TorHeader_t*      torHeader;
     uint32_t          torMagic;
+    uint8_t           torVersion;
     uint8_t           chipType;
     TorCpltBlock_t*   cpltBlock;
     TorCpltOffset_t   cpltOffset; // Offset from ringSection to chiplet section
@@ -73,6 +74,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
 
     torHeader = (TorHeader_t*)i_ringSection;
     torMagic  = be32toh(torHeader->magic);
+    torVersion = torHeader->version;
     chipType  = torHeader->chipType;
 
     rc = ringid_get_noof_chiplets( chipType,
@@ -115,6 +117,16 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
             numRings = bInstCase ? cpltData->iv_num_instance_rings : cpltData->iv_num_common_rings;
             ringIdList = bInstCase ? ringIdListInstance : ringIdListCommon;
 
+            // Adjust number of variants according to TOR version of image
+            if (torVersion < 7)
+            {
+                // Nothing to do. Number of variants is the same for Common and Instance rings.
+            }
+            else
+            {
+                numVariants = bInstCase ? 1 : numVariants; // Only BASE variant for Instance rings
+            }
+
             if (ringIdList) // Only proceed if chiplet has [Common/Instance] rings.
             {
                 // Calc offset to chiplet's CMN or INST section, cpltOffset (steps 1-3)
@@ -142,8 +154,8 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                             if ( strcmp( (ringIdList + iRing)->ringName,
                                          ringProps[i_ringId].iv_name ) == 0 &&
                                  ( i_ringVariant == ringVariantOrder->variant[iVariant] ||
-                                   numVariants == 1 ) &&  // If no variants, ignore Variant
-                                 ( !bInstCase || ( bInstCase && iInst == io_instanceId) ) )
+                                   numVariants == 1 ) &&  // If no variants, ignore i_ringVariant and assume "BASE" ring
+                                 ( !bInstCase || ( bInstCase && iInst == io_instanceId ) ) )
                             {
                                 strcpy(o_ringName, (ringIdList + iRing)->ringName);
 

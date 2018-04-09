@@ -411,7 +411,7 @@ ringid_get_chiplet_properties(
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
-    uint8_t*           o_varNumb);
+    uint8_t*           o_numVariants);
 
 // returns properties of a ring as determined by ringId
 GenRingIdList*

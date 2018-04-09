@@ -210,7 +210,7 @@
   <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
       HWPs</description>
   <valueType>uint8</valueType>
-  <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2</enum>
+  <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2,RL3 = 0x3,RL4 = 0x4, RL5 = 0x5</enum>
   <persistRuntime/>
   <platInit/>
 </attribute>

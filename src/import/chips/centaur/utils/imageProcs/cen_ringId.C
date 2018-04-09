@@ -145,7 +145,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"tp_pll_bndy_bucket_8", 0x6a, 0x01, 0x01, CEN_RING, 0x01030088},
 };
 
-const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
+const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 
 }; // namespace CEN
 
@@ -165,7 +165,7 @@ void CEN_RID::ringid_get_chiplet_properties(
     GenRingIdList**    o_ringComm,
     GenRingIdList**    o_ringInst,
     RingVariantOrder** o_varOrder,
-    uint8_t*           o_varNumb)
+    uint8_t*           o_numVariants)
 {
     switch (i_chipletType)
     {
@@ -174,7 +174,7 @@ void CEN_RID::ringid_get_chiplet_properties(
             *o_ringComm = (GenRingIdList*)    CEN::RING_ID_LIST_COMMON;
             *o_ringInst = NULL;
             *o_varOrder = (RingVariantOrder*) CEN::RING_VARIANT_ORDER;
-            *o_varNumb  = (*(*o_cpltData)).iv_num_ring_variants;
+            *o_numVariants = (*(*o_cpltData)).iv_num_common_ring_variants;
             break;
 
         default :
@@ -182,7 +182,7 @@ void CEN_RID::ringid_get_chiplet_properties(
             *o_ringComm = NULL;
             *o_ringInst = NULL;
             *o_varOrder = NULL;
-            *o_varNumb = 0;
+            *o_numVariants = 0;
             break;
     }
 }
@@ -192,12 +192,12 @@ GenRingIdList* CEN_RID::_ringid_get_ring_list(RingId_t i_ringId)
     ChipletData_t*    l_cpltData;
     GenRingIdList*    l_ringList[2];    // 0: common, 1: instance
     RingVariantOrder* l_varOrder;
-    uint8_t           l_varNumb;
+    uint8_t           l_numVariants;;
     int               i, j, n;
 
     CEN_RID::ringid_get_chiplet_properties(
         CEN_RID::ringid_get_chiplet(i_ringId),
-        &l_cpltData, &l_ringList[0], &l_ringList[1], &l_varOrder, &l_varNumb);
+        &l_cpltData, &l_ringList[0], &l_ringList[1], &l_varOrder, &l_numVariants);
 
     if (!l_ringList[0])
     {
