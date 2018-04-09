@@ -83,7 +83,7 @@ typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOL
 typedef struct
 {
     uint32_t   magic;       // =TOR_MAGIC_xyz
-    uint8_t    version;     // =TOR_VERSION
+    uint8_t    version;     // =TOR version
     ChipType_t chipType;    // Value from ChipType enum
     uint8_t    ddLevel;     // Actual DD level of ringSection
     uint8_t    undefined;
@@ -121,7 +121,8 @@ typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 //#define TOR_VERSION  3  // Added TOR magic header.
 //#define TOR_VERSION  4  // TOR API code restructuring.
 //#define TOR_VERSION  5  // Removed TOR-level DD handling.
-#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
+//#define TOR_VERSION  6  // Added additional runtime risk level (RL2)
+#define TOR_VERSION  7  // Added three more runtime risk levels (RL3/4/5)
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
@@ -196,7 +197,7 @@ typedef struct
     uint32_t     scanScomAddress;
 } GenRingIdList;
 
-// P9 PPE types supported.
+// PPE types supported.
 // - This enum also reflects the order with which they appear in the HW image's .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
 enum PpeType
@@ -207,28 +208,32 @@ enum PpeType
     NUM_PPE_TYPES = 0x03
 };
 
-// P9 ring variants supported.
+// Ring variants supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
 enum RingVariant
 {
     RV_BASE     = 0x00,
     RV_CC       = 0x01,
-    RV_RL       = 0x02,
-    RV_RL2      = 0x03,
-    NUM_RING_VARIANTS = 0x04,
+    RV_RL       = 0x02,  // Kernel and user protection
+    RV_RL2      = 0x03,  // Kernel only protection
+    RV_RL3      = 0x04,  // Rugby v4
+    RV_RL4      = 0x05,  // Java performance
+    RV_RL5      = 0x06,  // Spare
+    NUM_RING_VARIANTS = 0x07,
 };
 
 extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
 
+// Variant order for Common rings
 typedef struct
 {
-    RingVariant_t  variant[4];
+    RingVariant_t  variant[NUM_RING_VARIANTS];
 } RingVariantOrder;
 
 
-// P9 ring types supported.
+// Ring types supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
 enum RingType
@@ -247,21 +252,21 @@ enum RingBlockType
 
 typedef struct
 {
-    // This is the chiplet-ID of the first instance of the Chiplet
+    // Chiplet ID of the first instance of the Chiplet
     uint8_t iv_base_chiplet_number;
 
-    // The no.of common rings for the Chiplet
+    // Number of common rings for the Chiplet
     uint8_t iv_num_common_rings;
 
-    // The no.of instance rings for the Chiplet (w/different ringId values)
+    // Number of instance rings for the Chiplet (w/different ringId values)
     uint8_t iv_num_instance_rings;
 
-    // The no.of instance rings for the Chiplet (w/different ringId values
+    // Number of instance rings for the Chiplet (w/different ringId values
     // AND different scanAddress values)
     uint8_t iv_num_instance_rings_scan_addrs;
 
-    // The no.of ring variants
-    uint8_t iv_num_ring_variants;
+    // Number of variants for common rings (instance rings only have BASE variant)
+    uint8_t iv_num_common_ring_variants;
 } ChipletData_t;
 
 // This is used to Set (Mark) the left-most bit
@@ -351,6 +356,6 @@ int ringid_get_properties( ChipType_t         i_chipType,
                            GenRingIdList**    o_ringIdListInstance,
                            RingVariantOrder** o_ringVariantOrder,
                            RingProperties_t** o_ringProps,
-                           uint8_t*           o_numVariants );
+                           uint8_t*           o_numVariants);
 
 #endif  // _COMMON_RINGID_H_
