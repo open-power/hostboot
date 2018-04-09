@@ -60,7 +60,6 @@ namespace ISTEP
         MOD_SET_IPL_PARMS                                 = 0x1D,
         MOD_OCC_XSTOP_HANDLER                             = 0x1E,
         MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
-        MOD_FREQ_ATTR_DATA                                = 0x20,
     };
 
     /**
@@ -115,13 +114,6 @@ namespace ISTEP
         RC_P9N_DD1_NOT_SUPPORTED                 = ISTEP_COMP_ID | 0x35,
         RC_PREVENT_REBOOT_IN_MFG_TERM_MODE       = ISTEP_COMP_ID | 0x36,
         RC_FAILED_WRITE_SPR                      = ISTEP_COMP_ID | 0x37,
-        RC_FREQ_ATTR_TIMER_EXPIRED               = ISTEP_COMP_ID | 0x38,
-        RC_FREQ_ATTR_TIMER_THREAD_FAIL           = ISTEP_COMP_ID | 0x39,
-        RC_FLOOR_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x40,
-        RC_CEIL_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x41,
-        RC_TURBO_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x42,
-        RC_ULTRA_TURBO_FREQ_MISMATCH             = ISTEP_COMP_ID | 0x43,
-        RC_NEST_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x44,
     };
 
 };
