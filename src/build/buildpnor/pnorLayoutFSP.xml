@@ -168,10 +168,10 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
+        <description>Hostboot Runtime Services for Sapphire (6MB)</description>
         <eyeCatch>HBRT</eyeCatch>
         <physicalOffset>0x128D000</physicalOffset>
-        <physicalRegionSize>0x480000</physicalRegionSize>
+        <physicalRegionSize>0x600000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
@@ -179,7 +179,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x170D000</physicalOffset>
+        <physicalOffset>0x188D000</physicalOffset>
         <!-- Physical Size includes Header rounded to ECC valid size -->
         <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
         <physicalRegionSize>0x7000</physicalRegionSize>
@@ -190,7 +190,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x1714000</physicalOffset>
+        <physicalOffset>0x1894000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -198,7 +198,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x171D000</physicalOffset>
+        <physicalOffset>0x189D000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -206,7 +206,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x1722000</physicalOffset>
+        <physicalOffset>0x18A2000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -215,7 +215,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x1726000</physicalOffset>
+        <physicalOffset>0x18A6000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -226,7 +226,7 @@ Layout Description - Used when building an FSP driver
         <!-- We need 266KB per module sort, going to support
              40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x1846000</physicalOffset>
+        <physicalOffset>0x19C6000</physicalOffset>
         <physicalRegionSize>0xC00000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -235,7 +235,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x2446000</physicalOffset>
+        <physicalOffset>0x25C6000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -244,7 +244,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Centaur Hw Ref Image (12K)</description>
         <eyeCatch>CENHWIMG</eyeCatch>
-        <physicalOffset>0x2466000</physicalOffset>
+        <physicalOffset>0x25E6000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -253,7 +253,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Secure Boot (144K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalOffset>0x2469000</physicalOffset>
+        <physicalOffset>0x25E9000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
