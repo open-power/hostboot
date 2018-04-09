@@ -2904,13 +2904,26 @@ fapi2::ReturnCode layoutRingsForCME( Homerlayout_t*   i_pHomer,
                          i_debugMode );
 
     // get all the rings pertaining to CME in a work buffer first.
-    if( i_riskLevel == 0x1 )
+    switch (i_riskLevel)
     {
-        l_ringVariant = RV_RL;
-    }
-    else if ( i_riskLevel == 0x2 )
-    {
-        l_ringVariant = RV_RL2;
+        case 0x1:
+            l_ringVariant = RV_RL;
+            break;
+        case 0x2:
+            l_ringVariant = RV_RL2;
+            break;
+        case 0x3:
+            l_ringVariant = RV_RL3;
+            break;
+        case 0x4:
+            l_ringVariant = RV_RL4;
+            break;
+        case 0x5:
+            l_ringVariant = RV_RL5;
+            break;
+        default:
+            // Default to RV_BASE
+            break;
     }
 
     ringLength  =  SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_offset) + SWIZZLE_4_BYTE(
@@ -3373,14 +3386,27 @@ fapi2::ReturnCode layoutRingsForSGPE( Homerlayout_t*     i_pHomer,
     if( i_imgType.sgpeHcodeBuild )
     {
 
-        // get all the rings pertaining to CME in a work buffer first.
-        if( i_riskLevel == 0x1 )
+        // get all the rings pertaining to SGPE in a work buffer first.
+        switch (i_riskLevel)
         {
-            l_ringVariant = RV_RL;
-        }
-        else if ( i_riskLevel == 0x2 )
-        {
-            l_ringVariant = RV_RL2;
+            case 0x1:
+                l_ringVariant = RV_RL;
+                break;
+            case 0x2:
+                l_ringVariant = RV_RL2;
+                break;
+            case 0x3:
+                l_ringVariant = RV_RL3;
+                break;
+            case 0x4:
+                l_ringVariant = RV_RL4;
+                break;
+            case 0x5:
+                l_ringVariant = RV_RL5;
+                break;
+            default:
+                // Default to RV_BASE
+                break;
         }
 
         //Manage the Quad Common rings in HOMER
