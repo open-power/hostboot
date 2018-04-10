@@ -859,14 +859,6 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             PRDF_ASSERT( 1 == list.size() ); // just in case
             itr = list.begin();
         }
-        else if ( TYPE_MBA == trgtType && TYPE_DIMM == i_connType )
-        {
-            // TODO: RTC180690 This really wasn't supported in P8 because there
-            //       are two ports and two DIMM selects per port and there
-            //       wasn't a clean way to get the correct DIMM. MCA doesn't
-            //       have this issue, but it would be nice to get a clean
-            //       interface for both MCA and MBA.
-        }
         else
         {
             // default, i_connPos should match the unit position within the chip
@@ -1003,6 +995,112 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
     } while(0);
 
     return o_target;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t getDimmPort<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTrgt )
+{
+    PRDF_ASSERT( nullptr != i_dimmTrgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
+
+    return i_dimmTrgt->getAttr<ATTR_MBA_PORT>();
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t getDimmSlct<TYPE_MBA>( TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
+
+    return i_trgt->getAttr<ATTR_MBA_DIMM>();
+}
+
+template<>
+uint8_t getDimmSlct<TYPE_MCA>( TargetHandle_t i_trgt )
+{
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
+
+    return getTargetPosition(i_trgt) % MAX_DIMM_PER_PORT;
+}
+
+//------------------------------------------------------------------------------
+
+TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
+                                               const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::getConnectedDimms] "
+
+    TargetHandleList o_list;
+    TYPE l_trgtType = getTargetType( i_trgt );
+
+    if ( TYPE_MCA == l_trgtType )
+    {
+        o_list.push_back(
+            getConnectedChild(i_trgt, TYPE_DIMM, i_rank.getDimmSlct()) );
+    }
+    else if ( TYPE_MBA == l_trgtType )
+    {
+        TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
+        for ( auto & dimm : l_dimmList )
+        {
+            uint8_t l_dimmSlct = getDimmSlct<TYPE_MBA>( dimm );
+            if ( l_dimmSlct == i_rank.getDimmSlct() )
+            {
+                o_list.push_back( dimm );
+            }
+        }
+    }
+    else
+    {
+        PRDF_ERR(PRDF_FUNC "Invalid target type: HUID=0x%08x", getHuid(i_trgt));
+        PRDF_ASSERT( false );
+    }
+
+    return o_list;
+
+    #undef PRDF_FUNC
+}
+
+TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
+                                            const MemRank & i_rank,
+                                            uint8_t i_port )
+{
+    #define PRDF_FUNC "[PlatServices::getConnectedDimm] "
+
+    TargetHandle_t o_dimm = nullptr;
+    TYPE l_trgtType = getTargetType( i_trgt );
+
+    if ( TYPE_MCA == l_trgtType )
+    {
+        o_dimm = getConnectedChild( i_trgt, TYPE_DIMM, i_rank.getDimmSlct() );
+    }
+    else if ( TYPE_MBA == l_trgtType )
+    {
+        TargetHandleList l_dimmList = getConnectedDimms( i_trgt, i_rank );
+        for ( auto & dimm : l_dimmList )
+        {
+            uint8_t l_portSlct = getDimmPort<TYPE_MBA>( dimm );
+            if ( l_portSlct == i_port )
+            {
+                o_dimm = dimm;
+                break;
+            }
+        }
+    }
+    else
+    {
+        PRDF_ERR(PRDF_FUNC "Invalid target type: HUID=0x%08x", getHuid(i_trgt));
+        PRDF_ASSERT( false );
+    }
+
+    return o_dimm;
 
     #undef PRDF_FUNC
 }
@@ -1256,33 +1354,6 @@ int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
     }
 
     return o_rc;
-}
-
-//------------------------------------------------------------------------------
-
-int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port )
-{
-    return i_dimmTarget->tryGetAttr<ATTR_MBA_PORT>(o_port) ? SUCCESS : FAIL;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t getDimmSlct<TYPE_MBA>( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
-
-    return i_trgt->getAttr<ATTR_MBA_DIMM>();
-}
-
-template<>
-uint32_t getDimmSlct<TYPE_MCA>( TargetHandle_t i_trgt )
-{
-    PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
-
-    return getTargetPosition(i_trgt) % MAX_DIMM_PER_PORT;
 }
 
 //------------------------------------------------------------------------------
