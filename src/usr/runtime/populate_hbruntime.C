@@ -1328,9 +1328,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             for (const auto & secIdPair : preVerifiedPnorSections)
             {
                 // Skip RINGOVD section in POWERVM mode
-                if (secIdPair.first == PNOR::RINGOVD &&
-                        INITSERVICE::spBaseServicesEnabled() &&
-                        TARGETING::is_phyp_load())
+                // Skip loading WOFDATA in POWERVM mode due to its huge size;
+                // PHyp will just dynamically load it at runtime when requested.
+                if (   (   (secIdPair.first == PNOR::RINGOVD)
+                        || (secIdPair.first == PNOR::WOFDATA))
+                    && INITSERVICE::spBaseServicesEnabled()
+                    && TARGETING::is_phyp_load())
                 {
                     continue;
                 }
