@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file p9_mss_background_scrub.H
+/// @brief Begin background scrub
+///
+// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
+// *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef __P9_MSS_BACKGROUND_SCRUB__
+#define __P9_MSS_BACKGROUND_SCRUB__
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*p9_mss_background_scrub_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Begin background scrub
+    /// @param[in] i_target, MCBIST
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9_mss_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+}
+
+#endif
