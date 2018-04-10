@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,8 @@ namespace TRUSTEDBOOT
         MSG_TYPE_PCREXTEND,
         MSG_TYPE_SEPARATOR,
         MSG_TYPE_SHUTDOWN,
-        MSG_TYPE_LAST = MSG_TYPE_SHUTDOWN
+        MSG_TYPE_INIT_BACKUP_TPM,
+        MSG_TYPE_LAST = MSG_TYPE_INIT_BACKUP_TPM
     };
 
     /// PCREXTEND message data

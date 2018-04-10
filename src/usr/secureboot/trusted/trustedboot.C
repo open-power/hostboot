@@ -45,6 +45,7 @@
 #include <secureboot/trustedboot_reasoncodes.H>
 #include <sys/mmio.h>
 #include <sys/task.h>
+#include <sys/sync.h>
 #include <initservice/initserviceif.H>
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
@@ -68,6 +69,7 @@
 #include <targeting/common/commontargeting.H>
 #include <algorithm>
 #include <util/misc.H>
+#include <hwas/common/hwasCommon.H>
 
 namespace TRUSTEDBOOT
 {
@@ -323,8 +325,6 @@ void* host_update_master_tpm( void *io_pArgs )
 
         if(!primaryTpmAvail)
         {
-            /// @todo RTC:134913 Switch to backup chip if backup TPM avail
-
             // Primary TPM not available
             TRACFCOMP( g_trac_trustedboot,
                        "Primary TPM Existence Fail");
@@ -341,28 +341,28 @@ void* host_update_master_tpm( void *io_pArgs )
         }
         else
         {
+            auto l_backupHwasState = pBackupTpm->getAttr<
+                                                  TARGETING::ATTR_HWAS_STATE>();
             TPMDD::tpm_info_t tpmInfo;
             memset(&tpmInfo, 0, sizeof(tpmInfo));
             errlHndl_t tmpErr = TPMDD::tpmReadAttributes(
                                  pBackupTpm,
                                  tpmInfo,
                                  TPM_LOCALITY_0);
-            if (nullptr != tmpErr || !tpmInfo.tpmEnabled)
+            if (nullptr != tmpErr || !tpmInfo.tpmEnabled ||
+                (l_backupHwasState.functional && l_backupHwasState.present))
+            // If the backup state is functional and present then we are
+            // in MPIPL scenario and we need to reset the states
             {
                 TRACUCOMP( g_trac_trustedboot,
                            "host_update_master_tpm() "
                            "Marking backup TPM unavailable");
 
-                auto backupHwasState = pBackupTpm->getAttr<
-                    TARGETING::ATTR_HWAS_STATE>();
-                backupHwasState.present = false;
-                backupHwasState.functional = false;
+                l_backupHwasState.present = false;
+                l_backupHwasState.functional = false;
                 pBackupTpm->setAttr<
-                    TARGETING::ATTR_HWAS_STATE>(backupHwasState);
+                    TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
 
-
-                pBackupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(
-                    true);
                 if (nullptr != tmpErr)
                 {
                     // Ignore attribute read failure
@@ -425,7 +425,8 @@ void* host_update_master_tpm( void *io_pArgs )
     {
         TRACUCOMP( g_trac_trustedboot,
                    "host_update_master_tpm() - "
-                   "Backup TPM Present:%d Functional:%d Init Attempted:%d",
+                   "Backup TPM Present:%d Functional:%d Init Attempted:%d. "
+                   "Backup TPM initialization is deferred to istep 10.14.",
                    pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
                        present,
                    pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
@@ -541,14 +542,24 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                EXIT_MRK"tpmInitialize()");
 }
 
-void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_primaryTpm,
+                  TRUSTEDBOOT::TpmTarget* const i_backupTpm)
 {
-    assert(i_pTpm != nullptr,"tpmReplayLog: BUG! i_pTpm was nullptr");
-    assert(i_pTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
-           "tpmReplayLog: BUG! Expected target to be of TPM type, but "
-           "it was of type 0x%08X",i_pTpm->getAttr<TARGETING::ATTR_TYPE>());
-
+    assert(i_primaryTpm != nullptr,
+                                 "tpmReplayLog: BUG! i_primaryTpm was nullptr");
+    assert(i_backupTpm != nullptr,
+                               "tpmReplayLog: BUG! i_backupTpm was nullptr");
+    assert(i_primaryTpm->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_TPM,
+           "tpmReplayLog: BUG! Expected primary target to be of TPM type, but "
+           "it was of type 0x%08X",
+                                 i_primaryTpm->getAttr<TARGETING::ATTR_TYPE>());
+    assert(i_backupTpm->getAttr<TARGETING::ATTR_TYPE>()
+                                                         == TARGETING::TYPE_TPM,
+           "tpmReplayLog: BUG! Expected secondary target to be of TPM type, but"
+           " it was of type 0x%08X",
+                               i_backupTpm->getAttr<TARGETING::ATTR_TYPE>());
     TRACUCOMP(g_trac_trustedboot, ENTER_MRK"tpmReplayLog()");
+
     errlHndl_t err = nullptr;
     bool unMarshalError = false;
 
@@ -557,7 +568,12 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     TCG_PCR_EVENT2 l_eventLog = {0};
     // Move past header event to get a pointer to the first event
     // If there are no events besides the header, l_eventHndl = nullptr
-    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+    auto * const pTpmLogMgr = getTpmLogMgr(i_primaryTpm);
+    auto * const bTpmLogMgr = getTpmLogMgr(i_backupTpm);
+    assert(pTpmLogMgr != nullptr, "tpmReplayLog: BUG! Primary TPM's log manager"
+           " is nullptr!");
+    assert(bTpmLogMgr != nullptr, "tpmReplayLog: BUG! Backup TPM's log manager"
+           " is nullptr!");
     const uint8_t* l_eventHndl = TpmLogMgr_getFirstEvent(pTpmLogMgr);
     while ( l_eventHndl != nullptr )
     {
@@ -585,43 +601,42 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
 
             err->collectTrace( SECURE_COMP_NAME );
             err->collectTrace(TRBOOT_COMP_NAME);
+            tpmMarkFailed(i_primaryTpm, err);
             break;
         }
 
-        // Extend to tpm
-        if (EV_ACTION == l_eventLog.eventType)
+        err = TpmLogMgr_addEvent(bTpmLogMgr, &l_eventLog);
+        if(err)
         {
-            TRACUBIN(g_trac_trustedboot, "tpmReplayLog: Extending event:",
-                     &l_eventLog, sizeof(TCG_PCR_EVENT2));
-            for (size_t i = 0; i < l_eventLog.digests.count; i++)
-            {
+            tpmMarkFailed(i_backupTpm, err);
+            break;
+        }
 
-                TPM_Alg_Id l_algId = (TPM_Alg_Id)l_eventLog.digests.digests[i]
-                                                                .algorithmId;
-                err = tpmCmdPcrExtend(i_pTpm,
-                            (TPM_Pcr)l_eventLog.pcrIndex,
-                            l_algId,
-                            reinterpret_cast<uint8_t*>
+        TRACUBIN(g_trac_trustedboot, "tpmReplayLog: Extending event:",
+                 &l_eventLog, sizeof(TCG_PCR_EVENT2));
+        for (size_t i = 0; i < l_eventLog.digests.count; i++)
+        {
+            TPM_Alg_Id l_algId = (TPM_Alg_Id)l_eventLog.digests.digests[i]
+                                                                   .algorithmId;
+            err = tpmCmdPcrExtend(i_backupTpm,
+                                  (TPM_Pcr)l_eventLog.pcrIndex,
+                                  l_algId,
+                                  reinterpret_cast<uint8_t*>
                                       (&(l_eventLog.digests.digests[i].digest)),
-                            getDigestSize(l_algId));
-                if (err)
-                {
-                    break;
-                }
-            }
+                                  getDigestSize(l_algId));
             if (err)
             {
+                tpmMarkFailed(i_backupTpm, err);
                 break;
             }
         }
+        if (err)
+        {
+            break;
+        }
     }
 
-    // If the TPM failed we will mark it not functional and commit errl
-    if (err)
-    {
-        // err will be committed and set to nullptr
-        tpmMarkFailed(i_pTpm, err);
-    }
+    TRACUCOMP(g_trac_trustedboot, EXIT_MRK"tpmReplayLog()");
 }
 
 errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
@@ -1262,6 +1277,97 @@ void tpmVerifyFunctionalTpmExists(
     return;
 }
 
+void doInitBackupTpm()
+{
+    TARGETING::Target* l_backupTpm = nullptr;
+    errlHndl_t l_errl = nullptr;
+    TRUSTEDBOOT::getBackupTpm(l_backupTpm);
+
+    do {
+    if(l_backupTpm)
+    {
+        auto l_backupHwasState = l_backupTpm->getAttr<
+                                                  TARGETING::ATTR_HWAS_STATE>();
+        // Presence-detect the secondary TPM
+        TARGETING::TargetHandleList l_targetList;
+        l_targetList.push_back(l_backupTpm);
+        l_errl = HWAS::platPresenceDetect(l_targetList);
+        if(l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        // The TPM target would have been deleted from the list if it's
+        // not present.
+        if(l_targetList.size())
+        {
+            l_backupHwasState.present = true;
+            l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
+        }
+        else
+        {
+            l_backupHwasState.present = false;
+            l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>(l_backupHwasState);
+            break;
+        }
+
+        mutex_lock(l_backupTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+        tpmInitialize(l_backupTpm);
+        TpmLogMgr* l_tpmLogMgr = getTpmLogMgr(l_backupTpm);
+        if(!l_tpmLogMgr)
+        {
+            l_tpmLogMgr = new TpmLogMgr;
+            setTpmLogMgr(l_backupTpm, l_tpmLogMgr);
+            l_errl = TpmLogMgr_initialize(l_tpmLogMgr);
+            if(l_errl)
+            {
+                l_backupHwasState.functional = false;
+                l_backupTpm->setAttr<TARGETING::ATTR_HWAS_STATE>
+                                                            (l_backupHwasState);
+                errlCommit(l_errl, SECURE_COMP_ID);
+                mutex_unlock(l_backupTpm->
+                                getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+                break;
+            }
+        }
+        mutex_unlock(l_backupTpm->
+                                getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
+
+        TARGETING::Target* l_primaryTpm = nullptr;
+        getPrimaryTpm(l_primaryTpm);
+        if(l_primaryTpm)
+        {
+            auto l_primaryHwasState = l_primaryTpm->getAttr<
+                                                  TARGETING::ATTR_HWAS_STATE>();
+            if(l_primaryHwasState.functional && l_primaryHwasState.present)
+            {
+                tpmReplayLog(l_primaryTpm, l_backupTpm);
+            }
+        }
+
+        l_errl = TRUSTEDBOOT::testCmpPrimaryAndBackupTpm();
+        if(l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_trustedboot, "tpmDaemon: Backup TPM init message was"
+                  " received but the backup TPM cannot be found.");
+    }
+
+    } while(0);
+
+    // Init was attempted even if it didn't succeed
+    if(l_backupTpm)
+    {
+        l_backupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
+    }
+}
+
 void* tpmDaemon(void* unused)
 {
     bool shutdownPending = false;
@@ -1356,7 +1462,11 @@ void* tpmDaemon(void* unused)
                       NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
-
+            case TRUSTEDBOOT::MSG_TYPE_INIT_BACKUP_TPM:
+                {
+                    doInitBackupTpm();
+                }
+                break;
           default:
             assert(false, "Invalid msg command");
             break;
