@@ -286,6 +286,24 @@ TARGETING::TargetHandle_t getConnectedPeerTarget(
                                   TARGETING::TargetHandle_t i_tgt);
 
 /**
+ * @param  i_trgt The target MBA or MCA.
+ * @param  i_rank The target rank.
+ * @return A list of DIMMs connected to the target and rank.
+ */
+TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
+                                               const MemRank & i_rank );
+
+/**
+ * @param  i_trgt The target MBA or MCA.
+ * @param  i_rank The target rank.
+ * @param  i_port Port select.
+ * @return The DIMM connected to the target and rank on a port.
+ */
+TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
+                                            const MemRank & i_rank,
+                                            uint8_t i_port );
+
+/**
  * @brief   Returns the system target.
  * @return  The system target.
  */
@@ -363,20 +381,20 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget );
 int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget, bool &o_memBuf);
 
 /**
- * @brief   Obtain the MBA port select for the given Dimm.
- * @param   i_dimmTarget Dimm.
- * @param   o_port MBA port select.
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ * @brief   Obtain the port select for the given Dimm.
+ * @param   i_dimmTrgt Dimm.
+ * @return  port select
  */
-int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port );
+template<TARGETING::TYPE T>
+uint8_t getDimmPort( TARGETING::TargetHandle_t i_dimmTrgt );
 
 /**
  * @brief   Obtain the Dimm select for the given Dimm.
- * @param   i_dimmTarget Dimm.
+ * @param   i_trgt Dimm.
  * @return  The DIMM select
  */
 template<TARGETING::TYPE T>
-uint32_t getDimmSlct( TARGETING::TargetHandle_t i_dimmTarget );
+uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   checks dram widh ( x4 ) for mba
