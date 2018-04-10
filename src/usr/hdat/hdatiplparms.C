@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -523,80 +523,80 @@ static errlHndl_t hdatGetPortInfo(HDAT::hdatHDIFDataArray_t &o_portArrayHdr,
 }
 
 /**
- * @brief This routine gets the feature flag array based on processor type/DD
- *        level
- *
- * @pre None
- *
- * @post None
- *
- * @param o_featureFlagArr - output parameter - array of feature flags
- *
- */
-static void hdatGetFeatureFlagArray(const hdatIplpFeatureFlagSetting_t * o_featureFlagArr[],
-                                    uint32_t & o_size)
-{
-    //Default to Nimbus DD2.2 settings (DD1.0 doesn't matter) and these are current
-    //settings for cumulus
-    *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_22;
-    o_size = sizeof(hdatIplpFeatureFlagSettingsArray_22);
-
-    //Modify for Nimubs DD2.0 and DD2.1
-    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
-    if(l_pvr.chipType == PVR_t::NIMBUS_CHIP)
-    {
-        if(l_pvr.getDDLevel() == 0x20)
-        {
-            *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_20;
-            o_size = sizeof(hdatIplpFeatureFlagSettingsArray_20);
-
-        }
-        else if (l_pvr.getDDLevel() == 0x21)
-        {
-            *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_21;
-            o_size = sizeof(hdatIplpFeatureFlagSettingsArray_21);
-
-        }
-    }
-}
-
-
-/**
- * @brief This routine gets the information on feature flags
+ * @brief This routine fetches the information on feature flags
  *
  * @pre None
  *
  * @post None
  *
  * @param o_featureFlagArrayHdr - output parameter - Array header
- * @param o_featureFlagSettings - output parameter - The structure to update with 
- *                                            Feature flag  information
+ * @param o_featureFlagSettings - output parameter - The structure to update
+ *                                             with Feature flag information
+ * @param o_featFlagArrSize     - output parameter - Feature flag array size
  *
- * @return A null error log handle if successful, else the return code pointed
- *         to by errlHndl_t contains one of:
- *
- * @retval HDAT_OTHER_COMP_ERROR
+ * @retval None
  */
-static errlHndl_t hdatGetFeatureFlagInfo(HDAT::hdatHDIFVersionedDataArray_t &o_featureFlagArrayHdr,
-                                  hdatIplpFeatureFlagSetting_t o_featureFlagSettings[])
+static void hdatGetFeatureFlagInfo(
+                           hdatHDIFVersionedDataArray_t &o_featureFlagArrayHdr,
+                           hdatIplpFeatureFlagSetting_t o_featureFlagSettings[],
+                           uint32_t & o_featFlagArrSize)
 {
-    errlHndl_t l_errlHndl = NULL;
-    const hdatIplpFeatureFlagSetting_t * l_arr = NULL;
-    uint32_t l_arrSize = 0; 
-    hdatGetFeatureFlagArray(&l_arr, l_arrSize);
+    TARGETING::Target *l_pSysTarget = NULL;
+    (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
 
-    o_featureFlagArrayHdr.hdatOffset    = sizeof(HDAT::hdatHDIFVersionedDataArray_t);
+    if(l_pSysTarget == NULL)
+    {
+        HDAT_ERR("hdatGetFeatureFlagInfo::Top Level Target not found");
+        assert(l_pSysTarget != NULL);
+    }
+
+    // Default the dd level to 2.2
+    uint8_t l_ddLevel = HDAT_PROC_NIMBUS_DD_22;
+    const hdatIplpFeatureFlagSetting_t * l_featFlagArr;
+    uint32_t l_featFlagArrSize = 0;
+    uint8_t l_riskLvl = 0;
+
+    // Risk level is set
+    l_riskLvl = l_pSysTarget->getAttr<ATTR_RISK_LEVEL>();
+
+    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    // DD level is set
+    l_ddLevel = l_pvr.getDDLevel();
+
+    // Default to Nimbus DD2.2 settings (DD1.0 doesn't matter) and these are
+    // current settings for cumulus
+    // Default to DD2 flag struct index.
+    uint8_t l_idx = 2;
+    l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx];
+    l_featFlagArrSize =
+        sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx]);
+
+    // Modify for Nimubs DD2.0 and DD2.1
+    if (l_pvr.chipType == PVR_t::NIMBUS_CHIP)
+    {
+        if (l_ddLevel == HDAT_PROC_NIMBUS_DD_20) {l_idx = 0;}
+        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_21) {l_idx = 1;}
+        else if (l_ddLevel == HDAT_PROC_NIMBUS_DD_22) {l_idx = 2;}
+
+        l_featFlagArr = hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx];
+        l_featFlagArrSize =
+            sizeof(hdatIplpFeatureFlagSettingsArray[l_riskLvl][l_idx]);
+    }
+        
+    HDAT_DBG("Feature flag array size:0x%x, Model:0x%x, DD Level:0x%x "
+        "Risk Level:0x%x", l_featFlagArrSize, l_pvr.chipType,
+         l_ddLevel, l_riskLvl);
+
+    o_featFlagArrSize = l_featFlagArrSize;
+    o_featureFlagArrayHdr.hdatOffset    = sizeof(hdatHDIFVersionedDataArray_t);
     o_featureFlagArrayHdr.hdatAllocSize = sizeof(hdatIplpFeatureFlagSetting_t);
     o_featureFlagArrayHdr.hdatActSize   = sizeof(hdatIplpFeatureFlagSetting_t);
-    o_featureFlagArrayHdr.hdatArrayCnt  = 
-        l_arrSize/sizeof(hdatIplpFeatureFlagSetting_t);
+    o_featureFlagArrayHdr.hdatArrayCnt  =
+        l_featFlagArrSize/sizeof(hdatIplpFeatureFlagSetting_t);
     o_featureFlagArrayHdr.hdatVersion   = HDAT_FEATURE_FLAG_VERSION::V1;
-   
-    memcpy(o_featureFlagSettings , l_arr, 
-                    l_arrSize);
-    return l_errlHndl;
+ 
+    memcpy(o_featureFlagSettings , l_featFlagArr, l_featFlagArrSize);
 }
-
 
 /**
  * @brief This routine gets the information for System Parameters
@@ -986,9 +986,10 @@ static void hdatSetIPLParamsHdrs(hdatIPLParameters_t *o_iplparams)
     o_iplparams->hdatHdr.hdatDataPtrCnt     = HDAT_IPL_PARAMS_DA_CNT;
     o_iplparams->hdatHdr.hdatChildStrCnt    = 0;
     o_iplparams->hdatHdr.hdatChildStrOffset = 0;
-    const hdatIplpFeatureFlagSetting_t * l_arr = NULL;
-    uint32_t l_arrSize = 0;
-    hdatGetFeatureFlagArray(&l_arr, l_arrSize);
+
+    // Set the feature flag array size
+    uint32_t l_featureFlagArrSize = 0;
+    l_featureFlagArrSize = sizeof(hdatIplpFeatureFlagSettingsArray[0][0]);
 
     memcpy(o_iplparams->hdatHdr.hdatStructName, HDAT_IPLP_STRUCT_NAME,
             sizeof(o_iplparams->hdatHdr.hdatStructName));
@@ -1051,7 +1052,7 @@ static void hdatSetIPLParamsHdrs(hdatIPLParameters_t *o_iplparams)
         offsetof(hdatIPLParameters_t, iv_featureFlagArrayHdr);
 
     o_iplparams->hdatIPLParamsIntData[HDAT_IPL_PARAMS_FEATURE_FLAGS].hdatSize =
-        sizeof(hdatHDIFVersionedDataArray_t) + l_arrSize;
+        sizeof(hdatHDIFVersionedDataArray_t) + l_featureFlagArrSize;
 
 
 }
@@ -1167,8 +1168,10 @@ errlHndl_t HdatIplParms::hdatLoadIplParams(uint32_t &o_size, uint32_t &o_count)
                                 sizeof(HDAT::hdatHDIFVersionedDataArray_t));
     memset(&this->iv_hdatIPLParams->iv_featureFlagSettings, 0x00, 
                   sizeof(hdatIplpFeatureFlagSetting_t) * MAX_FEATURE_FLAGS);
+    this->iv_hdatIPLParams->iv_featureFlagArrSize = 0x00;
     hdatGetFeatureFlagInfo(this->iv_hdatIPLParams->iv_featureFlagArrayHdr,
-                        this->iv_hdatIPLParams->iv_featureFlagSettings);
+                           this->iv_hdatIPLParams->iv_featureFlagSettings,
+                           this->iv_hdatIPLParams->iv_featureFlagArrSize);
 
     HDAT_DBG("HDAT:: IPL Parameters Loaded :: Size : 0x%X",
                                       sizeof(hdatIPLParameters_t));
