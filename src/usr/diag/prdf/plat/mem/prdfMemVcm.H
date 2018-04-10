@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,12 +73,13 @@ class VcmEvent : public TdEntry
         switch ( iv_phase )
         {
             case TD_PHASE_0:
-                o_rc = startPhase1( io_sc );
+                o_rc = startNextPhase( io_sc );
                 break;
 
             case TD_PHASE_1:
                 o_rc = analyzePhase1( io_sc, o_done );
-                if ( SUCCESS == o_rc && !o_done ) o_rc = startPhase2( io_sc );
+                if ( SUCCESS == o_rc && !o_done )
+                    o_rc = startNextPhase( io_sc );
                 break;
 
             case TD_PHASE_2:
@@ -110,37 +111,44 @@ class VcmEvent : public TdEntry
   private: // functions
 
     /**
-     * @brief  Starts phase 1 of the procedure.
-     * @param  io_sc  The step code data struct.
+     * @brief  Starts the appropriate maintenance command for each phase of the
+     *         VCM procedure.
+     * @pre    iv_phase must be set appropriately before calling this function.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t startPhase1( STEP_CODE_DATA_STRUCT & io_sc )
-    {
-        PRDF_TRAC( "[VcmEvent] Starting VCM Phase 1: 0x%08x,0x%02x",
-                   iv_chip->getHuid(), getKey() );
-
-        iv_phase = TD_PHASE_1;
-        io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                              PRDFSIG_StartVcmPhase1 );
-
-        return PlatServices::startVcmPhase1<T>( iv_chip, iv_rank );
-    }
+    uint32_t startCmd();
 
     /**
-     * @brief  Starts phase 2 of the procedure.
+     * @brief  Starts the next phase of the procedure.
      * @param  io_sc  The step code data struct.
+     * @post   iv_phase will be updated appropriately per design.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t startPhase2( STEP_CODE_DATA_STRUCT & io_sc )
+    uint32_t startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
     {
-        PRDF_TRAC( "[VcmEvent] Starting VCM Phase 2: 0x%08x,0x%02x",
-                   iv_chip->getHuid(), getKey() );
+        uint32_t signature = 0;
 
-        iv_phase = TD_PHASE_2;
-        io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                              PRDFSIG_StartVcmPhase2 );
+        switch ( iv_phase )
+        {
+            case TD_PHASE_0:
+                iv_phase  = TD_PHASE_1;
+                signature = PRDFSIG_StartVcmPhase1;
+                break;
 
-        return PlatServices::startVcmPhase2<T>( iv_chip, iv_rank );
+            case TD_PHASE_1:
+                iv_phase  = TD_PHASE_2;
+                signature = PRDFSIG_StartVcmPhase2;
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        PRDF_TRAC( "[VcmEvent] Starting VCM Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
+
+        io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+        return startCmd();
     }
 
     /**

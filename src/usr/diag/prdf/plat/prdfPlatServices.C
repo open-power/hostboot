@@ -749,28 +749,6 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip, const MemRank & i_rank,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t startVcmPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank )
-{
-    mss::mcbist::stop_conditions stopCond;
-
-    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, MASTER_RANK );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startVcmPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank )
-{
-    mss::mcbist::stop_conditions stopCond;
-
-    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, MASTER_RANK );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t startTpsPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
                                    const MemRank & i_rank )
 {

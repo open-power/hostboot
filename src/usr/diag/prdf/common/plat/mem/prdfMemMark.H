@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,6 +216,14 @@ uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank,
             io_sc.service_data->setServiceCall();
             io_sc.service_data->setSignature( i_chip->getHuid(),
                                               PRDFSIG_AllDramRepairs );
+
+            // The chip and symbol mark may be on different DIMMs (Centaur ranks
+            // span two DIMMs). Therefore, we must add both to the callout list
+            // to ensure all DIMMs are in the callout list.
+            MemoryMru cm_mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
+            MemoryMru sm_mm { i_chip->getTrgt(), i_rank, symMark.getSymbol()  };
+            io_sc.service_data->SetCallout( cm_mm );
+            io_sc.service_data->SetCallout( sm_mm );
         }
 
     } while (0);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,6 +190,31 @@ template class VcmEvent<TYPE_MBA>;
 //##############################################################################
 
 template<>
+uint32_t VcmEvent<TYPE_MCA>::startCmd()
+{
+    #define PRDF_FUNC "[VcmEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // No stop conditions.
+    mss::mcbist::stop_conditions stopCond;
+
+    // Start the time based scrub procedure on this master rank.
+    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
                                        STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
@@ -270,6 +295,46 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
 //                          Specializations for MBA
 //
 //##############################################################################
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::startCmd()
+{
+    #define PRDF_FUNC "[VcmEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
+
+    // Due to a hardware bug in the Centaur, we must execute runtime maintenance
+    // commands at a very slow rate. Because of this, we decided that we should
+    // stop the command immediately on error if there is a UE so that we can
+    // respond quicker and send a DMD message to the hypervisor as soon as
+    // possible.
+
+    stopCond |= mss_MaintCmd::STOP_ON_UE;
+    stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
+
+    // Again, due to the hardware bug in the Centaur, we want to stop
+    // immediately if there is an MCE found during phase 2 because that
+    // indicates an error was detected on the bad DRAM and fixed by the chip
+    // mark.
+
+    if ( TD_PHASE_2 == iv_phase ) stopCond |= mss_MaintCmd::STOP_ON_MCE;
+
+    // Start the time based scrub procedure on this master rank.
+    o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template<>
 uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
