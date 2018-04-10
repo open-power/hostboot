@@ -2139,6 +2139,77 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
     std::copy(l_SMPLinkInfoCntr.begin(), l_SMPLinkInfoCntr.end(),io_SMPInfoFullPcrdDataPtr);
     HDAT_EXIT();
     return l_errl;
+
+}
+
+uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
+{
+
+    HDAT_ENTER();
+    TARGETING::ATTR_MSS_FREQ_type l_MemBusFreqInMHz = 0;
+
+    TARGETING::ATTR_CLASS_type l_class = GETCLASS(i_pTarget);
+    TARGETING::ATTR_TYPE_type l_type = GETTYPE(i_pTarget);
+    if((l_class == TARGETING::CLASS_CHIP) && (l_type == TARGETING::TYPE_PROC))
+    {
+        TARGETING::PredicateCTM l_mcbistPredicate(TARGETING::CLASS_UNIT,
+                                                TARGETING::TYPE_MCBIST);
+        TARGETING::PredicateHwas l_predHwasFunc;
+        TARGETING::PredicatePostfixExpr l_presentMcbist;
+        l_presentMcbist.push(&l_mcbistPredicate).
+                            push(&l_predHwasFunc).And();
+        TARGETING::TargetHandleList l_mcbistList;
+
+        // Find Associated MCBIST list
+        TARGETING::targetService().getAssociated(l_mcbistList,
+                                            i_pTarget,
+                                            TARGETING::TargetService::CHILD_BY_AFFINITY,
+                                            TARGETING::TargetService::ALL,
+                                            &l_presentMcbist);
+        if(l_mcbistList.size() == 0)
+        {
+            HDAT_ERR("Didn't find any mcbist for a proc with huid [0x%08X]",
+                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+        }
+        else
+        {
+            TARGETING::Target *l_pMcbistTarget = l_mcbistList[0];
+            if( l_pMcbistTarget->tryGetAttr<TARGETING::ATTR_MSS_FREQ>
+             (l_MemBusFreqInMHz) == false )
+            {
+                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
+                        l_pMcbistTarget->getAttr<TARGETING::ATTR_HUID>());
+            }
+        }
+     }
+    else if((l_class == TARGETING::CLASS_UNIT) && (l_type == TARGETING::TYPE_MCBIST))
+    {
+        if(i_pTarget->tryGetAttr<TARGETING::ATTR_MSS_FREQ>
+             (l_MemBusFreqInMHz) == false )
+            {
+                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
+                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+            }
+    }
+    else if((l_class == TARGETING::CLASS_UNIT) && (l_type == TARGETING::TYPE_DIMM))
+    {
+        TARGETING::TYPE  l_mcbistType = TARGETING::TYPE_MCBIST;
+        if(getParent(i_pTarget,l_mcbistType)
+                ->tryGetAttr<TARGETING::ATTR_MSS_FREQ>(l_MemBusFreqInMHz) == false )
+            {
+                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
+                getParent(i_pTarget,l_mcbistType)->getAttr<TARGETING::ATTR_HUID>());
+            }
+    }
+    else
+    {
+
+        HDAT_ERR(" Input target with HUID [0x%08X] is not of proc/mcbist/dimm target type",
+                        i_pTarget->getAttr<TARGETING::ATTR_HUID>());
+    }
+ 
+    HDAT_EXIT();
+    return l_MemBusFreqInMHz;
 }
 
 } //namespace HDAT
