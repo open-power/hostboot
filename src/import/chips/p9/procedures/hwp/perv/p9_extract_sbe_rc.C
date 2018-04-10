@@ -26,29 +26,34 @@
 /// @file  p9_extract_sbe_rc.C
 ///
 /// @brief Check for errors on the SBE, OTPROM, PIBMEM & SEEPROM
+/// Pre-Checking :
+///     1) Validating Usecase
+///     2) (In non HB mode only) Check if VDN_PGOOD is set
+///     3) Reading chip ec attribute detect if chip is NDD1 or later, and update memory location values
+///     4) Read the value of DBGPRO 0xE0005 & Store IAR as Current IAR
+///     5) Identify if PPE is halted from XSR Bit0, if not halted report error as infinite loop
 /// Level 0 :
-///     1) Read the value of RAMDBG 0xE0003 & store SPRG0
+///     1) If Halted, Read the value of RAMDBG 0xE0003 & store SPRG0
 ///     2) Check if SPRG0 has address within valid PIBMEM range
 ///     3) If in valid range, then read the PIBMEM Save-off data
 ///     4) If PIBMEM Saveoff data not available then Perform RAMMING SRR0, SRR1, FI2C CNFG & STATUS (if valid)
-///     5) Update l_data_iar to SRR0 value (if valid)
+///     5) Update l_data32_iar to SRR0 value (if valid)
 /// Level 1 :
-///     1) Read the value of DBGPRO 0xE0005 & Store IAR
-///     2) Identify if PPE is halted from XSR Bit0, Continue only if halted
-///     3) If Halted, Check for Halt Conditions(HC) i.e XSR (1:3)
-///     4) If HC is all Zero report error else Print the Halt condition reported
-///     5) Print info of XSR bits 7,8,12,13,14,21,28 if TRUE
-///     6) Read the value of XIRAMEDR 0xE0004 & Store IR and EDR
-///     7) Check for Machine Check State(MCS) i.e XSR (29:31)
-///     8) if MCS=0x4 OR Link Register contains Program Interrupt offset
+///     1) Check for Halt Conditions(HC) i.e XSR (1:3)
+///     2) If HC is all Zero report error else Print the Halt condition reported
+///     3) Print info of XSR bits 7,8,12,13,14,21,28 if TRUE
+///     4) Read the value of XIRAMEDR 0xE0004 & Store IR and EDR
+///     5) Check for Machine Check State(MCS) i.e XSR (29:31)
+///     6) if MCS=0x4 OR Link Register contains PIBMEM Program Interrupt offset OR Current IAR has OTPROM Program Interrupt offset
 ///         Look for IAR range and report specific memory program error
-///     8) if MCS=0x5 OR Link Register contains Instruction storage interrupt offset
+///         Reading SB_MSG register to collect SBE Code state bits(bit 30:31) & SBE booted bit (bit 0) to report error of specific boot stage
+///     7) if MCS=0x5 OR Link Register contains PIBMEM Instruction storage interrupt offset OR Current IAR has OTPROM Instruction storage interrupt offset
 ///         Look for IAR range and report specific memory program error
-///     8) if MCS=0x6 OR Link Register contains Alignment interrupt offset
+///     8) if MCS=0x6 OR Link Register contains PIBMEM Alignment interrupt offset OR Current IAR has OTPROM Alignment interrupt offset
 ///         Look for IAR range and report specific memory program error
-///     8) if MCS=0x7 OR Link Register contains Data storage interrupt offset
+///     9) if MCS=0x7 OR Link Register contains PIBMEM Data storage interrupt offset OR Current IAR has OTPROM Data storage interrupt offset
 ///         Look for IAR range and report specific memory program error
-///     9) elseif MCS=0x1, 0x2, 0x3, Set the flag as Data Machine Check - l_data_mchk
+///    10) elseif MCS=0x1, 0x2, 0x3, Set the flag as Data Machine Check - l_data_mchk
 /// Level 2 :
 ///     1) Based on IAR value identifying the Memory Address range
 ///        OTPROM (0x000C0000  to 0x000C0378)
@@ -547,7 +552,6 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH()
                                     .set_TARGET_CHIP(i_target_chip),
                                     "ERROR:Program Interrupt occured, probably MAGIC NUMBER MISMATCH");
-
                     }
                     else
                     {
@@ -566,17 +570,20 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 if(!l_is_ndd1)
                 {
                     fapi2::buffer<uint8_t> l_sbe_code_state;
+                    bool l_sbe_booted = false;
                     FAPI_DBG("p9_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
 
                     if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
                     {
                         FAPI_TRY(getScom(i_target_chip, PERV_SB_MSG_SCOM, l_data64));
                         l_data64.extractToRight(l_sbe_code_state, 30, 2);
+                        l_sbe_booted = l_data64.getBit<0>();
                     }
                     else
                     {
                         FAPI_TRY(getCfamRegister(i_target_chip, PERV_SB_MSG_FSI, l_data32));
                         l_data32.extractToRight(l_sbe_code_state, 30, 2);
+                        l_sbe_booted = l_data32.getBit<0>();
                     }
 
                     if(l_sbe_code_state == 0x2)
@@ -585,16 +592,15 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL()
                                     .set_TARGET_CHIP(i_target_chip),
                                     "ERROR:Program Interrupt occured during base loader (L1)");
-
                     }
-                    else if(l_sbe_code_state == 0x3)
+                    else if(l_sbe_code_state == 0x3 && (!l_sbe_booted))
                     {
                         o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
                         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
                                     .set_TARGET_CHIP(i_target_chip),
                                     "ERROR:Program Interrupt occured during L2 loader or pk boot")
                     }
-                    else
+                    else if(!l_sbe_booted)
                     {
                         FAPI_ERR("p9_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
                     }
