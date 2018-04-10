@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -680,7 +680,9 @@ errlHndl_t HdatMsVpd::addRamFru(uint16_t i_msAreaId,
                                 uint32_t i_slcaIndex,
                                 uint16_t i_ramId,
                                 uint16_t i_status,
-                                uint32_t i_size)
+                                uint32_t i_size,
+                                uint32_t i_dimmId,
+                                uint32_t i_RamCurFreq)
 {
     errlHndl_t l_errlHndl = NULL;
 
@@ -699,6 +701,8 @@ errlHndl_t HdatMsVpd::addRamFru(uint16_t i_msAreaId,
         {
             l_ram->iv_ramArea.hdatRamAreaId = i_ramId;
             l_ram->iv_ramArea.hdatRamStatus = i_status;
+            l_ram->iv_ramArea.hdatRamDimmId = i_dimmId;
+            l_ram->iv_ramArea.hdatRamCurFreq = i_RamCurFreq;
             l_ram->iv_ramSize.hdatRamTotalSize = i_size;
 
             // Add the RAM object to the mainstore area object
@@ -1425,14 +1429,19 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
                             TARGETING::ATTR_SLCA_INDEX_type l_dimmSlcaIndex =
                             l_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
-
+                            
+                            uint32_t l_dimmId = 
+                                    1 << (31 - (l_pDimmTarget->getAttr<TARGETING::ATTR_FAPI_POS>() % MAX_DIMMS_PER_MCBIST));
+                            uint32_t l_memBusFreq = getMemBusFreq(l_pDimmTarget);
                             l_err = addRamFru(l_index,
                                               l_pDimmTarget,
                                               l_dimmRid,
                                               l_dimmSlcaIndex,
                                               l_ramId,
                                               l_status,
-                                              (l_area)->ivSize);
+                                              (l_area)->ivSize,
+                                              l_dimmId,
+                                              l_memBusFreq);
 
                             if (l_err) // Failed to add ram fru information
                             {

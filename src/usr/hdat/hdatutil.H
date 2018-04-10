@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,20 @@ const uint16_t HDAT_VERSION3 = 3;
 
 #define HDAT_NV_KWD_MAGIC_WRD  0x4E563030    // "NV00"
 #define NUM_BRICKS_PER_OBUS 3
+
+/**
+ * Retrieve the CLASS of the target, or return NA if the target is NULL
+ */
+#define GETCLASS(pTarget) (((pTarget) == NULL) ? (TARGETING::CLASS_NA) : \
+        ((pTarget)->getAttr<TARGETING::ATTR_CLASS>()))
+
+/**
+ *  * Retrieve the TYPE of the target, or return NA if the target is NULL
+ *   */
+#define GETTYPE(pTarget) (((pTarget) == NULL) ? (TARGETING::TYPE_NA) : \
+        ((pTarget)->getAttr<TARGETING::ATTR_TYPE>()))
+
+
 namespace HDAT
 {
 
@@ -595,6 +609,12 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                                         TARGETING::Target* i_pProcTarget);
 
 
+/******************************************************************************
+ * @brief         get Memory bus frequency of given proc target.
+ * @param[in]     i_pTarget     : input Proc target handle
+ * @return        Memory bus frequency. upon any error conditions it returns 0.
+*******************************************************************************/
+uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget);
 };// end namespace
 
 #endif // HDATUTILITY_H

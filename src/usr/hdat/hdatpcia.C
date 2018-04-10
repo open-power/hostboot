@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -550,6 +550,8 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         //Set Time Base - units of microseconds * 2^32
         iv_spPcia[i_index].hdatTime.pciaTimeBase =
                          i_pProcTarget->getAttr<TARGETING::ATTR_TIME_BASE>();
+        // set the memory bus frequency
+        iv_spPcia[i_index].hdatTime.pciaMemBusFreq = getMemBusFreq(i_pProcTarget);
 
         //Set ICache Info
         //Cache Size Structure

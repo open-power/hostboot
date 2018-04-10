@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,8 @@ struct hdatRamAreaId_t
 {
     uint16_t hdatRamAreaId;     // 0x0000 Identifier for this RAM area
     uint16_t hdatRamStatus;     // 0x0002 Status of the RAM DIMM
+    uint32_t hdatRamDimmId;     // 0x0004 Dimm ID
+    uint32_t hdatRamCurFreq;    // 0x0008 Dimm current operating frequency
 }  __attribute__ ((packed));
 
 

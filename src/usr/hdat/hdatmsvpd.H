@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ const uint32_t HDAT_MB_PER_GB = 1024;
 const uint32_t MAX_CHIP_EC_CNT_PER_MSAREA = 2;
 const uint32_t HDAT_START_INSTANCE = 0;
 const uint32_t HDAT_RHB_MAX_RANGE_ENTRIES = 15;
-
+const uint32_t MAX_DIMMS_PER_MCBIST = 8;
 
 /** @brief Structure version number
  */
@@ -721,6 +721,9 @@ class HdatMsVpd : public HdatHdif
          *                       values from hdatRamStatus defined above
          * @param[in] i_size     -the total size of configured mainstore in this
          *                       RAM area
+         * @param[in] i_dimmId   - Dimm ID with bit positions signifying the target
+         *                         positions in the affinity path
+         * @param[in] i_dimmCurFreq - Current operating dimm frequency
          *
          * @return A null error log handle if successful, else the return code
          *  pointed to by errlHndl_t contains one of:
@@ -734,7 +737,9 @@ class HdatMsVpd : public HdatHdif
                              uint32_t i_slcaIndex,
                              uint16_t i_ramId,
                              uint16_t i_status,
-                             uint32_t i_size);
+                             uint32_t i_size,
+                             uint32_t i_dimmId,
+                             uint32_t i_dimmCurFreq);
         /**
          * @brief Initialization of HdatMsVpd object.
          *
