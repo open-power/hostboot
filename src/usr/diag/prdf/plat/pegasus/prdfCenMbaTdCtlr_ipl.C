@@ -376,56 +376,11 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
                                         const CenAddr & i_stopAddr,
                                         const CenAddr & i_endAddr )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::analyzeVcmPhase1] "
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to VcmEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( VCM_PHASE_1 != iv_tdState )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
-            o_rc = FAIL; break;
-        }
-
-        // Add the mark to the callout list.
-        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
-
-        // Get error condition which caused command to stop
-        uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
-            break;
-        }
-
-        if ( (eccErrorMask & UE) || (eccErrorMask & RETRY_CTE) )
-        {
-            // Handle UE. Highest priority
-            o_rc = handleUE( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleUE() failed" );
-                break;
-            }
-        }
-        else
-        {
-            // Start VCM Phase 2
-            o_rc = startVcmPhase2( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startVcmPhase2() failed" );
-                break;
-            }
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -434,83 +389,11 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
                                         const CenAddr & i_stopAddr,
                                         const CenAddr & i_endAddr )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::analyzeVcmPhase2] "
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to VcmEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( VCM_PHASE_2 != iv_tdState )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
-            o_rc = FAIL; break;
-        }
-
-        // Add the mark to the callout list.
-        CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
-
-        // Get error condition which caused command to stop
-        uint16_t eccErrorMask = NO_ERROR;
-        o_rc = checkEccErrors( eccErrorMask, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
-            break;
-        }
-
-        if ( eccErrorMask & UE )
-        {
-            // Handle UE. Highest priority
-            o_rc = handleUE( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleUE() failed" );
-                break;
-            }
-        }
-        else if ( eccErrorMask & MCE )
-        {
-            // Chip mark is verified.
-
-            // Do callouts, VPD updates, and start DRAM sparing, if possible.
-            o_rc = handleMCE_VCM2( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "handleMCE_VCM2() failed" );
-                break;
-            }
-        }
-        else
-        {
-            // Chip mark verification failed.
-
-            iv_tdState = NO_OP; // Abort the TD procedure.
-
-            setTdSignature( io_sc, PRDFSIG_VcmFalseAlarm );
-
-            // In the field, this error log will be recoverable for now, but we
-            // may have to add thresholding later if they become a problem. In
-            // manufacturing, this error log will be predictive.
-
-            if ( areDramRepairsDisabled() )
-                io_sc.service_data->setServiceCall();
-
-            // Remove chip mark from hardware.
-            iv_mark.clearCM();
-            bool blocked; // not possible during MDIA
-            o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, blocked );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed" );
-                break;
-            }
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -803,40 +686,22 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc,
 
 int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase1] "
-
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase1 );
-    iv_tdState = VCM_PHASE_1;
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Moved to startVcmPhase1() in prdfPlatServices_ipl.C
+    // moved to VcmEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase2] "
-
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase2 );
-    iv_tdState = VCM_PHASE_2;
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Moved to startVcmPhase2() in prdfPlatServices_ipl.C
+    // moved to VcmEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -978,109 +843,11 @@ int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::handleUE] "
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to MemEcc::handleMemUe()
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    using namespace CalloutUtil;
-
-    int32_t o_rc = SUCCESS;
-
-    iv_tdState = NO_OP; // Abort the TD procedure.
-
-    setTdSignature( io_sc, PRDFSIG_MaintUE );
-    io_sc.service_data->setServiceCall();
-
-    CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-
-    do
-    {
-        // Clean up the maintenance command. This is needed just in case the UE
-        // isolation procedure is modified to use maintenance commands.
-        o_rc = cleanupPrevCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "cleanupPrevCmd() failed" );
-            break;
-        }
-
-        // Look for all failing bits on this rank.
-        CenDqBitmap bitmap;
-        o_rc = mssIplUeIsolation( iv_mbaTrgt, iv_rank, bitmap );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssIplUeIsolation() failed" );
-            break;
-        }
-
-        // Add UE data to capture data.
-        bitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
-
-        // Callout the failing DIMMs.
-        TargetHandleList callouts;
-        for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
-        {
-            bool badDqs = false;
-            o_rc = bitmap.badDqs( ps, badDqs );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "badDqs(%d) failed", ps );
-                break;
-            }
-
-            if ( !badDqs ) continue; // nothing to do.
-
-            TargetHandleList dimms = getConnectedDimms(iv_mbaTrgt, iv_rank, ps);
-            if ( 0 == dimms.size() )
-            {
-                PRDF_ERR( PRDF_FUNC "getConnectedDimms(%d) failed", ps );
-                o_rc = FAIL; break;
-            }
-
-            callouts.insert( callouts.end(), dimms.begin(), dimms.end() );
-
-            if ( isMfgCeCheckingEnabled() )
-            {
-                // As we are doing callout for UE, we dont need to do callout
-                // during CE for this rank on given port
-                mbadb->getIplCeStats()->banAnalysis( iv_rank, ps );
-            }
-        }
-        if ( SUCCESS != o_rc ) break;
-
-        if ( 0 == callouts.size() )
-        {
-            // It is possible the scrub counters have rolled over to zero due to
-            // a known DD1.0 hardware bug. In this case, the best we can do is
-            // callout both DIMMs, because at minimum we know there was a UE, we
-            // just don't know where.
-            // NOTE: If this condition happens because of a DD2.0+ bug, the
-            //       mssIplUeIsolation procedure will callout the Centaur.
-            callouts = getConnectedDimms( iv_mbaTrgt, iv_rank );
-            if ( 0 == callouts.size() )
-            {
-                PRDF_ERR( PRDF_FUNC "getConnectedDimms() failed" );
-                o_rc = FAIL; break;
-            }
-
-            if ( isMfgCeCheckingEnabled() )
-            {
-                // As we are doing callout for UE, we dont need to do callout
-                // during CE for this rank on both port
-                mbadb->getIplCeStats()->banAnalysis( iv_rank);
-            }
-        }
-
-        // Callout all DIMMs in the list.
-        for ( TargetHandleList::iterator i = callouts.begin();
-              i != callouts.end(); i++ )
-        {
-            io_sc.service_data->SetCallout( *i, MRU_HIGH );
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------

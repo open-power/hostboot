@@ -195,6 +195,82 @@ uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
     #undef PRDF_FUNC
 }
 
+//##############################################################################
+//
+//                          Specializations for MCA
+//
+//##############################################################################
+
+template<>
+uint32_t VcmEvent<TYPE_MCA>::startCmd()
+{
+    #define PRDF_FUNC "[VcmEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // No stop conditions.
+    mss::mcbist::stop_conditions stopCond;
+
+    // Start the time based scrub procedure on this master rank.
+    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for MBA
+//
+//##############################################################################
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::startCmd()
+{
+    #define PRDF_FUNC "[VcmEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_1:
+            // Start the steer cleanup procedure on this master rank.
+            o_rc = startTdSteerCleanup<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
+                                                  stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) failed",
+                          iv_chip->getHuid(), getKey() );
+            }
+            break;
+
+        case TD_PHASE_2:
+            // Start the superfast read procedure on this master rank.
+            o_rc = startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
+                                            stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
+                          iv_chip->getHuid(), getKey() );
+            }
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.

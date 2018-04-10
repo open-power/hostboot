@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1201,84 +1201,28 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
 
 int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase1] "
+    // Starting a new phase of VCM procedure. Reset the scrub resume counter
+    iv_scrubResumeCounter.reset();
 
-    int32_t o_rc = SUCCESS;
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to VcmEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase1 );
-    iv_tdState = VCM_PHASE_1;
-
-    do
-    {
-        // Starting a new phase of VCM procedure. Reset the scrub resume counter
-        iv_scrubResumeCounter.reset();
-
-        // Get the current marks in hardware (initialize iv_mark).
-        o_rc = mssGetMarkStore( iv_mbaTrgt, iv_rank, iv_mark );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
-            break;
-        }
-
-        o_rc = prepareNextCmd( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Start phase 1.
-        o_rc = doTdScrubCmd( COND_RT_VCM_DSD );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startVcmPhase2] "
+    // Starting a new phase of VCM procedure. Reset the scrub resume counter
+    iv_scrubResumeCounter.reset();
 
-    int32_t o_rc = SUCCESS;
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to VcmEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartVcmPhase2 );
-    iv_tdState = VCM_PHASE_2;
-
-    do
-    {
-        // Starting a new phase of VCM procedure. Reset the scrub resume counter
-        iv_scrubResumeCounter.reset();
-
-        o_rc = prepareNextCmd( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Start phase 2.
-        o_rc = doTdScrubCmd( COND_RT_VCM_DSD | mss_MaintCmd::STOP_ON_MCE );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
