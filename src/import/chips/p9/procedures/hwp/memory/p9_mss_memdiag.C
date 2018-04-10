@@ -25,40 +25,45 @@
 
 ///
 /// @file p9_mss_memdiag.C
-/// @brief Mainstore pattern testing
+/// @brief HW Procedure pattern testing
 ///
-// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Owner: Matthew Hickman <Matthew.Hickman@ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 3
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
 #include <p9_mss_memdiag.H>
 
+#include <lib/dimm/rank.H>
 #include <lib/utils/poll.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
+#include <lib/mcbist/patterns.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/mc/port.H>
+#include <lib/mcbist/sim.H>
 #include <lib/ecc/ecc.H>
+#include <lib/fir/memdiags_fir.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_SYSTEM;
 using fapi2::TARGET_TYPE_MCA;
+using fapi2::FAPI2_RC_SUCCESS;
 
 extern "C"
 {
     ///
-    /// @brief Pattern test the DRAM
-    /// @param[in] i_target the McBIST of the ports of the dram you're training
+    /// @brief Begin background scrub and run pattern tests
+    /// @param[in] i_target MCBIST
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_memdiag( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
-        FAPI_INF("Start memdiag");
+        FAPI_INF("Start mss memdiags on: %s", mss::c_str( i_target ));
 
         // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
         // attributes for the PHY, etc.
@@ -68,9 +73,48 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+        // If we're running in the simulator, we want to only touch the addresses which training touched
         uint8_t l_sim = false;
+        bool l_poll_results = false;
+        fapi2::buffer<uint64_t> l_status;
+
+        // Set poll parameter values for max time to complete sf_init
+        constexpr uint64_t INITIAL_DELAY = 0;
+        constexpr uint64_t INITIAL_SIM_DELAY = 200;
+        constexpr uint64_t DELAY_TIME = 100 * mss::DELAY_1MS;
+        constexpr uint64_t SIM_DELAY_TIME = 200;
+        constexpr uint64_t MAX_POLL_COUNT = 10000;
+
+        // A small vector of addresses to poll during the polling loop
+        const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
+        {
+            {i_target, "mcbist current address", MCBIST_MCBMCATQ},
+        };
+
+        // We'll fill in the initial delay below
+        mss::poll_parameters l_poll_parameters(INITIAL_DELAY, INITIAL_SIM_DELAY, DELAY_TIME, SIM_DELAY_TIME, MAX_POLL_COUNT);
+        uint64_t l_memory_size = 0;
+
+        FAPI_TRY( mss::eff_memory_size(i_target, l_memory_size) );
+        l_poll_parameters.iv_initial_delay = mss::calculate_initial_delay(i_target, (l_memory_size * mss::BYTES_PER_GB));
+
         FAPI_TRY( mss::is_simulation( l_sim) );
 
+        if (l_sim)
+        {
+            // Use some sort of pattern in sim in case the verification folks need to look for something
+            FAPI_INF("running mss sim init in place of memdiags");
+            FAPI_TRY ( mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_0) );
+
+            // Unmask firs and turn off FIFO mode before returning
+            FAPI_TRY ( mss::unmask::after_memdiags( i_target ) );
+            FAPI_TRY ( mss::reset_reorder_queue_settings(i_target) );
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // Unsure if redundant code? Wasn't called before to my knowledge
+        // Only major difference between old mss_scrub and old mss_memdiag
         // Read the bad_dq_bitmap attribute and place corresponding symbol and chip marks
         for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
@@ -120,38 +164,28 @@ extern "C"
 #endif
         }
 
-        // We start the sf_init (write 0's) and it'll tickle the MCBIST complete FIR. PRD will see that
-        // and start a background scrub.
+        // In Cronus on hardware (which is how we got here - f/w doesn't call this) we want
+        // to call sf_init (0's)
         FAPI_TRY( mss::memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 
-        // If we're in the sim, we want to poll for the FIR bit. I don't think this ever really happens
-        // unless we're expressly testing this API.
-        if (l_sim)
+        // Poll for completion.
+        l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
+                                   [&l_status](const size_t poll_remaining,
+                                               const fapi2::buffer<uint64_t>& stat_reg) -> bool
         {
-            // Poll for the fir bit. We expect this to be set ...
-            fapi2::buffer<uint64_t> l_status;
+            FAPI_DBG("mcbist firq 0x%016llx, remaining: %d", stat_reg, poll_remaining);
+            l_status = stat_reg;
+            return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
+        },
+        l_probes);
 
-            // A small vector of addresses to poll during the polling loop
-            const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
-            {
-                {i_target, "mcbist current address", MCBIST_MCBMCATQ},
-            };
+        FAPI_ASSERT( l_poll_results == true,
+                     fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
+                     "p9_mss_memdiag (init) timedout %s", mss::c_str(i_target) );
 
-            mss::poll_parameters l_poll_parameters;
-            bool l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
-                                            [&l_status](const size_t poll_remaining,
-                                                    const fapi2::buffer<uint64_t>& stat_reg) -> bool
-            {
-                FAPI_DBG("mcbist firq 0x%llx, remaining: %d", stat_reg, poll_remaining);
-                l_status = stat_reg;
-                return l_status.getBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>() == true;
-            },
-            l_probes);
-
-            FAPI_ASSERT( l_poll_results == true,
-                         fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
-                         "p9_mss_memdiags timedout %s", mss::c_str(i_target) );
-        }
+        // Unmask firs after memdiags and turn off FIFO mode
+        FAPI_TRY ( mss::unmask::after_memdiags( i_target ) );
+        FAPI_TRY ( mss::reset_reorder_queue_settings(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End memdiag");
