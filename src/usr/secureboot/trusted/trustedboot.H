@@ -115,12 +115,19 @@ void tpmVerifyFunctionalTpmExists(
         NoTpmShutdownPolicy::SYNC_SHUTDOWN);
 
 /**
- *  @brief Replay the entries that exist in the log into the TPM as needed
+ *  @brief Replay (extend) the entries that exist in the log of the primary TPM
+ *         into the secondary TPM.
  *
- *  @param[in] i_pTpm TPM targeting target handle indicating TPM to replay log.
- *      Function will assert if value is nullptr or is not of TPM type
+ *  @param[in] i_primaryTpm TPM targeting target handle indicating TPM to
+ *             replay the log from. Function will assert if the value is nullptr
+ *             or is not of TPM type.
+ * @param[in] i_backupTpm TPM targeting target handle indicating TPM to replay
+ *            the log to. Function will assert if the value is nullptr or is not
+ *            of TPM type.
+ *
  */
-void tpmReplayLog(TRUSTEDBOOT::TpmTarget* i_pTpm);
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget* i_primaryTpm,
+                  TRUSTEDBOOT::TpmTarget* i_backupTpm);
 
 /**
  *  @brief Send config entries to TPM

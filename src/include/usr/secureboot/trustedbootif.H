@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,19 @@ namespace TRUSTEDBOOT
         EV_INVALID                 ///< Used for error checking
     } EventTypes;
 
+    // Indicate the points in the code where the backup TPM test failed.
+    // TODO RTC:191761
+    // remove once the Cxx test is created.
+    typedef enum : uint8_t
+    {
+        TPM_TEST_NO_ERROR             = 0x00,
+        TPM_TEST_LOGS_NOT_INITIALIZED = 0x01,
+        TPM_TEST_LOG_SIZE_MISMATCH    = 0x02,
+        TPM_TEST_UNMARSHAL_ERROR      = 0x03,
+        TPM_TEST_LOG_MISMATCH         = 0x04,
+        TPM_TEST_DIGEST_MISMATCH      = 0x05,
+    } BackupTpmTestFailures;
+
 
     /**
      * @brief Initialize trusted boot/TPM components for the master TPM
@@ -147,6 +160,24 @@ namespace TRUSTEDBOOT
      *      error log.
      */
     errlHndl_t pcrExtendSeparator(bool i_sendAsync = true);
+
+    /**
+     * @brief Attempt to initialize the backup TPM by sending a synchronous
+     *        MSG_TYPE_INIT_BACKUP_TPM to TPM daemon. Any error will be
+     *        committed internally.
+     */
+    void initBackupTpm();
+
+    /**
+     * @brief A testcase to make sure the backup TPM's logs and PCR registers
+     *        look exactly as the primary's.
+     * @return errlHndl_t NULL if test ran successfully; otherwise a pointer to
+     *         the error log.
+     */
+    errlHndl_t testCmpPrimaryAndBackupTpm(); //TODO RTC:191761
+                                             // make this a Cxx standalone
+                                             // test when the simics model has
+                                             // support for both boot chips.
 
     /**
      *  @brief Returns list of TPMs in the system meeting the specified critera

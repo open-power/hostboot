@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,27 +43,30 @@ namespace TRUSTEDBOOT
 
     enum TRUSTEDModuleId
     {
-        MOD_HOST_UPDATE_MASTER_TPM       = 0x00,
-        MOD_TPM_INITIALIZE               = 0x01,
-        MOD_TPM_CMD_STARTUP              = 0x02,
-        MOD_TPM_CMD_GETCAPFWVERSION      = 0x03,
-        MOD_TPM_MARSHALCMDDATA           = 0x04,
-        MOD_TPM_UNMARSHALRESPDATA        = 0x05,
-        MOD_TPM_VERIFYFUNCTIONAL         = 0x06,
-        MOD_TPM_CMD_PCREXTEND            = 0x07,
-        MOD_TPM_CMD_PCRREAD              = 0x08,
-        MOD_TPM_REPLAY_LOG               = 0x09,
-        MOD_TPM_PCREXTEND                = 0x0A,
-        MOD_TPM_TPMDAEMON                = 0x0B,
-        MOD_TPM_SYNCRESPONSE             = 0x0C,
-        MOD_TPM_SEPARATOR                = 0x0D,
-        MOD_TPM_CMD_GETCAPNVINDEX        = 0x0E,
+        MOD_HOST_UPDATE_MASTER_TPM          = 0x00,
+        MOD_TPM_INITIALIZE                  = 0x01,
+        MOD_TPM_CMD_STARTUP                 = 0x02,
+        MOD_TPM_CMD_GETCAPFWVERSION         = 0x03,
+        MOD_TPM_MARSHALCMDDATA              = 0x04,
+        MOD_TPM_UNMARSHALRESPDATA           = 0x05,
+        MOD_TPM_VERIFYFUNCTIONAL            = 0x06,
+        MOD_TPM_CMD_PCREXTEND               = 0x07,
+        MOD_TPM_CMD_PCRREAD                 = 0x08,
+        MOD_TPM_REPLAY_LOG                  = 0x09,
+        MOD_TPM_PCREXTEND                   = 0x0A,
+        MOD_TPM_TPMDAEMON                   = 0x0B,
+        MOD_TPM_SYNCRESPONSE                = 0x0C,
+        MOD_TPM_SEPARATOR                   = 0x0D,
+        MOD_TPM_CMD_GETCAPNVINDEX           = 0x0E,
 
-        MOD_TPMLOGMGR_INITIALIZE         = 0x10,
-        MOD_TPMLOGMGR_ADDEVENT           = 0x11,
-        MOD_TPMLOGMGR_INITIALIZEEXISTLOG = 0x12,
-        MOD_TPMLOGMGR_GETDEVTREEINFO     = 0x13,
-        MOD_TPM_MARK_FAILED              = 0x14,
+        MOD_TPMLOGMGR_INITIALIZE            = 0x10,
+        MOD_TPMLOGMGR_ADDEVENT              = 0x11,
+        MOD_TPMLOGMGR_INITIALIZEEXISTLOG    = 0x12,
+        MOD_TPMLOGMGR_GETDEVTREEINFO        = 0x13,
+        MOD_TPM_MARK_FAILED                 = 0x14,
+        MOD_INIT_BACKUP_TPM                 = 0x15,
+        MOD_DO_INIT_BACKUP_TPM              = 0x16,
+        MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM = 0x17
    };
 
     enum TRUSTEDReasonCode
@@ -92,6 +95,8 @@ namespace TRUSTEDBOOT
         RC_MSGRESPOND_FAIL               = TRBOOT_COMP_ID | 0xB3,
         RC_UPDATE_SECURITY_CTRL_HWP_FAIL = TRBOOT_COMP_ID | 0xB4,
         RC_TPM_NVINDEX_VALIDATE_FAIL     = TRBOOT_COMP_ID | 0xB5,
+        RC_TPMLOGMGR_INITIALIZE_FAIL     = TRBOOT_COMP_ID | 0xB6,
+        RC_BACKUP_TPM_TEST_FAIL          = TRBOOT_COMP_ID | 0xB7,
     };
 #ifdef __cplusplus
 }

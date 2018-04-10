@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <isteps/hwpisteperror.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <isteps/istep_reasoncodes.H>
@@ -38,6 +39,7 @@
 #include <util/align.H>
 #include <util/algorithm.H>
 #include <istepHelperFuncs.H>
+#include <secureboot/trustedbootif.H>
 
 namespace ISTEP_10
 {
@@ -47,10 +49,28 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ENTER_MRK"call_host_update_redundant_tpm");
 
+    ISTEP_ERROR::IStepError l_istepError;
+#ifdef CONFIG_TPMDD
+    TARGETING::Target* l_backupTpm = nullptr;
+
+    do{
+    TRUSTEDBOOT::getBackupTpm(l_backupTpm);
+    if(!l_backupTpm)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_update_redundant_tpm: Backup TPM not found.");
+        break;
+    }
+
+    TRUSTEDBOOT::initBackupTpm();
+
+    } while(0);
+#endif
+
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 EXIT_MRK"call_host_update_redundant_tpm");
 
-    return nullptr;
+    return l_istepError.getErrorHandle();
 }
 
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,8 @@
 #include "../trustedbootUtils.H"
 #include "../../pnor/pnor_utils.H"
 #include "trustedbootMsg.H"
+#include "../tpmLogMgr.H"
+#include <algorithm>
 
 // ----------------------------------------------
 // Trace definitions
@@ -487,6 +489,309 @@ errlHndl_t extendBaseImage()
 #endif
 
     return pError;
+}
+
+void initBackupTpm()
+{
+    errlHndl_t l_errl = nullptr;
+#ifdef CONFIG_TPMDD
+    Message* l_msg = Message::factory(MSG_TYPE_INIT_BACKUP_TPM,
+                                      0,
+                                      nullptr,
+                                      MSG_MODE_SYNC);
+    int l_rc = msg_sendrecv(systemData.msgQ, l_msg->iv_msg);
+    if(l_rc == 0)
+    {
+        l_errl = l_msg->iv_errl;
+        l_msg->iv_errl = nullptr;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_trustedboot, "Error occurred while sending message to"
+                 " the TPM daemon. RC = %d", l_rc);
+        /*@
+         * @errortype      ERRL_SEV_UNRECOVERABLE
+         * @reasoncode     RC_SENDRECV_FAIL
+         * @moduleid       MOD_INIT_BACKUP_TPM
+         * @userdata1      rc from msq_sendrecv()
+         * @devdesc        msg_sendrecv() failed
+         * @custdesc       Trusted Boot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_INIT_BACKUP_TPM,
+                                         RC_SENDRECV_FAIL,
+                                         l_rc,
+                                         0,
+                                         true);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
+    }
+    delete l_msg;
+    l_msg = nullptr;
+
+    if(l_errl)
+    {
+        TARGETING::Target* l_backupTpm = nullptr;
+        getBackupTpm(l_backupTpm);
+        if(l_backupTpm)
+        {
+            tpmMarkFailed(l_backupTpm, l_errl);
+        }
+    }
+#endif
+}
+
+errlHndl_t testCmpPrimaryAndBackupTpm()
+{
+    errlHndl_t l_err = nullptr;
+#ifdef CONFIG_TPMDD
+    TARGETING::Target* l_primaryTpm = nullptr;
+    TARGETING::Target* l_backupTpm = nullptr;
+    bool l_errorOccurred = false;
+    BackupTpmTestFailures l_rc = TPM_TEST_NO_ERROR;
+
+    do {
+
+    getPrimaryTpm(l_primaryTpm);
+    if(!l_primaryTpm)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+                           "testCmpPrimaryAndBackupTpm: primary TPM not found;"
+                           "skipping test");
+        break;
+    }
+    getBackupTpm(l_backupTpm);
+    if(!l_backupTpm)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+                            "testCmpPrimaryAndBackupTpm: backup TPM not found;"
+                            "skipping test");
+        break;
+    }
+
+    auto l_primaryHwasState = l_primaryTpm->getAttr<
+                                                  TARGETING::ATTR_HWAS_STATE>();
+    if(!(l_primaryHwasState.present && l_primaryHwasState.functional))
+    {
+        TRACFCOMP(g_trac_trustedboot, "testCmpPrimaryAndBackupTpm: primary TPM"
+                                      "is not present or not functional;"
+                                      "skipping the test.");
+        break;
+    }
+
+    auto l_backupHwasState = l_backupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+    if(!(l_backupHwasState.present && l_backupHwasState.functional))
+    {
+        TRACFCOMP(g_trac_trustedboot, "testCmpPrimaryAndBackupTpm: backup TPM"
+                                      "is not present or not functional;"
+                                      "skipping the test.");
+        break;
+    }
+
+    auto * const pTpmLogMgr = getTpmLogMgr(l_primaryTpm);
+    auto * const bTpmLogMgr = getTpmLogMgr(l_backupTpm);
+
+    if(!pTpmLogMgr || !bTpmLogMgr)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+                  "testCmpPrimaryAndBackupTpm: TPM log manager(s)"
+                  " is(are) uninitialized");
+        l_errorOccurred = true;
+        l_rc = TPM_TEST_LOGS_NOT_INITIALIZED;
+        break;
+    }
+
+    if(TpmLogMgr_getLogSize(bTpmLogMgr) == TpmLogMgr_getLogSize(pTpmLogMgr))
+    {
+        TRACFCOMP(g_trac_trustedboot,
+                     "testCmpPrimaryAndBackupTpm: the sizes of TPM logs match");
+    }
+    else
+    {
+        TRACFCOMP(g_trac_trustedboot,
+                  "testCmpPrimaryAndBackupTpm: log size mismatch."
+                  " Primary log size: %d; backup log size: %d.",
+                  TpmLogMgr_getLogSize(pTpmLogMgr),
+                  TpmLogMgr_getLogSize(bTpmLogMgr));
+        l_errorOccurred = true;
+        l_rc = TPM_TEST_LOG_SIZE_MISMATCH;
+        break;
+    }
+
+    int l_count = 0;
+    TCG_PCR_EVENT2 l_pEventLog = {0};
+    TCG_PCR_EVENT2 l_bEventLog = {0};
+    // Skip the first entry which is the header
+    const uint8_t* l_pEventHdl = TpmLogMgr_getFirstEvent(pTpmLogMgr);
+    const uint8_t* l_bEventHdl = TpmLogMgr_getFirstEvent(bTpmLogMgr);
+
+    // Match the logs
+    while(l_pEventHdl != nullptr && l_bEventHdl != nullptr)
+    {
+        // Other (than the header) events need to be processed
+        l_pEventHdl = TpmLogMgr_getNextEvent(pTpmLogMgr, l_pEventHdl,
+                                            &l_pEventLog, &l_errorOccurred);
+        if(l_errorOccurred)
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                "testCmpPrimaryAndBackupTpm: Unmarshaling error occurred.");
+            l_rc = TPM_TEST_UNMARSHAL_ERROR;
+            break;
+        }
+
+        l_bEventHdl = TpmLogMgr_getNextEvent(bTpmLogMgr, l_bEventHdl,
+                                            &l_bEventLog, &l_errorOccurred);
+        if(l_errorOccurred)
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                "testCmpPrimaryAndBackupTpm: Unmarshaling error occurred.");
+            l_rc = TPM_TEST_UNMARSHAL_ERROR;
+            break;
+        }
+
+        if(memcmp(&l_pEventLog, &l_bEventLog, sizeof(TCG_PCR_EVENT2)))
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                      "testCmpPrimaryAndBackupTpm: log #%d does not match",
+                      l_count);
+            TRACFBIN(g_trac_trustedboot,
+                     "testCmpPrimaryAndBackupTpm: primary TPM's log:",
+                     &l_pEventLog, sizeof(TCG_PCR_EVENT2));
+            TRACFBIN(g_trac_trustedboot,
+                     "testCmpPrimaryAndBackupTpm: backup TPM's log:",
+                     &l_bEventLog, sizeof(TCG_PCR_EVENT2));
+            l_errorOccurred = true;
+            l_rc = TPM_TEST_LOG_MISMATCH;
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot,
+                      "testCmpPrimaryAndBackupTpm: log #%d matches",
+                      l_count);
+        }
+
+        l_count++;
+    } //while
+
+    if(l_err || l_errorOccurred)
+    {
+        break;
+    }
+
+    TPM_Pcr l_pcrRegs[8] = {PCR_0, PCR_1, PCR_2, PCR_3,
+                            PCR_4, PCR_5, PCR_6, PCR_7};
+    TPM_Alg_Id l_algIds[2] = {TPM_ALG_SHA1, TPM_ALG_SHA256};
+
+    size_t l_sizeToAllocate = std::max(getDigestSize(TPM_ALG_SHA1),
+                                       getDigestSize(TPM_ALG_SHA256));
+
+    uint8_t* l_pDigest = new uint8_t[l_sizeToAllocate]();
+    uint8_t* l_bDigest = new uint8_t[l_sizeToAllocate]();
+    size_t l_digestSize = 0;
+
+    // Match the contents of the PCR regs
+    for(const auto l_algId : l_algIds)
+    {
+        l_digestSize = getDigestSize(l_algId);
+
+        for(const auto l_pcrReg : l_pcrRegs)
+        {
+            l_err = tpmCmdPcrRead(l_primaryTpm,
+                                  l_pcrReg,
+                                  l_algId,
+                                  l_pDigest,
+                                  l_digestSize);
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_trustedboot,
+                          "testCmpPrimaryAndBackupTpm: failed to read PCR %d"
+                          " of primary TPM; algId = 0x%.04x",
+                          l_pcrReg,
+                          l_algId);
+                break;
+            }
+
+            l_err = tpmCmdPcrRead(l_backupTpm,
+                                  l_pcrReg,
+                                  l_algId,
+                                  l_bDigest,
+                                  l_digestSize);
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_trustedboot,
+                          "testCmpPrimaryAndBackupTpm: failed to read PCR %d"
+                          " of backup TPM; algId = 0x%.04x",
+                          l_pcrReg,
+                          l_algId);
+                break;
+            }
+
+            if(memcmp(l_pDigest, l_bDigest, l_digestSize))
+            {
+                TRACFCOMP(g_trac_trustedboot,
+                          "testCmpPrimaryAndBackupTpm: digests of PCR %d"
+                          " algId 0x%.04x do not match!",
+                          l_pcrReg,
+                          l_algId);
+                TRACFBIN(g_trac_trustedboot,
+                         "testCmpPrimaryAndBackupTpm: contents of primary TPM's"
+                         " PCR:",
+                         l_pDigest, l_digestSize);
+                TRACFBIN(g_trac_trustedboot,
+                         "testCmpPrimaryAndBackupTpm: contents of backup TPM's"
+                         " PCR:",
+                         l_bDigest, l_digestSize);
+                l_rc = TPM_TEST_DIGEST_MISMATCH;
+                l_errorOccurred = true;
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_trustedboot,
+                          "testCmpPrimaryAndBackupTpm: digests of PCR %d, algId"
+                          " 0x%.04x match",
+                          l_pcrReg,
+                          l_algId);
+            }
+        } // pcrReg
+
+        if(l_err || l_errorOccurred)
+        {
+            break;
+        }
+    } // algId
+
+    delete l_pDigest;
+    delete l_bDigest;
+    l_pDigest = l_bDigest = nullptr;
+
+    } while(0);
+
+    if(!l_err && l_errorOccurred)
+    {
+        /*@
+         * @errortype
+         * @reasoncode     RC_BACKUP_TPM_TEST_FAIL
+         * @severity       ERRL_SEV_UNRECOVERABLE
+         * @moduleid       MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM
+         * @userdata1      return code
+         * @userdata2      0
+         * @devdesc        TPM testcase error. See the return code for details.
+         * @custdesc       Trusted Boot failure.
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM,
+                                      RC_BACKUP_TPM_TEST_FAIL,
+                                      l_rc,
+                                      0,
+                                      true /*Add HB SW Callout*/);
+
+        l_err->collectTrace(SECURE_COMP_NAME);
+        l_err->collectTrace(TRBOOT_COMP_NAME);
+    }
+#endif
+    return l_err;
 }
 
 } // end TRUSTEDBOOT
