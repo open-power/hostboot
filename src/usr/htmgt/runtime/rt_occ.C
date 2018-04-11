@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,5 +158,37 @@ namespace HTMGT
     };
 
     registerOcc g_registerOcc;
-}
 
+
+//------------------------------------------------------------------------
+
+    void process_occ_clr_msgs( void )
+    {
+#ifdef CONFIG_HTMGT
+        // a NULL parameter will cause processOccError() to poll
+        //   all of the OCCs (since the parm was invalid)
+        TARGETING::Target * l_DummyOccTarget = nullptr;
+        HTMGT::processOccError(l_DummyOccTarget);
+#else
+        TMGT_ERR("Unexpected call to process_occ_clr_msgs"
+                " when HTMGT is not enabled");
+#endif
+    }
+
+
+    //------------------------------------------------------------------------
+
+    struct registerOccStartup
+    {
+        registerOccStartup()
+        {
+            // Register interface for Host to call
+            postInitCalls_t * rt_post = getPostInitCalls();
+            rt_post->callClearPendingOccMsgs = &process_occ_clr_msgs;
+        }
+
+    };
+
+    registerOccStartup g_registerOccStartup;
+
+} // end namespace HTMGT

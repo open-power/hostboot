@@ -983,6 +983,12 @@ struct postInitCalls_t
      */
     void (*callClearPendingSbeMsgs)();
 
+    /**
+     * @brief Clear pending OCC messages
+     *
+     */
+    void (*callClearPendingOccMsgs)();
+
 };
 
 extern hostInterfaces_t* g_hostInterfaces;

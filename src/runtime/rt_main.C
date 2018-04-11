@@ -142,6 +142,17 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
     // check for possible missed in-flight messages/interrupts
     rtPost->callClearPendingSbeMsgs();
 
+    // check for possible missed in-flight messages/interrupts
+    if (rtPost->callClearPendingOccMsgs != nullptr )
+    {
+        // vector ptr has been initted, use it
+        rtPost->callClearPendingOccMsgs();
+    }
+    else
+    {
+        // (HTMGT not compiled in by default)
+    }
+
     // do any version mismatch fixups
     rt_version_fixup();
 
