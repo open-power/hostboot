@@ -1160,10 +1160,46 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             {
                 break;
             }
-
         }
         else if(TARGETING::is_sapphire_load())
         {
+            // Reserve the HRMOR space if it not at zero offset.
+            ////////////////////////////////////////////////////////////////////
+            // HRMOR Calculation on OPAL Vs PhyP systems
+            // For PhyP system, HRMOR is set to 128MB, which is calculated basis
+            // this theory ==>>
+            // "supported offset values are all values of the
+            // form i x 2 exp `r`, where 0 <= i <= 2 exp `j`, and j and r are
+            // implementation-dependent values having the properties that
+            // 12 <= r <= 26". (Texted quoted from PowerISA Doc) 
+            // Basis the above, value of r is 26, which sets the offset
+            // granularity to 64MB, therefore value of i is '2', which makes the
+            // offset to 128MB.
+            // Basis the above calculation/assumption, calculation of HRMO in
+            // OPAL system is as follows -
+            // OPAL needs the HRMOR in the range of 4GB, so that HB reloading
+            // doesn't stamp on the OPAL/HostLinux Data. Now keeping the max
+            // granularity as 64MB, 'i' is the multiplication factor which comes
+            // to around 64 (64MB * 64 = 4096MB)
+            ////////////////////////////////////////////////////////////////////
+            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+            // if l_hbAddr is zero that means PhyP system where HRMOR is set to
+            // 128MB, if this is not zero that means OPAL system where HRMOR is
+            // set to 3968MB
+            if(l_hbAddr)
+            {
+                l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
+                        i_nodeId,
+                        l_hbAddr,
+                        VMM_HB_RSV_MEM_SIZE,
+                        HBRT_RSVD_MEM__PRIMARY,
+                        HDAT::RHB_READ_WRITE,
+                        false);
+                if(l_elog != nullptr)
+                {
+                    break;
+                }
+            }
             // Opal data goes at top_of_mem
             l_topMemAddr = TARGETING::get_top_mem_addr();
             assert (l_topMemAddr != 0,
