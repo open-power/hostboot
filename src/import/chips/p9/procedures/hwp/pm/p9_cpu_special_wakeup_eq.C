@@ -61,7 +61,13 @@ fapi2::ReturnCode p9_cpu_special_wakeup_eq(
 
     uint8_t l_spWakeUpInProg = 0;
     ProcessingValues_t l_processing_info;
+    fapi2::buffer<uint64_t> l_sgpeActive;
     fapi2::ReturnCode l_rc;
+    uint8_t l_eqPos = 0;
+    auto l_procChip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target,  l_eqPos );
+    FAPI_TRY( getScom( l_procChip, PU_OCB_OCI_OCCFLG_SCOM, l_sgpeActive ) );
 
     FAPI_ATTR_GET( fapi2::ATTR_EQ_INSIDE_SPECIAL_WAKEUP,
                    i_target,
@@ -80,6 +86,16 @@ fapi2::ReturnCode p9_cpu_special_wakeup_eq(
 
     p9specialWakeup::blockWakeupRecurssion( i_target, p9specialWakeup::BLOCK );
 
+    //Special wakeup request can't be serviced if
+    //SGPE did not boot.
+    if( !l_sgpeActive.getBit( SGPE_ACTIVE_BIT ) )
+    {
+        FAPI_ASSERT( false,
+                     fapi2::QUAD_SPECIAL_WAKEUP_NOT_FEASIBLE()
+                     .set_QUAD_POS( l_eqPos ),
+                     "Special Wakeup Request Cannot Be Serviced on This Quad" );
+    }
+
     l_rc = _special_wakeup( i_target,
                             i_operation,
                             i_entity,
@@ -91,9 +107,10 @@ fapi2::ReturnCode p9_cpu_special_wakeup_eq(
         collectEqTimeoutFailInfo( i_target, l_processing_info );
     }
 
-    p9specialWakeup::blockWakeupRecurssion( i_target, p9specialWakeup::UNBLOCK );
 
+fapi_try_exit:
     FAPI_INF("<< p9_cpu_special_wakeup_eq" );
+    p9specialWakeup::blockWakeupRecurssion( i_target, p9specialWakeup::UNBLOCK );
     return fapi2::current_err;
 }
 

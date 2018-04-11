@@ -265,4 +265,25 @@
     </description>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_SPECIAL_WAKEUP_NOT_FEASIBLE</rc>
+    <description>Special Wakeup can't be serviced for given ex.
+    </description>
+    <ffdc>EX_POS</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_SPECIAL_WAKEUP_NOT_FEASIBLE</rc>
+    <description>Special Wakeup can't be serviced for given core.
+    </description>
+    <ffdc>CORE_POS</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_QUAD_SPECIAL_WAKEUP_NOT_FEASIBLE</rc>
+    <description>Special Wakeup can't be serviced for given quad.
+    </description>
+    <ffdc>QUAD_POS</ffdc>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
