@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,15 +27,19 @@
 #include <sys/syscall.h>
 #include <errno.h>
 #include <kernel/timemgr.H>
+#include <kernel/console.H>
+#include <sys/task.h>
 
 using namespace Systemcalls;
 
-void nanosleep(uint64_t sec, uint64_t nsec)
+void nanosleep(uint64_t i_sec, uint64_t i_nsec)
 {
+    uint64_t l_sec = i_sec + i_nsec/NS_PER_SEC;
+    uint64_t l_nsec = i_nsec%NS_PER_SEC;
     // If the delay is short then simpleDelay() will perform the delay
-    if(unlikely(!TimeManager::simpleDelay(sec, nsec)))
+    if(unlikely(!TimeManager::simpleDelay(l_sec, l_nsec)))
     {
-        _syscall2(TIME_NANOSLEEP, (void*)sec, (void*)nsec);
+        _syscall2(TIME_NANOSLEEP, (void*)l_sec, (void*)l_nsec);
     }
 }
 
