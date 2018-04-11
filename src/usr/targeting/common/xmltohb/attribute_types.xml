@@ -6471,6 +6471,7 @@ firmware notes: Used as override attribute for pstate procedure
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FAVOR_PERF_OVER_SECURITY</id>
         <macro>DIRECT</macro>
