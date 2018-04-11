@@ -87,6 +87,7 @@ static const uint32_t SGPE_ACTIVE_BIT       = 8;
 static const uint32_t CORES_PER_EX          = 2;
 static const uint32_t CORES_PER_EQ          = 4;
 static const uint64_t INIT_REG_PATT         = 0xDEADDEADDEADDEADll;
+static const uint64_t AUTO_SPWKUP_DIS_POS   = 12;
 
 
 namespace p9specialWakeup
