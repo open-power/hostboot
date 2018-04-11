@@ -60,13 +60,22 @@ fapi2::ReturnCode p9_cpu_special_wakeup_core(
     FAPI_INF(">> p9_cpu_special_wakeup_core");
     fapi2::ReturnCode l_rc;
     uint8_t l_spWakeUpInProg    =   0;
+    uint8_t l_corePos           =   0;
+    uint8_t l_autoSpWkUpEn      =   0;
 
     ProcessingValues_t l_processing_info;
+    fapi2::buffer<uint64_t> l_autoSpWkUp;
+    fapi2::buffer<uint64_t> l_sgpeActive;
+    auto l_exTarget = i_target.getParent<fapi2::TARGET_TYPE_EX>();
     auto l_eqTarget = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
+    auto l_procChip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY( getScom( l_procChip, PU_OCB_OCI_OCCFLG_SCOM, l_sgpeActive ) );
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target,  l_corePos );
 
     FAPI_ATTR_GET( fapi2::ATTR_CORE_INSIDE_SPECIAL_WAKEUP,
                    i_target,
                    l_spWakeUpInProg );
+
 
     // A special wakeup is already in progress. In all likelyhood, a special
     // wakeup has timed out and we are in FFDC collection path. During this
@@ -81,6 +90,24 @@ fapi2::ReturnCode p9_cpu_special_wakeup_core(
 
     p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::BLOCK );
 
+    //Special wakeup request can't be serviced if
+    //SGPE did not boot and auto-special wakeup is not enabled.
+    if( !l_sgpeActive.getBit( SGPE_ACTIVE_BIT ) )
+    {
+        l_rc = getScom( l_exTarget, EQ_CME_SCOM_LMCR_SCOM,  l_autoSpWkUp );
+
+        if( !l_rc )
+        {
+            l_autoSpWkUpEn =
+                l_autoSpWkUp.getBit(  AUTO_SPWKUP_DIS_POS + ((l_corePos >> 1) & 0x01) ) ? 0 : 1;
+        }
+
+        FAPI_ASSERT( (!l_rc && l_autoSpWkUpEn ),
+                     fapi2::CORE_SPECIAL_WAKEUP_NOT_FEASIBLE()
+                     .set_CORE_POS( l_corePos ),
+                     "Special Wakeup Request Cannot Be Serviced on This Core" );
+    }
+
     l_rc = _special_wakeup<fapi2::TARGET_TYPE_CORE> (
                i_target,
                i_operation,
@@ -92,8 +119,9 @@ fapi2::ReturnCode p9_cpu_special_wakeup_core(
         collectCoreTimeoutFailInfo( i_target, l_processing_info );
     }
 
-    p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::UNBLOCK );
 
+fapi_try_exit:
+    p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::UNBLOCK );
     FAPI_INF("<< p9_cpu_special_wakeup_core" );
     return fapi2::current_err;
 }
