@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,12 @@
 #include <prdfMemMark.H>
 
 #include <prdfTrace.H>
+#include <prdfErrlUtil.H>
+#include <prdfMemDbUtils.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <prdfMemVcm.H>
+#endif
 
 using namespace TARGETING;
 
@@ -327,6 +333,87 @@ uint32_t clearSymbolMark<TYPE_MCA>( ExtensibleChip * i_chip,
 //                  Utilities to read/write markstore (MBA)
 //##############################################################################
 
+template<TARGETING::TYPE>
+uint32_t __readMarks( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      MemMark & o_symMark, MemMark & o_chipMark );
+
+template<>
+uint32_t __readMarks<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
+                                MemMark & o_symMark, MemMark & o_chipMark )
+{
+    #define PRDF_FUNC "[__readMarks<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_MODULE
+    uint8_t l_sm = 0;
+    uint8_t l_cm = 0;
+    do
+    {
+        errlHndl_t l_errl = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
+        FAPI_INVOKE_HWP( l_errl, mss_get_mark_store, fapiTrgt,
+                         i_rank.getMaster(), l_sm, l_cm );
+
+        if ( nullptr != l_errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_get_mark_store() failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+        MemSymbol l_cmSym = MemSymbol::fromSymbol( i_chip->getTrgt(), i_rank,
+                                                   l_cm );
+        MemSymbol l_smSym = MemSymbol::fromSymbol( i_chip->getTrgt(), i_rank,
+                                                   l_sm );
+
+        //TODO RTC 189221 DRAM sparing support
+        // Check if the chip mark is on any of the spares
+
+        o_chipMark = MemMark( i_chip->getTrgt(), i_rank, l_cmSym );
+        o_symMark  = MemMark( i_chip->getTrgt(), i_rank, l_smSym );
+
+    }while(0);
+    #endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<TARGETING::TYPE>
+uint32_t __clearFetchAttn( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+template<>
+uint32_t __clearFetchAttn<TYPE_MBA>( ExtensibleChip * i_chip,
+                                     const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[__readMarks<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Clear the fetch MPE attention.
+    ExtensibleChip * l_membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+    const char * reg_str = ( 0 == i_chip->getPos() ) ? "MBA0_MBSECCFIR_AND"
+                                                     : "MBA1_MBSECCFIR_AND";
+    SCAN_COMM_REGISTER_CLASS * firand = l_membChip->getRegister( reg_str );
+
+    firand->setAllBits();
+    firand->ClearBit( 0 + i_rank.getMaster() ); // fetch
+    o_rc = firand->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template<>
 uint32_t readChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
                                  const MemRank & i_rank, MemMark & o_mark )
@@ -337,9 +424,52 @@ uint32_t readChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
 
     o_mark = MemMark(); // ensure invalid
 
-    // TODO: RTC 157888
+    do
+    {
+        // __readMarks will use mss_get_mark_store to get back the symbol
+        // value for both the chip and symbol marks, so the symbol mark value
+        // we get back here is irrelevant in this case.
+        MemMark l_junk;
+        o_rc = __readMarks<TYPE_MBA>( i_chip, i_rank, l_junk, o_mark );
+        if ( o_rc != SUCCESS )
+        {
+            PRDF_ERR( PRDF_FUNC "__readMarks<TYPE_MBA> failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+    }while(0);
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t readSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank, MemMark & o_mark )
+{
+    #define PRDF_FUNC "[readSymbolMark<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_mark = MemMark(); // ensure invalid
+
+    do
+    {
+        // __readMarks will use mss_get_mark_store to get back the symbol
+        // value for both the chip and symbol marks, so the chip mark value
+        // we get back here is irrelevant in this case.
+        MemMark l_junk;
+        o_rc = __readMarks<TYPE_MBA>( i_chip, i_rank, o_mark, l_junk );
+        if ( o_rc != SUCCESS )
+        {
+            PRDF_ERR( PRDF_FUNC "__readMarks<TYPE_MBA> failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+    }while(0);
 
     return o_rc;
 
@@ -359,9 +489,73 @@ uint32_t writeChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 157888
+    #ifdef __HOSTBOOT_MODULE
+    do
+    {
+        // mss_put_mark_store will overwrite both the chip and symbol marks,
+        // so we want to do a read of the symbol mark to ensure we do not
+        // overwrite it.
+        MemMark l_symMark;
+        o_rc = readSymbolMark<TYPE_MBA>( i_chip, i_rank, l_symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+        uint8_t l_sm = l_symMark.isValid() ? l_symMark.getSymbol().getSymbol()
+                                           : MSS_INVALID_SYMBOL;
+        uint8_t l_cm = i_mark.isValid() ? i_mark.getSymbol().getSymbol()
+                                        : MSS_INVALID_SYMBOL;
+
+        errlHndl_t l_errl = nullptr;
+        fapi2::ReturnCode l_rc;
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
+        FAPI_INVOKE_HWP_RC( l_errl, l_rc, mss_put_mark_store, fapiTrgt,
+                            i_rank.getMaster(), l_sm, l_cm );
+
+        if ( (fapi2::ReturnCode)fapi2::RC_CEN_MSS_MAINT_MARKSTORE_WRITE_BLOCKED
+             == l_rc )
+        {
+            delete l_errl;
+            l_errl = nullptr;
+
+            // Write was blocked by hardware, we will try one rewrite.
+            PRDF_TRAC( PRDF_FUNC "Write chip mark blocked by hardware on "
+                       "HUID: 0x%08x Rank: 0x%02x.", i_chip->getHuid(),
+                       i_rank.getKey() );
+
+            // Clear the fetch attn before attempting the rewrite to markstore.
+            o_rc = __clearFetchAttn<TYPE_MBA>( i_chip, i_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__clearFetchAttn failed. HUID: 0x%08x "
+                          "Rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            // Attempt to rewrite the chip mark.
+            FAPI_INVOKE_HWP( l_errl, mss_put_mark_store, fapiTrgt,
+                             i_rank.getMaster(), l_sm, l_cm );
+            if ( nullptr != l_errl )
+            {
+                PRDF_ERR( PRDF_FUNC "mss_put_mark_store rewrite failed." );
+                PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+            }
+        }
+        else if ( nullptr != l_errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
+                      "Rank: 0x%02x sm: %d cm: %d", i_chip->getHuid(),
+                      i_rank.getKey(), l_sm, l_cm );
+            PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+
+    }while(0);
+    #endif
 
     return o_rc;
 
@@ -378,9 +572,69 @@ uint32_t clearChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 157888
+    #ifdef __HOSTBOOT_MODULE
+    do
+    {
+        // Check to make sure there is a chip mark to clear
+        MemMark l_chipMark;
+        o_rc = readChipMark<TYPE_MBA>( i_chip,  i_rank, l_chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+        else if ( !l_chipMark.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "There is no chip mark to clear on HUID: 0x%08x"
+                      " Rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            o_rc = FAIL;
+            break;
+        }
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+        // Clear the fetch attention before attempting the write to markstore.
+        o_rc = __clearFetchAttn<TYPE_MBA>( i_chip, i_rank );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__clearFetchAttn failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // mss_put_mark_store will overwrite both the chip and symbol marks,
+        // so we want to do a read of the symbol mark to ensure we do not
+        // overwrite it.
+        MemMark l_symMark;
+        o_rc = readSymbolMark<TYPE_MBA>( i_chip, i_rank, l_symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        uint8_t l_sm = l_symMark.isValid() ? l_symMark.getSymbol().getSymbol()
+                                           : MSS_INVALID_SYMBOL;
+        uint8_t l_cm = MSS_INVALID_SYMBOL;
+
+        errlHndl_t l_errl = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
+
+        // The markstore write cannot be blocked in this case, as the chip mark
+        // already exists.
+        FAPI_INVOKE_HWP( l_errl, mss_put_mark_store, fapiTrgt,
+                         i_rank.getMaster(), l_sm, l_cm );
+        if ( nullptr != l_errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
+                      "Rank: 0x%02x sm: %d cm: %d", i_chip->getHuid(),
+                      i_rank.getKey(), l_sm, l_cm );
+            PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+
+    }while(0);
+    #endif
 
     return o_rc;
 
@@ -390,18 +644,111 @@ uint32_t clearChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t readSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
-                                   const MemRank & i_rank, MemMark & o_mark )
+uint32_t clearSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank )
 {
-    #define PRDF_FUNC "[readSymbolMark<TYPE_MBA>] "
+    #define PRDF_FUNC "[clearSymbolMark<TYPE_MBA>] "
 
     uint32_t o_rc = SUCCESS;
 
-    o_mark = MemMark(); // ensure invalid
+    #ifdef __HOSTBOOT_MODULE
+    do
+    {
+        // Check to make sure there is a symbol mark to clear
+        MemMark l_symMark;
+        o_rc = readSymbolMark<TYPE_MBA>( i_chip,  i_rank, l_symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+        else if ( !l_symMark.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "There is no symbol mark to clear on HUID: "
+                      "0x%08x Rank: 0x%02x", i_chip->getHuid(),
+                      i_rank.getKey() );
+            o_rc = FAIL;
+            break;
+        }
 
-    // TODO: RTC 157888
+        // mss_put_mark_store will overwrite both the chip and symbol marks,
+        // so we want to do a read of the symbol mark to ensure we do not
+        // overwrite it.
+        MemMark l_chipMark;
+        o_rc = readChipMark<TYPE_MBA>( i_chip, i_rank, l_chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+        uint8_t l_cm = l_chipMark.isValid() ? l_chipMark.getSymbol().getSymbol()
+                                            : MSS_INVALID_SYMBOL;
+        uint8_t l_sm = MSS_INVALID_SYMBOL;
+
+        errlHndl_t l_errl = nullptr;
+        fapi2::ReturnCode l_rc;
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
+        FAPI_INVOKE_HWP_RC( l_errl, l_rc, mss_put_mark_store, fapiTrgt,
+                            i_rank.getMaster(), l_sm, l_cm );
+
+        if ( (fapi2::ReturnCode)fapi2::RC_CEN_MSS_MAINT_MARKSTORE_WRITE_BLOCKED
+             == l_rc )
+        {
+            delete l_errl;
+            l_errl = nullptr;
+
+            // Hardware blocked the write so reread the chip mark and set mark
+            // store again with chip mark and without symbol mark.
+            MemMark l_newChipMark;
+            o_rc = readChipMark<TYPE_MBA>( i_chip, i_rank, l_newChipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x Rank: "
+                          "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+            uint8_t l_newCm = l_newChipMark.isValid()
+                ? l_newChipMark.getSymbol().getSymbol() : MSS_INVALID_SYMBOL;
+
+            // Clear the fetch attention before attempting the write to
+            // markstore
+            o_rc = __clearFetchAttn<TYPE_MBA>( i_chip, i_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__clearFetchAttn failed. HUID: 0x%08x "
+                          "Rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            // Since we cleared the attn, add the chip mark to the queue
+            TdEntry * entry = new VcmEvent<TYPE_MBA>( i_chip, i_rank,
+                                                      l_newChipMark );
+            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, entry );
+
+            // Try to write mark store again
+            FAPI_INVOKE_HWP( l_errl, mss_put_mark_store, fapiTrgt,
+                             i_rank.getMaster(), l_sm, l_newCm );
+            if ( nullptr != l_errl )
+            {
+                PRDF_ERR( PRDF_FUNC "mss_put_mark_store rewrite failed." );
+                PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+                o_rc = FAIL;
+            }
+        }
+        else if ( nullptr != l_errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
+                      "Rank: 0x%02x sm: %d cm: %d", i_chip->getHuid(),
+                      i_rank.getKey(), l_sm, l_cm );
+            PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+        }
+
+    }while(0);
+    #endif
 
     return o_rc;
 
@@ -421,28 +768,104 @@ uint32_t writeSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO: RTC 157888
+    #ifdef __HOSTBOOT_MODULE
+    do
+    {
+        // mss_put_mark_store will overwrite both the chip and symbol marks,
+        // so we want to do a read of the chip mark to ensure we do not
+        // overwrite it.
+        MemMark l_chipMark;
+        o_rc = readChipMark<TYPE_MBA>( i_chip, i_rank, l_chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x Rank: "
+                      "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+        uint8_t l_cm = l_chipMark.isValid() ? l_chipMark.getSymbol().getSymbol()
+                                            : MSS_INVALID_SYMBOL;
+        uint8_t l_sm = i_mark.isValid() ? i_mark.getSymbol().getSymbol()
+                                        : MSS_INVALID_SYMBOL;
 
-    return o_rc;
+        errlHndl_t l_errl = nullptr;
+        fapi2::ReturnCode l_rc;
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
+        FAPI_INVOKE_HWP_RC( l_errl, l_rc, mss_put_mark_store, fapiTrgt,
+                            i_rank.getMaster(), l_sm, l_cm );
 
-    #undef PRDF_FUNC
-}
+        if ( (fapi2::ReturnCode)fapi2::RC_CEN_MSS_MAINT_MARKSTORE_WRITE_BLOCKED
+             == l_rc )
+        {
+            delete l_errl;
+            l_errl = nullptr;
 
-//------------------------------------------------------------------------------
+            // The write was blocked by hardware, reread the chip mark.
+            MemMark l_newChipMark;
+            o_rc = readChipMark<TYPE_MBA>( i_chip, i_rank, l_newChipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x "
+                        "Rank: 0x%02x", i_chip->getHuid(),
+                        i_rank.getKey() );
+                break;
+            }
+            uint8_t l_newCm = l_newChipMark.isValid()
+                ? l_newChipMark.getSymbol().getSymbol() : MSS_INVALID_SYMBOL;
 
-template<>
-uint32_t clearSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
-                                    const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[clearSymbolMark<TYPE_MBA>] "
+            // If the chip mark and symbol mark are on the same DRAM
+            if ( l_newChipMark.getSymbol().getDram() ==
+                 i_mark.getSymbol().getDram() )
+            {
+                // Print trace indicating write blocked
+                PRDF_TRAC( PRDF_FUNC "Write chip mark blocked by hardware on "
+                           "HUID: 0x%08x Rank: 0x%02x.", i_chip->getHuid(),
+                           i_rank.getKey() );
 
-    uint32_t o_rc = SUCCESS;
+                // Don't write the symbol mark and let the fetch MPE attention
+                // add the chip mark to the queue
+            }
+            // If the chip mark and symbol mark are on separate DRAMS
+            else
+            {
+                // Clear the fetch attention
+                o_rc = __clearFetchAttn<TYPE_MBA>( i_chip, i_rank );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "__clearFetchAttn failed. HUID: 0x%08x "
+                              "Rank: 0x%02x", i_chip->getHuid(),
+                              i_rank.getKey() );
+                    break;
+                }
 
-    // TODO: RTC 157888
+                // Since we cleared the attn, add the chip mark to the queue
+                TdEntry * entry = new VcmEvent<TYPE_MBA>( i_chip, i_rank,
+                                                          l_newChipMark );
+                MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, entry );
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+                // Try to write mark store again
+                FAPI_INVOKE_HWP( l_errl, mss_put_mark_store, fapiTrgt,
+                                i_rank.getMaster(), l_sm, l_newCm );
+                if ( nullptr != l_errl )
+                {
+                    PRDF_ERR( PRDF_FUNC "mss_put_mark_store rewrite failed." );
+                    PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+                    o_rc = FAIL;
+                }
+            }
+        }
+        else if ( nullptr != l_errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
+                      "Rank: 0x%02x sm: %d cm: %d", i_chip->getHuid(),
+                      i_rank.getKey(), l_sm, l_cm );
+            PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+    }while(0);
+    #endif
 
     return o_rc;
 
