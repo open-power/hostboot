@@ -3334,6 +3334,26 @@ errlHndl_t openUntrustedSpCommArea()
 
             break;
         }
+
+        if (TARGETING::is_sapphire_load())
+        {
+            // Open Unsecure Memory Region for OPAL trace
+            l_err = SBEIO::openUnsecureMemRegion(
+                                            SP_HOST_UNTRUSTED_OPAL_TRACE_ADDR,
+                                            SP_HOST_UNTRUSTED_OPAL_TRACE_SIZE,
+                                            false, //Read-Only
+                                            l_procChip);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() for OPAL trace failed proc = 0x%X addr = 0x%016llx size = 0x%X",
+                      l_id,
+                      SP_HOST_UNTRUSTED_OPAL_TRACE_ADDR,
+                      SP_HOST_UNTRUSTED_OPAL_TRACE_SIZE);
+
+                break;
+            }
+        }
+
     }
     if(l_err)
     {
