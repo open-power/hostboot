@@ -26,6 +26,7 @@
 /** @file prdfMemTps_rt.C */
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
@@ -75,14 +76,10 @@ TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_MCA>( ExtensibleChip * i_chip )
     return getMcaDataBundle(i_chip)->getTpsFalseAlarmCounter();
 }
 
-//------------------------------------------------------------------------------
-
 template<>
 TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
 {
-    // TODO RTC 157888
-    //return getMbaDataBundle(i_chip)->getTpsFalseAlarmCounter();
-    return nullptr;
+    return getMbaDataBundle(i_chip)->getTpsFalseAlarmCounter();
 }
 
 //------------------------------------------------------------------------------
@@ -302,24 +299,6 @@ uint32_t __updateVpdSumAboveOne( CeCount i_sumAboveOneCount,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-uint32_t TpsEvent<T>::startTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_TRAC( "[TpsEvent] Starting TPS Phase 1: 0x%08x,0x%02x",
-               iv_chip->getHuid(), getKey() );
-
-    iv_phase = TD_PHASE_1;
-    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                          PRDFSIG_StartTpsPhase1 );
-    bool countAllCes = false;
-    if ( __getTpsFalseAlarmCounter<T>(iv_chip)->count(iv_rank, io_sc) >= 1 )
-        countAllCes = true;
-
-    return PlatServices::startTpsRuntime<T>( iv_chip, iv_rank, countAllCes);
 }
 
 //------------------------------------------------------------------------------
@@ -1177,14 +1156,21 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             break;
         }
 
+        // Runtime TPS is slightly different than IPL TPS or any other TD event.
+        // There really is only one phase, but we use two phases to help
+        // differentiate between the CE types that are collected. So only one of
+        // the two phases will be used during a TPS procedure, not both.
+        //  - Phase 1 looks for hard CEs. This is always used first on any rank.
+        //  - Phase 2 looks for all CE types. This phase is only used on a rank
+        //    after phase 1 has exceeded a threshold of false alarms.
+
         switch ( iv_phase )
         {
             case TD_PHASE_0:
-                // Start TPS phase 1
-                o_rc = startTpsPhase1_rt( io_sc );
+                o_rc = startNextPhase( io_sc );
                 break;
             case TD_PHASE_1:
-                // Analyze TPS phase 1
+            case TD_PHASE_2:
                 o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
                 break;
             default: PRDF_ASSERT( false ); // invalid phase
@@ -1216,6 +1202,192 @@ uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
     o_done = true;
 
     PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
+
+template <TARGETING::TYPE T>
+uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    uint32_t signature = 0;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_0:
+        {
+            // Only use phase 2 if the false alarm counter has exceeded
+            // threshold. Otherwise, use phase 1.
+            TpsFalseAlarm * faCounter = __getTpsFalseAlarmCounter<T>(iv_chip);
+            if ( faCounter->count(iv_rank, io_sc) >= 1 )
+            {
+                iv_phase  = TD_PHASE_2;
+                signature = PRDFSIG_StartTpsPhase2;
+            }
+            else
+            {
+                iv_phase  = TD_PHASE_1;
+                signature = PRDFSIG_StartTpsPhase1;
+            }
+            break;
+        }
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
+               iv_phase, iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
+}
+
+//##############################################################################
+//
+//                          Specializations for MCA
+//
+//##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::startCmd()
+{
+    #define PRDF_FUNC "[TpsEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // We don't need to set any stop-on-error conditions or thresholds for
+    // soft/inter/hard CEs at runtime. The design is to let the command continue
+    // to the end of the rank and we do diagnostics on the CE counts found in
+    // the per-symbol counters. Therefore, all we need to do is tell the
+    // hardware which CE types to count.
+
+    mss::mcbist::stop_conditions stopCond;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_1:
+            // Set the per symbol counters to count only hard CEs.
+            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+            break;
+
+        case TD_PHASE_2:
+            // Since there are not enough hard CEs to trigger a symbol mark, set
+            // the per symbol counters to count all CE types.
+            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+            stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    // Start the time based scrub procedure on this slave rank.
+    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for MBA
+//
+//##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_MBA>::startCmd()
+{
+    #define PRDF_FUNC "[TpsEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
+
+    // Due to a hardware bug in the Centaur, we must execute runtime maintenance
+    // commands at a very slow rate. Because of this, we decided that we should
+    // stop the command immediately on error if there is a UE or MPE so that we
+    // can respond quicker and send a DMD message to the hypervisor or do chip
+    // mark verification as soon as possible.
+
+    stopCond |= mss_MaintCmd::STOP_ON_UE;
+    stopCond |= mss_MaintCmd::STOP_ON_MPE;
+    stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
+
+    do
+    {
+        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
+        const char * reg_str = (0 == iv_chip->getPos()) ? "MBA0_MBSTR"
+                                                        : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s: 0x%08x", reg_str,
+                      membChip->getHuid() );
+            break;
+        }
+
+        // Stopping on CE thresholds should save us time since the TPS scrub
+        // could take several hours (again, due to the Centaur bug). We want to
+        // set all of the CE thresholds to the maximum value so that we can get
+        // as much data as we can for analysis before stopping the command.
+        // Hopefully, we can use this data to place any marks, if needed.
+        mbstr->SetBitFieldJustified(  4, 12, 0xfff );
+        mbstr->SetBitFieldJustified( 16, 12, 0xfff );
+        mbstr->SetBitFieldJustified( 28, 12, 0xfff );
+
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Set the per symbol counters to count only hard CEs.
+                mbstr->SetBitFieldJustified( 55, 3, 0x1 );
+                stopCond |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+                break;
+
+            case TD_PHASE_2:
+                // Since there are not enough hard CEs to trigger a symbol mark,
+                // set the per symbol counters to count all CE types.
+                mbstr->SetBitFieldJustified( 55, 3, 0x7 );
+                stopCond |= mss_MaintCmd::STOP_ON_SOFT_NCE_ETE;
+                stopCond |= mss_MaintCmd::STOP_ON_INT_NCE_ETE;
+                stopCond |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s: 0x%08x", reg_str,
+                      membChip->getHuid() );
+            break;
+        }
+
+        // Start the time based scrub procedure on this slave rank.
+        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+    } while(0);
 
     return o_rc;
 

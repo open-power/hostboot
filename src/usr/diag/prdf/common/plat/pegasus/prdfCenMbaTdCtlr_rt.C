@@ -1276,56 +1276,17 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase1] "
+    // Initially true, until hardware error is found.
+    iv_tpsFalseAlarm = true;
 
-    int32_t o_rc = SUCCESS;
+    // Starting a new TPS procedure. Reset the scrub resume counter.
+    iv_scrubResumeCounter.reset();
 
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase1 );
-    iv_tdState = TPS_PHASE_1;
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // moved to TpsEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    do
-    {
-        // Initially true, until hardware error is found.
-        iv_tpsFalseAlarm = true;
-
-        // Starting a new TPS procedure. Reset the scrub resume counter.
-        iv_scrubResumeCounter.reset();
-
-        o_rc = prepareNextCmd( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Set CE thresholds.
-        o_rc = setTpsThresholds();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setTpsThresholds() failed" );
-            break;
-        }
-
-        // Set stop conditions based on CE count type.
-        uint32_t stopCond = COND_RT_TPS_HARD_CE;
-        if ( iv_tpsRankData.checkCeTypeTh(iv_rank) )
-        {
-            stopCond = COND_RT_TPS_ALL_CE;
-        }
-
-        // Start TPS phase 1.
-        o_rc = doTdScrubCmd( stopCond, mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -2537,68 +2498,6 @@ int32_t CenMbaTdCtlr::getTpsCeThr( uint16_t & o_thr )
         }
 
     } while( 0 );
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-int32_t CenMbaTdCtlr::setTpsThresholds()
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::setTpsThresholds] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( TPS_PHASE_1 != iv_tdState )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
-            o_rc = FAIL;
-            break;
-        }
-
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
-        SCAN_COMM_REGISTER_CLASS * mbstr = iv_membChip->getRegister( reg_str );
-
-        // MBSTR's content could be modified by cleanupCmd() so refresh cache.
-        o_rc = mbstr->ForceRead();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s", reg_str );
-            break;
-        }
-
-        // Set all CE thresholds to the maximum value. The reason for this is if
-        // there are a lot of CEs we can stop the TPS scrub and place any marks,
-        // if needed. This will save time since the TPS scrub could take several
-        // hours. The threshold is set to the max value so that we can get
-        // enough data to place a mark.
-        mbstr->SetBitFieldJustified(  4, 12, 0xfff );
-        mbstr->SetBitFieldJustified( 16, 12, 0xfff );
-        mbstr->SetBitFieldJustified( 28, 12, 0xfff );
-
-        if ( !iv_tpsRankData.checkCeTypeTh(iv_rank) )
-        {
-            // Set the per symbol counters to count only hard CEs.
-            mbstr->SetBitFieldJustified( 55, 3, 0x1 );
-        }
-        else
-        {
-            // Set the per symbol counters to count all CE typs.
-            mbstr->SetBitFieldJustified( 55, 3, 0x7 );
-        }
-
-        o_rc = mbstr->Write();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
-            break;
-        }
-
-    } while(0);
 
     return o_rc;
 

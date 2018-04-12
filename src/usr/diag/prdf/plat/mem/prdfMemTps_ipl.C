@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,22 +62,13 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         //phase 0
         if ( TD_PHASE_0 == iv_phase )
         {
-            // Start TPS phase 1
-            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                                  PRDFSIG_StartTpsPhase1 );
-
-            PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 1" );
-
-            o_rc = startTpsPhase1<TYPE_MCA>( iv_chip, iv_rank );
+            o_rc = startNextPhase( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startTpsPhase1(0x%08x,m%ds%d) failed",
-                          iv_chip->getHuid(), iv_rank.getMaster(),
-                          iv_rank.getSlave() );
+                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%02x",
+                          iv_chip->getHuid(), getKey() );
                 break;
             }
-
-            iv_phase = TD_PHASE_1;
         }
         //phase 1/2
         else
@@ -183,22 +174,13 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 //phase 1
                 if ( TD_PHASE_1 == iv_phase )
                 {
-                    // Start TPS phase 2
-                    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                                      PRDFSIG_StartTpsPhase2 );
-
-                    PRDF_TRAC( PRDF_FUNC "Starting TPS Phase 2" );
-
-                    o_rc = startTpsPhase2<TYPE_MCA>( iv_chip, iv_rank );
+                    o_rc = startNextPhase( io_sc );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "startTpsPhase2(0x%08x,m%ds%d) "
-                                  "failed", iv_chip->getHuid(),
-                                  iv_rank.getMaster(), iv_rank.getSlave() );
+                        PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,"
+                                  "0x%02x", iv_chip->getHuid(), getKey() );
                         break;
                     }
-
-                    iv_phase = TD_PHASE_2;
                 }
                 //phase 2
                 else
@@ -230,6 +212,164 @@ uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
     o_done = true;
 
     PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
+
+template <TARGETING::TYPE T>
+uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    uint32_t signature = 0;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_0:
+            iv_phase  = TD_PHASE_1;
+            signature = PRDFSIG_StartTpsPhase1;
+            break;
+
+        case TD_PHASE_1:
+            iv_phase  = TD_PHASE_2;
+            signature = PRDFSIG_StartTpsPhase2;
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
+               iv_phase, iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
+}
+
+//##############################################################################
+//
+//                          Specializations for MCA
+//
+//##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::startCmd()
+{
+    #define PRDF_FUNC "[TpsEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // We don't need to set any stop-on-error conditions or thresholds for
+    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
+    // command continue to the end of the rank and we do diagnostics on the
+    // CE counts found in the per-symbol counters. Therefore, all we need to do
+    // is tell the hardware which CE types to count.
+
+    mss::mcbist::stop_conditions stopCond;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_1:
+            // Set the per symbol counters to count only soft/inter CEs.
+            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+            break;
+
+        case TD_PHASE_2:
+            // Set the per symbol counters to count only hard CEs.
+            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    // Start the time based scrub procedure on this slave rank.
+    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                  iv_chip->getHuid(), getKey() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
+//
+//                          Specializations for MBA
+//
+//##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_MBA>::startCmd()
+{
+    #define PRDF_FUNC "[TpsEvent::startCmd] "
+
+    uint32_t o_rc = SUCCESS;
+
+    uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
+
+    // We don't need to set any stop-on-error conditions or thresholds for
+    // soft/inter/hard CEs during Memory Diagnostics. The design is to let the
+    // command continue to the end of the rank and we do diagnostics on the
+    // CE counts found in the per-symbol counters. Therefore, all we need to do
+    // is tell the hardware which CE types to count.
+
+    do
+    {
+        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
+        const char * reg_str = (0 == iv_chip->getPos()) ? "MBA0_MBSTR"
+                                                        : "MBA1_MBSTR";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s: 0x%08x", reg_str,
+                      membChip->getHuid() );
+            break;
+        }
+
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Set the per symbol counters to count only soft/inter CEs.
+                mbstr->SetBitFieldJustified( 55, 3, 0x6 );
+                break;
+
+            case TD_PHASE_2:
+                // Set the per symbol counters to count only hard CEs.
+                mbstr->SetBitFieldJustified( 55, 3, 0x1 );
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        o_rc = mbstr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s: 0x%08x", reg_str,
+                      membChip->getHuid() );
+            break;
+        }
+
+        // Start the time based scrub procedure on this slave rank.
+        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+    } while(0);
 
     return o_rc;
 

@@ -36,6 +36,7 @@
 #ifdef __HOSTBOOT_MODULE
 
   #include <prdfMemTdCtlr.H>
+  #include <prdfMemTdFalseAlarm.H>
 
   #ifndef __HOSTBOOT_RUNTIME
     #include <prdfMemIplCeStats.H>
@@ -62,12 +63,20 @@ class MbaDataBundle : public DataBundle
     ~MbaDataBundle()
     {
         #ifdef __HOSTBOOT_MODULE
-        delete iv_tdCtlr; iv_tdCtlr = nullptr;
-        #endif
 
-        #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+        delete iv_tdCtlr; iv_tdCtlr = nullptr;
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        delete iv_tpsFalseAlarmCounter;
+
+        #else // IPL only
+
         delete iv_sfCmd; iv_sfCmd = nullptr;
         delete iv_iplCeStats; iv_iplCeStats = nullptr;
+
+        #endif
+
         #endif
     }
 
@@ -88,7 +97,22 @@ class MbaDataBundle : public DataBundle
         return iv_tdCtlr;
     }
 
-    #ifndef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /** @return The TPS false alarm counter. */
+    TpsFalseAlarm * getTpsFalseAlarmCounter()
+    {
+        if ( nullptr == iv_tpsFalseAlarmCounter )
+        {
+            iv_tpsFalseAlarmCounter = new TpsFalseAlarm(
+                TimeBasedThreshold{ 3, ThresholdResolution::ONE_DAY } );
+        }
+
+        return iv_tpsFalseAlarmCounter;
+    }
+
+    #else // IPL only
+
     /** @return The IPL CE statistics object. */
     MemIplCeStats<TARGETING::TYPE_MBA> * getIplCeStats()
     {
@@ -99,9 +123,10 @@ class MbaDataBundle : public DataBundle
 
         return iv_iplCeStats;
     }
-    #endif
 
-    #endif
+    #endif // __HOSTBOOT_RUNTIME
+
+    #endif // __HOSTBOOT_MODULE
 
   private: // instance variables
 
@@ -113,12 +138,19 @@ class MbaDataBundle : public DataBundle
     /** The Targeted Diagnostics controller. */
     MemTdCtlr<TARGETING::TYPE_MBA> * iv_tdCtlr = nullptr;
 
-    #ifndef __HOSTBOOT_RUNTIME
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /** TPS false alarm counter. */
+    TpsFalseAlarm * iv_tpsFalseAlarmCounter = nullptr;
+
+    #else // IPL only
+
     /** MNFG IPL CE statistics. */
     MemIplCeStats<TARGETING::TYPE_MBA> * iv_iplCeStats = nullptr;
-    #endif
 
-    #endif
+    #endif // __HOSTBOOT_RUNTIME
+
+    #endif // __HOSTBOOT_MODULE
 
   public: // instance variables
 

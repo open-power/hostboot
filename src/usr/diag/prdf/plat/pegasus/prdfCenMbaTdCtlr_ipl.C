@@ -803,40 +803,22 @@ int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase1] "
-
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase1 );
-    iv_tdState = TPS_PHASE_1;
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Moved to startTpsPhase1() in prdfPlatServices_ipl.C
+    // Moved to TpsEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int32_t CenMbaTdCtlr::startTpsPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startTpsPhase2] "
-
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartTpsPhase2 );
-    iv_tdState = TPS_PHASE_2;
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Moved to startTpsPhase2() in prdfPlatServices_ipl.C
+    // Moved to TpsEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
