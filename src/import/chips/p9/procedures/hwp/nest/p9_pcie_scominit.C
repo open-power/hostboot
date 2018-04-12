@@ -265,6 +265,7 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         if ((l_buf.getBit(PEC_IOP_IOVALID_ENABLE_STACK1_BIT)) || (l_buf.getBit(PEC_IOP_IOVALID_ENABLE_STACK2_BIT)))
         {
             l_buf.setBit<PEC_IOP_IOVALID_ENABLE_STACK0_BIT>();
+            l_buf.setBit<PEC_IOP_IOVALID_ENABLE_STACK1_BIT>();
         }
 
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
