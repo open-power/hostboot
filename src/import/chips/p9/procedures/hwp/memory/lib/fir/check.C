@@ -366,6 +366,15 @@ fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& 
     // Start by assuming we do not have a FIR
     o_fir_error = false;
 
+    // Checks for PLL unlocks first, as a PLL unlock can cause other FIRs to light up and complicate the error logs
+    FAPI_TRY(pll_fir(i_target, io_rc, o_fir_error));
+
+    // Exit if we have found a FIR
+    if(o_fir_error)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // Loop, check the scoms, and check the FIR
     // Note: we return out if any FIR is bad
     for(const auto& l_fir_reg : MCBIST_FIR_REGS)
@@ -400,9 +409,6 @@ fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& 
         }
     }
 
-    // Lastly, check for PLL unlocks
-    FAPI_TRY(pll_fir(i_target, io_rc, o_fir_error));
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -423,6 +429,15 @@ fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
     const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
     // Start by assuming we do not have a FIR
     o_fir_error = false;
+
+    // Checks for PLL unlocks first, as a PLL unlock can cause other FIRs to light up and complicate the error logs
+    FAPI_TRY(pll_fir(l_mcbist, io_rc, o_fir_error));
+
+    // Exit if we have found a FIR
+    if(o_fir_error)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Loop, check the scoms, and check the FIR
     // Note: we return out if any FIR is bad
@@ -454,9 +469,6 @@ fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
             return fapi2::FAPI2_RC_SUCCESS;
         }
     }
-
-    // Lastly, check for PLL unlocks
-    FAPI_TRY(pll_fir(l_mcbist, io_rc, o_fir_error));
 
 fapi_try_exit:
     return fapi2::current_err;
