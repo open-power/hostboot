@@ -182,11 +182,13 @@ void sbeAttemptRecovery(uint64_t i_data)
         // Set msgType based on recovery success or failure (If sbe made it back to runtime)
         if (l_SBEobj.isSbeAtRuntime())
         {
+            TRACFCOMP(g_trac_runtime, "sbeAttemptRecovery: RECOVERY_SUCCESS");
             l_req_fw_msg.generic_msg.msgType =
                              GenericFspMboxMessage_t::MSG_SBE_RECOVERY_SUCCESS;
         }
         else
         {
+            TRACFCOMP(g_trac_runtime, "sbeAttemptRecovery: RECOVERY_FAILED");
             l_req_fw_msg.generic_msg.msgType =
                               GenericFspMboxMessage_t::MSG_SBE_RECOVERY_FAILED;
         }
