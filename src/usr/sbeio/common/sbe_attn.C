@@ -86,6 +86,8 @@ namespace SBEIO
         // success or not
         if (!l_sbeObj.isSbeAtRuntime())
         {
+            TRACFCOMP( g_trac_sbeio,
+                       "handleVitalAttn: SBE recovery attempt FAILED" );
             /*@
             * @errortype  ERRL_SEV_PREDICTIVE
             * @moduleid   SBEIO_HANDLE_VITAL_ATTN
@@ -117,6 +119,8 @@ namespace SBEIO
         // Inform OPAL the state of the SBE after a retry is successful
         else
         {
+            TRACFCOMP( g_trac_sbeio,
+                       "handleVitalAttn: SBE recovery attempt was a SUCCESS" );
             if (TARGETING::is_sapphire_load())
             {
                 l_err = RT_SBEIO::vital_attn_inform_opal(i_procTarg,
