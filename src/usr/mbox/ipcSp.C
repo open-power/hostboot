@@ -99,19 +99,53 @@ void IpcSp::msgHandler()
         {
             case IPC_POPULATE_TPM_INFO_BY_NODE:
             {
-                // msg->extra_data contains PAYLOAD Base
-                RUNTIME::setPayloadBaseAddress(
-                    reinterpret_cast<uint64_t>(msg->extra_data));
+                // make sure runtime module is loaded
+                if ( !VFS::module_is_loaded( "libruntime.so" ) )
+                {
+                    err = VFS::module_load( "libruntime.so" );
 
-                // msg->data[0] contains the HDAT TPM info instance to populate
-                err = RUNTIME::populate_TpmInfoByNode(msg->data[0]);
+                    if ( err )
+                    {
+                        TRACFCOMP( g_trac_ipc,
+                                   "Could not load runtime module - must shutdown now!!!" );
+                    }
+                    else
+                    {
+                        mod_loaded = true;
+                    }
+                }
+
+                if(!err)
+                {
+                    // msg->extra_data contains PAYLOAD Base
+                    RUNTIME::setPayloadBaseAddress(
+                               reinterpret_cast<uint64_t>(msg->extra_data));
+
+                    // msg->data[0] contains the HDAT TPM info instance
+                    // to populate
+                    err = RUNTIME::populate_TpmInfoByNode(msg->data[0]);
+                    if(err)
+                    {
+                        TRACFCOMP( g_trac_ipc, ERR_MRK"IpcSp::msgHandler: populate_TpmInfoByNode errored - must shutdown now!!!");
+                    }
+                }
 
                 if (err)
                 {
-                    TRACFCOMP( g_trac_ipc, ERR_MRK"IpcSp::msgHandler: populate_TpmInfoByNode errored - must shutdown now!!!");
                     const auto l_errPlid = err->plid();
                     errlCommit(err, IPC_COMP_ID);
                     INITSERVICE::doShutdown(l_errPlid, true);
+                }
+
+                if(mod_loaded)
+                {
+                    err = VFS::module_unload( "libruntime.so" );
+
+                    if (err)
+                    {
+                        errlCommit(err, IPC_COMP_ID);
+                    }
+                    mod_loaded = false;
                 }
 
                 // give a response back to the sender
