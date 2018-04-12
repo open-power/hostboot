@@ -419,7 +419,11 @@ function run_fsp_ci {
         ((retries--))
 
         # Call fsp-CI without force; omitting force allows fsp-CI to kill duplicate jobs
-        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1)"
+        # HDW_MC_LIST is passed by the Jenkins job - this allows to control which HDW machine(s) to use
+        # for e.g. HDW_MC_LIST  can be passed as ' -hdw_machine_list="fleetwood_1, zep_2s4u, zz_2s4u" '
+        # If HDW_MC_LIST not supplied, it defaults to zep and zz -no fleetwood.
+
+        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1 $HDW_MC_LIST)"
 
         # Check if fsp-CI-jenkins failed to start
         if [ $? -eq 0 ]; then
