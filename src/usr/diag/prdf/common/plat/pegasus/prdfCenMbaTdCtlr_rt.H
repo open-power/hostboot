@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -333,14 +333,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
      *         function.
      */
     int32_t getTpsCeThr( uint16_t & o_thr );
-
-    /**
-     * @brief  Sets the CE thresholds in hardware for a TPS procedure.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     * @note   iv_tdState must be set to a valid TPS phase before calling this
-     *         function.
-     */
-    int32_t setTpsThresholds();
 
     /**
      * @brief  Sets iv_mark in hardware and adds a VCM request to the TD queue.

@@ -172,35 +172,6 @@ template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
                        AddrRangeType i_rangeType, SCT i_stopCond );
 
-/**
- * @brief  Starts a targeted scrub command on the target rank for TPS phase 1.
- * @param  i_chip MCA or MBA chip.
- * @param  i_rank The rank to target.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE T>
-uint32_t startTpsPhase1( ExtensibleChip * i_chip, const MemRank & i_rank );
-
-/**
- * @brief  Starts a targeted scrub command on the target rank for TPS phase 2.
- * @param  i_chip MCA or MBA chip.
- * @param  i_rank The rank to target.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE T>
-uint32_t startTpsPhase2( ExtensibleChip * i_chip, const MemRank & i_rank );
-
-/**
- * @brief  Starts a targeted scrub command on the target rank for runtime TPS.
- * @param  i_chip MCA or MBA chip.
- * @param  i_rank The rank to target.
- * @param  i_countAllCes True if we should count all CEs.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE T>
-uint32_t startTpsRuntime( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          bool i_countAllCes );
-
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################

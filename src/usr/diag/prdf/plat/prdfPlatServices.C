@@ -746,52 +746,6 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsPhase1<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank )
-{
-    mss::mcbist::stop_conditions stopCond;
-    stopCond.set_nce_soft_symbol_count_enable(mss::ON)
-            .set_nce_inter_symbol_count_enable(mss::ON);
-
-    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsPhase2<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                   const MemRank & i_rank )
-{
-    mss::mcbist::stop_conditions stopCond;
-    stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-
-    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsRuntime<TYPE_MCA>( ExtensibleChip * i_mcaChip,
-                                    const MemRank & i_rank,
-                                    bool i_countAllCes )
-{
-    mss::mcbist::stop_conditions stopCond;
-    stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-
-    // If the TPS false alarms count is one or more, enable per-symbol counters
-    // for soft and intermittent CEs.
-    if ( i_countAllCes )
-    {
-        stopCond.set_nce_soft_symbol_count_enable(mss::ON)
-                .set_nce_inter_symbol_count_enable(mss::ON);
-    }
-
-    return __startTdScrub_mca( i_mcaChip, i_rank, stopCond, SLAVE_RANK );
-}
-
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
@@ -980,17 +934,6 @@ uint32_t startTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t startTpsRuntime<TYPE_MBA>( ExtensibleChip * i_mbaChip,
-                                    const MemRank & i_rank,
-                                    bool i_countAllCes )
-{
-    PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
-    return SUCCESS;
 }
 
 //##############################################################################

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,14 +68,22 @@ class TpsEvent : public TdEntry
 
   private: // functions
 
-    #ifdef __HOSTBOOT_RUNTIME
-
     /**
-     * @brief  Starts phase 1 of the procedure.
-     * @param  io_sc  The step code data struct.
+     * @brief  Starts the appropriate maintenance command based on iv_phase.
+     * @pre    iv_phase must be set appropriately before calling this function.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t startTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t startCmd();
+
+    /**
+     * @brief  Starts the next phase of the procedure.
+     * @param  io_sc  The step code data struct.
+     * @post   iv_phase will be updated appropriately per design.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t startNextPhase( STEP_CODE_DATA_STRUCT & io_sc );
+
+    #ifdef __HOSTBOOT_RUNTIME
 
     /**
      * @brief  Analyzes phase 1 of the procedure.
