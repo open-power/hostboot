@@ -397,11 +397,11 @@ template<TARGETING::TYPE T>
 uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 
 /**
- * @brief   checks dram widh ( x4 ) for mba
- * @param   i_mbaTarget MBA target
- * @return  true if DRAM with is X4 false otherwise
+ * @brief   checks dram width ( x4 )
+ * @param   i_trgt MCA or MBA target
+ * @return  true if DRAM width is X4, false otherwise
  */
-bool isDramWidthX4(TARGETING::TargetHandle_t i_mbaTarget);
+bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);
 
 /**
  * @brief   Get DRAM generation
