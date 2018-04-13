@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenPll.C $          */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfCenPll.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@ namespace PRDF
 using namespace PLL;
 using namespace PlatServices;
 
-namespace Membuf
+namespace cen_centaur
 {
 
 enum
@@ -57,13 +57,14 @@ enum
 int32_t QueryPll( ExtensibleChip * i_chip,
                         bool & o_result)
 {
-    #define PRDF_FUNC "[Membuf::QueryPll] "
+    #define PRDF_FUNC "[cen_centaur::QueryPll] "
 
     int32_t rc = SUCCESS;
     o_result = false;
 
     SCAN_COMM_REGISTER_CLASS * TP_LFIR = i_chip->getRegister("TP_LFIR");
-    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask = i_chip->getRegister("TP_LFIR_MASK");
+    SCAN_COMM_REGISTER_CLASS * TP_LFIRmask =
+                                         i_chip->getRegister("TP_LFIR_MASK");
 
     do
     {
@@ -97,7 +98,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
+PRDF_PLUGIN_DEFINE( cen_centaur, QueryPll );
 
 /**
   * @brief Clear the PLL error for Centaur Plugin
@@ -109,7 +110,7 @@ PRDF_PLUGIN_DEFINE( Membuf, QueryPll );
 int32_t ClearPll( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & i_sc)
 {
-    #define PRDF_FUNC "[Membuf::ClearPll] "
+    #define PRDF_FUNC "[cen_centaur::ClearPll] "
     int32_t rc = SUCCESS;
 
     if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
@@ -130,7 +131,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
+PRDF_PLUGIN_DEFINE( cen_centaur, ClearPll );
 
 /**
   * @brief Mask the PLL error for Centaur Plugin
@@ -141,7 +142,7 @@ PRDF_PLUGIN_DEFINE( Membuf, ClearPll );
   */
 int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 {
-    #define PRDF_FUNC "[Membuf::MaskPll] "
+    #define PRDF_FUNC "[cen_centaur::MaskPll] "
     int32_t rc = SUCCESS;
 
     SCAN_COMM_REGISTER_CLASS * TP_LFIR_maskOr =
@@ -163,18 +164,18 @@ int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Membuf, MaskPll );
+PRDF_PLUGIN_DEFINE( cen_centaur, MaskPll );
 
 /**
  * @brief   capture additional PLL FFDC
- * @param   i_chip   Membuf chip
+ * @param   i_chip   Centaur chip
  * @param   i_sc     service data collector
  * @returns Success
  */
 int32_t capturePllFfdc( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[Membuf::capturePllFfdc] "
+    #define PRDF_FUNC "[cen_centaur::capturePllFfdc] "
 
     // Add FSI status reg
     captureFsiStatusReg( i_chip, io_sc );
@@ -183,9 +184,9 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( Membuf, capturePllFfdc );
+PRDF_PLUGIN_DEFINE( cen_centaur, capturePllFfdc );
 
 
-} // end namespace Membuf
+} // end namespace cen_centaur
 
 } // end namespace PRDF

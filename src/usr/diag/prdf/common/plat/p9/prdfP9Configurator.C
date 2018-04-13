@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -346,11 +346,9 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                     break;
 
                 case TYPE_MEMBUF:
-// TODO: RTC 155673 - Add MemBuf chips to PLL domain after Cen PLL plugins
-//                    have been defined
-//                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
-//                                        chip, trgt, TYPE_MEMBUF,
-//                                        scanFac, resFac );
+                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
+                                        chip, trgt, TYPE_MEMBUF,
+                                        scanFac, resFac );
                     break;
 
                 default: ;
