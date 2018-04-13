@@ -55,6 +55,7 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_ipl.o
+prd_obj += prdfMemDsd_ipl.o
 prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
 prd_obj += prdfMemIplCeStats.o
@@ -70,6 +71,7 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemTdCtlr_rt.o
+prd_obj += prdfMemDsd_rt.o
 prd_obj += prdfMemTps_rt.o
 prd_obj += prdfMemVcm_rt.o
 prd_obj += prdfMemDynDealloc.o
