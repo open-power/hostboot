@@ -1564,6 +1564,7 @@
       </uint8_t>
     </simpleType>
     <writeable></writeable>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -1728,20 +1729,7 @@
     <writeable></writeable>
   </attribute>
 
-  <attribute>
-    <description>Base Address for all mirrored mainstore behind this processor</description>
-    <hwpfToHbAttrMap>
-      <id>ATTR_PROC_MIRROR_BASE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <id>MIRROR_BASE</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable></readable>
-    <simpleType>
-      <uint64_t></uint64_t>
-    </simpleType>
-    <writeable></writeable>
-  </attribute>
+
 
   <attribute>
     <id>CVPD_SIZE</id>
@@ -5960,10 +5948,17 @@
 
 <attribute>
     <id>MIRROR_BASE_ADDRESS</id>
-    <description>System Mirrorable base address</description>
+    <description>System Mirrorable Base Address
+       Bits8-12 Specifies System Selects
+       Bits13-14 Memory select
+       Bits15-18 Group ID (within an SMP)
+       Bits19-21 Chip ID (8 Max)
+       Bits22-63 Chip internal address (42 bits, 4TB)
+       Mirroring uses memory select
+    </description>
     <simpleType>
         <uint64_t>
-            <default>0x0000800000000000</default><!-- 128 TB -->
+            <default>0x4000000000000</default><!-- 4PT -->
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -5972,6 +5967,7 @@
         <id>ATTR_MIRROR_BASE_ADDRESS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
