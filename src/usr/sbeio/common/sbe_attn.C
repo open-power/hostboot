@@ -73,7 +73,14 @@ namespace SBEIO
         SbeRetryHandler l_sbeObj = SbeRetryHandler(
                       SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
+        // We only want to handle vital attentions on BMC based systems.
+        // If we have a FSP we should be ignoring Vital attentions and
+        // the handleVitalAttn should have never been called. This
+        // check just ensures on an FSP system we will not disrupt other
+        // code that is attempting to handle the SBE fail
+#ifndef CONFIG_FSP_BUILD
         l_sbeObj.main_sbe_handler(i_procTarg);
+#endif
 
         // Check if the SBE made it back to runtime, this tells us if the retry was a
         // success or not
