@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2375,15 +2375,12 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
         l_err = read( ctl_reg|FSI_MLEVP0_018, &databuf );
         if( l_err ) { break; }
 
-        //Read what FSP actually enabled as well if they initialized it
+        //When FSP has init'ed the bus, MLEVP is toggling,
+        //rely only on MENP
         if( spfuncs.fsiSlaveInit )
         {
-            uint32_t databuf2 = 0;
-            l_err = read( ctl_reg|FSI_MENP0_010, &databuf2 );
+            l_err = read( ctl_reg|FSI_MENP0_010, &databuf );
             if( l_err ) { break; }
-
-            //Only use slaves that we sense and FSP has enabled
-            databuf = databuf & databuf2;
         }
 
         // Only looking at the top bits
