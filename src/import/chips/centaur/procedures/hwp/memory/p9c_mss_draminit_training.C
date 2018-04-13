@@ -26,7 +26,7 @@
 /// @file p9c_mss_draminit_training.C
 /// @brief HWP for training DRAM delay values
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 /// *HWP HWP Backup: Steve Glancy <sglancy@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -43,6 +43,7 @@
 //  Centaur function Includes
 //----------------------------------------------------------------------
 #include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fld.H>
 #include <p9c_mss_funcs.H>
 #include <p9c_mss_ddr4_funcs.H>
 #include <p9c_dimmBadDqBitmapFuncs.H>
@@ -52,11 +53,21 @@
 #include <p9c_mss_draminit_training.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>
+#include <delayRegs.H>
 
 const uint64_t INIT_CAL_STATUS[MAX_PORTS_PER_MBA]  = {CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P0_ROX, CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P1_ROX};
 const uint64_t INIT_CAL_ERROR[MAX_PORTS_PER_MBA]   = {CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ROX,  CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P1_ROX};
 const uint64_t INIT_CAL_CONFIG0[MAX_PORTS_PER_MBA] = {CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0,    CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P1};
 const uint64_t INIT_CAL_CONFIG0_REVERSED[MAX_PORTS_PER_MBA] = {CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P1,    CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0};
+
+enum size
+{
+    MAX_CAL_STEPS = 7, ///< read course and write course will occur at the same time
+    MAX_DQS_RETRY = 10, ///< Used for the DQS Alignment workaround.  Determines the number of DQS alignment retries.
+    DELAY_500MS = 500000000, ///< Delay used in dqs align workaround
+    DELAY_LOOP = 6, ///< Delay used in dqs align workaround
+    NUM_POLL = 10000 ///< Num to poll for ccs execute complete
+};
 
 extern "C" {
     ///
@@ -66,34 +77,24 @@ extern "C" {
     ///
     fapi2::ReturnCode p9c_mss_draminit_training(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
     {
-        enum size
-        {
-            MAX_CAL_STEPS = 7, //read course and write course will occur at the sametime
-            MAX_DQS_RETRY = 10, //Used for the DQS Alignment workaround.  Determines the number of DQS alignment retries.
-            DELAY_0P5S = 500000000,
-            DELAY_LOOP = 6,
-            NUM_POLL = 10000
-        };
+        constexpr size_t CLEANUP_QOFF_WRLVL_OFF = 0x00;  // Flag to signal configure_non_calibrating_ranks function post wrlvl
+        constexpr size_t CONFIGURE_QOFF_WRLVL_ON = 0xFF; // Flag to signal configure_non_calibrating_ranks function pre wrlvl
+
         //Issue ZQ Cal first per rank
         uint32_t l_instruction_number = 0;
         uint8_t l_port = 0;
         uint8_t l_group = 0;
-        uint8_t l_primary_ranks_array[MAX_RANKS_PER_DIMM][MAX_PORTS_PER_MBA] = {0}; //primary_ranks_array[group][port]
+        uint8_t l_primary_ranks_array[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0}; //primary_ranks_array[group][port]
         uint8_t l_cal_steps = 0;
-        uint8_t l_delay_loop_cnt = 0;
         uint8_t l_dqs_try = 0;        //part of DQS alignment workaround
-        uint8_t l_dqs_retry_num = 0;  //part of DQS alignment workaround
-        uint8_t l_max_cal_retry =
-            0;  //part of DQS alignment workaround added this to be a more generic var to pass into a proc.  May be used if we need to add a retry to another cal step
         uint8_t l_cur_cal_step = 0;
-        fapi2::variable_buffer l_cal_steps_8(8);
+        fapi2::buffer<uint8_t> l_cal_steps_8;
 
         uint8_t l_dram_rtt_nom_original = 0;
         uint8_t l_training_success = 0;
         uint8_t l_dimm_type = 0;
         uint8_t l_dram_gen = 0;
         uint8_t l_mbaPosition = 0;
-
 
         fapi2::variable_buffer l_address_buffer_16(16);
         fapi2::variable_buffer l_bank_buffer_8(8);
@@ -135,7 +136,6 @@ extern "C" {
         l_cal_timeout_cnt_buffer_16.flush<1>();
         l_cal_timeout_cnt_mult_buffer_2.flush<1>();
         l_resetn_buffer_1.setBit<0>();
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_target_centaur;
 
         enum mss_draminit_training_result l_cur_complete_status = MSS_INIT_CAL_COMPLETE;
         enum mss_draminit_training_result l_cur_error_status = MSS_INIT_CAL_PASS;
@@ -148,11 +148,10 @@ extern "C" {
 
         if (l_reset_disable != fapi2::ENUM_ATTR_CEN_MSS_DRAMINIT_RESET_DISABLE_DISABLE)
         {
-            FAPI_TRY(mss_reset_delay_values(i_target));
+            FAPI_TRY(mss_reset_delay_values(i_target), "Failed mss_reset_delay_values on %s", mss::c_str(i_target));
         }
 
 
-        l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
@@ -168,38 +167,36 @@ extern "C" {
         //Get which training steps we are to run
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_CAL_STEP_ENABLE, i_target, l_cal_steps));
 
-        FAPI_TRY(l_cal_steps_8.insert(l_cal_steps, 0, 8, 0));
+        l_cal_steps_8.insertFromRight<0, 8>(l_cal_steps);
 
         //Set up CCS Mode Reg for Init cal
         FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_CCS_MODEQ, l_data_buffer_64));
 
-        FAPI_TRY(l_data_buffer_64.insert(l_stop_on_err_buffer_1, 0, 1, 0));
-        FAPI_TRY(l_data_buffer_64.insert(l_cal_timeout_cnt_buffer_16, 8, 16, 0));
-        FAPI_TRY(l_data_buffer_64.insert(l_resetn_buffer_1, 24, 1, 0));
-        FAPI_TRY(l_data_buffer_64.insert(l_cal_timeout_cnt_mult_buffer_2, 30, 2, 0));
+        l_data_buffer_64.writeBit<CEN_MBA_CCS_MODEQ_STOP_ON_ERR>(l_stop_on_err_buffer_1);
+        l_data_buffer_64.insert<CEN_MBA_CCS_MODEQ_DDR_CAL_TIMEOUT_CNT, CEN_MBA_CCS_MODEQ_DDR_CAL_TIMEOUT_CNT_LEN>
+        (l_cal_timeout_cnt_buffer_16);
+        l_data_buffer_64.writeBit<CEN_MBA_CCS_MODEQ_MCBIST_DDR_RESETN>(l_resetn_buffer_1);
+        l_data_buffer_64.insert<CEN_MBA_CCS_MODEQ_DDR_CAL_TIMEOUT_CNT_MULT, CEN_MBA_CCS_MODEQ_DDR_CAL_TIMEOUT_CNT_MULT_LEN>
+        (l_cal_timeout_cnt_mult_buffer_2);
 
         //if in DDR4 mode, count the parity bit and set it
         if((l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4) && (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM
                 || l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM) )
         {
-            FAPI_TRY(l_data_buffer_64.insertFromRight( (uint8_t)0xff, 61, 1));
+            l_data_buffer_64.insertFromRight<CEN_MBA_CCS_MODEQ_DDR_PARITY_ENABLE, 1>( (uint8_t)0xff);
         }
 
-        FAPI_TRY(fapi2::putScom(i_target, CEN_MBA_CCS_MODEQ, l_data_buffer_64));
-        FAPI_TRY(mss_set_bbm_regs (i_target));
+        FAPI_TRY(fapi2::putScom(i_target, CEN_MBA_CCS_MODEQ, l_data_buffer_64), "Failed putscom on %s", mss::c_str(i_target));
+        FAPI_TRY(mss_set_bbm_regs (i_target), "Failed mss_set_bbm_regs on %s", mss::c_str(i_target));
 
-        if ( ( l_cal_steps_8.isBitSet(0) ) ||
-             ( (l_cal_steps_8.isBitClear(0)) && (l_cal_steps_8.isBitClear(1)) &&
-               (l_cal_steps_8.isBitClear(2)) && (l_cal_steps_8.isBitClear(3)) &&
-               (l_cal_steps_8.isBitClear(4)) && (l_cal_steps_8.isBitClear(5)) &&
-               (l_cal_steps_8.isBitClear(6)) && (l_cal_steps_8.isBitClear(7)) ))
+        if ( ( l_cal_steps_8.getBit<fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_EXT_ZQCAL>() ) || !(l_cal_steps_8.getBit<0, 8>()) )
         {
             FAPI_INF( "Performing External ZQ Calibration on %s.", mss::c_str(i_target));
 
             //Execute ZQ_CAL
             for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++)
             {
-                FAPI_TRY(mss_execute_zq_cal(i_target, l_port));
+                FAPI_TRY(mss_execute_zq_cal(i_target, l_port), "Failed mss_execute_zq_cal on %s", mss::c_str(i_target));
             }
 
             //executes the following to ensure that DRAMS have a good intial WR VREF DQ
@@ -209,32 +206,32 @@ extern "C" {
             if(l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
             {
                 FAPI_INF("For DDR4, setting VREFDQ to have an initial value!!!!");
-                uint8_t l_train_enable[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
-                uint8_t l_train_enable_override_on[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {{{fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}, {fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}}, {{fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}, {fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}}};
+                uint8_t l_train_enable[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][NUM_RANK_GROUPS] = {0};
+                uint8_t l_train_enable_override_on[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][NUM_RANK_GROUPS] = {{{fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}, {fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}}, {{fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}, {fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE, fapi2::ENUM_ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE}}};
 
                 FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target, l_train_enable));
                 FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target, l_train_enable_override_on));
 
                 //runs new values w/ train enable forces on
                 FAPI_INF("RUN MRS6 1ST");
-                FAPI_TRY(p9c_mss_mrs6_DDR4(  i_target));
+                FAPI_TRY(p9c_mss_mrs6_DDR4(  i_target), "Failed 1st p9c_mss_mrs6_DDR4 on %s", mss::c_str(i_target));
 
                 FAPI_INF("RUN MRS6 2ND");
-                FAPI_TRY(p9c_mss_mrs6_DDR4( i_target));
+                FAPI_TRY(p9c_mss_mrs6_DDR4( i_target), "Failed 2nd p9c_mss_mrs6_DDR4 on %s", mss::c_str(i_target));
                 //set old train enable value
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target, l_train_enable));
 
                 FAPI_INF("RUN MRS6 3RD");
-                FAPI_TRY(p9c_mss_mrs6_DDR4( i_target));
+                FAPI_TRY(p9c_mss_mrs6_DDR4( i_target), "Failed 3rd p9c_mss_mrs6_DDR4 on %s", mss::c_str(i_target));
 
                 //sets up the DQS offset to be 16 instead of 8
-                FAPI_TRY(mss_setup_dqs_offset(i_target));
+                FAPI_TRY(mss_setup_dqs_offset(i_target), "Failed mss_setup_dqs_offset on %s", mss::c_str(i_target));
             }
         }
 
         for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++)
         {
-            for(l_group = 0; l_group < MAX_RANKS_PER_DIMM; l_group ++)
+            for(l_group = 0; l_group < NUM_RANK_GROUPS; l_group ++)
             {
                 //Check if rank group exists
                 if(l_primary_ranks_array[l_group][l_port] != INVALID_RANK)
@@ -245,156 +242,27 @@ extern "C" {
                     l_casn_buffer_1.flush<1>();
                     l_rasn_buffer_1.flush<1>();
                     l_ddr_cal_enable_buffer_1.flush<1>(); //Init cal
+                    l_dqs_try = 0;
 
                     FAPI_INF( "+++ Setting up Init Cal on %s Port: %d rank group: %d cal_steps: 0x%02X +++", mss::c_str(i_target), l_port,
                               l_group, l_cal_steps);
 
                     for(l_cur_cal_step = 1; l_cur_cal_step < MAX_CAL_STEPS; l_cur_cal_step ++) //Cycle through all possible cal steps
                     {
-                        //DQS alignment workaround
-                        l_max_cal_retry = 0;
+                        FAPI_TRY(clear_status_and_error_regs(i_target, l_port), "Failed to clear status and error regs on %s",
+                                 mss::c_str(i_target));
 
-                        //clear status reg
-                        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_STATUS[l_port], l_data_buffer_64));
-                        l_data_buffer_64.clearBit<48, 4>();
-                        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_STATUS[l_port], l_data_buffer_64));
+                        FAPI_TRY(configure_cal_registers(i_target, l_port, l_group, l_cur_cal_step, l_cal_steps_8),
+                                 "Failed to confiugre cal registers on %s", mss::c_str(i_target));
 
-                        //clear error reg
-                        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_ERROR[l_port], l_data_buffer_64));
-                        l_data_buffer_64.clearBit<48, 11>();
-                        l_data_buffer_64.clearBit<60, 4>();
-                        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_ERROR[l_port], l_data_buffer_64));
-
-                        //Clearing any status or errors bits that may have occured in previous training subtest.
-                        //clear other port
-                        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0_REVERSED[l_port], l_data_buffer_64));
-                        l_data_buffer_64.clearBit<48>();
-                        l_data_buffer_64.clearBit<50>();
-                        l_data_buffer_64.clearBit<51>();
-                        l_data_buffer_64.clearBit<52>();
-                        l_data_buffer_64.clearBit<53>();
-                        l_data_buffer_64.clearBit<54>();
-                        l_data_buffer_64.clearBit<55>();
-                        l_data_buffer_64.clearBit<58>();
-                        l_data_buffer_64.clearBit<60>();
-                        l_data_buffer_64.clearBit<61>();
-                        l_data_buffer_64.clearBit<62>();
-                        l_data_buffer_64.clearBit<63>();
-                        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0_REVERSED[l_port], l_data_buffer_64));
-
-                        //Setup the Config Reg bit for the only cal step we want
-                        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64));
-
-                        //Clear training cnfg
-                        l_data_buffer_64.clearBit<48>();
-                        l_data_buffer_64.clearBit<50>();
-                        l_data_buffer_64.clearBit<51>();
-                        l_data_buffer_64.clearBit<52>();
-                        l_data_buffer_64.clearBit<53>();
-                        l_data_buffer_64.clearBit<54>();
-                        l_data_buffer_64.clearBit<55>();
-                        l_data_buffer_64.clearBit<60>();
-                        l_data_buffer_64.clearBit<61>();
-                        l_data_buffer_64.clearBit<62>();
-                        l_data_buffer_64.clearBit<63>();
-
-                        //Set stop on error
-                        l_data_buffer_64.setBit<58>();
-
-                        //cnfg rank groups
-                        if(l_group == 0)
-                        {
-                            l_data_buffer_64.setBit<60>();
-                        }
-                        else if(l_group == 1)
-                        {
-                            l_data_buffer_64.setBit<61>();
-                        }
-                        else if(l_group == 2)
-                        {
-                            l_data_buffer_64.setBit<62>();
-                        }
-                        else if(l_group == 3)
-                        {
-                            l_data_buffer_64.setBit<63>();
-                        }
-
-                        if ( (l_cur_cal_step == 1) && (l_cal_steps_8.isBitClear(0)) && (l_cal_steps_8.isBitClear(1)) &&
-                             (l_cal_steps_8.isBitClear(2)) && (l_cal_steps_8.isBitClear(3)) &&
-                             (l_cal_steps_8.isBitClear(4)) && (l_cal_steps_8.isBitClear(5)) &&
-                             (l_cal_steps_8.isBitClear(6)) && (l_cal_steps_8.isBitClear(7)) )
-                        {
-                            FAPI_INF( "+++ Executing ALL Cal Steps at the same time on %s Port: %d rank group: %d +++", mss::c_str(i_target),
-                                      l_port,
-                                      l_group);
-                            l_data_buffer_64.setBit<48>();
-                            l_data_buffer_64.setBit<50>();
-                            l_data_buffer_64.setBit<51>();
-                            l_data_buffer_64.setBit<52>();
-                            l_data_buffer_64.setBit<53>();
-                            l_data_buffer_64.setBit<54>();
-                            l_data_buffer_64.setBit<55>();
-
-                        }
-                        else if ( (l_cur_cal_step == 1) && (l_cal_steps_8.isBitSet(1)) )
-                        {
-                            FAPI_INF( "+++ Write Leveling (WR_LVL) on %s Port %d rank group: %d +++", mss::c_str(i_target), l_port, l_group);
-                            FAPI_TRY(l_data_buffer_64.setBit(48), "Set bit failed");
-                        }
-                        else if ( (l_cur_cal_step == 2) && (l_cal_steps_8.isBitSet(2)) )
-                        {
-                            l_max_cal_retry = 0;
-                            l_dqs_try = l_dqs_retry_num + 1;
-                            FAPI_INF( "+++ DQS Align (DQS_ALIGN) attempt %d on %s Port: %d rank group: %d +++", l_dqs_try, mss::c_str(i_target),
-                                      l_port,
-                                      l_group);
-
-                            if (l_dqs_try == MAX_DQS_RETRY)
-                            {
-                                l_max_cal_retry = 1;
-                                FAPI_INF( "+++ DQS Align (DQS_ALIGN) final attempt!");
-                            }
-
-                            l_data_buffer_64.setBit<50>();
-                        }
-                        else if ( (l_cur_cal_step == 3) && (l_cal_steps_8.isBitSet(3)) )
-                        {
-                            FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on %s Port: %d rank group: %d +++", mss::c_str(i_target), l_port, l_group);
-                            l_data_buffer_64.setBit<51>();
-                        }
-                        else if ( (l_cur_cal_step == 4) && (l_cal_steps_8.isBitSet(4)) )
-                        {
-                            FAPI_INF( "+++ Read Centering (READ_CTR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), l_port, l_group);
-                            l_data_buffer_64.setBit<52>();
-                        }
-                        else if ( (l_cur_cal_step == 5) && (l_cal_steps_8.isBitSet(5)) )
-                        {
-                            FAPI_INF( "+++ Write Centering (WRITE_CTR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), l_port, l_group);
-                            l_data_buffer_64.setBit<53>();
-                        }
-                        else if ( (l_cur_cal_step == 6) && (l_cal_steps_8.isBitSet(6)) && (l_cal_steps_8.isBitClear(7)) )
-                        {
-                            FAPI_INF( "+++ Initial Course Write (COURSE_WR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), l_port,
-                                      l_group);
-                            l_data_buffer_64.setBit<54>();
-                        }
-                        else if ( (l_cur_cal_step == 6) && (l_cal_steps_8.isBitClear(6)) && (l_cal_steps_8.isBitSet(7)) )
-                        {
-                            FAPI_INF( "+++ Course Read (COURSE_RD) on %s Port: %d rank group: %d +++", mss::c_str(i_target), l_port, l_group);
-                            l_data_buffer_64.setBit<55>();
-                        }
-                        else if ( (l_cur_cal_step == 6) && (l_cal_steps_8.isBitSet(6)) && (l_cal_steps_8.isBitSet(7)) )
-                        {
-                            FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on %s Port: %d rank group: %d +++",
-                                      mss::c_str(i_target), l_port, l_group);
-                            l_data_buffer_64.setBit<54>();
-                            l_data_buffer_64.setBit<55>();
-                        }
+                        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64),
+                                 "Failed to getscom INIT_CAL_CONFIG0 on %s", mss::c_str(i_target));
 
                         if ( ( l_data_buffer_64.getBit<48, 8>() ) ) // Only execute if we are doing a Cal Step
                         {
                             // Before WR_LVL --- Change the RTT_NOM to RTT_WR pre-WR_LVL
-                            if ( (l_cur_cal_step == 1) && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3))
+                            if ( (l_cur_cal_step == fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL)
+                                 && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3))
                             {
                                 l_dram_rtt_nom_original = 0xFF;
                                 FAPI_TRY(mss_rtt_nom_rtt_wr_swap(i_target,
@@ -406,7 +274,8 @@ extern "C" {
                             }
 
                             //DDR4 RDIMM, do the swap of the RTT_WR to RTT_NOM
-                            if ( (l_cur_cal_step == 1) && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
+                            if ( (l_cur_cal_step == fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL)
+                                 && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
                             {
                                 l_dram_rtt_nom_original = 0xFF;
                                 FAPI_TRY(mss_ddr4_rtt_nom_rtt_wr_swap(i_target,
@@ -416,10 +285,10 @@ extern "C" {
                                                                       l_group,
                                                                       l_instruction_number,
                                                                       l_dram_rtt_nom_original), "mss_ddr4_rtt_nom_rtt_wr_swap failed!");
+                                // Set non-calibrating ranks wr lvl == enable and qoff
+                                FAPI_TRY(configure_non_calibrating_ranks(i_target, l_port, l_group, CONFIGURE_QOFF_WRLVL_ON, l_instruction_number),
+                                         "Failed to configure non calibrating ranks with wr lvl settings on %s", mss::c_str(i_target));
                             }
-
-                            //Set the config register
-                            FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64));
 
                             FAPI_TRY(mss_ccs_inst_arry_0(i_target,
                                                          l_instruction_number,
@@ -464,7 +333,7 @@ extern "C" {
                             }
 
                             //Check to see if the training errored out
-                            FAPI_TRY(mss_check_error_status(i_target, l_port, l_group, l_cur_cal_step, l_cur_error_status, l_max_cal_retry));
+                            FAPI_TRY(mss_check_error_status(i_target, l_port, l_group, l_cur_cal_step, l_cur_error_status, l_dqs_try));
 
                             if (l_cur_error_status == MSS_INIT_CAL_FAIL)
                             {
@@ -472,7 +341,8 @@ extern "C" {
                             }
 
                             // Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
-                            if ((l_cur_cal_step == 1) && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3))
+                            if ((l_cur_cal_step == fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL)
+                                && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3))
                             {
                                 FAPI_TRY(mss_rtt_nom_rtt_wr_swap(i_target,
                                                                  l_port,
@@ -483,7 +353,8 @@ extern "C" {
                             }
 
                             // Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
-                            if ((l_cur_cal_step == 1) && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
+                            if ((l_cur_cal_step == fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL)
+                                && (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4))
                             {
                                 FAPI_TRY(mss_ddr4_rtt_nom_rtt_wr_swap(i_target,
                                                                       l_mbaPosition,
@@ -492,43 +363,11 @@ extern "C" {
                                                                       l_group,
                                                                       l_instruction_number,
                                                                       l_dram_rtt_nom_original));
+                                //cleanup non calibrating ranks wr_lvl enable and qoff
+                                FAPI_TRY(configure_non_calibrating_ranks(i_target, l_port, l_group, CLEANUP_QOFF_WRLVL_OFF, l_instruction_number),
+                                         "Failed to cleanup non calibrating ranks with wr lvl settings on %s", mss::c_str(i_target));
                             }
 
-                            // DQS Alignment workaround
-                            if (l_cur_cal_step == 2)
-                            {
-                                // Because the DQS cal step failed we need to rerun the step and clear out any bad bits
-                                if (l_cur_error_status == MSS_INIT_CAL_FAIL)
-                                {
-                                    if (l_dqs_try < MAX_DQS_RETRY)
-                                    {
-                                        ++l_dqs_retry_num;
-                                        --l_cur_cal_step;
-
-                                        for(l_delay_loop_cnt = 1; l_delay_loop_cnt <= DELAY_LOOP; l_delay_loop_cnt ++)
-                                        {
-                                            FAPI_TRY(fapi2::delay(DELAY_0P5S, DELAY_500SIMCYCLES));
-                                        }
-
-                                        l_delay_loop_cnt = 0;
-                                    }
-                                    else if (l_dqs_try == MAX_DQS_RETRY)
-                                    {
-                                        l_dqs_retry_num = 0;
-                                    }
-                                }
-                                //If the DQS cal step passes on a retry, we need to reset the error status to a pass.
-                                else if (l_cur_error_status == MSS_INIT_CAL_PASS)
-                                {
-                                    if (l_dqs_try > 1)
-                                    {
-                                        l_error_status = MSS_INIT_CAL_PASS;
-                                        l_dqs_retry_num = 0;
-                                    }
-
-                                    l_dqs_retry_num = 0;
-                                }
-                            } // end if cur cal step == 2
                         } //end if l_data_buffer_64.getBit<48, 8>
                     }//end of step loop
                 } //end if RG exists
@@ -541,19 +380,15 @@ extern "C" {
         }
 
         FAPI_TRY(mss_get_bbm_regs(i_target, l_training_success),
-                 "Error Moving bad bit information from the Phy regs. Exiting.");
+                 "Error Moving bad bit information from the Phy regs on %s. Exiting.", mss::c_str(i_target));
 
         //Executes if we do "all at once" or on the last cal steps
         //Must be a successful run.
         if (l_error_status == MSS_INIT_CAL_PASS &&
-            ((l_cal_steps_8.isBitSet(6) && l_cal_steps_8.isBitSet(7)) ||
-             (l_cal_steps_8.isBitClear(0) && l_cal_steps_8.isBitClear(1) &&
-              l_cal_steps_8.isBitClear(2) && l_cal_steps_8.isBitClear(3) &&
-              l_cal_steps_8.isBitClear(4) && l_cal_steps_8.isBitClear(5) &&
-              l_cal_steps_8.isBitClear(6) && l_cal_steps_8.isBitClear(7) ) ) )
+            (l_cal_steps_8.getBit<6, 2>() || !(l_cal_steps_8.getBit<0, 8>()) ) )
         {
             FAPI_INF( "WR LVL DISABLE WORKAROUND: Running wr_lvl workaround on %s", mss::c_str(i_target));
-            FAPI_TRY(mss_wr_lvl_disable_workaround(i_target));
+            FAPI_TRY(mss_wr_lvl_disable_workaround(i_target), "mss_wr_lvl_disable_workaround failed on %s", mss::c_str(i_target));
         }
 
         // If we hit either of these States, the error callout originates from Mike Jones Bad Bit code.
@@ -574,7 +409,190 @@ extern "C" {
         // it will commit the passed in rc (if non-zero), and return it's own bad rc.
         // Else if mss_unmask_draminit_training_errors runs clean,
         // it will just return the passed in rc.
-        FAPI_TRY(mss_unmask_draminit_training_errors(i_target));
+        FAPI_TRY(mss_unmask_draminit_training_errors(i_target), "Failed to unmask errors on %s", mss::c_str(i_target));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Clear cal-related status and error regs
+    /// @param[in] i_port Port to clear
+    /// @return fapi2::FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode clear_status_and_error_regs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_port)
+    {
+        fapi2::buffer<uint64_t> l_data_buffer_64;
+
+        FAPI_ASSERT(i_port < MAX_PORTS_PER_MBA,
+                    fapi2::CEN_INVALID_PORT().
+                    set_PORT_POSITION(i_port).
+                    set_TARGET_MBA_ERROR(i_target),
+                    "clear_status_and_error_regs got invalid input on %s port: %d",
+                    mss::c_str(i_target), i_port);
+
+        //clear status reg
+        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_STATUS[i_port], l_data_buffer_64), "Failed to getscom INIT_CAL_STATUS on %s",
+                 mss::c_str(i_target));
+        l_data_buffer_64.clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P0_COMPLETE, CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P0_COMPLETE_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_STATUS[i_port], l_data_buffer_64), "Failed to putscom INIT_CAL_STATUS on %s",
+                 mss::c_str(i_target));
+        //clear error reg
+        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_ERROR[i_port], l_data_buffer_64), "Failed to getscom INIT_CAL_ERROR on %s",
+                 mss::c_str(i_target));
+        l_data_buffer_64.clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_WR_LEVEL>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_INITIAL_PAT_WRITE>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_DQS_ALIGN>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RDCLK_ALIGN>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_READ_CTR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_WRITE_CTR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_INITIAL_COARSE_WR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_COARSE_RD>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_CUSTOM_RD>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_CUSTOM_WR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_DIGITAL_EYE>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_ERROR[i_port], l_data_buffer_64), "Failed to putscom INIT_CAL_ERROR on %s",
+                 mss::c_str(i_target));
+
+        //Clearing any status or errors bits that may have occured in previous training subtest.
+        //clear other port
+        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0_REVERSED[i_port], l_data_buffer_64),
+                 "Failed to getscom INIT_CAL_CONFIG0_REVERSED on %s", mss::c_str(i_target));
+        l_data_buffer_64.clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR_LEN>();
+        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0_REVERSED[i_port], l_data_buffer_64),
+                 "Failed to putscom INIT_CAL_CONFIG0_REVERSED on %s", mss::c_str(i_target));
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Configure calibration register in phy
+    /// @param[in] i_target MBA Target to configure
+    /// @param[in] i_port Port to calibrate
+    /// @param[in] i_group Rank Group to calibrate
+    /// @param[in] i_cur_step Current calibration step
+    /// @param[in] i_cal_step_arr Cal steps to run
+    /// @return fapi2::FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode configure_cal_registers(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_port,
+            const uint8_t i_group,
+            const uint8_t i_cur_cal_step,
+            const fapi2::buffer<uint8_t>& i_cal_steps)
+    {
+        //Setup the Config Reg bit for the only cal step we want
+        fapi2::buffer<uint64_t> l_data_buffer_64;
+        //Setup the Config Reg bit for the only cal step we want
+        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0[i_port], l_data_buffer_64),
+                 "Failed to getscom INIT_CAL_CONFIG0 on %s", mss::c_str(i_target));
+
+        //Clear training cnfg
+        l_data_buffer_64.clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN, 6>().
+        clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR_LEN>();
+        //Set stop on error
+        l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>();
+        //cnfg rank groups
+        FAPI_TRY(l_data_buffer_64.setBit(CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + i_group),
+                 "Failed to configure rank group for calibration on %s",
+                 mss::c_str(i_target));
+
+        switch (i_cur_cal_step)
+        {
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL:
+                if ( !(i_cal_steps.getBit<0, 8>()) )
+                {
+                    FAPI_INF( "+++ Executing ALL Cal Steps at the same time on %s Port: %d rank group: %d +++",
+                              mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>().
+                    setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN, 6>();
+                }
+                else if ( i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL))
+                {
+                    FAPI_INF( "+++ Write Leveling (WR_LVL) on %s Port %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>();
+                }
+
+                break;
+
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_DQS_ALIGN:
+                if (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_DQS_ALIGN))
+                {
+                    FAPI_INF( "+++ DQS Align (DQS_ALIGN) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>();
+                }
+
+                break;
+
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RDCLK_ALIGN:
+                if (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RDCLK_ALIGN))
+                {
+                    FAPI_INF( "+++ RD CLK Align (RDCLK_ALIGN) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>();
+                }
+
+                break;
+
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RD_CTR:
+                if (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RD_CTR))
+                {
+                    FAPI_INF( "+++ Read Centering (READ_CTR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>();
+                }
+
+                break;
+
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_CTR:
+                if (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_CTR))
+                {
+                    FAPI_INF( "+++ Write Centering (WRITE_CTR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>();
+                }
+
+                break;
+
+            case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_WR:
+                if ( (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_WR))
+                     && !(i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_RD)) )
+                {
+                    FAPI_INF( "+++ Initial Course Write (COURSE_WR) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port,
+                              i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>();
+                }
+                else if ( !(i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_WR))
+                          && (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_RD)) )
+                {
+                    FAPI_INF( "+++ Course Read (COURSE_RD) on %s Port: %d rank group: %d +++", mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>();
+                }
+                else if ( (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_WR))
+                          && (i_cal_steps.getBit(fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_RD)) )
+                {
+                    FAPI_INF( "+++ Initial Course Write (COURSE_WR) and Course Read (COURSE_RD) simultaneously on %s Port: %d rank group: %d +++",
+                              mss::c_str(i_target), i_port, i_group);
+                    l_data_buffer_64.setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR, 2>();
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        //Set the config register
+        FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0[i_port], l_data_buffer_64),
+                 "Failed to putscom INIT_CAL_CONFIG0 on %s", mss::c_str(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -595,7 +613,7 @@ extern "C" {
     {
         fapi2::buffer<uint64_t> l_cal_status_buffer_64;
         uint8_t l_poll_count = 1;
-        uint8_t l_cal_status_reg_offset = 48 + i_group;
+        const uint8_t l_cal_status_reg_offset = CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P0_COMPLETE + i_group;
 
         FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_STATUS[i_port], l_cal_status_buffer_64));
 
@@ -610,7 +628,7 @@ extern "C" {
             FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_STATUS[i_port], l_cal_status_buffer_64));
         }
 
-        if(l_cal_status_buffer_64.getBit(l_cal_status_reg_offset))
+        if(l_cal_status_buffer_64.getBit(CEN_MBA_DDRPHY_PC_INIT_CAL_STATUS_P0_COMPLETE + i_group))
         {
             FAPI_INF( "+++ Calibration on %s port: %d rank group: %d finished. +++", mss::c_str(i_target), i_port, i_group);
             io_status = MSS_INIT_CAL_COMPLETE;
@@ -631,37 +649,40 @@ extern "C" {
     /// @param[in] i_target const reference to centaur.mba target
     /// @param[in] i_port Memory Port
     /// @param[in] i_group Memory Rank Group
-    /// @param[in] i_cur_cal_step   Step of init cal
-    /// @param[in,out] io_status Cal Status
-    /// @param[in] i_max_cal_retry Max retry
+    /// @param[in, out] io_cur_cal_step   Step of init cal
+    /// @param[in, out] io_status Cal Status
+    /// @param[in, out] io_dqs_try  Num dqs_align retries
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode mss_check_error_status(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
             const uint8_t i_port,
             const uint8_t i_group,
-            const uint8_t i_cur_cal_step,
+            uint8_t& io_cur_cal_step,
             mss_draminit_training_result& io_status,
-            const uint8_t i_max_cal_retry
+            uint8_t& io_dqs_try
                                             )
     {
         fapi2::buffer<uint64_t> l_cal_error_buffer_64;
         fapi2::buffer<uint64_t> l_disable_bit_data_for_dp18_buffer_64;
-        uint64_t l_disable_bit_addr_for_dp18_0 = 0;
-        uint64_t l_disable_bit_addr_for_dp18_1 = 0;
-        uint64_t l_disable_bit_addr_for_dp18_2 = 0;
-        uint64_t l_disable_bit_addr_for_dp18_3 = 0;
-        uint64_t l_disable_bit_addr_for_dp18_4 = 0;
         uint8_t l_mbaPosition = 0;
-
-        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_ERROR[i_port], l_cal_error_buffer_64));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_mbaPosition));
 
-        if((l_cal_error_buffer_64.getBit<60>()) || (l_cal_error_buffer_64.getBit<61>())
-           || (l_cal_error_buffer_64.getBit<62>()) || (l_cal_error_buffer_64.getBit<63>()))
+        FAPI_ASSERT(i_port < MAX_PORTS_PER_MBA && i_group < NUM_RANK_GROUPS,
+                    fapi2::CEN_INVALID_INPUT_DATA().
+                    set_PORT_POSITION(i_port).
+                    set_RANKGROUP_POSITION(i_group).
+                    set_MBA_POSITION(l_mbaPosition).
+                    set_TARGET_MBA_ERROR(i_target),
+                    "mss_check_error_status got invalid input on %s port: %d  rankgroup: %d",
+                    mss::c_str(i_target), i_port, i_group);
+
+        FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_ERROR[i_port], l_cal_error_buffer_64));
+
+        if(l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR_LEN>())
         {
             io_status = MSS_INIT_CAL_FAIL;
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<48>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_WR_LEVEL>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR().
                         set_MBA_POSITION(l_mbaPosition).
                         set_PORT_POSITION(i_port).
@@ -670,129 +691,33 @@ extern "C" {
                         "+++ Write leveling error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            if(l_cal_error_buffer_64.getBit<50>())
+            if(l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_DQS_ALIGN>())
             {
                 // DQS Alignment Work Around:
-                if (i_max_cal_retry == 0)
+                if (io_dqs_try < MAX_DQS_RETRY)
                 {
-                    FAPI_INF( "+++ DQS Alignment recovery attempt on %s port: %d rank group: %d! +++", mss::c_str(i_target), i_port,
+                    ++io_dqs_try;
+                    --io_cur_cal_step;
+                    FAPI_INF( "+++ DQS Alignment recovery attempt %d on %s port: %d rank group: %d! +++", io_dqs_try, mss::c_str(i_target),
+                              i_port,
                               i_group);
 
-                    if (i_port == 0)
-                    {
-                        if (i_group == 0)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4;
-                        }
-                        else if (i_group == 1)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4;
-                        }
-                        else if (i_group == 2)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4;
-                        }
-                        else if (i_group == 3)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4;
-                        }
-                        else
-                        {
-                            FAPI_ERR( "+++ DQS Alignment Recovery error occured on %s port: %d rank group: %d! +++", mss::c_str(i_target), i_port,
-                                      i_group);
-                            FAPI_ASSERT(false,
-                                        fapi2::CEN_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR().
-                                        set_TARGET_MBA_ERROR(i_target).
-                                        set_MBA_POSITION(l_mbaPosition).
-                                        set_PORT_POSITION(i_port).
-                                        set_RANKGROUP_POSITION(i_group),
-                                        "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++",
-                                        mss::c_str(i_target), i_port, i_group);
-                        }
-                    } //if port 0
-                    else if (i_port == 1)
-                    {
-                        if (i_group == 0)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4;
-                        }
-                        else if (i_group == 1)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4;
-                        }
-                        else if (i_group == 2)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4;
-                        }
-                        else if (i_group == 3)
-                        {
-                            l_disable_bit_addr_for_dp18_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0;
-                            l_disable_bit_addr_for_dp18_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1;
-                            l_disable_bit_addr_for_dp18_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2;
-                            l_disable_bit_addr_for_dp18_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3;
-                            l_disable_bit_addr_for_dp18_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4;
-                        }
-                        else
-                        {
-                            FAPI_ASSERT(false,
-                                        fapi2::CEN_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR().
-                                        set_TARGET_MBA_ERROR(i_target).
-                                        set_MBA_POSITION(l_mbaPosition).
-                                        set_PORT_POSITION(i_port).
-                                        set_RANKGROUP_POSITION(i_group),
-                                        "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++",
-                                        mss::c_str(i_target), i_port, i_group);
+                    l_disable_bit_data_for_dp18_buffer_64.flush<0>();
 
-                        }
-                    } // if port 1
-                    else
+                    //Clear all disable regs before next attempt
+                    for (const auto& l_dp_reg : l_disable_reg[i_port][i_group])
                     {
-                        FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR().
-                                    set_TARGET_MBA_ERROR(i_target).
-                                    set_MBA_POSITION(l_mbaPosition).
-                                    set_PORT_POSITION(i_port).
-                                    set_RANKGROUP_POSITION(i_group),
-                                    "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++",
-                                    mss::c_str(i_target), i_port, i_group);
-
+                        FAPI_TRY(fapi2::putScom(i_target, l_dp_reg, l_disable_bit_data_for_dp18_buffer_64));
                     }
 
-                    l_disable_bit_data_for_dp18_buffer_64.flush<0>();
-                    FAPI_TRY(fapi2::putScom(i_target, l_disable_bit_addr_for_dp18_0, l_disable_bit_data_for_dp18_buffer_64));
-                    FAPI_TRY(fapi2::putScom(i_target, l_disable_bit_addr_for_dp18_1, l_disable_bit_data_for_dp18_buffer_64));
-                    FAPI_TRY(fapi2::putScom(i_target, l_disable_bit_addr_for_dp18_2, l_disable_bit_data_for_dp18_buffer_64));
-                    FAPI_TRY(fapi2::putScom(i_target, l_disable_bit_addr_for_dp18_3, l_disable_bit_data_for_dp18_buffer_64));
-                    FAPI_TRY(fapi2::putScom(i_target, l_disable_bit_addr_for_dp18_4, l_disable_bit_data_for_dp18_buffer_64));
-                } // if max cal retry == 0
+                    //Delay before next attempt
+                    FAPI_INF("Delaying before next DQS_ALIGN Attempt on %s.", mss::c_str(i_target));
+
+                    for(uint8_t l_delay = 0; l_delay < DELAY_LOOP; l_delay++)
+                    {
+                        FAPI_TRY(fapi2::delay(DELAY_500MS, DELAY_500SIMCYCLES));
+                    }
+                } // if dqs_try < max
                 else
                 {
                     FAPI_ASSERT(false,
@@ -801,13 +726,12 @@ extern "C" {
                                 set_MBA_POSITION(l_mbaPosition).
                                 set_PORT_POSITION(i_port).
                                 set_RANKGROUP_POSITION(i_group),
-                                "+++ DQS Alignment error occured on %s port: %d rank group: %d! +++",
-                                mss::c_str(i_target), i_port, i_group);
+                                "+++ DQS Alignment error occured on %s port: %d rank group: %d! Max attempts of %d tried and failed.  +++",
+                                mss::c_str(i_target), i_port, i_group, io_dqs_try);
                 }
-
             } // if getBit<50>
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<51>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RDCLK_ALIGN>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -816,7 +740,7 @@ extern "C" {
                         "+++ RDCLK to SysClk alignment error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<52>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_READ_CTR>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -827,7 +751,7 @@ extern "C" {
 
 
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<53>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_WRITE_CTR>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -836,7 +760,7 @@ extern "C" {
                         "+++ Write centering error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<55>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_COARSE_RD>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_COURSE_RD_CENTERING_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -845,7 +769,7 @@ extern "C" {
                         "+++ +++ Coarse read centering error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<56>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_CUSTOM_RD>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_CENTERING_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -854,7 +778,7 @@ extern "C" {
                         "+++ Custom pattern read centering error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<57>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_CUSTOM_WR>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_CENTERING_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -863,7 +787,7 @@ extern "C" {
                         "+++ Custom pattern write centering error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
 
-            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<58>(),
+            FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_DIGITAL_EYE>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
                         set_MBA_POSITION(l_mbaPosition).
@@ -871,37 +795,42 @@ extern "C" {
                         set_RANKGROUP_POSITION(i_group),
                         "+++ Digital eye error occured on %s port: %d rank group: %d! +++",
                         mss::c_str(i_target), i_port, i_group);
-        }
+        } // endif getBit<60,4>
         else
         {
-            if (i_cur_cal_step == 1)
+            switch (io_cur_cal_step)
             {
-                FAPI_INF( "+++ Write_leveling on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
-                          i_group);
-            }
-            else if (i_cur_cal_step == 2)
-            {
-                FAPI_INF( "+++ DQS Alignment on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port, i_group);
-            }
-            else if (i_cur_cal_step == 3)
-            {
-                FAPI_INF( "+++ RDCLK to SysClk alignment on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target),
-                          i_port, i_group);
-            }
-            else if (i_cur_cal_step == 4)
-            {
-                FAPI_INF( "+++ Read Centering on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
-                          i_group);
-            }
-            else if (i_cur_cal_step == 5)
-            {
-                FAPI_INF( "+++ Write Centering on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
-                          i_group);
-            }
-            else if (i_cur_cal_step == 6)
-            {
-                FAPI_INF( "+++ Course Read and/or Course Write on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target),
-                          i_port, i_group);
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_LVL:
+                    FAPI_INF( "+++ Write_leveling on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
+                              i_group);
+                    break;
+
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_DQS_ALIGN:
+                    FAPI_INF( "+++ DQS Alignment on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port, i_group);
+                    break;
+
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RDCLK_ALIGN:
+                    FAPI_INF( "+++ RDCLK to SysClk alignment on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target),
+                              i_port, i_group);
+                    break;
+
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_RD_CTR:
+                    FAPI_INF( "+++ Read Centering on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
+                              i_group);
+                    break;
+
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_WR_CTR:
+                    FAPI_INF( "+++ Write Centering on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target), i_port,
+                              i_group);
+                    break;
+
+                case fapi2::ENUM_ATTR_CEN_MSS_CAL_STEP_ENABLE_COARSE_WR:
+                    FAPI_INF( "+++ Course Read and/or Course Write on %s port: %d rank group: %d was successful. +++", mss::c_str(i_target),
+                              i_port, i_group);
+                    break;
+
+                default:
+                    break;
             }
 
             io_status = MSS_INIT_CAL_PASS;
@@ -920,29 +849,18 @@ extern "C" {
         const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target
     )
     {
+        constexpr uint64_t DISABLE_BITS_LEN = 4;
+        constexpr uint64_t DISABLE_BITS_NIBBLE0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15;
+        constexpr uint64_t DISABLE_BITS_NIBBLE1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15 + 4;
+        constexpr uint64_t DISABLE_BITS_NIBBLE2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15 + 8;
+        constexpr uint64_t DISABLE_BITS_NIBBLE3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15 + 12;
+
         //DQS_CLK for each nibble of a byte is being adjusted to the lowest value for the given byte
         //Across all byte lanes
         uint8_t l_primary_ranks_array[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0}; //primary_ranks_array[group][port]
         fapi2::buffer<uint64_t> l_data_buffer_64;
-        uint64_t l_DISABLE_ADDR_0 = 0;
-        uint64_t l_DISABLE_ADDR_1 = 0;
-        uint64_t l_DISABLE_ADDR_2 = 0;
-        uint64_t l_DISABLE_ADDR_3 = 0;
-        uint64_t l_DISABLE_ADDR_4 = 0;
-        uint64_t l_DQSCLK_RD_PHASE_ADDR_0 = 0;
-        uint64_t l_DQSCLK_RD_PHASE_ADDR_1 = 0;
-        uint64_t l_DQSCLK_RD_PHASE_ADDR_2 = 0;
-        uint64_t l_DQSCLK_RD_PHASE_ADDR_3 = 0;
-        uint64_t l_DQSCLK_RD_PHASE_ADDR_4 = 0;
-        uint64_t l_GATE_DELAY_ADDR_0 = 0;
-        uint64_t l_GATE_DELAY_ADDR_1 = 0;
-        uint64_t l_GATE_DELAY_ADDR_2 = 0;
-        uint64_t l_GATE_DELAY_ADDR_3 = 0;
-        uint64_t  l_GATE_DELAY_ADDR_4 = 0;
         uint8_t l_port = 0;
         uint8_t l_rank_group = 0;
-        uint8_t l_value_n0_u8 = 0;
-        uint8_t l_value_n1_u8 = 0;
         uint8_t l_block = 0;
         uint32_t l_byte = 0;
         uint32_t l_nibble = 0;
@@ -962,7 +880,6 @@ extern "C" {
         uint8_t l_index_u8 = 0;
         uint8_t l_mask = 0;
         uint8_t l_nibble_dq = 0;
-        uint8_t l_lane = 0;
         uint8_t l_rg = 0;
         uint8_t l_rank_2 = 0;
         uint8_t l_width = 0;
@@ -986,10 +903,10 @@ extern "C" {
         fapi2::variable_buffer l_ddr_cal_enable_buffer_1(1);
         fapi2::variable_buffer l_ccs_end_buffer_1(1);
         uint8_t l_group = 255;
-        constexpr uint32_t NUM_POLL = 10000;
         uint8_t l_cur_cal_step = 2;
         uint8_t l_mbaPosition = 0;
         uint8_t l_curr_bit = 0;
+        uint8_t max_retries = MAX_DQS_RETRY;
 
         //populate primary_ranks_arrays_array
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target, l_primary_ranks_array[0]));
@@ -1002,7 +919,7 @@ extern "C" {
         for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++)
         {
             //Gather all the byte information
-            for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+            for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
             {
                 //Initialize values
                 for(l_block = 0; l_block < MAX_BLOCKS_PER_RANK; l_block ++)
@@ -1027,412 +944,69 @@ extern "C" {
                     FAPI_DBG("WR LVL DISABLE WORKAROUND: DISABLE Workaround being applied on  %s  PORT: %d RP: %d", mss::c_str(i_target),
                              l_port, l_rank_group);
 
-                    if ( l_port == 0 )
+                    for(uint8_t l_block; l_block < MAX_BLOCKS_PER_RANK; l_block++)
                     {
-                        if ( l_rank_group == 0 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4;
-                        }
-                    }
-                    else if (l_port == 1 )
-                    {
+                        FAPI_TRY(fapi2::getScom(i_target, l_disable_reg[l_port][l_rank_group][l_block], l_data_buffer_64), "getScom Failed!");
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE0, DISABLE_BITS_LEN>
+                        (l_disable_value_u8[l_rank_group][l_block][0][0]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE1, DISABLE_BITS_LEN>
+                        (l_disable_value_u8[l_rank_group][l_block][0][1]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE2, DISABLE_BITS_LEN>
+                        (l_disable_value_u8[l_rank_group][l_block][1][0]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE3, DISABLE_BITS_LEN>
+                        (l_disable_value_u8[l_rank_group][l_block][1][1]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE0, DISABLE_BITS_LEN>
+                        (l_disable_old_value_u8[l_rank_group][l_block][0][0]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE1, DISABLE_BITS_LEN>
+                        (l_disable_old_value_u8[l_rank_group][l_block][0][1]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE2, DISABLE_BITS_LEN>
+                        (l_disable_old_value_u8[l_rank_group][l_block][1][0]);
+                        l_data_buffer_64.extractToRight<DISABLE_BITS_NIBBLE3, DISABLE_BITS_LEN>
+                        (l_disable_old_value_u8[l_rank_group][l_block][1][1]);
 
-                        if ( l_rank_group == 0 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4;
-                        }//if rankgroup
-                    }//if port
+                        FAPI_TRY(fapi2::getScom(i_target, l_dqs_rd_phase_select[l_port][l_rank_group][l_block], l_data_buffer_64),
+                                 "getScom Failed!");
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT0,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT0_LEN>
+                                                        (l_dqsclk_phase_value_u8[l_rank_group][l_block][0][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT1,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT1_LEN>
+                                                        (l_dqsclk_phase_value_u8[l_rank_group][l_block][0][1]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT2,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT2_LEN>
+                                                        (l_dqsclk_phase_value_u8[l_rank_group][l_block][1][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT3,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT3_LEN>
+                                                        (l_dqsclk_phase_value_u8[l_rank_group][l_block][1][1]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT0,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT0_LEN>
+                                                        (l_rdclk_phase_value_u8[l_rank_group][l_block][0][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT1,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT1_LEN>
+                                                        (l_rdclk_phase_value_u8[l_rank_group][l_block][0][1]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT2,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT2_LEN>
+                                                        (l_rdclk_phase_value_u8[l_rank_group][l_block][1][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT3,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT3_LEN>
+                                                        (l_rdclk_phase_value_u8[l_rank_group][l_block][1][1]);
 
-                    // PHY BLOCK 0
-                    FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_0, l_data_buffer_64), "getScom Failed!");
-                    l_data_buffer_64.extractToRight<48, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][0][0][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][0][0][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][0][0][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][0][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][0][1][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][0][1][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][0][1][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][0][1][1] = l_value_n1_u8;
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_0, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<48, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][0][0][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][0][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][0][1][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][0][1][1] = l_value_n1_u8;
-
-                    l_data_buffer_64.extractToRight<50, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<54, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][0][0][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][0][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<58, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<62, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][0][1][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][0][1][1] = l_value_n1_u8;
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_0, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<49, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<53, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][0][0][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][0][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<57, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<61, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][0][1][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][0][1][1] = l_value_n1_u8;
-
-
-                    // PHY BLOCK 1
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_1, l_data_buffer_64), "getScom Failed!");
-
-                    l_data_buffer_64.extractToRight<48, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][1][0][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][1][0][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][1][0][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][1][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][1][1][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][1][1][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][1][1][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][1][1][1] = l_value_n1_u8;
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_1, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<48, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][1][0][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][1][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][1][1][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][1][1][1] = l_value_n1_u8;
-
-                    l_data_buffer_64.extractToRight<50, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<54, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][1][0][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][1][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<58, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<62, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][1][1][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][1][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_1, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<49, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<53, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][1][0][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][1][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<57, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<61, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][1][1][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][1][1][1] = l_value_n1_u8;
-
-                    // PHY BLOCK 2
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_2, l_data_buffer_64), "getScom Failed!");
-
-                    l_data_buffer_64.extractToRight<48, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][2][0][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][2][0][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][2][0][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][2][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][2][1][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][2][1][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][2][1][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][2][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_2, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<48, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][2][0][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][2][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][2][1][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][2][1][1] = l_value_n1_u8;
-
-                    l_data_buffer_64.extractToRight<50, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<54, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][2][0][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][2][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<58, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<62, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][2][1][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][2][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_2, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<49, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<53, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][2][0][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][2][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<57, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<61, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][2][1][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][2][1][1] = l_value_n1_u8;
-
-                    // PHY BLOCK 3
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_3, l_data_buffer_64), "getScom Failed!");
-
-                    l_data_buffer_64.extractToRight<48, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][3][0][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][3][0][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][3][0][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][3][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][3][1][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][3][1][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][3][1][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][3][1][1] = l_value_n1_u8;
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_3, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<48, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][3][0][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][3][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][3][1][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][3][1][1] = l_value_n1_u8;
-
-                    l_data_buffer_64.extractToRight<50, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<54, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][3][0][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][3][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<58, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<62, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][3][1][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][3][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_3, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<49, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<53, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][3][0][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][3][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<57, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<61, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][3][1][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][3][1][1] = l_value_n1_u8;
-
-                    // PHY BLOCK 4
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_4, l_data_buffer_64), "getScom Failed!");
-
-                    l_data_buffer_64.extractToRight<48, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][4][0][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][4][0][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][4][0][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][4][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 4>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 4>(l_value_n1_u8);
-                    l_disable_value_u8[l_rank_group][4][1][0] = l_value_n0_u8;
-                    l_disable_value_u8[l_rank_group][4][1][1] = l_value_n1_u8;
-                    l_disable_old_value_u8[l_rank_group][4][1][0] = l_value_n0_u8;
-                    l_disable_old_value_u8[l_rank_group][4][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_4, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same bye and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<48, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<52, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][4][0][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][4][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<56, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<60, 2>(l_value_n1_u8);
-                    l_dqsclk_phase_value_u8[l_rank_group][4][1][0] = l_value_n0_u8;
-                    l_dqsclk_phase_value_u8[l_rank_group][4][1][1] = l_value_n1_u8;
-
-                    l_data_buffer_64.extractToRight<50, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<54, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][4][0][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][4][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<58, 2>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<62, 2>(l_value_n1_u8);
-                    l_rdclk_phase_value_u8[l_rank_group][4][1][0] = l_value_n0_u8;
-                    l_rdclk_phase_value_u8[l_rank_group][4][1][1] = l_value_n1_u8;
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_4, l_data_buffer_64), "getScom Failed!");
-
-                    // Grabbing 2 nibbles of the same byte and making them equal the same lowest value
-                    l_data_buffer_64.extractToRight<49, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<53, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][4][0][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][4][0][1] = l_value_n1_u8;
-                    l_data_buffer_64.extractToRight<57, 3>(l_value_n0_u8);
-                    l_data_buffer_64.extractToRight<61, 3>(l_value_n1_u8);
-                    l_gate_delay_value_u8[l_rank_group][4][1][0] = l_value_n0_u8;
-                    l_gate_delay_value_u8[l_rank_group][4][1][1] = l_value_n1_u8;
-
-                }//if rank group exists
+                        FAPI_TRY(fapi2::getScom(i_target, l_dqs_gate_delay[l_port][l_rank_group][l_block], l_data_buffer_64),
+                                 "getScom Failed!");
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N0,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N0_LEN>
+                                                        (l_gate_delay_value_u8[l_rank_group][l_block][0][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N1,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N1_LEN>
+                                                        (l_gate_delay_value_u8[l_rank_group][l_block][0][1]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N2,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N2_LEN>
+                                                        (l_gate_delay_value_u8[l_rank_group][l_block][1][0]);
+                        l_data_buffer_64.extractToRight<CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N3,
+                                                        CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0_01_N3_LEN>
+                                                        (l_gate_delay_value_u8[l_rank_group][l_block][1][1]);
+                    } //for block
+                } //if rank group exists
             } // for rank group
 
             // Determine rank and rank group matching
@@ -1486,87 +1060,13 @@ extern "C" {
                 {
                     for (l_nibble = 0; l_nibble < MAX_NIBBLES_PER_BYTE; l_nibble ++)
                     {
-                        for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+                        for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
                         {
                             //Check if rank group exists
                             if(l_primary_ranks_array[l_rank_group][l_port] != 255)
                             {
-                                if ( l_port == 0 )
-                                {
-                                    if ( l_rank_group == 0 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4;
-
-                                    }
-                                    else if ( l_rank_group == 1 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4;
-
-                                    }
-                                    else if ( l_rank_group == 2 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4;
-
-                                    }
-                                    else if ( l_rank_group == 3 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4;
-                                    }
-                                }
-                                else if (l_port == 1 )
-                                {
-
-                                    if ( l_rank_group == 0 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4;
-                                    }
-                                    else if ( l_rank_group == 1 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4;
-                                    }
-                                    else if ( l_rank_group == 2 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4;
-                                    }
-                                    else if ( l_rank_group == 3 )
-                                    {
-                                        l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0;
-                                        l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1;
-                                        l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2;
-                                        l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3;
-                                        l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4;
-                                    }
-                                }
-
-                                l_lane = l_byte * 8 + l_nibble * 4;
+                                // l_lane is not const because it's an i/o in mss_c4_phy below
+                                uint8_t l_lane = l_byte * BITS_PER_BYTE + l_nibble * BITS_PER_NIBBLE;
                                 l_input_type_e = WR_DQ;
                                 l_flag = 1;
                                 // C4 DQ to lane/block (l_flag = 0) in PHY or lane/block to C4 DQ (l_flag = 1)
@@ -1595,45 +1095,16 @@ extern "C" {
                                     l_disable_value_u8[l_rank_group][l_block][l_byte][l_nibble] = 0x00;
                                 }
 
-                                //BLOCK 0
-                                FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_0, l_data_buffer_64), "getScom failed!");
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][0][0][0], 48, 4), "insertFromRight failed!");
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][0][0][1], 52, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][0][1][0], 56, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][0][1][1], 60, 4));
-                                FAPI_TRY(fapi2::putScom(i_target, l_DISABLE_ADDR_0, l_data_buffer_64));
-
-                                //BLOCK 1
-                                FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_1, l_data_buffer_64));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][1][0][0], 48, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][1][0][1], 52, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][1][1][0], 56, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][1][1][1], 60, 4));
-                                FAPI_TRY(fapi2::putScom(i_target, l_DISABLE_ADDR_1, l_data_buffer_64));
-
-                                //BLOCK 2
-                                FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_2, l_data_buffer_64));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][2][0][0], 48, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][2][0][1], 52, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][2][1][0], 56, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][2][1][1], 60, 4));
-                                FAPI_TRY(fapi2::putScom(i_target, l_DISABLE_ADDR_2, l_data_buffer_64));
-
-                                //BLOCK 3
-                                FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_3, l_data_buffer_64));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][3][0][0], 48, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][3][0][1], 52, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][3][1][0], 56, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][3][1][1], 60, 4));
-                                FAPI_TRY(fapi2::putScom(i_target, l_DISABLE_ADDR_3, l_data_buffer_64));
-
-                                //Block 4
-                                FAPI_TRY(fapi2::getScom(i_target, l_DISABLE_ADDR_4, l_data_buffer_64));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][4][0][0], 48, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][4][0][1], 52, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][4][1][0], 56, 4));
-                                FAPI_TRY(l_data_buffer_64.insertFromRight(l_disable_value_u8[l_rank_group][4][1][1], 60, 4));
-                                FAPI_TRY(fapi2::putScom(i_target, l_DISABLE_ADDR_4, l_data_buffer_64));
+                                for(uint8_t l_block_num = 0; l_block_num < MAX_BLOCKS_PER_RANK; l_block_num++)
+                                {
+                                    FAPI_TRY(fapi2::getScom(i_target, l_disable_reg[l_port][l_rank_group][l_block_num], l_data_buffer_64),
+                                             "getScom failed!");
+                                    l_data_buffer_64.insertFromRight<48, 4>(l_disable_value_u8[l_rank_group][l_block_num][0][0]);
+                                    l_data_buffer_64.insertFromRight<52, 4>(l_disable_value_u8[l_rank_group][l_block_num][0][1]);
+                                    l_data_buffer_64.insertFromRight<56, 4>(l_disable_value_u8[l_rank_group][l_block_num][1][0]);
+                                    l_data_buffer_64.insertFromRight<60, 4>(l_disable_value_u8[l_rank_group][l_block_num][1][1]);
+                                    FAPI_TRY(fapi2::putScom(i_target, l_disable_reg[l_port][l_rank_group][l_block_num], l_data_buffer_64));
+                                }
                             } // end if rank group exists
                         } // end for rank group
                     } // end for nibble
@@ -1642,7 +1113,7 @@ extern "C" {
 
 
             //Re-run DQS ALIGN for only rank_group/ports that had a disable.
-            for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+            for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
             {
                 l_group = 255;
 
@@ -1671,73 +1142,29 @@ extern "C" {
                 {
                     FAPI_DBG("WR LVL DISABLE WORKAROUND: Re-Running DQS ALIGN on rank_group: %d port: %d", l_group, l_port);
 
-                    //Clearing any status or errors bits that may have occured in previous training subtest.
-                    //clear status reg
-                    FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_STATUS[l_port], l_data_buffer_64));
-
-                    l_data_buffer_64.clearBit<48, 4>();
-                    FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_STATUS[l_port], l_data_buffer_64));
-
-                    //clear error reg
-                    FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_ERROR[l_port], l_data_buffer_64));
-
-                    l_data_buffer_64.clearBit<48, 11>();
-                    l_data_buffer_64.clearBit<60, 4>();
-                    FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_ERROR[l_port], l_data_buffer_64));
-
-                    //clear other port
-                    FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0_REVERSED[l_port], l_data_buffer_64));
-
-                    l_data_buffer_64.clearBit<48>();
-                    l_data_buffer_64.clearBit<50>();
-                    l_data_buffer_64.clearBit<51>();
-                    l_data_buffer_64.clearBit<52>();
-                    l_data_buffer_64.clearBit<53>();
-                    l_data_buffer_64.clearBit<54>();
-                    l_data_buffer_64.clearBit<55>();
-                    l_data_buffer_64.clearBit<58>();
-                    l_data_buffer_64.clearBit<60>();
-                    l_data_buffer_64.clearBit<61>();
-                    l_data_buffer_64.clearBit<62>();
-                    l_data_buffer_64.clearBit<63>();
-                    FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0_REVERSED[l_port], l_data_buffer_64));
-
+                    FAPI_TRY(clear_status_and_error_regs(i_target, l_port), "Failed to clear cal error and status regs on %s",
+                             mss::c_str(i_target));
 
                     //Setup the Config Reg bit for the only cal step we want
-                    FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64));
+                    FAPI_TRY(fapi2::getScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64),
+                             "Failed to getscom INIT_CAL_CONFIG0 on %s", mss::c_str(i_target));
 
                     //Clear training cnfg
-                    l_data_buffer_64.clearBit<48>();
-                    l_data_buffer_64.setBit<50>();  // rerun dqs align
-                    l_data_buffer_64.clearBit<51>();
-                    l_data_buffer_64.clearBit<52>();
-                    l_data_buffer_64.clearBit<53>();
-                    l_data_buffer_64.clearBit<54>();
-                    l_data_buffer_64.clearBit<55>();
-                    l_data_buffer_64.clearBit<60>();
-                    l_data_buffer_64.clearBit<61>();
-                    l_data_buffer_64.clearBit<62>();
-                    l_data_buffer_64.clearBit<63>();
+                    l_data_buffer_64.clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>().
+                    setBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>(). //Rerun DQS_ALIGN
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>().
+                    clearBit<CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR_LEN>();  // rerun dqs align
 
-                    if(l_group == 0)
-                    {
-                        l_data_buffer_64.setBit<60>();
-                    }
-                    else if(l_group == 1)
-                    {
-                        l_data_buffer_64.setBit<61>();
-                    }
-                    else if(l_group == 2)
-                    {
-                        l_data_buffer_64.setBit<62>();
-                    }
-                    else if(l_group == 3)
-                    {
-                        l_data_buffer_64.setBit<63>();
-                    }
+                    FAPI_TRY(l_data_buffer_64.setBit(CEN_MBA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + l_group));
 
                     //Set the config register
-                    FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64));
+                    FAPI_TRY(fapi2::putScom(i_target, INIT_CAL_CONFIG0[l_port], l_data_buffer_64),
+                             "Failed to putscom INIT_CAL_CONFIG0 on %s", mss::c_str(i_target));
 
                     FAPI_TRY(mss_ccs_inst_arry_0(i_target,
                                                  l_instruction_number,
@@ -1771,8 +1198,8 @@ extern "C" {
                     FAPI_TRY(mss_execute_ccs_inst_array( i_target, NUM_POLL, 60));
                     //Error handling for mss_ccs_inst built into mss_funcs
 
-                    //Check to see if the training errored out
-                    FAPI_TRY(mss_check_error_status(i_target, l_port, l_group, l_cur_cal_step, l_cur_error_status, 1));
+                    //Check to see if the training errored out, no dqs align workaround.
+                    FAPI_TRY(mss_check_error_status(i_target, l_port, l_group, l_cur_cal_step, l_cur_error_status, max_retries));
 
                     if (l_cur_error_status == MSS_INIT_CAL_FAIL)
                     {
@@ -1791,7 +1218,7 @@ extern "C" {
                 {
                     for (l_nibble = 0; l_nibble < MAX_NIBBLES_PER_BYTE; l_nibble ++)
                     {
-                        for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+                        for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
                         {
                             for (l_nibble_dq = 0; l_nibble_dq < 4; l_nibble_dq ++)
                             {
@@ -1805,7 +1232,7 @@ extern "C" {
                                              l_nibble, l_dqsclk_phase_value_u8[l_rank_group][l_block][l_byte][l_nibble]);
 
                                     //SWAPPING DQSCLK PHASE SELECT
-                                    for (l_rg = 0; l_rg < MAX_RANKS_PER_DIMM; l_rg ++)
+                                    for (l_rg = 0; l_rg < NUM_RANK_GROUPS; l_rg ++)
                                     {
                                         FAPI_DBG("WR LVL DISABLE WORKAROUND: DQSCLK possible replacement value: %d",
                                                  l_dqsclk_phase_value_u8[l_rg][l_block][l_byte][l_nibble]);
@@ -1827,7 +1254,7 @@ extern "C" {
                                              l_nibble, l_dqsclk_phase_value_u8[l_rank_group][l_block][l_byte][l_nibble]);
 
                                     //SWAPPING RDCLK PHASE SELECT
-                                    for (l_rg = 0; l_rg < MAX_RANKS_PER_DIMM; l_rg ++)
+                                    for (l_rg = 0; l_rg < NUM_RANK_GROUPS; l_rg ++)
                                     {
                                         FAPI_DBG("WR LVL DISABLE WORKAROUND: RDCLK possible replacement value: %d",
                                                  l_rdclk_phase_value_u8[l_rg][l_block][l_byte][l_nibble]);
@@ -1848,7 +1275,7 @@ extern "C" {
                                              l_byte, l_nibble, l_dqsclk_phase_value_u8[l_rank_group][l_block][l_byte][l_nibble]);
 
                                     //SWAPPING RDCLK PHASE SELECT
-                                    for (l_rg = 0; l_rg < MAX_RANKS_PER_DIMM; l_rg ++)
+                                    for (l_rg = 0; l_rg < NUM_RANK_GROUPS; l_rg ++)
                                     {
                                         FAPI_DBG("WR LVL DISABLE WORKAROUND: GATE DELAY possible replacement value: %d",
                                                  l_gate_delay_value_u8[l_rg][l_block][l_byte][l_nibble]);
@@ -1873,12 +1300,14 @@ extern "C" {
                                     if (l_curr_bit)
                                     {
 
-                                        FAPI_DBG("WR LVL DISABLE WORKAROUND: DQ/DQS SWAP RANK_GROUP: %d BLOCK: %d BYTE: %d NIBBLE: %d DISABLE VALUE: 0x%02X",
-                                                 l_rank_group, l_block, l_byte, l_nibble, l_disable_old_value_u8[l_rank_group][l_block][l_byte][l_nibble]);
+                                        FAPI_DBG("%s WR LVL DISABLE WORKAROUND: DQ/DQS SWAP RANK_GROUP: %d BLOCK: %d BYTE: %d NIBBLE: %d DISABLE VALUE: 0x%02X",
+                                                 mss::c_str(i_target), l_rank_group, l_block, l_byte, l_nibble,
+                                                 l_disable_old_value_u8[l_rank_group][l_block][l_byte][l_nibble]);
 
                                         //Figure out which lane to investigate
                                         l_index_u8 = l_nibble_dq + 4 * l_nibble + 8 * l_byte;
-                                        l_lane = l_index_u8;
+                                        // l_lane isn't const because it's an i/o in mss_c4_phy below
+                                        uint8_t l_lane = l_index_u8;
 
                                         l_input_type_e = WR_DQ;
                                         l_flag = 1;
@@ -1917,7 +1346,7 @@ extern "C" {
                                         FAPI_DBG("WR LVL DISABLE WORKAROUND: Value being replaced C4: %d C4 DQS: %d Rank:%d DQ DELAY VALUE: 0x%03X DQS DELAY VALUE: 0x%03X ",
                                                  l_index_u8, l_dqs_index, l_ranks_array[l_rank_group][0][0], l_old_delay_value_u32, l_old_DQS_delay_value_u32);
 
-                                        for (l_rg = 0; l_rg < MAX_RANKS_PER_DIMM; l_rg ++)
+                                        for (l_rg = 0; l_rg < NUM_RANK_GROUPS; l_rg ++)
                                         {
                                             l_access_type_e = READ;
                                             l_rank_2 = l_ranks_array[l_rg][0][0];
@@ -1979,264 +1408,32 @@ extern "C" {
             } // for each block
 
             //Scoming in the New Values
-            for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+            for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
             {
                 //Check if rank group exists
                 if(l_primary_ranks_array[l_rank_group][l_port] != 255)
                 {
-                    if ( l_port == 0 )
+                    for(uint8_t l_block; l_block < MAX_BLOCKS_PER_RANK; l_block++)
                     {
-                        if ( l_rank_group == 0 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4;
-                        }
-                    } // if port 0
-                    else if (l_port == 1 )
-                    {
-                        if ( l_rank_group == 0 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR0_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR1_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR2_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_DQSCLK_RD_PHASE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_0;
-                            l_DQSCLK_RD_PHASE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_1;
-                            l_DQSCLK_RD_PHASE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_2;
-                            l_DQSCLK_RD_PHASE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_3;
-                            l_DQSCLK_RD_PHASE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_RD_PHASE_SELECT_RANK_PAIR3_P1_4;
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_4;
-                            l_DISABLE_ADDR_0 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0;
-                            l_DISABLE_ADDR_1 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1;
-                            l_DISABLE_ADDR_2 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2;
-                            l_DISABLE_ADDR_3 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3;
-                            l_DISABLE_ADDR_4 = CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4;
-                        }
-                    } // if port 1
-
-                    //Block 0
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_0, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][0][0][0], 48, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][0][0][1], 52, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][0][1][0], 56, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][0][1][1], 60, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][0][0][0], 50, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][0][0][1], 54, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][0][1][0], 58, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][0][1][1], 62, 2));
-                    FAPI_TRY(fapi2::putScom(i_target, l_DQSCLK_RD_PHASE_ADDR_0, l_data_buffer_64));
+                        FAPI_TRY(fapi2::getScom(i_target, l_dqs_rd_phase_select[l_port][l_rank_group][l_block], l_data_buffer_64));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][l_block][0][0], 48, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][l_block][0][1], 52, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][l_block][1][0], 56, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][l_block][1][1], 60, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][l_block][0][0], 50, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][l_block][0][1], 54, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][l_block][1][0], 58, 2));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][l_block][1][1], 62, 2));
+                        FAPI_TRY(fapi2::putScom(i_target, l_dqs_rd_phase_select[l_port][l_rank_group][l_block], l_data_buffer_64));
 
 
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_0, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][0][0][0], 49, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][0][0][1], 53, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][0][1][0], 57, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][0][1][1], 61, 3));
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_0, l_data_buffer_64));
-
-
-                    //Block 1
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_1, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][1][0][0], 48, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][1][0][1], 52, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][1][1][0], 56, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][1][1][1], 60, 2));
-
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][1][0][0], 50, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][1][0][1], 54, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][1][1][0], 58, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][1][1][1], 62, 2));
-                    FAPI_TRY(fapi2::putScom(i_target, l_DQSCLK_RD_PHASE_ADDR_1, l_data_buffer_64));
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_1, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][1][0][0], 49, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][1][0][1], 53, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][1][1][0], 57, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][1][1][1], 61, 3));
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_1, l_data_buffer_64));
-
-
-                    //Block 2
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_2, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][2][0][0], 48, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][2][0][1], 52, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][2][1][0], 56, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][2][1][1], 60, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][2][0][0], 50, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][2][0][1], 54, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][2][1][0], 58, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][2][1][1], 62, 2));
-                    FAPI_TRY(fapi2::putScom(i_target, l_DQSCLK_RD_PHASE_ADDR_2, l_data_buffer_64));
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_2, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][2][0][0], 49, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][2][0][1], 53, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][2][1][0], 57, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][2][1][1], 61, 3));
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_2, l_data_buffer_64));
-
-                    //Block 3
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_3, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][3][0][0], 48, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][3][0][1], 52, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][3][1][0], 56, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][3][1][1], 60, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][3][0][0], 50, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][3][0][1], 54, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][3][1][0], 58, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][3][1][1], 62, 2));
-                    FAPI_TRY(fapi2::putScom(i_target, l_DQSCLK_RD_PHASE_ADDR_3, l_data_buffer_64));
-
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_3, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][3][0][0], 49, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][3][0][1], 53, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][3][1][0], 57, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][3][1][1], 61, 3));
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_3, l_data_buffer_64));
-
-                    //Block 4
-                    FAPI_TRY(fapi2::getScom(i_target, l_DQSCLK_RD_PHASE_ADDR_4, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][4][0][0], 48, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][4][0][1], 52, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][4][1][0], 56, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_dqsclk_phase_value_u8[l_rank_group][4][1][1], 60, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][4][0][0], 50, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][4][0][1], 54, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][4][1][0], 58, 2));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_rdclk_phase_value_u8[l_rank_group][4][1][1], 62, 2));
-                    FAPI_TRY(fapi2::putScom(i_target, l_DQSCLK_RD_PHASE_ADDR_4, l_data_buffer_64));
-
-                    FAPI_TRY(fapi2::getScom(i_target, l_GATE_DELAY_ADDR_4, l_data_buffer_64));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][4][0][0], 49, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][4][0][1], 53, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][4][1][0], 57, 3));
-                    FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][4][1][1], 61, 3));
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_4, l_data_buffer_64));
-
+                        FAPI_TRY(fapi2::getScom(i_target, l_dqs_gate_delay[l_port][l_rank_group][l_block], l_data_buffer_64));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][l_block][0][0], 49, 3));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][l_block][0][1], 53, 3));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][l_block][1][0], 57, 3));
+                        FAPI_TRY(l_data_buffer_64.insertFromRight(l_gate_delay_value_u8[l_rank_group][l_block][1][1], 61, 3));
+                        FAPI_TRY(fapi2::putScom(i_target, l_dqs_gate_delay[l_port][l_rank_group][l_block], l_data_buffer_64));
+                    }
                 } // if rank group exists
             } // for each rank group
         } // for each port
@@ -2255,11 +1452,6 @@ extern "C" {
         //Across all configed rank pairs, in order
         uint8_t l_primary_ranks_array[4][2]; //primary_ranks_array[group][port]
         fapi2::buffer<uint64_t> l_data_buffer_64;
-        uint64_t l_GATE_DELAY_ADDR_0 = 0;
-        uint64_t l_GATE_DELAY_ADDR_1 = 0;
-        uint64_t l_GATE_DELAY_ADDR_2 = 0;
-        uint64_t l_GATE_DELAY_ADDR_3 = 0;
-        uint64_t l_GATE_DELAY_ADDR_4 = 0;
         uint8_t l_port = 0;
         uint8_t l_rank_group = 0;
 
@@ -2273,108 +1465,27 @@ extern "C" {
         //Hit the reset button for wr_lvl values
         //These won't reset until the next run of wr_lvl
         FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_WC_CONFIG2_P0, l_data_buffer_64));
-        FAPI_TRY(l_data_buffer_64.insertFromRight((uint8_t) 0xFF, 63, 1));
+        l_data_buffer_64.insertFromRight<CEN_MBA_DDRPHY_WC_CONFIG2_P0_EN_RESET_WR_DELAY_WL, 1>((uint8_t) 0xFF);
         FAPI_TRY(fapi2::putScom(i_target, CEN_MBA_DDRPHY_WC_CONFIG2_P0, l_data_buffer_64));
 
         FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_WC_CONFIG2_P1, l_data_buffer_64));
-        FAPI_TRY(l_data_buffer_64.insertFromRight((uint8_t) 0xFF, 63, 1));
+        l_data_buffer_64.insertFromRight<CEN_MBA_DDRPHY_WC_CONFIG2_P0_EN_RESET_WR_DELAY_WL, 1>((uint8_t) 0xFF);
         FAPI_TRY(fapi2::putScom(i_target, CEN_MBA_DDRPHY_WC_CONFIG2_P1, l_data_buffer_64));
 
         //Scoming in zeros into the Gate delay l_registers.
         for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port ++)
         {
-            for(l_rank_group = 0; l_rank_group < MAX_RANKS_PER_DIMM; l_rank_group ++)
+            for(l_rank_group = 0; l_rank_group < NUM_RANK_GROUPS; l_rank_group ++)
             {
                 //Check if rank group exists
                 if(l_primary_ranks_array[l_rank_group][l_port] != 255)
                 {
-                    if ( l_port == 0 )
-                    {
-                        if ( l_rank_group == 0 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P0_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P0_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P0_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P0_4;
-                        }
-                    } // if port 0
-                    else if (l_port == 1 )
-                    {
-                        if ( l_rank_group == 0 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP0_P1_4;
-                        }
-                        else if ( l_rank_group == 1 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP1_P1_4;
-                        }
-                        else if ( l_rank_group == 2 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP2_P1_4;
-                        }
-                        else if ( l_rank_group == 3 )
-                        {
-                            l_GATE_DELAY_ADDR_0 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_0;
-                            l_GATE_DELAY_ADDR_1 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_1;
-                            l_GATE_DELAY_ADDR_2 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_2;
-                            l_GATE_DELAY_ADDR_3 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_3;
-                            l_GATE_DELAY_ADDR_4 = CEN_MBA_DDRPHY_DP18_DQS_GATE_DELAY_RP3_P1_4;
-                        }
-                    } // if port 1
-
                     l_data_buffer_64.flush<0>();
 
-                    //BLOCK 0
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_0, l_data_buffer_64));
-
-                    //BLOCK 1
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_1, l_data_buffer_64));
-
-                    //BLOCK 2
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_2, l_data_buffer_64));
-
-                    //BLOCK 3
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_3, l_data_buffer_64));
-
-                    //BLOCK 4
-                    FAPI_TRY(fapi2::putScom(i_target, l_GATE_DELAY_ADDR_4, l_data_buffer_64));
+                    for(uint8_t l_block = 0; l_block < MAX_BLOCKS_PER_RANK; l_block++)
+                    {
+                        FAPI_TRY(fapi2::putScom(i_target, l_dqs_gate_delay[l_port][l_rank_group][l_block], l_data_buffer_64));
+                    }
                 } // if rank group exists
             } // rank group
         } // port
@@ -2441,7 +1552,16 @@ extern "C" {
         uint8_t l_wr_lvl = 0x00; //write leveling enable
         uint8_t l_q_off = 0x00; //Qoff - Output buffer Enable
         uint8_t l_dram_rtt_wr = 0x00;
-        uint32_t NUM_POLL = 100;
+        constexpr uint64_t const MR1_ADDRESS[MAX_PORTS_PER_MBA][NUM_RANK_GROUPS] =
+        {
+            {CEN_MBA_DDRPHY_PC_MR1_PRI_RP0_P0, CEN_MBA_DDRPHY_PC_MR1_PRI_RP1_P0, CEN_MBA_DDRPHY_PC_MR1_PRI_RP2_P0, CEN_MBA_DDRPHY_PC_MR1_PRI_RP3_P0},
+            {CEN_MBA_DDRPHY_PC_MR1_PRI_RP0_P1, CEN_MBA_DDRPHY_PC_MR1_PRI_RP1_P1, CEN_MBA_DDRPHY_PC_MR1_PRI_RP2_P1, CEN_MBA_DDRPHY_PC_MR1_PRI_RP3_P1}
+        };
+        constexpr uint64_t const MR2_ADDRESS[MAX_PORTS_PER_MBA][NUM_RANK_GROUPS] =
+        {
+            {CEN_MBA_DDRPHY_PC_MR2_PRI_RP0_P0, CEN_MBA_DDRPHY_PC_MR2_PRI_RP1_P0, CEN_MBA_DDRPHY_PC_MR2_PRI_RP2_P0, CEN_MBA_DDRPHY_PC_MR2_PRI_RP3_P0},
+            {CEN_MBA_DDRPHY_PC_MR2_PRI_RP0_P1, CEN_MBA_DDRPHY_PC_MR2_PRI_RP1_P1, CEN_MBA_DDRPHY_PC_MR2_PRI_RP2_P1, CEN_MBA_DDRPHY_PC_MR2_PRI_RP3_P1}
+        };
 
         FAPI_TRY(l_rasn_1.clearBit(0));
         FAPI_TRY(l_casn_1.clearBit(0));
@@ -2497,44 +1617,7 @@ extern "C" {
 
         //MRS1
         // Get contents of MRS 1 Shadow Reg
-        if (i_port_number == 0)
-        {
-            if (i_rank_pair_group == 0)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP0_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 1)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP1_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 2)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP2_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 3)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP3_P0, l_data_buffer_64));
-            }
-        }
-        else if (i_port_number == 1)
-        {
-            if (i_rank_pair_group == 0)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP0_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 1)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP1_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 2)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP2_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 3)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR1_PRI_RP3_P1, l_data_buffer_64));
-            }
-        }
+        FAPI_TRY(fapi2::getScom(i_target, MR1_ADDRESS[i_port_number][i_rank_pair_group], l_data_buffer_64));
 
         l_data_buffer_64.reverse();
         FAPI_TRY(l_mrs1_16.insert(uint64_t(l_data_buffer_64), 0, 16, 0));
@@ -2651,44 +1734,7 @@ extern "C" {
         }
 
         // Get contents of MRS 2 Shadow Reg
-        if (i_port_number == 0)
-        {
-            if (i_rank_pair_group == 0)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP0_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 1)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP1_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 2)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP2_P0, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 3)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP3_P0, l_data_buffer_64));
-            }
-        }
-        else if (i_port_number == 1)
-        {
-            if (i_rank_pair_group == 0)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP0_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 1)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP1_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 2)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP2_P1, l_data_buffer_64));
-            }
-            else if (i_rank_pair_group == 3)
-            {
-                FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_DDRPHY_PC_MR2_PRI_RP3_P1, l_data_buffer_64));
-            }
-        }
+        FAPI_TRY(fapi2::getScom(i_target, MR2_ADDRESS[i_port_number][i_rank_pair_group], l_data_buffer_64));
 
         l_data_buffer_64.reverse();
         FAPI_TRY(l_mrs2_16.insert(uint64_t(l_data_buffer_64), 0, 16, 0));
@@ -2812,7 +1858,8 @@ extern "C" {
         if ( ( l_address_mirror_map[i_port_number][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
         {
             //dimm and rank are only for print trace only, functionally not needed
-            FAPI_TRY(mss_address_mirror_swizzle(i_target, l_address_16, l_bank_3));
+            FAPI_TRY(mss_address_mirror_swizzle(i_target, l_address_16, l_bank_3), "mss_address_mirror_swizzle failed on %s",
+                     mss::c_str(i_target));
         }
 
         FAPI_TRY(l_ccs_end_1.setBit(0));
@@ -2844,7 +1891,6 @@ extern "C" {
 
         FAPI_TRY(mss_execute_ccs_inst_array( i_target, NUM_POLL, 60));
         //Error handling for mss_ccs_inst built into mss_funcs
-
         io_ccs_inst_cnt = 0;
     fapi_try_exit:
         return fapi2::current_err;
@@ -2857,81 +1903,6 @@ extern "C" {
     ///
     fapi2::ReturnCode mss_set_bbm_regs (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba_target)
     {
-        // disable0=dq bits, disable1=dqs(+,-)
-        // wrclk_en=dqs follows quad, same as disable0
-        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][MAX_BLOCKS_PER_RANK] =
-        {
-            /* port 0 */
-            {
-                // primary rank pair 0
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4
-                },
-                // primary rank pair 1
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4
-                },
-                // primary rank pair 2
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4
-                },
-                // primary rank pair 3
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4
-                }
-            },
-            /* port 1 */
-            {
-                // primary rank pair 0
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4
-                },
-                // primary rank p1
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4
-                },
-                // primary rank pair 2
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4
-                },
-                // primary rank pair 3
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4
-                }
-            }
-        };
         const uint8_t l_rg_invalid[] =
         {
             fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID,
@@ -2962,8 +1933,7 @@ extern "C" {
         fapi2::variable_buffer l_db_reg_rank6(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_rank7(LANES_PER_PORT);
         fapi2::buffer<uint64_t> l_put_mask;
-        uint8_t l_prg[MAX_RANKS_PER_DIMM][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_target_centaur;
+        uint8_t l_prg[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
         uint8_t l_is_clean = 1;
         uint8_t l_rank0_invalid = 1; //0 = valid, 1 = invalid
         uint8_t l_rank1_invalid = 1;
@@ -3001,35 +1971,15 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_mba_target, l_prg[2]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_mba_target, l_prg[3]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_mba_target, l_dram_width));
-        l_target_centaur = i_mba_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
 
-        switch (l_dram_width)
-        {
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4:
-                l_dram_width = 4;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8:
-                l_dram_width = 8;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X16:
-                l_dram_width = 16;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X32:
-                l_dram_width = 32;
-                break;
-
-            default:
-                //DECONFIG and FFDC INFO
-                FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_SETBBM().
-                            set_TARGET_MBA_ERROR(i_mba_target).
-                            set_WIDTH(l_dram_width),
-                            "ATTR_EFF_DRAM_WIDTH is invalid %u",
-                            l_dram_width);
-        }
+        //DECONFIG and FFDC INFO
+        FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4
+                    || l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8,
+                    fapi2::CEN_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_SETBBM().
+                    set_TARGET_MBA_ERROR(i_mba_target).
+                    set_WIDTH(l_dram_width),
+                    "ATTR_EFF_DRAM_WIDTH is invalid %u",
+                    l_dram_width);
 
         l_data_buffer.flush<0>();
 
@@ -3046,7 +1996,7 @@ extern "C" {
 
             // Gather all ranks first
             // loop through primary ranks [0:3]
-            for (l_prank = 0; l_prank < MAX_RANKS_PER_DIMM; l_prank ++ )
+            for (l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_is_clean = 1;
 
@@ -3139,7 +2089,7 @@ extern "C" {
             }
 
             // loop through primary ranks [0:3]
-            for (uint8_t prank = 0; l_prank < MAX_RANKS_PER_DIMM; l_prank ++ )
+            for (uint8_t prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 l_rank = l_prg[l_prank][l_port] & 0x03;
@@ -3223,7 +2173,7 @@ extern "C" {
 
                         l_wrclk_nmask = 0xF000 >> (4 * n);
 
-                        if (l_dram_width != 4) // x8 only disable the wrclk
+                        if (l_dram_width != fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4) // x8 only disable the wrclk
                         {
 
                             if (((l_wrclk_nmask & l_data) >> (4 * (3 - n))) == 0x0F)
@@ -3242,7 +2192,7 @@ extern "C" {
                         {
                             uint16_t l_nmask = 0xF000 >> (4 * n);
 
-                            if (l_dram_width == 4)
+                            if (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4)
                             {
                                 if ((l_nmask & l_data) == l_nmask)      // bad bit(s) in nibble
                                 {
@@ -3415,82 +2365,6 @@ extern "C" {
     fapi2::ReturnCode mss_get_bbm_regs (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba_target,
                                         const uint8_t i_training_success)
     {
-        // Registers to Flash.
-        const uint64_t l_disable_reg[MAX_PORTS_PER_MBA][MAX_RANKS_PER_DIMM][MAX_BLOCKS_PER_RANK] =
-        {
-            /* port 0 */
-            {
-                // primary rank pair 0
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P0_4
-                },
-                // primary rank pair 1
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P0_4
-                },
-                // primary rank pair 2
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P0_4
-                },
-                // primary rank pair 3
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P0_4
-                }
-            },
-            /* port 1 */
-            {
-                // primary rank pair 0
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP0_P1_4
-                },
-                // primary rank pair 1
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP1_P1_4
-                },
-                // primary rank pair 2
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP2_P1_4
-                },
-                // primary rank pair 3
-                {
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_0,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_1,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_2,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_3,
-                    CEN_MBA_DDRPHY_DP18_DATA_BIT_DISABLE0_RP3_P1_4
-                }
-
-            }
-        };
-
         const uint8_t l_rg_invalid[] =
         {
             fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID,
@@ -3502,7 +2376,7 @@ extern "C" {
         fapi2::buffer<uint64_t> l_data_buffer;
         fapi2::variable_buffer l_db_reg(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_vpd(LANES_PER_PORT);
-        uint8_t l_prg[MAX_RANKS_PER_DIMM][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
+        uint8_t l_prg[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0};      // primary rank group values
         uint8_t l_dram_width = 0;
         uint8_t l_dimm = 0;
         uint8_t l_rank = 0;
@@ -3552,31 +2426,12 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_mba_target, l_prg[3]));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_mba_target, l_dram_width));
 
-        switch (l_dram_width)
-        {
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4:
-                l_dram_width = 4;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8:
-                l_dram_width = 8;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X16:
-                l_dram_width = 16;
-                break;
-
-            case fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X32:
-                l_dram_width = 32;
-                break;
-
-            default:
-                FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_GETBBM().
-                            set_TARGET_MBA_ERROR(i_mba_target).
-                            set_WIDTH(l_dram_width),
-                            "ATTR_EFF_DRAM_WIDTH is invalid %u", l_dram_width);
-        }
+        FAPI_ASSERT(l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4
+                    || l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8,
+                    fapi2::CEN_MSS_DRAMINIT_TRAINING_DRAM_WIDTH_INPUT_ERROR_GETBBM().
+                    set_TARGET_MBA_ERROR(i_mba_target).
+                    set_WIDTH(l_dram_width),
+                    "ATTR_EFF_DRAM_WIDTH is invalid %u", l_dram_width);
 
         l_data_buffer.flush<0>();
 
@@ -3602,7 +2457,7 @@ extern "C" {
 
 
             // loop through primary ranks [0:3]
-            for (l_prank = 0; l_prank < MAX_RANKS_PER_DIMM; l_prank ++ )
+            for (l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 l_rank = l_prg[l_prank][l_port] & 0x03;
@@ -3739,7 +2594,7 @@ extern "C" {
 
 
             // loop through primary ranks [0:3]
-            for (uint8_t l_prank = 0; l_prank < MAX_RANKS_PER_DIMM; l_prank ++ )
+            for (uint8_t l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 l_rank = l_prg[l_prank][l_port] & 0x03;
@@ -3859,7 +2714,7 @@ extern "C" {
                         {
                             FAPI_DBG("BYTE DISABLE WORKAROUND: Found a non-zero, non-F nibble. Applying to all ranks.");
 
-                            if (l_dram_width == 4)
+                            if (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4)
                             {
                                 FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x4 so turning it to a 0xF. PRE DATA: 0x%04X", l_data);
                                 l_data = l_data  | l_nmask;
@@ -3879,7 +2734,7 @@ extern "C" {
                                          l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
 
                             }
-                            else if (l_dram_width == 8)
+                            else if (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8)
                             {
                                 FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x8 so leaving it the same.");
 
@@ -3952,7 +2807,7 @@ extern "C" {
             }// end of primary rank loop
 
             // loop through primary ranks [0:3]
-            for (uint8_t l_prank = 0; l_prank < MAX_RANKS_PER_DIMM; l_prank ++ )
+            for (uint8_t l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 uint8_t l_rank = l_prg[l_prank][l_port] & 0x03;
@@ -4299,25 +3154,27 @@ extern "C" {
     fapi2::ReturnCode mss_setup_dqs_offset(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
     {
         fapi2::buffer<uint64_t> l_buffer;
-        uint64_t l_scom_addr_array[10] = {CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_0 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_1 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_2 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_3 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_4 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_0 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_1 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_2 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_3 ,
-                                          CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_4
-                                         };
+        constexpr uint8_t const NUM_DQSCLK_REGS = MAX_PORTS_PER_MBA * DP18_INSTANCES; //2 * 5 = 10
+        uint64_t l_scom_addr_array[NUM_DQSCLK_REGS] = {CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_0 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_1 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_2 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_3 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_4 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_0 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_1 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_2 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_3 ,
+                                                       CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P1_4
+                                                      };
 
         FAPI_INF("DDR4: setting up DQS offset to be 16");
 
-        for(uint8_t scom_addr = 0; scom_addr < 10; ++scom_addr)
+        for(uint8_t scom_addr = 0; scom_addr < NUM_DQSCLK_REGS; ++scom_addr)
         {
             FAPI_TRY(fapi2::getScom(i_target, l_scom_addr_array[scom_addr], l_buffer));
             //Setting up CCS mode
-            FAPI_TRY(l_buffer.insertFromRight ((uint32_t)16, 49, 7));
+            l_buffer.insertFromRight<CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_0_01_DQS, CEN_MBA_DDRPHY_DP18_DQSCLK_OFFSET_P0_0_01_DQS_LEN>((
+                        uint32_t)16);
             FAPI_TRY(fapi2::putScom(i_target, l_scom_addr_array[scom_addr], l_buffer));
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,13 +98,44 @@ fapi2::ReturnCode mss_ddr4_modify_mrs_pda(const fapi2::Target<fapi2::TARGET_TYPE
 /// @param[in]  Port Number
 /// @param[in]  Rank Number
 /// @param[in]  Rank Pair group
-/// @param[in, out]  CCS instruction Number
-/// @param[in, out]  Original RTT NOM
+/// @param[in,out]  CCS instruction Number
+/// @param[in,out]  Original RTT NOM
 /// @return ReturnCode
 fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
         const uint8_t i_mbaPosition,
         const uint32_t i_port_number, const uint8_t i_rank, const uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt,
         uint8_t& io_dram_rtt_nom_original);
+///
+/// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (configure) 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_port,
+        const uint32_t i_rank_pair_group,
+        const uint8_t i_state,
+        uint32_t& io_ccs_inst_cnt);
+
+
+///
+/// @brief Send mrs to non calibrating ranks to turn wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (confiugre) or 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                  const uint8_t i_port,
+                                  const uint32_t i_rank_pair_group,
+                                  const uint8_t i_state,
+                                  uint32_t& io_ccs_inst_cnt);
+
 #endif /* _MSS_DDR4_FUNCS_H */
 
 

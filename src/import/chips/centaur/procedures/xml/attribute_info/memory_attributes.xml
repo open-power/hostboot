@@ -2714,7 +2714,8 @@ Firmware notes: none</description>
 <attribute>
     <id>ATTR_CEN_MSS_CAL_STEP_ENABLE</id>
     <targetType>TARGET_TYPE_MBA</targetType>
-    <description>A bit vector denoting valid cal steps to run during dram_init_train. [0] EXT_ZQCAL
+    <description>A bit vector denoting valid cal steps to run during dram_init_train.
+[0] EXT_ZQCAL
 [1] WR_LEVEL
 [2] DQS_ALIGN
 [3] RDCLK_ALIGN
@@ -2724,6 +2725,7 @@ Firmware notes: none</description>
 [7] COARSE_RD
 bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
+    <enum>EXT_ZQCAL = 0, WR_LVL = 1, DQS_ALIGN = 2, RDCLK_ALIGN = 3, RD_CTR = 4, WR_CTR = 5, COARSE_WR = 6, COARSE_RD = 7</enum>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>

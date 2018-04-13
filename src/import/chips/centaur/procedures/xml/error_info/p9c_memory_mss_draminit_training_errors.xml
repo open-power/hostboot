@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -148,6 +148,37 @@
   <deconfigure>
     <target>TARGET_MBA_ERROR</target>
   </deconfigure>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_INVALID_INPUT_DATA</rc>
+  <description>Function received invalid input args.</description>
+  <ffdc>MBA_POSITION</ffdc>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_INVALID_PORT</rc>
+  <description>Function received invalid port arg.</description>
+  <ffdc>MBA_POSITION</ffdc>
+  <ffdc>PORT_POSITION</ffdc>
+  <callout>
+    <target>TARGET_MBA_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
 </hwpError>
 
 <hwpError>

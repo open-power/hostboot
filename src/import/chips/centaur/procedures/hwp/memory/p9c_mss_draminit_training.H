@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,19 +69,24 @@ extern "C"
     /// @param[in] i_group  Rank group
     /// @return fapi2::ReturnCode
     fapi2::ReturnCode mss_check_cal_status(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                           const uint8_t i_port, const uint8_t i_group,  mss_draminit_training_result& io_status);
+                                           const uint8_t i_port,
+                                           const uint8_t i_group,
+                                           mss_draminit_training_result& io_status);
 
     /// @brief Interprets initcal error register
     /// @param[in] i_target const reference to centaur.mba target
     /// @param[in] i_port Memory Port
     /// @param[in] i_group Memory Rank Group
-    /// @param[in] i_cur_cal_step   Step of init cal
+    /// @param[in,out] io_cur_cal_step   Step of init cal
     /// @param[in,out] io_status Cal Status
-    /// @param[in] i_max_cal_retry Max retry
+    /// @param[in,out] io_dqs_try Current num dqs_align attempts
     /// @return fapi2::ReturnCode
     fapi2::ReturnCode mss_check_error_status(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-            const uint8_t i_port, const uint8_t i_group,  const uint8_t i_cur_cal_step, mss_draminit_training_result& io_status,
-            const uint8_t i_max_cal_retry);
+            const uint8_t i_port,
+            const uint8_t i_group,
+            uint8_t& io_cur_cal_step,
+            mss_draminit_training_result& io_status,
+            uint8_t& io_dqs_try);
 
     /// @brief Places RTT_WR into RTT_NOM within MR1 before wr_lvl
     /// @param[in] i_target const reference to centaur.mba target
@@ -95,7 +100,10 @@ extern "C"
     /// @note and write rtt_wr to the rtt_nom value
     /// @note If the function argument dram_rtt_nom_original has any value besides 0xFF it will try to write that value to rtt_nom.
     fapi2::ReturnCode mss_rtt_nom_rtt_wr_swap( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-            const uint32_t i_port_number, const uint8_t i_rank, const uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt,
+            const uint32_t i_port_number,
+            const uint8_t i_rank,
+            const uint32_t i_rank_pair_group,
+            uint32_t& io_ccs_inst_cnt,
             uint8_t& io_dram_rtt_nom_original);
 
     /// @brief  DQS_CLK for each nibble of a byte is being adjusted to the lowest value for the given byte
@@ -112,20 +120,29 @@ extern "C"
     /// @param[in] i_target const reference to centaur.mba target
     /// @param[in] i_port Memory Port
     /// @param[in] i_dimm Memory Dimm
+    /// @param[in] i_rank Memory Rank
     /// @param[out] o_reg
     /// @param[out] is_clean
     /// @return fapi2::ReturnCode
-    fapi2::ReturnCode getC4dq2reg(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba, const uint8_t i_port,
-                                  const uint8_t i_dimm, const uint8_t i_rank, fapi2::variable_buffer& o_reg, uint8_t& is_clean);
+    fapi2::ReturnCode getC4dq2reg(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba,
+                                  const uint8_t i_port,
+                                  const uint8_t i_dimm,
+                                  const uint8_t i_rank,
+                                  fapi2::variable_buffer& o_reg,
+                                  uint8_t& is_clean);
 
     /// @brief  Converts the data from phy order (i_reg) to cen_c4_dq array for dimmSetBadDqBitmap to write flash with
     /// @param[in] i_target const reference to centaur.mba target
     /// @param[in] i_port Memory Port
     /// @param[in] i_dimm Memory Dimm
+    /// @param[in] i_rank Memory Rank
     /// @param[in] i_reg
     /// @return fapi2::ReturnCode
-    fapi2::ReturnCode setC4dq2reg(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba, const uint8_t i_port,
-                                  const uint8_t i_dimm, const uint8_t i_rank, const fapi2::variable_buffer& i_reg);
+    fapi2::ReturnCode setC4dq2reg(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba,
+                                  const uint8_t i_port,
+                                  const uint8_t i_dimm,
+                                  const uint8_t i_rank,
+                                  const fapi2::variable_buffer& i_reg);
     /// @brief Set bad bit mask
     /// @param[in] i_target const reference to centaur.mba target
     /// @return fapi2::ReturnCode
@@ -145,9 +162,35 @@ extern "C"
     /// @param[in] i_quad
     /// @param[out] o_lane DQS lane
     /// @return fapi2::ReturnCode
-    fapi2::ReturnCode mss_get_dqs_lane (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba, const uint8_t i_port,
-                                        const uint8_t i_block, const uint8_t i_quad, uint8_t& lane);
+    fapi2::ReturnCode mss_get_dqs_lane (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba,
+                                        const uint8_t i_port,
+                                        const uint8_t i_block,
+                                        const uint8_t i_quad,
+                                        uint8_t& lane);
 
+    ///
+    /// @brief Clear cal-related status and error regs
+    /// @param[in] i_mba Target MBA to clear
+    /// @param[in] i_port port to clear
+    /// @return fapi2::FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode clear_status_and_error_regs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba,
+            const uint8_t i_port);
+
+    ///
+    /// @brief Configure calibration register in phy
+    /// @param[in] i_target MBA Target to configure
+    /// @param[in] i_port Port to calibrate
+    /// @param[in] i_group Rank Group to calibrate
+    /// @param[in] i_cur_step Current calibration step
+    /// @param[in] i_cal_step_arr Cal steps to run
+    /// @return fapi2::FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode configure_cal_registers(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba,
+            const uint8_t i_port,
+            const uint8_t i_group,
+            const uint8_t l_cur_cal_step,
+            const fapi2::buffer<uint8_t>& i_cal_steps);
 
 
 } // extern "C"

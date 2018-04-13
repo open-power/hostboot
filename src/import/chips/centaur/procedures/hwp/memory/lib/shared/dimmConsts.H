@@ -26,8 +26,8 @@
 /// @file dimmConsts.H
 /// @brief DIMM Constants
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
-/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
 /// *HWP Consumed by: HB:CI
@@ -45,6 +45,7 @@ enum consts : size_t
     MAX_RANKS_PER_DIMM = 4,        ///< Maximum number of ranks on a DIMM
     NUM_RANK_GROUPS = 4,           ///< Maximum number of rank groups
     MAX_RANKS_PER_PORT = 8,        ///< Maximum number of ranks on a port
+    MAX_RANKS_PER_RANK_GROUP = 4,  ///< Maximum number of ranks in a rank group
     DIMM_DQ_RANK_BITMAP_SIZE = 10, ///< Size in bytes of the Bad DQ bitmap for a rank.
 
     BITS_PER_BYTE = 8,
@@ -169,5 +170,4 @@ enum sim_cycles : size_t
     DELAY_2000000SIMCYCLES = 2000000, ///< 2000000 sim cycle delay for sim mode  (100 usec if simclk = 20Ghz)
     DELAY_10000000SIMCYCLES = 10000000, ///< 10000000 sim cycle delay for sim mode
 };
-
 #endif
