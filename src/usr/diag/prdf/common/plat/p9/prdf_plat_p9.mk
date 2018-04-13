@@ -47,6 +47,7 @@ prd_obj += prdfLineDelete.o
 # rule plugin related
 prd_rule_plugin += prdfP9Proc.o
 prd_rule_plugin += prdfP9Pll.o
+prd_rule_plugin += prdfCenPll.o
 prd_rule_plugin += prdfCommonPlugins.o
 prd_rule_plugin += prdfLaneRepair.o
 prd_rule_plugin += prdfP9Ex.o
