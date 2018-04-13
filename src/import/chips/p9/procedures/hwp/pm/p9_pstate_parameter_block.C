@@ -150,9 +150,6 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54,      // Magic_code 2B)
                            0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA8, 0xA5, 0xA5, 0xA1, 0x9D, 0x9A
                           };
 
-
-
-
 #define VALIDATE_VID_VALUES(w,x,y,z,state) \
     if (!((w <= x) && (x <= y) && (y <= z)))  \
        {state = 0;}
@@ -179,7 +176,6 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54,      // Magic_code 2B)
 #define VALIDATE_WOF_HEADER_DATA(a,b,c,d,e,f,g,state) \
      if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g)))  \
        {state = 0; }
-
 
 double internal_ceil(double x)
 {
@@ -816,12 +812,12 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         Pstate l_ps;
 
         //Translate safe mode frequency to pstate
-        freq2pState(&l_globalppb, 
-                    revle32(attr.attr_pm_safe_frequency_mhz * 1000), 
+        freq2pState(&l_globalppb,
+                    revle32(attr.attr_pm_safe_frequency_mhz * 1000),
                     &l_ps, ROUND_FAST);
 
         //Compute real frequency
-        l_occppb.frequency_min_khz = l_globalppb.reference_frequency_khz - 
+        l_occppb.frequency_min_khz = l_globalppb.reference_frequency_khz -
                                      (l_ps * l_globalppb.frequency_step_khz);
 
         // frequency_max_khz - Value from Ultra Turbo operating point after biases
@@ -1559,7 +1555,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     //if yes then initialized to 0
     for (int i = 0; i < IDDQ_MEASUREMENTS; ++i)
     {
-       if ( io_iddqt->ivdd_all_cores_off_caches_off[i] & 0x8000) 
+       if ( io_iddqt->ivdd_all_cores_off_caches_off[i] & 0x8000)
        {
            io_iddqt->ivdd_all_cores_off_caches_off[i] = 0;
        }
@@ -4911,6 +4907,8 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_safe_mode_mv;
     fapi2::ATTR_VDD_BOOT_VOLTAGE_Type l_boot_mv;
     uint32_t l_safe_mode_op_ps2freq_mhz;
+    uint32_t l_core_floor_mhz;
+    uint32_t l_op_pt;
 
     VpdOperatingPoint l_operating_point[NUM_OP_POINTS];
     get_operating_point(i_operating_points,
@@ -4919,18 +4917,18 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            FAPI_SYSTEM,
-                           l_safe_mode_values.safe_op_freq_mhz));
+                           l_core_floor_mhz));
 
     // Core floor frequency should be less than ultra turbo freq..
     // if not log an error
-    if ((l_safe_mode_values.safe_op_freq_mhz*1000) > i_reference_freq)
+    if ((l_core_floor_mhz*1000) > i_reference_freq)
     {
         FAPI_ERR("Core floor frequency %08x is greater than UltraTurbo frequency %08x",
-                  (l_safe_mode_values.safe_op_freq_mhz*1000), i_reference_freq);
+                  (l_core_floor_mhz*1000), i_reference_freq);
         FAPI_ASSERT(false,
                     fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_UT_FREQ()
                     .set_CHIP_TARGET(i_target)
-                    .set_CORE_FLOOR_FREQ(l_safe_mode_values.safe_op_freq_mhz*1000)
+                    .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
                     .set_UT_FREQ(i_reference_freq),
                     "Core floor freqency is greater than UltraTurbo frequency");
     }
@@ -4946,20 +4944,40 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     FAPI_DBG ("l_boot_mv 0%08x (%d)",
                 l_boot_mv, l_boot_mv);
 
-    FAPI_INF ("l_safe_mode_values.safe_op_freq_mhz 0%08x (%d)",
-                l_safe_mode_values.safe_op_freq_mhz,
-                l_safe_mode_values.safe_op_freq_mhz);
-    FAPI_INF ("i_reference_freq 0%08x (%d)",
+    FAPI_INF ("core_floor_mhz 0%08x (%d)",
+                l_core_floor_mhz,
+                l_core_floor_mhz);
+    FAPI_INF("operating_point[POWERSAVE].frequency_mhz 0%08x (%d)",
+                revle32(l_operating_point[POWERSAVE].frequency_mhz),
+                revle32(l_operating_point[POWERSAVE].frequency_mhz));
+    FAPI_INF ("reference_freq 0%08x (%d)",
                 i_reference_freq, i_reference_freq);
-    FAPI_INF ("i_step_frequency 0%08x (%d)",
+    FAPI_INF ("step_frequency 0%08x (%d)",
                 i_step_frequency, i_step_frequency);
+
+    l_op_pt = revle32(l_operating_point[POWERSAVE].frequency_mhz);
+    // Safe operational frequency is the MAX(core floor, VPD Powersave).
+    // PowerSave is the lowest operational frequency that the part was tested at
+    if (l_core_floor_mhz > l_op_pt)
+    {
+        FAPI_INF("Core floor greater that POWERSAVE");
+        l_safe_mode_values.safe_op_freq_mhz = l_core_floor_mhz;
+    }
+    else
+    {
+        FAPI_INF("Core floor less than or equal to POWERSAVE");
+        l_safe_mode_values.safe_op_freq_mhz = l_op_pt;
+    }
+
+    FAPI_INF ("safe_mode_values.safe_op_freq_mhz 0%08x (%d)",
+                 l_safe_mode_values.safe_op_freq_mhz,
+                 l_safe_mode_values.safe_op_freq_mhz);
 
     // Calculate safe operational pstate.  This must be rounded down to create
     // a faster Pstate than the floor
     l_safe_mode_values.safe_op_ps = ((float)(i_reference_freq) -
                                        (float)(l_safe_mode_values.safe_op_freq_mhz * 1000)) /
                                        (float)i_step_frequency;
-
 
     l_safe_mode_op_ps2freq_mhz =
         (i_reference_freq - (l_safe_mode_values.safe_op_ps * i_step_frequency)) / 1000;
@@ -4971,7 +4989,6 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         l_safe_mode_op_ps2freq_mhz =
             (i_reference_freq - (l_safe_mode_values.safe_op_ps * i_step_frequency)) / 1000;
     }
-
 
     // Calculate safe jump value for large frequency
     l_safe_mode_values.safe_vdm_jump_value =
@@ -5049,13 +5066,14 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         FAPI_INF("Setting safe mode voltage to %d mv (0x%x)",
                     l_safe_mode_values.safe_mode_mv,
                     l_safe_mode_values.safe_mode_mv);
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_values.safe_mode_mv));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                               i_target,
+                               l_safe_mode_values.safe_mode_mv));
     }
 
     FAPI_INF ("l_safe_mode_values.safe_mode_mv 0x%x (%d)",
         l_safe_mode_values.safe_mode_mv,
         l_safe_mode_values.safe_mode_mv);
-
 
     fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV_Type l_uplift_mv;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV, i_target, l_uplift_mv));
