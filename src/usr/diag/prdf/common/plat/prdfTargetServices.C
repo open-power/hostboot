@@ -1424,12 +1424,25 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
 
 bool isDramWidthX4( TargetHandle_t i_trgt )
 {
-    // TODO RTC 161599
-    // all drams for Nimbus will be treated as X4 - this will need to be
-    // updated for Cumulus
-    return true;
-    //return ( fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ==
-    //         i_trgt->getAttr<ATTR_EFF_DRAM_WIDTH>() );
+   bool o_dramWidthX4 = false;
+
+   PRDF_ASSERT( nullptr != i_trgt );
+   switch ( getTargetType(i_trgt) )
+   {
+        case TYPE_MCA:
+            o_dramWidthX4 = true; // Nimbus only supports x4 DRAMs
+            break;
+
+        case TYPE_MBA:
+            o_dramWidthX4 = ( fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4 ==
+                              i_trgt->getAttr<ATTR_CEN_EFF_DRAM_WIDTH>() );
+            break;
+
+        default:
+          PRDF_ASSERT(false); // code bug
+   }
+
+   return o_dramWidthX4;
 }
 
 //------------------------------------------------------------------------------
