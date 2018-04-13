@@ -708,95 +708,22 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startDsdPhase1] "
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to DsdEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartDsdPhase1 );
-    iv_tdState = DSD_PHASE_1;
-
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Set the steer mux
-        o_rc = mssSetSteerMux( iv_mbaTrgt, iv_rank, iv_mark.getCM(),
-                               iv_isEccSteer );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssSetSteerMux() failed" );
-            break;
-        }
-
-        // Start phase 1.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::TIMEBASE_STEER_CLEANUP,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 int32_t CenMbaTdCtlr::startDsdPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[CenMbaTdCtlr::startDsdPhase2] "
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Moved to DsdEvent class
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    int32_t o_rc = SUCCESS;
-
-    io_sc.service_data->AddSignatureList( iv_mbaTrgt, PRDFSIG_StartDsdPhase2 );
-    iv_tdState = DSD_PHASE_2;
-
-    do
-    {
-        o_rc = prepareNextCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
-            break;
-        }
-
-        // Start phase 2.
-        iv_mssCmd = createMssCmd( mss_MaintCmdWrapper::SUPERFAST_READ,
-                                  iv_mbaTrgt, iv_rank, COND_TARGETED_CMD );
-        if ( NULL == iv_mssCmd )
-        {
-            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
-            o_rc = FAIL; break;
-        }
-
-        o_rc = iv_mssCmd->setupAndExecuteCmd();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
-            break;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
