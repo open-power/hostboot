@@ -124,6 +124,7 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_STOP_BLOCK_ENTRY_C1                       = 11,
     CME_FLAGS_CORE_QUIESCE_ACTIVE                       = 12,
     CME_FLAGS_PM_DEBUG_HALT_ENABLE                      = 13,
+    CME_FLAGS_DROOP_SUSPEND_ENTRY                       = 14,
     CME_FLAGS_SAFE_MODE                                 = 16,
     CME_FLAGS_PSTATES_SUSPENDED                         = 17,
     CME_FLAGS_SPWU_CHECK_ENABLE                         = 22,
