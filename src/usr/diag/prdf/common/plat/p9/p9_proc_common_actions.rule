@@ -122,6 +122,20 @@ actionclass analyzeNPU0FIR
     analyze(gNPU0FIR);
 };
 
+/** Special wrapper for NPU1FIR to collect extra FFDC */
+actionclass analyzeNPU1FIR
+{
+    capture(npu1fir_ffdc);
+    analyze(gNPU1FIR);
+};
+
+/** Special wrapper for NPU2FIR to collect extra FFDC */
+actionclass analyzeNPU2FIR
+{
+    capture(npu2fir_ffdc);
+    analyze(gNPU2FIR);
+};
+
 /** Special wrapper for INTCQFIR to collect extra FFDC */
 actionclass analyzeINTCQFIR
 {

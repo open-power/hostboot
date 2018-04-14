@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -353,6 +353,18 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                                                     *serviceData.service_data );
                         // Set up Error Isolation Pass Flag.
                         serviceData.service_data->setIsolationOnlyPass();
+                        // The original capture data is held with l_temp_sdc
+                        // when the copy contructor was called above. If we
+                        // continue to use serviceData.service_data as is, it
+                        // still contains all of the current capture data. So
+                        // any additional capture data will most likely be
+                        // duplicates (which will actually be a third copy of
+                        // the registers). The duplicates will be removed
+                        // eventually when mergeData() is called later, but we
+                        // can prevent a lot of duplication and have a improve
+                        // preformance slightly by clearing the capture data for
+                        // the isolation pass.
+                        serviceData.service_data->GetCaptureData().Clear();
                         // Set the outer for loop iteration variable atnType so
                         // that we analyze MACHINE XSTOP in next iteration.
                         atnType = MACHINE_CHECK + 1;
