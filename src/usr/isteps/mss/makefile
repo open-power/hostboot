@@ -55,7 +55,9 @@ MSS_LIB += ${ROOTPATH}/src/import/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/common/ddr4/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/utils/shared/
 
 EXTRAINCDIR += ${MSS_LIB}
 
