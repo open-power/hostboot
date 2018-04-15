@@ -184,7 +184,7 @@ int32_t AnalyzeFetchMpe_##RANK( ExtensibleChip * i_chip, \
                                 STEP_CODE_DATA_STRUCT & io_sc ) \
 { \
     MemRank rank ( RANK ); \
-    MemEcc::analyzeFetchMpe<TYPE_MCA, McaDataBundle *>( i_chip, rank, io_sc ); \
+    MemEcc::analyzeFetchMpe<TYPE_MCA>( i_chip, rank, io_sc ); \
     return SUCCESS; \
 } \
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchMpe_##RANK );
@@ -227,7 +227,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchNceTce );
 int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeFetchUe<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    MemEcc::analyzeFetchUe<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
@@ -244,7 +244,7 @@ int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
                                  STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t rc = SUCCESS;
-    MemEcc::analyzeMainlineIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    MemEcc::analyzeMainlineIue<TYPE_MCA>( i_chip, io_sc );
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -269,7 +269,7 @@ int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
                               STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t rc = SUCCESS;
-    MemEcc::analyzeMaintIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    MemEcc::analyzeMaintIue<TYPE_MCA>( i_chip, io_sc );
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -292,7 +292,7 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintIue );
  */
 int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeImpe<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    MemEcc::analyzeImpe<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeImpe );

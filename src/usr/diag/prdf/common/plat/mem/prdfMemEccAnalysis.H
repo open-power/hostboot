@@ -101,7 +101,7 @@ uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
                        STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -140,7 +140,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                           STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -160,7 +160,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -170,7 +170,7 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -181,7 +181,7 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -191,7 +191,7 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 #ifdef __HOSTBOOT_RUNTIME

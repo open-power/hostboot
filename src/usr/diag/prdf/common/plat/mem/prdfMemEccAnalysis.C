@@ -49,7 +49,7 @@ namespace MemEcc
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                         UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -120,8 +120,7 @@ uint32_t handleMemUe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
         else
         {
             // Handle the memory UE.
-            o_rc = __handleMemUe<TYPE_MCA,McaDataBundle *>( i_chip, i_addr,
-                                                            i_type, io_sc );
+            o_rc = __handleMemUe<TYPE_MCA>( i_chip, i_addr, i_type, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
@@ -209,8 +208,7 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
         #else
 
-        o_rc =  __handleMemUe<TYPE_MBA, MbaDataBundle *>( i_chip, i_addr,
-                                                          i_type, io_sc );
+        o_rc =  __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
@@ -461,7 +459,7 @@ uint32_t handleMpe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -539,9 +537,9 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 // To resolve template linker errors.
 template
-uint32_t analyzeFetchMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                const MemRank & i_rank,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeFetchMpe<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -755,7 +753,7 @@ uint32_t analyzeFetchNceTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -819,19 +817,20 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 
 // To resolve template linker errors.
 template
-uint32_t analyzeFetchUe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeFetchUe<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
-uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
-                       STEP_CODE_DATA_STRUCT & io_sc )
+template<>
+uint32_t handleMemIue<TYPE_MCA>( ExtensibleChip * i_chip,
+                                 const MemRank & i_rank,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::handleMemIue] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -847,7 +846,7 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
         if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) break;
 
         // Get the data bundle from chip.
-        D db = static_cast<D>( i_chip->getDataBundle() );
+        McaDataBundle * db = getMcaDataBundle( i_chip );
 
         // If we have already caused a port fail, mask the IUE bits.
         if ( true == db->iv_iuePortFail )
@@ -886,10 +885,10 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
             // the error log has been committed.
 
             // Mask off the entire port to avoid collateral.
-            o_rc = MemEcc::maskMemPort<T>( i_chip );
+            o_rc = MemEcc::maskMemPort<TYPE_MCA>( i_chip );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort<T>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort(0x%08x) failed",
                           i_chip->getHuid() );
                 break;
             }
@@ -906,14 +905,14 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & io_sc )
+template<>
+uint32_t analyzeMainlineIue<TYPE_MCA>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeMainlineIue] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -923,7 +922,7 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
         // not likely that we will have two independent failure modes at the
         // same time. So we just assume the address is correct.
         MemAddr addr;
-        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_RCE_ADDR, addr );
+        o_rc = getMemReadAddr<TYPE_MCA>( i_chip, MemAddr::READ_RCE_ADDR, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_RCE_ADDR) failed",
@@ -932,10 +931,10 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<T,D>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<TYPE_MCA>( i_chip, rank, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "handleMemIue<T,D>(0x%08x,m%ds%d) failed",
+            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
                       i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
             break;
         }
@@ -947,21 +946,16 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-// To resolve template linker errors.
-template
-uint32_t analyzeMainlineIue<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc )
+template<>
+uint32_t analyzeMaintIue<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeMaintIue] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -969,7 +963,7 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
     {
         // Use the current address in the MCBMCAT.
         MemAddr addr;
-        o_rc = getMemMaintAddr<T>( i_chip, addr );
+        o_rc = getMemMaintAddr<TYPE_MCA>( i_chip, addr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
@@ -978,10 +972,10 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<T,D>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<TYPE_MCA>( i_chip, rank, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "handleMemIue<T,D>(0x%08x,m%ds%d) failed",
+            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
                       i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
             break;
         }
@@ -993,20 +987,16 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-// To resolve template linker errors.
-template
-uint32_t analyzeMaintIue<TYPE_MCA, McaDataBundle*>(ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+template<>
+uint32_t analyzeImpe<TYPE_MCA>( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc )
 {
 
     #define PRDF_FUNC "[MemEcc::analyzeImpe] "
 
-    PRDF_ASSERT( T == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -1048,7 +1038,7 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
         #ifdef __HOSTBOOT_MODULE
         // get data bundle from chip
-        D db = static_cast<D>( i_chip->getDataBundle() );
+        McaDataBundle * db = getMcaDataBundle( i_chip );
         uint8_t dram = symbol.getDram();
 
         // Increment the count and check threshold.
@@ -1064,7 +1054,8 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             else // Otherwise, place a chip mark on the failing DRAM.
             {
                 MemMark chipMark( trgt, rank, galois );
-                o_rc = MarkStore::writeChipMark<T>( i_chip, rank, chipMark );
+                o_rc = MarkStore::writeChipMark<TYPE_MCA>( i_chip, rank,
+                                                           chipMark );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",
@@ -1072,7 +1063,7 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
                     break;
                 }
 
-                o_rc = MarkStore::balance<T>( i_chip, rank, io_sc );
+                o_rc = MarkStore::balance<TYPE_MCA>( i_chip, rank, io_sc );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "balance(0x%08x,0x%02x) failed",
@@ -1081,7 +1072,7 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
                 }
 
                 // Set the dram in DRAM Repairs VPD.
-                o_rc = setDramInVpd<T>( i_chip, rank, symbol );
+                o_rc = setDramInVpd<TYPE_MCA>( i_chip, rank, symbol );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
@@ -1119,10 +1110,6 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t analyzeImpe<TYPE_MCA, McaDataBundle*>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
