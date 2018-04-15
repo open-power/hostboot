@@ -446,8 +446,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeEcc( const uint32_t & i_eccAttns,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_MaintMPE );
 
-            o_rc = MemEcc::handleMpe<TYPE_MCA, McaDataBundle *>( iv_chip,
-                iv_rank, io_sc );
+            o_rc = MemEcc::handleMpe<TYPE_MCA>( iv_chip, iv_rank,
+                                                UE_TABLE::SCRUB_MPE, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",

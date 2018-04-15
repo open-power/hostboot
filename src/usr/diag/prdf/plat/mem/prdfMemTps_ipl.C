@@ -143,25 +143,15 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
             //else if there was an MPE
             else if ( eccAttns & MAINT_MPE )
             {
-                //Add the mark to the callout list
-                MemMark chipMark;
-                o_rc = MarkStore::readChipMark<TYPE_MCA>( iv_chip, iv_rank,
-                                                          chipMark );
+                // Do memory MPE handling.
+                o_rc = MemEcc::handleMpe<TYPE_MCA>( iv_chip, iv_rank,
+                                                    UE_TABLE::SCRUB_MPE, io_sc);
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
-                            iv_chip->getHuid(), iv_rank.getMaster() );
+                    PRDF_ERR( PRDF_FUNC "handleMpe(0x%08x,0x%02x) failed",
+                              iv_chip->getHuid(), getKey() );
                     break;
                 }
-
-                MemoryMru memmru( iv_chip->getTrgt(), iv_rank,
-                                  chipMark.getSymbol() );
-                io_sc.service_data->SetCallout( memmru );
-
-                // Add a VCM procedure to the queue.
-                TdEntry * entry = new VcmEvent<TYPE_MCA> { iv_chip, iv_rank,
-                                                           chipMark };
-                MemDbUtils::pushToQueue<TYPE_MCA>( iv_chip, entry );
 
                 //Abort this procedure
                 o_done = true;

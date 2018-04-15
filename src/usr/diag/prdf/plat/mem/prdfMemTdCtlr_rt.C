@@ -663,11 +663,8 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintMPE );
 
-            // Add entry to UE table.
-            D db = static_cast<D>(i_chip->getDataBundle());
-            db->iv_ueTable.addEntry( UE_TABLE::SCRUB_MPE, i_addr );
-
-            o_rc = MemEcc::handleMpe<T,D>( i_chip, rank, io_sc );
+            o_rc = MemEcc::handleMpe<T>( i_chip, i_addr, UE_TABLE::SCRUB_MPE,
+                                         io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",
