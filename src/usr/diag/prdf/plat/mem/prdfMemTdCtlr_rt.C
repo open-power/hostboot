@@ -538,7 +538,7 @@ uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip,
         o_errorsFound = true;
         io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
                                               PRDFSIG_MaintIUE );
-        o_rc = MemEcc::analyzeMaintIue<TYPE_MCA,McaDataBundle *>(i_chip, io_sc);
+        o_rc = MemEcc::analyzeMaintIue<TYPE_MCA>(i_chip, io_sc);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
