@@ -26,11 +26,10 @@
 #include <prdfMemEccAnalysis.H>
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
+#include <prdfMemDbUtils.H>
 #include <prdfMemDqBitmap.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
@@ -393,68 +392,6 @@ bool queryIueTh<TYPE_MCA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
-
-template<TARGETING::TYPE T, typename D>
-uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
-                      bool i_isFetch )
-{
-    PRDF_ASSERT( T == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    D db = static_cast<D>(i_chip->getDataBundle());
-
-    TdEntry * entry = new VcmEvent<T>( i_chip, i_rank, i_mark );
-
-    // We only want to call handleTdEvent for fetch attentions, if we do it in
-    // other cases we will hit an infinite loop, so we just add the entry to the
-    // queue instead.
-    if ( i_isFetch )
-        o_rc = db->getTdCtlr()->handleTdEvent( io_sc, entry );
-    else
-        db->getTdCtlr()->pushToQueue( entry );
-
-    return o_rc;
-}
-
-template
-uint32_t addVcmEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                 const MemRank & i_rank,
-                                                 const MemMark & i_mark,
-                                                 STEP_CODE_DATA_STRUCT & io_sc,
-                                                 bool i_isFetch);
-
-#endif
-
-//------------------------------------------------------------------------------
-
-#ifdef __HOSTBOOT_MODULE
-
-template<TARGETING::TYPE T, typename D>
-uint32_t addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps )
-{
-    PRDF_ASSERT( T == i_chip->getType() );
-
-    D db = static_cast<D>(i_chip->getDataBundle());
-
-    TdEntry * entry = new TpsEvent<T>( i_chip, i_rank, i_banTps );
-
-    return db->getTdCtlr()->handleTdEvent( io_sc, entry );
-}
-
-template
-uint32_t addTpsEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                 const MemRank & i_rank,
-                                                 STEP_CODE_DATA_STRUCT & io_sc,
-                                                 bool i_banTps );
-
-#endif
-
-//------------------------------------------------------------------------------
-
 template<TARGETING::TYPE T, typename D>
 uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                     STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch )
@@ -487,27 +424,20 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         io_sc.service_data->SetCallout( mm );
 
         // Add a VCM request to the TD queue if at runtime or at memdiags.
-        #ifdef __HOSTBOOT_RUNTIME
-        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc, i_isFetch );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
-                      "i_rank=m%ds%d", i_chip->getHuid(), i_rank.getMaster(),
-                      i_rank.getSlave() );
-            break;
-        }
-        #elif defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+        #ifdef __HOSTBOOT_MODULE
+
+        #ifndef __HOSTBOOT_RUNTIME
         if ( isInMdiaMode() )
         {
-            o_rc = addVcmEvent<T,D>(i_chip, i_rank, chipMark, io_sc, i_isFetch);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
-                        "i_rank=m%ds%d", i_chip->getHuid(), i_rank.getMaster(),
-                        i_rank.getSlave() );
-                break;
-            }
+        #endif
+
+        TdEntry * entry = new VcmEvent<T>( i_chip, i_rank, chipMark );
+        MemDbUtils::pushToQueue<T>( i_chip, entry );
+
+        #ifndef __HOSTBOOT_RUNTIME
         }
+        #endif
+
         #endif
 
     }while(0);
@@ -569,6 +499,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         D db = static_cast<D>(i_chip->getDataBundle());
         db->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
 
+        // Get callouts, etc., and add the chip mark to the queue.
         o_rc = MemEcc::handleMpe<T,D>( i_chip, i_rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
@@ -576,6 +507,20 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                       i_chip->getHuid(), i_rank.getKey() );
             break;
         }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // The chip mark has already been added to the queue. Now tell the TD
+        // controller to process it if not already in progress.
+        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
+                          "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        #endif
 
     } while (0);
 
@@ -778,11 +723,13 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
             // will still try to start TPS just in case MNFG disables the
             // termination policy.
 
-            o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc );
+            MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank) );
+            o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x,0x%02x) failed",
-                          i_chip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
+                          "0x%02x", i_chip->getHuid(), rank.getKey() );
+                break;
             }
 
             #endif
@@ -846,12 +793,12 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
         // Add a TPS request to the TD queue and ban any further TPS requests
         // for this rank.
         MemRank rank = addr.getRank();
-        o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc, true );
+        MemDbUtils::pushToQueue<T>(i_chip, new TpsEvent<T>(i_chip, rank, true));
+        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "addTpsEvent() failed: i_chip=0x%08x "
-                      "rank=%d,%d", i_chip->getHuid(), rank.getMaster(),
-                      rank.getSlave() );
+            PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank 0x%02x",
+                      i_chip->getHuid(), rank.getKey() );
             break;
         }
 

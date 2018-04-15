@@ -29,14 +29,13 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistDataBundle.H>
 #include <prdfPlatServices.H>
 #ifdef __HOSTBOOT_RUNTIME
   #include <prdfMemTps.H>
 #endif
-
 
 using namespace TARGETING;
 
@@ -150,8 +149,6 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     {
         io_sc.service_data->setServiceCall();
 
-        McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
-
         std::vector<MemRank> list;
         getSlaveRanks<TYPE_MCA>( i_mcaChip->getTrgt(), list );
         PRDF_ASSERT( !list.empty() ); // target configured with no ranks
@@ -159,7 +156,8 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
         for ( auto & r : list )
         {
             TdEntry * entry = new TpsEvent<TYPE_MCA>( i_mcaChip, r );
-            uint32_t rc = mcbdb->getTdCtlr()->handleTdEvent( io_sc, entry );
+            MemDbUtils::pushToQueue<TYPE_MCA>( i_mcaChip, entry );
+            uint32_t rc = MemDbUtils::handleTdEvent<TYPE_MCA>(i_mcaChip, io_sc);
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleTdEvent() failed on 0x%08x",

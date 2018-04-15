@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,8 +164,7 @@ void __recaptureRegs<TYPE_MBA>( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
-                                      TdEntry * i_entry )
+uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
 
@@ -181,9 +180,6 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                       iv_chip->getHuid() );
             break;
         }
-
-        // Add this entry to the queue.
-        iv_queue.push( i_entry );
 
         // Don't interrupt a TD procedure if one is already in progress.
         if ( nullptr != iv_curProcedure ) break;
