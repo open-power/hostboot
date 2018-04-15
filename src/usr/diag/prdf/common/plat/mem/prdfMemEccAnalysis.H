@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,15 +210,6 @@ bool queryIueTh( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
  */
 template<TARGETING::TYPE T>
 uint32_t maskMemPort( ExtensibleChip * i_chip );
-
-template<TARGETING::TYPE T, typename D>
-uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
-                      bool i_isFetch = false );
-
-template<TARGETING::TYPE T, typename D>
-uint32_t addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      STEP_CODE_DATA_STRUCT & io_sc, bool i_banTps = false );
 
 #endif
 

@@ -26,6 +26,7 @@
 /** @file prdfMemTps_ipl.C */
 
 // Platform includes
+#include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemIplCeStats.H>
 #include <prdfMemMark.H>
@@ -157,9 +158,10 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                   chipMark.getSymbol() );
                 io_sc.service_data->SetCallout( memmru );
 
-                //Add a VCM procedure to the queue
-                MemEcc::addVcmEvent<TYPE_MCA, McaDataBundle *>(iv_chip, iv_rank,
-                                                               chipMark, io_sc);
+                // Add a VCM procedure to the queue.
+                TdEntry * entry = new VcmEvent<TYPE_MCA> { iv_chip, iv_rank,
+                                                           chipMark };
+                MemDbUtils::pushToQueue<TYPE_MCA>( iv_chip, entry );
 
                 //Abort this procedure
                 o_done = true;
