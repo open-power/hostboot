@@ -67,8 +67,7 @@ uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     io_sc.service_data->setServiceCall();
 
     // Add entry to UE table.
-    D db = static_cast<D>(i_chip->getDataBundle());
-    db->iv_ueTable.addEntry( i_type, i_addr );
+    MemDbUtils::addUeTableEntry<T>( i_chip, i_type, i_addr );
 
     #ifdef __HOSTBOOT_RUNTIME
 
@@ -206,9 +205,7 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
         io_sc.service_data->setServiceCall();
 
         // Add entry to UE table.
-        MbaDataBundle * db =
-            static_cast<MbaDataBundle *>(i_chip->getDataBundle());
-        db->iv_ueTable.addEntry( i_type, i_addr );
+        MemDbUtils::addUeTableEntry<TYPE_MBA>( i_chip, i_type, i_addr );
 
         #else
 
@@ -392,9 +389,9 @@ bool queryIueTh<TYPE_MCA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
-uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                    STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch )
+template<TARGETING::TYPE T>
+uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                    UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::handleMpe] "
 
@@ -402,15 +399,17 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     uint32_t o_rc = SUCCESS;
 
+    MemRank rank = i_addr.getRank();
+
     do
     {
         // Read the chip mark from markstore.
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<T>( i_chip, i_rank, chipMark );
+        o_rc = MarkStore::readChipMark<T>( i_chip, rank, chipMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
-                      i_chip->getHuid(), i_rank.getMaster() );
+            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), rank.getKey() );
             break;
         }
 
@@ -420,8 +419,11 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         PRDF_ASSERT( chipMark.isValid() );
 
         // Add the mark to the callout list.
-        MemoryMru mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
+        MemoryMru mm { i_chip->getTrgt(), rank, chipMark.getSymbol() };
         io_sc.service_data->SetCallout( mm );
+
+        // Add entry to UE table.
+        MemDbUtils::addUeTableEntry<T>( i_chip, i_type, i_addr );
 
         // Add a VCM request to the TD queue if at runtime or at memdiags.
         #ifdef __HOSTBOOT_MODULE
@@ -431,7 +433,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         {
         #endif
 
-        TdEntry * entry = new VcmEvent<T>( i_chip, i_rank, chipMark );
+        TdEntry * entry = new VcmEvent<T>( i_chip, rank, chipMark );
         MemDbUtils::pushToQueue<T>( i_chip, entry );
 
         #ifndef __HOSTBOOT_RUNTIME
@@ -449,11 +451,13 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 // To resolve template linker errors.
 template
-uint32_t handleMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch );
+uint32_t handleMpe<TYPE_MCA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                              UE_TABLE::Type i_type,
+                              STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t handleMpe<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch );
+uint32_t handleMpe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                              UE_TABLE::Type i_type,
+                              STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -492,15 +496,14 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         // simply fake an address with the correct rank and move on.
         if ( i_rank != addr.getRank() )
         {
-            addr = MemAddr ( i_rank, 0, 0, 0 );
+            o_rc = MemEcc::handleMpe<T>( i_chip, i_rank, UE_TABLE::FETCH_MPE,
+                                         io_sc );
         }
-
-        // Add address to UE table.
-        D db = static_cast<D>(i_chip->getDataBundle());
-        db->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
-
-        // Get callouts, etc., and add the chip mark to the queue.
-        o_rc = MemEcc::handleMpe<T,D>( i_chip, i_rank, io_sc, true );
+        else
+        {
+            o_rc = MemEcc::handleMpe<T>( i_chip, addr, UE_TABLE::FETCH_MPE,
+                                         io_sc );
+        }
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",

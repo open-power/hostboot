@@ -107,15 +107,31 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Handles a MPE attention.
- * @param  i_chip    MCA or MBA.
- * @param  i_rank    Target rank.
- * @param  io_sc     The step code data struct.
- * @param  i_isFetch Whether this is a fetch attn or not.
+ * @param  i_chip MCA or MBA.
+ * @param  i_addr Failed address.
+ * @param  i_type The type of UE.
+ * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
+uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                    UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief  Handles a MPE attention.
+ * @param  i_chip    MCA or MBA.
+ * @param  i_rank    Target rank.
+ * @param  i_type    The type of UE.
+ * @param  io_sc     The step code data struct.
+ * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
 uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                    STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch = false );
+                    UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemAddr addr { i_rank, 0, 0, 0 };
+    return handleMpe<T>( i_chip, addr, i_type, io_sc );
+}
 
 /**
  * @brief  Analyzes a fetch MPE attention.

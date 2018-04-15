@@ -36,6 +36,37 @@ namespace MemDbUtils
 {
 
 //##############################################################################
+//                                 Generic wrappers
+//##############################################################################
+
+/**
+ * @brief  Generic wrapper to add an entry to the UE table.
+ * @param  i_chip MCA or MBA.
+ * @param  i_type UE table entry type.
+ * @param  i_addr UE address.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+void addUeTableEntry( ExtensibleChip * i_chip, UE_TABLE::Type i_type,
+                      const MemAddr & i_addr );
+
+template<> inline
+void addUeTableEntry<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                           UE_TABLE::Type i_type,
+                                           const MemAddr & i_addr )
+{
+    getMcaDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
+}
+
+template<> inline
+void addUeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                           UE_TABLE::Type i_type,
+                                           const MemAddr & i_addr )
+{
+    getMbaDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
+}
+
+//##############################################################################
 //                         Hostboot IPL/Runtime wrappers
 //##############################################################################
 
