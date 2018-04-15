@@ -69,6 +69,16 @@ class TpsEvent : public TdEntry
   private: // functions
 
     /**
+     * @brief  Does analysis of the command that just completed for the current
+     *         phase.
+     * @param  io_sc  The step code data struct.
+     * @param  o_done True if the procedure is complete or has aborted, false
+     *                otherwise.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    /**
      * @brief  Does analysis on any ECC errors found during the current phase.
      * @param  i_eccAttns Mask of all currently active maintenance attentions.
      *                    See enum MaintEccAttns for values.

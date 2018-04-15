@@ -43,13 +43,19 @@ namespace PRDF
 
 using namespace PlatServices;
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
 
-template<>
-uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+template <TARGETING::TYPE T>
+uint32_t TpsEvent<T>::nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
 {
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
+    #define PRDF_FUNC "[TpsEvent::nextStep] "
+
+    // Should only do this procedure if MNFG IPL CE handling is enabled.
+    PRDF_ASSERT( isMfgCeCheckingEnabled() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -57,81 +63,34 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
     do
     {
-        //only done in MNFG IPL CE Handling mode
-        PRDF_ASSERT( isMfgCeCheckingEnabled() );
-
-        //phase 0
-        if ( TD_PHASE_0 == iv_phase )
+        // First, do analysis.
+        o_rc = analyzePhase( io_sc, o_done );
+        if ( SUCCESS != o_rc )
         {
-            o_rc = startNextPhase( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%02x",
-                          iv_chip->getHuid(), getKey() );
-                break;
-            }
-        }
-        //phase 1/2
-        else
-        {
-            // PHASE_1: Collect soft/intermittent CE for later analysis use.
-            // PHASE_2: Callout all hard CEs.
-            McaDataBundle * db = getMcaDataBundle( iv_chip );
-            o_rc = ( TD_PHASE_1 == iv_phase )
-                                ? db->getIplCeStats()->collectStats(  iv_rank)
-                                : db->getIplCeStats()->calloutHardCes(iv_rank);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "collectStats/calloutHardCes(0x%02x) "
-                          "failed on 0x%08x", iv_rank.getKey(),
-                          iv_chip->getHuid() );
-                break;
-            }
-
-            //get the ecc attentions
-            uint32_t eccAttns;
-            o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Call to 'checkEccFirs' failed on chip: "
-                          "0x%08x", iv_chip->getHuid() );
-                break;
-            }
-
-            // Analyze the ECC errors, if needed.
-            o_rc = analyzeEccErrors( eccAttns, io_sc, o_done );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "analyzeEccErrors() failed" );
-                break;
-            }
-            if ( o_done ) break; // abort the procedure.
-
-                //Add the rank to the callout list
-                MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
-                        MemoryMruData::CALLOUT_RANK);
-                io_sc.service_data->SetCallout( memmru );
-
-                //phase 1
-                if ( TD_PHASE_1 == iv_phase )
-                {
-                    o_rc = startNextPhase( io_sc );
-                    if ( SUCCESS != o_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,"
-                                  "0x%02x", iv_chip->getHuid(), getKey() );
-                        break;
-                    }
-                }
-                //phase 2
-                else
-                {
-                    //Abort this procedure
-                    o_done = true;
-                }
+            PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
+                      iv_chip->getHuid(), getKey() );
+            break;
         }
 
-    }while(0);
+        if ( o_done ) break; // Nothing more to do.
+
+        // Then, start the next phase of the procedure.
+        o_rc = startNextPhase( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+    } while (0);
+
+    // Add the rank to the callout list if no callouts in the list.
+    if ( 0 == io_sc.service_data->getMruListSize() )
+    {
+        MemoryMru mm {iv_chip->getTrgt(), iv_rank, MemoryMruData::CALLOUT_RANK};
+        io_sc.service_data->SetCallout( mm );
+    }
 
     return o_rc;
 
@@ -140,29 +99,71 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
 //------------------------------------------------------------------------------
 
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
-template<>
-uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
+template<TARGETING::TYPE T>
+uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
+                                    bool & o_done )
 {
-    #define PRDF_FUNC "[TpsEvent<TYPE_MBA>::nextStep] "
+    #define PRDF_FUNC "[TpsEvent::analyzePhase] "
 
     uint32_t o_rc = SUCCESS;
 
-    o_done = true;
+    o_done = false;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    do
+    {
+        if ( TD_PHASE_0 == iv_phase ) break; // Nothing to analyze yet.
+
+        // Collect the CE statistics from the command that just completed.
+        MemIplCeStats<T> * ceStats = MemDbUtils::getIplCeStats<T>( iv_chip );
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1: // Collect all CE stats.
+                o_rc = ceStats->collectStats( iv_rank );
+                break;
+
+            case TD_PHASE_2: // Collect hard CE stats.
+                o_rc = ceStats->calloutHardCes( iv_rank );
+                break;
+
+            default: PRDF_ASSERT(false); // code bug
+        }
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to collect CE stats on 0x%08x,0x%02x",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+        // Look for any ECC errors that occurred during the command.
+        uint32_t eccAttns;
+        o_rc = checkEccFirs<T>( iv_chip, eccAttns );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Analyze the ECC errors, if needed.
+        o_rc = analyzeEccErrors( eccAttns, io_sc, o_done );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeEccErrors() failed" );
+            break;
+        }
+        if ( o_done ) break; // abort the procedure.
+
+        // The procedure is complete if this was phase 2.
+        if ( TD_PHASE_2 == iv_phase ) o_done = true;
+
+    } while(0);
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
-//##############################################################################
-//
-//                          Generic template functions
-//
-//##############################################################################
+//------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
 bool __iueCheck( uint32_t i_eccAttns );
@@ -411,6 +412,12 @@ uint32_t TpsEvent<TYPE_MBA>::startCmd()
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class TpsEvent<TYPE_MCA>;
+template class TpsEvent<TYPE_MBA>;
 
 //------------------------------------------------------------------------------
 

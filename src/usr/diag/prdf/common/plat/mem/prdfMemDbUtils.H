@@ -98,6 +98,35 @@ void pushToQueue<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
 #endif // Hostboot IPL/Runtime
 
 //##############################################################################
+//                          Hostboot IPL only wrappers
+//##############################################################################
+
+#if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+
+/**
+ * @brief  Generic wrapper to get a pointer to the MemIplCeStats object from the
+ *         data bundle of the given chip.
+ * @param  i_chip MCA or MBA.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+MemIplCeStats<T> * getIplCeStats( ExtensibleChip * i_chip );
+
+template<> inline
+MemIplCeStats<TARGETING::TYPE_MCA> * getIplCeStats( ExtensibleChip * i_chip )
+{
+    return getMcaDataBundle(i_chip)->getIplCeStats();
+}
+
+template<> inline
+MemIplCeStats<TARGETING::TYPE_MBA> * getIplCeStats( ExtensibleChip * i_chip )
+{
+    return getMbaDataBundle(i_chip)->getIplCeStats();
+}
+
+#endif // Hostboot IPL only
+
+//##############################################################################
 //                          Hostboot Runtime only wrappers
 //##############################################################################
 
