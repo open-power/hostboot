@@ -1785,6 +1785,12 @@ void hdatGetI2cDeviceInfo(
 
         for (const auto& i2cDevice : deviceInfo)
         {
+            if (i2cDevice.devicePurpose ==
+               TARGETING::HDAT_I2C_DEVICE_PURPOSE_SBE_SEEPROM)
+            {
+                continue;
+            }
+
             if(   (i2cDevice.assocNode != linkId.node)
                || (i2cDevice.assocProc != linkId.proc))
             {
