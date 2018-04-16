@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -39,5 +39,6 @@ p8_force_attn:
     mfspr r9, HID0
     mfspr r9, HID0
     isync
+    rlwimi 31,31,0,4,22   /* MAGIC_SIMICS_SHUTDOWN */
     attn
     b 0

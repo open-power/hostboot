@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -445,7 +445,6 @@ inline void MAGIC_INSTRUCTION(int _n)
 // for example), assign hap numbers in the range 7000..7999 (decimal).
 // Presently, the hap handler for magic instruction is found in
 // src/build/debug/simics-debug-framework.py
-// Jan 2012 Monte
 
 enum
 {
@@ -459,6 +458,7 @@ enum
                                      // that we are waking up and expecting
                                      // CORES to become fused.
 
+    // 7000-7999 are defined by Hostboot
     MAGIC_SHUTDOWN            =  7006, // KernelMisc::shutdown() called.
     MAGIC_BREAK               =  7007, // hard-code a breakpoint
     MAGIC_RANDOM              =  7008, // generate random number
@@ -466,12 +466,6 @@ enum
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
     MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_LOAD_PAYLOAD        =  7012, // load payload from flash
-
-                                       // These are used for getting threads
-                                       // going after doing 'stop/winkle'
-    MAGIC_WAKE_MASTER_THREAD  =  7015, // Wake master thread
-    MAGIC_WAKE_OTHER_THREADS  =  7016, // Wake other threads on initial CORE
-    MAGIC_WAKE_FUSED_THREADS  =  7017, // Wake up fused core threads
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces
@@ -479,6 +473,13 @@ enum
     MAGIC_PRINT_TWO_REGS      =  7021, // Print 2 numbers passed in
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
+
+
+    // 8000-8999 are defined by the Simics CEC team
+    MAGIC_SIMICS_FSP_WAIT      =  8001, // Notify we are/aren't waiting for FSP
+                                        //   1=waiting, 2=done waiting
+    MAGIC_SIMICS_SHUTDOWN      =  8006, // Notify we are shutting down
+    MAGIC_SIMICS_ISTEP         =  8020, // Log istep, same parms as 7020
 };
 
 /**
@@ -500,6 +501,7 @@ enum
     asm volatile("mr 4, %0; mr 5, %1" :: \
                  "r" (_major), "r" (_minor) : "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_PRINT_ISTEP); \
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_ISTEP); \
 
 /**
  * @brief Display 2 numbers on the simics console
@@ -510,5 +512,20 @@ enum
     asm volatile("mr 4, %0; mr 5, %1" :: \
                  "r" (_first), "r" (_second) : "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_PRINT_TWO_REGS); \
+
+/**
+ * @brief Notify simics that we are waiting for a FSP message
+ */
+#define MAGIC_WAITING_FOR_FSP() \
+    asm volatile("mr 4, 1"); \
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
+
+/**
+ * @brief Notify simics that we are done waiting for a FSP message
+ */
+#define MAGIC_DONE_WAITING_FOR_FSP() \
+    asm volatile("mr 4, 2"); \
+    MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
+
 
 #endif

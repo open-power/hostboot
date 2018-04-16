@@ -28,6 +28,7 @@
 #include <initservice/initserviceif.H>
 #include <errl/hberrltypes.H>
 #include <secureboot/service.H>
+#include <arch/ppc.H>
 
 using namespace ERRORLOG;
 
@@ -143,6 +144,11 @@ namespace TARGETING
 
             }
 
+            // Tell Simics we are waiting for the FSP to do something
+            //  simce the vast majority of the processing time is
+            //  on the FSP side of things
+            MAGIC_WAITING_FOR_FSP();
+
             if(( l_errl == NULL ) && ( iv_total_pages != 0 ))
             {
                 // tell fsp to commit the last section of data we sent
@@ -153,6 +159,9 @@ namespace TARGETING
                     TARG_ERR("failed sending sync complete message");
                 }
             }
+
+            // Tell Simics we are done waiting
+            MAGIC_DONE_WAITING_FOR_FSP();
 
         }while(0);
 
