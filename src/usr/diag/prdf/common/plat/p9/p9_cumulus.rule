@@ -5927,17 +5927,17 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[27]
      *  INT_CQ_FIR_WRQ_OP_HANG:
      */
-    (rINTCQFIR, bit(27)) ? self_th_1;
+    (rINTCQFIR, bit(27)) ? threshold_and_mask_self;
 
     /** INTCQFIR[28]
      *  INT_CQ_FIR_RDQ_OP_HANG:
      */
-    (rINTCQFIR, bit(28)) ? self_th_1;
+    (rINTCQFIR, bit(28)) ? threshold_and_mask_self;
 
     /** INTCQFIR[29]
      *  INT_CQ_FIR_INTQ_OP_HANG:
      */
-    (rINTCQFIR, bit(29)) ? self_th_1;
+    (rINTCQFIR, bit(29)) ? threshold_and_mask_self;
 
     /** INTCQFIR[30]
      *  INT_CQ_FIR_RDQ_DATA_HANG:
