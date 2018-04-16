@@ -332,6 +332,8 @@ namespace TARGETING
                 if(iv_nodeContainer[i_nodeId].pTargetMap == nullptr)
                 {
                     // Locate targeting image for this node in reserved memory
+                    TARG_INF("getTargetMapPtr Locating reserved memory "
+                             "targeting image for the node %d", i_nodeId);
                     uint64_t attr_size = 0;
                     iv_nodeContainer[i_nodeId].pTargetMap =
                         reinterpret_cast<void*>(
@@ -366,6 +368,7 @@ namespace TARGETING
                 else
                 {
                     // This should return pTargetMap from here
+                    l_pTargetMap = iv_nodeContainer[i_nodeId].pTargetMap;
                     break;
                 }
             } while(0);
@@ -382,6 +385,8 @@ namespace TARGETING
             errlCommit(l_errl, TARG_COMP_ID);
         }
 
+        TARG_DBG("getTargetMapPtr returning %p for node %d",
+                 l_pTargetMap, i_nodeId);
         return l_pTargetMap;
         #undef TARG_FN
     }
