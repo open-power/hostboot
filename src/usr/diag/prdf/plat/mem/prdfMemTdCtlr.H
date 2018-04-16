@@ -287,6 +287,10 @@ class MemTdCtlr
      *  to be restarted with a new command. */
     bool iv_resumeBgScrub = false;
 
+    /** Keeps track if the fetch attentions have been masked during a TD
+     *  procedure. */
+    bool iv_fetchAttnsMasked = false;
+
     #else // IPL only
 
     /** Indicates if broadcast mode is capable on iv_chip. */
