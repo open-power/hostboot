@@ -67,6 +67,7 @@ my %maxInstance = (
     "MCA"           => 8,
     "PHB"           => 6, #PHB is same as PCIE
     "PEC"           => 3, #PEC is same as PBCQ
+    "PCIESWITCH"    => 2,
     "MBA"           => 16,
     "PPE"           => 51, #Only 21, but they are sparsely populated
     "PERV"          => 56, #Only 42, but they are sparsely populated
