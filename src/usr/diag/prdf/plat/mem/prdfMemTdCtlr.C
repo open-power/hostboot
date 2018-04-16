@@ -26,6 +26,7 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemScrubUtils.H>
@@ -305,11 +306,9 @@ uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
     // Update iv_stoppedRank.
     o_stoppedRank = __getStopRank<TYPE_MBA>( i_chip, i_addr );
 
-    /* TODO RTC 157888
     // Check the MBA for ECC errors.
-    return __checkEcc<TYPE_MBA>(i_chip, io_queue, i_addr, o_errorsFound, io_sc);
-    */
-    return SUCCESS;
+    return __checkEcc<TYPE_MBA, MbaDataBundle *>( i_chip, io_queue, i_addr,
+                                                  o_errorsFound, io_sc );
 }
 
 //------------------------------------------------------------------------------

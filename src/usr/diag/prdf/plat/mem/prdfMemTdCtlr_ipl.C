@@ -30,6 +30,7 @@
 #include <prdfMemTdCtlr.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemoryMru.H>
@@ -142,6 +143,28 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+template <TARGETING::TYPE T>
+bool __mnfgCeCheck( uint32_t i_eccAttns );
+
+template<> inline
+bool __mnfgCeCheck<TYPE_MCA>( uint32_t i_eccAttns )
+{
+    // The MAINT_HARD_NCE_ETE attention is reported on the MCBIST. If the
+    // command was run in broadcast mode, we may end up doing TPS on all four
+    // ports when only one port has the CE. Therefore, we must check for
+    // MAINT_NCE or MAINT_TCE, which are found on the MCA, to determine if this
+    // MCA needs a TPS procedure.
+    return ( (  0 != (i_eccAttns & MAINT_HARD_NCE_ETE) ) &&
+             ( (0 != (i_eccAttns & MAINT_NCE)) ||
+               (0 != (i_eccAttns & MAINT_TCE))         ) );
+}
+
+template<> inline
+bool __mnfgCeCheck<TYPE_MBA>( uint32_t i_eccAttns )
+{
+    return ( 0 != (i_eccAttns & MAINT_HARD_NCE_ETE) );
+}
+
 template <TARGETING::TYPE T, typename D>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
@@ -200,25 +223,9 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                 break;
             }
         }
-        else if ( isMfgCeCheckingEnabled() &&
-                  (0 != (eccAttns & MAINT_HARD_NCE_ETE)) &&
-                  ( (0 != (eccAttns & MAINT_NCE)) ||
-                    (0 != (eccAttns & MAINT_TCE))    ) )
+        else if ( isMfgCeCheckingEnabled() && __mnfgCeCheck<T>(eccAttns) )
         {
-            // NOTE: The MAINT_HARD_NCE_ETE attention is reported on the MCBIST.
-            //       If the command is run in broadcast mode, we may end up
-            //       doing TPS on all four ports when only one port has the CE.
-            //       Therefore, we must check for MAINT_NCE or MAINT_TCE, which
-            //       are found on the MCA, to determine if this MCA need a TPS
-            //       procedure.
-
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
-
-            // NOTE: Normally we would add each symbol in the per-symbol
-            //       counters to the callout list for FFDC, but the results are
-            //       a bit undefined in broadcast mode. Since this should not be
-            //       a predictive error log, it is fine to have no callouts for
-            //       now.
 
             // Add a TPS procedure to the queue.
             TdEntry * e = new TpsEvent<T>{ i_chip, rank };
@@ -242,13 +249,12 @@ uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
                                                 const MemAddr & i_addr,
                                                 bool & o_errorsFound,
                                                 STEP_CODE_DATA_STRUCT & io_sc );
-
-/* TODO RTC 157888
 template
-uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-*/
+uint32_t __checkEcc<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
+                                                TdQueue & io_queue,
+                                                const MemAddr & i_addr,
+                                                bool & o_errorsFound,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
