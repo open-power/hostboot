@@ -53,6 +53,7 @@ COPY_FILES = \
     src/build/debug/ecmd-debug-framework.pl:openpower \
     src/build/debug/eSEL.pl:openpower \
     src/build/debug/fsp-memdump.sh:tools,vpo \
+    src/build/tools/genIstepWaitOverride.pl:tools,openpower \
     src/build/vpo/hb-dump:vpo \
     src/build/vpo/hb-istep:vpo \
     src/build/vpo/hb-virtdebug.pl:vpo \
@@ -294,6 +295,7 @@ fsp.tar_CONTENTS = \
     src/include/kernel/hbdescriptor.H \
     src/include/kernel/hbterminatetypes.H \
     src/build/tools/hwp_id.pl \
+    src/build/tools/genIstepWaitOverride.pl \
     src/build/tools/editimgid \
     obj/genfiles/plugins/makefile:plugins/ \
     obj/genfiles/plugins/hbfwUdIds.H:plugins/ \
