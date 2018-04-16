@@ -313,11 +313,6 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                 sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
                         (TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY);
                 l_smt8 = true;
-                if(l_isFuseBlown)
-                {
-                    sys->setAttr<TARGETING::ATTR_PAYLOAD_KIND>
-                            (TARGETING::PAYLOAD_KIND_PHYP);
-                }
             }
         }
 
