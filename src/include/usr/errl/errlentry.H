@@ -98,6 +98,12 @@ class ErrlEntry
     friend class ErrlTest;
 
 public:
+    /** Constants to use in constructor */
+    static constexpr bool ADD_SW_CALLOUT = true;
+    static constexpr bool NO_SW_CALLOUT = false;
+    static constexpr bool FORCE_DUMP = true;
+    static constexpr bool NO_FORCE_DUMP = false;
+
     /**
      * @brief   ErrlEntry constructor. Builds an error log with info
      * constructed from the input.
@@ -137,8 +143,8 @@ public:
               const uint16_t i_reasonCode,
               const uint64_t i_user1 = 0,
               const uint64_t i_user2 = 0,
-              const bool i_hbSwError = false,
-              const bool i_hbDump = false );
+              const bool i_hbSwError = ErrlEntry::NO_SW_CALLOUT,
+              const bool i_hbDump = ErrlEntry::NO_FORCE_DUMP );
 
     /**
      * @brief   Destructor

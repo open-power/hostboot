@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,7 +222,8 @@ errlHndl_t VfsRp::_init()
              VFS::VFS_ALLOC_VMEM_FAILED,             //  reason Code
              rc,                                     //  user1 = rc
              l_pnor_info.size,                       //  user2 = size
-             true /*Add HB Software Callout*/
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+             ERRORLOG::ErrlEntry::FORCE_DUMP
             );
         break;
     }
@@ -274,7 +275,8 @@ void VfsRp::_vfsWatcher()
              VFS::VFS_TASK_CRASHED,                // reason
              (uint64_t)tidRc,                      // tid rc
              (uint64_t)childRc,                    // child rc
-             true
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+             ERRORLOG::ErrlEntry::FORCE_DUMP
             );
 
         // Message is only saved in iv_msg for messages from the kernel
@@ -437,7 +439,8 @@ void VfsRp::_loadUnloadMonitored(msg_t * i_msg)
              VFS::VFS_TASK_CRASHED,                    // reason Code
              (uint64_t)tidRc,                          // tid rc
              (uint64_t)childsts,                       // task status
-             true
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+             ERRORLOG::ErrlEntry::FORCE_DUMP
             );
 
         if(childRc != NULL) // crit elog aleady generated
@@ -541,7 +544,8 @@ void VfsRp::_loadUnload(msg_t * i_msg)
                  VFS_PERMS_VMEM_FAILED,                  //  reason Code
                  rc,                                     //  user1 = rc
                  i_msg->type,                            //  user2
-                 true /*Add HB Software Callout*/ );
+                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+                 ERRORLOG::ErrlEntry::FORCE_DUMP );
         }
     }
     else
@@ -574,7 +578,9 @@ void VfsRp::_loadUnload(msg_t * i_msg)
                  VFS::VFS_MODULE_ID,                     //  moduleid
                  VFS_MODULE_DOES_NOT_EXIST,              //  reason Code
                  name[0],
-                 name[1]
+                 name[1],
+                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+                 ERRORLOG::ErrlEntry::FORCE_DUMP
                 );
             err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH );
@@ -625,7 +631,8 @@ void VfsRp::_execMonitored(msg_t * i_msg)
              VFS::VFS_TASK_CRASHED,                    // reason Code
              (uint64_t)tidRc,                          // tid rc
              (uint64_t)childRc,                        // child rc
-             true
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+             ERRORLOG::ErrlEntry::FORCE_DUMP
             );
 
         if(childRc != NULL) // crit elog aleady generated
@@ -868,7 +875,8 @@ errlHndl_t VFS::module_load_unload(const char * i_module, VfsMessages i_msgtype)
              VFS::VFS_LOAD_FAILED,                   //  reason Code
              rc,                                     //  user1 = msg_sendrecv rc
              i_msgtype,                              //  user2 = message type
-             true /*Add HB Software Callout*/
+             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT,
+             ERRORLOG::ErrlEntry::FORCE_DUMP
             );
     }
 
