@@ -510,68 +510,52 @@ Target* TargetService::getNextTarget(const Target* i_pTarget) const
 
     if(l_pTarget != NULL)
     {
-        for(uint8_t i_node=0; i_node<MAX_NODE_ID; ++i_node)
+        for(uint8_t l_node=0; l_node<MAX_NODE_ID; ++l_node)
         {
-            if((iv_nodeData[i_node].initialized) &&
-                (iv_nodeData[i_node].maxTargets > 0) &&
-                ((l_pTarget >= &(*(iv_nodeData[i_node].targets))[0]) &&
-                    (l_pTarget <= &(*(iv_nodeData[i_node].targets))[
-                                iv_nodeData[i_node].maxTargets - 1])))
-            {
-                if( l_pTarget == &(*(iv_nodeData[i_node].targets))[iv_nodeData[
-                            i_node].maxTargets - 1] )
-                {
-                    // Go for next node
-                    uint8_t l_nextNode = getNextInitializedNode(
-                                            static_cast<NODE_ID>(i_node));
-                    TARG_INF("getNextTarget: Using next node %d", l_nextNode);
-                    if(l_nextNode < MAX_NODE_ID)
-                    {
-                        l_pTarget = &(*(iv_nodeData[l_nextNode].targets))[0];
-                        l_targetFound = true;
-                        break;
-                    }
-                    else
-                    {
-                        l_targetFound = false;
-                        break;
-                    }
-                }
-                else
-                {
-                    ++l_pTarget;
-                    l_targetFound = true;
-                    break;
-                }
-            }
-            else if( !(iv_nodeData[i_node].initialized) ||
-                     (iv_nodeData[i_node].maxTargets == 0))
+            // Node data is not initialized or has 0 targets
+            if( !(iv_nodeData[l_node].initialized) ||
+                (iv_nodeData[l_node].maxTargets == 0))
             {
                 TARG_ERR("getNextTarget: For node %d, initialized %d, "
                          "maximum targets %d",
-                         i_node,
-                         iv_nodeData[i_node].initialized,
-                         iv_nodeData[i_node].maxTargets);
+                         l_node,
+                         iv_nodeData[l_node].initialized,
+                         iv_nodeData[l_node].maxTargets);
             }
-        }
-
-        if(l_targetFound == false)
-        {
-            for(uint8_t i_node=0; i_node<MAX_NODE_ID; ++i_node)
+            // Starting target is last target on its node
+            else if( l_pTarget == &(*(iv_nodeData[l_node].targets))[iv_nodeData[
+                            l_node].maxTargets - 1] )
             {
-                TARG_ERR("getNextTarget: Node %d targets: first %p, "
-                         "current %p, last %p",
-                         i_node,
-                         &(*(iv_nodeData[i_node].targets))[0],
-                         l_pTarget,
-                         &(*(iv_nodeData[i_node].targets))[
-                                iv_nodeData[i_node].maxTargets - 1]);
+                // Go for next node
+                uint8_t l_nextNode = getNextInitializedNode(
+                                        static_cast<NODE_ID>(l_node));
+                if(l_nextNode < MAX_NODE_ID)
+                {
+                    TARG_DBG("getNextTarget: Switched to node %d", l_nextNode);
+                    l_pTarget = &(*(iv_nodeData[l_nextNode].targets))[0];
+                    l_targetFound = true;
+                    break;
+                }
+                else
+                {
+                    l_targetFound = false;
+                    break;
+                }
+            }
+            // Starting target is in range for its node, but not last target
+            else if((l_pTarget >= &(*(iv_nodeData[l_node].targets))[0]) &&
+                    (l_pTarget < &(*(iv_nodeData[l_node].targets))[
+                                iv_nodeData[l_node].maxTargets - 1]))
+            {
+                ++l_pTarget;
+                l_targetFound = true;
+                break;
             }
         }
     }
     if(l_targetFound == false)
     {
-        TARG_ERR("getNextTarget: Target not found");
+        TARG_DBG("getNextTarget: Target not found");
         l_pTarget = NULL;
     }
 
