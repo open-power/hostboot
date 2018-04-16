@@ -34,6 +34,7 @@
 #include <UtilHash.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTps.H>
@@ -720,13 +721,16 @@ uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
                                                 const MemAddr & i_addr,
                                                 bool & o_errorsFound,
                                                 STEP_CODE_DATA_STRUCT & io_sc );
-
-/* TODO RTC 157888
-template
-uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
-                               const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-*/
+template<>
+uint32_t __checkEcc<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
+                                                TdQueue & io_queue,
+                                                const MemAddr & i_addr,
+                                                bool & o_errorsFound,
+                                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // TODO: remove this once runtime support is abled for MBA.
+    return SUCCESS;
+}
 
 //------------------------------------------------------------------------------
 
