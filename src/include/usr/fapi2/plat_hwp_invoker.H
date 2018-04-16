@@ -61,7 +61,7 @@ void hwpLock( bool i_lock );
  * parameters. This macro simply calls the FAPI HWP executor macro and converts
  * the returned fapi::Return code to a HostBoot error log
  *
- * ERRHNDL    - errlHndl_t
+ * ERRHNDL    - local errlHndl_t
  * FUNC       - HWP function name
  * _args_...  - Any additional arguments that the HWP requires
  */
@@ -72,6 +72,32 @@ void hwpLock( bool i_lock );
         fapi2::ReturnCode l_rc; \
         FAPI_EXEC_HWP(l_rc, FUNC, ##_args_); \
         ERRHNDL = fapi2::rcToErrl(l_rc);\
+        if( ERRHNDL ) {\
+            ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
+            ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
+        }\
+        fapi2::hwpLock(false); \
+    }
+
+/**
+ * @brief HWP Invoker macro that returns the fapi RC
+ *
+ * This macro is called by HostBoot PLAT code to invoke a HW Procedure (HWP).
+ * The caller must create any necessary fapi::Targets and pass them as
+ * parameters. This macro simply calls the FAPI HWP executor macro and converts
+ * the returned fapi::Return code to a HostBoot error log
+ *
+ * ERRHNDL    - local errlHndl_t
+ * _RC        - local fapi2::ReturnCode
+ * FUNC       - HWP function name
+ * _args_...  - Any additional arguments that the HWP requires
+ */
+
+#define FAPI_INVOKE_HWP_RC(ERRHNDL, _RC, FUNC, _args_...) \
+    {\
+        fapi2::hwpLock(true); \
+        FAPI_EXEC_HWP(_RC, FUNC, ##_args_); \
+        ERRHNDL = fapi2::rcToErrl(_RC);\
         if( ERRHNDL ) {\
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
