@@ -98,66 +98,15 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 break;
             }
 
-            //if there was a UE or IUE
-            if ( (eccAttns & MAINT_UE) || (eccAttns & MAINT_IUE) )
+            // Analyze the ECC errors, if needed.
+            o_rc = analyzeEccErrors( eccAttns, io_sc, o_done );
+            if ( SUCCESS != o_rc )
             {
-                PRDF_TRAC( PRDF_FUNC "UE Detected. Aborting this procedure." );
-                //UE
-                if ( eccAttns & MAINT_UE )
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintUE );
-                }
-                //IUE
-                else
-                {
-                    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                                      PRDFSIG_MaintIUE );
-                }
-
-                // At this point we don't actually have an address for the UE.
-                // The best we can do is get the address in which the command
-                // stopped.
-                MemAddr addr;
-                o_rc = getMemMaintAddr<TYPE_MCA>( iv_chip, addr );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
-                              iv_chip->getHuid() );
-                    break;
-                }
-
-                // Do memory UE handling.
-                o_rc = MemEcc::handleMemUe<TYPE_MCA>(iv_chip, addr,
-                                                     UE_TABLE::SCRUB_UE, io_sc);
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
-                              iv_chip->getHuid() );
-                    break;
-                }
-
-                //Abort this procedure
-                o_done = true;
+                PRDF_ERR( PRDF_FUNC "analyzeEccErrors() failed" );
+                break;
             }
-            //else if there was an MPE
-            else if ( eccAttns & MAINT_MPE )
-            {
-                // Do memory MPE handling.
-                o_rc = MemEcc::handleMpe<TYPE_MCA>( iv_chip, iv_rank,
-                                                    UE_TABLE::SCRUB_MPE, io_sc);
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "handleMpe(0x%08x,0x%02x) failed",
-                              iv_chip->getHuid(), getKey() );
-                    break;
-                }
+            if ( o_done ) break; // abort the procedure.
 
-                //Abort this procedure
-                o_done = true;
-            }
-            else
-            {
                 //Add the rank to the callout list
                 MemoryMru memmru(iv_chip->getTrgt(), iv_rank,
                         MemoryMruData::CALLOUT_RANK);
@@ -180,7 +129,6 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                     //Abort this procedure
                     o_done = true;
                 }
-            }
         }
 
     }while(0);
@@ -215,6 +163,102 @@ uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 //                          Generic template functions
 //
 //##############################################################################
+
+template<TARGETING::TYPE T>
+bool __iueCheck( uint32_t i_eccAttns );
+
+template<> inline
+bool __iueCheck<TYPE_MCA>( uint32_t i_eccAttns )
+{
+    return ( 0 != (i_eccAttns & MAINT_IUE) );
+}
+
+template<> inline
+bool __iueCheck<TYPE_MBA>( uint32_t i_eccAttns )
+{
+    // IUES are reported via RCE ETE on Centaur
+    return ( 0 != (i_eccAttns & MAINT_RCE_ETE) );
+}
+
+template<TARGETING::TYPE T>
+uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
+                                        STEP_CODE_DATA_STRUCT & io_sc,
+                                        bool & o_done )
+{
+    #define PRDF_FUNC "[TpsEvent::analyzeEccErrors] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // At this point we don't actually have an address for any ECC errors.
+        // The best we can do is get the address in which the command stopped.
+        MemAddr addr;
+        o_rc = getMemMaintAddr<T>( iv_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // IUEs are reported as UEs during read operations. Therefore, we will
+        // treat IUEs like UEs for these scrub operations simply to maintain
+        // consistency during all of Memory Diagnostics.
+        if ( (i_eccAttns & MAINT_UE) || __iueCheck<T>(i_eccAttns) )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            // Add the signature to the multi-signature list. Also, since
+            // this will be a predictive callout, change the primary
+            // signature as well.
+            uint32_t sig = (i_eccAttns & MAINT_UE) ? PRDFSIG_MaintUE
+                                                   : PRDFSIG_MaintIUE;
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), sig );
+            io_sc.service_data->setSignature(     iv_chip->getHuid(), sig );
+
+            o_rc = MemEcc::handleMemUe<T>( iv_chip, addr, UE_TABLE::SCRUB_UE,
+                                           io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemEcc::handleMemUe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
+        else if ( i_eccAttns & MAINT_MPE )
+        {
+            PRDF_TRAC( PRDF_FUNC "MPE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_MaintMPE );
+
+            o_rc = MemEcc::handleMpe<T>( iv_chip, addr, UE_TABLE::SCRUB_MPE,
+                                         io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MemEcc::handleMpe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
 uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )

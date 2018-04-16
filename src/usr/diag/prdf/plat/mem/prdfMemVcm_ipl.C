@@ -125,13 +125,13 @@ uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
 template<TARGETING::TYPE T>
 bool __iueCheck( uint32_t i_eccAttns );
 
-template<>
+template<> inline
 bool __iueCheck<TYPE_MCA>( uint32_t i_eccAttns )
 {
     return ( 0 != (i_eccAttns & MAINT_IUE) );
 }
 
-template<>
+template<> inline
 bool __iueCheck<TYPE_MBA>( uint32_t i_eccAttns )
 {
     // IUES are reported via RCE ETE on Centaur
