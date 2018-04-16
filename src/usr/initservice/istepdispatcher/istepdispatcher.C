@@ -1434,6 +1434,9 @@ void IStepDispatcher::waitForSyncPoint()
     }
     else
     {
+        // Tell Simics we are waiting for the FSP to do something
+        MAGIC_WAITING_FOR_FSP();
+
         // Wait for the condition variable to be signalled
         mutex_lock(&iv_mutex);
         while((!iv_syncPointReached) && (!iv_shutdown))
@@ -1451,6 +1454,9 @@ void IStepDispatcher::waitForSyncPoint()
             iv_syncPointReached = false;
             mutex_unlock(&iv_mutex);
         }
+
+        // Tell Simics we are done waiting
+        MAGIC_DONE_WAITING_FOR_FSP();
     }
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::waitForSyncPoint");
