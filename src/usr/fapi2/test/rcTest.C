@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1748,6 +1748,21 @@ uint32_t rcTestReturnCodeAttrErrls()
         else
         {
             TS_FAIL("No error from p9_registerFfdc_fail !!");
+            numFails++;
+        }
+
+        numTests++;
+        fapi2::ReturnCode l_rc;
+        FAPI_INVOKE_HWP_RC(l_errl, l_rc, p9_registerFfdc_fail, fapi2_procTarget);
+        if( (l_errl != NULL) && (l_rc == (fapi2::ReturnCode)fapi2::RC_TEST_ERROR_A) )
+        {
+            FAPI_INF("p9_registerFfdc_fail returned correct RC");
+            delete l_errl;
+            l_errl = NULL;
+        }
+        else
+        {
+            TS_FAIL("Wrong RC from p9_registerFfdc_fail !!");
             numFails++;
         }
     } while (0);
