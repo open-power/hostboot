@@ -825,31 +825,33 @@ uint32_t MemTdCtlr<TYPE_MBA>::maskEccAttns()
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO RTC 176901
-    //do
-    //{
-    //    // Don't want to handle memory CEs during any TD procedures, so
-    //    // mask them.
+    do
+    {
+        // Don't want to handle memory CEs during any TD procedures, so
+        // mask them.
 
-    //    const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_OR"
-    //                                            : "MBA1_MBSECCFIR_MASK_OR";
-    //    SCAN_COMM_REGISTER_CLASS * reg = iv_membChip->getRegister(reg_str);
+        const char * reg_str = (0 == iv_chip->getPos())
+            ? "MBA0_MBSECCFIR_MASK_OR" : "MBA1_MBSECCFIR_MASK_OR";
 
-    //    reg->clearAllBits();
-    //    reg->SetBit(16); // fetch NCE
-    //    reg->SetBit(17); // fetch RCE
-    //    reg->SetBit(43); // prefetch UE
+        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
 
-    //    o_rc = reg->Write();
-    //    if ( SUCCESS != o_rc )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
-    //        break;
-    //    }
+        SCAN_COMM_REGISTER_CLASS * reg = membChip->getRegister(reg_str);
 
-    //    iv_fetchAttnsMasked = true;
+        reg->clearAllBits();
+        reg->SetBit(16); // fetch NCE
+        reg->SetBit(17); // fetch RCE
+        reg->SetBit(43); // prefetch UE
 
-    //} while (0);
+        o_rc = reg->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+            break;
+        }
+
+        iv_fetchAttnsMasked = true;
+
+    } while (0);
 
     return o_rc;
 
@@ -865,44 +867,45 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO RTC 176901
-    //do
-    //{
-    //    // Memory CEs where masked at the beginning of the TD procedure, so
-    //    // clear and unmask them. Also, it is possible that memory UEs have
-    //    // thresholded so clear and unmask them as well.
+    do
+    {
+        // Memory CEs where masked at the beginning of the TD procedure, so
+        // clear and unmask them. Also, it is possible that memory UEs have
+        // thresholded so clear and unmask them as well.
 
-    //    const char * fir_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-    //                                            : "MBA1_MBSECCFIR_AND";
-    //    const char * msk_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_AND"
-    //                                            : "MBA1_MBSECCFIR_MASK_AND";
+        const char * fir_str = (0 == iv_chip->getPos())
+            ? "MBA0_MBSECCFIR_AND" : "MBA1_MBSECCFIR_AND";
+        const char * msk_str = (0 == iv_chip->getPos())
+            ? "MBA0_MBSECCFIR_MASK_AND" : "MBA1_MBSECCFIR_MASK_AND";
 
-    //    SCAN_COMM_REGISTER_CLASS * fir = iv_membChip->getRegister( fir_str );
-    //    SCAN_COMM_REGISTER_CLASS * msk = iv_membChip->getRegister( msk_str );
+        ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
 
-    //    fir->setAllBits(); msk->setAllBits();
-    //    fir->ClearBit(16); msk->ClearBit(16); // fetch NCE
-    //    fir->ClearBit(17); msk->ClearBit(17); // fetch RCE
-    //    fir->ClearBit(19); msk->ClearBit(19); // fetch UE
-    //    fir->ClearBit(43); msk->ClearBit(43); // prefetch UE
+        SCAN_COMM_REGISTER_CLASS * fir = membChip->getRegister( fir_str );
+        SCAN_COMM_REGISTER_CLASS * msk = membChip->getRegister( msk_str );
 
-    //    o_rc = fir->Write();
-    //    if ( SUCCESS != o_rc )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
-    //        break;
-    //    }
+        fir->setAllBits(); msk->setAllBits();
+        fir->ClearBit(16); msk->ClearBit(16); // fetch NCE
+        fir->ClearBit(17); msk->ClearBit(17); // fetch RCE
+        fir->ClearBit(19); msk->ClearBit(19); // fetch UE
+        fir->ClearBit(43); msk->ClearBit(43); // prefetch UE
 
-    //    o_rc = msk->Write();
-    //    if ( SUCCESS != o_rc )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
-    //        break;
-    //    }
+        o_rc = fir->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
+            break;
+        }
 
-    //    iv_fetchAttnsMasked = false;
+        o_rc = msk->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
+            break;
+        }
 
-    //} while (0);
+        iv_fetchAttnsMasked = false;
+
+    } while (0);
 
     return o_rc;
 
