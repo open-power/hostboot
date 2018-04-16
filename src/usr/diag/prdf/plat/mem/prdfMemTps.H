@@ -69,6 +69,18 @@ class TpsEvent : public TdEntry
   private: // functions
 
     /**
+     * @brief  Does analysis on any ECC errors found during the current phase.
+     * @param  i_eccAttns Mask of all currently active maintenance attentions.
+     *                    See enum MaintEccAttns for values.
+     * @param  io_sc      The step code data struct.
+     * @param  o_done     True if the procedure is complete or has aborted.
+     *                    False otherwise.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzeEccErrors( const uint32_t & i_eccAttns,
+                               STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    /**
      * @brief  Starts the appropriate maintenance command based on iv_phase.
      * @pre    iv_phase must be set appropriately before calling this function.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
