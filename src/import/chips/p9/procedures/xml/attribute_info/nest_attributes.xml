@@ -1089,22 +1089,28 @@
        consumer:- mss_setup_bars
        Data Structure from eff grouping to setup bars to help determine
        different groups
-       Non-Mirroring array[0-7]  [0.17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of non-mirroring;
+       Non-Mirroring array[0-7]  [0.20]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of non-mirroring;
                                           3-- Base address; 4-11-- PortID number in group;
                                          12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
                                          14-- Alt Group size (0); 15-- Alt Group size(1);
                                          16-- Alt Base address (0); 17-- Alt Base address (1);
+                                         18-- SMF Memory Valid
+                                         19-- SMF Group Size (size[22:35] in lower bits)
+                                         20-- SMF Base Address (addr[22:35] in lower bits)
 
-                                         13-- Alternate Group Size; 14-- Alternate Base address
-       Mirroring     array[8-15] [0:17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
+
+       Mirroring     array[8-15] [0:20]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
                                           3-- Base address; 4-11-- PortID number;
                                          12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
                                          14-- Alt Group size (0); 15-- Alt Group size(1);
                                          16-- Alt Base address (0); 17-- Alt Base address (1);
+                                         18-- SMF Memory Valid
+                                         19-- SMF Group Size (size[22:35] in lower bits)
+                                         20-- SMF Base Address (addr[22:35] in lower bits)
        Measured in GB
      </description>
     <valueType>uint32</valueType>
-    <array>16,18</array>
+    <array>16,21</array>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -1238,7 +1244,79 @@
   <writeable/>
   <persistRuntime/>
 </attribute>
-
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_SMF_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The base address where the SMF bar starts.It is
+                calculated based on the SMF size requested by users.
+                Set by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_SMF_BAR_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The total amount of memory a user has requested to reserve for
+                secure memory functions.
+                Used by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <initToZero/>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SMF_CONFIG</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description> Controls the enabling and disabling of smf.
+                Used by unit initfiles, p9_mss_eff_grouping.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SMF_ENABLED</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description> True if smf config is enabled and smf is supported in the
+                chip ec level. Set by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x00,
+    TRUE = 0x01
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
