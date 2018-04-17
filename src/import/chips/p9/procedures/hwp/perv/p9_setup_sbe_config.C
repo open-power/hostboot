@@ -46,10 +46,10 @@
 enum P9_SETUP_SBE_CONFIG_Private_Constants
 {
     // Scratch_reg_1
-    ATTR_EQ_GARD_STARTBIT             = 0,
-    ATTR_EQ_GARD_LENGTH               = 6,
-    ATTR_EC_GARD_STARTBIT             = 8,
-    ATTR_EC_GARD_LENGTH               = 24,
+    ATTR_EQ_GARD_STARTBIT              = 0,
+    ATTR_EQ_GARD_LENGTH                = 6,
+    ATTR_EC_GARD_STARTBIT              = 8,
+    ATTR_EC_GARD_LENGTH                = 24,
 
     // Scratch_reg_2
     ATTR_I2C_BUS_DIV_REF_STARTBIT      = 0,
@@ -58,8 +58,8 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT  = 17,
     ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT  = 18,
     ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT  = 19,
-    ATTR_MC_PLL_BUCKET_STARTBIT      = 21,
-    ATTR_MC_PLL_BUCKET_LENGTH        = 3,
+    ATTR_MC_PLL_BUCKET_STARTBIT        = 21,
+    ATTR_MC_PLL_BUCKET_LENGTH          = 3,
     ATTR_OB0_PLL_BUCKET_STARTBIT       = 24,
     ATTR_OB0_PLL_BUCKET_LENGTH         = 2,
     ATTR_OB1_PLL_BUCKET_STARTBIT       = 26,
@@ -98,17 +98,18 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_SLOW_PCI_REF_CLOCK_BIT        = 5,
 
     // Scratch_reg_6
+    ATTR_SMF_CONFIG                        = 16,
     ATTR_PROC_EFF_FABRIC_GROUP_ID_STARTBIT = 17,
-    ATTR_PROC_EFF_FABRIC_GROUP_ID_LENGTH = 3,
-    ATTR_PROC_EFF_FABRIC_CHIP_ID_STARTBIT = 20,
-    ATTR_PROC_EFF_FABRIC_CHIP_ID_LENGTH = 3,
-    ATTR_PUMP_CHIP_IS_GROUP            = 23,
-    ATTR_PROC_FABRIC_GROUP_ID_STARTBIT = 26,
-    ATTR_PROC_FABRIC_GROUP_ID_LENGTH   = 3,
-    ATTR_PROC_FABRIC_CHIP_ID_STARTBIT  = 29,
-    ATTR_PROC_FABRIC_CHIP_ID_LENGTH    = 3,
-    ATTR_PROC_MEM_TO_USE_STARTBIT = 1,
-    ATTR_PROC_MEM_TO_USE_LENGTH   = 6,
+    ATTR_PROC_EFF_FABRIC_GROUP_ID_LENGTH   = 3,
+    ATTR_PROC_EFF_FABRIC_CHIP_ID_STARTBIT  = 20,
+    ATTR_PROC_EFF_FABRIC_CHIP_ID_LENGTH    = 3,
+    ATTR_PUMP_CHIP_IS_GROUP                = 23,
+    ATTR_PROC_FABRIC_GROUP_ID_STARTBIT     = 26,
+    ATTR_PROC_FABRIC_GROUP_ID_LENGTH       = 3,
+    ATTR_PROC_FABRIC_CHIP_ID_STARTBIT      = 29,
+    ATTR_PROC_FABRIC_CHIP_ID_LENGTH        = 3,
+    ATTR_PROC_MEM_TO_USE_STARTBIT          = 1,
+    ATTR_PROC_MEM_TO_USE_LENGTH            = 6,
 };
 
 
@@ -526,6 +527,7 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     }
     //set_scratch6_reg
     {
+        uint8_t l_smf_config;
         uint8_t l_pump_mode;
         uint8_t l_proc_chip_mem_to_use;
 
@@ -555,6 +557,20 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         else
         {
             l_read_scratch_reg.setBit<24>();
+        }
+
+        FAPI_DBG("Reading SMF_CONFIG");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_smf_config));
+
+        if (l_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
+        {
+            l_read_scratch_reg.setBit<ATTR_SMF_CONFIG>();
+        }
+        else
+        {
+            l_read_scratch_reg.clearBit<ATTR_SMF_CONFIG>();
         }
 
         FAPI_DBG("Reading PUMP MODE");
