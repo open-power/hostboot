@@ -35,6 +35,7 @@ constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b11 = 0b11;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0xFC = 0xFC;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_2 = 2;
@@ -61,6 +62,8 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID, TGT1, l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID));
         fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID_Type l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID, TGT1, l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID));
+        fapi2::ATTR_SMF_CONFIG_Type l_TGT1_ATTR_SMF_CONFIG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, TGT1, l_TGT1_ATTR_SMF_CONFIG));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x2011041ull, l_scom_buffer ));
@@ -663,6 +666,15 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
             {
                 l_scom_buffer.insert<56, 4, 60, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID );
                 l_scom_buffer.insert<60, 3, 61, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+            {
+                if ((l_TGT1_ATTR_SMF_CONFIG == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED))
+                {
+                    l_scom_buffer.insert<34, 2, 62, uint64_t>(literal_0b10 );
+                }
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5)
