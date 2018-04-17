@@ -72,6 +72,10 @@ const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 const uint8_t CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_HW423589_OPTION2 = 0x0;
 const uint8_t CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2 = 0x7;
 
+// chip address extension mask, for SMF_ENABLE
+// repurposes group ID(0) as secure memory indicator
+const uint8_t CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_SMF_ENABLE = 0x8;
+
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE                  = 0x40000000000ULL; // 4_TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2 = 0x8000000000ULL;  // 512_GB
 
