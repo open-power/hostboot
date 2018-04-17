@@ -112,6 +112,9 @@ struct EffGroupingSysAttrs
     uint8_t iv_selectiveMode = 0;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
     uint8_t iv_hwMirrorEnabled = 0;      // ATTR_MRW_HW_MIRRORING_ENABLE
     uint8_t iv_groupsAllowed = 0;        // ATTR_MSS_INTERLEAVE_ENABLE
+    uint8_t iv_smfSupported = 0;         // ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED
+    uint8_t iv_smfConfig = 0;            // ATTR_SMF_CONFIG
+    uint8_t iv_smfEnabled = 0;           // ATTR_SMF_ENABLED
 };
 
 // See doxygen in struct definition.
@@ -144,6 +147,14 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
         FAPI_DBG("Extended addressing supported: %d, HW423589 option2: %d",
                  l_extended_addressing_mode,
                  l_hw423589_option2);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, iv_smfConfig),
+                 "Error from FAPI_ATTR_GET (ATTR_SMF_CONFIG)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED, l_targets.front(), iv_smfSupported),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED)");
+
+        FAPI_DBG("SMF config: %d, supported: %d", iv_smfConfig, iv_smfSupported);
     }
 
     if (l_extended_addressing_mode)
@@ -152,6 +163,12 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
         {
             l_addr_extension_group_id = CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_HW423589_OPTION2;
             l_addr_extension_chip_id = CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2;
+        }
+
+        if (iv_smfConfig && iv_smfSupported)
+        {
+            l_addr_extension_group_id |= CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_SMF_ENABLE;
+            iv_smfEnabled = fapi2::ENUM_ATTR_SMF_ENABLED_TRUE;
         }
 
         // enable extended addressing mode, seed attributes from defaults
@@ -184,6 +201,11 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
                            FAPI_SYSTEM,
                            l_max_interleave_group_size),
              "Error from FAPI_ATTR_SET (ATTR_MAX_INTERLEAVE_GROUP_SIZE)");
+
+    // Set smf enabled attribute
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SMF_ENABLED,
+                           FAPI_SYSTEM, iv_smfEnabled),
+             "Error from FAPI_ATTR_SET (ATTR_SMF_ENABLED)");
 
     // Get mirror placement policy
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,
@@ -237,6 +259,7 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
     FAPI_INF("   ATTR_MEM_MIRROR_PLACEMENT_POLICY 0x%.8X", iv_selectiveMode);
     FAPI_INF("   ATTR_MRW_HW_MIRRORING_ENABLE 0x%.8X", iv_hwMirrorEnabled);
     FAPI_INF("   ATTR_MSS_INTERLEAVE_ENABLE 0x%.8X", iv_groupsAllowed);
+    FAPI_INF("   ATTR_SMF_ENABLED 0x%X", iv_smfEnabled);
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingSysAttrs::getAttrs");
@@ -292,6 +315,9 @@ struct EffGroupingProcAttrs
     uint64_t iv_chtmBarSizes[NUM_OF_CHTM_REGIONS];  // ATTR_PROC_CHTM_BAR_SIZES
 
     uint64_t iv_occSandboxSize = 0; // ATTR_PROC_OCC_SANDBOX_SIZE
+
+    uint64_t iv_smfBarSize = 0;     // ATTR_PROC_SMF_BAR_SIZE
+
     uint32_t iv_fabricSystemId = 0; // ATTR_PROC_FABRIC_SYSTEM_ID
     uint8_t  iv_fabricGroupId = 0;  // ATTR_PROC_FABRIC_GROUP_ID
     uint8_t  iv_fabricChipId = 0;   // ATTR_PROC_FABRIC_CHIP_ID
@@ -354,6 +380,12 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
              "Error getting ATTR_PROC_OCC_SANDBOX_SIZE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
+    // Get Secure Memory (SMF) bar size
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SMF_BAR_SIZE, i_target,
+                           iv_smfBarSize),
+             "Error getting ATTR_PROC_SMF_BAR_SIZE, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+
     // Get Fabric system ID
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target,
                            iv_fabricSystemId),
@@ -388,6 +420,7 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     }
 
     FAPI_INF("  ATTR_PROC_OCC_SANDBOX_SIZE 0x%.16llX", iv_occSandboxSize);
+    FAPI_INF("  ATTR_PROC_SMF_BAR_SIZE 0x%.16llX", iv_smfBarSize);
     FAPI_INF("  ATTR_PROC_FABRIC_SYSTEM_ID 0x%.8X", iv_fabricSystemId);
     FAPI_INF("  ATTR_PROC_FABRIC_GROUP_ID 0x%.8X", iv_fabricGroupId);
     FAPI_INF("  ATTR_PROC_FABRIC_CHIP_ID 0x%.8X", iv_fabricChipId);
@@ -855,6 +888,22 @@ struct EffGroupingBaseSizeData
         const EffGroupingProcAttrs& i_procAttrs);
 
     ///
+    /// @brief Setting SMF base addresses based on bar size
+    ///
+    /// @param[in] i_target       Reference to Processor Chip Target
+    /// @param[in] i_sysAttrs     System attribute settings
+    /// @param[in] i_procAttrs    Proc attribute values
+    /// @param[in] io_groupData   Effective grouping data info
+    ///
+    /// @return FAPI2_RC_SUCCESS if success, else error code.
+    ///
+    fapi2::ReturnCode setSMFBaseSizeData(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const EffGroupingSysAttrs& i_sysAttrs,
+        const EffGroupingProcAttrs& i_procAttrs,
+        EffGroupingData& io_groupData);
+
+    ///
     /// @brief setBaseSizeAttr
     /// Function that set base and size attribute values for both mirror
     /// and non-mirror based on given base/size data.
@@ -881,6 +930,7 @@ struct EffGroupingBaseSizeData
     uint64_t iv_mirror_sizes[NUM_MIRROR_REGIONS];
     uint64_t iv_mirror_sizes_ack[NUM_MIRROR_REGIONS];
 
+    uint64_t iv_smf_bar_base = 0;
     uint64_t iv_occ_sandbox_base = 0;
     uint64_t iv_nhtm_bar_base = 0;
     uint64_t iv_chtm_bar_bases[NUM_OF_CHTM_REGIONS];
@@ -1195,7 +1245,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     {
         FAPI_ASSERT(l_mem_sizes[l_index] >= l_htmOccSize,
                     fapi2::MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE()
-                    .set_AJUSTED_SIZE(l_mem_sizes[l_index])
+                    .set_ADJUSTED_SIZE(l_mem_sizes[l_index])
                     .set_NHTM_TOTAL_BAR_SIZE(l_nhtmSize)
                     .set_CHTM_TOTAL_BAR_SIZE(l_chtmSize)
                     .set_OCC_SANDBOX_BAR_SIZE(i_procAttrs.iv_occSandboxSize)
@@ -1295,6 +1345,197 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// See description in struct definition
+fapi2::ReturnCode EffGroupingBaseSizeData::setSMFBaseSizeData(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const EffGroupingSysAttrs& i_sysAttrs,
+    const EffGroupingProcAttrs& i_procAttrs,
+    EffGroupingData& io_groupData)
+{
+    FAPI_DBG("Entering");
+
+    // Hold mem bases & sizes for mirror/non-mirror
+    uint64_t l_mem_bases[NUM_NON_MIRROR_REGIONS];
+    uint64_t l_mem_sizes[NUM_NON_MIRROR_REGIONS];
+    uint64_t l_smf_bases[NUM_NON_MIRROR_REGIONS];
+    uint64_t l_smf_sizes[NUM_NON_MIRROR_REGIONS];
+    uint64_t l_smf_valid[NUM_NON_MIRROR_REGIONS];
+    uint8_t  l_numRegions = 0;
+    uint8_t  l_memHole = 0;
+    uint8_t  l_index = 0;
+    uint64_t l_accMemSize = 0;
+    uint64_t l_totalSize = 0;
+    uint64_t l_memSizeAfterSmf = 0;
+
+    // Set local variables with attribute values
+    uint64_t l_smfTotalSize = i_procAttrs.iv_smfBarSize;
+    uint64_t l_smfSupported = i_sysAttrs.iv_smfSupported;
+    uint64_t l_smfConfig = i_sysAttrs.iv_smfConfig;
+    uint64_t l_smfEnabled = i_sysAttrs.iv_smfEnabled;
+
+    // No SMF space requested, exit
+    if (l_smfTotalSize == 0)
+    {
+        FAPI_INF("setSMFBaseSizeData: No SMF memory requested.");
+        goto fapi_try_exit;
+    }
+
+    // Determine whether secure memory region can be enabled
+    FAPI_ASSERT(l_smfEnabled != 0,
+                fapi2::MSS_EFF_GROUPING_SMF_NOT_ENABLED_OR_SUPPORTED()
+                .set_SMF_SUPPORTED(l_smfSupported)
+                .set_SMF_CONFIG(l_smfConfig)
+                .set_SMF_ENABLED(l_smfEnabled)
+                .set_SMF_TOTAL_BAR_SIZE(l_smfTotalSize),
+                "EffGroupingBaseSizeData::setSMFBaseSizeData: Requirements to "
+                "enable a secure memory space not met. "
+                "smfSupported 0x%llX, smfConfig 0x%llX, smfEnabled 0x%llX, smfSize 0x%.16llX",
+                l_smfSupported, l_smfConfig, l_smfEnabled, l_smfTotalSize);
+
+    // Setup mem base and size working array depending on mirror setting
+    if (i_sysAttrs.iv_selectiveMode ==
+        fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)   // Normal
+    {
+        l_numRegions = NUM_NON_MIRROR_REGIONS;
+        memcpy(l_mem_bases, iv_mem_bases, sizeof(iv_mem_bases));
+        memcpy(l_mem_sizes, iv_memory_sizes,  sizeof(iv_memory_sizes));
+    }
+    else // Flipped
+    {
+        l_numRegions = NUM_MIRROR_REGIONS;
+        memcpy(l_mem_bases, iv_mirror_bases, sizeof(iv_mirror_bases));
+        memcpy(l_mem_sizes, iv_mirror_sizes, sizeof(iv_mirror_sizes));
+    }
+
+    // Setup smf base and size working array
+    memset(l_smf_valid, 0, sizeof(l_smf_valid));
+    memset(l_smf_bases, 0, sizeof(l_smf_bases));
+    memset(l_smf_sizes, 0, sizeof(l_smf_sizes));
+
+    // Calculate total available memory
+    for (uint8_t ii = 0; ii < l_numRegions; ii++)
+    {
+        l_totalSize += l_mem_sizes[ii];
+
+        for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+        {
+            if (io_groupData.iv_data[ii][ALT_VALID(jj)])
+            {
+                l_memHole++;
+            }
+        }
+    }
+
+    FAPI_INF("Total memory size = %.16lld bytes (%d GB) , l_memHole %d",
+             l_totalSize, l_totalSize >> 30, l_memHole);
+
+    // Error if total memory is not enough for requested SMF
+    FAPI_ASSERT(l_totalSize >= l_smfTotalSize,
+                fapi2::MSS_EFF_GROUPING_NO_SPACE_FOR_SMF_BAR()
+                .set_TOTAL_SIZE(l_totalSize)
+                .set_SMF_TOTAL_BAR_SIZE(l_smfTotalSize)
+                .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
+                "EffGroupingBaseSizeData::setSMFBaseSizeData: Required memory "
+                "space for requested SMF BAR is not available. "
+                "Placement policy %u, MemSize 0x%.16llX, SmfSize 0x%.16llX",
+                i_sysAttrs.iv_selectiveMode, l_totalSize, l_smfTotalSize);
+
+    // Calculate which memory region the SMF memory starts
+    l_memSizeAfterSmf = l_totalSize - l_smfTotalSize;
+    FAPI_DBG("Memsize available after SMF: %.16lld (%d GB)",
+             l_memSizeAfterSmf, l_memSizeAfterSmf >> 30);
+
+    l_index = getMemoryRegionIndex(l_mem_bases[0] + l_memSizeAfterSmf,
+                                   i_sysAttrs,
+                                   l_accMemSize);
+
+    // Adjusted memory size for region where SMF starts
+    l_mem_sizes[l_index] = l_mem_sizes[l_index] -
+                           (l_accMemSize - l_memSizeAfterSmf);
+
+    FAPI_DBG("Adjusted memsize at index - l_mem_sizes[%d] = %.16lld (%d GB)",
+             l_index,  l_mem_sizes[l_index], l_mem_sizes[l_index] >> 30);
+
+    if (l_memHole)
+    {
+        FAPI_ASSERT(l_mem_sizes[l_index] >= l_smfTotalSize,
+                    fapi2::MSS_EFF_GROUPING_SMF_BAR_NOT_POSSIBLE()
+                    .set_ADJUSTED_SIZE(l_mem_sizes[l_index])
+                    .set_SMF_TOTAL_BAR_SIZE(l_smfTotalSize)
+                    .set_MIRROR_PLACEMENT_POLICY(i_sysAttrs.iv_selectiveMode),
+                    "EffGroupingBaseSizeData::setSMFBaseSizeData: Memory SMF "
+                    "BAR not possible, Placement policy %u, "
+                    "MemorySizes[%d] 0x%.16llX, SmfSize 0x%.16llX",
+                    i_sysAttrs.iv_selectiveMode, l_index, l_mem_sizes[l_index],
+                    l_smfTotalSize);
+    }
+
+    // Setting SMF base address for ATTR_PROC_SMF_BAR_BASE_ADDR
+    // Also sets addr(15) to indicate secure memory base address
+    iv_smf_bar_base = l_mem_bases[l_index] + l_mem_sizes[l_index];
+    iv_smf_bar_base |= ((uint64_t)1 << (63 - 15));
+
+    // Allocate SMF base address and size for region where SMF starts
+    l_smf_bases[l_index] = l_mem_bases[l_index] + l_mem_sizes[l_index];
+    l_smf_sizes[l_index] = (l_accMemSize - l_memSizeAfterSmf);
+    l_smf_valid[l_index] = 1;
+
+    // Redefine memory region for SMF and zero out memory size of regions used by SMF
+    for (uint8_t ii = l_index + 1; ii < l_numRegions; ii++)
+    {
+        l_smf_bases[ii] = l_mem_bases[ii];
+        l_smf_sizes[ii] = l_mem_sizes[ii];
+        l_mem_sizes[ii] = 0;
+
+        if (l_smf_sizes[ii] != 0)
+        {
+            l_smf_valid[ii] = 1;
+        }
+    }
+
+    // Update mem sizes with working array values
+    if (l_numRegions == NUM_NON_MIRROR_REGIONS)
+    {
+        memcpy(iv_memory_sizes, l_mem_sizes, sizeof(iv_memory_sizes));
+    }
+    else
+    {
+        memcpy(iv_mirror_sizes, l_mem_sizes, sizeof(iv_mirror_sizes));
+    }
+
+    // Update SMF data in groupData variable for ATTR_MSS_MCS_GROUP_32
+    // Note: Lower address is compared against addr(22:35)
+    for (uint8_t ii = 0; ii < io_groupData.iv_numGroups; ii++)
+    {
+        io_groupData.iv_data[ii][SMF_VALID] = l_smf_valid[ii];
+        io_groupData.iv_data[ii][SMF_SIZE] = l_smf_sizes[ii] >> (63 - 35);
+        io_groupData.iv_data[ii][SMF_BASE_ADDR] = l_smf_bases[ii] >> (63 - 35);
+    }
+
+    // Result traces
+    FAPI_INF("EffGroupingBaseSizeData::setSMFBaseSizeData");
+    FAPI_INF("  Placement policy %u, total mem %.16lld (%d GB), smfSize %.16lld (%d GB)",
+             i_sysAttrs.iv_selectiveMode, l_totalSize, l_totalSize >> 30,
+             l_smfTotalSize, l_smfTotalSize >> 30);
+
+    for (uint8_t ii = 0; ii < l_numRegions; ii++)
+    {
+        FAPI_INF("  Index: %d, iv_mem_bases 0x%.16llX, iv_memory_sizes 0x%.16llX",
+                 ii, l_mem_bases[ii], l_mem_sizes[ii]);
+    }
+
+    FAPI_INF("SMF_BASE  %.16lld (%d GB)", iv_smf_bar_base, iv_smf_bar_base >> 30);
+
+    for (uint8_t ii = 0; ii < l_numRegions; ii++)
+    {
+        FAPI_INF("  Index: %d, iv_smf_bases 0x%.16llX, iv_smf_sizes    0x%.16llX",
+                 ii, l_smf_bases[ii], l_smf_sizes[ii]);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
 
 // See description in struct definition
 fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
@@ -1338,7 +1579,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
     // Set ATTR_PROC_NHTM_BAR_BASE_ADDR
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_target,
                            iv_nhtm_bar_base),
-             "Error setting ATTR_PROC_HTM_BAR_BASE_ADDR, "
+             "Error setting ATTR_PROC_NHTM_BAR_BASE_ADDR, "
              "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
 
     // Set ATTR_PROC_CHTM_BAR_BASE_ADDR
@@ -1352,6 +1593,12 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
                            iv_occ_sandbox_base),
              "Error setting ATTR_PROC_OCC_SANDBOX_BASE_ADDR, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
+
+    // Set ATTR_PROC_SMF_BAR_BASE_ADDR
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_SMF_BAR_BASE_ADDR, i_target,
+                           iv_smf_bar_base),
+             "Error setting ATTR_PROC_SMF_BAR_BASE_ADDR, "
+             "l_rc 0x%.8X", (uint64_t)fapi2::current_err);
 
     // Mirror mode attribute setting
     if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
@@ -1413,6 +1660,9 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
 
     FAPI_INF("ATTR_PROC_OCC_SANDBOX_BASE_ADDR: 0x%.16llX (%d GB)",
              iv_occ_sandbox_base, iv_occ_sandbox_base >> 30);
+
+    FAPI_INF("ATTR_PROC_SMF_BAR_BASE_ADDR : 0x%.16llX (%d GB)",
+             iv_smf_bar_base, iv_smf_bar_base >> 30);
 
     // Display mirror mode attribute values
     if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
@@ -3468,6 +3718,12 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     // Set memory base and size
     l_baseSizeData.setBaseSizeData(l_sysAttrs, l_groupData);
+
+    // Set SMF base addresses
+    FAPI_TRY(l_baseSizeData.setSMFBaseSizeData(i_target, l_sysAttrs,
+             l_procAttrs, l_groupData),
+             "setSMFBaseSizeData() returns error l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Set HTM/OCC base addresses
     FAPI_TRY(l_baseSizeData.set_HTM_OCC_base_addr(i_target, l_sysAttrs,

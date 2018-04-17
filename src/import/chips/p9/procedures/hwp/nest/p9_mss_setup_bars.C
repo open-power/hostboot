@@ -42,6 +42,8 @@
 #include <p9_mss_eff_grouping.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <p9n2_mc_scom_addresses.H>
+#include <p9n2_mc_scom_addresses_fld.H>
 #include <map>
 #include <generic/memory/lib/utils/memory_size.H>
 
@@ -125,7 +127,7 @@ struct mcPortGroupInfo_t
      */
     inline mcPortGroupInfo_t()
         : myGroup(0), numPortsInGroup(0), groupSize(0), groupBaseAddr(0),
-          channelId(0)
+          channelId(0), smfMemValid(0), smfMemSize(0), smfBaseAddr(0)
     {
         memset(altMemValid, 0, sizeof(altMemValid));
         memset(altMemSize, 0, sizeof(altMemSize));
@@ -146,6 +148,11 @@ struct mcPortGroupInfo_t
     uint8_t altMemValid[NUM_OF_ALT_MEM_REGIONS];
     uint32_t altMemSize[NUM_OF_ALT_MEM_REGIONS];
     uint32_t altBaseAddr[NUM_OF_ALT_MEM_REGIONS];
+
+    // SMF_MEM
+    uint8_t smfMemValid;
+    uint32_t smfMemSize;
+    uint32_t smfBaseAddr;
 };
 
 /**
@@ -162,7 +169,9 @@ struct mcBarData_t
         : MCFGP_valid(false), MCFGP_chan_per_group(0),
           MCFGP_chan0_group_member_id(0), MCFGP_chan1_group_member_id(0),
           MCFGP_group_size(0), MCFGP_groupBaseAddr(0),
-          MCFGPM_valid(false), MCFGPM_group_size(0), MCFGPM_groupBaseAddr(0)
+          MCFGPM_valid(false), MCFGPM_group_size(0), MCFGPM_groupBaseAddr(0),
+          MCFGPA_SMF_valid(0), MCFGPA_SMF_LOWER_addr(0), MCFGPA_SMF_UPPER_addr(0),
+          MCFGPMA_SMF_valid(0), MCFGPMA_SMF_LOWER_addr(0), MCFGPMA_SMF_UPPER_addr(0)
     {
         memset(MCFGPA_HOLE_valid, 0, sizeof(MCFGPA_HOLE_valid));
         memset(MCFGPA_HOLE_LOWER_addr, 0, sizeof(MCFGPA_HOLE_LOWER_addr));
@@ -190,11 +199,17 @@ struct mcBarData_t
     bool     MCFGPA_HOLE_valid[NUM_OF_ALT_MEM_REGIONS];
     uint32_t MCFGPA_HOLE_LOWER_addr[NUM_OF_ALT_MEM_REGIONS];
     uint32_t MCFGPA_HOLE_UPPER_addr[NUM_OF_ALT_MEM_REGIONS];
+    bool     MCFGPA_SMF_valid;
+    uint32_t MCFGPA_SMF_LOWER_addr;
+    uint32_t MCFGPA_SMF_UPPER_addr;
 
     // Info to program MCFGPMA reg
     bool     MCFGPMA_HOLE_valid[NUM_OF_ALT_MEM_REGIONS];
     uint32_t MCFGPMA_HOLE_LOWER_addr[NUM_OF_ALT_MEM_REGIONS];
     uint32_t MCFGPMA_HOLE_UPPER_addr[NUM_OF_ALT_MEM_REGIONS];
+    bool     MCFGPMA_SMF_valid;
+    uint32_t MCFGPMA_SMF_LOWER_addr;
+    uint32_t MCFGPMA_SMF_UPPER_addr;
 };
 
 ///----------------------------------------------------------------------------
@@ -707,6 +722,33 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
 
     }
 
+    // SMF Section of MCFGPA and MCFGPMA
+    if ( i_portInfo[0].smfMemValid )
+    {
+        o_mcBarData.MCFGPA_SMF_valid = 1;
+        o_mcBarData.MCFGPA_SMF_LOWER_addr = i_portInfo[0].smfBaseAddr;
+        o_mcBarData.MCFGPA_SMF_UPPER_addr = i_portInfo[0].smfBaseAddr + i_portInfo[0].smfMemSize;
+    }
+    else
+    {
+        o_mcBarData.MCFGPA_SMF_valid = 0;
+        o_mcBarData.MCFGPA_SMF_LOWER_addr = 0;
+        o_mcBarData.MCFGPA_SMF_UPPER_addr = 0;
+    }
+
+    if ( i_portInfo[1].smfMemValid )
+    {
+        o_mcBarData.MCFGPMA_SMF_valid = 1;
+        o_mcBarData.MCFGPMA_SMF_LOWER_addr = i_portInfo[1].smfBaseAddr;
+        o_mcBarData.MCFGPMA_SMF_UPPER_addr = i_portInfo[1].smfBaseAddr + i_portInfo[1].smfMemSize;
+    }
+    else
+    {
+        o_mcBarData.MCFGPMA_SMF_valid = 0;
+        o_mcBarData.MCFGPMA_SMF_LOWER_addr = 0;
+        o_mcBarData.MCFGPMA_SMF_UPPER_addr = 0;
+    }
+
 fapi_try_exit:
     FAPI_DBG("Exit");
     return fapi2::current_err;
@@ -932,6 +974,14 @@ void getPortData(const bool i_nonMirror,
                         o_portInfo[l_mcPortNum].altMemSize[ii] = i_groupData[l_group][ALT_SIZE(ii)];
                         o_portInfo[l_mcPortNum].altBaseAddr[ii] = i_groupData[l_group][ALT_BASE_ADDR(ii)];
                     }
+                }
+
+                // SMF memory regions
+                if (i_groupData[l_group][SMF_VALID])
+                {
+                    o_portInfo[l_mcPortNum].smfMemValid = 1;
+                    o_portInfo[l_mcPortNum].smfMemSize = i_groupData[l_group][SMF_SIZE];
+                    o_portInfo[l_mcPortNum].smfBaseAddr = i_groupData[l_group][SMF_BASE_ADDR];
                 }
             }
 
@@ -1224,6 +1274,14 @@ fapi2::ReturnCode writeMCBarData(
         // 3. ---- Set MCFGPA reg -----
         l_scomData = 0;
 
+        // Assert if both HOLE1 and SMF are valid, settings will overlap
+        FAPI_ASSERT((l_data.MCFGPA_HOLE_valid[1] && l_data.MCFGPA_SMF_valid) == 0,
+                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
+                    .set_TARGET(l_target)
+                    .set_HOLE1_VALID(l_data.MCFGPA_HOLE_valid[1])
+                    .set_SMF_VALID(l_data.MCFGPA_SMF_valid),
+                    "Error: MCFGPA HOLE1 and SMF are both valid, settings will overlap");
+
         // Hole 0
         if (l_data.MCFGPA_HOLE_valid[0] == true)
         {
@@ -1242,14 +1300,14 @@ fapi2::ReturnCode writeMCBarData(
             // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE0_UPPER_ADDRESS,
                                        MCS_MCFGPA_HOLE0_UPPER_ADDRESS_LEN>(
-                                           (l_data.MCFGPMA_HOLE_UPPER_addr[0] >> 2));
+                                           (l_data.MCFGPA_HOLE_UPPER_addr[0] >> 2));
         }
 
         // Hole 1
         if (l_data.MCFGPA_HOLE_valid[1] == true)
         {
             // MCFGPA HOLE1 valid (bit 0)
-            l_scomData.setBit<MCS_MCFGPA_HOLE0_VALID>();
+            l_scomData.setBit<MCS_MCFGPA_HOLE1_VALID>();
 
             // MCFGPA_HOLE1_UPPER_ADDRESS_AT_END_OF_RANGE
             setUpperAddrEndOfRangeBit(l_target, l_scomData);
@@ -1263,7 +1321,26 @@ fapi2::ReturnCode writeMCBarData(
             // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE1_UPPER_ADDRESS,
                                        MCS_MCFGPA_HOLE1_UPPER_ADDRESS_LEN>(
-                                           (l_data.MCFGPMA_HOLE_UPPER_addr[1] >> 2));
+                                           (l_data.MCFGPA_HOLE_UPPER_addr[1] >> 2));
+        }
+
+        // SMF
+        if (l_data.MCFGPA_SMF_valid == true)
+        {
+            // MCFGPA SMF valid (bit 0)
+            l_scomData.setBit<P9N2_MCS_MCFGPA_SMF_VALID>();
+
+            // MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+            l_scomData.setBit<P9N2_MCS_MCFGPA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE>();
+
+            // SMF lower addr
+            l_scomData.insertFromRight<P9N2_MCS_MCFGPA_SMF_LOWER_ADDRESS,
+                                       P9N2_MCS_MCFGPA_SMF_LOWER_ADDRESS_LEN>(
+                                           (l_data.MCFGPA_SMF_LOWER_addr));
+            // SMF upper addr
+            l_scomData.insertFromRight<P9N2_MCS_MCFGPA_SMF_UPPER_ADDRESS,
+                                       P9N2_MCS_MCFGPA_SMF_UPPER_ADDRESS_LEN>(
+                                           (l_data.MCFGPA_SMF_UPPER_addr));
         }
 
         // Write to reg
@@ -1274,6 +1351,14 @@ fapi2::ReturnCode writeMCBarData(
 
         // 4. ---- Set MCFGPMA reg -----
         l_scomData = 0;
+
+        // Assert if both HOLE1 and SMF are valid, settings will overlap
+        FAPI_ASSERT((l_data.MCFGPMA_HOLE_valid[1] && l_data.MCFGPMA_SMF_valid) == 0,
+                    fapi2::MSS_SETUP_BARS_HOLE1_SMF_CONFLICT()
+                    .set_TARGET(l_target)
+                    .set_HOLE1_VALID(l_data.MCFGPMA_HOLE_valid[1])
+                    .set_SMF_VALID(l_data.MCFGPMA_SMF_valid),
+                    "Error: MCFGPMA HOLE1 and SMF are both valid, settings will overlap");
 
         // Hole 0
         if (l_data.MCFGPMA_HOLE_valid[0] == true)
@@ -1315,6 +1400,25 @@ fapi2::ReturnCode writeMCBarData(
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE1_UPPER_ADDRESS,
                                        MCS_MCFGPMA_HOLE1_UPPER_ADDRESS_LEN>(
                                            (l_data.MCFGPMA_HOLE_UPPER_addr[1] >> 2));
+        }
+
+        // SMF
+        if (l_data.MCFGPMA_SMF_valid == true)
+        {
+            // MCFGPMA SMF valid (bit 0)
+            l_scomData.setBit<P9N2_MCS_MCFGPMA_SMF_VALID>();
+
+            // MCFGPMA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE
+            l_scomData.setBit<P9N2_MCS_MCFGPMA_SMF_UPPER_ADDRESS_AT_END_OF_RANGE>();
+
+            // SMF lower addr
+            l_scomData.insertFromRight<P9N2_MCS_MCFGPMA_SMF_LOWER_ADDRESS,
+                                       P9N2_MCS_MCFGPMA_SMF_LOWER_ADDRESS_LEN>(
+                                           (l_data.MCFGPMA_SMF_LOWER_addr));
+            // SMF upper addr
+            l_scomData.insertFromRight<P9N2_MCS_MCFGPMA_SMF_UPPER_ADDRESS,
+                                       P9N2_MCS_MCFGPMA_SMF_UPPER_ADDRESS_LEN>(
+                                           (l_data.MCFGPMA_SMF_UPPER_addr));
         }
 
         // Write to reg
@@ -1381,6 +1485,9 @@ fapi2::ReturnCode unmaskMCFIR(
         l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
     }
 
+    // Defect HW451708, HW451711
+    // Leave MCS_MCFIR_INVALID_SMF_ACCESS masked if MCD cl_probes are enabled
+
     for (auto l_pair : i_mcBarDataPair)
     {
         fapi2::Target<T> l_target = l_pair.first;
@@ -1423,7 +1530,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
 
     // Get functional MCS chiplets, should be none for Cumulus
     auto l_mcsChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
-    // Get functional MI chiplets, , should be none for Nimbus
+    // Get functional MI chiplets, should be none for Nimbus
     auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
 
     FAPI_INF("Num of MCS %u; Num of MIs %u", l_mcsChiplets.size(), l_miChiplets.size());

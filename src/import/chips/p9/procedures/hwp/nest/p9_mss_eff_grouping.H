@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@
 // Constants used for EffGroupingData struct
 const uint8_t DATA_GROUPS   = 16;   // 8 regular groups, 8 mirrored groups
 const uint8_t MIRR_OFFSET   = 8;    // Start of mirrored offset in DATA_GROUPS
-const uint8_t DATA_ELEMENTS = 18;   // 18 items of data for each group
+const uint8_t DATA_ELEMENTS = 21;   // 21 items of data for each group
 
 // Indexes used for EffGroupingData::iv_data DATA ELEMENTS
 const uint8_t PORT_SIZE = 0;         // Memory size of each port in group (GB)
@@ -63,9 +63,12 @@ const uint8_t PORTS_IN_GROUP = 1;    // Number of ports in group
 const uint8_t GROUP_SIZE = 2;        // Memory size of entire group (GB)
 const uint8_t BASE_ADDR = 3;         // Base Address
 #define MEMBER_IDX(X) ((X) + 4)      // List of MC ports in group
-#define ALT_VALID(X) ((X) + 12)      // Alt Memory valid (2 alt memory regions)
+#define ALT_VALID(X) ((X) + 12)      // Alt Memory Valid (2 alt memory regions)
 #define ALT_SIZE(X) ((X) + 14)       // Alt Memory Size
 #define ALT_BASE_ADDR(X) ((X) + 16)  // Alt Base Address
+const uint8_t SMF_VALID = 18;        // SMF Memory Valid
+const uint8_t SMF_SIZE = 19;         // SMF Memory Size
+const uint8_t SMF_BASE_ADDR = 20;    // SMF Base Address
 
 // Number of memory regions
 const uint8_t NUM_NON_MIRROR_REGIONS = 8;

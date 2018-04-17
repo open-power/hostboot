@@ -121,10 +121,53 @@
     <description>
         HTM and OCC Sandbox bars are not possible.
     </description>
-    <ffdc>AJUSTED_SIZE</ffdc>
+    <ffdc>ADJUSTED_SIZE</ffdc>
     <ffdc>NHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>CHTM_TOTAL_BAR_SIZE</ffdc>
     <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_NOT_ENABLED_OR_SUPPORTED</rc>
+    <description>
+        Secure memory is not enabled or supported.
+    </description>
+    <ffdc>SMF_SUPPORTED</ffdc>
+    <ffdc>SMF_CONFIG</ffdc>
+    <ffdc>SMF_ENABLED</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_SMF_BAR</rc>
+    <description>
+        There is not enough memory available for the requested SMF bar sizes.
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_SMF_BAR_NOT_POSSIBLE</rc>
+    <description>
+        SMF bars are not possible.
+    </description>
+    <ffdc>ADJUSTED_SIZE</ffdc>
+    <ffdc>SMF_TOTAL_BAR_SIZE</ffdc>
     <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
     <callout>
       <procedure>CODE</procedure>

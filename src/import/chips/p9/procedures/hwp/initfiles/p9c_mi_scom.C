@@ -44,6 +44,7 @@ constexpr uint64_t literal_1400 = 1400;
 constexpr uint64_t literal_1500 = 1500;
 constexpr uint64_t literal_0b0000000000001000000 = 0b0000000000001000000;
 constexpr uint64_t literal_0b0000000000001000 = 0b0000000000001000;
+constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_5 = 5;
 
@@ -79,6 +80,8 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
                                l_TGT2_ATTR_CHIP_EC_FEATURE_HW423533_P9UDD11_MDI));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
         uint64_t l_def_ENABLE_HWFM = literal_1;
+        fapi2::ATTR_SMF_CONFIG_Type l_TGT1_ATTR_SMF_CONFIG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, TGT1, l_TGT1_ATTR_SMF_CONFIG));
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
@@ -270,6 +273,14 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             {
                 constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_OFF = 0x0;
                 l_scom_buffer.insert<46, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_OFF );
+            }
+
+            if (((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
+            {
+                if ((l_TGT1_ATTR_SMF_CONFIG == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED))
+                {
+                    l_scom_buffer.insert<19, 2, 62, uint64_t>(literal_0b10 );
+                }
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));

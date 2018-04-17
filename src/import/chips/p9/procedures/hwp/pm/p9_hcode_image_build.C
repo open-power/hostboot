@@ -884,7 +884,6 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_ENABLE_MEM_EARLY_DATA_SCOM");
 
-    //Attribute set to 0x01 for CHIP_IS_NODE
     if( attrVal == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON )
     {
         sgpeFlag |= SGPE_ENABLE_MEM_EARLY_DATA_SCOM_POS;
@@ -937,6 +936,21 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("Cache DC Adjust Disabled      :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SMF_CONFIG");
+    FAPI_DBG("SMF Config Attr Value         :   %d", attrVal );
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_PROC_SMF_CONFIG_BIT_POS;
+    }
+
+    FAPI_DBG("SMF Config                    :   %s", attrVal ? "TRUE" : "FALSE" );
 
     ///
 
