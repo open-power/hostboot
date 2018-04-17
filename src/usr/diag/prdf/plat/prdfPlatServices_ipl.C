@@ -188,11 +188,10 @@ uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
 {
     uint32_t o_rc = SUCCESS;
 
-    /* TODO RTC 178743
     errlHndl_t errl = NULL;
 
     FAPI_INVOKE_HWP( errl, mss_restore_DRAM_repairs,
-                     fapi::Target(fapi::TARGET_TYPE_MCA_CHIPLET, i_target),
+                     fapi2::Target<fapi2::TARGET_TYPE_MBA>( i_target ),
                      o_repairedRankMask, o_badDimmMask );
 
     if ( NULL != errl )
@@ -203,7 +202,6 @@ uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-    */
 
     return o_rc;
 }
