@@ -201,7 +201,7 @@ errlHndl_t utilSetupPayloadTces(void)
     errl = utilAllocateTces(addr, size, token);
     if (errl)
     {
-        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() for HDAT using addr=0x%.16llX, size=0x%llX", HDAT_TMP_ADDR, HDAT_TMP_SIZE);
+        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() for HDAT using addr=0x%.16llX, size=0x%llX", addr, size);
         break;
     }
     else
@@ -262,7 +262,7 @@ errlHndl_t utilClosePayloadTces(void)
                                          nullptr); //Master Processor
     if(errl)
     {
-        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from closeUnsecureMemRegion() using start address=0x%016llX",MCL_TMP_ADDR);
+        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from closeUnsecureMemRegion() using start address=0x%016llX",addr);
         break;
     }
 

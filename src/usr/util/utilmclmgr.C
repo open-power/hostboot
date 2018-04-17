@@ -27,6 +27,7 @@
 #include <util/util_reasoncodes.H>
 #include "utilbase.H"
 #include <sys/mm.h>
+#include <sys/misc.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <initservice/initserviceif.H>
@@ -94,21 +95,30 @@ void CompInfo::print() const
 ////////////////////////////////////////////////////////////////////////////////
 
 MasterContainerLidMgr::MasterContainerLidMgr()
-: iv_mclAddr(MCL_ADDR), iv_mclSize(MCL_SIZE), iv_tmpAddr(MCL_TMP_ADDR),
-  iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0), iv_pMclVaddr(nullptr),
-  iv_pTempVaddr(nullptr), iv_pVaddr(nullptr), iv_compInfoCache{},
-  iv_hasHeader(true)
+: iv_mclSize(MCL_SIZE), iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0),
+  iv_pMclVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
+  iv_compInfoCache{}, iv_hasHeader(true)
 {
+    // Need to make Memory spaces HRMOR-relative
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    iv_mclAddr = hrmorVal - VMM_HRMOR_OFFSET + MCL_ADDR;
+    iv_tmpAddr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+
     initMcl();
 }
 
 MasterContainerLidMgr::MasterContainerLidMgr(const void* i_pMcl,
                                              const size_t i_size)
-: iv_mclAddr(MCL_ADDR), iv_mclSize(MCL_SIZE), iv_tmpAddr(MCL_TMP_ADDR),
-  iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0), iv_pMclVaddr(nullptr),
-  iv_pTempVaddr(nullptr), iv_pVaddr(nullptr), iv_compInfoCache{},
-  iv_hasHeader(false)
+: iv_mclSize(MCL_SIZE), iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0),
+  iv_pMclVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
+  iv_compInfoCache{}, iv_hasHeader(false)
 {
+    // Need to make Memory spaces HRMOR-relative
+    uint64_t hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    iv_mclAddr = hrmorVal - VMM_HRMOR_OFFSET + MCL_ADDR;
+    iv_tmpAddr = hrmorVal - VMM_HRMOR_OFFSET + MCL_TMP_ADDR;
+
+
     initMcl(i_pMcl, i_size);
 }
 
