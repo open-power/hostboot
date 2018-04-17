@@ -71,6 +71,8 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
     uint64_t nhtm_size;
     uint64_t chtm_bases[24];
     uint64_t chtm_sizes[24];
+    uint64_t smf_base;
+    uint64_t smf_size;
     uint64_t occ_base;
     uint64_t occ_size;
     uint8_t  mirror_policy;
@@ -302,9 +304,8 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
         //------------------------------------------------------------------------------------------------------------------------
         // Print out memory reservations
         //------------------------------------------------------------------------------------------------------------------------
-        if(((mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL ) ||
-            (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)    )
-           && (l_mirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE) )
+        if((mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL ) ||
+           (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED))
         {
             // ATTR_PROC_NHTM_BAR_BASE_ADDR: Get Nest Hardware Trace Macro (NHTM) bar base addr
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_vect_pu_targets[i], nhtm_base),
@@ -326,6 +327,16 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
                      "Error reading ATTR_PROC_CHTM_BAR_SIZES, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
+            // ATTR_PROC_SMF_BAR_BASE_ADDR: Get Secure Memory Facility (SMF) bar base addr
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SMF_BAR_BASE_ADDR, i_vect_pu_targets[i], smf_base),
+                     "Error reading ATTR_PROC_SMF_BAR_BASE_ADDR, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            // ATTR_PROC_SMF_BAR_SIZE: Get Secure Memory Facility (SMF) bar size
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SMF_BAR_SIZE, i_vect_pu_targets[i], smf_size),
+                     "Error reading ATTR_PROC_SMF_BAR_SIZE, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
             // ATTR_PROC_OCC_SANDBOX_BASE_ADDR
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OCC_SANDBOX_BASE_ADDR, i_vect_pu_targets[i], occ_base),
                      "Error reading ATTR_PROC_OCC_SANDBOX_BASE_ADDR, l_rc 0x%.8X",
@@ -345,6 +356,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
 
             if ((nhtm_size != 0) ||
                 (chtm_total_size != 0) ||
+                (smf_size != 0) ||
                 (occ_size != 0))
             {
                 printf("\n");
@@ -432,6 +444,33 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
                     printf("CHTM Base Address = 0x%016llx  Size = %lld (%s)\n", chtm_bases[i], chtm_sizes[i], suffix.c_str());
 #endif
                 }
+            }
+
+            if (smf_size != 0)
+            {
+                std::string suffix = "B";
+
+                if (smf_size >= (1024 * 1024 * 1024))
+                {
+                    suffix = "GB";
+                    smf_size /= (1024 * 1024 * 1024);
+                }
+                else if (smf_size >= (1024 * 1024))
+                {
+                    suffix = "MB";
+                    smf_size /= (1024 * 1024);
+                }
+                else if (smf_size >= (1024))
+                {
+                    suffix = "KB";
+                    smf_size /= (1024);
+                }
+
+#ifdef _LP64
+                printf("SMF Base Address = 0x%016lx  Size = %ld (%s)\n", smf_base, smf_size, suffix.c_str());
+#else
+                printf("SMF Base Address = 0x%016llx  Size = %lld (%s)\n", smf_base, smf_size, suffix.c_str());
+#endif
             }
 
         }
