@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+    ############################################################################
+    # Centaur chip TP_LFIR
+    ############################################################################
+
+    register TP_LFIR_MASK_OR
+    {
+        name        "Centaur chip TP_LFIR MASK atomic OR";
+        scomaddr    0x0104000f;
+        capture     group never;
+        access      write_only;
+    };
 
     ############################################################################
     # Additional regs for CEN target MBSECCFIR
