@@ -266,6 +266,8 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
 
     fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2_Type l_hw423589_option2;
+    fapi2::ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED_Type l_smf_supported;
+    fapi2::ATTR_SMF_CONFIG_Type l_smf_config;
 
     FAPI_TRY(p9_fbc_utils_get_chip_base_address_no_aliases(i_target,
              i_addr_mode,
@@ -293,6 +295,18 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
                                FAPI_SYSTEM,
                                l_addr_extension_chip_id),
                  "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, FAPI_SYSTEM, l_smf_config),
+                 "Error from FAPI_ATTR_GET (ATTR_SMF_CONFIG)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED, i_target, l_smf_supported),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SMF_SUPPORTED)");
+
+        // mask group_id(0) to prevent it from being exposed to callers if smf is enabled
+        if (l_smf_config && l_smf_supported)
+        {
+            l_addr_extension_group_id &= ~CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_SMF_ENABLE;
+        }
 
         // mask all but LSB, prevent regions above RA bit 21 from being exposed to callers
         l_addr_extension_chip_id &= 0x01;
