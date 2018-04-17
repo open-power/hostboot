@@ -36,6 +36,7 @@ constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_25 = 25;
 constexpr uint64_t literal_0b001111 = 0b001111;
 constexpr uint64_t literal_0b0000000000001000000 = 0b0000000000001000000;
+constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0b0001100000000 = 0b0001100000000;
 constexpr uint64_t literal_1350 = 1350;
 constexpr uint64_t literal_1000 = 1000;
@@ -56,6 +57,8 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW398139, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW398139));
         fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
+        fapi2::ATTR_SMF_CONFIG_Type l_TGT1_ATTR_SMF_CONFIG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG, TGT1, l_TGT1_ATTR_SMF_CONFIG));
         fapi2::ATTR_RISK_LEVEL_Type l_TGT1_ATTR_RISK_LEVEL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT1, l_TGT1_ATTR_RISK_LEVEL));
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
@@ -175,6 +178,14 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010813ull, l_scom_buffer ));
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) )
+            {
+                if ((l_TGT1_ATTR_SMF_CONFIG == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED))
+                {
+                    l_scom_buffer.insert<19, 2, 62, uint64_t>(literal_0b10 );
+                }
+            }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
