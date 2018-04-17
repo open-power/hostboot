@@ -93,4 +93,17 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_HOLE1_SMF_CONFLICT</rc>
+    <description>The MC HOLE1 and SMF areas are both valid and will conflict
+                 when setting the MCFGPA/MCFGPMA registers.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>HOLE1_VALID</ffdc>
+    <ffdc>SMF_VALID</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
