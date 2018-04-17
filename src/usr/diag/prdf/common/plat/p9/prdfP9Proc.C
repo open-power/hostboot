@@ -392,6 +392,7 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
     // and initiate recovery with FSP,etc... if needed
 #ifdef __HOSTBOOT_MODULE
     TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
+    SCAN_COMM_REGISTER_CLASS * l_tpmask_or;
 
    PRDF_ERR("Invoking HB SBE vital routine");
    errlHndl_t  l_elog = SBEIO::handleVitalAttn( l_target );
@@ -399,6 +400,19 @@ int32_t handleSbeVital( ExtensibleChip * i_chip,
     // commit any failures
     if (nullptr != l_elog)
     {
+        // Need to MASK bit 26 of TPLFIR to avoid getting this again
+        // (will use the 'OR' reg for doing the masking)
+        l_tpmask_or = i_chip->getRegister("TP_LFIR_MASK_OR");
+        l_tpmask_or->clearAllBits();
+        l_tpmask_or->SetBit( 26  );
+
+        int32_t l_rc = l_tpmask_or->Write();
+        if (l_rc != SUCCESS)
+        {   // we are probably stuck in an infinite loop now
+            PRDF_ERR("Failed(%d) masking SBE bit for chip: 0x%08x",
+                      l_rc,  i_chip->getHuid() );
+        }
+
         PRDF_ERR("handleVitalAttn failure");
         PRDF_COMMIT_ERRL( l_elog, ERRL_ACTION_REPORT );
     }
