@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,7 +347,7 @@ errlHndl_t PnorDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
                           - l_pos;
         }
 
-        TRACFCOMP(g_trac_pnor, "astMboxDD::adjustMboxWindow opening %s window at 0x%08x"
+        TRACDCOMP(g_trac_pnor, "astMboxDD::adjustMboxWindow opening %s window at 0x%08x"
                   " for addr 0x%08x req_size 0x%08x",
                   i_isWrite ? "write" : "read", l_pos, i_reqAddr, l_reqSize);
 

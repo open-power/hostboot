@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -350,7 +350,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
         ERRORLOG::errlCommit(l_lpc_err, PNOR_COMP_ID);
     }
 
-    TRACFCOMP( g_trac_pnor, EXIT_MRK "astMboxDD::doMessage() resp=0x%02x",
+    TRACDCOMP( g_trac_pnor, EXIT_MRK "astMboxDD::doMessage() resp=0x%02x",
                io_msg.iv_resp );
     return l_err;
 }
