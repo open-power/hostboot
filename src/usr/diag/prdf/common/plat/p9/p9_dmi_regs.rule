@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -35,4 +35,66 @@
         access      write_only;
     };
 
+    register MCICFG0
+    {
+        name        "MCI Configuration Register 0";
+        scomaddr    0x0701090A;
+        capture     group default;
+    };
+
+    register MCISTAT
+    {
+        name        "MCI Status Register";
+        scomaddr    0x0701090B;
+        capture     group default;
+    };
+
+    register MCICRCSYN
+    {
+        name        "MCI CRC Syndromes Register";
+        scomaddr    0x0701090C;
+        capture     group default;
+    };
+
+    register MCIERRINJ
+    {
+        name        "MCI Error Inject Register";
+        scomaddr    0x0701090D;
+        capture     group default;
+    };
+
+    register MCICFG1
+    {
+        name        "MCI Configuration Register 1";
+        scomaddr    0x0701090E;
+        capture     group default;
+    };
+
+    register RECR
+    {
+        name        "Read ECC Control Register";
+        scomaddr    0x07010914;
+        capture     group default;
+    };
+
+    register EICR
+    {
+        name        "Error Inject Control Register";
+        scomaddr    0x07010918;
+        capture     group default;
+    };
+
+    register CERR0
+    {
+        name        "Error detail register 0";
+        scomaddr    0x07010919;
+        capture     group default;
+    };
+
+    register CERR1
+    {
+        name        "Error detail register 1";
+        scomaddr    0x0701091A;
+        capture     group default;
+    };
 

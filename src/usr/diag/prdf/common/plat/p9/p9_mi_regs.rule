@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_dmi_actions.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_mi_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2018
+# Contributors Listed Below - COPYRIGHT 2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,27 +23,28 @@
 #
 # IBM_PROLOG_END_TAG
 
-actionclass analyzeConnectedMembuf
-{
-    analyze(connected(TYPE_MEMBUF, 0));
-};
+    ############################################################################
+    # Additional regs for P9 MI target MCFIR
+    ############################################################################
 
-actionclass analyzeConnectedMembuf_UERE
-{
-    SueSource;
-    analyzeConnectedMembuf;
-};
+    register MCERPT0
+    {
+        name        "MCERPT0";
+        scomaddr    0x0501081E;
+        capture     group default;
+    };
 
-actionclass dmi_bus_th_1
-{
-# TODO: RTC 144057
-#    funccall("calloutBusInterfacePlugin");
-    threshold1;
-};
+    register MCERPT1
+    {
+        name        "MCERPT1";
+        scomaddr    0x0501081F;
+        capture     group default;
+    };
 
-actionclass dmi_bus_th_1_UERE
-{
-    SueSource;
-    dmi_bus_th_1;
-};
+    register MCERPT2
+    {
+        name        "MCERPT2";
+        scomaddr    0x0501081A;
+        capture     group default;
+    };
 
