@@ -387,20 +387,32 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // attempt CBS, during runtime we will want to use HRESET.
             else if(this->iv_sbeRestartMethod == SBE_RESTART_METHOD::START_CBS)
             {
-                SBE_TRACF("Invoking p9_start_cbs HWP on processor %.8X", get_huid(i_target));
-
-                FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
-                                l_fapi2_proc_target, true);
-
                 //Increment attempt count for this side
                 this->iv_currentSideBootAttempts++;
+
+                SBE_TRACF("Invoking p9_start_cbs HWP on processor %.8X", get_huid(i_target));
+
+                // We cannot use FAPI_INVOKE in this case because it is possible
+                // we are handling a HWP fail. If we attempted to use FAPI_INVOKE
+                // while we are already inside a FAPI_INVOKE call then we can
+                // end up in an endless wait on the fapi mutex lock
+                fapi2::ReturnCode l_rc;
+
+                // For now we only use p9_start_cbs if we fail to boot the slave SBE
+                // on our initial attempt, the bool param is true we are telling the
+                // HWP that we are starting up the SBE which is true in this case
+                FAPI_EXEC_HWP(l_rc, p9_start_cbs,
+                                l_fapi2_proc_target, true);
+
+                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
                 if(l_errl)
                 {
                     SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x",
                                 l_errl->plid() );
-                    l_errl->collectTrace( "ISTEPS_TRACE", 256 );
-                    l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
+                    l_errl->collectTrace(SBEIO_COMP_NAME, 256 );
+                    l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+                    l_errl->collectTrace(FAPI_TRACE_NAME, 384);
 
                     // Deconfig the target when SBE Retry fails
                     l_errl->addHwCallout(i_target,
@@ -422,17 +434,31 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // The only other type of reset method is HRESET
             else
             {
+                // Increment attempt count for this side
                 this->iv_currentSideBootAttempts++;
+
+                SBE_TRACF("Invoking p9_sbe_hreset HWP on processor %.8X", get_huid(i_target));
+
+                // We cannot use FAPI_INVOKE in this case because it is possible
+                // we are handling a HWP fail. If we attempted to use FAPI_INVOKE
+                // while we are already inside a FAPI_INVOKE call then we can
+                // end up in an endless wait on the fapi mutex lock
+                fapi2::ReturnCode l_rc;
 
                 // For now we only use HRESET during runtime, the bool param
                 // we are passing in is supposed to be FALSE if runtime, TRUE is ipl time
-                FAPI_INVOKE_HWP(l_errl, p9_sbe_hreset,
+                FAPI_EXEC_HWP(l_rc, p9_sbe_hreset,
                                 l_fapi2_proc_target, false);
+
+                l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
                 if(l_errl)
                 {
                     SBE_TRACF("ERROR: call p9_sbe_hreset, PLID=0x%x",
                                 l_errl->plid() );
-                    l_errl->collectTrace( SBEIO_COMP_NAME, 256 );
+                    l_errl->collectTrace(SBEIO_COMP_NAME, 256 );
+                    l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+                    l_errl->collectTrace(FAPI_TRACE_NAME, 384);
 
                     // Deconfig the target when SBE Retry fails
                     l_errl->addHwCallout(i_target,
@@ -607,16 +633,28 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg(TARGETING::Target * i_target)
 
     for( uint64_t l_loops = 0; l_loops < SBE_RETRY_NUM_LOOPS; l_loops++ )
     {
-        sbeMsgReg_t l_reg;
-        FAPI_INVOKE_HWP(l_errl, p9_get_sbe_msg_register,
-                        l_fapi2_proc_target, l_reg);
-        this->iv_sbeRegister.reg = l_reg.reg;
+        fapi2::ReturnCode l_rc;
+
+        // We cannot use FAPI_INVOKE in this case because it is possible
+        // we are handling a HWP fail. If we attempted to use FAPI_INVOKE
+        // while we are already inside a FAPI_INVOKE call then we can
+        // end up in an endless wait on the fapi mutex lock
+        FAPI_EXEC_HWP(l_rc, p9_get_sbe_msg_register,
+                        l_fapi2_proc_target, this->iv_sbeRegister);
+
+        l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
         if (l_errl)
         {
             SBE_TRACF("ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
                       "on loop %d",
                       l_errl->plid(),
                       l_loops );
+
+            l_errl->collectTrace(SBEIO_COMP_NAME,256);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+            l_errl->collectTrace(FAPI_TRACE_NAME, 384);
+
             this->iv_currentSBEState =
                     SbeRetryHandler::SBE_REG_RETURN::FAILED_COLLECTING_REG;
             break;
@@ -977,6 +1015,10 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
         SBE_TRACF("Error: sbe_boot_fail_handler : p9_extract_sbe_rc HWP "
                   " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
                   this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
+
+        l_errl->collectTrace(SBEIO_COMP_NAME,256);
+        l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
+        l_errl->collectTrace(FAPI_TRACE_NAME, 384);
 
         // Capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
