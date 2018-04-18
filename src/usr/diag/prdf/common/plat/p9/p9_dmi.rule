@@ -136,7 +136,7 @@ rule rCHIFIR
     CHIFIR & ~CHIFIR_MASK &  CHIFIR_ACT0 &  CHIFIR_ACT1;
 };
 
-group gCHIFIR filter singlebit, cs_root_cause
+group gCHIFIR filter singlebit, cs_root_cause( 0, 2, 4, 5, 6, 12, 14, 15, 16, 32, 36, 40, 41, 42, 43, 46, 61 )
 {
     /** CHIFIR[0]
      *  PE on internal register
@@ -151,7 +151,7 @@ group gCHIFIR filter singlebit, cs_root_cause
     /** CHIFIR[2]
      *  Too many EDI replays due to CRC error
      */
-    (rCHIFIR, bit(2)) ? defaultMaskedError;
+    (rCHIFIR, bit(2)) ? dmi_bus_th_1_UERE;
 
     /** CHIFIR[3]
      *  EDI bus performance degraded by 1%
@@ -161,35 +161,35 @@ group gCHIFIR filter singlebit, cs_root_cause
     /** CHIFIR[4]
      *  DMI entered failed state
      */
-    (rCHIFIR, bit(4)) ? defaultMaskedError; # CUMULUS_10
+    (rCHIFIR, bit(4)) ? dmi_bus_th_1; # CUMULUS_10
 
     /** CHIFIR[5]
      *  Channel initialization timeout
      */
-    (rCHIFIR, bit(5)) ? defaultMaskedError; # CUMULUS_10
+    (rCHIFIR, bit(5)) ? defaultMaskedError;
 
     /** CHIFIR[6]
-     *  Chn interlock err (crc,. No ack, etc)
+     *  Channel interlock error
      */
-    (rCHIFIR, bit(6)) ? self_th_1; # CUMULUS_10
+    (rCHIFIR, bit(6)) ? defaultMaskedError;
 
     /** CHIFIR[7]
-     *  Round trip latency counter overflow
+     *  FRTL counter overflow
      */
     (rCHIFIR, bit(7)) ? defaultMaskedError;
 
     /** CHIFIR[8]
-     *  CRC error detected
+     *  CRC error
      */
-    (rCHIFIR, bit(8)) ? defaultMaskedError;
+    (rCHIFIR, bit(8)) ? dmi_bus_th_1; # CUMULUS_10
 
     /** CHIFIR[9]
-     *  No Ack error detected
+     *  No ack error
      */
     (rCHIFIR, bit(9)) ? defaultMaskedError;
 
     /** CHIFIR[10]
-     *  Sequence ID out of order error detected
+     *  Sequence ID out of order
      */
     (rCHIFIR, bit(10)) ? defaultMaskedError;
 
@@ -201,7 +201,7 @@ group gCHIFIR filter singlebit, cs_root_cause
     /** CHIFIR[12]
      *  UE on replay buffer read
      */
-    (rCHIFIR, bit(12)) ? self_th_1;
+    (rCHIFIR, bit(12)) ? self_th_1_UERE;
 
     /** CHIFIR[13]
      *  Multiple replay
@@ -211,107 +211,112 @@ group gCHIFIR filter singlebit, cs_root_cause
     /** CHIFIR[14]
      *  Replay buffer overrun
      */
-    (rCHIFIR, bit(14)) ? self_th_1; # CUMULUS_10
+    (rCHIFIR, bit(14)) ? self_th_1_UERE;
 
     /** CHIFIR[15]
      *  PE on MCI dataflow or state machine
      */
-    (rCHIFIR, bit(15)) ? self_th_1;
+    (rCHIFIR, bit(15)) ? self_th_1_UERE;
 
     /** CHIFIR[16]
-     *  Checkstop received from Centaur
+     *  Checkstop attn from memory buffer
      */
-    (rCHIFIR, bit(16)) ? analyzeConnectedCentaur;
+    (rCHIFIR, bit(16)) ? analyzeConnectedMembuf_UERE;
 
     /** CHIFIR[17]
-     *  Tracestop received from Centaur
+     *  Tracestop received from memory buffer
      */
     (rCHIFIR, bit(17)) ? defaultMaskedError;
 
     /** CHIFIR[18]
-     *  FPGA int received from Centaur
+     *  FPGA int received from memory buffer
      */
     (rCHIFIR, bit(18)) ? defaultMaskedError;
 
     /** CHIFIR[19]
-     *  Recoverable err received from Centaur
+     *  Recoverable attn from memory buffer
      */
-    (rCHIFIR, bit(19)) ? analyzeConnectedCentaur;
+    (rCHIFIR, bit(19)) ? analyzeConnectedMembuf;
 
     /** CHIFIR[20]
-     *  Special attention received from Centaur
+     *  Special attn from memory buffer
      */
-    (rCHIFIR, bit(20)) ? analyzeConnectedCentaur;
+    (rCHIFIR, bit(20)) ? analyzeConnectedMembuf;
 
     /** CHIFIR[21]
-     *  Maintenance complete from centuar
+     *  Maintenance complete from memory buffer
      */
     (rCHIFIR, bit(21)) ? defaultMaskedError;
 
     /** CHIFIR[22:30]
-     *  Fir bits from MCS
+     *  reserved
      */
     (rCHIFIR, bit(22|23|24|25|26|27|28|29|30)) ? defaultMaskedError;
 
     /** CHIFIR[31]
-     *  Channel sequence error
+     *  USDF sequence error
      */
     (rCHIFIR, bit(31)) ? self_th_1;
 
     /** CHIFIR[32]
-     *  Tag overrun in DSFF
+     *  DSFF tag overrun
      */
-    (rCHIFIR, bit(32)) ? defaultMaskedError; # CUMULUS_10
+    (rCHIFIR, bit(32)) ? self_th_1_UERE;
 
     /** CHIFIR[33]
-     *  DSFF DS Data Error(UE)
+     *  DSFF DS data error
      */
     (rCHIFIR, bit(33)) ? self_th_1;
 
     /** CHIFIR[34:35]
-     *  spare
+     *  reserved
      */
     (rCHIFIR, bit(34|35)) ? defaultMaskedError;
 
     /** CHIFIR[36]
-     *  Rdata Parity error
+     *  Rdata parity error
      */
-    (rCHIFIR, bit(36)) ? self_th_1;
+    (rCHIFIR, bit(36)) ? self_th_1_UERE;
 
     /** CHIFIR[37:39]
-     *  spare
+     *  reserved
      */
     (rCHIFIR, bit(37|38|39)) ? defaultMaskedError;
 
-    /** CHIFIR[40:41]
-     *  DSFF async crossing error
+    /** CHIFIR[40]
+     *  DSFF async cmd parity error
      */
-    (rCHIFIR, bit(40|41)) ? self_th_1;
+    (rCHIFIR, bit(40)) ? self_th_1_UERE;
+
+    /** CHIFIR[41]
+     *  DSFF async cmd sequence error
+     */
+    (rCHIFIR, bit(41)) ? self_th_1_UERE;
 
     /** CHIFIR[42]
      *  DSFF state machine error
      */
-    (rCHIFIR, bit(42)) ? self_th_1;
+    (rCHIFIR, bit(42)) ? self_th_1_UERE;
 
     /** CHIFIR[43]
      *  Recoverable parity error on EICR
      */
-    (rCHIFIR, bit(43)) ? self_th_32perDay;
+    (rCHIFIR, bit(43)) ? self_th_1;
 
     /** CHIFIR[44]
      *  Recoverable parity error on RECR
      */
-    (rCHIFIR, bit(44)) ? self_th_32perDay;
+    (rCHIFIR, bit(44)) ? self_th_1;
 
     /** CHIFIR[45]
      *  CE on WRT or RMW buffer
      */
-    (rCHIFIR, bit(45)) ? self_th_1;
+    (rCHIFIR, bit(45)) ? self_th_32perDay;
 
     /** CHIFIR[46]
      *  UE on WRT or RMW buffer
      */
-    (rCHIFIR, bit(46)) ? self_th_32perDay;
+    (rCHIFIR, bit(46)) ? self_th_1_UERE;
 
     /** CHIFIR[47]
      *  SUE on WRT or RMW buffer
@@ -324,32 +329,32 @@ group gCHIFIR filter singlebit, cs_root_cause
     (rCHIFIR, bit(48|49)) ? self_th_1;
 
     /** CHIFIR[50]
-     *  WDF SCOM Sequence error
+     *  WDF SCOM sequence error
      */
     (rCHIFIR, bit(50)) ? self_th_1;
 
     /** CHIFIR[51]
-     *  WDF State machine error
+     *  WDF state machine error
      */
     (rCHIFIR, bit(51)) ? self_th_1;
 
     /** CHIFIR[52]
-     *  WDF Register parity error
+     *  WDF register parity error
      */
     (rCHIFIR, bit(52)) ? self_th_1;
 
     /** CHIFIR[53]
-     *  WRT scom sequence error
+     *  WRT SCOM sequence error
      */
     (rCHIFIR, bit(53)) ? self_th_1;
 
     /** CHIFIR[54]
-     *  WRT Register parity error.
+     *  WRT register parity error.
      */
     (rCHIFIR, bit(54)) ? self_th_1;
 
     /** CHIFIR[55]
-     *  spare
+     *  reserved
      */
     (rCHIFIR, bit(55)) ? defaultMaskedError;
 
@@ -359,29 +364,24 @@ group gCHIFIR filter singlebit, cs_root_cause
     (rCHIFIR, bit(56)) ? self_th_1;
 
     /** CHIFIR[57]
-     *  WDF Async error
+     *  WDF async error
      */
     (rCHIFIR, bit(57)) ? self_th_1;
 
-    /** CHIFIR[58]
-     *  Read MCA parity error.
+    /** CHIFIR[58:59]
+     *  reserved
      */
-    (rCHIFIR, bit(58)) ? self_th_1;
-
-    /** CHIFIR[59]
-     *  Read MCA sequence error
-     */
-    (rCHIFIR, bit(59)) ? self_th_1;
+    (rCHIFIR, bit(58|59)) ? defaultMaskedError;
 
     /** CHIFIR[60]
      *  Debug/WAT register parity error
      */
-    (rCHIFIR, bit(60)) ? self_th_1;
+    (rCHIFIR, bit(60)) ? defaultMaskedError;
 
     /** CHIFIR[61]
      *  DSFF channel timeout
      */
-    (rCHIFIR, bit(61)) ? self_th_1;
+    (rCHIFIR, bit(61)) ? self_th_1_UERE;
 
     /** CHIFIR[62]
      *  SCOM error

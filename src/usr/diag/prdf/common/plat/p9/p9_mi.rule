@@ -136,62 +136,47 @@ rule rMCFIR
     MCFIR & ~MCFIR_MASK &  MCFIR_ACT0 &  MCFIR_ACT1;
 };
 
-group gMCFIR filter singlebit, cs_root_cause( 0, 8, 9 )
+group gMCFIR filter singlebit, cs_root_cause( 0 )
 {
     /** MCFIR[0]
-     *  mc internal recoverable eror
+     *  MC internal recoverable eror
      */
     (rMCFIR, bit(0)) ? self_th_1;
 
     /** MCFIR[1]
-     *  mc internal non recovervable error
+     *  MC internal non recovervable error
      */
     (rMCFIR, bit(1)) ? self_th_1;
 
     /** MCFIR[2]
-     *  powerbus protocol error
+     *  Powerbus protocol error
      */
     (rMCFIR, bit(2)) ? level2_th_1;
 
     /** MCFIR[3]
-     *  bat with with incorrect tty pe
+     *  Inband bar hit with incorrect ttype
      */
-    (rMCFIR, bit(3)) ? defaultMaskedError;
+    (rMCFIR, bit(3)) ? level2_M_self_L_th_1;
 
     /** MCFIR[4]
-     *  multiple bar
+     *  Multiple bar
      */
     (rMCFIR, bit(4)) ? level2_M_self_L_th_1;
 
-    /** MCFIR[5]
-     *  Invalid Address
+    /** MCFIR[5:7]
+     *  reserved
      */
-    (rMCFIR, bit(5)) ? defaultMaskedError;
-
-    /** MCFIR[6]
-     *  Illegal consumer address
-     */
-    (rMCFIR, bit(6)) ? level2_th_1;
-
-    /** MCFIR[7]
-     *  Illegal producer address
-     */
-    (rMCFIR, bit(7)) ? level2_th_1;
+    (rMCFIR, bit(5|6|7)) ? defaultMaskedError;
 
     /** MCFIR[8]
-     *  command list timeout
+     *  Command list timeout
      */
     (rMCFIR, bit(8)) ? threshold_and_mask_level2;
 
-    /** MCFIR[9]
-     *  channel 0 time out error
+    /** MCFIR[9:10]
+     *  reserved
      */
-    (rMCFIR, bit(9)) ? threshold_and_mask;
-
-    /** MCFIR[10]
-     *  channel 1 time out error
-     */
-    (rMCFIR, bit(10)) ? level2_th_1;
+    (rMCFIR, bit(9|10)) ? defaultMaskedError;
 
     /** MCFIR[11]
      *  mcs wat0 event
@@ -214,42 +199,32 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 8, 9 )
     (rMCFIR, bit(14)) ? defaultMaskedError;
 
     /** MCFIR[15]
-     *  mirror action occurred
+     *  Mirror action occurred
      */
     (rMCFIR, bit(15)) ? defaultMaskedError;
 
     /** MCFIR[16]
-     *  centaur sync command occurred
+     *  reserved
      */
     (rMCFIR, bit(16)) ? defaultMaskedError;
 
     /** MCFIR[17]
-     *  debug config reg error
+     *  WAT debug config reg error
      */
-    (rMCFIR, bit(17)) ? defaultMaskedError;
+    (rMCFIR, bit(17)) ? threshold_and_mask_self;
 
-    /** MCFIR[18]
+    /** MCFIR[18:20]
      *  reserved
      */
-    (rMCFIR, bit(18)) ? defaultMaskedError;
-
-    /** MCFIR[19]
-     *  reserved
-     */
-    (rMCFIR, bit(19)) ? defaultMaskedError;
-
-    /** MCFIR[20]
-     *  reserved
-     */
-    (rMCFIR, bit(20)) ? defaultMaskedError;
+    (rMCFIR, bit(18|19|20)) ? defaultMaskedError;
 
     /** MCFIR[21]
-     *  reserved
+     *  HWFM event occurred
      */
     (rMCFIR, bit(21)) ? defaultMaskedError;
 
     /** MCFIR[22]
-     *  Access to secure memory facility failed
+     *  Invalid SMF access
      */
     (rMCFIR, bit(22)) ? defaultMaskedError;
 
