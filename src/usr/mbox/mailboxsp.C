@@ -371,12 +371,17 @@ void MailboxSp::msgHandler()
                               msg->data[1]);
 
                     iv_shutdown_msg = msg;      // Respond to this when done
-                    iv_disabled = true;         // stop incomming new messages
 
                     if(iv_suspended == true)
                     {
                         resume();
                     }
+                    // Set iv_disabled after we have resumed the mbox interrupts so that the
+                    // message queue can drain. If iv_disabled is true, resume() will not do
+                    // anything and the mbox msg queue will not drain. This can cause us to
+                    // hang in the shutdown path because we will never reach the quiesced
+                    // state that we need to be in before initiating handleShutdown()
+                    iv_disabled = true;         // stop incomming new messages
 
                     // Deal with messages never claimed by any HB component
                     handleUnclaimed();
