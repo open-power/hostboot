@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -71,6 +71,12 @@ actionclass threshold32pday
     threshold( field(32 / day) );
 };
 
+/** Threshold of 5 per hour */
+actionclass threshold5phour
+{
+    threshold( field(5 / hour) );
+};
+
 ################################################################################
 #                       Threshold and Mask policy
 ################################################################################
@@ -110,6 +116,40 @@ actionclass calloutSelfLow  { callout(MRU_LOW);  };
 # 2nd Level Support
 actionclass callout2ndLvlMed
 { callout(procedure(LEVEL2_SUPPORT), MRU_MED); };
+
+################################################################################
+#                           Callouts with thresholds                           #
+################################################################################
+
+actionclass self_th_1
+{
+    calloutSelfMed;
+    threshold1;
+};
+
+actionclass self_th_5perHour
+{
+    calloutSelfMed;
+    threshold5phour;
+};
+
+actionclass self_th_32perDay
+{
+    calloutSelfMed;
+    threshold32pday;
+};
+
+actionclass level2_th_1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+################################################################################
+#                           Callouts with flags                                #
+################################################################################
+
+actionclass level2_th_1_UERE { level2_th_1; SueSource; };
 
 ################################################################################
 #                               Default callouts                               #
