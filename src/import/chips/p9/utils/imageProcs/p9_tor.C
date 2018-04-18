@@ -360,6 +360,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
 
     if ( torMagic >> 8 != TOR_MAGIC ||
+         torHeader->version > TOR_VERSION || // Code cannot be forward compatible to a newer image
          torHeader->version == 0 ||
          torHeader->chipType >= NUM_CHIP_TYPES )
     {
