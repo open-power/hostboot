@@ -66,14 +66,14 @@ fapi2::ReturnCode get_plat_error(void)
     // Get a list of all of the proc chips
     TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-    TARGETING::Target * l_Proc = NULL;
+    TARGETING::Target * l_Proc = nullptr;
 
     if (l_chipList.size() > 0)
     {
         l_Proc = l_chipList[0];
     }
 
-    if (l_Proc != NULL)
+    if (l_Proc != nullptr)
     {
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_Proc);
 
@@ -153,7 +153,7 @@ uint32_t rcTestReturnCodeCreator()
     else
     {
         // Set the return code to a PLAT code
-        l_rc = get_plat_error(); //.setPlatError(NULL);
+        l_rc = get_plat_error(); //.setPlatError(nullptr);
 
         // Ensure that the creator is PLAT
         l_creator = l_rc.getCreator();
@@ -388,7 +388,7 @@ uint32_t rcTestCopyConstructor()
         else
         {
             // Ensure that getPlatData retrieves the PlatData from l_rc2
-            l_pMyDataCheck = NULL;
+            l_pMyDataCheck = nullptr;
             l_pMyDataCheck = l_rc2.getPlatDataPtr();
 
             if (l_pMyDataCheck != l_pMyData)
@@ -467,15 +467,15 @@ uint32_t rcTestGetErrorInfo()
     // Create a ReturnCode
     ReturnCode l_rc;
 
-    // Ensure that the getErrorInfo function returns NULL
+    // Ensure that the getErrorInfo function returns nullptr
     const ErrorInfo * l_pErrInfo =
         reinterpret_cast<const ErrorInfo *> (0x12345678);
 
     l_pErrInfo = l_rc.getErrorInfo();
 
-    if (l_pErrInfo != NULL)
+    if (l_pErrInfo != nullptr)
     {
-        FAPI_ERR("rcTestGetErrorInfo. getErrorInfo did not return NULL");
+        FAPI_ERR("rcTestGetErrorInfo. getErrorInfo did not return nullptr");
         l_result = 1;
     }
     else
@@ -498,15 +498,15 @@ uint32_t rcTestErrorInfo()
     ReturnCode l_rc;
 
     //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(NULL, FAPI2_RC_PLAT_ERR_SEE_DATA);
+    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
-    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::Target * l_pTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_pTarget);
 
     fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_target(l_pTarget);
 
-    TARGETING::Target* l_masterProc = NULL;
+    TARGETING::Target* l_masterProc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
     fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_target2(l_masterProc);
@@ -560,12 +560,12 @@ uint32_t rcTestErrorInfo()
     do
     {
         // Check that the Error Info can be retrieved
-        const ErrorInfo * l_pErrInfo = NULL;
+        const ErrorInfo * l_pErrInfo = nullptr;
         l_pErrInfo = l_rc.getErrorInfo();
 
-        if (l_pErrInfo == NULL)
+        if (l_pErrInfo == nullptr)
         {
-            FAPI_ERR("rcTestErrorInfo. getErrorInfo returned NULL");
+            FAPI_ERR("rcTestErrorInfo. getErrorInfo returned nullptr");
             l_result = 1;
             break;
         }
@@ -579,7 +579,7 @@ uint32_t rcTestErrorInfo()
         }
 
         uint32_t l_size = 0;
-        const void * l_pFfdc = NULL;
+        const void * l_pFfdc = nullptr;
 
         l_pFfdc = l_pErrInfo->iv_ffdcs[0]->getData(l_size);
 
@@ -817,10 +817,10 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
     // Create a ReturnCode
     ReturnCode l_rc;
     //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(NULL, FAPI2_RC_PLAT_ERR_SEE_DATA);
+    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
-    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::Target * l_pTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_pTarget);
 
     fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_target(l_pTarget);
@@ -851,14 +851,14 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
         }
 
         // Ensure that getErrorInfo returns correct information from l_rc
-        const ErrorInfo * l_pErrInfo = NULL;
+        const ErrorInfo * l_pErrInfo = nullptr;
 
         l_pErrInfo = l_rc.getErrorInfo();
 
-        if (l_pErrInfo == NULL)
+        if (l_pErrInfo == nullptr)
         {
             FAPI_ERR("rcTestCopyConstructorwithErrorInfo. getErrorInfo "
-                    "returned NULL");
+                    "returned nullptr");
             l_result = 2;
             break;
         }
@@ -913,10 +913,10 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
     // Create a ReturnCode
     ReturnCode l_rc;
     //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(NULL, FAPI2_RC_PLAT_ERR_SEE_DATA);
+    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
-    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::Target * l_pTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_pTarget);
 
     fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_target(l_pTarget);
@@ -949,14 +949,14 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
         }
 
         // Ensure that getErrorInfo returns correct information from l_rc
-        const ErrorInfo * l_pErrInfo = NULL;
+        const ErrorInfo * l_pErrInfo = nullptr;
 
         l_pErrInfo = l_rc.getErrorInfo();
 
-        if (l_pErrInfo == NULL)
+        if (l_pErrInfo == nullptr)
         {
             FAPI_ERR("rcTestAssignmentOperatorwithErrorInfo. getErrorInfo "
-                       "returned NULL");
+                       "returned nullptr");
             l_result = 2;
             break;
         }
@@ -1013,10 +1013,10 @@ uint32_t rcTestClearErrorInfo()
     // Create a ReturnCode
     ReturnCode l_rc;
     //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(NULL, FAPI2_RC_PLAT_ERR_SEE_DATA);
+    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
-    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::Target * l_pTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_pTarget);
 
     fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_target(l_pTarget);
@@ -1037,13 +1037,13 @@ uint32_t rcTestClearErrorInfo()
     l_rc = FAPI2_RC_SUCCESS;
 
     // Check that there is no ErrorInfo
-    const ErrorInfo * l_pErrInfo = NULL;
+    const ErrorInfo * l_pErrInfo = nullptr;
 
     l_pErrInfo = l_rc.getErrorInfo();
 
-    if (l_pErrInfo != NULL)
+    if (l_pErrInfo != nullptr)
     {
-        FAPI_ERR("rcTestClearErrorInfo. getErrorInfo returned NULL");
+        FAPI_ERR("rcTestClearErrorInfo. getErrorInfo returned nullptr");
         l_result = 1;
     }
     else
@@ -1065,12 +1065,12 @@ uint32_t rcTestAddErrorInfo()
     ReturnCode l_rc;
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
-    TARGETING::Target * l_pTarget = NULL;
+    TARGETING::Target * l_pTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_pTarget);
 
     fapi2::Target <fapi2::TARGET_TYPE_SYSTEM> l_target(l_pTarget);
 
-    TARGETING::Target* l_masterProc = NULL;
+    TARGETING::Target* l_masterProc = nullptr;
     TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
 
     fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_target2(l_masterProc);
@@ -1146,12 +1146,12 @@ uint32_t rcTestAddErrorInfo()
     do
     {
         // Check that the Error Info can be retrieved
-        const ErrorInfo * l_pErrInfo = NULL;
+        const ErrorInfo * l_pErrInfo = nullptr;
         l_pErrInfo = l_rc.getErrorInfo();
 
-        if (l_pErrInfo == NULL)
+        if (l_pErrInfo == nullptr)
         {
-            FAPI_ERR("rcTestAddErrorInfo. getErrorInfo returned NULL");
+            FAPI_ERR("rcTestAddErrorInfo. getErrorInfo returned nullptr");
             l_result = 1;
             break;
         }
@@ -1165,7 +1165,7 @@ uint32_t rcTestAddErrorInfo()
         }
 
         uint32_t l_size = 0;
-        const void * l_pFfdc = NULL;
+        const void * l_pFfdc = nullptr;
 
         l_pFfdc = l_pErrInfo->iv_ffdcs[0]->getData(l_size);
 
@@ -1556,7 +1556,7 @@ uint32_t rcTestRcToErrl()
     ReturnCode l_rc(FAPI2_RC_INVALID_ATTR_GET);
 
     // Create Target of functional processor chip
-    TARGETING::Target *l_proc = NULL;
+    TARGETING::Target *l_proc = nullptr;
 
     //  Use PredicateIsFunctional (formerly HwasPredicate) to filter
     //  only functional chips
@@ -1614,12 +1614,12 @@ uint32_t rcTestRcToErrl()
         l_rc.addErrorInfo(l_objects, l_entries, 1);
 
         // Check that the Error Info can be retrieved
-        const ErrorInfo * l_pErrInfo = NULL;
+        const ErrorInfo * l_pErrInfo = nullptr;
         l_pErrInfo = l_rc.getErrorInfo();
 
-        if (l_pErrInfo == NULL)
+        if (l_pErrInfo == nullptr)
         {
-            FAPI_ERR("rcTestRcToErrl:getErrorInfo returned NULL");
+            FAPI_ERR("rcTestRcToErrl:getErrorInfo returned nullptr");
             l_result = 2;
             break;
         }
@@ -1641,7 +1641,7 @@ uint32_t rcTestRcToErrl()
 
         // fapiRcToErrl is implicitly calling processEICDGs
         errlHndl_t pError = fapi2::rcToErrl(l_rc);
-        if(pError == NULL)
+        if(pError == nullptr)
         {
             FAPI_ERR("rcTestRcToErrl:fapiRcToErrl returnd No Errorlog handle");
             l_result = 5;
@@ -1662,10 +1662,10 @@ uint32_t rcTestRcToErrl()
         // Garded Target must be UnGard here.
 
         FAPI_INF("rcTestRcToErrl:Deconfig/Gard HWP callout TC success");
-        if(pError != NULL)
+        if(pError != nullptr)
         {
             delete pError;
-            pError = NULL;
+            pError = nullptr;
         }
 
     }while(0);
@@ -1678,7 +1678,7 @@ uint32_t rcTestReturnCodeAttrErrls()
 {
     uint32_t numTests = 0;
     uint32_t numFails = 0;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     FAPI_INF("rcTestReturnCodeAttrErrls() running");
     do
     {
@@ -1688,7 +1688,7 @@ uint32_t rcTestReturnCodeAttrErrls()
         // Get a list of all of the proc chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-        TARGETING::Target * l_Proc = NULL;
+        TARGETING::Target * l_Proc = nullptr;
 
         //Take the first proc and use it
         if (l_chipList.size() > 0)
@@ -1697,7 +1697,7 @@ uint32_t rcTestReturnCodeAttrErrls()
         }
 
         numTests++;
-        if(l_Proc == NULL)
+        if(l_Proc == nullptr)
         {
             // Send an errorlog because we cannot find any procs.
             TS_FAIL("getAllChips: could not find proc, skipping tests");
@@ -1708,11 +1708,11 @@ uint32_t rcTestReturnCodeAttrErrls()
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_ffdc_fail);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             FAPI_INF("p9_ffdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
-            l_errl = NULL;
+            l_errl = nullptr;
         }
         else
         {
@@ -1722,11 +1722,11 @@ uint32_t rcTestReturnCodeAttrErrls()
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_procedureFfdc_fail);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             FAPI_INF("p9_procedureFfdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
-            l_errl = NULL;
+            l_errl = nullptr;
         }
         else
         {
@@ -1739,11 +1739,11 @@ uint32_t rcTestReturnCodeAttrErrls()
 
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_registerFfdc_fail, fapi2_procTarget);
-        if(l_errl != NULL)
+        if(l_errl != nullptr)
         {
             FAPI_INF("p9_registerFfdc_fail returned errl");
             errlCommit(l_errl,CXXTEST_COMP_ID);
-            l_errl = NULL;
+            l_errl = nullptr;
         }
         else
         {
@@ -1754,11 +1754,11 @@ uint32_t rcTestReturnCodeAttrErrls()
         numTests++;
         fapi2::ReturnCode l_rc;
         FAPI_INVOKE_HWP_RC(l_errl, l_rc, p9_registerFfdc_fail, fapi2_procTarget);
-        if( (l_errl != NULL) && (l_rc == (fapi2::ReturnCode)fapi2::RC_TEST_ERROR_A) )
+        if( (l_errl != nullptr) && (l_rc == (fapi2::ReturnCode)fapi2::RC_TEST_ERROR_A) )
         {
             FAPI_INF("p9_registerFfdc_fail returned correct RC");
             delete l_errl;
-            l_errl = NULL;
+            l_errl = nullptr;
         }
         else
         {
