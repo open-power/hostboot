@@ -129,5 +129,20 @@ fapi_try_exit:
     return c_str_storage;
 }
 
+namespace spd
+{
+
+///
+/// @brief fapi2::Target c_str general declaration
+/// @param[in] i_target - target you want the name for
+/// @return const char *
+///
+inline const char* c_str( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
+{
+    fapi2::toString( i_target, c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
+    return c_str_storage;
 }
+
+}// spd
+}// mss
 #endif
