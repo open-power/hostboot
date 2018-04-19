@@ -747,16 +747,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             {
                 break;
             }
-
-            // Invalidate the VPD cache for golden side boot
-            // Also invalidate in manufacturing mode
-            // Must do this after building the devtree
-            l_err = VPD::goldenCacheInvalidate();
-            if ( l_err )
-            {
-                break;
-            }
-
         }
         else if( TARGETING::is_phyp_load() )
         {
@@ -791,6 +781,19 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "Failed hbRuntimeData setup" );
             // break from do loop if error occurred
             break;
+        }
+
+        if( !INITSERVICE::spBaseServicesEnabled() )
+        {
+            // Invalidate the VPD cache for golden side boot
+            // Also invalidate in manufacturing mode
+            // Must do this after saving away the VPD cache into mainstore,
+            //  i.e. after RUNTIME::populate_hbRuntimeData()
+            l_err = VPD::goldenCacheInvalidate();
+            if ( l_err )
+            {
+                break;
+            }
         }
 
         if (TCE::utilUseTcesForDmas())
