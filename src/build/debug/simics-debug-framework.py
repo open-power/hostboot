@@ -623,6 +623,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         chip_num = hb_hrmor//per_chip
         mem_object = None
         #print ">> hrmor=%X" % hb_hrmor
+        #print ">> hb_tracBinaryBuffer=%X" % hb_tracBinaryBuffer
+        #print ">> hb_tracBinaryBufferSz=%X" % hb_tracBinaryBufferSz
+        #print ">> node_num=%d" % node_num
+        #print ">> chip_num=%d" % chip_num
 
         # Find the entry in the memory map that includes our
         #  base memory region. Can't assume object is "ram"
@@ -649,14 +653,12 @@ def magic_instruction_callback(user_arg, cpu, arg):
                         if ((smm_entry[0] == (node_num*per_node)) or
                             (entry[0] == hb_hrmor)):
                             mem_object = simics.SIM_object_name(smm_entry[1])
-                            base_addr = smm_entry[0]
                             #print "Found entry %s for hrmor %x" % (mem_object, hb_hrmor)
                             low_priority = priority
                             #break
                     break
                 elif priority < low_priority:
                     mem_object = simics.SIM_object_name(entry[1])
-                    base_addr = entry[0]
                     #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
                     low_priority = priority
                     #break
@@ -671,8 +673,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         if 'cache' not in mem_object:
             hb_tracBinaryBuffer = (hb_tracBinaryBuffer +
                                    hb_hrmor -
-                                   per_node*node_num -
-                                   base_addr)
+                                    (per_node*node_num))
 
         tracbin = ["hbTracBINARY","hbTracBINARY1","hbTracBINARY2","hbTracBINARY3"]
         tracmerg = ["hbTracMERG","hbTracMERG1","hbTracMERG2","hbTracMERG3"]
