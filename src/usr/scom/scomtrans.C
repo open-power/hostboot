@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -999,6 +999,7 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
                 case(0x20):
                 case(0x21):
                 case(0x22):
+                case(0x23):
                     l_chipLevel = P9N_DD2_SI_MODE;
                     break;
 
@@ -1017,6 +1018,8 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
             {
                 case(0x10):
                 case(0x11):
+                case(0x12):
+                case(0x13):
                     l_chipLevel = P9C_DD1_SI_MODE;
                     break;
                 case(0x20):
