@@ -1113,46 +1113,37 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 break;
             }
 
-            ConstTargetHandle_t parent = getParentChip(target);
-
             // new command...use the full range
 
             switch(workItem)
             {
                 case START_RANDOM_PATTERN:
-                    // TODO RTC 180118
-                    // For Cumulus PON we will only support init to 0
-                    if ( MODEL_CUMULUS != parent->getAttr<ATTR_MODEL>() )
-                    {
-                        cmd = new mss_SuperFastRandomInit(
-                                fapiMba,
-                                startAddr,
-                                endAddr,
-                                mss_MaintCmd::PATTERN_RANDOM,
-                                stopCondition,
-                                false);
 
-                        MDIA_FAST("sm: random init %p on: %x", cmd,
-                                  get_huid(target));
-                    }
+                    cmd = new mss_SuperFastRandomInit(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            mss_MaintCmd::PATTERN_RANDOM,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: random init %p on: %x", cmd,
+                            get_huid(target));
                     break;
 
                 case START_SCRUB:
-                    // TODO RTC 180118
-                    // For Cumulus PON we will only support init to 0
-                    if ( MODEL_CUMULUS != parent->getAttr<ATTR_MODEL>() )
-                    {
-                        cmd = new mss_SuperFastRead(
-                                fapiMba,
-                                startAddr,
-                                endAddr,
-                                stopCondition,
-                                false);
 
-                        MDIA_FAST("sm: scrub %p on: %x", cmd,
-                                  get_huid(target));
-                    }
+                    cmd = new mss_SuperFastRead(
+                            fapiMba,
+                            startAddr,
+                            endAddr,
+                            stopCondition,
+                            false);
+
+                    MDIA_FAST("sm: scrub %p on: %x", cmd,
+                            get_huid(target));
                     break;
+
                 case START_PATTERN_0:
                 case START_PATTERN_1:
                 case START_PATTERN_2:
