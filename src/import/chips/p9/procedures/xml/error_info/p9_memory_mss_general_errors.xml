@@ -35,6 +35,24 @@
 <!-- -->
 
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_MSS_LOOKUP_FAILED</rc>
+    <description>
+      Conditional that tests whether a certain key value is located in a map.
+    </description>
+    <ffdc>KEY</ffdc>
+    <ffdc>DATA</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
   <hwpError>
     <rc>RC_MSS_EMPTY_VECTOR</rc>
     <description>
@@ -108,6 +126,38 @@
     <ffdc>TARGET</ffdc>
     <ffdc>EXPECTED</ffdc>
     <ffdc>ACTUAL</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_OUT_OF_BOUNDS_INDEXING</rc>
+    <description>
+      Desired index is larger than list (std::vector, array, etc.) size.
+      Likely a programming error.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>INDEX</ffdc>
+    <ffdc>LIST_SIZE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CONVERSION_ERROR</rc>
+    <description>
+      Overflow or underflow occured converting one integral type to another.
+      This is a programming error.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ORIGINAL_VAL</ffdc>
+    <ffdc>CONVERTED_VAL</ffdc>
     <ffdc>FUNCTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
