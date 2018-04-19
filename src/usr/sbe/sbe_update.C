@@ -2078,8 +2078,14 @@ namespace SBE
                            err->reasonCode() );
                 break;
             }
-            const void* hbblPnorPtr = reinterpret_cast<const void*>(
-                                                                pnorInfo.vaddr);
+
+            // Create a working copy of HBBL since it may need to be modified
+            // and it's not legal to update code partitions
+            uint8_t pHbbl[MAX_HBBL_SIZE]={0};
+            memcpy(pHbbl,
+                   reinterpret_cast<const void*>(pnorInfo.vaddr),
+                   sizeof(pHbbl));
+            const void* hbblPnorPtr = reinterpret_cast<const void*>(pHbbl);
 
             // Use max hbbl size and not the PNOR size. The PNOR size can grow
             // to add a secure header, but the code size limit is still 20K.
