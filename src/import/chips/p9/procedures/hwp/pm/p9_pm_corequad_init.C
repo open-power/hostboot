@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -753,7 +753,7 @@ fapi2::ReturnCode pm_disable_resclk(
                          CACCR and QACCR don't match");
                 continue;
             }
-            else if(l_caccr_bit_13_14_value)
+            else if(l_caccr_bit_13_14_value)//if override bit is set
             {
                 FAPI_INF ("CACCR value %04X", l_caccr_value);
 
@@ -786,18 +786,25 @@ fapi2::ReturnCode pm_disable_resclk(
 
                 l_step = l_core_index < l_quad_index ? 1 : -1;
 
+                l_address = C_CPPM_CACCR;
+
                 while (l_core_index != l_quad_index)
                 {
                     l_core_index += l_step;
+
                     l_caccr_value = p9_resclk_defines::RESCLK_TABLE_VEC.at(l_core_index);
+
+                    FAPI_INF("Updated CACCR value %04x", l_caccr_value);
+
+                    // Update CACCR (0:11) data
+                    l_core_data64.insert<C_CPPM_CACCR_CLK_SB_STRENGTH,
+                                         C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
+                    FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+                             "ERROR: Failed to write C_CPPM_CACCR");
                 }
 
-                FAPI_INF("Updated CACCR value %04x", l_caccr_value);
-
-                // Update CACCR (0:11) data
-                l_core_data64.insert<C_CPPM_CACCR_CLK_SB_STRENGTH,
-                                     C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
-                l_address = C_CPPM_CACCR;
+                //Clear override bits before QACCR is updated
+                l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 2>(0);
                 FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
                          "ERROR: Failed to write C_CPPM_CACCR");
             }
@@ -806,22 +813,26 @@ fapi2::ReturnCode pm_disable_resclk(
 
     //Get power off index value
     l_poweroff_index = p9_resclk_defines::RESCLK_INDEX_VEC.at(0).idx;
+    FAPI_INF ("POWER Of  index value %u", l_poweroff_index);
 
     l_step = l_quad_index < l_poweroff_index ? 1 : -1;
+
+    l_address = EQ_QPPM_QACCR;
 
     while (l_poweroff_index != l_quad_index)
     {
         l_quad_index += l_step;
         l_qaccr_value = p9_resclk_defines::RESCLK_TABLE_VEC.at(l_quad_index);
-    }
 
-    FAPI_INF("Updated QACCR value %04x", l_qaccr_value);
-    // Update QACCR (0:11) data
-    l_address = EQ_QPPM_QACCR;
-    l_quad_data64.insert<EQ_QPPM_QACCR_COMMON_CLK_SB_STRENGTH,
-                         EQ_QPPM_QACCR_COMMON_CLK_SW_SPARE>(l_qaccr_value);
-    FAPI_TRY(fapi2::putScom(i_target, l_address, l_quad_data64),
-             "ERROR: Failed to write C_CPPM_CACCR");
+        FAPI_INF("Updated QACCR value %04x l_poweroff_index %d l_quad_index %d", l_qaccr_value,
+                 l_poweroff_index, l_quad_index);
+
+        // Update QACCR (0:11) data
+        l_quad_data64.insert<EQ_QPPM_QACCR_COMMON_CLK_SB_STRENGTH,
+                             EQ_QPPM_QACCR_COMMON_CLK_SW_SPARE>(l_qaccr_value);
+        FAPI_TRY(fapi2::putScom(i_target, l_address, l_quad_data64),
+                 "ERROR: Failed to write EQ_QPPM_QACCR");
+    }
 
 fapi_try_exit:
 
