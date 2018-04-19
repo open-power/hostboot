@@ -60,6 +60,7 @@ namespace ISTEP
         MOD_SET_IPL_PARMS                                 = 0x1D,
         MOD_OCC_XSTOP_HANDLER                             = 0x1E,
         MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
+        MOD_REDISCOVER_I2C_TARGETS                        = 0x20,
     };
 
     /**
@@ -115,6 +116,7 @@ namespace ISTEP
         RC_PREVENT_REBOOT_IN_MFG_TERM_MODE       = ISTEP_COMP_ID | 0x36,
         RC_FAILED_WRITE_SPR                      = ISTEP_COMP_ID | 0x37,
         RC_FAILED_TO_BOOT_SBE                    = ISTEP_COMP_ID | 0x38,
+        RC_REDISCOVERED_TARGETS                  = ISTEP_COMP_ID | 0x39,
     };
 
 };

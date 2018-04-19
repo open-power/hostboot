@@ -1120,9 +1120,10 @@ bool i2cPresence( TARGETING::Target * i_target,
                         uint64_t i_engine,
                         uint64_t i_devAddr )
 {
-    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPresence(): tgt=0x%X: e/p/devAddr="
-              "%d/%d/0x%X", TARGETING::get_huid(i_target), i_engine,
+    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPresence(): tgt=0x%X: e%d/p%d/"
+              "devAddr=0x%X", TARGETING::get_huid(i_target), i_engine,
               i_port, i_devAddr );
+
 
     errlHndl_t err = NULL;
     bool l_mutex_success = false;
@@ -1324,9 +1325,9 @@ bool i2cPresence( TARGETING::Target * i_target,
     if( err )
     {
         TRACFCOMP( g_trac_i2c,
-                   ERR_MRK"i2cPresence() Error!"
-                   "tgt=0x%X",
-                   TARGETING::get_huid(i_target));
+                   ERR_MRK"i2cPresence() Error! "
+                   "tgt=0x%X: e%d/p%d/devAddr=0x%X",
+                   TARGETING::get_huid(i_target), i_engine, i_port, i_devAddr);
         errlCommit(err,
                    I2C_COMP_ID);
 
@@ -1342,8 +1343,8 @@ bool i2cPresence( TARGETING::Target * i_target,
                    args.engine );
     }
 
-    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cPresence(): tgt=0x%X: e/p/devAddr="
-              "%d/%d/0x%X: l_present=%d",
+    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cPresence(): tgt=0x%X: e%d/p%d/"
+              "devAddr=0x%X: l_present=%d",
               TARGETING::get_huid(i_target), i_engine, i_port, i_devAddr,
               l_present );
 
