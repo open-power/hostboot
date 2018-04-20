@@ -478,10 +478,6 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                 l_targetLid->getAttr<ATTR_TYPE>(l_attrRPLid,
                                                 l_pAttrIdLid,
                                                 l_ppAttrAddrLid);
-            ATTR_ORDINAL_ID_type l_ordinalIdLid =
-                l_targetLid->getAttr<ATTR_ORDINAL_ID>(l_attrRPLid,
-                                                      l_pAttrIdLid,
-                                                      l_ppAttrAddrLid);
             ATTR_HUID_type l_huidLid =
                 l_targetLid->getAttr<ATTR_HUID>(l_attrRPLid,
                                                 l_pAttrIdLid,
@@ -492,12 +488,11 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                                                      l_ppAttrAddrLid);
             TRACFCOMP( g_trac_targeting,
                        "Target %3d has %3d attrs, class %0.8x, type %0.8x, "
-                       "ord ID %0.8x, HUID 0x%0.8x, %s",
+                       "HUID 0x%0.8x, %s",
                        l_targetNum,
                        l_attrCountLid,
                        l_classLid,
                        l_typeLid,
-                       l_ordinalIdLid,
                        l_huidLid,
                        l_physPathLid.toString());
 
@@ -505,7 +500,7 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
             bool targetMatched = false;
 
             // Create TargetRangeFilter for current Reserved Memory data
-            TargetRangeFilter l_allTargetsRsvd(l_targSrv.begin(),
+            TargetRangeFilter l_allTargetsRsvd(l_targSrv.begin(l_nodeId),
                                                l_targSrv.end(),
                                                NULL);
 
@@ -516,8 +511,6 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
             {
                 if((l_classLid == l_allTargetsRsvd->getAttr<ATTR_CLASS>()) &&
                    (l_typeLid == l_allTargetsRsvd->getAttr<ATTR_TYPE>()) &&
-                   (l_ordinalIdLid ==
-                    l_allTargetsRsvd->getAttr<ATTR_ORDINAL_ID>()) &&
                    (l_physPathLid ==
                     l_allTargetsRsvd->getAttr<ATTR_PHYS_PATH>()))
                 {
