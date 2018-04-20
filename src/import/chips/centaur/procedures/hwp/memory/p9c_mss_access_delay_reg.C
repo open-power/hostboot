@@ -1857,6 +1857,55 @@ extern "C" {
         return fapi2::current_err;
     }
 
+    ///
+    /// @brief Worksaround old VPD that does not have the isdimmdq attribute
+    /// @param[in] i_target - centaur target on which to operate
+    /// @param[out] o_isdimm_dq - the attribute data
+    /// @return fapi2::returnCode
+    ///
+    fapi2::ReturnCode isdimmdq_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                                          uint8_t (&o_isdimm_dq)[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES])
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ, i_target, o_isdimm_dq));
+
+        FAPI_DBG("%s has up to date VPD with the ISDIMMTOC4DQ attribute", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    fapi_try_exit:
+        FAPI_ERR("%s has out of date VPD and lacks the ISDIMMTOC4DQ attribute! Contact your memory representative",
+                 mss::c_str(i_target));
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        // Filling with 0's.  This should be ok unless we run on a planar ISDIMM system.  Currently, there are none for P9
+        std::fill( &o_isdimm_dq[0][0], &o_isdimm_dq[0][0] + sizeof(&o_isdimm_dq), 0);
+
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Worksaround old VPD that does not have the isdimmdq attribute
+    /// @param[in] i_target - centaur target on which to operate
+    /// @param[out] o_isdimm_dqs - the attribute data
+    /// @return fapi2::returnCode
+    ///
+    fapi2::ReturnCode isdimmdqs_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                                           uint8_t (&o_isdimm_dqs)[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES])
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQS, i_target, o_isdimm_dqs));
+
+        FAPI_DBG("%s has up to date VPD with the ISDIMMTOC4DQS attribute", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    fapi_try_exit:
+        FAPI_ERR("%s has out of date VPD and lacks the ISDIMMTOC4DQS attribute! Contact your memory representative",
+                 mss::c_str(i_target));
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        // Filling with 0's.  This should be ok unless we run on a planar ISDIMM system.  Currently, there are none for P9
+        std::fill( &o_isdimm_dqs[0][0], &o_isdimm_dqs[0][0] + sizeof(&o_isdimm_dqs), 0);
+
+        return fapi2::current_err;
+    }
 
     ///@function rosetta_map()
     ///@brief This function returns C4 bit for the corresponding ISDIMM bit
@@ -1878,21 +1927,21 @@ extern "C" {
         uint8_t l_mbapos = 0;
         uint8_t l_dimmtype = 0;
         uint8_t l_swizzle = 0;
-        const uint8_t l_GL_DQ_p0_g1[ISDIMM_MAX_DQ_72] = {10, 9, 11, 8, 12, 13, 14, 15, 3, 1, 2, 0, 7, 5, 4, 6, 20, 21, 22, 23, 16, 17, 18, 19, 64, 65, 66, 67, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 42, 40, 43, 41, 44, 46, 45, 47, 48, 51, 50, 49, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 31, 28, 29, 30, 25, 27, 26, 24};
-        const uint8_t l_GL_DQ_p0_g2[ISDIMM_MAX_DQ_72] = {10, 9, 11, 8, 12, 13, 14, 15, 3, 1, 2, 0, 7, 5, 4, 6, 16, 17, 18, 19, 20, 21, 22, 23, 64, 65, 66, 67, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 42, 40, 43, 41, 44, 46, 45, 47, 48, 51, 50, 49, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 25, 27, 26, 24, 28, 31, 29, 30};
-        const uint8_t l_GL_DQ_p1_g1[ISDIMM_MAX_DQ_72] = {15, 13, 12, 14, 9, 8, 10, 11, 5, 7, 4, 6, 3, 2, 1, 0, 20, 22, 21, 23, 16, 17, 18, 19, 70, 71, 69, 68, 67, 66, 65, 64, 32, 35, 34, 33, 38, 37, 39, 36, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 48, 51, 52, 53, 54, 55, 59, 57, 56, 58, 60, 62, 61, 63, 27, 26, 25, 24, 31, 30, 28, 29};
-        const uint8_t l_GL_DQ_p1_g2[ISDIMM_MAX_DQ_72] = {8, 9, 10, 11, 12, 13, 14, 15, 3, 2, 1, 0, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 67, 66, 64, 65, 70, 71, 69, 68, 32, 35, 34, 33, 38, 37, 39, 36, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 48, 51, 52, 53, 54, 55, 59, 57, 56, 58, 60, 62, 61, 63, 27, 26, 25, 24, 31, 30, 28, 29};
-        const uint8_t l_GL_DQ_p2[ISDIMM_MAX_DQ_72] = {9, 11, 10, 8, 12, 15, 13, 14, 0, 1, 3, 2, 5, 4, 7, 6, 19, 17, 16, 18, 20, 22, 21, 23, 66, 67, 65, 64, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 41, 40, 43, 42, 45, 44, 47, 46, 48, 49, 50, 51, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 25, 27, 24, 26, 28, 31, 29, 30};
-        const uint8_t l_GL_DQ_p3[ISDIMM_MAX_DQ_72] = {3, 2, 0, 1, 4, 5, 6, 7, 11, 10, 8, 9, 15, 14, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 64, 65, 66, 67, 68, 69, 70, 71, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 24, 25, 26, 27, 28, 29, 30, 31};
+        constexpr uint8_t l_GL_DQ_p0_g1[ISDIMM_MAX_DQ_72] = {10, 9, 11, 8, 12, 13, 14, 15, 3, 1, 2, 0, 7, 5, 4, 6, 20, 21, 22, 23, 16, 17, 18, 19, 64, 65, 66, 67, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 42, 40, 43, 41, 44, 46, 45, 47, 48, 51, 50, 49, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 31, 28, 29, 30, 25, 27, 26, 24};
+        constexpr uint8_t l_GL_DQ_p0_g2[ISDIMM_MAX_DQ_72] = {10, 9, 11, 8, 12, 13, 14, 15, 3, 1, 2, 0, 7, 5, 4, 6, 16, 17, 18, 19, 20, 21, 22, 23, 64, 65, 66, 67, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 42, 40, 43, 41, 44, 46, 45, 47, 48, 51, 50, 49, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 25, 27, 26, 24, 28, 31, 29, 30};
+        constexpr uint8_t l_GL_DQ_p1_g1[ISDIMM_MAX_DQ_72] = {15, 13, 12, 14, 9, 8, 10, 11, 5, 7, 4, 6, 3, 2, 1, 0, 20, 22, 21, 23, 16, 17, 18, 19, 70, 71, 69, 68, 67, 66, 65, 64, 32, 35, 34, 33, 38, 37, 39, 36, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 48, 51, 52, 53, 54, 55, 59, 57, 56, 58, 60, 62, 61, 63, 27, 26, 25, 24, 31, 30, 28, 29};
+        constexpr uint8_t l_GL_DQ_p1_g2[ISDIMM_MAX_DQ_72] = {8, 9, 10, 11, 12, 13, 14, 15, 3, 2, 1, 0, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 67, 66, 64, 65, 70, 71, 69, 68, 32, 35, 34, 33, 38, 37, 39, 36, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 48, 51, 52, 53, 54, 55, 59, 57, 56, 58, 60, 62, 61, 63, 27, 26, 25, 24, 31, 30, 28, 29};
+        constexpr uint8_t l_GL_DQ_p2[ISDIMM_MAX_DQ_72] = {9, 11, 10, 8, 12, 15, 13, 14, 0, 1, 3, 2, 5, 4, 7, 6, 19, 17, 16, 18, 20, 22, 21, 23, 66, 67, 65, 64, 71, 70, 69, 68, 32, 33, 34, 35, 36, 37, 38, 39, 41, 40, 43, 42, 45, 44, 47, 46, 48, 49, 50, 51, 52, 53, 54, 55, 58, 56, 57, 59, 60, 61, 62, 63, 25, 27, 24, 26, 28, 31, 29, 30};
+        constexpr uint8_t l_GL_DQ_p3[ISDIMM_MAX_DQ_72] = {3, 2, 0, 1, 4, 5, 6, 7, 11, 10, 8, 9, 15, 14, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 64, 65, 66, 67, 68, 69, 70, 71, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 24, 25, 26, 27, 28, 29, 30, 31};
 
-        const uint8_t l_GL_DQS_p0_g1[ISDIMM_MAX_DQS_18] = {2, 0, 5, 16, 8, 10, 12, 14, 7, 3, 1, 4, 17, 9, 11, 13, 15, 6};
-        const uint8_t l_GL_DQS_p0_g2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
-        const uint8_t l_GL_DQS_p1_g1[ISDIMM_MAX_DQS_18] = {3, 1, 5, 16, 8, 10, 12, 14, 6, 2, 0, 4, 17, 9, 11, 13, 15, 7};
-        const uint8_t l_GL_DQS_p1_g2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
-        const uint8_t l_GL_DQS_p2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
-        const uint8_t l_GL_DQS_p3[ISDIMM_MAX_DQS_18] = {0, 2, 4, 16, 8, 10, 12, 14, 6, 1, 3, 5, 17, 9, 11, 13, 15, 7};
-        uint8_t l_isdm_c4_dq[4][80];
-        uint8_t l_isdm_c4_dqs[4][20];
+        constexpr uint8_t l_GL_DQS_p0_g1[ISDIMM_MAX_DQS_18] = {2, 0, 5, 16, 8, 10, 12, 14, 7, 3, 1, 4, 17, 9, 11, 13, 15, 6};
+        constexpr uint8_t l_GL_DQS_p0_g2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
+        constexpr uint8_t l_GL_DQS_p1_g1[ISDIMM_MAX_DQS_18] = {3, 1, 5, 16, 8, 10, 12, 14, 6, 2, 0, 4, 17, 9, 11, 13, 15, 7};
+        constexpr uint8_t l_GL_DQS_p1_g2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
+        constexpr uint8_t l_GL_DQS_p2[ISDIMM_MAX_DQS_18] = {2, 0, 4, 16, 8, 10, 12, 14, 6, 3, 1, 5, 17, 9, 11, 13, 15, 7};
+        constexpr uint8_t l_GL_DQS_p3[ISDIMM_MAX_DQS_18] = {0, 2, 4, 16, 8, 10, 12, 14, 6, 1, 3, 5, 17, 9, 11, 13, 15, 7};
+        uint8_t l_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES] = {0};
+        uint8_t l_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES] = {0};
 
         FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_DQS_SWIZZLE_TYPE, i_target_mba, l_swizzle);
         FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_dimmtype);
@@ -1902,8 +1951,8 @@ extern "C" {
 
         if(l_dimmtype != fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
         {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQS, i_target_centaur, l_isdm_c4_dqs));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ, i_target_centaur, l_isdm_c4_dq));
+            FAPI_TRY(isdimmdqs_workaround(i_target_centaur, l_isdm_c4_dqs));
+            FAPI_TRY(isdimmdq_workaround(i_target_centaur, l_isdm_c4_dq));
         }
 
 
