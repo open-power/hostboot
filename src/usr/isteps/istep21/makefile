@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 OBJS += call_host_runtime_setup.o
+OBJS += freqAttrData.o
 OBJS += call_host_verify_hdat.o
 OBJS += call_host_start_payload.o
 

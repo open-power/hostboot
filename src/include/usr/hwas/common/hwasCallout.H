@@ -61,6 +61,13 @@ typedef enum {
     GARD_Void                   = 0xFF
 } GARD_ErrorType;
 
+// Used in EPUB_PRC_INVALID_PART
+// userdata 3 of the SRC
+enum ErrorCategory {
+    ERR_CATEGORY_INVALID_SERIAL = 0x01,
+    ERR_CATEGORY_INVALID_PART = 0x02,
+};
+
 // from src/epub/fsp/epub_service_codes.H v1.24.24.4
 // - Any additions should be added to FipS code first
 

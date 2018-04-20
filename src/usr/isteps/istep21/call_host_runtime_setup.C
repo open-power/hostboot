@@ -53,6 +53,8 @@
 
 #include <hbotcompid.H>
 
+#include "freqAttrData.H"
+
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
   #include <isteps/pm/occAccess.H>
   #include <isteps/pm/occCheckstop.H>
@@ -593,6 +595,19 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     do
     {
+        // Send the master node frequency attribute info
+        // to slave nodes
+        l_err = sendFreqAttrData();
+
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_runtime_setup: ERROR: sendFreqAttrData Failed");
+
+            // break from do loop if error occurred
+            break;
+        }
+
         // Close PAYLOAD TCEs
         if (TCE::utilUseTcesForDmas())
         {
