@@ -425,6 +425,10 @@ function run_fsp_ci {
 
         OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --test_on_hardware=1 $HDW_MC_LIST)"
 
+        echo -e ">>> BEGIN Returned output tokens from running \"fsp-CI-jenkins\"\n"
+        echo -e "\nOUTPUT=>$OUTPUT<="
+        echo -e "<<< END Returned output tokens from running \"fsp-CI-jenkins\"\n"
+
         # Check if fsp-CI-jenkins failed to start
         if [ $? -eq 0 ]; then
             URL="$(echo $OUTPUT | grep -o "Check status at .*" | sed -e "s/Check status at//")"
