@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,19 +45,15 @@ namespace IPMIWATCHDOG
 /**
  * @brief the default watchdog countdown setting it to 120 seconds.
  *
- * @TODO RTC:124499 revisit after performace improvments
- *
  */
 // The config option CONFIG_BMC_IPMI_LONG_WATCHDOG allows a tester to use a
 // watchdog timer that is several times more than what a customer would desire
-// to aid in testing only. This option was initially envisioned for use with
-// tracelite enabled, which greatly lengthens IPL time causing the watchdog
-// timer to timeout. However this option could have other uses, so its name
-// is left generic so as not imply the limited use with tracelite alone.
+// to aid in testing only. This option will be automatically set whenever any
+// kind of console tracing is enabled.
 #ifdef CONFIG_BMC_IPMI_LONG_WATCHDOG
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 2400;
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 3600; //60 minutes
 #else
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120;
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120; //2 minutes
 #endif
 
 /**
