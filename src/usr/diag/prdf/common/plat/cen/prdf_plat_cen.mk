@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -37,4 +37,9 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/cen
 # Object files common to both FSP and Hostboot
 ################################################################################
 
+# plat/cen/ (non-rule plugin related)
 prd_obj += prdfCenMbaDomain.o
+
+# plat/cen/ (rule plugin related)
+prd_rule_plugin += prdfCenMba_common.o
+

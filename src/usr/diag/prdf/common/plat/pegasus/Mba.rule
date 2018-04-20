@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,25 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 
-################################################################################
-#
-# Scope:
-#   Registers and actions for the following chiplets:
-#
-# Chiplet  Register Addresses       Description
-# =======  =======================  ============================================
-#   MEM    0x03010400 - 0x0301043F  MBA 01
-#   MEM    0x03010600 - 0x0301063F  MBA 01 MCBIST
-#   MEM    0x03010C00 - 0x03010C3F  MBA 23
-#   MEM    0x03010E00 - 0x03010E3F  MBA 23 MCBIST
-#
-################################################################################
-
-chip Mba
+chip cen_mba
 {
-    name        "Centaur MBA Chiplet";
+    name        "Centaur MBA chiplet";
     targettype  TYPE_MBA;
-    sigoff      0x8000;
+    sigoff      0x9000;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
@@ -60,12 +46,67 @@ chip Mba
  #############################################################################
 
     ############################################################################
-    # MEM Chiplet MBAFIR
+    # Centaur chip MBA target MBACALFIR
+    ############################################################################
+
+    register MBACALFIR
+    {
+        name        "Centaur chip MBA target MBACALFIR";
+        scomaddr    0x03010400;
+        reset       (&, 0x03010401);
+        mask        (|, 0x03010405);
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+    };
+
+    register MBACALFIR_MASK
+    {
+        name        "Centaur chip MBA target MBACALFIR MASK";
+        scomaddr    0x03010403;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+    };
+
+    register MBACALFIR_ACT0
+    {
+        name        "Centaur chip MBA target MBACALFIR ACT0";
+        scomaddr    0x03010406;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+        capture     req nonzero("MBACALFIR");
+    };
+
+    register MBACALFIR_ACT1
+    {
+        name        "Centaur chip MBA target MBACALFIR ACT1";
+        scomaddr    0x03010407;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+        capture     req nonzero("MBACALFIR");
+    };
+
+    ############################################################################
+    # Centaur chip MBA target MBASECUREFIR
+    ############################################################################
+
+    # This register is hardwired to channel failure (checkstop) and we cannot
+    # mask or change the state of the action registers.
+    register MBASECUREFIR
+    {
+        name        "Centaur chip MBA target MBASECUREFIR";
+        scomaddr    0x0301041b;
+        reset       (&, 0x0301041c);
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+    };
+
+    ############################################################################
+    # Centaur chip MBA target MBAFIR
     ############################################################################
 
     register MBAFIR
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRQ";
+        name        "Centaur chip MBA target MBAFIR";
         scomaddr    0x03010600;
         reset       (&, 0x03010601);
         mask        (|, 0x03010605);
@@ -75,23 +116,15 @@ chip Mba
 
     register MBAFIR_MASK
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
+        name        "Centaur chip MBA target MBAFIR MASK";
         scomaddr    0x03010603;
         capture     group FirRegs;
         capture     group MemChipletRegs;
     };
 
-    register MBAFIR_MASK_OR
-    {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRMASK OR";
-        scomaddr    0x03010605;
-        capture     group never;
-        access      write_only;
-    };
-
     register MBAFIR_ACT0
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
+        name        "Centaur chip MBA target MBAFIR ACT0";
         scomaddr    0x03010606;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -100,7 +133,7 @@ chip Mba
 
     register MBAFIR_ACT1
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
+        name        "Centaur chip MBA target MBAFIR ACT1";
         scomaddr    0x03010607;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -108,131 +141,12 @@ chip Mba
     };
 
     ############################################################################
-    # MEM Chiplet MBASECUREFIR
-    ############################################################################
-
-    # This register is hardwired to channel failure (checkstop) and we cannot
-    # mask or change the state of the action registers.
-    register MBASECUREFIR
-    {
-        name        "MBU.MBA_SRQ.MBASIRQ";
-        scomaddr    0x0301041b;
-        reset       (&, 0x0301041c);
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    ############################################################################
-    # MEM Chiplet DDRPHYFIR
-    ############################################################################
-
-    register MBADDRPHYFIR
-    {
-        name        "DDRPHY_FIR_REG";
-        scomaddr    0x800200900301143F;
-        reset       (&, 0x800200910301143F);
-        mask        (|, 0x800200950301143F);
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MBADDRPHYFIR_AND
-    {
-        name        "DDRPHY_FIR_REG_AND";
-        scomaddr    0x800200910301143F;
-        capture     group never;
-        access      write_only;
-    };
-
-    register MBADDRPHYFIR_MASK
-    {
-        name        "DDRPHY_FIR_MASK_REG";
-        scomaddr    0x800200930301143F;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MBADDRPHYFIR_ACT0
-    {
-        name        "DDRPHY_FIR_ACTION0_REG";
-        scomaddr    0x800200960301143F;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MBADDRPHYFIR");
-    };
-
-    register MBADDRPHYFIR_ACT1
-    {
-        name        "DDRPHY_FIR_ACTION1_REG";
-        scomaddr    0x800200970301143F;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MBADDRPHYFIR");
-    };
-
-    ############################################################################
-    # MEM Chiplet MBACALFIR
-    ############################################################################
-
-    register MBACALFIR
-    {
-        name        "MBU.MBA_SRQ.MBACALFIRQ";
-        scomaddr    0x03010400;
-        reset       (&, 0x03010401);
-        mask        (|, 0x03010405);
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MBACALFIR_AND
-    {
-        name        "MBU.MBA_SRQ.MBACALFIRQ AND";
-        scomaddr    0x03010401;
-        capture     group never;
-        access      write_only;
-    };
-
-    register MBACALFIR_MASK
-    {
-        name        "MBU.MBA_SRQ.MBACALFIR_MASK";
-        scomaddr    0x03010403;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MBACALFIR_MASK_OR
-    {
-        name        "MBU.MBA_SRQ.MBACALFIR_MASK OR";
-        scomaddr    0x03010405;
-        capture     group never;
-        access      write_only;
-    };
-
-    register MBACALFIR_ACT0
-    {
-        name        "MBU.MBA_SRQ.MBACALFIR_ACTION0";
-        scomaddr    0x03010406;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MBACALFIR");
-    };
-
-    register MBACALFIR_ACT1
-    {
-        name        "MBU.MBA_SRQ.MBACALFIR_ACTION1";
-        scomaddr    0x03010407;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MBACALFIR");
-    };
-
-    ############################################################################
-    # MEM Chiplet MBASPA
+    # Centaur chip MBA target MBASPA
     ############################################################################
 
     register MBASPA
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAQ";
+        name        "Centaur chip MBA target MBASPA";
         scomaddr    0x03010611;
         reset       (&, 0x03010612);
         mask        (|, 0x03010614);
@@ -241,21 +155,53 @@ chip Mba
         capture     group MaintCmdRegs;
     };
 
-    register MBASPA_AND
-    {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAQ_AND";
-        scomaddr    0x03010612;
-        capture     group never;
-        access      write_only;
-    };
-
     register MBASPA_MASK
     {
-        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
+        name        "Centaur chip MBA target MBASPA MASK";
         scomaddr    0x03010614;
         capture     group FirRegs;
         capture     group MemChipletRegs;
         capture     group MaintCmdRegs;
+    };
+
+    ############################################################################
+    # Centaur chip MBA target MBADDRPHYFIR
+    ############################################################################
+
+    register MBADDRPHYFIR
+    {
+        name        "Centaur chip MBA target MBADDRPHYFIR";
+        scomaddr    0x800200900301143F;
+        reset       (&, 0x800200910301143F);
+        mask        (|, 0x800200950301143F);
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+    };
+
+    register MBADDRPHYFIR_MASK
+    {
+        name        "Centaur chip MBA target MBADDRPHYFIR MASK";
+        scomaddr    0x800200930301143F;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+    };
+
+    register MBADDRPHYFIR_ACT0
+    {
+        name        "Centaur chip MBA target MBADDRPHYFIR ACT0";
+        scomaddr    0x800200960301143F;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+        capture     req nonzero("MBADDRPHYFIR");
+    };
+
+    register MBADDRPHYFIR_ACT1
+    {
+        name        "Centaur chip MBA target MBADDRPHYFIR ACT1";
+        scomaddr    0x800200970301143F;
+        capture     group FirRegs;
+        capture     group MemChipletRegs;
+        capture     req nonzero("MBADDRPHYFIR");
     };
 
     ############################################################################
@@ -310,61 +256,6 @@ chip Mba
         capture     group MemChipletRegs;
     };
 
-    ############################################################################
-    # Maintenance Command Registers
-    ############################################################################
-
-    register MBMCT
-    {
-        name        "MBA Maintenance Command Type Register";
-        scomaddr    0x0301060A;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
-    # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so I
-    #       see no reason to add it here.
-
-    register MBMSR
-    {
-        name        "MBA Maintenance Command Status Register";
-        scomaddr    0x0301060C;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
-    register MBMACA
-    {
-        name        "MBA Maintenance Command Start Address Register";
-        scomaddr    0x0301060D;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
-    register MBMEA
-    {
-        name        "MBA Maintenance Command End Address Register";
-        scomaddr    0x0301060E;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
-    register MBASCTL
-    {
-        name        "MBA Memory Scrub/Read Control Register";
-        scomaddr    0x0301060F;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
-    register MBAECTL
-    {
-        name        "MBA Error Control Register";
-        scomaddr    0x03010610;
-        capture     group default;
-        capture     group MaintCmdRegs;
-    };
-
 };
 
  ##############################################################################
@@ -378,473 +269,446 @@ chip Mba
  #                                                                            #
  ##############################################################################
 
-# This group is a layer of indirection. Normally, each rule file will have a
-# single global or chiplet FIR which will have group that defines which lower
-# level FIRs to analyze. Unfortunately, the MBA target contains only a subset of
-# the FIRs in the Centaur's MEM chiplet. So the MEM chiplet FIR's group
-# definition must remain in Membuf.rule. This group will serve as a psuedo
-# chiplet FIR. This group could contain the bit definitions for all of the MBA
-# registers, however, we could not utilize the filter for each register.
-# Instead, the bit definitions will simply analyze the respective FIR groups.
-# The FIRs in this group will be analyzed in order so if a FIR should be
-# analyzed before another then simply change the order of the FIRs in this
-# group.
-
-# NOTE: The rule definition for this group must be different than that of the
-#       individual FIR groups. Otherwise, it causes hashing collisions in the
-#       signatures. In this case, we will add the SPECIAL attention line even
-#       though none of these registers will trigger a special attention. This
-#       should change the hash enough to make a unique signature.
-
+################################################################################
+# Summary for MBA
+################################################################################
 
 rule rMBA
 {
-    CHECK_STOP:  summary( 0, MbaFir )       |
-                 summary( 1, MbaSecureFir ) |
-                 summary( 2, MbaDdrPhyFir ) |
-                 summary( 3, MbaCalFir );
+  UNIT_CS:
+    summary( 0, rMBACALFIR ) |
+    summary( 1, rMBASECUREFIR ) |
+    summary( 2, rMBAFIR ) |
+    summary( 3, rMBADDRPHYFIR );
 
-    UNIT_CS:     summary( 0, MbaFir )       |
-                 summary( 1, MbaSecureFir ) |
-                 summary( 2, MbaDdrPhyFir ) |
-                 summary( 3, MbaCalFir );
+  RECOVERABLE:
+    summary( 0, rMBACALFIR ) |
+    summary( 1, rMBASECUREFIR ) |
+    summary( 2, rMBAFIR ) |
+    summary( 3, rMBADDRPHYFIR );
 
-    RECOVERABLE: summary( 0, MbaFir )       |
-                 summary( 1, MbaSecureFir ) |
-                 summary( 2, MbaDdrPhyFir ) |
-                 summary( 3, MbaCalFir );
+  HOST_ATTN:
+    summary( 4, rMBASPA );
 };
 
-group gMBA attntype CHECK_STOP, UNIT_CS, RECOVERABLE filter priority( 3 )
+group gMBA attntype UNIT_CS, RECOVERABLE, HOST_ATTN filter singlebit
 {
-    (rMBA, bit(0)) ? analyze(gMbaFir);
-    (rMBA, bit(1)) ? analyze(gMbaSecureFir);
-    (rMBA, bit(2)) ? analyze(gMbaDdrPhyFir);
-    (rMBA, bit(3)) ? analyze(gMbaCalFir);
+    (rMBA, bit(0)) ? analyze(gMBACALFIR);
+    (rMBA, bit(1)) ? analyze(gMBASECUREFIR);
+    (rMBA, bit(2)) ? analyze(gMBAFIR);
+    (rMBA, bit(3)) ? analyze(gMBADDRPHYFIR);
+    (rMBA, bit(4)) ? analyze(gMBASPA);
 };
 
 ################################################################################
-# MEM Chiplet MBAFIR
+# Centaur chip MBA target MBACALFIR
 ################################################################################
 
-# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
-# TODO via RTC 23125. In some Fir bits, we may have to callout Centaur
-# rather than MBA. Marc will change callout rules as per latest design.
-# This is applicable for all FIRs in this file
-rule MbaFir
+rule rMBACALFIR
 {
-    CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
-    UNIT_CS:     MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
-    RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
+  UNIT_CS:
+    MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  RECOVERABLE:
+    MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
 };
 
-group gMbaFir filter singlebit, secondarybits(0,1,2,4,9,10,11,12,13,14,15,16)
+group gMBACALFIR filter singlebit, cs_root_cause( 4, 7 )
 {
-    /** MBAFIR[0]
-     *  MBAFIRQ_INVALID_MAINT_CMD
+    /** MBACALFIR[0]
+     *  MBA_RECOVERABLE_ERROR
      */
-    (MbaFir, bit(0)) ? defaultMaskedError;
+    (rMBACALFIR, bit(0)) ? self_th_1;
 
-    /** MBAFIR[1]
-     *  MBAFIRQ_INVALID_MAINT_ADDRESS
+    /** MBACALFIR[1]
+     *  MBA_NONRECOVERABLE_ERROR
      */
-    (MbaFir, bit(1)) ? defaultMaskedError;
+    (rMBACALFIR, bit(1)) ? self_th_1;
 
-    /** MBAFIR[2]
-     *  MBAFIRQ_MULTI_ADDRESS_MAINT_TIMEOUT
+    /** MBACALFIR[2]
+     *  REFRESH_OVERRUN
      */
-    (MbaFir, bit(2)) ? SelfMedThr1;
+    (rMBACALFIR, bit(2)) ? self_th_32perDay;
 
-    /** MBAFIR[3]
-     *  MBAFIRQ_INTERNAL_FSM_ERROR
+    /** MBACALFIR[3]
+     *  WAT_ERROR
      */
-    (MbaFir, bit(3)) ? SelfMedThr1;
+    (rMBACALFIR, bit(3)) ? defaultMaskedError;
 
-    /** MBAFIR[4]
-     *  MBAFIRQ_MCBIST_ERROR
+    /** MBACALFIR[4]
+     *  RCD parity error on port 0
      */
-    (MbaFir, bit(4)) ? defaultMaskedError;
+    (rMBACALFIR, bit(4)) ? rcd_parity_error_port0_UERE;
 
-    /** MBAFIR[5]
-     *  MBAFIRQ_SCOM_CMD_REG_PE
+    /** MBACALFIR[5]
+     *  DDR0_CAL_TIMEOUT_ERR
      */
-    (MbaFir, bit(5)) ? SelfMedThr1;
+    (rMBACALFIR, bit(5)) ? self_th_1;
 
-    /** MBAFIR[6]
-     *  MBAFIRQ_CHANNEL_CHKSTP_ERR
+    /** MBACALFIR[6]
+     *  DDR1_CAL_TIMEOUT_ERR
      */
-    (MbaFir, bit(6)) ? SelfMedThr1;
+    (rMBACALFIR, bit(6)) ? self_th_1;
 
-    /** MBAFIR[7]
-     *  MBAFIRQ_WRD_CAW2_DATA_CE_UE_ERR
+    /** MBACALFIR[7]
+     *  RCD parity error on port 1
      */
-    (MbaFir, bit(7)) ? SelfMedThr1;
+    (rMBACALFIR, bit(7)) ? rcd_parity_error_port1_UERE;
 
-    # This is for DD2 only
-    /** MBAFIR[8]
-     *  MBAFIRQ_MAINT_1HOT_ST_ERROR_DD2
+    /** MBACALFIR[8]
+     *  MBX_TO_MBA_PAR_ERROR
      */
-    (MbaFir, bit(8)) ? SelfMedThr1;
+    (rMBACALFIR, bit(8)) ? self_th_1;
 
-    /** MBAFIR[9:14]
+    /** MBACALFIR[9]
+     *  MBA_WRD_UE
+     */
+    (rMBACALFIR, bit(9)) ? self_th_1;
+
+    /** MBACALFIR[10]
+     *  MBA_WRD_CE
+     */
+    (rMBACALFIR, bit(10)) ? threshold_and_mask_self;
+
+    /** MBACALFIR[11]
+     *  MBA_MAINT_UE
+     */
+    (rMBACALFIR, bit(11)) ? self_th_1;
+
+    /** MBACALFIR[12]
+     *  MBA_MAINT_CE
+     */
+    (rMBACALFIR, bit(12)) ? self_th_32perDay;
+
+    /** MBACALFIR[13]
+     *  DDR_CAL_RESET_TIMEOUT
+     */
+    (rMBACALFIR, bit(13)) ? self_th_1;
+
+    /** MBACALFIR[14]
+     *  WRQ_DATA_CE
+     */
+    (rMBACALFIR, bit(14)) ? threshold_and_mask_self;
+
+    /** MBACALFIR[15]
+     *  WRQ_DATA_UE
+     */
+    (rMBACALFIR, bit(15)) ? self_th_1;
+
+    /** MBACALFIR[16]
+     *  WRQ_DATA_SUE
+     */
+    (rMBACALFIR, bit(16)) ? defaultMaskedError;
+
+    /** MBACALFIR[17]
+     *  WRQ_RRQ_HANG_ERR
+     */
+    (rMBACALFIR, bit(17)) ? self_th_1;
+
+    /** MBACALFIR[18]
+     *  SM_1HOT_ERR
+     */
+    (rMBACALFIR, bit(18)) ? self_th_1;
+
+    /** MBACALFIR[19]
+     *  WRD_SCOM_ERROR
+     */
+    (rMBACALFIR, bit(19)) ? threshold_and_mask_self;
+
+    /** MBACALFIR[20]
+     *  RHMR_PRIM_REACHED_MAX
+     */
+    (rMBACALFIR, bit(20)) ? defaultMaskedError;
+
+    /** MBACALFIR[21]
+     *  RHMR_SEC_REACHED_MAX
+     */
+    (rMBACALFIR, bit(21)) ? defaultMaskedError;
+
+    /** MBACALFIR[22]
+     *  RHMR_SEC_ALREADY_FULL
+     */
+    (rMBACALFIR, bit(22)) ? defaultMaskedError;
+
+    /** MBACALFIR[23]
      *  Reserved
      */
-    (MbaFir, bit(9|10|11|12|13|14)) ? defaultMaskedError;
+    (rMBACALFIR, bit(23)) ? defaultMaskedError;
 
-    /** MBAFIR[15]
-     *  MBAFIRQ_INTERNAL_SCOM_ERROR
+    /** MBACALFIR[24]
+     *  SCOM FIR error
      */
-    (MbaFir, bit(15)) ? thresholdAndMask_self;
+    (rMBACALFIR, bit(24)) ? threshold_and_mask_self;
 
-    /** MBAFIR[16]
-     *  MBAFIRQ_INTERNAL_SCOM_ERROR_CLONE
+    /** MBACALFIR[25]
+     *  SCOM FIR error clone
      */
-    (MbaFir, bit(16)) ? thresholdAndMask_self;
+    (rMBACALFIR, bit(25)) ? threshold_and_mask_self;
+
 };
 
 ################################################################################
-# MEM Chiplet MBASECUREFIR
+# Centaur chip MBA target MBASECUREFIR
 ################################################################################
 
-rule MbaSecureFir
+rule rMBASECUREFIR
 {
-  # NOTE: This secure FIR will only report checkstop attentions.
-  CHECK_STOP: MBASECUREFIR;
-  UNIT_CS:    MBASECUREFIR;
+  UNIT_CS:
+    MBASECUREFIR;
 };
 
-group gMbaSecureFir filter singlebit
+group gMBASECUREFIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5 )
 {
     /** MBASECUREFIR[0]
-     *  MBASIRQ_INVALID_MBA_CAL0Q_ACCESS
+     *  Invalid MBA_CALQ0 access
      */
-    (MbaSecureFir, bit(0)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(0)) ? level2_th_1_UERE;
 
     /** MBASECUREFIR[1]
-     *  MBASIRQ_INVALID_MBA_CAL1Q_ACCESS
+     *  Invalid MBA_CALQ1 access
      */
-    (MbaSecureFir, bit(1)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(1)) ? level2_th_1_UERE;
 
     /** MBASECUREFIR[2]
-     *  MBASIRQ_INVALID_MBA_CAL2Q_ACCESS
+     *  Invalid MBA_CAL2Q access
      */
-    (MbaSecureFir, bit(2)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(2)) ? level2_th_1_UERE;
 
     /** MBASECUREFIR[3]
-     *  MBASIRQ_INVALID_MBA_CAL3Q_ACCESS
+     *  Invalid MBA_CAL3Q access
      */
-    (MbaSecureFir, bit(3)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(3)) ? level2_th_1_UERE;
 
     /** MBASECUREFIR[4]
-     *  MBASIRQ_INVALID_DDR_CONFIG_REG_ACCESS
+     *  Invalid DDR config reg access
      */
-    (MbaSecureFir, bit(4)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(4)) ? level2_th_1_UERE;
 
     /** MBASECUREFIR[5]
-     *  MBASIRQ_INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
+     *  Invalid SIR mask or action reg access
      */
-    (MbaSecureFir, bit(5)) ? secureFirCallout;
+    (rMBASECUREFIR, bit(5)) ? level2_th_1_UERE;
+
 };
 
 ################################################################################
-# MEM Chiplet DDRPHYFIR
+# Centaur chip MBA target MBAFIR
 ################################################################################
-# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
-rule MbaDdrPhyFir
+
+rule rMBAFIR
 {
-  CHECK_STOP:
-    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  UNIT_CS:
+    MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+  RECOVERABLE:
+    MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
+};
+
+group gMBAFIR filter singlebit, cs_root_cause( 3, 5, 6, 7, 8 )
+{
+    /** MBAFIR[0]
+     *  Invalid Maintenance Command
+     */
+    (rMBAFIR, bit(0)) ? defaultMaskedError;
+
+    /** MBAFIR[1]
+     *  Invalid Maintenance Address
+     */
+    (rMBAFIR, bit(1)) ? defaultMaskedError;
+
+    /** MBAFIR[2]
+     *  Multi-address Maintenance Cmd Timeout
+     */
+    (rMBAFIR, bit(2)) ? self_th_1;
+
+    /** MBAFIR[3]
+     *  Internal FSM parity error
+     */
+    (rMBAFIR, bit(3)) ? self_th_1;
+
+    /** MBAFIR[4]
+     *  MCBIST error
+     */
+    (rMBAFIR, bit(4)) ? defaultMaskedError;
+
+    /** MBAFIR[5]
+     *  SCOM command register parity error
+     */
+    (rMBAFIR, bit(5)) ? self_th_1;
+
+    /** MBAFIR[6]
+     *  Unrecoverable channel error
+     */
+    (rMBAFIR, bit(6)) ? self_th_1;
+
+    /** MBAFIR[7]
+     *  UE or CE Error in WRD caw2 data latches
+     */
+    (rMBAFIR, bit(7)) ? self_th_1;
+
+    /** MBAFIR[8]
+     *  Illegal transition maint state machine
+     */
+    (rMBAFIR, bit(8)) ? self_th_1;
+
+    /** MBAFIR[9:14]
+     *  RESERVED
+     */
+    (rMBAFIR, bit(9|10|11|12|13|14)) ? defaultMaskedError;
+
+    /** MBAFIR[15]
+     *  SCOM Internal Error
+     */
+    (rMBAFIR, bit(15)) ? threshold_and_mask_self;
+
+    /** MBAFIR[16]
+     *  SCOM Internal Error Copy
+     */
+    (rMBAFIR, bit(16)) ? threshold_and_mask_self;
+
+};
+
+################################################################################
+# Centaur chip MBA target MBASPA
+################################################################################
+
+rule rMBASPA
+{
+  HOST_ATTN:
+    MBASPA & ~MBASPA_MASK;
+};
+
+group gMBASPA filter singlebit, cs_root_cause
+{
+    /** MBASPA[0]
+     *  Maintenance command complete
+     */
+    (rMBASPA, bit(0)) ? maint_cmd_complete;
+
+    /** MBASPA[1]
+     *  Hard NCE ETE
+     */
+    (rMBASPA, bit(1)) ? defaultMaskedError;
+
+    /** MBASPA[2]
+     *  Soft NCE ETE
+     */
+    (rMBASPA, bit(2)) ? defaultMaskedError;
+
+    /** MBASPA[3]
+     *  Intermittent NCE ETE
+     */
+    (rMBASPA, bit(3)) ? defaultMaskedError;
+
+    /** MBASPA[4]
+     *  Retry CE ETE
+     */
+    (rMBASPA, bit(4)) ? defaultMaskedError;
+
+    /** MBASPA[5]
+     *  Emergency throttle action detected
+     */
+    (rMBASPA, bit(5)) ? defaultMaskedError;
+
+    /** MBASPA[6]
+     *  Firmware generated attention 0
+     */
+    (rMBASPA, bit(6)) ? defaultMaskedError;
+
+    /** MBASPA[7]
+     *  Firmware generated attention 1
+     */
+    (rMBASPA, bit(7)) ? defaultMaskedError;
+
+    /** MBASPA[8]
+     *  WAT debug attention
+     */
+    (rMBASPA, bit(8)) ? defaultMaskedError;
+
+    /** MBASPA[9]
+     *  Spare
+     */
+    (rMBASPA, bit(9)) ? defaultMaskedError;
+
+    /** MBASPA[10]
+     *  MCBIST done
+     */
+    (rMBASPA, bit(10)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Centaur chip MBA target MBADDRPHYFIR
+################################################################################
+
+rule rMBADDRPHYFIR
+{
   UNIT_CS:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
   RECOVERABLE:
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
 };
 
-group gMbaDdrPhyFir filter singlebit, secondarybits(50,53,54,55,58)
+group gMBADDRPHYFIR filter singlebit, cs_root_cause
 {
     /** MBADDRPHYFIR[48]
-     *  DDRPHY_FIR_REG_DDR0_FSM_CKSTP
+     *  FSM Error Checkstop
      */
-    (MbaDdrPhyFir, bit(48)) ? SelfMedThr1;
+    (rMBADDRPHYFIR, bit(48)) ? self_th_1;
 
     /** MBADDRPHYFIR[49]
-     *  DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
+     *  Parity Error Checkstop
      */
-    (MbaDdrPhyFir, bit(49)) ? SelfMedThr1;
+    (rMBADDRPHYFIR, bit(49)) ? self_th_1;
 
     /** MBADDRPHYFIR[50]
-     *  DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
+     *  Calibration Error RE
      */
-    (MbaDdrPhyFir, bit(50)) ? defaultMaskedError;
+    (rMBADDRPHYFIR, bit(50)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[51]
-     *  DDRPHY_FIR_REG_DDR0_FSM_ERR
+     *  FSM Recoverable Error
      */
-    (MbaDdrPhyFir, bit(51)) ? SelfMedThr32PerDay;
+    (rMBADDRPHYFIR, bit(51)) ? self_th_32perDay;
 
     /** MBADDRPHYFIR[52]
-     *  DDRPHY_FIR_REG_DDR0_PARITY_ERR
+     *  Parity Recoverable Error
      */
-    (MbaDdrPhyFir, bit(52)) ? SelfMedThr32PerDay;
+    (rMBADDRPHYFIR, bit(52)) ? self_th_32perDay;
 
     /** MBADDRPHYFIR[53]
-     *  DDRPHY_FIR_REG_DDR01_FIR_PARITY_ERR
+     *  Parity Recoverable Error
      */
-    (MbaDdrPhyFir, bit(53)) ? thresholdAndMask_self;
+    (rMBADDRPHYFIR, bit(53)) ? threshold_and_mask_self;
 
     /** MBADDRPHYFIR[54:55]
      *  Reserved
      */
-    (MbaDdrPhyFir, bit(54|55)) ? defaultMaskedError;
+    (rMBADDRPHYFIR, bit(54|55)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[56]
-     *  DDRPHY_FIR_REG_DDR1_FSM_CKSTP
+     *  FSM Error Checkstop
      */
-    (MbaDdrPhyFir, bit(56)) ? SelfMedThr1;
+    (rMBADDRPHYFIR, bit(56)) ? self_th_1;
 
     /** MBADDRPHYFIR[57]
-     *  DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
+     *  Parity Error Checkstop
      */
-    (MbaDdrPhyFir, bit(57)) ? SelfMedThr1;
+    (rMBADDRPHYFIR, bit(57)) ? self_th_1;
 
     /** MBADDRPHYFIR[58]
-     *  DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
+     *  Calibration Error RE
      */
-    (MbaDdrPhyFir, bit(58)) ? defaultMaskedError;
+    (rMBADDRPHYFIR, bit(58)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[59]
-     *  DDRPHY_FIR_REG_DDR1_FSM_ERR
+     *  FSM Recoverable Error
      */
-    (MbaDdrPhyFir, bit(59)) ? SelfMedThr32PerDay;
+    (rMBADDRPHYFIR, bit(59)) ? self_th_32perDay;
 
     /** MBADDRPHYFIR[60]
-     *  DDRPHY_FIR_REG_DDR1_PARITY_ERR
+     *  Parity Recoverable Error
      */
-    (MbaDdrPhyFir, bit(60)) ? SelfMedThr32PerDay;
-};
+    (rMBADDRPHYFIR, bit(60)) ? self_th_32perDay;
 
-################################################################################
-# MEM Chiplet MBACALFIR
-################################################################################
-
-# RAS spreadsheet: p8dd1_mss_FFDC_37_ reviewd.xls
-rule MbaCalFir
-{
-  CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
-  UNIT_CS:     MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
-  RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
-};
-
-# bits 4 and 7 given priority to check for RCD parity error before potential
-# side effects in bits 2 and 17
-group gMbaCalFir filter priority( 4, 7 ),
-                 secondarybits(3,10,12,14,16,19,20,21,22,23,24,25)
-{
-    /** MBACALFIR[0]
-     *  MBACALFIRQ_MBA_RECOVERABLE_ERROR
-     */
-    (MbaCalFir, bit(0)) ? SelfMedThr1;
-
-    /** MBACALFIR[1]
-     *  MBACALFIRQ_MBA_NONRECOVERABLE_ERROR
-     */
-    (MbaCalFir, bit(1)) ? SelfMedThr1;
-
-    /** MBACALFIR[2]
-     *  MBACALFIRQ_REFRESH_OVERRUN
-     */
-    (MbaCalFir, bit(2)) ? SelfMedThr32PerDay;
-
-    /** MBACALFIR[3]
-     *  MBACALFIRQ_WAT_ERROR
-     */
-    (MbaCalFir, bit(3)) ? defaultMaskedError;
-
-    /** MBACALFIR[4]
-     *  MBACALFIRQ_RCD_PARITY_ERROR_0
-     */
-    (MbaCalFir, bit(4)) ? RcdParityError0;
-
-    /** MBACALFIR[5]
-     *  MBACALFIRQ_DDR0_CAL_TIMEOUT_ERR
-     */
-    (MbaCalFir, bit(5)) ? SelfMedThr1;
-
-    /** MBACALFIR[6]
-     *  MBACALFIRQ_DDR1_CAL_TIMEOUT_ERR
-     */
-    (MbaCalFir, bit(6)) ? SelfMedThr1;
-
-    /** MBACALFIR[7]
-     *  MBACALFIRQ_RCD_PARITY_ERROR_1
-     */
-    (MbaCalFir, bit(7)) ? RcdParityError1;
-
-    /** MBACALFIR[8]
-     *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
-     */
-    (MbaCalFir, bit(8)) ? SelfMedThr1;
-
-    /** MBACALFIR[9]
-     *  MBACALFIRQ_MBA_WRD_UE
-     */
-    (MbaCalFir, bit(9)) ? SelfMedThr1;
-
-    /** MBACALFIR[10]
-     *  MBACALFIRQ_MBA_WRD_CE
-     */
-    (MbaCalFir, bit(10)) ? thresholdAndMask_self;
-
-    /** MBACALFIR[11]
-     *  MBACALFIRQ_MBA_MAINT_UE
-     */
-    (MbaCalFir, bit(11)) ? SelfMedThr1;
-
-    /** MBACALFIR[12]
-     *  MBACALFIRQ_MBA_MAINT_CE
-     */
-    (MbaCalFir, bit(12)) ? SelfMedThr32PerDay;
-
-    /** MBACALFIR[13]
-     *  MBACALFIRQ_DDR_CAL_RESET_TIMEOUT
-     */
-    (MbaCalFir, bit(13)) ? SelfMedThr1;
-
-    /** MBACALFIR[14]
-     *  MBACALFIRQ_WRQ_DATA_CE
-     */
-    (MbaCalFir, bit(14)) ? thresholdAndMask_self;
-
-    /** MBACALFIR[15]
-     *  MBACALFIRQ_WRQ_DATA_UE
-     */
-    (MbaCalFir, bit(15)) ? SelfMedThr1;
-
-    /** MBACALFIR[16]
-     *  MBACALFIRQ_WRQ_DATA_SUE
-     */
-    (MbaCalFir, bit(16)) ? defaultMaskedError;
-
-    /** MBACALFIR[17]
-     *  MBACALFIRQ_WRQ_RRQ_HANG_ERR
-     */
-    (MbaCalFir, bit(17)) ? SelfMedThr1;
-
-    /** MBACALFIR[18]
-     *  MBACALFIRQ_SM_1HOT_ERR
-     */
-    (MbaCalFir, bit(18)) ? SelfMedThr1;
-
-    /** MBACALFIR[19]
-     *  MBACALFIRQ_WRD_SCOM_ERROR
-     */
-    (MbaCalFir, bit(19)) ? thresholdAndMask_self;
-
-    /** MBACALFIR[20]
-     *  DD1: MBACALFIRQ_INTERNAL_SCOM_ERROR
-     */
-    (MbaCalFir, bit(20)) ? thresholdAndMask_self; # DD1 action, masked for DD2+
-
-    /** MBACALFIR[21]
-     *  DD1: MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
-     */
-    (MbaCalFir, bit(21)) ? thresholdAndMask_self; # DD1 action, masked for DD2+
-
-    # This is for DD2 only
-    /** MBACALFIR[22]
-     *  MBACALFIRQ_RHMR_SEC_ALREADY_FULL
-     */
-    (MbaCalFir, bit(22)) ? defaultMaskedError;
-
-    # This is for DD2 only
-    /** MBACALFIR[23]
-     *  Reserved
-     */
-    (MbaCalFir, bit(23)) ? defaultMaskedError;
-
-    # This is for DD2 only
-    /** MBACALFIR[24]
-     *  MBACALFIRQ_INTERNAL_SCOM_ERROR
-     */
-    (MbaCalFir, bit(24)) ? thresholdAndMask_self;
-
-    # This is for DD2 only
-    /** MBACALFIR[25]
-     *  MBACALFIRQ_INTERNAL_SCOM_ERROR_COPY
-     */
-    (MbaCalFir, bit(25)) ? thresholdAndMask_self;
-};
-
-###############################################################################
-# MEM Chiplet MBASPA
-################################################################################
-
-rule MbaSpa
-{
-    SPECIAL: MBASPA & ~MBASPA_MASK;
-};
-
-group gMbaSpa attntype SPECIAL filter singlebit
-{
-    /** MBASPA[0]
-     *  MBSPAQ_COMMAND_COMPLETE_WO_ENA_ERR_ATTN
-     */
-    (MbaSpa, bit(0)) ? analyzeMaintCmdComplete;
-
-    /** MBASPA[1]
-     *  MBSPAQ_HARD_CE_ETE_ATTN
-     */
-    (MbaSpa, bit(1)) ? defaultMaskedError;
-
-    /** MBASPA[2]
-     *  MBSPAQ_SOFT_CE_ETE_ATTN
-     */
-    (MbaSpa, bit(2)) ? defaultMaskedError;
-
-    /** MBASPA[3]
-     *  MBSPAQ_INTERMITTENT_ETE_ATTN
-     */
-    (MbaSpa, bit(3)) ? defaultMaskedError;
-
-    /** MBASPA[4]
-     *  MBSPAQ_RCE_ETE_ATTN
-     */
-    (MbaSpa, bit(4)) ? defaultMaskedError;
-
-    /** MBASPA[5]
-     *  MBSPAQ_EMERGENCY_THROTTLE_ATTN
-     */
-    (MbaSpa, bit(5)) ? defaultMaskedError;
-
-    /** MBASPA[6]
-     *  MBSPAQ_FIRMWARE_ATTN0
-     */
-    (MbaSpa, bit(6)) ? defaultMaskedError;
-
-    /** MBASPA[7]
-     *  MBSPAQ_FIRMWARE_ATTN1
-     */
-    (MbaSpa, bit(7)) ? defaultMaskedError;
-
-    /** MBASPA[8]
-     *  MBSPAQ_WAT_DEBUG_ATTN
-     */
-    # WORKAROUND: HW217608
-    # For Centaur DD1.0, the hardware team will utilize the WAT logic to look
-    # for a command complete and trigger this bit. Note that the HW will still
-    # trigger MBASPA[0], however, that bit should be masked for this
-    # workaround.
-    (MbaSpa, bit(8)) ? analyzeMaintCmdComplete;
-
-    /** MBASPA[9]
-     *  MBSPAQ_SPARE_ATTN1
-     */
-    (MbaSpa, bit(9)) ? defaultMaskedError;
-
-    /** MBASPA[10]
-     *  MBSPAQ_MCBIST_DONE
-     */
-    (MbaSpa, bit(10)) ? defaultMaskedError;
 };
 
  ##############################################################################
@@ -859,54 +723,7 @@ group gMbaSpa attntype SPECIAL filter singlebit
  ##############################################################################
 
 # Include the common action set.
-.include "CommonActions.rule";
-
-################################################################################
-# Higher level actions
-################################################################################
-
-/** Analyze maintenance command complete */
-actionclass analyzeMaintCmdComplete
-{
-    funccall("MaintCmdComplete");  # Must be called last so return code can be
-                                   # passed on to rule code.
-};
-
-/** Callout MBA and DIMMs on Port 0 */
-actionclass CalloutMbaAndDimmOnPort0
-{
-    funccall("CalloutMbaAndDimmOnPort0");
-    threshold1;
-};
-
-/** Callout MBA and DIMMs on Port 1 */
-actionclass CalloutMbaAndDimmOnPort1
-{
-    funccall("CalloutMbaAndDimmOnPort1");
-    threshold1;
-};
-
-/** Handle RCD Parity Error 0 */
-actionclass RcdParityError0
-{
-    funccall("maskRcdParitySideEffects");
-    CalloutMbaAndDimmOnPort0;
-    SUEGenerationPoint;
-};
-
-/** Handle RCD Parity Error 1 */
-actionclass RcdParityError1
-{
-    funccall("maskRcdParitySideEffects");
-    CalloutMbaAndDimmOnPort1;
-    SUEGenerationPoint;
-};
-
-/** Callouts specific to MBASECUREFIR attentions. */
-actionclass secureFirCallout
-{
-    callout2ndLvlMed;
-    calloutSelfLow;
-    threshold1;
-};
+.include "cen_common_actions.rule";
+# Include the chip-specific action set.
+.include "cen_mba_actions.rule";
 

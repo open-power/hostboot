@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,24 +41,6 @@ using namespace PlatServices;
 
 namespace cen_mba
 {
-
-//##############################################################################
-//
-//                             Special plugins
-//
-//##############################################################################
-
-/**
- * @brief  Plugin that initializes the data bundle.
- * @param  i_mbaChip An MBA chip.
- * @return SUCCESS
- */
-int32_t Initialize( ExtensibleChip * i_mbaChip )
-{
-    i_mbaChip->getDataBundle() = new MbaDataBundle( i_mbaChip );
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( cen_mba, Initialize );
 
 //##############################################################################
 //

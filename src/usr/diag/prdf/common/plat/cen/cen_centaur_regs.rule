@@ -36,12 +36,24 @@
     };
 
     ############################################################################
-    # Additional regs for CEN target MBSECCFIR
+    # Centaur chip MBSFIR
+    ############################################################################
+
+    register MBSFIR_MASK_OR
+    {
+        name        "Centaur chip MBSFIR MASK atomic OR";
+        scomaddr    0x02011405;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # Centaur chip MBSECCFIR 0
     ############################################################################
 
     register MBSECCFIR_0_AND
     {
-        name        "Centaur chip MBSECCFIR_0 atomic AND";
+        name        "Centaur chip MBSECCFIR 0 atomic AND";
         scomaddr    0x02011441;
         capture     group never;
         access      write_only;
@@ -49,7 +61,7 @@
 
     register MBSECCFIR_0_MASK_AND
     {
-        name        "MBU.MBS.ECC01.MBECCFIR_MASK_AND";
+        name        "Centaur chip MBSECCFIR 0 MASK atomic AND";
         scomaddr    0x02011444;
         capture     group never;
         access      write_only;
@@ -57,15 +69,19 @@
 
     register MBSECCFIR_0_MASK_OR
     {
-        name        "MBU.MBS.ECC01.MBECCFIR_MASK_OR";
+        name        "Centaur chip MBSECCFIR 0 MASK atomic OR";
         scomaddr    0x02011445;
         capture     group never;
         access      write_only;
     };
 
+    ############################################################################
+    # Centaur chip MBSECCFIR 0
+    ############################################################################
+
     register MBSECCFIR_1_AND
     {
-        name        "Centaur chip MBSECCFIR_1 atomic AND";
+        name        "Centaur chip MBSECCFIR 1 atomic AND";
         scomaddr    0x02011481;
         capture     group never;
         access      write_only;
@@ -73,7 +89,7 @@
 
     register MBSECCFIR_1_MASK_AND
     {
-        name        "MBU.MBS.ECC23.MBECCFIR_MASK_AND";
+        name        "Centaur chip MBSECCFIR 1 MASK atomic AND";
         scomaddr    0x02011484;
         capture     group never;
         access      write_only;
@@ -81,7 +97,7 @@
 
     register MBSECCFIR_1_MASK_OR
     {
-        name        "MBU.MBS.ECC23.MBECCFIR_MASK_OR";
+        name        "Centaur chip MBSECCFIR 1 MASK atomic OR";
         scomaddr    0x02011485;
         capture     group never;
         access      write_only;
