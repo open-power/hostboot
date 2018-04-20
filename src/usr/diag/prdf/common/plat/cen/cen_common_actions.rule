@@ -149,6 +149,7 @@ actionclass level2_th_1
 #                           Callouts with flags                                #
 ################################################################################
 
+actionclass self_th_1_UERE   { self_th_1;   SueSource; };
 actionclass level2_th_1_UERE { level2_th_1; SueSource; };
 
 ################################################################################

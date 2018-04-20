@@ -244,7 +244,10 @@ rule rMBACALFIR
     MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
 };
 
-group gMBACALFIR filter singlebit, cs_root_cause
+# RCD parity errors (bits 4 and 7) given priority over potential side effects
+# bits 2 and 17.
+group gMBACALFIR filter priority( 4, 7 ),
+                        cs_root_cause( 0, 1, 2, 4, 5, 6, 7, 8, 9, 11, 13, 15, 17, 18 )
 {
     /** MBACALFIR[0]
      *  MBA_RECOVERABLE_ERROR
@@ -254,12 +257,12 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[1]
      *  MBA_NONRECOVERABLE_ERROR
      */
-    (rMBACALFIR, bit(1)) ? self_th_1;
+    (rMBACALFIR, bit(1)) ? self_th_1_UERE;
 
     /** MBACALFIR[2]
      *  REFRESH_OVERRUN
      */
-    (rMBACALFIR, bit(2)) ? self_th_1;
+    (rMBACALFIR, bit(2)) ? self_th_32perDay;
 
     /** MBACALFIR[3]
      *  WAT_ERROR
@@ -269,7 +272,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[4]
      *  RCD parity error on port 0
      */
-    (rMBACALFIR, bit(4)) ? TBDDefaultCallout;
+    (rMBACALFIR, bit(4)) ? rcd_parity_error_port0_UERE;
 
     /** MBACALFIR[5]
      *  DDR0_CAL_TIMEOUT_ERR
@@ -284,7 +287,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[7]
      *  RCD parity error on port 1
      */
-    (rMBACALFIR, bit(7)) ? TBDDefaultCallout;
+    (rMBACALFIR, bit(7)) ? rcd_parity_error_port1_UERE;
 
     /** MBACALFIR[8]
      *  MBX_TO_MBA_PAR_ERROR
@@ -294,7 +297,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[9]
      *  MBA_WRD_UE
      */
-    (rMBACALFIR, bit(9)) ? self_th_1;
+    (rMBACALFIR, bit(9)) ? self_th_1_UERE;
 
     /** MBACALFIR[10]
      *  MBA_WRD_CE
@@ -304,7 +307,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[11]
      *  MBA_MAINT_UE
      */
-    (rMBACALFIR, bit(11)) ? self_th_1;
+    (rMBACALFIR, bit(11)) ? self_th_1_UERE;
 
     /** MBACALFIR[12]
      *  MBA_MAINT_CE
@@ -314,7 +317,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[13]
      *  DDR_CAL_RESET_TIMEOUT
      */
-    (rMBACALFIR, bit(13)) ? self_th_1;
+    (rMBACALFIR, bit(13)) ? self_th_1_UERE;
 
     /** MBACALFIR[14]
      *  WRQ_DATA_CE
@@ -324,7 +327,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[15]
      *  WRQ_DATA_UE
      */
-    (rMBACALFIR, bit(15)) ? self_th_1;
+    (rMBACALFIR, bit(15)) ? self_th_1_UERE;
 
     /** MBACALFIR[16]
      *  WRQ_DATA_SUE
@@ -339,7 +342,7 @@ group gMBACALFIR filter singlebit, cs_root_cause
     /** MBACALFIR[18]
      *  SM_1HOT_ERR
      */
-    (rMBACALFIR, bit(18)) ? self_th_1;
+    (rMBACALFIR, bit(18)) ? self_th_1_UERE;
 
     /** MBACALFIR[19]
      *  WRD_SCOM_ERROR
@@ -454,7 +457,7 @@ group gMBAFIR filter singlebit, cs_root_cause( 3, 5, 6, 7, 8 )
     /** MBAFIR[3]
      *  Internal FSM parity error
      */
-    (rMBAFIR, bit(3)) ? self_th_1;
+    (rMBAFIR, bit(3)) ? self_th_1_UERE;
 
     /** MBAFIR[4]
      *  MCBIST error
@@ -464,22 +467,22 @@ group gMBAFIR filter singlebit, cs_root_cause( 3, 5, 6, 7, 8 )
     /** MBAFIR[5]
      *  SCOM command register parity error
      */
-    (rMBAFIR, bit(5)) ? self_th_1;
+    (rMBAFIR, bit(5)) ? self_th_1_UERE;
 
     /** MBAFIR[6]
      *  Unrecoverable channel error
      */
-    (rMBAFIR, bit(6)) ? self_th_1;
+    (rMBAFIR, bit(6)) ? self_th_1_UERE;
 
     /** MBAFIR[7]
      *  UE or CE Error in WRD caw2 data latches
      */
-    (rMBAFIR, bit(7)) ? self_th_1;
+    (rMBAFIR, bit(7)) ? self_th_1_UERE;
 
     /** MBAFIR[8]
      *  Illegal transition maint state machine
      */
-    (rMBAFIR, bit(8)) ? self_th_1;
+    (rMBAFIR, bit(8)) ? self_th_1_UERE;
 
     /** MBAFIR[9:14]
      *  RESERVED
@@ -513,7 +516,7 @@ group gMBASPA filter singlebit, cs_root_cause
     /** MBASPA[0]
      *  Maintenance command complete
      */
-    (rMBASPA, bit(0)) ? maintenance_command_complete; # DD2+ only
+    (rMBASPA, bit(0)) ? maint_cmd_complete;
 
     /** MBASPA[1]
      *  Hard NCE ETE
@@ -579,17 +582,17 @@ rule rMBADDRPHYFIR
     MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
 };
 
-group gMBADDRPHYFIR filter singlebit, cs_root_cause
+group gMBADDRPHYFIR filter singlebit, cs_root_cause( 48, 49, 51, 52, 56, 57, 59, 60 )
 {
     /** MBADDRPHYFIR[48]
      *  FSM Error Checkstop
      */
-    (rMBADDRPHYFIR, bit(48)) ? self_th_1;
+    (rMBADDRPHYFIR, bit(48)) ? self_th_1_UERE;
 
     /** MBADDRPHYFIR[49]
      *  Parity Error Checkstop
      */
-    (rMBADDRPHYFIR, bit(49)) ? self_th_1;
+    (rMBADDRPHYFIR, bit(49)) ? self_th_1_UERE;
 
     /** MBADDRPHYFIR[50]
      *  Calibration Error RE
@@ -619,12 +622,12 @@ group gMBADDRPHYFIR filter singlebit, cs_root_cause
     /** MBADDRPHYFIR[56]
      *  FSM Error Checkstop
      */
-    (rMBADDRPHYFIR, bit(56)) ? self_th_1;
+    (rMBADDRPHYFIR, bit(56)) ? self_th_1_UERE;
 
     /** MBADDRPHYFIR[57]
      *  Parity Error Checkstop
      */
-    (rMBADDRPHYFIR, bit(57)) ? self_th_1;
+    (rMBADDRPHYFIR, bit(57)) ? self_th_1_UERE;
 
     /** MBADDRPHYFIR[58]
      *  Calibration Error RE

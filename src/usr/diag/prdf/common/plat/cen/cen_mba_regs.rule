@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,27 +23,66 @@
 #
 # IBM_PROLOG_END_TAG
 
+    ############################################################################
+    # Centaur chip MBA target MBACALFIR
+    ############################################################################
 
-    ###########################################################################
-    # P9 MBASPA
-    ###########################################################################
+    register MBACALFIR_AND
+    {
+        name        "Centaur chip MBA target MBACALFIR atomic AND";
+        scomaddr    0x03010401;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MBACALFIR_MASK_OR
+    {
+        name        "Centaur chip MBA target MBACALFIR_MASK atomic OR";
+        scomaddr    0x03010405;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # Centaur chip MBA target MBAFIR
+    ############################################################################
+
+    register MBAFIR_MASK_OR
+    {
+        name        "Centaur chip MBA target MBAFIR_MASK atomic OR";
+        scomaddr    0x03010605;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
+    # Centaur chip MBA target MBASPA
+    ############################################################################
+
+    register MBASPA_AND
+    {
+        name        "Centaur chip MBA target MBASPA atomic AND";
+        scomaddr    0x03010612;
+        capture     group never;
+        access      write_only;
+    };
 
     register MBASPA_OR
     {
-        name        "Memory Buffer MBA SPA OR register";
+        name        "Centaur chip MBA target MBASPA atomic OR";
         scomaddr    0x03010613;
         capture     group never;
         access      write_only;
     };
 
     ############################################################################
-    # Additional regs for CEN MBA target MBASPA
+    # Centaur chip MBA target MBADDRPHYFIR
     ############################################################################
 
-    register MBASPA_AND
+    register MBADDRPHYFIR_AND
     {
-        name        "CEN MBA target MBASPA atomic AND";
-        scomaddr    0x03010612;
+        name        "Centaur chip MBA target MBADDRPHYFIR atomic AND";
+        scomaddr    0x800200910301143F;
         capture     group never;
         access      write_only;
     };
@@ -60,8 +99,8 @@
         capture     group MaintCmdRegs;
     };
 
-    # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so I
-    #       see no reason to add it here.
+    # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so no
+    # reason to add it here.
 
     register MBMSR
     {
