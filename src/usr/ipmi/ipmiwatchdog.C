@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,11 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
     data[4] = init_countdown_lsb; // byte 5 initial countdown timer LSByte
     data[5] = init_countdown_msb; // byte 6 initial countdown timer MSByte
 
+    IPMI_TRAC( "setWatchDogTimer : sec=%d, use=%d, act=%d, clr=%d",
+               i_countdown_secs,
+               i_timer_use,
+               i_timer_action,
+               i_timer_clr_flag );
     return IPMI::send(IPMI::set_watchdog(), len, data);
 
 }
@@ -107,6 +112,7 @@ errlHndl_t resetWatchDogTimer()
 
     do
     {
+        IPMI_TRAC( "resetWatchDogTimer" );
 
         // Don't worry about the return just send the msg over
         // If there is an error during the reset
