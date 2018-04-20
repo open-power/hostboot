@@ -38,13 +38,11 @@
 echo "+++ Need to alter where we look for pnor images so they will be picked up properly"
 mkdir -p  $sb/simu/data
 
-echo "+++ Get some simics info changes"
-sbex -t 1049203
-
 ###############################################################################
 ### NOTE - if you need to sbex a simicsInfo track it needs to be done BEFORE
 ###        executing the code below
 ###############################################################################
+cp $bb/src/simu/data/simicsInfo $sb/simu/data/
 chmod +w $sb/simu/data/simicsInfo
 egrep -v "nimbus.pnor|cumulus.pnor|cumulus_cdimm.pnor" $sb/simu/data/simicsInfo > $sb/simu/data/simicsInfo.new
 mv $sb/simu/data/simicsInfo.new $sb/simu/data/simicsInfo
