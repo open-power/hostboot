@@ -257,6 +257,42 @@
 #define EDI_TX_ZCAL_DONE                                   0x800f04000000003f, 50,  1 // impedance calibration sequence complete\r\n\t results are valid when 1.\r\n\tjfg
 #define EDI_TX_ZCAL_ERROR                                  0x800f04000000003f, 51,  1 // impedance calibration sequence error\r\n\t indicates, independent of tx_zcal_done, whether no calibration answer was found, or state machine failed. cleared on tx_zcal_req.\r\n\tjfg
 
+
+
+
+
+
+
+
+
+
+#define OPT_TX_FIFO_L2U_DLY                                0x80040c000000003f, 48,  3 // this field is used to read or set the tx fifo load to unload delay according to the following.\r\n\t000:(0_to_2_ui) 0 to 2 ui \r\n\t001:(4_to_6_ui) 4 to 6 ui (default) \r\n\t010:(8_to_10_ui) 8 to 10 ui\r\n\t011:(12_to_14_ui) 12 to 14 ui \r\n\t100:(16_to_18_ui) 16 to 18 ui \r\n\t101:(20_to_22_ui) 20 to 22 ui\r\n\t110:(24_to_26_ui) 24 to 26 ui\r\n\t111:(28_to_30_ui) 28 to 30 ui\r\n\trjr
+#define OPT_TX_UNLOAD_CLK_DISABLE                          0x80040c000000003f, 56,  1 // set to 0 to enable sync of tx custom serializer via tx_fifo_init register.  set to 1 to clock off sync logic and save power.
+#define OPT_TX_RXCAL                                       0x80040c000000003f, 57,  1 // set transmitter to drive vio/2 common mode on both legs.  use this control during far end rx offset calibration.
+#define OPT_TX_UNLOAD_SEL                                  0x80040c000000003f, 58,  3 // controls the preset value of the tx slice unload counter, which effectively gives subcycle control of the offset of tx unload clock from grid clock.
+#define OPT_TX_MODE2_PL                                    0x80040c000000003f, 48, 16 // register -- description
+#define OPT_TX_ERR_INJECT                                  0x800414000000003f, 48,  5 // inject one beat of error on this lane.  set code 1yyyy where yyyy is the beat in the deserialized cycle to inject on.
+#define OPT_TX_FIFO_INIT                                   0x800414000000003f, 53,  1 // used to initialize the tx fifo and put it into a known reset state. this will cause the load to unload delay of the fifo to be set to the value in the tx_fifo_l2u_dly field of the tx_mode_pp register.
+#define OPT_TX_SET_UNLOAD_CLK_DISABLE                      0x800414000000003f, 60,  1 // set tx_unload_clk_disable register
+#define OPT_TX_CLR_UNLOAD_CLK_DISABLE                      0x800414000000003f, 61,  1 // clear tx_unload_clk_disable register
+#define OPT_TX_CNTL1G_PL                                   0x800414000000003f, 48, 16 // register -- description
+#define OPT_RX_RUN_LANE                                    0x800320000000003f, 48,  1 // run training and subsequent recalibration on given lane
+#define OPT_RX_LANE_BUSY                                   0x800328000000003f, 50,  1 // state machine busy indicator on given lane
+#define OPT_RX_IORESET                                     0x800258000000003f, 63,  1 // reset the given rx lane (except the cdr logic)
+#define OPT_TX_IORESET                                     0x80044c000000003f, 48,  1 // reset the given tx lane
+#define OPT_RX_PR_RESET                                    0x800258000000003f, 62,  1 // set this to reset cdr logic.  power and clocks must be enabled in the slice.
+#define OPT_RX_CLKDIST_PDWN                                0x800810000000003f, 48,  3 // used to disable the rx group clocks and put them into a low power state. \r\n\t bit 0 disables slices 0-7 \r\n\t bit 1 disables slices 8-15 \r\n\t bit 2 disables slices 16-23
+#define OPT_RX_LANE_ANA_PDWN                               0x800008000000003f, 54,  1 // lane power down of analog and custom circuits
+#define OPT_RX_LANE_DIG_PDWN                               0x800220000000003f, 48,  1 // used to power down digital logic for a lane.
+#define OPT_TX_LANE_PDWN                                   0x800404000000003f, 48,  1 // used to drive inhibit (tristate) and fully power down a lane independent of the logical lane disable.  \r\n\t0:(enabled) lane powered up \r\n\t1:(disabled) lane drive inhibited (tristated) and powered down (default).
+#define OPT_RX_PR_PHASE_STEP                               0x800228000000003f, 60,  4 // amount to be added or subtracted from to phase rotator accumulator on each shift left or right.  0000: decoded as b10000 in logic, so pr will update every 4 shifts; other values will update with every 4*(16/phase_step) shifts.
+#define OPT_RX_CFG_LTE_MC                                  0x800000000000003f, 60,  4 // cfg_lte_mc, see glen for details
+#define OPT_RX_A_INTEG_COARSE_GAIN                         0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+#define OPT_RX_B_INTEG_COARSE_GAIN                         0x800098000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+#define OPT_RX_E_INTEG_COARSE_GAIN                         0x8000c0000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
+#define OPT_RX_PR_FW_INTERTIA_AMT                          0x800228000000003f, 57,  3
+#define OPT_RX_PR_IQ_RES_SEL                               0x800010000000003f, 59,  3
+
 /*
  * Leaving these as comments until we close out OPT RAS discussions and write Abus link training
  *
@@ -272,7 +308,6 @@
 #define OPT_TX_PL_SPARE_MODE_2                             0x800404000000003f, 62,  1 // per-lane spare mode latch.
 #define OPT_TX_PL_SPARE_MODE_3                             0x800404000000003f, 63,  1 // per-lane spare mode latch.
 #define OPT_TX_MODE1_PL                                    0x800404000000003f, 48, 16 // register -- description
-*/
 #define OPT_TX_FIFO_L2U_DLY                                0x80040c000000003f, 48,  3 // this field is used to read or set the tx fifo load to unload delay according to the following.\r\n\t000:(0_to_2_ui) 0 to 2 ui \r\n\t001:(4_to_6_ui) 4 to 6 ui (default) \r\n\t010:(8_to_10_ui) 8 to 10 ui\r\n\t011:(12_to_14_ui) 12 to 14 ui \r\n\t100:(16_to_18_ui) 16 to 18 ui \r\n\t101:(20_to_22_ui) 20 to 22 ui\r\n\t110:(24_to_26_ui) 24 to 26 ui\r\n\t111:(28_to_30_ui) 28 to 30 ui\r\n\trjr
 #define OPT_TX_UNLOAD_CLK_DISABLE                          0x80040c000000003f, 56,  1 // set to 0 to enable sync of tx custom serializer via tx_fifo_init register.  set to 1 to clock off sync logic and save power.
 #define OPT_TX_RXCAL                                       0x80040c000000003f, 57,  1 // set transmitter to drive vio/2 common mode on both legs.  use this control during far end rx offset calibration.
@@ -283,7 +318,6 @@
 #define OPT_TX_SET_UNLOAD_CLK_DISABLE                      0x800414000000003f, 60,  1 // set tx_unload_clk_disable register
 #define OPT_TX_CLR_UNLOAD_CLK_DISABLE                      0x800414000000003f, 61,  1 // clear tx_unload_clk_disable register
 #define OPT_TX_CNTL1G_PL                                   0x800414000000003f, 48, 16 // register -- description
-/*
 #define OPT_TX_LANE_BIST_ERR                               0x80041c000000003f, 48,  1 // indicates txbist has found an error.\r\n\t0:(no_error) no error\r\n\t1:(error) an error has been found during txbist.
 #define OPT_TX_LANE_BIST_ACTVITY_DET                       0x80041c000000003f, 49,  1 // indicates that activity was detected in prbs checker. \r\n\t0:(no_error) no activity \r\n\t1:(error) activity has been found during txbist.
 #define OPT_TX_SEG_TEST_STATUS                             0x80041c000000003f, 50,  2 // driver segment test result. bit0 for pad p, bit1 for pad n
