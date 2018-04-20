@@ -1,0 +1,50 @@
+#!/usr/bin/expect
+
+# Description : The purpose of this script is to create a tool which will use
+#               expect to make scp calls to the FSP easier to do in a script.
+
+# Take in parameters
+set MACHINE   [lindex $argv 0];
+set PASSWORD  [lindex $argv 1];
+set FILE      [lindex $argv 2];
+set OUTDIR    [lindex $argv 3];
+
+set USER      root
+if {$argc==5} {
+set USER [lindex $argv 4]
+}
+
+# Handle empty parameters
+if {$MACHINE==""} {
+    puts "\nError!! No target machine provided\n"
+}
+
+if {$PASSWORD=="" && $MACHINE!="-h" && $MACHINE!="--help"} {
+    puts "\nError!! No password provided\n"
+}
+
+if {$FILE=="" && $MACHINE!="-h" && $MACHINE!="--help" } {
+    puts "\nError!! No filepath to copy provided\n"
+}
+
+if {$OUTDIR=="" && $MACHINE!="-h" && $MACHINE!="--help" } {
+    puts "\nError!! No output directory on FSP provided\n"
+}
+
+# All parameters are required except USER, if any are missing , or if help flag is set dump
+# out some help text to the console
+if {$FILE=="" || $MACHINE=="" || $PASSWORD=="" || $OUTDIR=="" ||  $FILE=="-h" || $FILE=="--help" } {
+    puts "\nauto_scp <targetMachine> <password> <fileToCopy> <outDirOnFsp> <user(optional)>\n"
+    puts "Description: This script will copy a given file onto a given directory on a given fsp."
+    puts "             If no user is provided script will default user to be \"root\"\n"
+    exit 1;
+}
+
+# Kick off the SCP command
+spawn scp -F /gsa/ausgsa/home/h/o/hostboot/fsp.ssh_config $FILE $USER@$MACHINE:$OUTDIR/
+
+# This expect part will automatically enter the password passed in as the 2nd param
+expect {
+password: {send "$PASSWORD\r"; exp_continue}
+}
+
