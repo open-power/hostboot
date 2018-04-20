@@ -61,6 +61,7 @@ namespace ISTEP
         MOD_OCC_XSTOP_HANDLER                             = 0x1E,
         MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
         MOD_REDISCOVER_I2C_TARGETS                        = 0x20,
+        MOD_FREQ_ATTR_DATA                                = 0x21,
     };
 
     /**
@@ -118,6 +119,13 @@ namespace ISTEP
         RC_FAILED_TO_BOOT_SBE                    = ISTEP_COMP_ID | 0x38,
         RC_REDISCOVERED_TARGETS                  = ISTEP_COMP_ID | 0x39,
         RC_HDAT_SIZE_CHECK_FAILED                = ISTEP_COMP_ID | 0x3A,
+        RC_FREQ_ATTR_TIMER_EXPIRED               = ISTEP_COMP_ID | 0x40,
+        RC_FREQ_ATTR_TIMER_THREAD_FAIL           = ISTEP_COMP_ID | 0x41,
+        RC_FLOOR_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x42,
+        RC_CEIL_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x43,
+        RC_TURBO_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x44,
+        RC_ULTRA_TURBO_FREQ_MISMATCH             = ISTEP_COMP_ID | 0x45,
+        RC_NEST_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x46,
     };
 
 };

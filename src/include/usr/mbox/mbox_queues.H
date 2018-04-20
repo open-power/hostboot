@@ -56,6 +56,7 @@ namespace MBOX
         HB_SBE_SYSCONFIG_MSGQ   = 12, //For SBE System Config response
         HB_CLOSE_TCES_MSGQ      = 13, // close/disable TCEs
         HB_POP_TPM_INFO_MSGQ    = 14, // response to populate TPM info by node
+        HB_FREQ_ATTR_DATA_MSGQ  = 15, // freq attributes data from master to all other drawers
 
         // Add HB mbox msg queue ids (services) before this line
         HB_LAST_VALID_MSGQ,          // end of valid HB mbox msgQ ids
