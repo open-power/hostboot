@@ -330,9 +330,10 @@ void IpcSp::msgHandler()
 
              case IPC_START_PAYLOAD:
             {
-                const int NUM_MOD = 3;
+                const int NUM_MOD = 4;
                 const char * mods[NUM_MOD] =
-                   {"libp9_cpuWkup.so", "libistep21.so", "libpm.so"};
+                   {"libp9_cpuWkup.so", "libistep21.so", "libpm.so",
+                   "libruntime.so"};
                 bool loaded_mods[NUM_MOD] = {false, false, false};
                 for (auto cnt = 0; cnt < NUM_MOD; ++cnt)
                 {
