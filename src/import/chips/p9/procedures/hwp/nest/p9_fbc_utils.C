@@ -182,12 +182,10 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address_no_aliases(
                                l_proc_chip_mem_to_use),
                  "Error from FAPI_ATTR_GET (ATTR_FABRIC_GROUP_ID)");
 
-        l_proc_chip_mem_to_use.extract<FABRIC_ADDR_MEMORY_GROUP_ID_START_BIT,
-                                       FABRIC_ADDR_MEMORY_GROUP_ID_LEN,
-                                       0>(l_fabric_group_id);
-        l_proc_chip_mem_to_use.extract<FABRIC_ADDR_MEMORY_CHIP_ID_START_BIT,
-                                       FABRIC_ADDR_MEMORY_CHIP_ID_LEN,
-                                       0>(l_fabric_chip_id);
+        l_proc_chip_mem_to_use.extractToRight<FABRIC_ADDR_MEMORY_GROUP_ID_START_BIT,
+                                              FABRIC_ADDR_MEMORY_GROUP_ID_LEN>(l_fabric_group_id);
+        l_proc_chip_mem_to_use.extractToRight<FABRIC_ADDR_MEMORY_CHIP_ID_START_BIT,
+                                              FABRIC_ADDR_MEMORY_CHIP_ID_LEN>(l_fabric_chip_id);
     }
     else if (i_addr_mode == EFF_FBC_GRP_CHIP_IDS)
     {
