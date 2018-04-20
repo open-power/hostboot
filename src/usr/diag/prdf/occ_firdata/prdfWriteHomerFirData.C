@@ -544,11 +544,11 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x02010400, // DMIFIR
         0x02010800, // MBIFIR
         0x02011400, // MBSFIR
-        0x02011440, // MBA0_MBSECCFIR
-        0x02011480, // MBA1_MBSECCFIR
+        0x02011440, // MBSECCFIR_0
+        0x02011480, // MBSECCFIR_1
         0x020115c0, // SCACFIR
-        0x02011600, // MBA0_MCBISTFIR
-        0x02011700, // MBA1_MCBISTFIR
+        0x02011600, // MCBISTFIR_0
+        0x02011700, // MCBISTFIR_1
         0x0204000a, // NEST_LFIR
         0x0304000a, // MEM_LFIR
     };
@@ -611,7 +611,7 @@ void getAddresses( TrgtMap_t & io_targMap )
         // Other ECC regs (won't be used in analysis, but could be useful FFDC)
         0x02011653, // MBA0_MBSEC0
         0x02011654, // MBA0_MBSEC1
-        0x02011655, // MBA0_MBSTR
+        0x02011655, // MBSTR_0
         0x02011656, // MBA0_MBSSYMEC0
         0x02011657, // MBA0_MBSSYMEC1
         0x02011658, // MBA0_MBSSYMEC2
@@ -623,7 +623,7 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x0201165e, // MBA0_MBSSYMEC8
         0x02011753, // MBA1_MBSEC0
         0x02011754, // MBA1_MBSEC1
-        0x02011755, // MBA1_MBSTR
+        0x02011755, // MBSTR_1
         0x02011756, // MBA1_MBSSYMEC0
         0x02011757, // MBA1_MBSSYMEC1
         0x02011758, // MBA1_MBSSYMEC2
