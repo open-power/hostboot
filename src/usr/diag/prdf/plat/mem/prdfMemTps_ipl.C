@@ -363,8 +363,7 @@ uint32_t TpsEvent<TYPE_MBA>::startCmd()
     do
     {
         ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
-        const char * reg_str = (0 == iv_chip->getPos()) ? "MBA0_MBSTR"
-                                                        : "MBA1_MBSTR";
+        const char * reg_str = (0 == iv_chip->getPos()) ? "MBSTR_0" : "MBSTR_1";
         SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
         o_rc = mbstr->Read();
         if ( SUCCESS != o_rc )

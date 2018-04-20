@@ -117,13 +117,13 @@ void __recaptureRegs<TYPE_MBA>( STEP_CODE_DATA_STRUCT & io_sc,
 
     const char * membRegs[2][15] =
     {
-        { "MBA0_MBSECCFIR", "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
-          "MBA0_MBSEC0", "MBA0_MBSEC1", "MBA0_MBSTR",
+        { "MBSECCFIR_0", "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
+          "MBA0_MBSEC0", "MBA0_MBSEC1", "MBSTR_0",
           "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1", "MBA0_MBSSYMEC2",
           "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
           "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8", },
-        { "MBA1_MBSECCFIR", "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
-          "MBA1_MBSEC0", "MBA1_MBSEC1", "MBA1_MBSTR",
+        { "MBSECCFIR_1", "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
+          "MBA1_MBSEC0", "MBA1_MBSEC1", "MBSTR_1",
           "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1", "MBA1_MBSSYMEC2",
           "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
           "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8", },
@@ -831,7 +831,7 @@ uint32_t MemTdCtlr<TYPE_MBA>::maskEccAttns()
         // mask them.
 
         const char * reg_str = (0 == iv_chip->getPos())
-            ? "MBA0_MBSECCFIR_MASK_OR" : "MBA1_MBSECCFIR_MASK_OR";
+            ? "MBSECCFIR_0_MASK_OR" : "MBSECCFIR_1_MASK_OR";
 
         ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
 
@@ -874,9 +874,9 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
         // thresholded so clear and unmask them as well.
 
         const char * fir_str = (0 == iv_chip->getPos())
-            ? "MBA0_MBSECCFIR_AND" : "MBA1_MBSECCFIR_AND";
+            ? "MBSECCFIR_0_AND" : "MBSECCFIR_1_AND";
         const char * msk_str = (0 == iv_chip->getPos())
-            ? "MBA0_MBSECCFIR_MASK_AND" : "MBA1_MBSECCFIR_MASK_AND";
+            ? "MBSECCFIR_0_MASK_AND" : "MBSECCFIR_1_MASK_AND";
 
         ExtensibleChip * membChip = getConnectedParent( iv_chip, TYPE_MEMBUF );
 

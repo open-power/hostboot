@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,10 +156,6 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
 
     } while (0);
 
-    // We have to clear all stats before giving control back to MDIA..
-    // This is done by setting up MBSTRQ[53] bit
-    // We are doing cleanup in TdController code,
-    // So not clearing up stats here.
     return o_rc;
 
     #undef PRDF_FUNC

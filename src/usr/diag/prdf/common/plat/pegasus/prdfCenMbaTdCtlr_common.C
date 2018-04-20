@@ -162,7 +162,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd( bool i_clearStats )
 
         if ( i_clearStats )
         {
-            reg_str = (0 == iv_mbaPos) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+            reg_str = (0 == iv_mbaPos) ? "MBSTR_0" : "MBSTR_1";
             SCAN_COMM_REGISTER_CLASS * mbstr =
                                     iv_membChip->getRegister( reg_str );
 
@@ -195,8 +195,7 @@ int32_t CenMbaTdCtlrCommon::prepareNextCmd( bool i_clearStats )
         // Clear ECC FIRs
         //----------------------------------------------------------------------
 
-        reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-                                   : "MBA1_MBSECCFIR_AND";
+        reg_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_AND" : "MBSECCFIR_1_AND";
         SCAN_COMM_REGISTER_CLASS * firand = iv_membChip->getRegister( reg_str );
         firand->setAllBits();
 
@@ -283,8 +282,7 @@ int32_t CenMbaTdCtlrCommon::checkEccErrors( uint16_t & o_eccErrorMask,
 
     do
     {
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR"
-                                                : "MBA1_MBSECCFIR";
+        const char * reg_str = (0 == iv_mbaPos) ? "MBSECCFIR_0" : "MBSECCFIR_1";
         SCAN_COMM_REGISTER_CLASS * mbsEccFir
                                         = iv_membChip->getRegister( reg_str );
         o_rc = mbsEccFir->Read();

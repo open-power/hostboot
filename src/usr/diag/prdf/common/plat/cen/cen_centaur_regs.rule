@@ -39,18 +39,50 @@
     # Additional regs for CEN target MBSECCFIR
     ############################################################################
 
-    register MBA0_MBSECCFIR_AND
+    register MBSECCFIR_0_AND
     {
-        name        "CEN target MBA0_MBSECCFIR atomic AND";
+        name        "Centaur chip MBSECCFIR_0 atomic AND";
         scomaddr    0x02011441;
         capture     group never;
         access      write_only;
     };
 
-    register MBA1_MBSECCFIR_AND
+    register MBSECCFIR_0_MASK_AND
     {
-        name        "CEN target MBA1_MBSECCFIR atomic AND";
+        name        "MBU.MBS.ECC01.MBECCFIR_MASK_AND";
+        scomaddr    0x02011444;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MBSECCFIR_0_MASK_OR
+    {
+        name        "MBU.MBS.ECC01.MBECCFIR_MASK_OR";
+        scomaddr    0x02011445;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MBSECCFIR_1_AND
+    {
+        name        "Centaur chip MBSECCFIR_1 atomic AND";
         scomaddr    0x02011481;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MBSECCFIR_1_MASK_AND
+    {
+        name        "MBU.MBS.ECC23.MBECCFIR_MASK_AND";
+        scomaddr    0x02011484;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MBSECCFIR_1_MASK_OR
+    {
+        name        "MBU.MBS.ECC23.MBECCFIR_MASK_OR";
+        scomaddr    0x02011485;
         capture     group never;
         access      write_only;
     };
@@ -59,7 +91,7 @@
     # Memory maintenance threshold control registers
     ############################################################################
 
-    register MBA0_MBSTR
+    register MBSTR_0
     {
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSTRQ";
         scomaddr    0x02011655;
@@ -67,7 +99,7 @@
         capture     group MaintCmdRegs_mba0;
     };
 
-    register MBA1_MBSTR
+    register MBSTR_1
     {
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSTRQ";
         scomaddr    0x02011755;

@@ -228,17 +228,17 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
         const char * membRegs[2][18] =
         {
-            { "MBA0_MBSECCFIR", "MBA0_MBSECCFIR_MASK",
-              "MBA0_MBSECCFIR_ACT0", "MBA0_MBSECCFIR_ACT1",
+            { "MBSECCFIR_0", "MBSECCFIR_0_MASK",
+              "MBSECCFIR_0_ACT0", "MBSECCFIR_0_ACT1",
               "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
-              "MBA0_MBSEC0", "MBA0_MBSEC1", "MBA0_MBSTR",
+              "MBA0_MBSEC0", "MBA0_MBSEC1", "MBSTR_0",
               "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1", "MBA0_MBSSYMEC2",
               "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
               "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8", },
-            { "MBA1_MBSECCFIR", "MBA1_MBSECCFIR_MASK",
-              "MBA1_MBSECCFIR_ACT0", "MBA1_MBSECCFIR_ACT1",
+            { "MBSECCFIR_1", "MBSECCFIR_1_MASK",
+              "MBSECCFIR_1_ACT0", "MBSECCFIR_1_ACT1",
               "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
-              "MBA1_MBSEC0", "MBA1_MBSEC1", "MBA1_MBSTR",
+              "MBA1_MBSEC0", "MBA1_MBSEC1", "MBSTR_1",
               "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1", "MBA1_MBSSYMEC2",
               "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
               "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8", },
@@ -458,8 +458,8 @@ int32_t CenMbaTdCtlr::initialize()
         // already in the queue. This is reset/reload safe because initialize()
         // will be called again and we can redetect the unverified chip marks.
 
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-                                                : "MBA1_MBSECCFIR_AND";
+        const char * reg_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_AND"
+                                                : "MBSECCFIR_1_AND";
         SCAN_COMM_REGISTER_CLASS * firand = iv_membChip->getRegister( reg_str );
         firand->setAllBits();
 
@@ -1874,8 +1874,8 @@ int32_t CenMbaTdCtlr::handleMpe_Tps( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Clear the scrub attention. This is needed later if we need to write
         // markstore for a symbol mark.
-        const char * fir_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-                                                : "MBA1_MBSECCFIR_AND";
+        const char * fir_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_AND"
+                                                : "MBSECCFIR_1_AND";
 
         SCAN_COMM_REGISTER_CLASS * fir = iv_membChip->getRegister( fir_str );
 
@@ -2566,8 +2566,8 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Clear the fetch attention before attempting the rewrite.
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-                                                : "MBA1_MBSECCFIR_AND";
+        const char * reg_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_AND"
+                                                : "MBSECCFIR_1_AND";
         SCAN_COMM_REGISTER_CLASS * firand = iv_membChip->getRegister( reg_str );
         firand->setAllBits();
         firand->ClearBit( 0 + iv_rank.getMaster() ); // fetch
@@ -2608,8 +2608,8 @@ int32_t CenMbaTdCtlr::maskFetchAttns()
         // Don't want to handle memory CEs during any TD procedures, so
         // mask them.
 
-        const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_OR"
-                                                : "MBA1_MBSECCFIR_MASK_OR";
+        const char * reg_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_MASK_OR"
+                                                : "MBSECCFIR_1_MASK_OR";
         SCAN_COMM_REGISTER_CLASS * reg = iv_membChip->getRegister(reg_str);
 
         reg->clearAllBits();
@@ -2647,10 +2647,10 @@ int32_t CenMbaTdCtlr::unmaskFetchAttns()
         // clear and unmask them. Also, it is possible that memory UEs have
         // thresholded so clear and unmask them as well.
 
-        const char * fir_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
-                                                : "MBA1_MBSECCFIR_AND";
-        const char * msk_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_AND"
-                                                : "MBA1_MBSECCFIR_MASK_AND";
+        const char * fir_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_AND"
+                                                : "MBSECCFIR_1_AND";
+        const char * msk_str = (0 == iv_mbaPos) ? "MBSECCFIR_0_MASK_AND"
+                                                : "MBSECCFIR_1_MASK_AND";
 
         SCAN_COMM_REGISTER_CLASS * fir = iv_membChip->getRegister( fir_str );
         SCAN_COMM_REGISTER_CLASS * msk = iv_membChip->getRegister( msk_str );

@@ -395,8 +395,8 @@ uint32_t __clearFetchAttn<TYPE_MBA>( ExtensibleChip * i_chip,
 
     // Clear the fetch MPE attention.
     ExtensibleChip * l_membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-    const char * reg_str = ( 0 == i_chip->getPos() ) ? "MBA0_MBSECCFIR_AND"
-                                                     : "MBA1_MBSECCFIR_AND";
+    const char * reg_str = ( 0 == i_chip->getPos() ) ? "MBSECCFIR_0_AND"
+                                                     : "MBSECCFIR_1_AND";
     SCAN_COMM_REGISTER_CLASS * firand = l_membChip->getRegister( reg_str );
 
     firand->setAllBits();

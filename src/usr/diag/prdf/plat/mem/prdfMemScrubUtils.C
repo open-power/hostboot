@@ -173,7 +173,7 @@ uint32_t clearEccCounters<TYPE_MBA>( ExtensibleChip * i_chip )
 
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
 
-    const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSTR" : "MBA1_MBSTR";
+    const char * reg = (0 == i_chip->getPos()) ? "MBSTR_0" : "MBSTR_1";
 
     return __clearEccCounters<TYPE_MEMBUF>( membChip, reg, 53 );
 }
@@ -239,8 +239,8 @@ uint32_t clearEccFirs<TYPE_MBA>( ExtensibleChip * i_chip )
     {
         ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
 
-        const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSECCFIR_AND"
-                                                   : "MBA1_MBSECCFIR_AND";
+        const char * reg = (0 == i_chip->getPos()) ? "MBSECCFIR_0_AND"
+                                                   : "MBSECCFIR_1_AND";
 
         // Clear MBSECCFIR[20:27,36:41]
         o_rc = __clearFir<TYPE_MEMBUF>( membChip, reg, 0xfffff00ff03fffffull );
@@ -337,8 +337,7 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
 
     ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
 
-    const char * reg = (0 == i_chip->getPos()) ? "MBA0_MBSECCFIR"
-                                               : "MBA1_MBSECCFIR";
+    const char * reg = (0 == i_chip->getPos()) ? "MBSECCFIR_0" : "MBSECCFIR_1";
 
     SCAN_COMM_REGISTER_CLASS * mbseccfir = membChip->getRegister( reg );
     SCAN_COMM_REGISTER_CLASS * mbspa     = i_chip->getRegister( "MBASPA" );
@@ -490,8 +489,7 @@ uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
     do
     {
         ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
-        const char * reg_str = (0 == i_chip->getPos()) ? "MBA0_MBSTR"
-                                                       : "MBA1_MBSTR";
+        const char * reg_str = (0 == i_chip->getPos()) ? "MBSTR_0" : "MBSTR_1";
         SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( reg_str );
         o_rc = mbstr->Read();
         if ( SUCCESS != o_rc )
