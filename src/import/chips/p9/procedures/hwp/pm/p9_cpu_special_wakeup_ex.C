@@ -97,11 +97,12 @@ fapi2::ReturnCode p9_cpu_special_wakeup_ex(
             l_autoSpWkUpEn =
                 l_autoSpWkUp.getBit( AUTO_SPWKUP_DIS_POS + (l_exPos  & 0x01) ) ? 0 : 1;
 
-            FAPI_ASSERT( (!l_rc && l_autoSpWkUpEn ),
-                         fapi2::EX_SPECIAL_WAKEUP_NOT_FEASIBLE()
-                         .set_EX_POS( l_exPos ),
-                         "Special Wakeup Request Cannot Be Serviced on This Ex" );
         }
+
+        FAPI_ASSERT( (!l_rc && l_autoSpWkUpEn ),
+                     fapi2::EX_SPECIAL_WAKEUP_NOT_FEASIBLE()
+                     .set_EX_POS( l_exPos ),
+                     "Special Wakeup Request Cannot Be Serviced on This Ex" );
     }
 
     l_rc = _special_wakeup( i_target,
