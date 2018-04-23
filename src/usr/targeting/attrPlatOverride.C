@@ -237,6 +237,41 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
 
                 // Deserialize the data with the approriate AttributeTank
                 l_ptank->deserializeAttributes(l_chunk, true);
+
+                // The extraction of FAPI Tank Override Attributes is
+                //   not supported. Note it here at ingestion so no
+                //   silent fail later
+                if ( l_pAttrOverSec->iv_layer ==
+                        AttributeTank::TANK_LAYER_FAPI )
+                {
+                    TRACFCOMP(g_trac_targeting,
+                              "getAttrOverrides: "
+                              "FAPI Tank Layer Not Supported");
+                    /*@
+                     * @errortype
+                     * @moduleid     TARG_GET_ATTR_OVER
+                     * @reasoncode   TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED
+                     * @userdata1    Tank Layer of attribute
+                     * @userdata2    PNOR Section specified
+                     * @devdesc      Attribute override is in the FAPI Tank
+                     *               which is not supported
+                     * @custdesc     Unsupported override configuration data
+                     */
+                    l_err =
+                        new ERRORLOG::ErrlEntry
+                        (ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                         TARG_GET_ATTR_OVER,
+                         TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED,
+                         l_pAttrOverSec->iv_layer,
+                         i_sectionInfo.id);
+                    l_err->collectTrace("TARG",256);
+                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                               HWAS::SRCI_PRIORITY_HIGH);
+                    ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
+                }
+
+
+
             }
             l_index += l_pAttrOverSec->iv_size;
         }
