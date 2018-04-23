@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/cen/prdf_plat_cen.mk $
+# $Source: src/usr/diag/prdf/plat/cen/prdf_plat_cen_hb_only.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -23,24 +23,36 @@
 #
 # IBM_PROLOG_END_TAG
 
-# NOTE: PRD_SRC_PATH must be defined before including this file.
+# NOTE: PRD_SRC_PATH and PRD_INC_PATH must be defined before including this file
 
 ################################################################################
-# Paths common to both FSP and Hostboot
+# Paths common to both IPL and runtime
 ################################################################################
 
-prd_vpath += ${PRD_SRC_PATH}/common/plat/cen
+prd_vpath += ${PRD_SRC_PATH}/plat/cen
 
-prd_incpath += ${PRD_SRC_PATH}/common/plat/cen
+prd_incpath += ${PRD_SRC_PATH}/plat/cen
 
 ################################################################################
-# Object files common to both FSP and Hostboot
+# Hostboot only object files common to both IPL and runtime
 ################################################################################
-
-# plat/cen/ (non-rule plugin related)
-prd_obj += prdfCenMbaDomain.o
 
 # plat/cen/ (rule plugin related)
-prd_rule_plugin += prdfCenMba_common.o
-prd_rule_plugin += prdfCenMembuf_common.o
+prd_rule_plugin += prdfCenMembuf.o
+
+################################################################################
+# Hostboot only object files (IPL only)
+################################################################################
+
+ifneq (${HOSTBOOT_RUNTIME},1)
+
+endif
+
+################################################################################
+# Hostboot only object files (runtime only)
+################################################################################
+
+ifeq (${HOSTBOOT_RUNTIME},1)
+
+endif
 
