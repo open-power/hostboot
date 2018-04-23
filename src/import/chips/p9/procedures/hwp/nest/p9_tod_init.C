@@ -94,6 +94,8 @@ fapi2::ReturnCode init_tod_node(
     // Timeout counter for bits that are cleared by hardware
     uint32_t l_tod_init_pending_count = 0;
     fapi2::buffer<uint64_t> l_tod_fsm_reg;
+    // Flag to check if the TOD FSM is running
+    bool l_tod_running = false;
     FAPI_DBG("Start");
 
     // Sequence details are in TOD Workbook section 1.6.3
@@ -161,10 +163,26 @@ fapi2::ReturnCode init_tod_node(
         if (l_tod_fsm_reg.getBit<PERV_TOD_FSM_REG_IS_RUNNING>())
         {
             FAPI_DBG("TOD is running!");
+            l_tod_running = true;
             break;
         }
 
         ++l_tod_init_pending_count;
+    }
+
+    if (l_tod_running == false)
+    {
+        FAPI_DBG("TOD FSM failed !");
+        fapi2::buffer<uint64_t> l_tod_err_reg = 0;
+        FAPI_TRY(fapi2::getScom(*(i_tod_node->i_target),
+                                PERV_TOD_ERROR_REG,
+                                l_tod_err_reg),
+                 "Error from getScom (PERV_TOD_ERROR_REG)!");
+
+        FAPI_ASSERT(!l_tod_err_reg.getBit<PERV_TOD_ERROR_ROUTING_REG_OSCSWITCH_INTERRUPT>(),
+                    fapi2::P9_TOD_MF_CLK_FAILURE()
+                    .set_TARGET(*(i_tod_node->i_target)),
+                    "Interrupt from TOD Oscillator Switch");
     }
 
     FAPI_ASSERT((l_tod_init_pending_count < P9_TOD_UTIL_TIMEOUT_COUNT),
