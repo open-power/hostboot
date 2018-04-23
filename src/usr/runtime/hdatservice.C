@@ -696,17 +696,22 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             errhdl = getResvMemArrHdr(reservedMemArrayHeader);
             if( errhdl ) { break; }
 
-            uint64_t l_arrCount = reservedMemArrayHeader->arrayEntryCount;
-            if( i_instance >= l_arrCount )
+            // get the total number of entries per node in the hostboot
+            // reserved memory area, since we are using the instance num
+            // as an index into the reserved mem array, make sure
+            // the passed in instance is within the array boundary
+            uint64_t l_maxArrayIndex =
+                reservedMemArrayHeader->arrayEntryCount -1;
+            if( i_instance > l_maxArrayIndex )
             {
-                TRACFCOMP( g_trac_runtime, "Instance %d exceeds max reserved mem entry count %d",
-                          i_instance, l_arrCount);
+                TRACFCOMP( g_trac_runtime, "Instance %d exceeds max reserved mem entry index %d",
+                          i_instance, l_maxArrayIndex );
                 /*@
                  * @errortype
                  * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
                  * @reasoncode   RUNTIME::RC_INVALID_RHB_INSTANCE
-                 * @userdata1    Requested instance
-                 * @userdata2    Entry count
+                 * @userdata1    Requested instance (reserved mem array index)
+                 * @userdata2    maximum array index allowed
                  * @devdesc      Invalid instance requested for Reserved
                  *               Hostboot Memory section
                  * @custdesc     Firmware error during boot
@@ -716,7 +721,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                 RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
                                 RUNTIME::RC_INVALID_RHB_INSTANCE,
                                 i_instance,
-                                l_arrCount,
+                                l_maxArrayIndex,
                                 true /*Add HB Software Callout*/);
                 errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
                 break;
