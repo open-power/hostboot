@@ -496,6 +496,25 @@
   </attribute>
 
   <attribute>
+    <description>Block speculative deconfig in reconfig loop.
+        Flags when speculative deconfigurations should not be done for
+        predictive gard records on a reconfig loop IPL due to out of
+        hardware condition on prior IPL.
+        0 = Allow speculative deconfiguration
+        1 = Block speculative deconfiguration
+        </description>
+    <id>BLOCK_SPEC_DECONFIG</id>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>Numeric POD type test structure</description>
       <field>
@@ -5091,6 +5110,10 @@
     <enumerator>
       <name>HOSTSVC_HBEL</name>
       <value>0x00000008</value>
+    </enumerator>
+    <enumerator>
+      <name>RESRC_RECOV</name>
+      <value>0x00000010</value>
     </enumerator>
     <id>HWAS_CHANGED_BIT</id>
   </enumerationType>
