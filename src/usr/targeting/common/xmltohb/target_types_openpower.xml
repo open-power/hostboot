@@ -103,6 +103,8 @@
     <attribute><id>ALLOW_CALLHOME_ESELS_TO_BMC</id></attribute>
     <attribute><id>REPORT_THROTTLE_BELOW_NOMINAL</id></attribute>
     <attribute><id>HTMGT_SAVED_POWER_LIMIT</id></attribute>
+    <attribute><id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id></attribute>
+    <attribute><id>MAX_VDD_CURRENT_READING</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

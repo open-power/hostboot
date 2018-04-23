@@ -1337,6 +1337,38 @@ ID for the sensor number returned with the elog. -->
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
+    <description>
+        Used to enable Vdd current overflow worakaround.
+        To enable this attribute should be set to 1 and
+        MAX_VDD_CURRENT_READING must be populated.
+        Set to 0 to disable.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0000</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_VDD_CURRENT_READING</id>
+    <description>
+       Maximum theoretical Vdd current reading in 10mA units.
+       Used when VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE is set.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0000</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <!-- end HTMGT attributes -->
 
 <attribute>

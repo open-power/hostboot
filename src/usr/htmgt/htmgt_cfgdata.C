@@ -248,7 +248,6 @@ enum occCfgDataVersion
     OCC_CFGDATA_PCAP_CONFIG_VERSION   = 0x20,
     OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x21,
     OCC_CFGDATA_TCT_CONFIG_VERSION    = 0x20,
-    OCC_CFGDATA_AVSBUS_CONFIG_VERSION = 0X01,
 };
 
 
@@ -1075,9 +1074,13 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
                                  uint64_t & o_size )
 {
     uint64_t index      = 0;
+    uint8_t version = 0x01;
     o_size = 0;
-
     assert( o_data != nullptr );
+
+    Target* l_sys = nullptr;
+    targetService().getTopLevelTarget(l_sys);
+    assert(l_sys != nullptr);
 
     // Get the parent processor
     ConstTargetHandle_t l_proc = getParentChip( i_occ );
@@ -1085,7 +1088,7 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
 
     // Populate the data
     o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG;
-    o_data[index++] = OCC_CFGDATA_AVSBUS_CONFIG_VERSION;
+    const uint64_t version_index = index++; // version updated later
     o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_BUSNUM>();//Vdd Bus
     o_data[index++] = l_proc->getAttr<ATTR_VDD_AVSBUS_RAIL>();  //Vdd Rail Sel
     o_data[index++] = 0xFF;                                     //reserved
@@ -1094,8 +1097,8 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
     o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();  //Vdn Rail sel
 
     ATTR_NO_APSS_PROC_POWER_VCS_VIO_WATTS_type PowerAdder = 0;
-    if ( l_proc->tryGetAttr          //if attr exists populate Proc Power Adder.
-           <ATTR_NO_APSS_PROC_POWER_VCS_VIO_WATTS>(PowerAdder))
+    if (l_proc->tryGetAttr          //if attr exists populate Proc Power Adder.
+        <ATTR_NO_APSS_PROC_POWER_VCS_VIO_WATTS>(PowerAdder))
     {
         o_data[index++] = ((PowerAdder>>8)&0xFF);
         o_data[index++] = ((PowerAdder)&0xFF);
@@ -1105,6 +1108,26 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
         o_data[index++] = 0x00;
         o_data[index++] = 0x00;
     }
+
+    ATTR_VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE_type overflow_enable = 0;
+    ATTR_MAX_VDD_CURRENT_READING_type max_vdd_current = 0;
+    if ((l_sys->tryGetAttr          //if attr exists populate overflow_enable
+         <ATTR_VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE>(overflow_enable)) &&
+        (l_sys->tryGetAttr          //if attr exists populate max_vdd_current
+         <ATTR_MAX_VDD_CURRENT_READING>(max_vdd_current)))
+    {
+        if (overflow_enable == 1)
+        {
+            // Additional config info for Vdd Current overflow workaround
+            version = 0x02;
+            o_data[index++] = 0x7F; // Hardcode Vdd Current Rollover Point
+            o_data[index++] = 0xFF;
+            o_data[index++] = (max_vdd_current>>8) & 0xFF;
+            o_data[index++] = max_vdd_current & 0xFF;
+        }
+    }
+
+    o_data[version_index] = version; // Version
     o_size = index;
 
 }
