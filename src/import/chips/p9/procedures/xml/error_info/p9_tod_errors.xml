@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -241,6 +241,32 @@
     <ffdc>TARGET</ffdc>
     <ffdc>THREAD_NUMBER</ffdc>
     <!-- no callout, deconfig, gard tags as FW does not consume             -->
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_MF_CLK_FAILURE</rc>
+    <description>
+      Procedure: p9_tod_init
+      TOD FSM did not reach running state due
+      to interrupt from TOD Oscillator switch
+    </description>
+    <ffdc>TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_TOD_STATUS</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <hw>
+         <hwid>PCI_REF_CLOCK</hwid>
+         <refTarget>TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
