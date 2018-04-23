@@ -103,6 +103,17 @@ MemAddr MemAddr::fromMaintAddr<TYPE_MBA>( uint64_t i_addr )
     return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
 }
 
+template<>
+uint64_t MemAddr::toMaintAddr<TYPE_MBA>() const
+{
+    return ( ((uint64_t) iv_rnk.getMaster() << 60) |
+             ((uint64_t) iv_rnk.getSlave()  << 57) |
+             ((uint64_t) iv_bnk             << 53) |
+             ((uint64_t)(iv_row & 0x1ffff)  << 36) |  // r16-r0
+             ((uint64_t) iv_col             << 24) |
+             ((uint64_t)(iv_row & 0x20000)  << 13) ); // r17
+}
+
 //------------------------------------------------------------------------------
 //                       Address Accessor Functions
 //------------------------------------------------------------------------------

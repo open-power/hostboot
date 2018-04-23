@@ -87,11 +87,21 @@ class MemAddr
     static MemAddr fromReadAddr( uint64_t i_addr );
 
     /**
-     * @brief Creates a MemAddr from a maintenance address.
+     * @brief Creates a MemAddr from the current maintenance address.
      * @param i_addr 64-bit address.
      */
     template<TARGETING::TYPE T>
     static MemAddr fromMaintAddr( uint64_t i_addr );
+
+    /**
+     * @brief  Converts internal data structure to a maintenance address.
+     * @return A uint64_t version of the address.
+     * @note   Does not include error type. This is because in most cases we
+     *         will use this function to write out to hardware and in doing so
+     *         we will want to clear the status bits anyway.
+     */
+    template<TARGETING::TYPE T>
+    uint64_t toMaintAddr() const;
 
     /** @return This address's rank. */
     const MemRank& getRank() const { return iv_rnk; }
