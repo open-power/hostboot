@@ -34,6 +34,7 @@
 // Framework includes
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
+#include <prdfRegisterCache.H>
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
@@ -215,29 +216,28 @@ uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    uint32_t rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
-/* TODO RTC 157888
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+    errlHndl_t errl = nullptr;
+
     // It is safe to create a dummy command object because runtime commands do
     // not store anything for cleanupCmd() and the stopCmd() function is generic
     // for all command types. Also, since we are only stopping the command, all
     // of the parameters for the command object are junk except for the target.
-    ecmdDataBufferBase i_startAddr, i_endAddr;
-    mss_TimeBaseScrub cmd { getFapiTarget(i_trgt), i_startAddr, i_endAddr,
+    fapi2::buffer<uint64_t> startAddr, endAddr;
+    mss_TimeBaseScrub cmd { fapiTrgt, startAddr, endAddr,
                             mss_MaintCmd::FAST_MAX_BW_IMPACT, 0, false };
-
-    errlHndl_t errl = fapi::fapiRcToErrl( cmd.stopCmd() );
+    FAPI_INVOKE_HWP( errl, cmd.stopCmd );
     if ( nullptr != errl )
     {
         PRDF_ERR( PRDF_FUNC "mss_TimeBaseScrub::stop(0x%08x) failed",
-                  getHuid(i_trgt) );
+                  i_chip->getHuid() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        rc = FAIL;
+        o_rc = FAIL;
     }
-*/
 
-    return rc;
+    return o_rc;
 
     #undef PRDF_FUNC
 }
@@ -262,6 +262,14 @@ uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
+    // Make sure there is a command complete attention when the command stops.
+    i_stopCond |= mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Make sure the command stops immediately on error or on the end address if
+    // there are no errors.
+    i_stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
+    i_stopCond |= mss_MaintCmd::STOP_ON_END_ADDRESS;
+
     if ( getMbaDataBundle(i_chip)->iv_scrubResumeCounter.atTh() )
     {
         // We have resumed scrubbing on this rank too many times. We still want
@@ -277,11 +285,108 @@ uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
         i_stopCond &= ~mss_MaintCmd::STOP_ON_UE;
     }
 
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+    errlHndl_t errl = nullptr;
+
     do
     {
-        // TODO: Clear ECC counters/FIRs. Increment the current address. Clear
-        //       FIRs again. Start the command from the current address to the
-        //       end of the rank.
+        // Manually clear the CE counters based on the error type and clear the
+        // maintenance FIRs. Note that we only want to clear counters that are
+        // at attention to allow the other CE types the opportunity to reach
+        // threshold, if possible.
+        o_rc = conditionallyClearEccCounters<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "conditionallyClearEccCounters(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Increment the current maintenance address.
+        mss_IncrementAddress incCmd { fapiTrgt };
+        FAPI_INVOKE_HWP( errl, incCmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "mss_IncrementAddress setupAndExecuteCmd() on "
+                      "0x%08x failed", i_chip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
+            break;
+        }
+
+        // Clear the maintenance FIRs again. This time do not clear the CE
+        // counters.
+        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // The address register has been updated so we need to clear our cache
+        // to ensure we can do a new read.
+        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
+        RegDataCache::getCachedRegisters().flush( i_chip, reg );
+
+        // Read the new start address from hardware.
+        MemAddr addr;
+        o_rc = getMemMaintAddr<TYPE_MBA>( i_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+        fapi2::buffer<uint64_t> saddr = addr.toMaintAddr<TYPE_MBA>();
+
+        // Get the end address of the current rank.
+        fapi2::buffer<uint64_t> eaddr, junk;
+        MemRank rank = addr.getRank();
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, rank, junk, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // Resume the scrub command.
+        mss_TimeBaseScrub scrubCmd { fapiTrgt, saddr, eaddr, i_cmdSpeed,
+                                     i_stopCond, false };
+        FAPI_INVOKE_HWP( errl, scrubCmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
 
         // Resume successful. So increment the resume counter.
         getMbaDataBundle(i_chip)->iv_scrubResumeCounter.inc();
@@ -301,10 +406,22 @@ uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    /* TODO:
+    uint32_t stopCond = mss_MaintCmd::STOP_ON_HARD_NCE_ETE |
+                        mss_MaintCmd::STOP_ON_INT_NCE_ETE  |
+                        mss_MaintCmd::STOP_ON_SOFT_NCE_ETE |
+                        mss_MaintCmd::STOP_ON_RETRY_CE_ETE |
+                        mss_MaintCmd::STOP_ON_MPE          |
+                        mss_MaintCmd::STOP_ON_UE;
+
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = enableFastBgScrub()
+                                            ? mss_MaintCmd::FAST_MED_BW_IMPACT
+                                            : mss_MaintCmd::BG_SCRUB;
+
+    // Because of the Centaur workarounds, we have to limit the number of times
+    // a command has been resumed on a rank. Therefore, we must always resume
+    // the command to the end of the current slave rank.
+
     return __resumeScrub<TYPE_MBA>( i_chip, SLAVE_RANK, stopCond, cmdSpeed );
-    */
-    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -317,10 +434,11 @@ uint32_t resumeTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    /* TODO:
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = enableFastBgScrub()
+                                            ? mss_MaintCmd::FAST_MAX_BW_IMPACT
+                                            : mss_MaintCmd::FAST_MIN_BW_IMPACT;
+
     return __resumeScrub<TYPE_MBA>( i_chip, i_rangeType, i_stopCond, cmdSpeed );
-    */
-    return SUCCESS;
 }
 
 //##############################################################################

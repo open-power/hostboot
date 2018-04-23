@@ -386,6 +386,146 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t conditionallyClearEccCounters<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[conditionallyClearEccCounters] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check for maintenance ECC errors.
+        uint32_t eccAttns = 0;
+        o_rc = checkEccFirs<TYPE_MBA>( i_chip, eccAttns );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEccFirs<TYPE_MBA>(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+        uint8_t mbaPos = i_chip->getPos();
+
+        const char * ec0Reg_str = (0 == mbaPos) ? "MBA0_MBSEC0" : "MBA1_MBSEC0";
+        SCAN_COMM_REGISTER_CLASS * ec0Reg = membChip->getRegister( ec0Reg_str );
+        o_rc = ec0Reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", ec0Reg_str );
+            break;
+        }
+
+        const char * mbstr_str = (0 == mbaPos) ? "MBSTR_0" : "MBSTR_1";
+        SCAN_COMM_REGISTER_CLASS * mbstr = membChip->getRegister( mbstr_str );
+        o_rc = mbstr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", mbstr_str );
+            break;
+        }
+
+        bool updateEc0     = false;
+        bool clearSymCntrs = false;
+
+        if ( eccAttns & MAINT_SOFT_NCE_ETE )
+        {
+            // Clear Soft CE total count.
+            ec0Reg->SetBitFieldJustified( 0, 12, 0 );
+            updateEc0 = true;
+
+            if ( mbstr->IsBitSet(55) ) clearSymCntrs = true;
+        }
+
+        if ( eccAttns & MAINT_INT_NCE_ETE )
+        {
+            // Clear Intermittent CE total count.
+            ec0Reg->SetBitFieldJustified( 12, 12, 0 );
+            updateEc0 = true;
+
+            if ( mbstr->IsBitSet(56) ) clearSymCntrs = true;
+        }
+
+        if ( eccAttns & MAINT_HARD_NCE_ETE )
+        {
+            // Clear the hard CE total count.
+            ec0Reg->SetBitFieldJustified( 24, 12, 0 );
+            updateEc0 = true;
+
+            if ( mbstr->IsBitSet(57) ) clearSymCntrs = true;
+        }
+
+        if ( updateEc0 )
+        {
+            o_rc = ec0Reg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", ec0Reg_str );
+                break;
+            }
+        }
+
+        if ( clearSymCntrs )
+        {
+            // Clear all of the per symbol counters. Note that there are a total
+            // of 9 MBSSYMECx registers (MBSSYMEC0-MBSSYMEC8) per MBA.
+            for ( uint8_t i = 0; i < 9; i++ )
+            {
+                char reg_str[20];
+                snprintf( reg_str, 20, "MBA%d_MBSSYMEC%d", mbaPos, i );
+
+                SCAN_COMM_REGISTER_CLASS * reg = membChip->getRegister(reg_str);
+
+                reg->clearAllBits();
+
+                o_rc = reg->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+                    break;
+                }
+            }
+            if ( SUCCESS != o_rc ) break;
+        }
+
+        if ( eccAttns & MAINT_RCE_ETE )
+        {
+            // Clear only the RCE total count.
+            const char * ec1Reg_str =
+                            (0 == mbaPos) ? "MBA0_MBSEC1" : "MBA1_MBSEC1";
+            SCAN_COMM_REGISTER_CLASS * ec1Reg =
+                            membChip->getRegister( ec1Reg_str );
+
+            o_rc = ec1Reg->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", ec1Reg_str );
+                break;
+            }
+
+            ec1Reg->SetBitFieldJustified( 0, 12, 0 );
+
+            o_rc = ec1Reg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", ec1Reg_str );
+                break;
+            }
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
                                          const MemRank & i_rank )
 {

@@ -66,6 +66,15 @@ template<TARGETING::TYPE T>
 uint32_t clearEccCounters( ExtensibleChip * i_chip );
 
 /**
+ * @brief  Calls checkEccFirs() and clears the maintenance ECC counters based on
+ *         the active error types.
+ * @param  i_chip MBA.
+ * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t conditionallyClearEccCounters( ExtensibleChip * i_chip );
+
+/**
  * @brief  Clears the maintenance ECC FIRs.
  * @param  i_chip MBA, MCA, or MCBIST.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
