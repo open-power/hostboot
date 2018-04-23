@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -66,7 +68,7 @@ public:
      *  will be called first with SET_NONFUNC to fill in i_origStates.
      *  @param  i_state         - SET_NONFUNC or RESTORE
      *  @param  i_targetHList   -   TargetHandleList of targets to work on
-     *  @param  i_origStatew    -   array of HWasStates to store the original
+     *  @param  i_origStates    -   array of HWasStates to store the original
      *                              state in.
      *  @param  l_keep          -   number of states to keep (i.e. leave alone)
      *                              when running SET_NONFUNC
@@ -109,9 +111,11 @@ public:
             }
             else
             {
+                // Get fake HWAS state setting
+                l_fakeState = l_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
                 // Restore to original state.
                 l_target->setAttr<TARGETING::ATTR_HWAS_STATE>(i_origStates[i]);
-
             }
         }   //  endfor
     }
@@ -128,9 +132,12 @@ public:
         //  may cause other tests to fail.
         //  Do not leave this test enabled for normal operations.
         TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
+        HWAS_INF("testCheckMinimumHardwareCore: Skipped");
 #else
+
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareCore");
+        HWAS_INF("testCheckMinimumHardwareCore: Started");
 
         TargetHandleList l_cores;
         getAllChiplets(l_cores, TYPE_CORE, true );
@@ -141,12 +148,36 @@ public:
         TS_TRACE( "testCheckMinimumHardwareCore: set cores nonfunctional");
         setTargetStates( SET_NONFUNC, l_cores, &l_origStates[0]  );
 
+        // Save original Block Spec Deconfig value
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+        TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
+            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+        // If original attribute value is non-zero, clear it
+        if(l_orig_block_spec_deconfig != 0)
+        {
+            // Clear attribute to test that checkMinimumHardware() sets it
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+        }
+
         TS_TRACE( "testCheckMinimumHardwareCore: check for minimum hardware" );
         l_errl  =   HWAS::checkMinimumHardware();
         if ( l_errl )
         {
-            //  got an errorlog, no cores
-            TS_TRACE( "testCheckMinimumHardwareCore: PASSED");
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
+                pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig == 0)
+            {
+                TS_FAIL("testCheckMinimumHardwareCore: Expected non-zero value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG");
+            }
+            else
+            {
+                //  got an errorlog, no cores
+                TS_TRACE( "testCheckMinimumHardwareCore: PASSED");
+            }
+            //  Commit the errorlog.
             errlCommit( l_errl, HWAS_COMP_ID );
         }
         else
@@ -157,6 +188,7 @@ public:
 
         TS_TRACE( "testCheckMinimumHardwareCore: restore original states");
         setTargetStates( RESTORE, l_cores, &(l_origStates[0])  );
+        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
 #endif
     }
@@ -173,9 +205,12 @@ public:
         //  may cause other tests to fail.
         //  Do not leave this test enabled for normal operations.
         TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
+        HWAS_INF("testCheckMinimumHardwareDimm: Skipped");
 #else
+
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareDimm");
+        HWAS_INF("testCheckMinimumHardwareDimm: Started");
 
         //  check for functional dimms
         TargetHandleList l_dimms;
@@ -187,12 +222,36 @@ public:
 
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origStates[0])  );
 
+        // Save original Block Spec Deconfig value
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+        TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
+            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+        // If original attribute value is non-zero, clear it
+        if(l_orig_block_spec_deconfig != 0)
+        {
+            // Clear attribute to test that checkMinimumHardware() sets it
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+        }
+
         TS_TRACE( "testCheckMinimumHardwareDimm: check for minimum hardware" );
         l_errl  =   HWAS::checkMinimumHardware();
         if ( l_errl )
         {
-            //  got an errorlog, no dimms
-            TS_TRACE( "testCheckMinimumHardwareDimm: PASSED");
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
+                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig == 0)
+            {
+                TS_FAIL("testCheckMinimumHardwareDimm: Expected non-zero value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG");
+            }
+            else
+            {
+                //  got an errorlog, no dimms
+                TS_TRACE( "testCheckMinimumHardwareDimm: PASSED");
+            }
+            //  Commit the errorlog.
             errlCommit( l_errl, HWAS_COMP_ID );
         }
         else
@@ -202,6 +261,7 @@ public:
         }
 
         setTargetStates( RESTORE, l_dimms, &(l_origStates[0])  );
+        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
 #endif
     }
@@ -220,9 +280,12 @@ public:
         //  may cause other tests to fail.
         //  Do not leave this test enabled for normal operations.
         TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
+        HWAS_INF("testCheckMinimumHardwareBoth: Skipped");
 #else
+
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareBoth");
+        HWAS_INF("testCheckMinimumHardwareBoth: Started");
 
         //  set all cores nonfunctional
         TargetHandleList l_cores;
@@ -242,13 +305,37 @@ public:
         TS_TRACE( "testCheckMinimumHardwareBoth: set dimms nonfunctional");
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origDimmStates[0])  );
 
+        // Save original Block Spec Deconfig value
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+        TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
+            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+        // If original attribute value is non-zero, clear it
+        if(l_orig_block_spec_deconfig != 0)
+        {
+            // Clear attribute to test that checkMinimumHardware() sets it
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+        }
+
         TS_TRACE( "testCheckMinimumHardwareBoth: check for minimum hardware" );
         l_errl  =   HWAS::checkMinimumHardware();
         if ( l_errl )
         {
-            //  got an errorlog, this is good.  Commit the errorlog.
-            //  There should be 2 errorlogs with a common plid.
-            TS_TRACE( "testCheckMinimumHardwareBoth: PASSED");
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
+                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig == 0)
+            {
+                TS_FAIL("testCheckMinimumHardwareBoth: Expected non-zero value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG");
+            }
+            else
+            {
+                //  got an errorlog, this is good.
+                //  There should be 2 errorlogs with a common plid.
+                TS_TRACE( "testCheckMinimumHardwareBoth: PASSED");
+            }
+            //  Commit the errorlog.
             errlCommit( l_errl, HWAS_COMP_ID );
         }
         else
@@ -260,6 +347,7 @@ public:
         //  restore everything to normal.
         setTargetStates( RESTORE, l_cores, &(l_origCoreStates[0])  );
         setTargetStates( RESTORE, l_dimms, &(l_origDimmStates[0])  );
+        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
 #endif
     }
@@ -278,9 +366,12 @@ public:
         //  may cause other tests to fail.
         //  Do not leave this test enabled for normal operations.
         TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
+        HWAS_INF("testCheckMinimumHardwareOneDimm: Skipped");
 #else
+
         errlHndl_t  l_errl  =   NULL;
         TS_TRACE(INFO_MRK "testCheckMinimumHardwareOneDimm");
+        HWAS_INF("testCheckMinimumHardwareOneDimm: Started");
 
         //  check for functional dimms
         TargetHandleList l_dimms;
@@ -291,6 +382,19 @@ public:
         TARGETING::HwasState    l_origStates[ l_dimms.size() ]  ;
 
         setTargetStates( SET_NONFUNC, l_dimms, &(l_origStates[0]), 1  );
+
+        // Save original Block Spec Deconfig value
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+        TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig =
+            pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+        // If original attribute value is non-zero, clear it
+        if(l_orig_block_spec_deconfig != 0)
+        {
+            // Clear attribute, test that checkMinimumHardware() does NOT set it
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+        }
 
         TS_TRACE( "testCheckMinimumHardwareOneDimm: "
                   "check for minimum hardware" );
@@ -303,15 +407,29 @@ public:
         }
         else
         {
-            //  No errorlog, this is good.
-            TS_TRACE( "testCheckMinimumHardwareOneDimm: PASSED");
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
+                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig != 0)
+            {
+                TS_FAIL("testCheckMinimumHardwareOneDimm: Expected zero value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG, not %d",
+                        l_block_spec_deconfig);
+            }
+            else
+            {
+                //  No errorlog, this is good.
+                TS_TRACE( "testCheckMinimumHardwareOneDimm: PASSED");
+            }
         }
 
         setTargetStates( RESTORE, l_dimms, &(l_origStates[0]), 1  );
+        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
 #endif
     }
 
 };  // end class
+
+#undef DISABLE_UNIT_TESTS
 
 #endif

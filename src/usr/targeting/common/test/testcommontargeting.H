@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -672,6 +672,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
     void testPredicateHwasChanged()
     {
         TARG_TS_TRACE(ENTER_MRK "testPredicateHwasChanged" );
+        TARG_INF(ENTER_MRK "testPredicateHwasChanged" );
 
         do {
 

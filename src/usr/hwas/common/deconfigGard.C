@@ -234,8 +234,9 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
             {
                 // could be a platform specific target for the other
                 // ie, we are hostboot and this is an FSP target, or vice-versa
-                HWAS_INF("Could not find Target for %.8X",
-                        get_huid(l_pTarget));
+                HWAS_INF_BIN("Could not find Target for:",
+                             &(l_gardRecord.iv_targetId),
+                             sizeof(l_gardRecord.iv_targetId));
 
                 // we just skip this GARD record
                 continue;
@@ -329,8 +330,9 @@ errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
                     // could be a platform specific target for the other
                     // ie, we are hostboot and this is an FSP target,
                     // or vice-versa
-                    HWAS_INF("Could not find Target for %08X",
-                            get_huid(l_pTarget));
+                    HWAS_INF_BIN("Could not find Target for:",
+                                 &(l_gardRecord.iv_targetId),
+                                 sizeof(l_gardRecord.iv_targetId));
 
                     // we just skip this GARD record
                     continue;
@@ -581,13 +583,29 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             break;
         }
 
-        //Now loop through all gard records and apply recoverable
-        //gard records(non Fatal and non Unrecoverable) check
-        //whether system can be booted after applying each gard record
-        //if system cant be booted after applying gard record that need
-        //to be rolled back and try with next one.
+        // If any targets have been replaced, clear Block Spec Deconfig
+        TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
+            DeconfigGard::clearBlockSpecDeconfigForReplacedTargets();
+
+        if(l_block_spec_deconfig != 0)
+        {
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            CONSOLE::displayf("HWAS", "Blocking Speculative Deconfig");
+#endif
+            HWAS_INF("Blocking Speculative Deconfig: "
+                     "skipping Predictive GARD Records");
+        }
+
+        GardRecords_t l_specDeconfigVector;
+
+        //If allowed, that is if Block Spec Deconfig is cleared,
+        //loop through all gard records and apply recoverable
+        //gard records(non Fatal and non Unrecoverable).  Check
+        //whether system can be booted after applying all gard
+        //records.  If system can't be booted after applying gard
+        //records, then need to rolled them back.
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
-             l_itr != l_gardRecords.end();
+             (l_block_spec_deconfig == 0) && (l_itr != l_gardRecords.end());
              ++l_itr)
         {
             GardRecord l_gardRecord = *l_itr;
@@ -640,73 +658,81 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
                 continue;
             }
-            l_pErr = applyGardRecord(l_pTarget,l_gardRecord,SPEC_DECONFIG);
+
+            //Apply the gard record.
+            l_pErr = applyGardRecord(l_pTarget, l_gardRecord, SPEC_DECONFIG);
             if (l_pErr)
             {
                 HWAS_ERR("applyGardRecord returned an error");
                 break;
             }
-
-            l_pErr = checkMinimumHardware(pSys,&l_isSystemBootable);
-            if (l_pErr)
+            else
             {
-                HWAS_ERR("checkMinimumHardware returned an error");
-                break;
+                // Keep track of spec deconfig gard record
+                l_specDeconfigVector.push_back(l_gardRecord);
             }
+        } // for
 
-            if(!l_isSystemBootable)
+        if(l_pErr)
+        {
+            break;
+        }
+
+        l_pErr = checkMinimumHardware(pSys,&l_isSystemBootable);
+        if (l_pErr)
+        {
+            HWAS_ERR("checkMinimumHardware returned an error");
+            break;
+        }
+
+        if(!l_isSystemBootable)
+        {
+            HWAS_INF("System cannot ipl, rolling back the gard for "
+                     "speculatively deconfigured targets");
+
+            const uint64_t userdata1 = l_specDeconfigVector.size();
+            const uint64_t userdata2 = 0;
+            /*@
+             * @errortype
+             * @severity          ERRL_SEV_INFORMATIONAL
+             * @moduleid          MOD_DECONFIG_TARGETS_FROM_GARD
+             * @reasoncode        RC_RESOURCE_RECOVERED
+             * @devdesc           Gard record(s) not applied due to a
+             *                    lack of resources.
+             * @custdesc          A previously discovered hardware issue is
+             *                    being ignored to allow the system to boot.
+             * @userdata1         Number of gard records not applied
+             * @userdata2         0
+             */
+
+            l_pErr = hwasError(ERRL_SEV_INFORMATIONAL,
+                               MOD_DECONFIG_TARGETS_FROM_GARD,
+                               RC_RESOURCE_RECOVERED,
+                               userdata1,
+                               userdata2);
+            errlCommit(l_pErr, HWAS_COMP_ID);
+
+            //Now go through all targets which are speculatively
+            //deconfigured and roll back gard on them.
+            PredicateHwas predSpecDeconfig;
+            predSpecDeconfig.specdeconfig(true);
+            TargetHandleList l_specDeconfgList;
+            targetService().getAssociated(l_specDeconfgList, pSys,
+                            TargetService::CHILD, TargetService::ALL,
+                            &predSpecDeconfig);
+
+            //Loop through gard records where spec deconfig was applied
+            for (TargetHandleList::const_iterator
+                 l_sdIter = l_specDeconfgList.begin();
+                 l_sdIter != l_specDeconfgList.end();
+                 ++l_sdIter)
             {
-                HWAS_INF("System cannot ipl, rolling back the gard Target 0x%08x",
-                               get_huid(l_pTarget));
-                HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
-                l_state.deconfiguredByEid = CONFIGURED_BY_RESOURCE_RECOVERY;
+                HwasState l_state = (*l_sdIter)->getAttr<ATTR_HWAS_STATE>();
+                l_state.deconfiguredByEid = 0;
                 l_state.specdeconfig = 0;
-                l_pTarget->setAttr<ATTR_HWAS_STATE>(l_state);
+                (*l_sdIter)->setAttr<ATTR_HWAS_STATE>(l_state);
 
-                //Now go through all other targets which are speculatively
-                //deconfigured and roll back gard on that too.
-                PredicateHwas predSpecDeconfig;
-                predSpecDeconfig.specdeconfig(true);
-                TargetHandleList l_specDeconfgList;
-                targetService().getAssociated(l_specDeconfgList, pSys,
-                                TargetService::CHILD, TargetService::ALL,
-                                &predSpecDeconfig);
-
-                for (TargetHandleList::const_iterator
-                     l_sdIter = l_specDeconfgList.begin();
-                     l_sdIter != l_specDeconfgList.end();
-                     ++l_sdIter)
-                {
-                    l_state = (*l_sdIter)->getAttr<ATTR_HWAS_STATE>();
-                    l_state.deconfiguredByEid = 0;
-                    l_state.specdeconfig = 0;
-                    (*l_sdIter)->setAttr<ATTR_HWAS_STATE>(l_state);
-                }
-
-                /*@
-                 * @errortype
-                 * @severity          ERRL_SEV_INFORMATIONAL
-                 * @moduleid          MOD_DECONFIG_TARGETS_FROM_GARD
-                 * @reasoncode        RC_RESOURCE_RECOVERED
-                 * @devdesc           A gard record was not applied due to a
-                 *                    lack of resources.
-                 * @custdesc          A previously discovered hardware issue is
-                 *                    being ignored to allow the system to boot.
-                 * @userdata1[00:31]  HUID the resource
-                 * @userdata2[00:31]  EID from the gard record.
-                 */
-                const uint64_t userdata1 =
-                       (static_cast<uint64_t>(get_huid(l_pTarget)) << 32);
-                const uint64_t userdata2 =
-                       (static_cast<uint64_t>(l_gardRecord.iv_errlogEid) << 32);
-
-                l_pErr = hwasError(ERRL_SEV_INFORMATIONAL,
-                        MOD_DECONFIG_TARGETS_FROM_GARD,
-                        RC_RESOURCE_RECOVERED,
-                        userdata1,
-                        userdata2);
-                errlCommit(l_pErr, HWAS_COMP_ID);
-                l_pErr = platLogEvent(l_pTarget, RESOURCE_RECOVERED);
+                l_pErr = platLogEvent(*l_sdIter, RESOURCE_RECOVERED);
                 if (l_pErr)
                 {
                     HWAS_ERR("platLogEvent returned an error");
@@ -721,7 +747,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 nodeCheckExpr.push(&predNode).push(&predFunctional).And();
 
                 TargetHandleList pNodeList;
-                targetService().getAssociated(pNodeList, l_pTarget,
+                targetService().getAssociated(pNodeList, *l_sdIter,
                                 TargetService::PARENT, TargetService::ALL,
                                 &nodeCheckExpr);
                 if(!pNodeList.empty())
@@ -732,45 +758,53 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                             CONFIGURED_BY_RESOURCE_RECOVERY;
                     pNodeList[0]->setAttr<ATTR_HWAS_STATE>(l_state);
                 }
-                continue;
-            }
+            } // for
+        }
+        else
+        {
+            //Loop through gard records where spec deconfig was applied
+            while(!l_specDeconfigVector.empty())
+            {
+                // Get gard record and associated target
+                GardRecord l_gardRecord = l_specDeconfigVector.front();
+                Target * l_pTarget =
+                    targetService().toTarget(l_gardRecord.iv_targetId);
 
-            //The system can be booted even after garding this resource
-            //Apply the gard record.
-            l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
-            if (l_pErr)
-            {
-                HWAS_ERR("applyGardRecord returned an error");
-                break;
-            }
-            uint32_t l_errlogEid = l_gardRecord.iv_errlogEid;
-            //If the errlogEid is already in the errLogEidList, then
-            //don't need to log it again as a single error log can
-            //create multiple guard records and we only need to repost
-            //it once.
-            std::vector<uint32_t>::iterator low =
-                    std::lower_bound(errlLogEidList.begin(),
-                    errlLogEidList.end(), l_errlogEid);
-            if((low == errlLogEidList.end()) || ((*low) != l_errlogEid))
-            {
-                errlLogEidList.insert(low, l_errlogEid);
-                l_pErr = platReLogGardError(l_gardRecord);
+                //Apply the gard record.
+                l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
                 if (l_pErr)
                 {
-                    HWAS_ERR("platReLogGardError returned an error");
+                    HWAS_ERR("applyGardRecord returned an error");
                     break;
                 }
-            }
+
+                uint32_t l_errlogEid = l_gardRecord.iv_errlogEid;
+                //If the errlogEid is already in the errLogEidList, then
+                //don't need to log it again as a single error log can
+                //create multiple guard records and we only need to repost
+                //it once.
+                std::vector<uint32_t>::iterator low =
+                        std::lower_bound(errlLogEidList.begin(),
+                        errlLogEidList.end(), l_errlogEid);
+                if((low == errlLogEidList.end()) || ((*low) != l_errlogEid))
+                {
+                    errlLogEidList.insert(low, l_errlogEid);
+                    l_pErr = platReLogGardError(l_gardRecord);
+                    if (l_pErr)
+                    {
+                        HWAS_ERR("platReLogGardError returned an error");
+                        break;
+                    }
+                }
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-            CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
+                CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
                     get_huid(l_pTarget),
                     l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
 #endif
-        } // for
-        if(l_pErr)
-        {
-            break;
+
+                l_specDeconfigVector.erase(l_specDeconfigVector.begin());
+            } // while
         }
 
         if (iv_XAOBusEndpointDeconfigured)
@@ -2936,5 +2970,62 @@ errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
     return l_errl ;
 }
 #endif
+
+//******************************************************************************
+uint8_t DeconfigGard::clearBlockSpecDeconfigForReplacedTargets()
+{
+    HWAS_INF("Clear Block Spec Deconfig for replaced Targets");
+
+    // Get Block Spec Deconfig value
+    Target *pSys;
+    targetService().getTopLevelTarget(pSys);
+    ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
+        pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+    do
+    {
+        // Check Block Spec Deconfig value
+        if(l_block_spec_deconfig == 0)
+        {
+            // Block Spec Deconfig is already cleared
+            HWAS_INF("Block Spec Deconfig already cleared");
+        }
+
+        // Create the predicate with HWAS changed state and our RESRC_RECOV bit
+        PredicateHwasChanged l_predicateHwasChanged;
+        l_predicateHwasChanged.changedBit(HWAS_CHANGED_BIT_RESRC_RECOV, true);
+
+        // Go through all targets
+        for (TargetIterator t_iter = targetService().begin();
+             t_iter != targetService().end();
+             ++t_iter)
+        {
+            Target* l_pTarget = *t_iter;
+
+            // Check if target has changed
+            if (l_predicateHwasChanged(l_pTarget))
+            {
+                // Check if Block Spec Deconfig is set
+                if(l_block_spec_deconfig == 1)
+                {
+                    l_block_spec_deconfig = 0;
+                    pSys->setAttr
+                        <ATTR_BLOCK_SPEC_DECONFIG>(l_block_spec_deconfig);
+                    HWAS_INF("Block Spec Deconfig cleared due to HWAS state "
+                             "change for 0x%.8x",
+                             get_huid(l_pTarget));
+                }
+
+                // Clear RESRC_RECOV bit in changed flags for the target
+                HWAS_DBG("RESRC_RECOV bit cleared for 0x%.8x",
+                         get_huid(l_pTarget));
+                clear_hwas_changed_bit(l_pTarget, HWAS_CHANGED_BIT_RESRC_RECOV);
+            }
+        } // for
+    } while (0);
+
+    return l_block_spec_deconfig;
+} // clearBlockSpecDeconfigForReplacedTargets
+
 } // namespace HWAS
 

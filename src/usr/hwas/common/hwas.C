@@ -2200,6 +2200,14 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
     HWAS_INF("checkMinimumHardware exit - minimum hardware %s",
             ((l_errl != NULL)||((o_bootable!=NULL)&&(!*o_bootable))) ?
                     "NOT available" : "available");
+    if((l_errl != NULL)||((o_bootable!=NULL)&&(!*o_bootable)))
+    {
+        // Minimum hardware not available, block speculative deconfigs
+        Target *pSys;
+        targetService().getTopLevelTarget(pSys);
+        pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+    }
+
     return  l_errl ;
 } // checkMinimumHardware
 

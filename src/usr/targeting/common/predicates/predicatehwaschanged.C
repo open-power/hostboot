@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -98,7 +100,8 @@ bool PredicateHwasChanged::operator()(
     ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type subscriptionMask =
             i_pTarget->getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
 
-    return ((actual.rawValue & (iv_valid.rawValue & subscriptionMask)) ==
+    return ((subscriptionMask != 0) &&
+            (actual.rawValue & (iv_valid.rawValue & subscriptionMask)) ==
             (iv_desired.rawValue & (iv_valid.rawValue & subscriptionMask)));
 
     #undef TARG_FUNC

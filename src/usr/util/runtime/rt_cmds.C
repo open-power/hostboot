@@ -646,16 +646,21 @@ void cmd_putscom( char*& o_output,
  * @param[in] i_word2  Userdata 3 & 4
  * @param[in] i_callout  HUID of target to callout (zero if none)
  * @param[in] i_ffdcLength  Additional ffdc data bytes to add to the error log
+ * @param[in] i_deconfig  Indication if callout target should be deconfigured
+ * @param[in] i_gard  Indication of type of failure for callout
  */
 void cmd_errorlog( char*& o_output,
                    uint64_t i_word1,
                    uint64_t i_word2,
                    uint32_t i_callout,
-                   uint32_t i_ffdcLength )
+                   uint32_t i_ffdcLength,
+                   HWAS::DeconfigEnum i_deconfig,
+                   HWAS::GARD_ErrorType i_gard )
 {
-    UTIL_FT( "cmd_errorlog> word1=%.8X%.8X, word2=%.8X%.8X, i_callout=%.8X ffdcLength=%ld",
+    UTIL_FT( "cmd_errorlog> word1=%.8X%.8X, word2=%.8X%.8X, i_callout=%.8X ffdcLength=%ld, deconfig=%.2X, gard=%.2X",
              (uint32_t)(i_word1>>32), (uint32_t)i_word1,
-             (uint32_t)(i_word2>>32), (uint32_t)i_word2, i_callout, i_ffdcLength );
+             (uint32_t)(i_word2>>32), (uint32_t)i_word2, i_callout,
+             i_ffdcLength, i_deconfig, i_gard );
     o_output = new char[100];
 
     errlHndl_t l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
@@ -669,8 +674,8 @@ void cmd_errorlog( char*& o_output,
     {
         l_err->addHwCallout( l_targ,
                              HWAS::SRCI_PRIORITY_HIGH,
-                             HWAS::NO_DECONFIG,
-                             HWAS::GARD_NULL );
+                             i_deconfig,
+                             i_gard );
     }
 
     if (i_ffdcLength > 0)
@@ -1158,24 +1163,39 @@ int hbrtCommand( int argc,
     }
     else if( !strcmp( argv[0], "errorlog" ) )
     {
-        // errorlog <word1> <word2> <huid to callout>
-        if( (argc == 3) || (argc == 4) || (argc == 5) )
+        // errorlog <word1> <word2> <huid to callout> <size> <deconfig> <gard>
+        if( (argc == 3) || (argc == 4) || (argc == 5) || (argc == 6) ||
+            (argc == 7) )
         {
             uint32_t l_huid = 0;
             uint32_t l_ffdcLength = 0;
-            if( argc == 4 )
+            HWAS::DeconfigEnum l_deconfig = HWAS::NO_DECONFIG;
+            HWAS::GARD_ErrorType l_gard = HWAS::GARD_NULL;
+            if( argc >= 4 )
             {
                 l_huid = strtou64( argv[3], NULL, 16 );
             }
-            if (argc == 5)
+            if (argc >= 5)
             {
                 l_ffdcLength = strtou64( argv[4], NULL, 16 );
+            }
+            if( argc >= 6 )
+            {
+                l_deconfig = static_cast<HWAS::DeconfigEnum>(
+                                 strtou64( argv[5], NULL, 16 ));
+            }
+            if( argc >= 7 )
+            {
+                l_gard = static_cast<HWAS::GARD_ErrorType>(
+                             strtou64( argv[6], NULL, 16 ));
             }
             cmd_errorlog( *l_output,
                           strtou64( argv[1], NULL, 16 ),
                           strtou64( argv[2], NULL, 16 ),
                           l_huid,
-                          l_ffdcLength );
+                          l_ffdcLength,
+                          l_deconfig,
+                          l_gard );
         }
         else
         {
@@ -1249,7 +1269,7 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "putscom <huid> <address> <data>\n" );
         strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>] [size]\n" );
+        sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>] [size] [deconfig] [gard]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "sbemsg <chipid>\n" );
         strcat( *l_output, l_tmpstr );

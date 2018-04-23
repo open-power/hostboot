@@ -43,6 +43,13 @@
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
 
+//  $$  make sure these are disabled before checking in!!
+#define DISABLE_UNIT_TESTS        1
+#define DISABLE_MBA_UNIT_TESTS    1
+#define DISABLE_MEM_UNIT_TESTS    1
+#define DISABLE_EX_UNIT_TESTS     1
+//$$#define DISABLE_UNIT_TESTS        0
+
 using namespace HWAS;
 using namespace TARGETING;
 
@@ -62,13 +69,14 @@ public:
     void testDeconfigure2()
     {
         TS_TRACE(INFO_MRK "testDeconfigure2: Started");
+        HWAS_INF("testDeconfigure2: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::DeconfigureRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -83,7 +91,7 @@ public:
 
             if (pExList.empty())
             {
-                TS_FAIL("testDeconfigure3a: empty pExList");
+                TS_FAIL("testDeconfigure2: empty pExList");
                 break;
             }
             TargetHandle_t l_pTarget = *pExList.begin();
@@ -137,8 +145,8 @@ public:
     void testDeconfigure3()
     {
         TS_TRACE(INFO_MRK "testDeconfigure3: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -147,13 +155,15 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigure3: Skipped");
 #else
+        HWAS_INF("testDeconfigure3: Started");
 
         errlHndl_t l_pErr = NULL;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -221,8 +231,8 @@ public:
     void testDeconfigure4()
     {
         TS_TRACE(INFO_MRK "testDeconfigure4: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -231,13 +241,15 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigure4: Skipped");
 #else
+        HWAS_INF("testDeconfigure4: Started");
 
         errlHndl_t l_pErr = NULL;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -260,9 +272,6 @@ public:
             // Get the current HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
-            // get the current status/counter
-            uint32_t l_origStatus = theDeconfigGard().getDeconfigureStatus();
-
             // Deconfigure the target.
             l_pErr = theDeconfigGard().
                     deconfigureTarget(*l_pTarget, 0xA);
@@ -270,12 +279,6 @@ public:
             {
                 TS_FAIL("testDeconfigure4: Error from deconfigureTarget");
                 break;
-            }
-
-            // confirm the counter changed
-            if (l_origStatus == theDeconfigGard().getDeconfigureStatus())
-            {
-                TS_FAIL("testDeconfigure4: unchanged deconfigureStatus");
             }
 
             // Deconfigure the target again
@@ -319,8 +322,8 @@ public:
     {
         TS_TRACE(INFO_MRK "testDeconfigurePECTarget: Started");
 
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -329,8 +332,10 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-
+        HWAS_INF("testDeconfigurePECTarget: Skipped");
 #else
+        HWAS_INF("testDeconfigurePECTarget: Started");
+
         errlHndl_t l_pErr = NULL;
 
         do
@@ -449,8 +454,8 @@ public:
     void testDeconfigurePECwithAllBadPHBs()
     {
         TS_TRACE(INFO_MRK "testDeconfigurePECwithAllBadPHBs: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -459,8 +464,10 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
-
+        HWAS_INF("testDeconfigurePECwithAllBadPHBs: Skipped");
 #else
+        HWAS_INF("testDeconfigurePECwithAllBadPHBs: Started");
+
         errlHndl_t l_pErr = NULL;
 
         do
@@ -574,8 +581,8 @@ public:
     void testDeconfigureEQTarget()
     {
         TS_TRACE(INFO_MRK "testDeconfigureEQTarget: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -584,7 +591,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureEQTarget: Skipped");
 #else
+        HWAS_INF("testDeconfigureEQTarget: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -748,8 +757,8 @@ public:
     void testDeconfigureAssoc1()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssoc1: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_MBA_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -758,7 +767,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssoc1: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssoc1: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -836,8 +847,8 @@ public:
     void testDeconfigureAssoc2()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssoc2: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_MEM_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -846,7 +857,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssoc2: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssoc2: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -913,8 +926,8 @@ public:
     void testDeconfigureAssoc3()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssoc3: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -923,7 +936,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssoc3: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssoc3: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -989,8 +1004,8 @@ public:
     void testDeconfigureAssoc4()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssoc4: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -999,7 +1014,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssoc4: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssoc4: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -1066,7 +1083,7 @@ public:
     void testDeconfigureAssoc5()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssoc5: Started");
-#if 1
+#if DISABLE_MBA_UNIT_TESTS
         // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
@@ -1076,7 +1093,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE(" - SKIPPING -- other tests could be adversely affected");
+        HWAS_INF("testDeconfigureAssoc5: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssoc5: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -1183,8 +1202,8 @@ public:
     void testDeConfigEX2BadCores()
     {
         TS_TRACE(INFO_MRK "testDeConfigEX2BadCores: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1193,13 +1212,15 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeConfigEX2BadCores: Skipped");
 #else
+        HWAS_INF("testDeConfigEX2BadCores: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -1298,8 +1319,8 @@ public:
     void testDeConfigEX1BadCore()
     {
         TS_TRACE(INFO_MRK "testDeConfigEX1BadCore: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1308,13 +1329,15 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeConfigEX1BadCore: Skipped");
 #else
+        HWAS_INF("testDeConfigEX1BadCore: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -1412,8 +1435,8 @@ public:
     void testDeConfigEQ2BadEXs()
     {
         TS_TRACE(INFO_MRK "testDeConfigEQ2BadEXs: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1422,7 +1445,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeConfigEQ2BadEXs: Skipped");
 #else
+        HWAS_INF("testDeConfigEQ2BadEXs: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -1528,8 +1553,8 @@ public:
     void testDeConfigEQ1BadEX()
     {
         TS_TRACE(INFO_MRK "testDeConfigEQ1BadEX: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1538,7 +1563,9 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeConfigEQ1BadEX: Skipped");
 #else
+        HWAS_INF("testDeConfigEQ1BadEX: Started");
 
         errlHndl_t l_pErr = NULL;
         do
@@ -1644,8 +1671,8 @@ public:
     void testDeConfigEXInFusedCoreMode()
     {
         TS_TRACE(INFO_MRK "testDeConfigEXInFusedCoreMode: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1654,13 +1681,15 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeConfigEXInFusedCoreMode: Skipped");
 #else
+        HWAS_INF("testDeConfigEXInFusedCoreMode: Started");
 
         errlHndl_t l_pErr = NULL;
         do
         {
 
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -1771,8 +1800,8 @@ public:
     void testDefDeconfig1()
     {
         TS_TRACE(INFO_MRK "testDefDeconfig1: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1780,14 +1809,16 @@ public:
         // tests are left in the code so that a developer can enable them
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
+        HWAS_INF("testDefDeconfig1: Skipped");
 #else
+        HWAS_INF("testDefDeconfig1: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::DeconfigureRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -1825,27 +1856,12 @@ public:
             // Get the original HWAS_STATE of the target
             HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
 
-            // get the current status/counter
-            uint32_t l_origStatus = theDeconfigGard().getDeconfigureStatus();
-
             // create a deconfigure record
             theDeconfigGard().
                     registerDeferredDeconfigure(*l_pTarget, 0x12);
 
-            // confirm the counter changed
-            if (l_origStatus == theDeconfigGard().getDeconfigureStatus())
-            {
-                TS_FAIL("testDefDeconfig1: unchanged deconfigureStatus");
-            }
-
             // call function to process deferred deconfigure records
-            bool l_processed = processDeferredDeconfig();
-
-            if (!l_processed)
-            {
-                TS_FAIL("testDefDeconfig1: processDeferredDeconfig found no work");
-                break;
-            }
+            theDeconfigGard().processDeferredDeconfig();
 
             // Get the new HWAS_STATE of the target
             HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
@@ -1893,6 +1909,7 @@ public:
     void testGard1()
     {
         TS_TRACE(INFO_MRK "testGard1: Started");
+        HWAS_INF("testGard1: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
@@ -1918,8 +1935,8 @@ public:
     void testGard4()
     {
         TS_TRACE(INFO_MRK "testGard4: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -1928,14 +1945,16 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard4: Skipped");
 #else
+        HWAS_INF("testGard4: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2047,8 +2066,8 @@ public:
     void testGard5()
     {
         TS_TRACE(INFO_MRK "testGard5: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2057,14 +2076,16 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard5: Skipped");
 #else
+        HWAS_INF("testGard5: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2180,8 +2201,8 @@ public:
     void testGard6()
     {
         TS_TRACE(INFO_MRK "testGard6: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2190,14 +2211,16 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard6: Skipped");
 #else
+        HWAS_INF("testGard6: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2321,8 +2344,8 @@ public:
     void testGard7()
     {
         TS_TRACE(INFO_MRK "testGard7: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2331,14 +2354,16 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard7: Skipped");
 #else
+        HWAS_INF("testGard7: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2430,8 +2455,8 @@ public:
     void testGard8()
     {
         TS_TRACE(INFO_MRK "testGard8: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2440,7 +2465,10 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard8: Skipped");
 #else
+        HWAS_INF("testGard8: Started");
+
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
@@ -2460,7 +2488,7 @@ public:
                         l_records.size());
                 break;
             }
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
 
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
@@ -2486,7 +2514,7 @@ public:
             // create GARD record, call 'doGard' step and confirm target is
             //  deconfigured
             l_pErr = theDeconfigGard().
-                    platCreateGardRecord(l_target, 0x12, GARD_User_Manual);
+                    platCreateGardRecord(l_target, 0x12, GARD_Void);
             if (l_pErr)
             {
                 TS_FAIL("testGard8: Error from platCreateGardRecord");
@@ -2568,13 +2596,13 @@ public:
     }
 
     /**
-     *  @brief Test CDM modes to restrict createing GARD records
+     *  @brief Test CDM modes to restrict creating GARD records
      */
     void testGard9()
     {
         TS_TRACE(INFO_MRK "testGard9: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2583,14 +2611,16 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard9: Skipped");
 #else
+        HWAS_INF("testGard9: Started");
 
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
         do
         {
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2710,8 +2740,8 @@ public:
     void testGard10()
     {
         TS_TRACE(INFO_MRK "testGard10: Started");
-#if 1
-        // these tests deconfigure and gard targets. and even tho they
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
         //  restore their state after the tests, since the cxxtests are
         //  all run in parallel, during the time that a target is non-
         //  functional due to this test, another test may be running that
@@ -2720,7 +2750,10 @@ public:
         //  to test these specific functions - just keep in mind that there
         //  could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard10: Skipped");
 #else
+        HWAS_INF("testGard10: Started");
+
         errlHndl_t l_pErr = NULL;
         DeconfigGard::GardRecords_t l_records;
 
@@ -2741,7 +2774,7 @@ public:
                 break;
             }
 
-            // find a ex unit that we can play with
+            // find an ex unit that we can play with
             Target * pSys;
             targetService().getTopLevelTarget(pSys);
 
@@ -2895,6 +2928,208 @@ public:
 #endif
     }
 
+    /**
+     *  @brief Test create GARD record, call collect GARD to confirm targets
+     *      are deconfigured, set changed bit ala HCDB, reprocess GARD to
+     *      confirm GARD record is deleted.
+     */
+    void testGard11()
+    {
+        TS_TRACE(INFO_MRK "testGard11: Started");
+#if DISABLE_EX_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testGard11: Skipped");
+#else
+        HWAS_INF("testGard11: Started");
+
+        errlHndl_t l_pErr = NULL;
+        DeconfigGard::GardRecords_t l_records;
+
+        do
+        {
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard11: Error from getGardRecords");
+                break;
+            }
+
+            if (l_records.size() > 0)
+            {
+                TS_FAIL("testGard11: already GARD records here. %d records",
+                        l_records.size());
+                break;
+            }
+
+            // Go through all targets to ensure changed flags are cleared
+            for (TargetIterator t_iter = targetService().begin();
+                 t_iter != targetService().end();
+                 ++t_iter)
+            {
+                Target* l_pTarget = *t_iter;
+
+                // Clear bits in changed flags for the target
+                ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK_type l_mask =
+                    l_pTarget->
+                        getAttr<ATTR_HWAS_STATE_CHANGED_SUBSCRIPTION_MASK>();
+                clear_hwas_changed_bit(l_pTarget,
+                                       static_cast<HWAS_CHANGED_BIT>(l_mask));
+            } // for
+
+            // find an ex unit that we can play with
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predEx(CLASS_UNIT, TYPE_EX);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predEx).push(&predFunctional).And();
+
+            TargetHandleList pExList;
+            targetService().getAssociated( pExList, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pExList.empty())
+            {
+                TS_FAIL("testGard11: empty pExList");
+                break;
+            }
+
+            TargetHandle_t l_target = *pExList.begin();
+
+            // Save ATTR_BLOCK_SPEC_DECONFIG value
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_orig_block_spec_deconfig
+                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+
+            // Allow speculative deconfigs (clear ATTR_BLOCK_SPEC_DECONFIG)
+            HWAS_INF("testGard11: Allow speculative deconfigs");
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+
+            // create GARD record, call 'doGard' step and confirm target is
+            //  deconfigured
+            l_pErr = theDeconfigGard().
+                    platCreateGardRecord(l_target, 0x12, GARD_Predictive);
+            if (l_pErr)
+            {
+                TS_FAIL("testGard11: Error from platCreateGardRecord");
+                break;
+            }
+
+            l_pErr = theDeconfigGard().getGardRecords(NULL, l_records);
+            if (l_pErr)
+            {
+                errlCommit(l_pErr,HWAS_COMP_ID);
+                TS_FAIL("testGard11: Error from getGardRecords");
+                break;
+            }
+            if (l_records.size() != 1)
+            {
+                TS_FAIL("testGard11: should be 1 record; instead %d records",
+                        l_records.size());
+                break;
+            }
+
+            // Note that collectGard() makes various calls, including calls of
+            // clearGardRecordsForReplacedTargets() and
+            // deconfigureTargetsFromGardRecordsForIpl(i_pPredicate)
+            // which in turn calls clearBlockSpecDeconfigForReplacedTargets().
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard11: Error from collectGard");
+                break;
+            }
+
+            HwasState l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (l_state.functional)
+            {
+                TS_FAIL("testGard11: target still functional");
+                break;
+            }
+
+            // Block speculative deconfigs(set ATTR_BLOCK_SPEC_DECONFIG)
+            HWAS_INF("testGard11: Block speculative deconfigs");
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+
+            // restore functional state
+            l_state.functional = true;
+            l_target->setAttr<ATTR_HWAS_STATE>(l_state);
+
+            // call collectGard and confirm Block speculative deconfigs stays
+            //  set and target stays functional
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard11: Error from collectGard call 2");
+                break;
+            }
+
+            TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
+                = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig == 0)
+            {
+                TS_FAIL("testGard11: block spec deconfig cleared");
+                break;
+            }
+
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard11: target NOT functional");
+                break;
+            }
+
+            // emulate HCDB - target changed, call collectGard and confirm Block
+            //  speculative deconfigs is cleared and target is deconfigured
+            update_hwas_changed_mask(l_target);
+            l_pErr = collectGard();
+            if (l_pErr)
+            {
+                TS_FAIL("testGard11: Error from collectGard call 2");
+                break;
+            }
+
+            l_block_spec_deconfig = pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
+            if(l_block_spec_deconfig != 0)
+            {
+                TS_FAIL("testGard11: block spec deconfig NOT cleared, is %d",
+                        l_block_spec_deconfig);
+                break;
+            }
+
+            l_state = l_target->getAttr<ATTR_HWAS_STATE>();
+            if (!l_state.functional)
+            {
+                TS_FAIL("testGard11: target NOT functional");
+                break;
+            }
+
+            // Restore
+            l_state.functional = true;
+            l_target->setAttr<ATTR_HWAS_STATE>(l_state);
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
+
+            TS_TRACE(INFO_MRK "testGard11: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
+        }
+#endif
+    }
+
 
     /**
      *  @brief Test Deconfigure Associated Proc1
@@ -2902,6 +3137,7 @@ public:
     void testDeconfigureAssocProc1()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
+        HWAS_INF("testDeconfigureAssocProc1: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3010,6 +3246,7 @@ public:
     void testDeconfigureAssocProc2()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc2: Started");
+        HWAS_INF("testDeconfigureAssocProc2: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3115,6 +3352,7 @@ public:
     void testDeconfigureAssocProc3()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc3: Started");
+        HWAS_INF("testDeconfigureAssocProc3: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3284,6 +3522,7 @@ public:
     void testDeconfigureAssocProc4()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc4: Started");
+        HWAS_INF("testDeconfigureAssocProc4: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3455,6 +3694,7 @@ public:
     void testDeconfigureAssocProc5()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc5: Started");
+        HWAS_INF("testDeconfigureAssocProc5: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3633,6 +3873,7 @@ public:
     void testDeconfigureAssocProc6()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc6: Started");
+        HWAS_INF("testDeconfigureAssocProc6: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3738,7 +3979,7 @@ public:
     void testDeconfigureAssocProc7()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc7: Started");
-#if 1
+#if DISABLE_UNIT_TESTS
         // This test deconfigures proc2-xbus1 and proc3-xbus1 in a
         // TULETA-2S4U system. Even though this test
         // restores their states after the test, since the cxxtests are
@@ -3749,7 +3990,9 @@ public:
         // to test these specific functions - just keep in mind that there
         // could be side effects in other cxxtests.
         TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssocProc7: Skipped");
 #else
+        HWAS_INF("testDeconfigureAssocProc7: Started");
 
         errlHndl_t l_pErr = NULL;
 
@@ -3885,6 +4128,7 @@ public:
     void testDeconfigureAssocProc8()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc8: Started");
+        HWAS_INF("testDeconfigureAssocProc8: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -3992,6 +4236,7 @@ public:
     void testDeconfigureAssocProc9()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc9: Started");
+        HWAS_INF("testDeconfigureAssocProc9: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4088,6 +4333,7 @@ public:
     void testDeconfigureAssocProc10()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc10: Started");
+        HWAS_INF("testDeconfigureAssocProc10: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4190,6 +4436,7 @@ public:
     void testDeconfigureAssocProc11()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc11: Started");
+        HWAS_INF("testDeconfigureAssocProc11: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4292,6 +4539,7 @@ public:
     void testDeconfigureAssocProc12()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc12: Started");
+        HWAS_INF("testDeconfigureAssocProc12: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4394,6 +4642,7 @@ public:
     void testDeconfigureAssocProc13()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc13: Started");
+        HWAS_INF("testDeconfigureAssocProc13: Started");
 
         // This test populates structs which contain information
         // regarding a processor and its child chiplet's linkage
@@ -4499,6 +4748,8 @@ public:
     void testdeconfigPresentByAssoc1()
     {
         TS_TRACE(INFO_MRK "testDeconfigureAssocProc1: Started");
+        HWAS_INF("testdeconfigPresentByAssoc1: Started");
+
         // This tests the scenario where there is 1 mc, mi, dmi, membuff, mba and dimm
         // This is done to ensure that the algorithm works on each edge case
 
@@ -4606,6 +4857,8 @@ public:
     void testdeconfigPresentByAssoc2()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc2: Started");
+        HWAS_INF("testdeconfigPresentByAssoc2: Started");
+
         // This test the scenario where MC Group 0 does not have a membuf
         // MC Group 1 is fully populated
 
@@ -4707,6 +4960,8 @@ public:
     void testdeconfigPresentByAssoc3()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc3: Started");
+        HWAS_INF("testdeconfigPresentByAssoc3: Started");
+
         // This test the scenario where MEMBUF Group 1 has no DMI and then
         // DIMM Group 1 has no MEMBUF because MEMBUF 1 will be marked for
         // deconfigure
@@ -4834,6 +5089,8 @@ public:
     void testdeconfigPresentByAssoc4()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc4: Started");
+        HWAS_INF("testdeconfigPresentByAssoc4: Started");
+
         // This test the scenario where MEMBUF Group 0 has no MBAs causing
         // MC Group 0 to also be deconfigured.
 
@@ -4910,6 +5167,8 @@ public:
     void testdeconfigPresentByAssoc5()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc5: Started");
+        HWAS_INF("testdeconfigPresentByAssoc5: Started");
+
         // This test the scenario where MEMBUF Group 0 and MBA Group 0 having
         // no DMI. This tests the DMIINDEX edge case because one never existed
 
@@ -4973,6 +5232,8 @@ public:
     void testdeconfigPresentByAssoc6()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc6: Started");
+        HWAS_INF("testdeconfigPresentByAssoc6: Started");
+
         // This test the scenario where MBA Group 0 and DIMM Group 0 having
         // no MEMBUF. This tests the MEMBUFIndex edge case because one never existed
 
@@ -5038,6 +5299,8 @@ public:
     void testdeconfigPresentByAssoc7()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc7: Started");
+        HWAS_INF("testdeconfigPresentByAssoc7: Started");
+
         // This test the scenario where MBA Group 1 has no DIMMS
 
         // User-defined number of targets
@@ -5141,6 +5404,8 @@ public:
     void testdeconfigPresentByAssoc8()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc8: Started");
+        HWAS_INF("testdeconfigPresentByAssoc8: Started");
+
         // This test the scenario where each type is missing it's child
         //  and the cascade
 
@@ -5304,6 +5569,8 @@ public:
     void testdeconfigPresentByAssoc9()
     {
         TS_TRACE(INFO_MRK "testdeconfigPresentByAssoc9: Started");
+        HWAS_INF("testdeconfigPresentByAssoc9: Started");
+
         // This test the scenario where each type is missing it's parent
         //  and the cascade
 
@@ -5409,5 +5676,10 @@ public:
     }
 
 };
+
+#undef DISABLE_UNIT_TESTS
+#undef DISABLE_MBA_UNIT_TESTS
+#undef DISABLE_MEM_UNIT_TESTS
+#undef DISABLE_EX_UNIT_TESTS
 
 #endif

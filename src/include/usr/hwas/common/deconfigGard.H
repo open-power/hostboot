@@ -513,6 +513,16 @@ public:
             const errlHndl_t i_deconfigErrl);
 #endif
 
+    /**
+     * @brief Clears attribute which blocks speculative deconfiguration
+     *     (ATTR_BLOCK_SPEC_DECONFIG) so that resource recovery is allowed to
+     *     apply speculative deconfigurations / predictive gards.  Attribute
+     *     is cleared only if a target has been replaced.
+     *
+     * @return ATTR_BLOCK_SPEC_DECONFIG.
+     */
+    uint8_t clearBlockSpecDeconfigForReplacedTargets();
+
 protected:
 
     /**

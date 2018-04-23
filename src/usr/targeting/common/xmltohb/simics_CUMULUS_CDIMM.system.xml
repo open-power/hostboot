@@ -691,7 +691,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000009</default>
+        <default>0x00000019</default>
     </attribute>
 
 
@@ -972,7 +972,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1354,7 +1354,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1437,7 +1437,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1520,7 +1520,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1603,7 +1603,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1686,7 +1686,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1769,7 +1769,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1852,7 +1852,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -1935,7 +1935,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2018,7 +2018,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2101,7 +2101,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2184,7 +2184,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2267,7 +2267,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2350,7 +2350,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2433,7 +2433,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2516,7 +2516,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2599,7 +2599,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2682,7 +2682,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2765,7 +2765,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2848,7 +2848,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -2931,7 +2931,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -3014,7 +3014,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -3097,7 +3097,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -3180,7 +3180,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -3263,7 +3263,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -3979,7 +3979,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4060,7 +4060,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4139,7 +4139,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4218,7 +4218,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4297,7 +4297,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4376,7 +4376,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -4455,7 +4455,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4533,7 +4533,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4611,7 +4611,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4689,7 +4689,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4767,7 +4767,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4845,7 +4845,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -4923,7 +4923,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5001,7 +5001,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5079,7 +5079,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5157,7 +5157,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5235,7 +5235,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5313,7 +5313,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
     <attribute>
@@ -5510,7 +5510,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
+        <default>0x00000013</default>
     </attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
@@ -5901,7 +5901,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
+        <default>0x00000013</default>
     </attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
@@ -6921,7 +6921,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7004,7 +7004,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7087,7 +7087,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7170,7 +7170,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7253,7 +7253,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7336,7 +7336,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7419,7 +7419,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7502,7 +7502,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7585,7 +7585,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7668,7 +7668,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7751,7 +7751,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -7834,7 +7834,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11312,7 +11312,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11403,7 +11403,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11494,7 +11494,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11585,7 +11585,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11676,7 +11676,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -11767,7 +11767,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -13398,7 +13398,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -13488,7 +13488,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
@@ -13578,7 +13578,7 @@
 
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000001</default>
+        <default>0x00000011</default>
     </attribute>
 
 
