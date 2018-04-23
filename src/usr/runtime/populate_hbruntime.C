@@ -102,7 +102,52 @@ const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
+// Helper function to get the instance number from the
+// node number. The instance is derived from the hb_images
+// attribute, instance 0 will be the first active drawer
+// in the sytem, if hb_images is zero this function will
+// also return zero.
+uint16_t getHdatNodeInstance(void)
+{
 
+    uint16_t instance = 0;
+    TARGETING::Target* sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != nullptr,
+            "getHdatNodeInstance() - Could not obtain top level target");
+
+    // This attribute is only set on a multi-node system.
+    // We will use it below to detect a multi-node scenario
+    auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    // get the node id
+    const auto l_node = TARGETING::UTIL::getCurrentNodePhysId();
+
+    // if hb_images is empty instance is 0 for a single node
+    if( hb_images )
+    {
+        // leftmost position indicates node 0
+        decltype(hb_images) l_mask = 0x1 << (sizeof(hb_images)*BITS_PER_BYTE-1);
+
+        uint16_t i = 0;
+
+        while( i != l_node )
+        {
+            l_mask = l_mask >> 1;
+            // see if this node is functional
+            if( hb_images & l_mask )
+            {
+                instance++;
+            }
+            i++;
+        }
+    }
+
+    TRACFCOMP( g_trac_runtime,"node %d is hdat instance %d",
+            l_node,instance);
+
+    return instance;
+}
 /**
  *  @brief Get a pointer to the next available
  *          HDAT HB Reserved Memory entry
@@ -128,24 +173,13 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
         uint64_t l_rsvMemDataAddr = 0;
         uint64_t l_rsvMemDataSizeMax = 0;
 
-        // Figure out which node we are running on
-        TARGETING::Target* mproc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(mproc);
-
-        TARGETING::EntityPath epath =
-            mproc->getAttr<TARGETING::ATTR_PHYS_PATH>();
-
-        const TARGETING::EntityPath::PathElement pe =
-            epath.pathElementOfType(TARGETING::TYPE_NODE);
-
-        uint64_t nodeid = pe.instance;
-
         // there are 50 reserved memory spots per node,
-        // use the node number to index into the hb reserved mem pointers
+        // use the node instance to index into the hb reserved mem pointers
         // for this node. HB_RSV_MEM_NUM_PTRS is defined as the number
         // of usable pointers - see runtime.H for some background
+        uint16_t l_nodeInstance = getHdatNodeInstance();
         uint32_t instance = l_nextSection +
-            ((HB_RSV_MEM_NUM_PTRS + 1) * nodeid);
+            (HB_RSV_MEM_NUM_PTRS * l_nodeInstance);
 
         // Get the address of the next section
         l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
@@ -2949,10 +2983,10 @@ errlHndl_t populate_hbRuntimeData( void )
         const TARGETING::EntityPath::PathElement pe =
             epath.pathElementOfType(TARGETING::TYPE_NODE);
 
-        uint64_t nodeid = pe.instance;
+        uint64_t l_masterNodeId = pe.instance;
 
         TRACFCOMP( g_trac_runtime, "Master node nodeid = %x",
-                   nodeid);
+                   l_masterNodeId);
 
         // ATTR_HB_EXISTING_IMAGE only gets set on a multi-drawer system.
         // Currently set up in host_sys_fab_iovalid_processing() which only
@@ -2972,7 +3006,7 @@ errlHndl_t populate_hbRuntimeData( void )
         {
             if( !TARGETING::is_no_load() )
             {
-                l_elog = populate_HbRsvMem(nodeid,true);
+                l_elog = populate_HbRsvMem(l_masterNodeId,true);
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "populate_HbRsvMem failed" );
@@ -3036,7 +3070,7 @@ errlHndl_t populate_hbRuntimeData( void )
             uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
             // populate our own node specific data + the common stuff
-            l_elog = populate_HbRsvMem(nodeid,true);
+            l_elog = populate_HbRsvMem(l_masterNodeId,true);
 
             if(l_elog != nullptr)
             {
@@ -3068,7 +3102,7 @@ errlHndl_t populate_hbRuntimeData( void )
             for (uint64_t l_node=0; (l_node < MAX_NODES_PER_SYS); l_node++ )
             {
                 // skip sending to ourselves, we did our construction above
-                if(l_node == nodeid)
+                if(l_node == l_masterNodeId)
                     continue;
 
                 if( 0 != ((mask >> l_node) & hb_images ) )
@@ -3080,7 +3114,7 @@ errlHndl_t populate_hbRuntimeData( void )
                     msg_t * msg = msg_allocate();
                     msg->type = IPC::IPC_POPULATE_ATTRIBUTES;
                     msg->data[0] = l_node;      // destination node
-                    msg->data[1] = nodeid;      // respond to this node
+                    msg->data[1] = l_masterNodeId; // respond to this node
                     msg->extra_data = reinterpret_cast<uint64_t*>(payloadBase);
 
                     // send the message to the slave hb instance
