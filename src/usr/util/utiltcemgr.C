@@ -164,19 +164,6 @@ errlHndl_t utilSetupPayloadTces(void)
     // opened for it
     pNodeTgt->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
 
-    // Legacy Support: Also set System Level Attributes on Node 0
-    // @TODO RTC 190014 Can Be Removed Once FSP Switches To Node Attributes
-    // Get Target Service and the system target to set attributes
-    TARGETING::TargetService& tS = TARGETING::targetService();
-    TARGETING::Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "utilSetupPayloadTces() system target is NULL");
-    if (nodeId == 0)
-    {
-        sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
-        sys->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
-    }
-
     // Save for internal use since can't trust FSP won't change attribute
     Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::PAYLOAD_TOKEN,
                                                token);
@@ -211,13 +198,6 @@ errlHndl_t utilSetupPayloadTces(void)
 
     // Set attribute to tell FSP what the HDAT token is
     pNodeTgt->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
-
-    // Legacy Support: Also set System Level Attributes on Node 0
-    // @TODO RTC 190014 Can Be Removed Once FSP Switches To Node Attributes
-    if (nodeId == 0)
-    {
-         sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
-    }
 
     // Save for internal use since we can't trust FSP won't change the attribute
     Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::HDAT_TOKEN,
