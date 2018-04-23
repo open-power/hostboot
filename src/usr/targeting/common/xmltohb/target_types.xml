@@ -922,6 +922,9 @@
   <attribute>
     <id>MFG_TRACE_ENABLE</id>
   </attribute>
+  <attribute>
+    <id>MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</id>
+  </attribute>
     <attribute>
     <id>FREQ_PROC_REFCLOCK</id>
   </attribute>
@@ -1717,6 +1720,9 @@
   <attribute>
     <default>0x00000001</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
+    <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
   </attribute>
 </targetType>
 
