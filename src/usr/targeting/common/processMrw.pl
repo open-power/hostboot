@@ -1497,7 +1497,7 @@ sub processXbus
     my $xbus_child_conn = $targetObj->getFirstConnectionDestination($target);
     if ($xbus_child_conn ne "")
     {
-        # The CONFIG_APPLY bus attribute carries a comma seperated values for each 
+        # The CONFIG_APPLY bus attribute carries a comma seperated values for each
         # X-bus connection. It can currently take the following values.
         # "w" - This connection is applicable only in wrap config
         # "d" - This connection is applicable in default config (non-wrap mode).
@@ -1521,6 +1521,11 @@ sub processXbus
             $targetObj->setAttribute($target, "PEER_TARGET",
                 $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
 
+            $targetObj->setAttribute($xbus_child_conn, "PEER_PATH",
+                $targetObj->getAttribute($target, "PHYS_PATH"));
+            $targetObj->setAttribute($target, "PEER_PATH",
+                $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
+
             $targetObj->setAttribute($xbus_child_conn, "PEER_HUID",
                 $targetObj->getAttribute($target, "HUID"));
             $targetObj->setAttribute($target, "PEER_HUID",
@@ -1532,6 +1537,8 @@ sub processXbus
         {
             $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET", "NULL");
             $targetObj->setAttribute($target, "PEER_TARGET","NULL");
+            $targetObj->setAttribute($xbus_child_conn, "PEER_PATH", "physical:na");
+            $targetObj->setAttribute($target, "PEER_PATH", "physical:na");
         }
     }
 
@@ -1561,8 +1568,8 @@ sub processAbus
     my $fournode = "4";
     my @configs = split(',',$config);
 
-    # The CONFIG_APPLY bus attribute carries a comma seperated values for each 
-    # A-bus connection. For eg., 
+    # The CONFIG_APPLY bus attribute carries a comma seperated values for each
+    # A-bus connection. For eg.,
     # "2,3,4" - This connection is applicable in 2,3 and 4 node config
     # "w" - This connection is applicable only in wrap config
     # "2" - This connection is applicable only in 2 node config
@@ -1604,40 +1611,40 @@ sub processAbus
         ## set attributes for both directions
         my $phys1 = $targetObj->getAttribute($target, "PHYS_PATH");
         my $phys2 = $targetObj->getAttribute($abus_dest_parent, "PHYS_PATH");
- 
+
         $targetObj->setAttribute($abus_dest_parent, "PEER_TARGET",$phys1);
         $targetObj->setAttribute($target, "PEER_TARGET",$phys2);
         $targetObj->setAttribute($abus_dest_parent, "PEER_PATH", $phys1);
         $targetObj->setAttribute($target, "PEER_PATH", $phys2);
-        
+
         $targetObj->setAttribute($abus_dest_parent, "PEER_HUID",
            $targetObj->getAttribute($target, "HUID"));
         $targetObj->setAttribute($target, "PEER_HUID",
            $targetObj->getAttribute($abus_dest_parent, "HUID"));
- 
+
         $targetObj->setAttribute($abussource, "PEER_TARGET",
                  $targetObj->getAttribute($abusdest, "PHYS_PATH"));
         $targetObj->setAttribute($abusdest, "PEER_TARGET",
                  $targetObj->getAttribute($abussource, "PHYS_PATH"));
- 
+
         $targetObj->setAttribute($abussource, "PEER_PATH",
                  $targetObj->getAttribute($abusdest, "PHYS_PATH"));
         $targetObj->setAttribute($abusdest, "PEER_PATH",
                  $targetObj->getAttribute($abussource, "PHYS_PATH"));
- 
+
         $targetObj->setAttribute($abussource, "PEER_HUID",
            $targetObj->getAttribute($abusdest, "HUID"));
         $targetObj->setAttribute($abusdest, "PEER_HUID",
            $targetObj->getAttribute($abussource, "HUID"));
- 
+
          # copy Abus attributes from the connection to the chiplet
         my $abus = $targetObj->getFirstConnectionBus($target);
- 
+
         $targetObj->setAttribute($target, "EI_BUS_TX_MSBSWAP",
               $abus->{bus_attribute}->{SOURCE_TX_MSBSWAP}->{default});
         $targetObj->setAttribute($abus_dest_parent, "EI_BUS_TX_MSBSWAP",
               $abus->{bus_attribute}->{DEST_TX_MSBSWAP}->{default});
- 
+
         # copy attributes for wrap config
         my $link_set = "SET_NONE";
         if ($targetObj->isBusAttributeDefined($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET"))

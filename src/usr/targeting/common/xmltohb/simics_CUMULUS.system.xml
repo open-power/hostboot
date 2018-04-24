@@ -6573,7 +6573,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-0</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
@@ -6651,7 +6654,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-1</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
@@ -6729,7 +6735,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-2</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
@@ -6807,7 +6816,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-3</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
@@ -13416,6 +13428,10 @@
         <default>NULL</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-0</default>
     </attribute>
@@ -13506,6 +13522,10 @@
         <default>NULL</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
@@ -13594,6 +13614,10 @@
     <attribute>
         <id>PEER_TARGET</id>
         <default>NULL</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
