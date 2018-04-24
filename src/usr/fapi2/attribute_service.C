@@ -559,7 +559,26 @@ struct dimmBadDqDataFormat
 const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 9;
 const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
 const uint8_t  DIMM_BAD_DQ_VERSION = 1;
+const uint8_t  DIMM_BAD_DQ_NUM_BYTES = 80;
 size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
+
+union wiringData
+{
+    uint8_t nimbus[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
+    uint8_t cumulus[DIMM_BAD_DQ_NUM_BYTES];
+};
+
+//******************************************************************************
+// fapi2::platAttrSvc::__getChipModel function
+//******************************************************************************
+TARGETING::ATTR_MODEL_type __getChipModel()
+{
+    // determine whether this is a Nimbus or Cumulus chip
+    TARGETING::Target * masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+    return masterProc->getAttr<TARGETING::ATTR_MODEL>();
+}
 
 //******************************************************************************
 // fapi2::platAttrSvc::__getMcsAndPortSlct function
@@ -573,11 +592,7 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 
     do
     {
-        // determine whether this is a Nimbus or Cumulus chip
-        TARGETING::Target * masterProc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-        TARGETING::ATTR_MODEL_type procType =
-            masterProc->getAttr<TARGETING::ATTR_MODEL>();
+        TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
         TARGETING::TargetHandle_t l_port = nullptr;
 
@@ -639,27 +654,47 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
 //******************************************************************************
 ReturnCode __badDqBitmapGetHelperAttrs(
     const TARGETING::TargetHandle_t i_dimmTarget,
-    uint8_t  (&o_wiringData)[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint64_t &o_allMnfgFlags, uint32_t &o_ps )
+    wiringData &o_wiringData, uint64_t &o_allMnfgFlags, uint32_t &o_ps )
 {
     fapi2::ReturnCode l_rc;
 
     do
     {
-        // memset to avoid known syntax issue with previous compiler versions
-        // and ensure zero initialized array.
-        memset( o_wiringData, 0, sizeof(o_wiringData) );
-
         Target<TARGET_TYPE_DIMM> l_fapiDimm( i_dimmTarget );
         TARGETING::TargetHandle_t l_mcsTarget = nullptr;
 
         __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, o_ps );
 
+        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+
         // Get the DQ to DIMM Connector DQ Wiring attribute.
         // Note that for C-DIMMs, this will return a simple 1:1 mapping.
         // This code cannot tell the difference between C-DIMMs and IS-DIMMs.
-        l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_mcsTarget,
-                              o_wiringData );
+        if ( TARGETING::MODEL_NIMBUS == procType )
+        {
+            // memset to avoid known syntax issue with previous compiler
+            // versions and ensure zero initialized array.
+            memset( o_wiringData.nimbus, 0, sizeof(o_wiringData.nimbus) );
+
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_MSS_VPD_DQ_MAP, l_mcsTarget,
+                                  o_wiringData.nimbus );
+        }
+        else if ( TARGETING::MODEL_CUMULUS == procType )
+        {
+            // memset to avoid known syntax issue with previous compiler
+            // versions and ensure zero initialized array.
+            memset( o_wiringData.cumulus, 0, sizeof(o_wiringData.cumulus) );
+
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_DQ_TO_DIMM_CONN_DQ,
+                                  i_dimmTarget, o_wiringData.cumulus );
+        }
+        else
+        {
+            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Invalid procType" );
+            assert(false);
+        }
+
+
         if ( l_rc )
         {
             FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read attribute - "
@@ -764,8 +799,35 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
         uint32_t l_ps = 0;
         __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, l_ps );
 
-        l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_mcsTarget,
-                              l_dramSpare );
+        TARGETING::ATTR_MODEL_type procType = __getChipModel();
+
+        if ( TARGETING::MODEL_NIMBUS == procType )
+        {
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_mcsTarget,
+                                  l_dramSpare );
+        }
+        else if ( TARGETING::MODEL_CUMULUS == procType )
+        {
+            Target<TARGET_TYPE_MBA> l_fapiMba =
+                l_fapiDimm.getParent<TARGET_TYPE_MBA>();
+            TARGETING::TargetHandle_t l_mbaTrgt = nullptr;
+            errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mbaTrgt );
+            if ( l_errl )
+            {
+                FAPI_ERR( "__dimmGetDqBitmapSpareByte: Error from "
+                          "getTargetingTarget getting MBA." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_DIMM_SPARE, l_mbaTrgt,
+                                  l_dramSpare );
+        }
+        else
+        {
+            FAPI_ERR( "__dimmGetDqBitmapSpareByte: Invalid procType" );
+            assert(false);
+        }
+
         if ( l_rc )
         {
             FAPI_ERR( "__dimmGetDqBitmapSpareByte: Error getting DRAM Spare "
@@ -967,8 +1029,8 @@ ReturnCode __compareEccAndSpare(TARGETING::TargetHandle_t i_dimm,
 //******************************************************************************
 ReturnCode __mcLogicalToDimmDqHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
-    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint32_t i_ps, uint8_t i_mcPin, uint8_t &o_dimm_dq )
+    wiringData  i_wiringData, uint32_t i_ps, uint8_t i_mcPin,
+    uint8_t &o_dimm_dq )
 {
     fapi2::ReturnCode l_rc;
 
@@ -976,11 +1038,7 @@ ReturnCode __mcLogicalToDimmDqHelper(
     {
         uint64_t l_c4 = 0;
 
-        // determine whether this is a Nimbus or Cumulus chip
-        TARGETING::Target * masterProc = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-        TARGETING::ATTR_MODEL_type procType =
-            masterProc->getAttr<TARGETING::ATTR_MODEL>();
+        TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
         if ( TARGETING::MODEL_NIMBUS == procType )
         {
@@ -997,29 +1055,42 @@ ReturnCode __mcLogicalToDimmDqHelper(
                           "rosetta_map::mc_to_c4 failed." );
                 break;
             }
+
+            // use wiring data to translate c4 pin to dimm dq format
+            // Note: the wiring data maps from dimm dq format to c4 format
+            for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
+            {
+                // Check to see which bit in the wiring data corresponds to our
+                // DIMM DQ format pin.
+                if ( i_wiringData.nimbus[i_ps][bit] == l_c4 )
+                {
+                    o_dimm_dq = bit;
+                    break;
+                }
+            }
         }
         else if ( TARGETING::MODEL_CUMULUS == procType )
         {
             // For Cumulus, MC to C4 is 1-to-1
             l_c4 = i_mcPin;
+
+            // use wiring data to translate c4 pin to dimm dq format
+            // Note: the wiring data maps from dimm dq format to c4 format
+            for ( uint8_t bit = 0; bit < DIMM_BAD_DQ_NUM_BYTES; bit++ )
+            {
+                // Check to see which bit in the wiring data corresponds to our
+                // DIMM DQ format pin.
+                if ( i_wiringData.cumulus[bit] == l_c4 )
+                {
+                    o_dimm_dq = bit;
+                    break;
+                }
+            }
         }
         else
         {
             FAPI_ERR( "__mcLogicalToDimmDqHelper: Invalid procType" );
             assert(false);
-        }
-
-        // use wiring data to translate c4 pin to dimm dq format
-        // Note: the wiring data maps from dimm dq format to c4 format
-        for ( uint8_t bit = 0; bit < mss::MAX_DQ_BITS; bit++ )
-        {
-            // Check to see which bit in the wiring data corresponds to our
-            // DIMM DQ format pin.
-            if ( i_wiringData[i_ps][bit] == l_c4 )
-            {
-                o_dimm_dq = bit;
-                break;
-            }
         }
 
     }while(0);
@@ -1033,8 +1104,8 @@ ReturnCode __mcLogicalToDimmDqHelper(
 ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t i_mcLogical_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_dimmDq_bitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
-    uint8_t i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint8_t i_spareByte[mss::MAX_RANK_PER_DIMM], uint32_t i_ps )
+    wiringData i_wiringData, uint8_t i_spareByte[mss::MAX_RANK_PER_DIMM],
+    uint32_t i_ps )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1108,24 +1179,21 @@ ReturnCode __mcLogicalToDimmDq( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
 //******************************************************************************
 ReturnCode __dimmDqToMcLogicalHelper(
     const Target<TARGET_TYPE_ALL>& i_fapiDimm,
-    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint32_t i_ps, uint8_t i_dimm_dq, uint64_t &o_mcPin )
+    wiringData  i_wiringData, uint32_t i_ps, uint8_t i_dimm_dq,
+    uint64_t &o_mcPin )
 {
     fapi2::ReturnCode l_rc;
     uint64_t l_c4 = 0;
 
-    // Translate from DIMM DQ format to C4 using wiring data
-    // Note: the wiring data maps from dimm dq format to c4 format
-    l_c4 = i_wiringData[i_ps][i_dimm_dq];
-
-    // determine whether this is a Nimbus or Cumulus chip
-    TARGETING::Target * masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-    TARGETING::ATTR_MODEL_type procType =
-        masterProc->getAttr<TARGETING::ATTR_MODEL>();
+    TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
     if ( TARGETING::MODEL_NIMBUS == procType )
     {
+
+        // Translate from DIMM DQ format to C4 using wiring data
+        // Note: the wiring data maps from dimm dq format to c4 format
+        l_c4 = i_wiringData.nimbus[i_ps][i_dimm_dq];
+
         Target<TARGET_TYPE_MCA> l_fapiMca =
             i_fapiDimm.getParent<TARGET_TYPE_MCA>();
 
@@ -1141,6 +1209,11 @@ ReturnCode __dimmDqToMcLogicalHelper(
     }
     else if ( TARGETING::MODEL_CUMULUS == procType )
     {
+
+        // Translate from DIMM DQ format to C4 using wiring data
+        // Note: the wiring data maps from dimm dq format to c4 format
+        l_c4 = i_wiringData.cumulus[i_dimm_dq];
+
         // For Cumulus, C4 to MC Logical is 1-to-1
         o_mcPin = l_c4;
     }
@@ -1160,8 +1233,7 @@ ReturnCode __dimmDqToMcLogical( const Target<TARGET_TYPE_ALL>& i_fapiDimm,
     uint8_t i_dimmDq_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
     uint8_t (&o_mcLogical_bitmap)[mss::MAX_RANK_PER_DIMM]
                                  [mss::BAD_DQ_BYTE_COUNT],
-    uint8_t  i_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS],
-    uint32_t i_ps )
+    wiringData i_wiringData, uint32_t i_ps )
 {
     fapi2::ReturnCode l_rc;
 
@@ -1243,7 +1315,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
             break;
         }
 
-        uint8_t  l_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
+        wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
         uint32_t l_ps = 0;
 
@@ -1402,7 +1474,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
             break;
         }
 
-        uint8_t  l_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
+        wiringData l_wiringData;
         uint64_t l_allMnfgFlags;
         uint32_t l_ps = 0;
 
