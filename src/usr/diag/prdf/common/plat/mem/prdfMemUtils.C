@@ -31,6 +31,9 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfParserUtils.H>
+#include <prdfMemSymbol.H>
+#include <prdfCenMbaDataBundle.H>
+#include <prdfPlatServices_common.H>
 
 #if defined(__HOSTBOOT_RUNTIME) || !defined(__HOSTBOOT_MODULE)
 //  #include <prdfCenMbaDynMemDealloc_rt.H>
@@ -51,8 +54,6 @@ using namespace CEN_SYMBOL;
 const uint8_t CE_REGS_PER_PORT = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
 
-//TODO RTC 166802
-/*
 static const char *mbsCeStatReg[][ CE_REGS_PER_PORT ] = {
                        { "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1","MBA0_MBSSYMEC2",
                          "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
@@ -61,7 +62,7 @@ static const char *mbsCeStatReg[][ CE_REGS_PER_PORT ] = {
                          "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
                          "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8" }
                           };
-*/
+
 
 static const char *mcbCeStatReg[CE_REGS_PER_PORT] =
                        {
@@ -218,9 +219,7 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
 
     int32_t o_rc = SUCCESS;
 
-    //TODO RTC 166802
-    /*
-    o_chipMark = CenSymbol(); // Initially invalid.
+    o_chipMark = MemSymbol(); // Initially invalid.
 
     do
     {
@@ -230,10 +229,9 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
             o_rc = FAIL; break;
         }
 
-        TargetHandle_t mbaTrgt = i_mbaChip->getTrgt();
-        CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-        ExtensibleChip * membufChip = mbadb->getMembChip();
-        if ( NULL == membufChip )
+        TargetHandle_t mbaTrgt = i_chip->getTrgt();
+        ExtensibleChip * membufChip = getConnectedParent(i_chip, TYPE_MEMBUF);
+        if ( nullptr == membufChip )
         {
             PRDF_ERR( PRDF_FUNC "getMembChip() failed" );
             o_rc = FAIL; break;
@@ -249,13 +247,16 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
         const bool isX4 = isDramWidthX4(mbaTrgt);
 
         // Get the current spares on this rank.
-        CenSymbol sp0, sp1, ecc;
+        MemSymbol sp0, sp1, ecc;
+
+        /* TODO RTC 157888/189221 - uncomment when mssGetSteerMux is working
         o_rc = mssGetSteerMux( mbaTrgt, i_rank, sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed." );
             break;
         }
+        */
 
         // Use this map to keep track of the total counts per DRAM.
         DramCountMap dramCounts;
@@ -263,7 +264,7 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
         const char * reg_str = NULL;
         SCAN_COMM_REGISTER_CLASS * reg = NULL;
 
-        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_MBA; regIdx++ )
+        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
         {
             reg_str = mbsCeStatReg[mbaPos][regIdx];
             reg     = membufChip->getRegister( reg_str );
@@ -284,7 +285,10 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
                 if ( 0 == count ) continue; // nothing to do
 
                 uint8_t sym  = baseSymbol + i;
-                uint8_t dram = symbol2Dram( sym, isX4 );
+
+                uint8_t dram = isX4 ? symbol2Nibble<TYPE_MBA>( sym )
+                                    : symbol2Byte  <TYPE_MBA>( sym );
+
 
                 // Keep track of the total DRAM counts.
                 dramCounts[dram].totalCount += count;
@@ -297,17 +301,18 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
                     dramCounts[dram].symbolCount++;
 
                     SymbolData symData;
-                    symData.symbol = CenSymbol::fromSymbol( mbaTrgt, i_rank,
+                    symData.symbol = MemSymbol::fromSymbol( mbaTrgt, i_rank,
                                             sym, CEN_SYMBOL::BOTH_SYMBOL_DQS );
                     if ( !symData.symbol.isValid() )
                     {
-                        PRDF_ERR( PRDF_FUNC "CenSymbol() failed: symbol=%d",
+                        PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
                                   sym );
                         o_rc = FAIL;
                         break;
                     }
                     else
                     {
+                      /* TODO RTC 157888/189221 - sp0 and sp1 aren't defined yet
                         // Check if this symbol is on any of the spares.
                         if ( ( sp0.isValid() &&
                                (sp0.getDram() == symData.symbol.getDram()) ) ||
@@ -316,6 +321,7 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
                         {
                             symData.symbol.setDramSpared();
                         }
+                      */
                         if ( ecc.isValid() &&
                              (ecc.getDram() == symData.symbol.getDram()) )
                         {
@@ -354,15 +360,20 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
 
         if ( 0 != highestCount )
         {
-            uint8_t sym = dram2Symbol( highestDram, isX4 );
-            o_chipMark  = CenSymbol::fromSymbol( mbaTrgt, i_rank, sym );
+            uint8_t sym = isX4 ? nibble2Symbol<TYPE_MBA>( highestDram )
+                               : byte2Symbol  <TYPE_MBA>( highestDram );
+            PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
+            o_chipMark  = MemSymbol::fromSymbol( mbaTrgt, i_rank, sym );
+
+            /* TODO RTC 157888/18922uncomment when mssGetSteerMux is working1 - sp0 and sp1 aren't defined yet
             // Check if this symbol is on any of the spares.
             if ( ( sp0.isValid() && (sp0.getDram() == o_chipMark.getDram()) ) ||
                  ( sp1.isValid() && (sp1.getDram() == o_chipMark.getDram()) ) )
             {
                 o_chipMark.setDramSpared();
             }
+            */
             if ( ecc.isValid() && (ecc.getDram() == o_chipMark.getDram()) )
             {
                 o_chipMark.setEccSpared();
@@ -374,10 +385,10 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "Failed: i_mbaChip=0x%08x i_rank=m%ds%d i_thr=%d",
-                  i_mbaChip->GetId(), i_rank.getMaster(), i_rank.getSlave(),
+                  i_chip->GetId(), i_rank.getMaster(), i_rank.getSlave(),
                   i_thr );
     }
-    */
+
     return o_rc;
 
     #undef PRDF_FUNC
@@ -418,29 +429,23 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 {
     #define PRDF_FUNC "[MemUtils::getDramSize] "
 
-    uint8_t o_rc = 0;
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    /* TODO RTC 166802 - consider using ATTR_EFF_DRAM_DENSITY as well.
+    uint8_t o_size = 0;
+
     do
     {
-        CenMbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-        ExtensibleChip * membufChip = mbadb->getMembChip();
-        if ( NULL == membufChip )
-        {
-            PRDF_ERR( PRDF_FUNC "getMembChip() failed: MBA=0x%08x",
-                      getHuid(mbaTrgt) );
-            o_rc = FAIL; break;
-        }
+        ExtensibleChip * membufChip = getConnectedParent(i_chip, TYPE_MEMBUF);
 
-        uint32_t pos = getTargetPosition(mbaTrgt);
+        uint32_t pos = i_chip->getPos();
         const char * reg_str = (0 == pos) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
 
         SCAN_COMM_REGISTER_CLASS * reg = membufChip->getRegister( reg_str );
-        o_rc = reg->Read();
-        if ( SUCCESS != o_rc )
+        uint32_t rc = reg->Read();
+        if ( SUCCESS != rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on %s. Target=0x%08x",
-                      reg_str, getHuid(mbaTrgt) );
+                      reg_str, i_chip->getHuid() );
             break;
         }
 
@@ -450,12 +455,10 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
         o_size = 1 << (reg->GetBitFieldJustified(6,2) + 1);
 
     } while(0);
-    */
 
-    return o_rc;
+    return o_size;
 
     #undef PRDF_FUNC
-
 }
 
 //------------------------------------------------------------------------------
@@ -495,7 +498,7 @@ uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip )
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 166802
+/* TODO RTC 136123
 int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -534,13 +537,13 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
 
         // Indicate that cleanup is required.
         P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
-        ExtensibleChip * membChip = mcsdb->getMembChip();
+        ExtensibleChip * membChip =  mcsdb->getMembChip();
         if ( NULL == membChip )
         {
             PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL" );
             o_rc = FAIL; break;
         }
-        CenMembufDataBundle * mbdb = getMembufDataBundle( membChip );
+        MembufDataBundle * mbdb = getMembufDataBundle( membChip );
         mbdb->iv_doChnlFailCleanup = true;
 
     } while (0);
@@ -697,7 +700,6 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
 
     #undef PRDF_FUNC
 }
-
 //------------------------------------------------------------------------------
 */
 } // end namespace MemUtils

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,11 +103,11 @@ int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
 /**
  * @brief  Gets DRAM size for an MBA or MCA.
  * @param  i_chip     MBA or MCA chip.
- * @param  i_dimmSlct DIMM select.
+ * @param  i_dimmSlct DIMM select. Optional for MBA chip.
  * @return size for a DRAM
  */
 template<TARGETING::TYPE T>
-uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct );
+uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct = 0 );
 
 /**
  * @brief  Check for channel fail attentions on the MCS side of the DMI bus.

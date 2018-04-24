@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <prdfExtensibleChip.H>
 
 // Platform includes
-//#include <prdfCenMbaDataBundle.H> TODO RTC 166802
+#include <prdfCenMbaDataBundle.H>
 //#include <prdfMbaDomain.H> TODO RTC 157888
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
@@ -95,11 +95,9 @@ int32_t analyzeIplCEStats( TargetHandle_t i_trgt, bool &o_calloutMade )
     }
     else if ( TYPE_MBA == type )
     {
-        /* TODO: RTC 166802
         // Analyze the CE stats for the MBA.
-        CenMbaDataBundle * db = getMbaDataBundle( chip );
+        MbaDataBundle * db = getMbaDataBundle( chip );
         o_calloutMade = db->getIplCeStats()->analyzeStats();
-        */
     }
     else
     {
