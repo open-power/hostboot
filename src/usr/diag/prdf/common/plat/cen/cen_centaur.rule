@@ -1234,12 +1234,12 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[9]
      *  CACHE_SRW_CE
      */
-    (rMBSFIR, bit(9)) ? TBDDefaultCallout;
+    (rMBSFIR, bit(9)) ? l4_cache_srw_ce;
 
     /** MBSFIR[10]
      *  CACHE_SRW_UE
      */
-    (rMBSFIR, bit(10)) ? TBDDefaultCallout;
+    (rMBSFIR, bit(10)) ? l4_cache_srw_ue_UERE;
 
     /** MBSFIR[11]
      *  CACHE_SRW_SUE
@@ -1249,12 +1249,12 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[12]
      *  CACHE_CO_CE
      */
-    (rMBSFIR, bit(12)) ? TBDDefaultCallout;
+    (rMBSFIR, bit(12)) ? l4_cache_co_ce;
 
     /** MBSFIR[13]
      *  CACHE_CO_UE
      */
-    (rMBSFIR, bit(13)) ? TBDDefaultCallout;
+    (rMBSFIR, bit(13)) ? l4_cache_co_ue_UERE;
 
     /** MBSFIR[14]
      *  CACHE_CO_SUE

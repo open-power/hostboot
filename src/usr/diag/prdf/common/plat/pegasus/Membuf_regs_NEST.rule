@@ -199,14 +199,6 @@
         capture     group FirRegs;
     };
 
-    register MBSFIR_AND
-    {
-        name        "MBU.MBS.MBS_FIR_REG AND";
-        scomaddr    0x02011401;
-        capture     group never;
-        access      write_only;
-    };
-
     register MBSFIR_MASK
     {
         name        "MBU.MBS.MBS_FIR_MASK_REG";
@@ -937,14 +929,3 @@
         capture     group never;
     };
 
-    ############################################################################
-    #  L4 cache trapped address.
-    #  This is FFDC only register.
-    ############################################################################
-
-    register MBCELOG
-    {
-        name        "MBU.MBS.MBCELOGQ";
-        scomaddr    0x02011416;
-        capture     group L4CacheErr;
-    };

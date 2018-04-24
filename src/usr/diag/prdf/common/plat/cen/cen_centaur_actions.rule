@@ -1,0 +1,68 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/cen/cen_centaur_actions.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2018
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+/** Callout the connected L4 */
+actionclass calloutL4 { callout(connected(TYPE_L4), MRU_MED); };
+
+/** L4 cache SRW CE */
+actionclass l4_cache_srw_ce
+{
+    calloutL4;
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_CEN_L4_CACHE_CES));
+    funccall("CaptureL4CacheErr");
+    funccall("ClearServiceCallFlag");
+    funccall("ClearMbsSecondaryBits");
+};
+
+/** L4 cache SRW UE */
+actionclass l4_cache_srw_ue_UERE
+{
+    calloutL4;
+    threshold1;
+    funccall("CaptureL4CacheErr");
+    funccall("MaskMbsSecondaryBits");
+    SueSource;
+};
+
+/** L4 cache CO UE */
+actionclass l4_cache_co_ce
+{
+    calloutL4;
+    threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_CEN_L4_CACHE_CES));
+    funccall("CaptureL4CacheErr");
+    funccall("ClearServiceCallFlag");
+    funccall("ClearMbaCalSecondaryBits");
+};
+
+/** L4 cache CO UE */
+actionclass l4_cache_co_ue_UERE
+{
+    calloutL4;
+    threshold1;
+    funccall("CaptureL4CacheErr");
+    funccall("MaskMbaCalSecondaryBits");
+    SueSource;
+};
+

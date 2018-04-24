@@ -638,12 +638,12 @@ group gMbsFir filter singlebit,
     /** MBSFIR[9]
      *  MBS_FIR_REG_CACHE_SRW_CE
      */
-    (MbsFir, bit(9)) ? clearSecMbsBitsAndLineDelete;
+    (MbsFir, bit(9)) ? l4_cache_srw_ce;
 
     /** MBSFIR[10]
      *  MBS_FIR_REG_CACHE_SRW_UE
      */
-    (MbsFir, bit(10)) ? maskSecMbsBitsAndConnL4UE;
+    (MbsFir, bit(10)) ? l4_cache_srw_ue_UERE;
 
     /** MBSFIR[11]
      *  MBS_FIR_REG_CACHE_SRW_SUE
@@ -653,12 +653,12 @@ group gMbsFir filter singlebit,
     /** MBSFIR[12]
      *  MBS_FIR_REG_CACHE_CO_CE
      */
-    (MbsFir, bit(12)) ? clearSecMbaCalBitsAndLineDelete;
+    (MbsFir, bit(12)) ? l4_cache_co_ce;
 
     /** MBSFIR[13]
      *  MBS_FIR_REG_CACHE_CO_UE
      */
-    (MbsFir, bit(13)) ? maskSecMbaCalBitsAndConnL4UE;
+    (MbsFir, bit(13)) ? l4_cache_co_ue_UERE;
 
     /** MBSFIR[14]
      *  MBS_FIR_REG_CACHE_CO_SUE

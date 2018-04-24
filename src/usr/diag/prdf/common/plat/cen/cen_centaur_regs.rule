@@ -39,6 +39,14 @@
     # Centaur chip MBSFIR
     ############################################################################
 
+    register MBSFIR_AND
+    {
+        name        "Centaur chip MBSFIR atomic AND";
+        scomaddr    0x02011401;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBSFIR_MASK_OR
     {
         name        "Centaur chip MBSFIR MASK atomic OR";
@@ -123,4 +131,14 @@
         capture     group MaintCmdRegs_mba1;
     };
 
+    ############################################################################
+    # L4 cache address trap
+    ############################################################################
+
+    register MBCELOG
+    {
+        name        "MBU.MBS.MBCELOGQ";
+        scomaddr    0x02011416;
+        capture     group L4CacheErr;
+    };
 
