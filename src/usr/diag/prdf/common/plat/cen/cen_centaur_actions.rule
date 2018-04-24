@@ -59,6 +59,62 @@ actionclass l4_th_32perDay { calloutL4; threshold32pday; };
 /** Callout the connected L4, threshold 1, SUE source */
 actionclass l4_th_1_UERE { l4_th_1; SueSource; };
 
+/** PLL error */
+actionclass pll_unlock_UERE
+{
+    # These FIR bits should never trigger directly themselves in the rule code.
+    # Instead, They should be handled by global PRD PLL isolation code. We will
+    # add a threshold here to prevent flooding, just in case.
+    threshold32pday;
+};
+
+/** Callout the DMI BUS interface */
+actionclass calloutBusInterface_dmibus
+{
+# TODO: RTC 144057
+#    funccall("calloutBusInterfacePlugin");
+};
+
+/** Callout the DMI BUS interface, threshold 1 */
+actionclass calloutBusInterface_dmibus_th1
+{
+    calloutBusInterface_dmibus;
+    threshold1;
+};
+
+/** Callout the DMI BUS interface, threshold 1 */
+actionclass calloutBusInterface_dmibus_th1_UERE
+{
+    calloutBusInterface_dmibus;
+    threshold1;
+    SueSource;
+};
+
+/** Lane Repair: spare deployed */
+actionclass spareDeployed_dmibus
+{
+    calloutBusInterface_dmibus;
+# TODO: RTC 144057
+#    funccall("spareDeployed");
+};
+
+/** Lane Repair: max spares exceeded */
+actionclass maxSparesExceeded_dmibus_UERE
+{
+    calloutBusInterface_dmibus_th1;
+# TODO: RTC 144057
+#    funccall("maxSparesExceeded");
+    SueSource; # channel failure
+};
+
+/** Lane Repair: too many bus errors */
+actionclass tooManyBusErrors_dmibus
+{
+    calloutBusInterface_dmibus_th1;
+# TODO: RTC 144057
+#    funccall("tooManyBusErrors");
+};
+
 /** L4 cache SRW CE */
 actionclass l4_cache_srw_ce
 {
