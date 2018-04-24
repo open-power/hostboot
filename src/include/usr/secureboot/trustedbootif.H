@@ -41,6 +41,7 @@
 #include <secureboot/containerheader.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <config.h>
 
 namespace TRUSTEDBOOT
 {
@@ -232,6 +233,32 @@ namespace TRUSTEDBOOT
         const TpmTarget* i_pTpm,
               uint64_t   i_xscomAddr,
               uint32_t   i_i2cMasterOffset);
+
+    #ifdef CONFIG_TPMDD
+    /**
+     *  @brief Generate random numbers via TPM hardware.
+     *
+     *  @parm[in] i_pTpm Pointer to TPM target. In order to succeed, it cannot
+     *            be null and must be a TPM target pointer. The TPM target must
+     *            be functional. All of these conditions must be met or an error
+     *            log will result.
+     *
+     *  @parm[out] o_randNum A uint64_t reference to be filled with random bits.
+     *
+     *  @return errlHndl_t nullptr on success or an error log pointer on failure
+     */
+    errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum);
+    #endif
+
+    /**
+     *  @brief Helper function for validating TPM handles. Returns an error log
+     *         if the supplied TPM is null, not a TPM target, or not functional.
+     *
+     *  @parm[in] i_pTpm Pointer to the TPM target to be checked.
+     *
+     *  @return errlHndl_t nullptr if valid or error log otherwise.
+     */
+    errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm);
 
     /**
      * @brief Checks whether the node has a present and functioning primary TPM.

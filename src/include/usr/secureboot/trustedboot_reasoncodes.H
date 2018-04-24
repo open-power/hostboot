@@ -58,7 +58,6 @@ namespace TRUSTEDBOOT
         MOD_TPM_SYNCRESPONSE                = 0x0C,
         MOD_TPM_SEPARATOR                   = 0x0D,
         MOD_TPM_CMD_GETCAPNVINDEX           = 0x0E,
-
         MOD_TPMLOGMGR_INITIALIZE            = 0x10,
         MOD_TPMLOGMGR_ADDEVENT              = 0x11,
         MOD_TPMLOGMGR_INITIALIZEEXISTLOG    = 0x12,
@@ -66,7 +65,9 @@ namespace TRUSTEDBOOT
         MOD_TPM_MARK_FAILED                 = 0x14,
         MOD_INIT_BACKUP_TPM                 = 0x15,
         MOD_DO_INIT_BACKUP_TPM              = 0x16,
-        MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM = 0x17
+        MOD_TEST_CMP_PRIMARY_AND_BACKUP_TPM = 0x17,
+        MOD_TPM_GETRANDOM                   = 0x18,
+        MOD_VALIDATE_TPM_HANDLE             = 0x19,
    };
 
     enum TRUSTEDReasonCode
@@ -97,6 +98,9 @@ namespace TRUSTEDBOOT
         RC_TPM_NVINDEX_VALIDATE_FAIL     = TRBOOT_COMP_ID | 0xB5,
         RC_TPMLOGMGR_INITIALIZE_FAIL     = TRBOOT_COMP_ID | 0xB6,
         RC_BACKUP_TPM_TEST_FAIL          = TRBOOT_COMP_ID | 0xB7,
+        RC_INVALID_TPM_HANDLE            = TRBOOT_COMP_ID | 0xB8,
+        RC_NON_FUNCTIONAL_TPM_HANDLE     = TRBOOT_COMP_ID | 0xB9,
+        RC_UNREACHABLE_TPM               = TRBOOT_COMP_ID | 0xBA,
     };
 #ifdef __cplusplus
 }

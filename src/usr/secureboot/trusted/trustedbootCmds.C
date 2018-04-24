@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,6 +237,14 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
               }
               break;
 
+          case TPM_CC_GetRandom:
+              {
+                  auto cmdPtr = reinterpret_cast<TPM2_2ByteIn*>(i_cmd);
+                  sBuf = TPM2_2ByteIn_marshal(cmdPtr, sBuf,
+                                              i_bufsize, o_cmdSize);
+              }
+              break;
+
           default:
               {
                   // Command code not supported
@@ -382,6 +390,14 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                   sBuf = TPM2_PcrReadOut_unmarshal(respPtr, sBuf,
                                                    &i_respBufSize,
                                                    i_outBufSize);
+              }
+              break;
+
+          case TPM_CC_GetRandom:
+              {
+                  auto respPtr = reinterpret_cast<TPM2_GetRandomOut*>(o_outBuf);
+                  sBuf = TPM2B_DIGEST_unmarshal(&respPtr->randomBytes, sBuf,
+                                                &i_respBufSize);
               }
               break;
 

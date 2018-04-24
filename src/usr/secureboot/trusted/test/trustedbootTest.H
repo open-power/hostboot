@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
 #include "../tpmLogMgr.H"
+#include <config.h>
 
 using namespace TRUSTEDBOOT;
 
@@ -883,6 +884,53 @@ class TrustedBootTest: public CxxTest::TestSuite
 
         TRACFCOMP( g_trac_trustedboot,
                    EXIT_MRK "testReadPCR: %d/%d fails",
+                   fails, num_ops );
+    }
+
+    /**
+     * @brief TPM GetRandom
+     */
+    void testGetRandom ( void )
+    {
+        TRACFCOMP( g_trac_trustedboot,
+                   ENTER_MRK "testGetRandom" );
+
+        errlHndl_t err = nullptr;
+        size_t fails = 0;
+        size_t num_ops = 0;
+
+        // Just for fun generate random numbers for each of the TPMs
+        TARGETING::TargetHandleList tpmList;
+        TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_FUNCTIONAL);
+        for (auto pTpm: tpmList)
+        {
+            uint64_t randNum = 0;
+            err = TRUSTEDBOOT::GetRandom(pTpm, randNum);
+            num_ops ++;
+            if(err)
+            {
+                fails++;
+                TS_FAIL( "testGetRandom: Error detected" );
+                errlCommit( err,
+                            TRBOOT_COMP_ID );
+                delete err;
+                err = nullptr;
+            }
+            else if (randNum == 0) // if random number is zero still
+            {
+                fails++;
+                TS_FAIL( "testGetRandom: got zero for a random number");
+            }
+            else
+            {
+
+                TRACUCOMP(g_trac_trustedboot, "testGetRandom: GetRandom returned as expected. Random number 0x%.16llX",randNum);
+            }
+
+        }
+
+        TRACFCOMP( g_trac_trustedboot,
+                   EXIT_MRK "testGetRandom: %d/%d fails",
                    fails, num_ops );
     }
 };
