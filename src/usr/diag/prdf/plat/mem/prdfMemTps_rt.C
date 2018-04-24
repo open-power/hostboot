@@ -46,8 +46,7 @@ using namespace PlatServices;
 const uint8_t CE_REGS_PER_PORT = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
 
-//TODO RTC 166802
-/*
+/* // We will need this for MBA TPS.
 static const char *mbsCeStatReg[][ CE_REGS_PER_PORT ] = {
                        { "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1","MBA0_MBSSYMEC2",
                          "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
