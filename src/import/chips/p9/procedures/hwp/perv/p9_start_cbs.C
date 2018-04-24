@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,7 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     FAPI_DBG("Setting up hreset to 0");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
     l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR0>();
+    l_data32.clearBit<PERV_SB_CS_START_RESTART_VECTOR1>();
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
 
     FAPI_DBG("check for VDN_PGOOD");
