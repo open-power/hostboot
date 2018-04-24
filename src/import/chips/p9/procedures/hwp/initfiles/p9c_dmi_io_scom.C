@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@ constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_0b000111 = 0b000111;
 constexpr uint64_t literal_0b1010 = 0b1010;
 constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b0010111 = 0b0010111;
 constexpr uint64_t literal_0b00010 = 0b00010;
 constexpr uint64_t literal_0b0001 = 0b0001;
@@ -70,7 +71,6 @@ constexpr uint64_t literal_0b0000000000000000 = 0b0000000000000000;
 constexpr uint64_t literal_0b00000000 = 0b00000000;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0b1100 = 0b1100;
-constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b0010000 = 0b0010000;
 
 fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0,
@@ -4240,7 +4240,7 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_OFF = 0x0;
             l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_OFF );
-            l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b01 );
+            l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b00 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008c0600701103full, l_scom_buffer));
         }
         {
