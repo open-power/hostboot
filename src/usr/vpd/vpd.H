@@ -258,6 +258,7 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
                                                  vpdKeyword & io_partKeyword,
                                                  vpdKeyword & io_serialKeyword);
 
-}; //end VPD namespace
+void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
+}; //end VPD namespace
 #endif

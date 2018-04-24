@@ -136,3 +136,10 @@ config PALMETTO_PASS1
     default n
     help
         Palmetto pass1 specific changes
+
+config UPDATE_SN_FROM_BMC
+    default n
+    depends on BMC_IPMI
+    help
+        Read Planar serial number from BMC
+        via IPMI FRU Record 0
