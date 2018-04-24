@@ -121,90 +121,6 @@ int32_t CheckForRecovered(ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 /**
- * @brief  MBA0 is always analyzed before MBA1 in the rule code.
- *         This plugin will help prevent starvation of MBA1.
- * @param  i_membChip The Centaur Membuf chip.
- * @param  i_sc     The step code data struct.
- * @return FAIL if MBA1 is not analyzed.
- */
-int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
-                         STEP_CODE_DATA_STRUCT & i_sc )
-{
-    using namespace TARGETING;
-    CenMembufDataBundle * l_membdb = getMembufDataBundle(i_membChip);
-
-    do
-    {
-        ExtensibleChip * mba1Chip = l_membdb->getMbaChip(1);
-        if ( NULL == mba1Chip ) break; // No MBA1 target, exit early
-
-        if ( l_membdb->iv_analyzeMba1Starvation )
-        {
-            // Get the mem chiplet register
-            SCAN_COMM_REGISTER_CLASS * l_memcFir = NULL;
-            uint32_t l_checkBits = 0;
-            switch ( i_sc.service_data->getSecondaryAttnType() )
-            {
-                case CHECK_STOP:
-                    l_memcFir = i_membChip->getRegister("MEM_CHIPLET_CS_FIR");
-                    // mba1 CS: bits 7, 8, 10, 13
-                    l_checkBits = 0x01A40000;
-                    break;
-                case RECOVERABLE:
-                    l_memcFir = i_membChip->getRegister("MEM_CHIPLET_RE_FIR");
-                    // mba1 RE: bits 5, 6, 8, 11
-                    l_checkBits = 0x06900000;
-                    break;
-                case SPECIAL:
-                    l_memcFir = i_membChip->getRegister("MEM_CHIPLET_SPA");
-                    // mba1 SA: bit 1
-                    l_checkBits = 0x40000000;
-                    break;
-                default: ;
-            }
-
-            if( NULL == l_memcFir )
-            {
-                break;
-            }
-
-            // Check if MBA1 from Mem Chiplet is reporting an attention
-            int32_t l_rc = l_memcFir->Read();
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR("[MBA1_Starvation] SCOM fail on 0x%08x",
-                         i_membChip->GetId());
-                break;
-            }
-
-            uint32_t l_val = l_memcFir->GetBitFieldJustified(0,32);
-            if ( 0 == ( l_val & l_checkBits ) )
-            {
-                break; // No MBA1 attentions
-            }
-
-            // MBA0 takes priority next
-            l_membdb->iv_analyzeMba1Starvation = false;
-
-            // Analyze MBA1
-            return mba1Chip->Analyze( i_sc,
-                                i_sc.service_data->getSecondaryAttnType() );
-        }
-        else
-        {
-            // MBA1 takes priority next
-            l_membdb->iv_analyzeMba1Starvation = true;
-        }
-
-    } while (0);
-
-    return FAIL;
-}
-PRDF_PLUGIN_DEFINE( Membuf, MBA1_Starvation );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief Analysis code that is called before the main analyze() function.
  * @param i_mbChip A MEMBUF chip.
  * @param i_sc Step Code Data structure
@@ -939,32 +855,6 @@ int32_t internalTimeout( ExtensibleChip * i_mbChip,
     #undef PRDF_FUNC
 
 } PRDF_PLUGIN_DEFINE( Membuf, internalTimeout );
-
-//------------------------------------------------------------------------------
-
-/**
- * @brief   Checks DD level. If DD1, implements the DD1 callout actions for
- *          MBSFIR bit 30.
- * @param   i_membChip Centaur chip
- * @param   i_sc       Step code data struct
- * @returns SUCCESS if DD1, FAIL otherwise
- */
-int32_t mbsfirBit30_dd1( ExtensibleChip * i_membChip,
-                         STEP_CODE_DATA_STRUCT & i_sc )
-{
-    int32_t l_rc = FAIL;
-    TargetHandle_t l_membTrgt = i_membChip->GetChipHandle();
-    if(0x20 > getChipLevel(l_membTrgt))
-    {
-        i_sc.service_data->SetCallout(l_membTrgt, MRU_MED);
-        ClearServiceCallFlag(i_membChip, i_sc);
-        i_sc.service_data->SetErrorSig( PRDFSIG_MbsFir_30_DD1Signature );
-        l_rc = SUCCESS;
-    }
-
-    return l_rc;
-}
-PRDF_PLUGIN_DEFINE( Membuf, mbsfirBit30_dd1 );
 
 //------------------------------------------------------------------------------
 
