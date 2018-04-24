@@ -2478,11 +2478,12 @@
   </attribute>
 
   <attribute>
-    <description>Entity path of the peer target of an Abus
+    <description>Entity path of the peer target of a bus target
     </description>
     <id>PEER_PATH</id>
     <nativeType>
       <name>EntityPath</name>
+      <default>physical:na</default>
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable></readable>

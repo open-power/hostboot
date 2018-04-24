@@ -6598,7 +6598,10 @@
     </attribute>
 
 
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
 
 
 
@@ -6649,7 +6652,10 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -6727,7 +6733,10 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -6805,7 +6814,10 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:na</default>
+    </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>

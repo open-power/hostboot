@@ -5223,6 +5223,10 @@ sub generate_xbus
         <id>PEER_TARGET</id>
         <default>$peerPhysPath</default>
     </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
+        <default>$peerPhysPath</default>
+    </attribute>
     <compileAttribute>
         <id>PEER_HUID</id>
         <default>${peerHuid}</default>

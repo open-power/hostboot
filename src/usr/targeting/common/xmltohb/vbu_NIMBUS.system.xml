@@ -5042,6 +5042,10 @@
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
     </attribute>
@@ -5080,6 +5084,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
     <attribute>
@@ -8366,6 +8374,10 @@
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
     <attribute>
+        <id>PEER_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-1/perv-6</default>
     </attribute>
@@ -8408,6 +8420,10 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>PEER_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
     <attribute>

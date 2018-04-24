@@ -1714,6 +1714,10 @@
     <id>PEER_TARGET</id>
   </attribute>
   <attribute>
+    <id>PEER_PATH</id>
+    <default>physical:na</default>
+  </attribute>
+  <attribute>
     <default>FABRIC</default>
     <id>CDM_DOMAIN</id>
   </attribute>
@@ -1794,7 +1798,7 @@
     <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
     <attribute><id>HUID</id></attribute>
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0</default> 
+        <default>0</default>
     </attribute>
 </targetType>
 
@@ -1922,6 +1926,10 @@
   </attribute>
   <attribute>
     <id>PEER_TARGET</id>
+  </attribute>
+  <attribute>
+    <id>PEER_PATH</id>
+    <default>physical:na</default>
   </attribute>
   <attribute>
     <default>FABRIC</default>
