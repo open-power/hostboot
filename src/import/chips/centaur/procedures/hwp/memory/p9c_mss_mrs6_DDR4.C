@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,9 @@
 #include <cen_gen_scom_addresses.H>
 #include <p9c_mss_mrs6_DDR4.H>
 #include <dimmConsts.H>
+#include <generic/memory/lib/utils/c_str.H>
 
+using mss::c_str;
 extern "C"
 {
     ///
@@ -59,7 +61,7 @@ extern "C"
         for (uint8_t l_port_number = 0; l_port_number < 2; ++l_port_number)
         {
             // Step four: Load MRS Setting
-            FAPI_INF("Loading MRS6 for port %d", l_port_number);
+            FAPI_DBG("%s Loading MRS6 for port %d", c_str(i_target), l_port_number);
             FAPI_TRY(mss_mr6_loader(i_target, l_port_number, l_ccs_inst_cnt), " mrs_load Failed");
         }
 
@@ -115,7 +117,7 @@ extern "C"
         fapi2::variable_buffer l_rank_cal_4(4);
         fapi2::variable_buffer l_cal_enable_1(1);
         fapi2::variable_buffer l_ccs_end_1(1);
-        FAPI_INF("\n Running NO -OP command");
+        FAPI_DBG("%s Running NO -OP command", c_str(i_target_mba));
         fapi2::buffer<uint8_t> l_data_8;
         fapi2::buffer<uint16_t> l_data_16;
         uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
@@ -135,7 +137,7 @@ extern "C"
 
         if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
         {
-            FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
+            FAPI_DBG( "%s =============  Got in the 3DS stack loop CKE !!!!=====================", c_str(i_target_mba));
             FAPI_TRY(l_csn_8.clearBit(2, 2));
             FAPI_TRY(l_csn_8.clearBit(6, 2));
             FAPI_TRY(l_cke_4.clearBit(1));
@@ -227,7 +229,8 @@ extern "C"
         uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_tccd_l = 0; //tccd_l  -  NEW
 
-        FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR PORT %d +++++++++++++++++++++", i_port_number);
+        FAPI_DBG( "%s +++++++++++++++++++++ LOADING MRS SETTINGS FOR PORT %d +++++++++++++++++++++", c_str(i_target),
+                  i_port_number);
 
         FAPI_TRY(l_activate_1.setBit(0));
         FAPI_TRY(l_rasn_1.clearBit(0));
@@ -269,14 +272,14 @@ extern "C"
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
 
-        FAPI_INF( "Stack Type: %d\n", l_dram_stack[0][0]);
+        FAPI_DBG( "%s Stack Type: %d", c_str(i_target), l_dram_stack[0][0]);
 
         //MRS6
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, i_target, l_vrefdq_train_value));
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_RANGE, i_target, l_vrefdq_train_range));
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target, l_vrefdq_train_enable));
 
-        FAPI_INF("enable attribute %d", l_vrefdq_train_enable[0][0][0]);
+        FAPI_DBG("%s enable attribute %d", c_str(i_target), l_vrefdq_train_enable[0][0][0]);
 
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_TCCD_L, i_target, l_tccd_l));
 
@@ -339,14 +342,15 @@ extern "C"
 
             if (l_num_ranks == 0)
             {
-                FAPI_INF( "PORT%d DIMM%d not configured. Num_ranks: %d ", i_port_number, l_dimm_number, l_num_ranks);
+                FAPI_INF( "%s PORT%d DIMM%d not configured. Num_ranks: %d ", c_str(i_target), i_port_number, l_dimm_number,
+                          l_num_ranks);
             }
             else
             {
                 // Rank 0-3
                 for ( l_rank_number = 0; l_rank_number < l_num_ranks; l_rank_number ++)
                 {
-                    FAPI_INF( "MRS SETTINGS FOR PORT%d DIMM%d RANK%d", i_port_number, l_dimm_number, l_rank_number);
+                    FAPI_DBG( "%s MRS SETTINGS FOR PORT%d DIMM%d RANK%d", c_str(i_target), i_port_number, l_dimm_number, l_rank_number);
 
                     FAPI_TRY(l_csn_8.setBit(0, 8));
                     FAPI_TRY(l_address_16.clearBit(0, 16));
@@ -389,7 +393,7 @@ extern "C"
 
                     FAPI_TRY(l_mrs6.extract(l_MRS6, 0, 16));
 
-                    FAPI_INF( "MRS 6: 0x%04X", l_MRS6);
+                    FAPI_DBG( "%s MRS 6: 0x%04X", c_str(i_target), l_MRS6);
 
 
                     // Only corresponding CS to rank
@@ -398,7 +402,7 @@ extern "C"
 
                     if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
                     {
-                        FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
+                        FAPI_DBG( "%s =============  Got in the 3DS stack loop CKE !!!!=====================", c_str(i_target));
                         FAPI_TRY(l_csn_8.clearBit(2, 2));
                         FAPI_TRY(l_csn_8.clearBit(6, 2));
                         FAPI_TRY(l_cke_4.clearBit(1));

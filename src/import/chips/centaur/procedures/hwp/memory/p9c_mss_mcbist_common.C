@@ -590,7 +590,7 @@ extern "C"
 
         if (*o_mcb_status == 1)
         {
-            FAPI_DBG("poll_mcb: MCBIST failed");
+            FAPI_DBG("%s poll_mcb: MCBIST failed", mss::c_str(i_target_mba));
             return fapi2::FAPI2_RC_FALSE;
         }
 
@@ -634,7 +634,7 @@ extern "C"
         uint8_t l_marray0[DIMM_DQ_SPD_DATA_SIZE] = { 0 };
         uint8_t l_num, io_num, l_inter, l_num2, l_index2;
         fapi2::variable_buffer l_data_buffer1_64(64), l_data_buffer3_64(64);
-        FAPI_INF("Function MCB_ERROR_MAP_PRINT");
+        FAPI_DBG("%s Function MCB_ERROR_MAP_PRINT", mss::c_str(i_target_mba));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_mba,  l_mba_position));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  dram_stack));
