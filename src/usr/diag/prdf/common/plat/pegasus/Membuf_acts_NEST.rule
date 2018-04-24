@@ -60,18 +60,11 @@ actionclass mba1MemoryUe
     try ( funccall("handleSingleMbaCalParityErr1"), analyzeFetchUe1 );
 };
 
-/** Clear MBS SecondaryBits and calloutDmiBusTh1UE */
+/** Clear MBS SecondaryBits and calloutBusInterface_dmibus_th1_UERE */
 actionclass clearSecMbsBitsCalloutDmiBusTh1UE
 {
     funccall("ClearMbsSecondaryBits");
-    calloutDmiBusTh1UE;
-};
-
-/** Callout the DMI bus, threshold 1 */
-actionclass calloutDmiBusTh1UE
-{
-    calloutDmiBusTh1;
-    SUEGenerationPoint;
+    calloutBusInterface_dmibus_th1_UERE;
 };
 
 /** Callout the DMI bus, threshold 1 */
@@ -85,14 +78,6 @@ actionclass analyzeSpareBitAndThr
 {
     try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
 };
-
-/** Lane Repair: spare deployed */
-actionclass spareDeployed
-{ calloutDmiBus; funccall("spareDeployed"); };
-
-/** Lane Repair: max spares exceeded */
-actionclass maxSparesExceeded
-{ calloutDmiBusTh1; funccall("maxSparesExceeded"); };
 
 /** Analyze a fetch MPE on MBA0 rank 0 */
 actionclass analyzeFetchMpe0_0 { funccall("AnalyzeFetchMpe0_0"); };

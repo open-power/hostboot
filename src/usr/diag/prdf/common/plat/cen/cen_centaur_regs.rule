@@ -132,6 +132,53 @@
     };
 
     ############################################################################
+    # Non-existent Registers for Capture
+    ############################################################################
+
+    register VPD_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes read from VPD";
+        scomaddr    0xFFFF0001;
+        access      no_access;
+        capture     group never;
+    };
+
+    register VPD_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes read from VPD";
+        scomaddr    0xFFFF0002;
+        access      no_access;
+        capture     group never;
+    };
+
+    register ALL_FAILED_LANES_0TO63
+    {
+        name        "Bit map 0-63 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0003;
+        access      no_access;
+        capture     group never;
+    };
+
+    register ALL_FAILED_LANES_64TO127
+    {
+        name        "Bit map 64-127 of failed lanes from io_read_erepair";
+        scomaddr    0xFFFF0004;
+        access      no_access;
+        capture     group never;
+    };
+
+    ############################################################################
+    # PLL Registers
+    ############################################################################
+
+    register CFAM_FSI_STATUS
+    {
+        name        "VI.FSI.STATUS";
+        scomaddr    0x00001007;
+        capture     group never;
+    };
+
+    ############################################################################
     # L4 cache address trap
     ############################################################################
 
