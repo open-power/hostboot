@@ -95,9 +95,9 @@ namespace RT_TARG
                 bool l_hasPeer = l_target->tryGetAttr<ATTR_PEER_TARGET>(l_peer);
                 if (l_hasPeer && (l_peer != nullptr))
                 {
-                    TRACFCOMP(g_trac_targeting,
-                          "translate peer target for=%p %x",
-                          l_target, get_huid(l_target));
+                    TRACDCOMP(g_trac_targeting,
+                            "translate the peer target %p for HUID %x",
+                            l_peer, get_huid(l_target));
 
                     ATTR_PEER_TARGET_type l_xlated = (TARGETING::Target *)
                                        Singleton<AttrRP>::instance().
@@ -116,8 +116,62 @@ namespace RT_TARG
                     else
                     {
                         TRACFCOMP(g_trac_targeting,
-                            "failed to translate peer target HUID=0x%x",
+                            "failed to translate peer target for HUID=0x%x",
                             get_huid(l_target));
+                    }
+                }
+                else if(l_hasPeer && l_peer == nullptr)
+                {
+                    TRACDCOMP(g_trac_targeting,
+                              "looking up peer path and target for HUID %x",
+                              get_huid(l_target));
+                    // Create variables entity path variable to write PEER_PATH into
+                    // as well as a Target pointer to set once we get the PEER_PATH
+                    TARGETING::EntityPath l_peerPath;
+                    TARGETING::Target * l_newTargPtr;
+
+                    // Look up the PEER_PATH attribute if it exists on the target
+                    bool l_hasPeerPath = l_target->tryGetAttr<ATTR_PEER_PATH>(l_peerPath);
+
+                    //If we find a PEER_PATH we need to next look up the PEER_TARGET
+                    if(l_hasPeerPath)
+                    {
+                        TRACDCOMP(g_trac_targeting,
+                                  "Found peer path for HUID %x",get_huid(l_target));
+                        // Look up the PEER_TARGET based on what the PEER_PATH is
+                        l_newTargPtr = targetService().toTarget(l_peerPath);
+
+                        bool l_fixed = false;
+
+                        // If the pointer returned from toTarget isn't null then
+                        // we will try to set PEER_TARGET with that value
+                        if(l_newTargPtr != nullptr)
+                        {
+                            l_fixed = l_target->_trySetAttr(ATTR_PEER_TARGET,
+                                                            sizeof(l_newTargPtr),
+                                                            &l_newTargPtr);
+                        }
+
+                        if (l_fixed)
+                        {
+                            TRACDCOMP(g_trac_targeting, "Peer target for HUID %x found to be %p",
+                                    get_huid(l_target), l_newTargPtr);
+                            l_xlateCnt++;
+                        }
+                        // Not good if could not be fixed. But might not be
+                        // referenced. A segment fault will occur if used.
+                        else
+                        {
+                            TRACFCOMP(g_trac_targeting,
+                                "failed to find peer target for HUID=0x%x",
+                                get_huid(l_target));
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_targeting,
+                                  "Failed to find peer path for HUID=0x%x",
+                                  get_huid(l_target));
                     }
                 }
             }
