@@ -1471,11 +1471,79 @@ void* tpmDaemon(void* unused)
                       NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
-            case TRUSTEDBOOT::MSG_TYPE_INIT_BACKUP_TPM:
-                {
-                    doInitBackupTpm();
-                }
-                break;
+          case TRUSTEDBOOT::MSG_TYPE_INIT_BACKUP_TPM:
+              {
+                  doInitBackupTpm();
+              }
+              break;
+          case TRUSTEDBOOT::MSG_TYPE_GETRANDOM:
+              {
+                  errlHndl_t err = nullptr;
+                  tb_msg = static_cast<TRUSTEDBOOT::Message*>(msg->extra_data);
+                  assert(tb_msg != nullptr,
+                      "Trusted boot message pointer absent in the extra data");
+                  tb_msg->iv_errl = nullptr;
+
+                  auto msgData =
+                      reinterpret_cast<struct GetRandomMsgData*>
+                      (tb_msg->iv_data);
+                  assert(msgData != nullptr,
+                      "Trusted boot message data pointer is null");
+                  auto l_pTpm = msgData->i_pTpm;
+
+                  err = validateTpmHandle(l_pTpm);
+                  if (err)
+                  {
+                      tb_msg->iv_errl = err;
+                      err = nullptr;
+                      break;
+                  }
+                  uint8_t dataBuf[sizeof(TPM2_GetRandomOut)] = {0};
+                  size_t dataSize = sizeof(dataBuf);
+                  auto cmd = reinterpret_cast<TPM2_GetRandomIn*>(dataBuf);
+                  auto resp = reinterpret_cast<TPM2_GetRandomOut*>(dataBuf);
+                  uint64_t randNum = 0;
+
+                  cmd->base.tag = TPM_ST_NO_SESSIONS;
+                  cmd->base.commandCode = TPM_CC_GetRandom;
+                  cmd->bytesRequested = sizeof(randNum);
+
+                  err = tpmTransmitCommand(l_pTpm, dataBuf, dataSize,
+                                           TPM_LOCALITY_0);
+
+                  if (err != nullptr)
+                  {
+                      TRACFCOMP( g_trac_trustedboot,
+                          ERR_MRK"TPM GetRandom Transmit Fail! huid = 0x%08X",
+                          TARGETING::get_huid(l_pTpm));
+                      auto l_errPlid = err->plid();
+                      tpmMarkFailed(l_pTpm, err);
+                      /*@
+                       * @errortype       ERRL_SEV_UNRECOVERABLE
+                       * @moduleid        MOD_TPM_TPMDAEMON
+                       * @reasoncode      RC_UNREACHABLE_TPM
+                       * @userdata1       TPM HUID or nullptr
+                       * @devdesc         Unable to reach the TPM
+                       * @custdesc        Trusted boot failure
+                       */
+                      err = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_TPM_TPMDAEMON,
+                                          RC_UNREACHABLE_TPM,
+                                          TARGETING::get_huid(l_pTpm),
+                                          0,
+                                          true);
+                      err->plid(l_errPlid);
+                      tb_msg->iv_errl = err;
+                      err = nullptr;
+                  }
+                  else
+                  {
+                      memcpy(&randNum, resp->randomBytes.buffer,sizeof(randNum));
+                      msgData->o_randNum = randNum;
+                  }
+              }
+              break;
           default:
             assert(false, "Invalid msg command");
             break;
@@ -1527,6 +1595,65 @@ void* tpmDaemon(void* unused)
 
     TRACUCOMP( g_trac_trustedboot, EXIT_MRK "TpmDaemon Thread Terminate");
     return nullptr;
+}
+
+errlHndl_t validateTpmHandle(const TpmTarget* i_pTpm)
+{
+    errlHndl_t err = nullptr;
+
+    do {
+
+    if (i_pTpm == nullptr ||
+        i_pTpm->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_TPM)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK"Invalid TPM handle passed to GetRandom() huid = 0x%08X",
+            TARGETING::get_huid(i_pTpm));
+        /*@
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        MOD_VALIDATE_TPM_HANDLE
+         * @reasoncode      RC_INVALID_TPM_HANDLE
+         * @userdata1       TPM HUID if it's not nullptr
+         * @devdesc         Caller attempted to get a random number from a TPM
+         *                  using an invalid TPM target.
+         * @custdesc        Trusted boot failure
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_VALIDATE_TPM_HANDLE,
+                                          RC_INVALID_TPM_HANDLE,
+                                          TARGETING::get_huid(i_pTpm),
+                                          0,
+                                          true);
+
+        break;
+    }
+
+    auto l_tpmHwasState = i_pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+    if (!l_tpmHwasState.functional)
+    {
+        TRACFCOMP(g_trac_trustedboot,
+            ERR_MRK"Non functional TPM handle passed to GetRandom() huid = 0x%08X",
+            TARGETING::get_huid(i_pTpm));
+       /*@
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        MOD_VALIDATE_TPM_HANDLE
+         * @reasoncode      RC_NON_FUNCTIONAL_TPM_HANDLE
+         * @userdata1       TPM HUID if it's not nullptr
+         * @devdesc         Call attempted to get a random number from a TPM
+         *                  that was not functional
+         * @custdesc        Trusted boot failure
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          MOD_VALIDATE_TPM_HANDLE,
+                                          RC_NON_FUNCTIONAL_TPM_HANDLE,
+                                          TARGETING::get_huid(i_pTpm),
+                                          0,
+                                          true);
+        break;
+    }
+
+    } while(0);
+    return err;
 }
 
 bool isTpmRequired()

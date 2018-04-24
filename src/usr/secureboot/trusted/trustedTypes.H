@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,6 +105,7 @@ namespace TRUSTEDBOOT
         // Command Codes
         TPM_CC_Startup            = 0x00000144,
         TPM_CC_GetCapability      = 0x0000017A,
+        TPM_CC_GetRandom          = 0x0000017B,
         TPM_CC_PCR_Read           = 0x0000017E,
         TPM_CC_PCR_Extend         = 0x00000182,
 
@@ -452,6 +453,22 @@ namespace TRUSTEDBOOT
                                        const uint8_t* i_tpmBuf,
                                        size_t* io_tpmBufSize,
                                        size_t i_outBufSize);
+
+    /// Incoming GetRandom structure
+    struct _TPM2_GetRandomIn
+    {
+        TPM2_BaseIn  base;
+        uint16_t bytesRequested;
+    } PACKED;
+    typedef struct _TPM2_GetRandomIn TPM2_GetRandomIn;
+
+    /// Outgoing GetRandom structure
+    struct _TPM2_GetRandomOut
+    {
+        TPM2_BaseOut  base;
+        TPM2B_DIGEST  randomBytes;
+    } PACKED;
+    typedef struct _TPM2_GetRandomOut TPM2_GetRandomOut;
 
     /// TPM Authorization structure
     ///  This is not the full structure and only works for PW auth with NULL PW

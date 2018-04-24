@@ -55,7 +55,8 @@ namespace TRUSTEDBOOT
         MSG_TYPE_SEPARATOR,
         MSG_TYPE_SHUTDOWN,
         MSG_TYPE_INIT_BACKUP_TPM,
-        MSG_TYPE_LAST = MSG_TYPE_INIT_BACKUP_TPM
+        MSG_TYPE_GETRANDOM,
+        MSG_TYPE_LAST = MSG_TYPE_GETRANDOM,
     };
 
     /// PCREXTEND message data
@@ -67,6 +68,12 @@ namespace TRUSTEDBOOT
         size_t     mDigestSize;
         uint8_t    mDigest[TPM_ALG_SHA256_SIZE];
         char       mLogMsg[MAX_TPM_LOG_MSG];
+    };
+
+    struct GetRandomMsgData
+    {
+        TARGETING::Target* i_pTpm; // the TPM to obtain random data from
+        uint64_t o_randNum;        // the random data is populated here
     };
 
     // Trustedboot message class

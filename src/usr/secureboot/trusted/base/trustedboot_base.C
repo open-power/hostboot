@@ -794,4 +794,77 @@ errlHndl_t testCmpPrimaryAndBackupTpm()
     return l_err;
 }
 
+#ifdef CONFIG_TPMDD
+errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
+{
+    errlHndl_t err = nullptr;
+    Message* msg = nullptr;
+
+    do {
+
+    auto pData = new struct GetRandomMsgData;
+    memset(pData, 0, sizeof(*pData));
+
+    pData->i_pTpm = const_cast<TpmTarget*>(i_pTpm);
+
+    msg = Message::factory(MSG_TYPE_GETRANDOM, sizeof(*pData),
+                           reinterpret_cast<uint8_t*>(pData), MSG_MODE_SYNC);
+
+    assert(msg != nullptr, "BUG! Message is null");
+    pData = nullptr; // Message owns msgData now
+
+    int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
+    if (0 == rc)
+    {
+        err = msg->iv_errl;
+        msg->iv_errl = nullptr; // taking over ownership of error log
+        if (err != nullptr)
+        {
+            break;
+        }
+    }
+    else // sendrecv failure
+    {
+        /*@
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        MOD_TPM_GETRANDOM
+         * @reasoncode      RC_SENDRECV_FAIL
+         * @userdata1       rc from msq_sendrecv()
+         * @userdata2       TPM HUID if it's not nullptr
+         * @devdesc         msg_sendrecv() failed
+         * @custdesc        Trusted boot failure
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      MOD_TPM_GETRANDOM,
+                                      RC_SENDRECV_FAIL,
+                                      rc,
+                                      TARGETING::get_huid(i_pTpm),
+                                      true);
+        break;
+    }
+
+    pData = reinterpret_cast<struct GetRandomMsgData*>(msg->iv_data);
+    assert(pData != nullptr,
+        "BUG! Completed send/recv to random num generator has null data ptr!");
+
+    o_randNum = pData->o_randNum;
+
+    } while (0);
+
+    if (msg != nullptr)
+    {
+        delete msg; // also deletes the msg->iv_data
+        msg = nullptr;
+    }
+
+    if (err)
+    {
+        err->collectTrace(SECURE_COMP_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
+    }
+
+    return err;
+}
+#endif // CONFIG_TPMDD
+
 } // end TRUSTEDBOOT
