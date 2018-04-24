@@ -170,10 +170,6 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(l_data64.setBit(l_startVectorBit));
         FAPI_TRY(fapi2::putScom(i_target, PERV_SB_CS_SCOM, l_data64),
                  "Error from putScom to PERV_SB_CS_SCOM (2)");
-
-        FAPI_TRY(l_data64.clearBit(l_startVectorBit));
-        FAPI_TRY(fapi2::putScom(i_target, PERV_SB_CS_SCOM, l_data64),
-                 "Error from putScom to PERV_SB_CS_SCOM (3)");
     }
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -203,9 +199,6 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to PERV_SB_CS_FSI (2)");
 
-        FAPI_TRY(l_data32.clearBit(l_startVectorBit));
-        FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
-                 "Error from putCfamRegister to PERV_SB_CS_FSI (3)");
     }
 
 #endif
