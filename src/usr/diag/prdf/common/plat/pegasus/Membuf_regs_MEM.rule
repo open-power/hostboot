@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,110 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-    ############################################################################
-    # MEM Chiplet Registers
-    ############################################################################
-
-    register MEM_CHIPLET_CS_FIR
-    {
-        name        "TCM.XFIR";
-        scomaddr    0x03040000;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_CHIPLET_RE_FIR
-    {
-        name        "TCM.RFIR";
-        scomaddr    0x03040001;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_CHIPLET_FIR_MASK
-    {
-        name        "TCM.FIR_MASK";
-        scomaddr    0x03040002;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_CHIPLET_SPA
-    {
-        name        "TCM.EPS.FIR.SPATTN";
-        scomaddr    0x03040004;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_CHIPLET_SPA_MASK
-    {
-        name        "TCM.EPS.FIR.SPA_MASK";
-        scomaddr    0x03040007;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    ############################################################################
-    # MEM Chiplet LFIR
-    ############################################################################
-
-    register MEM_LFIR
-    {
-        name        "TCM.LOCAL_FIR";
-        scomaddr    0x0304000a;
-        reset       (&, 0x0304000b);
-        mask        (|, 0x0304000f);
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_LFIR_MASK
-    {
-        name        "TCM.EPS.FIR.LOCAL_FIR_MASK";
-        scomaddr    0x0304000d;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-    };
-
-    register MEM_LFIR_ACT0
-    {
-        name        "TCM.EPS.FIR.LOCAL_FIR_ACTION0";
-        scomaddr    0x03040010;
-        capture     type secondary;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MEM_LFIR");
-    };
-
-    register MEM_LFIR_ACT1
-    {
-        name        "TCM.EPS.FIR.LOCAL_FIR_ACTION1";
-        scomaddr    0x03040011;
-        capture     type secondary;
-        capture     group FirRegs;
-        capture     group MemChipletRegs;
-        capture     req nonzero("MEM_LFIR");
-    };
-
-    ############################################################################
-    # MEM Chiplet MEMFBISTFIR
-    ############################################################################
-
-    # FIR not used. Capture for FFDC only.
-    # This register is on the same clock domain for both MBAs. So if one is
-    # powered down and we try to SCOM to the other, there will be SCOM failures.
-    # Since this register is for FFDC purposes only, we simply will not capture
-    # this register.
-
-#    register MEMFBISTFIR
-#    {
-#        name        "FBIST.FBM.FBM_FIR_REG";
-#        scomaddr    0x03010480;
-#        capture     group FirRegs;
-#        capture     group MemChipletRegs;
-#    };
 
     ############################################################################
     # Error Report Registers

@@ -23,8 +23,41 @@
 #
 # IBM_PROLOG_END_TAG
 
+/** Callout the connected MBA 0 */
+actionclass calloutMba0 { callout(connected(TYPE_MBA, 0), MRU_MED); };
+
+/** Callout the connected MBA 1 */
+actionclass calloutMba1 { callout(connected(TYPE_MBA, 1), MRU_MED); };
+
+/** Callout the connected MBA 0, threshold 1 */
+actionclass mba0_th_1 { calloutMba0; threshold1; };
+
+/** Callout the connected MBA 1, threshold 1 */
+actionclass mba1_th_1 { calloutMba1; threshold1; };
+
+/** Callout the connected MBA 0, threshold 1, SUE source */
+actionclass mba0_th_1_UERE { mba0_th_1; SueSource; };
+
+/** Callout the connected MBA 1, threshold 1, SUE source */
+actionclass mba1_th_1_UERE { mba1_th_1; SueSource; };
+
+/** Threshold and mask policy (MBA 0) */
+actionclass threshold_and_mask_mba0 { calloutMba0; threshold_and_mask; };
+
+/** Threshold and mask policy (MBA 1) */
+actionclass threshold_and_mask_mba1 { calloutMba1; threshold_and_mask; };
+
 /** Callout the connected L4 */
 actionclass calloutL4 { callout(connected(TYPE_L4), MRU_MED); };
+
+/** Callout the connected L4, threshold 1 */
+actionclass l4_th_1 { calloutL4; threshold1; };
+
+/** Callout the connected L4, threshold 32/day */
+actionclass l4_th_32perDay { calloutL4; threshold32pday; };
+
+/** Callout the connected L4, threshold 1, SUE source */
+actionclass l4_th_1_UERE { l4_th_1; SueSource; };
 
 /** L4 cache SRW CE */
 actionclass l4_cache_srw_ce

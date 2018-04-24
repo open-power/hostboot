@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -648,7 +648,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         l_tpfirmask   = i_mbChip->getRegister("TP_CHIPLET_FIR_MASK");
         l_nestfirmask = i_mbChip->getRegister("NEST_CHIPLET_FIR_MASK");
         l_memfirmask  = i_mbChip->getRegister("MEM_CHIPLET_FIR_MASK");
-        l_memspamask  = i_mbChip->getRegister("MEM_CHIPLET_SPA_MASK");
+        l_memspamask  = i_mbChip->getRegister("MEM_CHIPLET_SPA_FIR_MASK");
 
         l_tpfirmask->setAllBits();   o_rc |= l_tpfirmask->Write();
         l_nestfirmask->setAllBits(); o_rc |= l_nestfirmask->Write();

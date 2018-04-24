@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
         SCAN_COMM_REGISTER_CLASS * cs_global, * re_global, * spa_global;
         cs_global  = i_membChip->getRegister("GLOBAL_CS_FIR");
         re_global  = i_membChip->getRegister("GLOBAL_RE_FIR");
-        spa_global = i_membChip->getRegister("GLOBAL_SPA");
+        spa_global = i_membChip->getRegister("GLOBAL_SPA_FIR");
         l_rc  = cs_global->Read() | re_global->Read() | spa_global->Read();
         if ( SUCCESS != l_rc )
         {
