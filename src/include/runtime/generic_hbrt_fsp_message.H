@@ -36,6 +36,9 @@
  *  FSP/HWSV team to send and receive data.
  */
 
+// Sentinel value for bad SCOM reads
+#define DEADBEEF 0xDEADBEEF
+
 /**
   * This generates a sequence ID that the GenericFspMboxMessage_t
   * consumes.
@@ -61,6 +64,43 @@ struct TargetDeconfigHbrtFspData_t
    uint32_t huid;
    TARGETING::HwasState hwasState;
 } PACKED ;
+
+
+/**
+  * This struct contains the message-specific data for
+  * MSG_SINGLE_SCOM_OP calls to the FSP.
+  * It shows the format of GenericFspMboxMessage_t.data.
+  */
+struct SingleScomOpHbrtFspData_t
+{
+    uint8_t     scom_op;    // 0 == read, 1 == write
+    uint32_t    huid;       // hardware target
+    uint64_t    scom_addr;
+    uint64_t    scom_data;  // SCOM value read by FSP, or
+                            // SCOM value to be written by FSP
+} PACKED;
+
+
+/**
+  * This struct contains the message-specific data for
+  * MSG_MULTI_SCOM_OP calls to the FSP.
+  * It shows the format of GenericFspMboxMessage_t.data.
+  */
+struct MultiScomReadHbrtFspData_t
+{
+    uint32_t    huid;       // hardware target
+    uint8_t     scom_num;   // number of SCOMs to read
+    uint64_t    scom_data;  // addresses of SCOMs to read, or
+                            // values of SCOMs in FSP response
+                            // ** if a SCOM cannot be read, its value **
+                            // ** should be returned as DEADBEEF      **
+                            //
+                            // placeholder that can be cast to an array
+                            // of values (or addresses)
+                            // uint64_t* mydata =
+                            //              (uint64_t*)&(l_generic_msg.data);
+                            // more than 8 bytes of data is possible
+} PACKED;
 
 
 /**
@@ -147,6 +187,8 @@ struct GenericFspMboxMessage_t
         MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
         MSG_TOD_TOPOLOGY_DATA            = 0x0003,
         MSG_DECONFIG_TARGET              = 0x0004,
+        MSG_SINGLE_SCOM_OP               = 0x0005,
+        MSG_MULTI_SCOM_OP                = 0x0006,
         MSG_ATTR_SYNC_REQUEST            = 0x000000A5,
         MSG_SBE_ERROR                    = 0x000000D4,
         MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5,
