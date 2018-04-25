@@ -186,6 +186,8 @@ public:
         DECONFIGURED_BY_NO_PARENT_MC,           // BASE | 0x19
         DECONFIGURED_BY_NO_PARENT_MI,           // BASE | 0x1A
 
+        DECONFIGURED_BY_NO_MATCHING_LINK_SET,   // BASE | 0x1B
+
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
     };

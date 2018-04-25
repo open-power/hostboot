@@ -53,3 +53,8 @@ config SUPPORT_PARTIAL_CACHE
     help
         Support chips that do not have full cache --
         intended for early bringup of hardware
+
+config SMP_WRAP_TEST
+    defaults y
+    help
+        Enables SMP Wrap configuration for manufacturing testing

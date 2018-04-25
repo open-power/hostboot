@@ -35,6 +35,7 @@ namespace HWAS
         MOD_DECONFIG_TARGETS_FROM_GARD = 0x04,
         MOD_VALIDATE_EC_LEVELS    = 0x05,
         MOD_RUNTIME_DECONFIG      = 0x06,
+        MOD_DISABLE_OBUS          = 0x07,
     };
 
     enum HwasReasonCode
@@ -62,6 +63,7 @@ namespace HWAS
         RC_INVALID_PARAM                        = HWAS_COMP_ID | 0x11,
         RC_NOT_AT_RUNTIME                       = HWAS_COMP_ID | 0x12,
         RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
+        RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED   = HWAS_COMP_ID | 0x14,
     };
 };
 
