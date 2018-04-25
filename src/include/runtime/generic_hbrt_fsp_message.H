@@ -73,7 +73,7 @@ struct TargetDeconfigHbrtFspData_t
   */
 struct SingleScomOpHbrtFspData_t
 {
-    uint8_t     scom_op;    // 0 == read, 1 == write
+    uint8_t     scom_op;    // DeviceFW::READ, DeviceFW::WRITE
     uint32_t    huid;       // hardware target
     uint64_t    scom_addr;
     uint64_t    scom_data;  // SCOM value read by FSP, or
@@ -92,11 +92,12 @@ struct MultiScomReadHbrtFspData_t
     uint8_t     scom_num;   // number of SCOMs to read
     uint64_t    scom_data;  // addresses of SCOMs to read, or
                             // values of SCOMs in FSP response
+                            //
                             // ** if a SCOM cannot be read, its value **
                             // ** should be returned as DEADBEEF      **
                             //
                             // placeholder that can be cast to an array
-                            // of values (or addresses)
+                            // of SCOM addresses (or values)
                             // uint64_t* mydata =
                             //              (uint64_t*)&(l_generic_msg.data);
                             // more than 8 bytes of data is possible

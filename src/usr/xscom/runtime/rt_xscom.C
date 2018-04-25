@@ -43,6 +43,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_PROC,
                       xscomPerformOp);
 
+#if 0
 // Also direct fsi scom calls though this interface at runtime
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::FSISCOM,
@@ -53,6 +54,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::FSISCOM,
                       TARGETING::TYPE_MEMBUF,
                       xscomPerformOp);
+#endif
 
 
 /**
