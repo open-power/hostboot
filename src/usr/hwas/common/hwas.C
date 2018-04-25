@@ -193,6 +193,104 @@ bool allCoresBad(const uint8_t & i_firstCore,
     return coresBad;
 }
 
+#ifdef CONFIG_SMP_WRAP_TEST
+/**
+ * @brief disable obuses in wrap config.
+ *        Due to fabric limitations, we can only have 2 parallel OBUS
+ *        connections at a time in wrap config.So, deconfigure appropriate
+ *        OBUSes using the following rule. If the value of
+ *        MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE (on the system target) does
+ *        not match with the value of MFG_WRAP_TEST_ABUS_LINKS_SET (on the
+ *        OBUS target), then deconfigure the OBUSes.
+ * @return errlHndl_t
+ *
+ */
+errlHndl_t disableOBUSes()
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        //get system target and figure out which links to enable
+        Target* pSys;
+        targetService().getTopLevelTarget(pSys);
+        auto l_links_set_enable =
+            pSys->getAttr<ATTR_MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE>();
+
+        //get all OBUS chiplets
+        TargetHandleList l_obusList;
+        getAllChiplets(l_obusList, TYPE_OBUS);
+        for (const auto & l_obus : l_obusList)
+        {
+            //It fails to compile if you compare two different enum types
+            //That's why, typecasting here. The underlying enum value
+            //should be the same.
+            ATTR_MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE_type l_link_set =
+                (ATTR_MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE_type)
+                l_obus->getAttr<ATTR_MFG_WRAP_TEST_ABUS_LINKS_SET>();
+
+            if (l_links_set_enable != l_link_set)
+            {
+                //deconfigure
+                l_err = HWAS::theDeconfigGard().deconfigureTarget(
+                     *l_obus,
+                      HWAS::DeconfigGard::DECONFIGURED_BY_NO_MATCHING_LINK_SET);
+                if (l_err)
+                {
+                    HWAS_ERR("disableOBUSes: Unable to deconfigure %x OBUS",
+                            get_huid(l_obus));
+                    break;
+                }
+            }
+        }
+
+        if (l_err)
+        {
+            break;
+        }
+
+        //Sanity Check to make sure each proc only has a max of 2 OBUSes
+        //only if MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE was overidden
+        //because that means we are trying to run in wrap mode.
+        //Otherwise, it will be defaulted to SET_NONE
+        if (l_links_set_enable != MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE_SET_NONE)
+        {
+            TargetHandleList l_procList;
+            getAllChips(l_procList, TYPE_PROC);
+            for (const auto & l_proc : l_procList)
+            {
+                getChildChiplets(l_obusList, l_proc, TYPE_OBUS, true);
+                if (l_obusList.size() > 2)
+                {
+                    HWAS_ERR("disableOBUSes: Only 2 BUSes should be functional"
+                            " under %x, found %d",
+                            get_huid(l_proc), l_obusList.size());
+                    /*@
+                     * @errortype
+                     * @severity           ERRL_SEV_UNRECOVERABLE
+                     * @moduleid           MOD_DISABLE_OBUS
+                     * @reasoncode         RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED
+                     * @devdesc            Due to fabric limitations, only 2
+                     *                     OBUSes should be configured, we found
+                     *                     too many
+                     * @custdesc           A problem occurred during the IPL of
+                     *                     the system: Found too many obus links
+                     * @userdata1          HUID of proc
+                     * @userdata2          number of functional OBUSes
+                     */
+                    l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_DISABLE_OBUS,
+                                       RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED,
+                                       get_huid(l_proc), l_obusList.size());
+                    break;
+                }
+            }
+        }
+    } while (0);
+    return l_err;
+}
+#endif
+
 errlHndl_t discoverTargets()
 {
     HWAS_DBG("discoverTargets entry");
@@ -483,6 +581,21 @@ errlHndl_t discoverTargets()
         // memory. Call algorithm function presentByAssoc() to determine
         // targets that need to be deconfigured
         invokePresentByAssoc();
+
+#ifdef CONFIG_SMP_WRAP_TEST
+        //Due to fabric limitations, we can only have 2 parallel OBUS
+        //connections at a time in wrap config. So, deconfigure appropriate
+        //OBUSes using the following rule. If the value of
+        //MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE (on the system target) does
+        //not match with the value of MFG_WRAP_TEST_ABUS_LINKS_SET (on the
+        //OBUS target), then deconfigure the OBUSes.
+        errl = disableOBUSes();
+        if (errl)
+        {
+            HWAS_ERR ("discoverTargets:: disableOBUSes failed");
+            break;
+        }
+#endif
 
     } while (0);
 
