@@ -555,6 +555,10 @@ template
 uint32_t analyzeFetchMpe<TYPE_MCA>( ExtensibleChip * i_chip,
                                     const MemRank & i_rank,
                                     STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchMpe<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -765,6 +769,9 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 template
 uint32_t analyzeFetchNceTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
                                                 STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchNceTce<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
+                                                STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -833,6 +840,9 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 // To resolve template linker errors.
 template
 uint32_t analyzeFetchUe<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t analyzeFetchUe<TYPE_MBA>( ExtensibleChip * i_chip,
                                    STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
@@ -1120,6 +1130,68 @@ uint32_t analyzeImpe<TYPE_MCA>( ExtensibleChip * i_chip,
 
     } while (0);
 
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t analyzeFetchRcePue<TYPE_MBA>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::analyzeFetchRcePue] "
+
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // WORKAROUND: An RCE starts as a UE and its address is trapped in the
+        //             MBUER (note: UE fir bit not set at this point). Since
+        //             multiple addresses are retried (not just the failing
+        //             address), the MBRCER will contain the last address
+        //             retried, and not necessarily the address that started out
+        //             with the UE. Therefore, we will use the MBUER instead.
+
+        MemAddr addr;
+        o_rc = getMemReadAddr<TYPE_MBA>( i_chip, MemAddr::READ_UE_ADDR, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_UE_ADDR) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+        MemRank rank = addr.getRank();
+
+        // Callout the rank.
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm );
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Add an entry to the RCE table.
+        if ( getMbaDataBundle(i_chip)->iv_rceTable.addEntry(rank, io_sc) )
+        {
+            TdEntry * entry = new TpsEvent<TYPE_MBA>{ i_chip, rank };
+            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, entry );
+            o_rc = MemDbUtils::handleTdEvent<TYPE_MBA>( i_chip, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
+                          "0x%02x", i_chip->getHuid(), rank.getKey() );
+                break;
+            }
+        }
+
+        #endif // __HOSTBOOT_RUNTIME
+
+    } while (0);
+
+    MemCaptureData::addEccData<TYPE_MBA>( i_chip, io_sc );
 
     return o_rc;
 
