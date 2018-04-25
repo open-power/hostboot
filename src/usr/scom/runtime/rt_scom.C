@@ -28,6 +28,7 @@
 #include <errl/errlmanager.H>
 #include <scom/scomreasoncodes.H>
 #include <scom/scomif.H>
+#include <scom/runtime/rt_scomif.H>
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
 #include <xscom/piberror.H>
@@ -222,6 +223,13 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                                                     rc,
                                                     i_opType),
                                     i_scomAddr);
+
+                constexpr int MembufFatalError = -0x1008;
+
+                if (rc == MembufFatalError)
+                {
+                    FSISCOM::switchToFspScomAccess(i_target);
+                }
 
                 // attempt to translate rc into a pib error assuming
                 //  the rc is in common format

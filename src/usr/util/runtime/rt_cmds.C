@@ -43,6 +43,9 @@
 #include <isteps/pm/pm_common_ext.H>
 #include <p9_hcd_memmap_base.H>  // for reload_pm_complex
 #include <p9_stop_data_struct.H> // for reload_pm_complex
+#include <scom/runtime/rt_scomif.H> // sendScomOpToFsp,
+                                    // sendMultiScomReadToFsp,
+                                    // switchToFspScomAccess
 
 extern char hbi_ImageId;
 
@@ -994,6 +997,158 @@ void cmd_hbrt_update(char*& o_output)
 
 
 /**
+ * @brief Mark a target as requiring access to its SCOMs through the FSP
+ * @param[out] o_output     Output display buffer, memory allocated here
+ * @param[in]  i_huid       HUID associated with Target to switch access on
+ */
+void cmd_switchToFspScomAccess( char*& o_output, uint32_t i_huid)
+{
+    UTIL_FT( "cmd_switchToFspScomAccess> huid=%.8X", i_huid );
+
+    TARGETING::Target* l_targ{};
+
+    if(0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[100];
+    if( l_targ == NULL )
+    {
+        sprintf( o_output, "HUID %.8X not found", i_huid );
+        return;
+    }
+
+    FSISCOM::switchToFspScomAccess(l_targ);
+
+    sprintf( o_output, "switchToFspScomAccess executed");
+}
+
+
+/**
+ * @brief Send a scom operation (read/write) to the FSP
+ * @param[out] o_output     Output display buffer, memory allocated here
+ * @param[in]  i_op         Operation: r or w
+ * @param[in]  i_huid       HUID associated with Target to get the SCOM from
+ * @param[in]  i_scomAddr   Address of SCOM to read or write
+ * @param[in]  io_scomValue Buffer for read SCOM value, or value to write
+ */
+void cmd_sendScomOpToFSP( char*&   o_output,
+                          char     i_op,
+                          uint32_t i_huid,
+                          uint64_t i_scomAddr,
+                          uint64_t *io_scomValue )
+{
+    UTIL_FT( "cmd_getScomFromFSP> op=%c, huid=%.8X, addr=%.8X, size=%d",
+             i_op, i_huid, i_scomAddr, *io_scomValue );
+
+    TARGETING::Target* l_targ{};
+
+    if(0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[100];
+    if( l_targ == NULL )
+    {
+        sprintf( o_output, "HUID %.8X not found", i_huid );
+        return;
+    }
+
+    DeviceFW::OperationType l_op;
+    switch (i_op) {
+        case 'r':
+        case 'R':
+            l_op = DeviceFW::READ;
+            break;
+        case 'w':
+        case 'W':
+            l_op = DeviceFW::WRITE;
+            break;
+        default:
+            sprintf( o_output, "Operation must be r or w: %c", i_op );
+            return;
+    }
+
+    errlHndl_t l_err = nullptr;
+    l_err = FSISCOM::sendScomOpToFsp(l_op, l_targ, i_scomAddr,
+                                     (void *)io_scomValue);
+    if (l_err)
+    {
+            sprintf( o_output, "Error on call to sendScomOpToFsp, rc=%.4X",
+                     ERRL_GETRC_SAFE(l_err) );
+            return;
+    }
+
+    sprintf( o_output, "op=%c, huid=%.16llX, scomAddr=%.16llX, scomValue=%.16llX",
+             i_op, i_huid, i_scomAddr, *io_scomValue);
+}
+
+
+/**
+ * @brief Send a multi scom read to the FSP
+ * @param[out] o_output     Output display buffer, memory allocated here
+ * @param[in]  i_huid       HUID associated with Target to get the SCOMs from
+ * @param[in]  i_scomAddr   Addresses of SCOMs to read
+ * @param[in]  o_scomValue  Values of read SCOMs
+ */
+void cmd_sendMultiScomReadToFSP( char*                 &o_output,
+                                 uint32_t               i_huid,
+                                 std::vector<uint64_t> &i_scomAddr,
+                                 std::vector<uint64_t> &o_scomValue )
+{
+    UTIL_FT( "cmd_sendMultiScomReadToFSP> huid=%.8X, num_SCOMs=%d,"
+             " num_outSCOMs=%d",
+             i_huid, i_scomAddr.size(), o_scomValue.size() );
+
+    TARGETING::Target* l_targ{};
+
+    if(0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[500];
+    if( l_targ == NULL )
+    {
+        sprintf( o_output, "HUID %.8X not found", i_huid );
+        return;
+    }
+
+    errlHndl_t l_err = nullptr;
+    l_err = FSISCOM::sendMultiScomReadToFsp( l_targ, i_scomAddr, o_scomValue);
+    if (l_err)
+    {
+            sprintf( o_output, "Error on call to sendMultiScomReadToFsp,"
+                               " rc=%.4X", ERRL_GETRC_SAFE(l_err) );
+            return;
+    }
+
+    sprintf( o_output, "num_outSCOMs=%d", o_scomValue.size());
+    for (auto scom: o_scomValue)
+    {
+        char tmp_str[100];
+
+        sprintf( tmp_str, ", %.8llX", scom);
+        strcat( o_output, tmp_str);
+    }
+}
+
+
+/**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
  * @param[in]   Number of arguments (standard C args)
  * @param[in]   Array of argument values (standard C args)
@@ -1254,9 +1409,67 @@ int hbrtCommand( int argc,
                      "ERROR: hbrt_update\n" );
         }
     }
+    else if( !strcmp( argv[0], "switchToFspScomAccess" ) )
+    {
+        if (argc == 2)
+        {
+            cmd_switchToFspScomAccess( *l_output,
+                                       strtou64(argv[1], NULL, 16)); // huid
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output,
+                    "ERROR: switchToFspScomAccess <huid>");
+        }
+    }
+    else if( !strcmp( argv[0], "scomOpToFsp" ) )
+    {
+        if ((argc == 4) || (argc == 5))
+        {
+            uint64_t l_scomValue = 0;
+
+            if (argc == 5)
+                l_scomValue = strtou64( argv[4], NULL, 16 );  // value
+
+            cmd_sendScomOpToFSP( *l_output,
+                                 argv[1][0],                  // op
+                                 strtou64(argv[2], NULL, 16), // huid
+                                 strtou64(argv[3], NULL, 16), // addr
+                                 &l_scomValue );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output,
+                    "ERROR: scomOpToFsp <op> <huid> <scomAddr> [<scomValue>]");
+        }
+    }
+    else if( !strcmp( argv[0], "multiScomReadToFsp" ) )
+    {
+        if (argc >= 3)
+        {
+            std::vector<uint64_t> l_scomAddrs, l_scomValues;
+
+            for (int i = 2;i < argc;++i)
+                l_scomAddrs.push_back(strtou64( argv[i], NULL, 16 ));
+            l_scomValues.reserve(argc - 2);
+
+            cmd_sendMultiScomReadToFSP( *l_output,
+                                        strtou64(argv[1], NULL, 16), // huid
+                                        l_scomAddrs,
+                                        l_scomValues );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output,
+                    "ERROR: multiScomReadToFsp <huid> <scomAddrs>");
+        }
+    }
     else
     {
-        *l_output = new char[50+100*10];
+        *l_output = new char[50+100*12];
         char l_tmpstr[100];
         sprintf( *l_output, "HBRT Commands:\n" );
         sprintf( l_tmpstr, "testRunCommand <args...>\n" );
@@ -1282,6 +1495,13 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "readHBRTversion\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "hbrt_update\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "switchToFspScomAccess <huid>\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "scomOpToFsp <op> <huid> <scomAddr> [<scomValue>]\n"
+                           "            <op> == r|w\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "multiScomReadToFsp <huid> <scomAddrs>\n");
         strcat( *l_output, l_tmpstr );
     }
 

@@ -37,7 +37,7 @@ namespace SCOM
  * @param[in]           i_target         Scom target
  * @param[in]           i_scomAddr       Scom address
  * @param[in|out]       io_buffer        Pointer to scom data
- * @return              errlHndl_t
+ * @return  errlHndl_t
  */
 errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                          TARGETING::Target * i_target,
@@ -45,5 +45,45 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                          void * io_buffer);
 
 };  // end namespace SCOM
+
+namespace FSISCOM
+{
+
+/**
+ * @brief DMI channel has checkstopped.  Mark it bad and switch to FSP access.
+ *
+ * @param[in]     i_target    SCOM target
+ * @return  None
+ */
+void switchToFspScomAccess(TARGETING::TargetHandle_t i_target);
+
+/**
+ * @brief This function sends the scom op to the FSP
+ *
+ * @param[in]     i_opType    Scom operation type, see driverif.H
+ * @param[in]     i_target    Scom target
+ * @param[in]     i_scomAddr  Scom address
+ * @param[in/out] io_buffer   Read: Pointer to output data storage
+ *                            Write: Pointer to input data storage
+ * @return  errlHndl_t
+ */
+errlHndl_t sendScomOpToFsp(DeviceFW::OperationType   i_opType,
+                           TARGETING::TargetHandle_t i_target,
+                           uint64_t                  i_scomAddr,
+                           void *                    io_buffer);
+
+/**
+ * @brief Ask FSP to read list of SCOMs
+ *
+ * @param[in]     i_target    Scom target
+ * @param[in]     i_scomAddr  Scom addresses to read
+ * @param[out]    o_scomValue Scom values read (0xDEADBEEF for errors)
+ * @return  errlHndl_t
+ */
+errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
+                                  std::vector<uint64_t> &   i_scomAddr,
+                                  std::vector<uint64_t> &   o_scomValue);
+
+};  // end namespace FSISCOM
 
 #endif  // end __RT_SCOMIF_H

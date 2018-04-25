@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/fsiscom/makefile $
+# $Source: src/usr/fsiscom/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2018
+# Contributors Listed Below - COPYRIGHT 2018
 # [+] International Business Machines Corp.
 #
 #
@@ -22,12 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = fsiscom
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+MODULE = fsiscom_rt
 
-OBJS += fsiscom.o
+OBJS += rt_fsiscom.o
 
-SUBDIRS += test.d
-SUBDIRS += runtime.d
-
-include ${ROOTPATH}/config.mk
+EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/
+VPATH += ..
+include $(ROOTPATH)/config.mk

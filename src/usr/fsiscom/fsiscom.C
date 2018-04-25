@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,7 +200,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             TRACFCOMP( g_trac_fsiscom, ERR_MRK "fsiScomPerformOp> Invalid data length : io_buflen=%d", io_buflen );
             /*@
              * @errortype
-             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
+             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORM_OP
              * @reasoncode   FSISCOM::RC_INVALID_LENGTH
              * @userdata1    SCOM Address
              * @userdata2    Data Length
@@ -209,7 +209,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              *               Invalid data length for a SCOM operation.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                            FSISCOM::MOD_FSISCOM_PERFORM_OP,
                                             FSISCOM::RC_INVALID_LENGTH,
                                             l_scomAddr,
                                             TO_UINT64(io_buflen));
@@ -225,7 +225,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             TRACFCOMP( g_trac_fsiscom, ERR_MRK "fsiScomPerformOp> Address contains more than 31 bits : l_scomAddr=0x%.16X", l_scomAddr );
             /*@
              * @errortype
-             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
+             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORM_OP
              * @reasoncode   FSISCOM::RC_INVALID_ADDRESS
              * @userdata1    SCOM Address
              * @userdata2    Target HUID
@@ -235,7 +235,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              *               Invalid address on a SCOM operation.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                            FSISCOM::MOD_FSISCOM_PERFORM_OP,
                                             FSISCOM::RC_INVALID_ADDRESS,
                                             l_scomAddr,
                                             TARGETING::get_huid(i_target));
@@ -322,7 +322,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Write: PCB/PIB error received: l_status=0x%X)", l_status);
                 /*@
                  * @errortype
-                 * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
+                 * @moduleid     FSISCOM::MOD_FSISCOM_PERFORM_OP
                  * @reasoncode   FSISCOM::RC_WRITE_ERROR
                  * @userdata1    SCOM Addr
                  * @userdata2[00:31]  Target HUID
@@ -334,7 +334,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  */
                 l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                FSISCOM::MOD_FSISCOM_PERFORM_OP,
                                 FSISCOM::RC_WRITE_ERROR,
                                 l_scomAddr,
                                 TWO_UINT32_TO_UINT64(
@@ -389,7 +389,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
                 /*@
                  * @errortype
-                 * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
+                 * @moduleid     FSISCOM::MOD_FSISCOM_PERFORM_OP
                  * @reasoncode   FSISCOM::RC_READ_ERROR
                  * @userdata1    SCOM Addr
                  * @userdata2[00:31]  Target HUID
@@ -399,7 +399,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
                  *               Error returned from SCOM engine after read.
                  */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                                FSISCOM::MOD_FSISCOM_PERFORM_OP,
                                                 FSISCOM::RC_READ_ERROR,
                                                 l_scomAddr,
                                                 TWO_UINT32_TO_UINT64(
@@ -448,7 +448,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
             /*@
              * @errortype
-             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORMOP
+             * @moduleid     FSISCOM::MOD_FSISCOM_PERFORM_OP
              * @reasoncode   FSISCOM::RC_INVALID_OPTYPE
              * @userdata1[0:31]    Operation Type (i_opType) : 0=READ, 1=WRITE
              * @userdata1[32:64]   Input scom address
@@ -458,7 +458,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
              *               Unsupported SCOM operation type.
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            FSISCOM::MOD_FSISCOM_PERFORMOP,
+                                            FSISCOM::MOD_FSISCOM_PERFORM_OP,
                                             FSISCOM::RC_INVALID_OPTYPE,
                                             TWO_UINT32_TO_UINT64(i_opType,
                                                                  l_scomAddr),

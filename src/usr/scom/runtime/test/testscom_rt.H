@@ -176,7 +176,7 @@ public:
       TRACFCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_proc> %d/%d fails", fails, total );
 
   }
-
+      // FSI access in runtime
   /**
    * @brief SCOM test via FSISCOM to Centaur
    *
@@ -186,6 +186,8 @@ public:
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
       uint64_t fails = 0;
       uint64_t total = 0;
+#if 0 // removing this test from runtime because HB doesn't have any FSI SCOM
+      // access during runtime (except through FSP)
       errlHndl_t l_err = NULL;
 
       // Setup some targets to use
@@ -252,8 +254,10 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->
-                getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+          else if ((scom_targets[x]->
+                getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) ||
+                   (scom_targets[x]->
+                getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -347,6 +351,7 @@ public:
           }
       }
 
+#endif
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> %d/%d fails", fails, total );
   }
 
