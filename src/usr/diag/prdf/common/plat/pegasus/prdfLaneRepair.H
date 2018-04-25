@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,17 +72,6 @@ namespace LaneRepair
     int32_t cleanupSecondaryFirBits(  ExtensibleChip * i_chip,
                        TARGETING::TYPE i_busType,
                        uint32_t i_busPos );
-
-    /**
-     * @brief Checks if spare bit is set for DMI Bus.
-     * @param i_mcsChip    MCS chip.
-     * @param i_mbChip    Membuf chip.
-     * @return  True if spare bit is set false otherwise.
-     * @note This function will check both ends of DMI bus to check
-     *       if spare deployed attention is raised on any side.
-     */
-    bool isSpareBitOnDMIBus( ExtensibleChip * i_mcsChip,
-                             ExtensibleChip * i_mbChip );
 
 } // end namespace LaneRepair
 } // end namespace PRDF

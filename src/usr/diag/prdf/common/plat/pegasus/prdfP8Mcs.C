@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,32 +138,6 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( Mcs, PostAnalysis );
-
-/**
- * @brief  Checks if spare deployed bit for DMI bus for this MCS is set.
- * @param  i_mcsChip MCS chip
- * @param  i_sc      The step code data struct.
- * @return SUCCESS if bit is on, FAIL otherwise.
- */
-int32_t checkSpareBit( ExtensibleChip * i_mcsChip,
-                       STEP_CODE_DATA_STRUCT & i_sc )
-{
-    using namespace LaneRepair;
-
-    int32_t l_rc = FAIL; // Default is to handle the attention (via rule code).
-
-    ExtensibleChip * mbChip = getMcsDataBundle( i_mcsChip )->getMembChip();
-
-    if ( isSpareBitOnDMIBus(i_mcsChip, mbChip) )
-    {
-        // Ignore attention and do not commit the error log.
-        i_sc.service_data->setDontCommitErrl();
-        l_rc = SUCCESS;
-    }
-
-    return l_rc;
-}
-PRDF_PLUGIN_DEFINE( Mcs, checkSpareBit );
 
 /**
  * @fn ClearMbsSecondaryBits

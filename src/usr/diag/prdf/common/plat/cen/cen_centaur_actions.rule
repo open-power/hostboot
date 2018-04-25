@@ -115,6 +115,34 @@ actionclass tooManyBusErrors_dmibus
 #    funccall("tooManyBusErrors");
 };
 
+/** Callout the DMI bus, threshold 1. Also, clear secondary MBSFIR bits. */
+actionclass replayTimeoutCleanup
+{
+    calloutBusInterface_dmibus_th1_UERE;
+    funccall("ClearMbsSecondaryBits");
+};
+
+/** Handles channel failures on the DMI side of the bus, if present. Otherwise,
+ *  calls out self (TH 1). */
+actionclass replay_timeout_UERE
+{
+    try ( funccall("analyzeDmiChnlFail"), replayTimeoutCleanup );
+};
+
+/** Handles RCD parity errors, if present. Otherwise, calls out self (TH 1). */
+actionclass mbs_internal_timeout
+{
+    try ( funccall("analyzeMbaRcdParityError0"),
+          try ( funccall("analyzeMbaRcdParityError1"), self_th_1 ) );
+};
+
+/** Handles RCD parity errors, if present. Otherwise, calls out lvl 2 (TH 1). */
+actionclass mbs_int_ext_timeout
+{
+    try ( funccall("analyzeMbaRcdParityError0"),
+          try ( funccall("analyzeMbaRcdParityError1"), level2_th_1 ) );
+};
+
 /** L4 cache SRW CE */
 actionclass l4_cache_srw_ce
 {

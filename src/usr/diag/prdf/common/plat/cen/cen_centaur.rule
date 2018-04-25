@@ -1054,7 +1054,7 @@ group gMBIFIR filter priority(  8, 9, 19, 20, 6, 0, 16, 5, 10 ),
     /** MBIFIR[0]
      *  Replay Timeout
      */
-    (rMBIFIR, bit(0)) ? TBDDefaultCallout;
+    (rMBIFIR, bit(0)) ? replay_timeout_UERE;
 
     /** MBIFIR[1]
      *  Channel Fail
@@ -1154,7 +1154,7 @@ group gMBIFIR filter priority(  8, 9, 19, 20, 6, 0, 16, 5, 10 ),
     /** MBIFIR[20]
      *  Replay Buffer Overrun
      */
-    (rMBIFIR, bit(20)) ? TBDDefaultCallout;
+    (rMBIFIR, bit(20)) ? calloutBusInterface_dmibus_th1_UERE;
 
     /** MBIFIR[21]
      *  WAT error
@@ -1205,7 +1205,7 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[2]
      *  INVALID_ADDRESS_ERROR
      */
-    (rMBSFIR, bit(2)) ? level2_th_1_UERE;
+    (rMBSFIR, bit(2)) ? calloutBusInterface_dmibus_th1;
 
     /** MBSFIR[3]
      *  EXTERNAL_TIMEOUT
@@ -1215,7 +1215,12 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[4]
      *  INTERNAL_TIMEOUT
      */
-    (rMBSFIR, bit(4)) ? TBDDefaultCallout;
+    (rMBSFIR, bit(4)) ? mbs_internal_timeout;
+
+    /** MBSFIR[3,4]
+     *  EXTERNAL_TIMEOUT
+     */
+    (rMBSFIR, bit(3,4)) ? mbs_int_ext_timeout;
 
     /** MBSFIR[5]
      *  INT_BUFFER_CE

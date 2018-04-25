@@ -1146,7 +1146,7 @@ group gMBIFIR filter priority(  8, 9, 19, 20, 6, 0, 16, 5, 10 ),
     /** MBIFIR[0]
      *  Replay Timeout
      */
-    (rMBIFIR, bit(0)) ? replayTimeOutError;
+    (rMBIFIR, bit(0)) ? replay_timeout_UERE;
 
     /** MBIFIR[1]
      *  Channel Fail
@@ -1196,7 +1196,7 @@ group gMBIFIR filter priority(  8, 9, 19, 20, 6, 0, 16, 5, 10 ),
     /** MBIFIR[10]
      *  CRC Performance Degradation
      */
-    (rMBIFIR, bit(10)) ? analyzeSpareBitAndThr;
+    (rMBIFIR, bit(10)) ? defaultMaskedError;
 
     /** MBIFIR[11]
      *  Global Host MC Checkstop
@@ -1307,15 +1307,12 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[4]
      *  INTERNAL_TIMEOUT
      */
-    (rMBSFIR, bit(4)) ? internalTimeout;
+    (rMBSFIR, bit(4)) ? mbs_internal_timeout;
 
     /** MBSFIR[3,4]
      *  EXTERNAL_TIMEOUT
      */
-    # NOTE: The signature will match the external timeout, but we will still
-    #       call the internalTimeout plugin because there is extra processing
-    #       done to handle parity errors and such.
-    (rMBSFIR, bit(3,4)) ? internalTimeout;
+    (rMBSFIR, bit(3,4)) ? mbs_int_ext_timeout;
 
     /** MBSFIR[5]
      *  INT_BUFFER_CE

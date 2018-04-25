@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -256,7 +256,7 @@ group gMciFir attntype CHECK_STOP, RECOVERABLE, SPECIAL, UNIT_CS
     /** MCIFIR[10]
      *  MCIFIRQ_CRC_PERFORMANCE_DEGRADATION
      */
-    (MciFir, bit(10)) ? analyzeSpareBitAndThr;
+    (MciFir, bit(10)) ? defaultMaskedError;
 
     /** MCIFIR[11]
      *  MCIFIRQ_CHANNEL_INTERLOCK_FAIL
@@ -547,13 +547,6 @@ actionclass CalloutDmiBusAndThr2pd
 {
     calloutDmiBus;
     threshold2pday;
-};
-
-/** If there is a lane repair attention, do nothing. Otherwise, callout DMI bus
-    with threshold of 2/day. */
-actionclass analyzeSpareBitAndThr
-{
-    try( funccall("checkSpareBit"), CalloutDmiBusAndThr2pd );
 };
 
 /** The plugin checks if the Proc is either Murano DD2 or Venice DD1.
