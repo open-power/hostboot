@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -251,63 +251,6 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     return SUCCESS;
 
     #undef PRDF_FUNC
-}
-
-//-----------------------------------------------------------------------------
-
-bool isSpareBitOnDMIBus( ExtensibleChip * i_mcsChip, ExtensibleChip * i_mbChip )
-{
-    bool bitOn = false;
-
-    do
-    {
-        // If any of these object is NULL, spare bit should not be on.
-        if ( ( NULL == i_mcsChip ) || ( NULL == i_mbChip ))
-            break;
-
-        // check spare deployed bit on Centaur side
-        SCAN_COMM_REGISTER_CLASS * dmiFir = i_mbChip->getRegister( "DMIFIR" );
-        int32_t rc = dmiFir->Read();
-        if ( SUCCESS != rc )
-        {
-            PRDF_ERR("isSpareBitOnDMIBus() : Failed to read DMIFIR."
-                      "MEMBUF: 0x%08X", getHuid( i_mbChip->GetChipHandle()) );
-            break;
-        }
-        if ( dmiFir->IsBitSet( 9 ))
-        {
-            bitOn = true;
-            break;
-        }
-
-        // check spare deployed bit on Proc side
-        TargetHandle_t mcsTgt = i_mcsChip->GetChipHandle();
-        TargetHandle_t procTgt = getConnectedParent( mcsTgt, TYPE_PROC );
-        ExtensibleChip * procChip =
-                        ( ExtensibleChip * )systemPtr->GetChip( procTgt );
-
-        uint32_t mcsPos = getTargetPosition( mcsTgt );
-
-        const char * regStr = ( 4 > mcsPos) ? "IOMCFIR_0" : "IOMCFIR_1";
-        SCAN_COMM_REGISTER_CLASS * iomcFir = procChip->getRegister( regStr );
-        rc = iomcFir->Read();
-        if ( SUCCESS != rc )
-        {
-            PRDF_ERR("isSpareBitOnDMIBus() : Failed to read %s."
-                      "MCS: 0x%08X", regStr, getHuid(mcsTgt) );
-            break;
-        }
-        // Bit 9, 17, 25 and 33 are for spare deployed.
-        // Check bit corrosponding to MCS position
-        uint8_t bitPos = 9 + ( mcsPos % 4 ) *8;
-        if ( iomcFir->IsBitSet(bitPos))
-        {
-            bitOn = true;
-        }
-
-    }while(0);
-
-    return bitOn;
 }
 
 //-----------------------------------------------------------------------------

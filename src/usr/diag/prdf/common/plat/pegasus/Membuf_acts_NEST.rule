@@ -35,36 +35,16 @@ actionclass calloutDmiBus
     funccall("calloutInterface_dmi");
 };
 
-/** Handles MCS Chnl XSTOP if present otherwise handles MBIFIR Replay Timeout */
-actionclass replayTimeOutError
-{
-    try( funccall("handleMcsChnlCs"), clearSecMbsBitsCalloutDmiBusTh1UE );
-};
-
-/** Handles MBACAL parity err if present, else handles MBS Internal Timeout */
-actionclass internalTimeout
-{
-    threshold1;
-    funccall("internalTimeout"); # must be called last so rc is passed on
-};
-
 /** Handles MBACAL parity err if present, else handles MBA0 MBSECC Memory UE */
 actionclass mba0MemoryUe
 {
-    try ( funccall("handleSingleMbaCalParityErr0"), analyzeFetchUe0 );
+    try ( funccall("analyzeMbaRcdParityError0"), analyzeFetchUe0 );
 };
 
 /** Handles MBACAL parity err if present, else handles MBA1 MBSECC Memory UE */
 actionclass mba1MemoryUe
 {
-    try ( funccall("handleSingleMbaCalParityErr1"), analyzeFetchUe1 );
-};
-
-/** Clear MBS SecondaryBits and calloutBusInterface_dmibus_th1_UERE */
-actionclass clearSecMbsBitsCalloutDmiBusTh1UE
-{
-    funccall("ClearMbsSecondaryBits");
-    calloutBusInterface_dmibus_th1_UERE;
+    try ( funccall("analyzeMbaRcdParityError1"), analyzeFetchUe1 );
 };
 
 /** Callout the DMI bus, threshold 1 */
@@ -72,12 +52,6 @@ actionclass calloutDmiBusTh1 { calloutDmiBus; threshold1; };
 
 /** Callout the DMI bus, threshold 2 per day */
 actionclass calloutDmiBusTh2pday { calloutDmiBus; threshold2pday; };
-
-/** If no sparebit is set, execute calloutDmiBusTh2pday*/
-actionclass analyzeSpareBitAndThr
-{
-    try( funccall("checkSpareBit"), calloutDmiBusTh2pday );
-};
 
 /** Analyze a fetch MPE on MBA0 rank 0 */
 actionclass analyzeFetchMpe0_0 { funccall("AnalyzeFetchMpe0_0"); };
