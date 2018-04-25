@@ -234,10 +234,11 @@ namespace TRUSTEDBOOT
               uint32_t   i_i2cMasterOffset);
 
     /**
-     * @brief Is trustedboot enabled and functional
-     * @retval true if trustboot enabled and functional TPM's are available
+     * @brief Checks whether the node has a present and functioning primary TPM.
+     * @retval true if a present and functional primary TPM is available;
+     *         false otherwise
      */
-    bool enabled();
+    bool functionalPrimaryTpmExists();
 
     /**
      * @brief Wrapper around pcrExtend for measuring PNOR sections

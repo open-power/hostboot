@@ -171,9 +171,9 @@ void getBackupTpm(TARGETING::Target*& o_pBackupTpm)
         o_pBackupTpm);
 }
 
-bool enabled()
+bool functionalPrimaryTpmExists()
 {
-    bool enabled = false;
+    bool exists = false;
 #ifdef CONFIG_TPMDD
     TARGETING::TargetHandleList tpmList;
     getTPMs(tpmList,TPM_FILTER::ALL_IN_BLUEPRINT);
@@ -185,17 +185,21 @@ bool enabled()
     TARGETING::PredicateAttrVal<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>
         initialized(true);
 
+    // Only look for primary TPM
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_TPM_ROLE>
+                    isPrimaryTpm(TARGETING::TPM_ROLE_TPM_PRIMARY);
+
     auto itr = std::find_if(tpmList.begin(),tpmList.end(),
-        [&presentAndFunctional,&initialized](
+        [&presentAndFunctional, &initialized, &isPrimaryTpm](
             const TARGETING::Target* const i_pTpm)
         {
-            return (   presentAndFunctional(i_pTpm)
-                    || !initialized(i_pTpm));
+            return (isPrimaryTpm(i_pTpm) && (presentAndFunctional(i_pTpm)
+                    || !initialized(i_pTpm)));
         });
 
-    enabled = (itr!=tpmList.end()) ? true : false;
+    exists = (itr!=tpmList.end()) ? true : false;
 #endif
-    return enabled;
+    return exists;
 }
 
 void* host_update_master_tpm( void *io_pArgs )
@@ -386,7 +390,7 @@ void* host_update_master_tpm( void *io_pArgs )
 
     // Make sure we are in a state
     //  where we have a functional TPM
-    TRUSTEDBOOT::tpmVerifyFunctionalTpmExists();
+    TRUSTEDBOOT::tpmVerifyFunctionalPrimaryTpmExists();
 
     if (nullptr == err)
     {
@@ -1171,11 +1175,11 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
 
 }
 
-void tpmVerifyFunctionalTpmExists(
+void tpmVerifyFunctionalPrimaryTpmExists(
     const NoTpmShutdownPolicy i_noTpmShutdownPolicy)
 {
     errlHndl_t err = nullptr;
-    bool foundFunctional = enabled();
+    bool foundFunctional = functionalPrimaryTpmExists();
     const bool isBackgroundShutdown =
         (i_noTpmShutdownPolicy == NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
 
@@ -1183,7 +1187,7 @@ void tpmVerifyFunctionalTpmExists(
     {
         systemData.failedTpmsPosted = true;
         TRACFCOMP( g_trac_trustedboot,
-                   "NO FUNCTIONAL TPM FOUND");
+                   "NO FUNCTIONAL PRIMARY TPM FOUND ON THE NODE");
 
         // Check to ensure jumper indicates we are running secure
         SECUREBOOT::SecureJumperState l_state
@@ -1208,19 +1212,23 @@ void tpmVerifyFunctionalTpmExists(
                  * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
                  * @userdata1      0
                  * @userdata2      0
-                 * @devdesc        The system is configured in the hardware
-                 *                 (via processor secure jumpers) to enable
-                 *                 Secure Boot, and the system's "TPM required"
-                 *                 policy is configured to require at least one
-                 *                 functional TPM in order to boot with Secure
-                 *                 Boot enabled. Therefore, the system will
-                 *                 terminate due to lack of functional TPMs.
+                 * @devdesc        The system (or node, if multi-node system)
+                 *                 is configured in the hardware (via processor
+                 *                 secure jumpers) to enable Secure Boot, and
+                 *                 the system's/node's "TPM required" policy is
+                 *                 configured to require at least one
+                 *                 functional boot processor TPM in order to
+                 *                 boot with Trusted Boot enabled. Therefore,
+                 *                 the system (or node, if multi-node system)
+                 *                 will terminate due to lack of functional
+                 *                 boot processor TPM.
                  * @custdesc       The system is configured for Secure Boot and
-                 *                 trusted platform module required mode; at
-                 *                 least one functional trusted platform module
-                 *                 is required to boot the system, but none are
-                 *                 available.  Therefore, the system will
-                 *                 terminate.
+                 *                 trusted platform module required mode; a
+                 *                 functional boot processor trusted platform
+                 *                 module is required to boot the system (or
+                 *                 node, if multi-node system), but none are
+                 *                 available.  Therefore, the system (or node,
+                 *                 if multi-node system) will terminate.
                  *                 Trusted platform module required mode may be
                  *                 disabled via the appropriate systems
                  *                 management interface to allow platform boot
@@ -1245,12 +1253,12 @@ void tpmVerifyFunctionalTpmExists(
                 // Add Security Registers to the error log
                 SECUREBOOT::addSecurityRegistersToErrlog(err);
 
-                // HW callout TPMs
-                TARGETING::TargetHandleList l_tpmList;
-                TRUSTEDBOOT::getTPMs(l_tpmList, TPM_FILTER::ALL_IN_BLUEPRINT);
-                for(const auto &tpm : l_tpmList)
+                // HW callout TPM
+                TARGETING::Target* l_primaryTpm = nullptr;
+                getPrimaryTpm(l_primaryTpm);
+                if(l_primaryTpm)
                 {
-                    err->addHwCallout(tpm,
+                    err->addHwCallout(l_primaryTpm,
                                       HWAS::SRCI_PRIORITY_HIGH,
                                       HWAS::NO_DECONFIG,
                                       HWAS::GARD_NULL);
@@ -1262,14 +1270,15 @@ void tpmVerifyFunctionalTpmExists(
             }
             else
             {
-                TRACUCOMP( g_trac_trustedboot,
-                           "No functional TPM's found but TPM not Required");
+                TRACUCOMP(g_trac_trustedboot,
+                          "No functional primary TPM found but"
+                                                            "TPM not Required");
             }
         }
         else
         {
-            TRACUCOMP( g_trac_trustedboot,
-                       "No functional TPM's found but not running secure");
+            TRACUCOMP(g_trac_trustedboot,
+                      "No functional primary TPM found but not running secure");
         }
 
     }
@@ -1437,7 +1446,7 @@ void* tpmDaemon(void* unused)
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
-                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists(
+                  TRUSTEDBOOT::tpmVerifyFunctionalPrimaryTpmExists(
                       NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
@@ -1458,7 +1467,7 @@ void* tpmDaemon(void* unused)
 
                   // Lastly make sure we are in a state
                   //  where we have a functional TPM
-                  TRUSTEDBOOT::tpmVerifyFunctionalTpmExists(
+                  TRUSTEDBOOT::tpmVerifyFunctionalPrimaryTpmExists(
                       NoTpmShutdownPolicy::BACKGROUND_SHUTDOWN);
               }
               break;
