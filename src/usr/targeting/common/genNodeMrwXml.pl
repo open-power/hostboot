@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -75,6 +75,7 @@ my $usage = 0;
 my $nodeCount = 0;
 my $outFileDir = "";
 my $build = "fsp";
+my $config = "";
 use Getopt::Long;
 
 GetOptions( "mrwdir:s"  => \$mrwdir,
@@ -83,6 +84,7 @@ GetOptions( "mrwdir:s"  => \$mrwdir,
             "nodeCount:i" => \$nodeCount,
             "outfileDir:s" => \$outFileDir,
             "build:s"   => \$build,
+            "config:s" => \$config,
             "help"      => \$usage, );
 
 
@@ -119,22 +121,16 @@ else
     die "ERROR: $build is not valid. Valid values are fsp or hb\n";
 }
 
-my $nodeSuffix = "";
-if( ($sysnodes) && ($sysnodes =~ /2/) )
-{
-    $nodeSuffix = "2N_"
-}
-
 #create files
 my $mrw_file =
-    open_mrw_file($mrwdir, "${SYSNAME}_${nodeSuffix}${fileSuffix}.mrw.xml");
+    open_mrw_file($mrwdir, "${SYSNAME}${config}_${fileSuffix}.mrw.xml");
 $sysInfo = XMLin($mrw_file,
                 ForceArray=>1);
 #print Dumper($sysInfo);
 for my $j(0..($nodeCount))
 {
     $outFile =
-        "$outFileDir/${SYSNAME}_${nodeSuffix}node_$j"."_${fileSuffix}.mrw.xml";
+        "$outFileDir/${SYSNAME}${config}_node_$j"."_${fileSuffix}.mrw.xml";
     push @nodeOutFiles, [$outFile];
 }
 
@@ -249,7 +245,7 @@ Usage:
 
 
     $scriptname --system=sysname --systemnodes=2 --mrwdir=pathname
-                     --build=hb --nodeCount=nodeCount
+                     --build=hb --nodeCount=nodeCount --config=_MST
         --system=systemname
               Specify which system MRW XML to be generated
                The system name will be set as uppercase
@@ -265,6 +261,9 @@ Usage:
               Specify if HostBoot build (hb) or FSP build (fsp)
         --nodeCount
               Specify the max number of nodes for the system
+        --config
+              Name of the config we are compiling for. This is used in the
+              input mrw name and output node xmls as well.
 
 \n";
 }
