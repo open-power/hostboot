@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,8 +36,7 @@ enum internode_info_vals_t
 enum intr_mpipl_sync_t
 {
     INTR_MPIPL_SYNC_CLEAR = 0,
-    INTR_MPIPL_UPSTREAM_DISABLED = 1,
-    INTR_MPIPL_DRAINED = 2,
+    INTR_MPIPL_INIT_COMPLETE = 1,
 };
 
 
