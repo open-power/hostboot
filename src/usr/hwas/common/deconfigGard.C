@@ -1725,7 +1725,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 // get parent MI
                 TargetHandleList pParentMitList;
                 getParentAffinityTargetsByState(pParentMitList, &i_target,
-                                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_MI, UTIL_FILTER_PRESENT);
 
                 HWAS_ASSERT((pParentMitList.size() <= 1),
                             "HWAS _deconfigureByAssoc: DMI has multiple MI parents, this is impossible");
