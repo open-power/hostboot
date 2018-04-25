@@ -132,6 +132,77 @@ fapi_try_exit:
 } // code
 
 ///
+/// @brief Enforce DRAM width system support checks
+/// @param[in] i_target the port
+/// @param[in] i_kind a DIMM kind
+/// @param[in] i_mrw_supported_list the MRW bitmap's value
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note The DIMM kind should be a DIMM on the MCA
+///
+fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const dimm::kind& i_kind,
+        const fapi2::buffer<uint8_t>& i_mrw_supported_list)
+{
+    // Contains a mapping of the DRAM width to the bitmap value to be checked for support
+    // If the DRAM's width is not found in this map, we'll error out with a special error
+    static const std::vector<std::pair<uint8_t, uint8_t>> DRAM_WIDTH_MAP =
+    {
+        {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4, fapi2::ENUM_ATTR_MSS_MRW_SUPPORTED_DRAM_WIDTH_X4},
+        {fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8, fapi2::ENUM_ATTR_MSS_MRW_SUPPORTED_DRAM_WIDTH_X8},
+    };
+    // Gets the bitmap value for this DIMM's DRAM's width
+    uint8_t l_bitmap_value = 0;
+    const auto l_found = mss::find_value_from_key(DRAM_WIDTH_MAP, i_kind.iv_dram_width, l_bitmap_value);
+
+    // We didn't find this DRAM width as supported in the above list
+    FAPI_ASSERT(l_found,
+                fapi2::MSS_PLUG_RULES_DRAM_WIDTH_NOT_SUPPORTED()
+                .set_DRAM_WIDTH(i_kind.iv_dram_width)
+                .set_MCA_TARGET(i_target),
+                "%s failed to find DRAM width of %u in the supported DRAM widths vector",
+                mss::c_str(i_kind.iv_target), i_kind.iv_dram_width);
+
+    // We didn't find this DRAM width as supported in the MRW attribute
+    FAPI_ASSERT(i_mrw_supported_list.getBit(l_bitmap_value),
+                fapi2::MSS_PLUG_RULES_MRW_DRAM_WIDTH_NOT_SUPPORTED()
+                .set_DRAM_WIDTH(i_kind.iv_dram_width)
+                .set_MRW_SUPPORTED_LIST(i_mrw_supported_list)
+                .set_BITMAP_VALUE(l_bitmap_value)
+                .set_MCA_TARGET(i_target),
+                "%s failed! 0x%02x is not in MRW suppored value of 0x%02x for DRAM width of %u",
+                mss::c_str(i_kind.iv_target), l_bitmap_value, i_mrw_supported_list, i_kind.iv_dram_width);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce DRAM width system support checks
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+/// This function will commit error logs if a DIMM has an unsupported DRAM width
+///
+fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const std::vector<dimm::kind>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint8_t l_mrw_supported_list = 0;
+    FAPI_TRY(mss::mrw_supported_dram_width(l_mrw_supported_list));
+
+    // Loops through the DIMM and checks for unsupported DRAM widths
+    for(const auto& l_kind : i_kinds)
+    {
+        FAPI_TRY(check_system_supported_dram_width(i_target, l_kind, l_mrw_supported_list));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enforce DRAM width checks
 /// @note DIMM0's width needs to equal DIMM1's width
 /// @param[in] i_target the port
@@ -754,6 +825,9 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
 
     // Ensures that the port has a valid combination of DRAM widths
     FAPI_TRY( plug_rule::check_dram_width(i_target, l_dimm_kinds) );
+
+    // Ensures that the system as a whole supports a given DRAM width
+    FAPI_TRY( plug_rule::check_system_supported_dram_width(i_target, l_dimm_kinds) );
 
     // Ensures that the port has a valid combination of stack types
     FAPI_TRY( plug_rule::check_stack_type(i_target, l_dimm_kinds) );
