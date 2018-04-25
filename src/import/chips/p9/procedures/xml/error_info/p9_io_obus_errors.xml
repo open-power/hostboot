@@ -53,4 +53,13 @@
         </callout>
     </hwpError>
     <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_P9_IO_FIRMASK_RESTORE_ERROR</rc>
+        <description>Attempted to restore OBUS firmasks when values were never saved</description>
+        <ffdc>TARGET</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
 </hwpErrors>
