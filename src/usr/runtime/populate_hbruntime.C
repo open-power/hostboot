@@ -1447,7 +1447,7 @@ errlHndl_t populate_hbSecurebootData ( void )
         // populate secure setting for trusted boot
         bool trusted = false;
 #ifdef CONFIG_TPMDD
-        trusted = TRUSTEDBOOT::enabled();
+        trusted = TRUSTEDBOOT::functionalPrimaryTpmExists();
 #endif
         l_sysSecSets->trustedboot = trusted? 1: 0;
 

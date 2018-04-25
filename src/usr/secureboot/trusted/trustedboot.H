@@ -99,18 +99,19 @@ enum class NoTpmShutdownPolicy
 };
 
 /**
- * @brief Verify a functional TPM still exists in the system
+ * @brief Verify a functional primary TPM still exists in the system
  *
- * If no functional TPMs are found in the system :
+ * If no functional primary TPM is found in the system :
  *   If the system is running in secure mode an error log will be committed
  *   and if the TPMRequired attribute is true a system shutdown will be
  *   initiated
  *
  * @param[in] i_noTpmShutdownPolicy Shutdown policy to invoke if a functional
- *     TPM is required to boot the system (TPM required policy is "required")
- *     -and- no functional TPMs are available (or other critical error occurred)
+ *     primary TPM is required to boot the system (TPM required policy is
+ *     "required") -and- no functional primary TPM is available
+ *     (or other critical error occurred)
 */
-void tpmVerifyFunctionalTpmExists(
+void tpmVerifyFunctionalPrimaryTpmExists(
     NoTpmShutdownPolicy i_noTpmShutdownPolicy =
         NoTpmShutdownPolicy::SYNC_SHUTDOWN);
 
