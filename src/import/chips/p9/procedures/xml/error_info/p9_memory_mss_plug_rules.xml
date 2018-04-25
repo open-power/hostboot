@@ -59,6 +59,58 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_DRAM_WIDTH_NOT_SUPPORTED</rc>
+    <description>
+      DRAM width was not found to be supported by the code
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_MRW_DRAM_WIDTH_NOT_SUPPORTED</rc>
+    <description>
+      DRAM width was not found to be supported by the MRW attribute
+    </description>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <ffdc>MRW_SUPPORTED_LIST</ffdc>
+    <ffdc>BITMAP_VALUE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_INVALID_DRAM_WIDTH_MIX</rc>
     <description>
       Two different widths of DIMMs are installed on port

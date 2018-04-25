@@ -665,4 +665,19 @@
     <mssAccessorName>mrw_allow_unsupported_rcw</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_SUPPORTED_DRAM_WIDTH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Bitmap of DRAM widths supported by a system. A 1 indicates that the system supports a density.
+      Enums below represent the the bit location in the attribute for a given DRAM width.
+      Default value is 0xC -> both x4/x8 supported
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default> 0xc0 </default>
+    <enum> X4 = 0, X8 = 1 </enum>
+    <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
+  </attribute>
+
 </attributes>

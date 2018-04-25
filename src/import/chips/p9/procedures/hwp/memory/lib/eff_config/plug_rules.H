@@ -159,6 +159,29 @@ fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
                                     const uint64_t i_ranks_override);
 
 ///
+/// @brief Enforce DRAM width system support checks
+/// @param[in] i_target the port
+/// @param[in] i_kind a DIMM kind
+/// @param[in] i_mrw_supported_list the MRW bitmap's value
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note The DIMM kind should be a DIMM on the MCA
+///
+fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const dimm::kind& i_kind,
+        const fapi2::buffer<uint8_t>& i_mrw_supported_list);
+
+///
+/// @brief Enforce DRAM width system support checks
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+/// This function will commit error logs if a DIMM has an unsupported DRAM width
+///
+fapi2::ReturnCode check_system_supported_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const std::vector<dimm::kind>& i_kinds);
+
+///
 /// @brief Enforce DRAM width checks
 /// @note DIMM0's width needs to equal DIMM1's width
 /// @param[in] i_target the port
