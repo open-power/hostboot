@@ -115,6 +115,40 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IO_OLLFIR_MASK</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    This attribute provides a place for Hostboot to save off the IO_OLLFIR_MASK.
+    During IPL time Hostboot wants to change the value of the FIR but it will
+    write the value back during Hostboot Runtime (HBRT). Hostboot will need to
+    wait to save the values until after p9_chiplet_scominit is called because that
+    HWP sets the fir masks we want to save off. Values will need to restored
+    after the PEER_TARGET values have been updated in HBRT
+  </description>
+  <valueType>uint64</valueType>
+  <initToZero/>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_PB_IOOFIR_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    This attribute provides a place for Hostboot to save off the PB_IOOFIR_MASK.
+    During IPL time Hostboot wants to change the value of the FIR but it will
+    write the value back during Hostboot Runtime (HBRT). Hostboot will need to
+    wait to save the values until after p9_chiplet_scominit is called because that
+    HWP sets the fir masks we want to save off. Values will need to restored
+    after the PEER_TARGET values have been updated in HBRT
+  </description>
+  <valueType>uint64</valueType>
+  <initToZero/>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IO_O_CHANNEL_TYPE</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>
@@ -129,5 +163,4 @@
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
-
 </attributes>
