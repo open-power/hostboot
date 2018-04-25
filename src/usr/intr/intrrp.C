@@ -118,6 +118,58 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             break;
         }
 
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+        TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
+        hb_existing_image = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+        if (hb_existing_image == 0)
+        {
+            //single node system so do nothing
+            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "IntrRp::resetIntpForMpipl() called on a single node system, skip INTRP sync steps");
+        }
+        else
+        {
+            TRACFCOMP(g_trac_intr,
+               "IntrRp::resetIntpForMpipl() Synchronize multi-node interrupt enablement");
+
+            // MPIPL Step 1 -- Set the Interrupt LSI state machine to disabled
+            for (uint64_t i = 0; i < LSI_LAST_SOURCE; i++)
+            {
+                err = sendPsiHbEOI(iv_masterHdlr, i);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_intr,
+                      "IntrRp::resetIntpForMpipl() Error sending PsiHbEOI for int source: %d", i);
+                    break;
+                }
+            }
+
+            if (err)
+            { break; }
+
+            // Step 2 -- Set bit 0 of Interrupt Control Register
+            //     to 1 to enable LSI mode
+            for(ChipList_t::iterator targ_itr = iv_chipList.begin();
+                                targ_itr != iv_chipList.end(); ++targ_itr)
+            {
+                PSIHB_SW_INTERFACES_t * l_psihb_ptr =
+                                        (*targ_itr)->psiHbBaseAddr;
+                l_psihb_ptr->icr =
+                         (l_psihb_ptr->icr | PSI_BRIDGE_INTP_STATUS_CTL_ENABLE);
+            }
+
+            // Step 3 -- Confirm all other nodes have
+            //   completed steps 1+2 above before the rest
+            //   of the initialization sequence is completed
+            err = syncNodes(INTR_MPIPL_INIT_COMPLETE);
+        }
+
+        if (err)
+        { break; }
+
         TRACFCOMP(g_trac_intr, "IntrRp::resetIntpForMpipl() Masking all interrupt sources.");
         //Mask any future interrupts to avoid receiving anymore while in the process
         // of resetting the rest of the Interrupt Logic
@@ -1225,13 +1277,11 @@ void IntrRp::msgHandler()
                 break;
             case MSG_INTR_ADD_HBNODE:  // node info for mpipl
                 {
-#ifdef CONFIG_MPIPL_ENABLED //TODO RTC 134431
                     errlHndl_t err = addHbNodeToMpiplSyncArea(msg->data[0]);
                     if(err)
                     {
                         errlCommit(err,INTR_COMP_ID);
                     }
-#endif
                     msg_free(msg); // async message
                 }
                 break;
@@ -1250,6 +1300,55 @@ void IntrRp::msgHandler()
         }
     }
 }
+
+errlHndl_t IntrRp::sendPsiHbEOI(intr_hdlr_t* i_proc, uint64_t& i_intSource)
+{
+     errlHndl_t l_err = NULL;
+
+    //The XIVE HW is expecting these MMIO accesses to come from the
+    // core/thread they were setup (master core, thread 0)
+    // These functions will ensure this code executes there
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    //Send an EOI to the Power bus using the PSIHB ESB Space
+    //This is done with a read to the page specific to the interrupt source.
+    //Each interrupt source gets one page
+    uint64_t * l_psiHbPowerBusEoiAddr =
+          i_proc->psiHbEsbBaseAddr + ((i_intSource)*PAGE_SIZE)/sizeof(uint64_t);
+
+    uint64_t eoiRead = *l_psiHbPowerBusEoiAddr;
+
+    //MMIO Complete, rest of code can run on any thread
+    task_affinity_unpin();
+
+    if (eoiRead != 0)
+    {
+        TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendPsiHbEOI error sending EOI"
+                               " to PSIHB ESB. EOI load returned: %x", eoiRead);
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        INTR::MOD_INTRRP_SENDEOI
+         * @reasoncode      INTR::RC_PSIHB_ESB_EOI_FAIL
+         * @userdata1       Value read from EOI load
+         * @userdata2       Interrupt Source to issue EOI to
+         * @devdesc         Unexpected RC from issuing PSIHB EOI store
+         */
+        l_err = new ERRORLOG::ErrlEntry
+          (
+           ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+           INTR::MOD_INTRRP_SENDEOI,            // moduleid
+           INTR::RC_PSIHB_ESB_EOI_FAIL,         // reason code
+           eoiRead,                             // read value
+           i_intSource                          // interrupt source number
+           );
+    }
+
+    TRACDCOMP(g_trac_intr, "IntrRp::sendPsiHbEOI read response: %lx", eoiRead);
+
+    return l_err;
+}
+
 
 errlHndl_t IntrRp::sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir)
 {
@@ -1340,47 +1439,9 @@ errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource, PIR_t& i_pir)
     }
 
     do {
-        //The XIVE HW is expecting these MMIO accesses to come from the
-        // core/thread they were setup (master core, thread 0)
-        // These functions will ensure this code executes there
-        task_affinity_pin();
-        task_affinity_migrate_to_master();
-
-        //Send an EOI to the Power bus using the PSIHB ESB Space
-        //This is done with a read to the page specific to the interrupt source.
-        //Each interrupt source gets one page
-        uint64_t * l_psiHbPowerBusEoiAddr =
-          l_proc->psiHbEsbBaseAddr + ((i_intSource)*PAGE_SIZE)/sizeof(uint64_t);
-
-        uint64_t eoiRead = *l_psiHbPowerBusEoiAddr;
-
-        //MMIO Complete, rest of code can run on any thread
-        task_affinity_unpin();
-
-        if (eoiRead != 0)
-        {
-            TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error sending EOI"
-                               " to PSIHB ESB. EOI load returned: %x", eoiRead);
-            /*@ errorlog tag
-             * @errortype       ERRL_SEV_UNRECOVERABLE
-             * @moduleid        INTR::MOD_INTRRP_SENDEOI
-             * @reasoncode      INTR::RC_PSIHB_ESB_EOI_FAIL
-             * @userdata1       Value read from EOI load
-             * @userdata2       Interrupt Source to issue EOI to
-             * @devdesc         Unexpected RC from issuing PSIHB EOI store
-             */
-            l_err = new ERRORLOG::ErrlEntry
-              (
-               ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-               INTR::MOD_INTRRP_SENDEOI,            // moduleid
-               INTR::RC_PSIHB_ESB_EOI_FAIL,         // reason code
-               eoiRead,                             // read value
-               i_intSource                          // interrupt source number
-               );
-            break;
-        }
-
-        TRACDCOMP(g_trac_intr, "IntrRp::sendEOI read response: %lx", eoiRead);
+        l_err = sendPsiHbEOI(l_proc, i_intSource);
+        if (l_err)
+        { break ;}
 
         l_err = sendXiveEOI(i_intSource, i_pir);
 
@@ -2130,346 +2191,6 @@ void IntrRp::shutDown(uint64_t i_status)
 
 //----------------------------------------------------------------------------
 
-#ifdef CONFIG_MPIPL_ENABLED
-
-errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
-                                     INTR_ROUTING_t i_rx_tx)
-{
-    errlHndl_t err = NULL;
-    do
-    {
-        size_t scom_len = sizeof(uint64_t);
-
-        // PSI
-        PSIHB_ISRN_REG_t reg;
-
-        err = deviceRead
-          (
-           i_proc,
-           &reg,
-           scom_len,
-           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_STATUS_CTL_REG)
-
-           );
-
-        if(err)
-        {
-            break;
-        }
-
-        switch(i_rx_tx)
-        {
-        case INTR_UPSTREAM:
-            reg.uie = 0;   //upstream interrupt enable = 0 (disable)
-            break;
-
-        case INTR_DOWNSTREAM:
-            reg.die = 0;  //downstream interrupt enable = 0 (disable)
-            break;
-        }
-
-        scom_len = sizeof(uint64_t);
-        err = deviceWrite
-          (
-           i_proc,
-           &reg,
-           scom_len,
-           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_STATUS_CTL_REG)
-           );
-
-        if(err)
-        {
-            break;
-        }
-
-        for(size_t i = 0;
-            i < sizeof(cv_PE_BAR_SCOM_LIST)/sizeof(cv_PE_BAR_SCOM_LIST[0]);
-            ++i)
-        {
-            uint64_t reg = 0;
-            scom_len = sizeof(uint64_t);
-            err = deviceRead
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
-                );
-
-            if(err)
-            {
-                break;
-            }
-
-            switch(i_rx_tx)
-            {
-                case INTR_UPSTREAM:
-                    // reset bit PE_IRSN_UPSTREAM
-                    reg &= ~((1ull << (63-PE_IRSN_UPSTREAM)));
-                    break;
-
-                case INTR_DOWNSTREAM:
-                    // reset bit PE_IRSN_DOWNSTREAM
-                    reg &= ~((1ull << (63-PE_IRSN_DOWNSTREAM)));
-                    break;
-            }
-
-            scom_len = sizeof(uint64_t);
-            err = deviceWrite
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(cv_PE_BAR_SCOM_LIST[i])
-                );
-
-            if(err)
-            {
-                break;
-            }
-        }
-        if(err)
-        {
-            break;
-        }
-
-        //NX has no up/down stream enable bit - just one enable bit.
-        //The NX should be cleared as part of an MPIPL so no
-        //interrupts should be pending from this unit, however
-        //we must allow EOIs to flow, so only disable when
-        //downstream is requested
-        if(i_rx_tx == INTR_DOWNSTREAM)
-        {
-            uint64_t reg = 0;
-            scom_len = sizeof(uint64_t);
-            err = deviceRead
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
-                );
-            if(err)
-            {
-                break;
-            }
-
-            // reset bit NX_BUID_ENABLE
-            reg &= ~(1ull << (63-NX_BUID_ENABLE));
-
-            scom_len = sizeof(uint64_t);
-            err = deviceWrite
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
-                );
-            if(err)
-            {
-                break;
-            }
-        }
-
-    } while(0);
-    return err;
-}
-#endif
-
-//----------------------------------------------------------------------------
-
-#ifdef CONFIG_MPIPL_ENABLED
-errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
-{
-    errlHndl_t err = NULL;
-    size_t scom_len = sizeof(uint64_t);
-    do
-    {
-        // PSI
-        PSIHB_ISRN_REG_t reg1; // zeros self
-        reg1.irsn -= 1;  // default all '1's according to scom spec
-        // all other fields = 0
-
-        err = deviceWrite
-          (
-           i_proc,
-           &reg1,
-           scom_len,
-           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
-           );
-        if(err)
-        {
-            break;
-        }
-
-        // PE
-        for(size_t i = 0;
-            i < sizeof(cv_PE_BAR_SCOM_LIST)/sizeof(cv_PE_BAR_SCOM_LIST[0]);
-            ++i)
-        {
-            uint64_t reg = 0;
-            scom_len = sizeof(uint64_t);
-            // Note: no default value specified in scom spec - assume 0
-            err = deviceWrite
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(cv_PE_IRSN_COMP_SCOM_LIST[i])
-                );
-            if(err)
-            {
-                break;
-            }
-
-            scom_len = sizeof(uint64_t);
-            // Note: no default value specified in scom spec - assume 0
-            err = deviceWrite
-                (
-                 i_proc,
-                 &reg,
-                 scom_len,
-                 DEVICE_SCOM_ADDRESS(cv_PE_IRSN_MASK_SCOM_LIST[i])
-                );
-            if(err)
-            {
-                break;
-            }
-        }
-        if(err)
-        {
-            break;
-        }
-
-        // NX [1:19] is BUID [20:32] mask
-        // No default value specified in scom spec. assume 0
-        uint64_t reg = 0;
-        scom_len = sizeof(uint64_t);
-        err = deviceWrite
-            (
-             i_proc,
-             &reg,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(NX_BUID_SCOM_ADDR)
-            );
-        if(err)
-        {
-            break;
-        }
-    } while(0);
-    return err;
-}
-#endif
-
-//----------------------------------------------------------------------------
-#ifdef CONFIG_MPIPL_ENABLED
-errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
-{
-    errlHndl_t err = NULL;
-
-    TARGETING::TargetHandleList procCores;
-    getChildChiplets(procCores, i_proc, TYPE_CORE, false); //state can change
-
-    do
-    {
-        //Issue eio to IPIs first
-        for(TARGETING::TargetHandleList::iterator
-            core = procCores.begin();
-            core != procCores.end();
-            ++core)
-        {
-            FABRIC_CHIP_ID_ATTR chip = i_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
-            FABRIC_GROUP_ID_ATTR node = i_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
-            CHIP_UNIT_ATTR coreId =
-                                (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-            PIR_t pir(0);
-            pir.groupId = node;
-            pir.chipId = chip;
-            pir.coreId = coreId;
-
-            size_t threads = cpu_thread_count();
-            for(size_t thread = 0; thread < threads; ++thread)
-            {
-                pir.threadId = thread;
-                uint64_t xirrAddr = iv_baseAddr +
-                  cpuOffsetAddr(pir);
-                 uint32_t * xirrPtr =
-                  reinterpret_cast<uint32_t*>(xirrAddr + XIRR_OFFSET);
-                uint8_t * mfrrPtr = reinterpret_cast<uint8_t*>(
-                                                 xirrAddr + MFRR_OFFSET);
-
-                //need to set mfrr to 0xFF first
-                TRACDCOMP(g_trac_intr,"Clearing IPI to xirrPtr[%p]", xirrPtr);
-                *mfrrPtr = 0xFF;
-                *xirrPtr = 0xFF000002;
-            }
-        }
-
-        PIR_t pir(iv_masterCpu);
-        pir.threadId = 0;
-        //Can just write all EOIs to master core thread 0 XIRR
-        uint64_t xirrAddr = iv_baseAddr + cpuOffsetAddr(pir);
-        volatile uint32_t * xirrPtr =
-                   reinterpret_cast<uint32_t*>(xirrAddr +XIRR_OFFSET);
-
-
-        //Issue eio to PSI logic
-        uint32_t l_psiBaseIsn;
-        uint32_t l_maxInt = 0;
-        err = getPsiIRSN(i_proc, l_psiBaseIsn, l_maxInt);
-        if(err)
-        {
-            break;
-        }
-
-        //Only issue if ISN is non zero (ie set)
-        if(l_psiBaseIsn)
-        {
-            l_psiBaseIsn |= 0xFF000000;
-            uint32_t l_psiMaxIsn = l_psiBaseIsn + l_maxInt;
-
-            TRACFCOMP(g_trac_intr,"Issuing EOI to PSIHB range %x - %x",
-                      l_psiBaseIsn, l_psiMaxIsn);
-
-            for(uint32_t l_isn = l_psiBaseIsn; l_isn < l_psiMaxIsn; ++l_isn)
-            {
-                TRACDCOMP(g_trac_intr,"   xirrPtr[%p] xirr[%x]\n", xirrPtr, l_isn);
-                *xirrPtr = l_isn;
-            }
-        }
-
-        //Don't need to issue EOIs to PHBs
-        //since PHB ETU reset cleans them up
-
-        //Issue eio to NX logic
-        uint32_t l_nxBaseIsn;
-        err = getNxIRSN(i_proc, l_nxBaseIsn, l_maxInt);
-        if(err)
-        {
-            break;
-        }
-
-        //Only issue if ISN is non zero (ie set)
-        if(l_nxBaseIsn)
-        {
-            l_nxBaseIsn |= 0xFF000000;
-            uint32_t l_nxMaxIsn = l_nxBaseIsn + l_maxInt;
-            TRACFCOMP(g_trac_intr,"Issuing EOI to NX range %x - %x",
-                      l_nxBaseIsn, l_nxMaxIsn);
-
-            for(uint32_t l_isn = l_nxBaseIsn; l_isn < l_nxMaxIsn; ++l_isn)
-            {
-                *xirrPtr = l_isn;
-            }
-        }
-    } while(0);
-    return err;
-}
-#endif
-
-//----------------------------------------------------------------------------
-
 errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
                                    TARGETING::TargetHandleList& o_cores)
 {
@@ -2714,156 +2435,6 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
 }
 
 
-#ifdef CONFIG_MPIPL_ENABLED
-errlHndl_t IntrRp::hw_disableIntrMpIpl()
-{
-    errlHndl_t err = NULL;
-    TARGETING::TargetHandleList funcProc, procCores;
-
-    //Need to clear out all pending interrupts.  This includes
-    //ones that PHYP already accepted and ones "hot" in the XIRR
-    //register.   Must be done for all processors prior to opening
-    //up traffic for mailbox (since we switch the IRSN).  PHYP
-    //can route PSI interrupts to any chip in the system so all
-    //must be cleaned up prior to switching
-
-    do
-    {
-        //extract the node layout for later
-        err = extractHbNodeInfo();
-        if(err)
-        {
-            break;
-        }
-
-        //Get the procs/cores
-        err = findProcs_Cores(funcProc, procCores);
-        if(err)
-        {
-            break;
-        }
-
-        //since HB will need to use PSI interrupt block, we need to
-        //perform the extra step of disabling FSP PSI interrupts at
-        //source(theoretically upstream disable should have handled,
-        //but it seesms to slip through somehow and doesn't get fully
-        //cleaned up cause we clear the XIVR
-        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
-            (proc != funcProc.end()) && !err;
-            ++proc)
-        {
-            uint64_t reg = PSI_FSP_INT_ENABLE;
-            size_t scom_len = sizeof(uint64_t);
-            err = deviceWrite
-              (
-               (*proc),
-               &reg,
-               scom_len,
-               DEVICE_SCOM_ADDRESS(PSI_HBCR_AND_SCOM_ADDR)
-               );
-        }
-        if(err)
-        {
-            break;
-        }
-
-        // Disable upstream intr routing on all processor chips
-        TRACFCOMP(g_trac_intr,"Disable upstream interrupt");
-        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
-            (proc != funcProc.end()) && !err;
-            ++proc)
-        {
-            // disable upstream intr routing
-            err = hw_disableRouting(*proc,INTR_UPSTREAM);
-        }
-        if(err)
-        {
-            break;
-        }
-
-        err = syncNodes(INTR_MPIPL_UPSTREAM_DISABLED);
-        if ( err )
-        {
-            break;
-        }
-
-        // Set interrupt presenter to allow all interrupts
-        TRACFCOMP(g_trac_intr,"Allow interrupts");
-        for(TARGETING::TargetHandleList::iterator
-            core = procCores.begin();
-            core != procCores.end();
-            ++core)
-        {
-            allowAllInterrupts(*core);
-        }
-
-        // Now look for interrupts
-        drainMpIplInterrupts(procCores);
-
-        // Issue blind EOIs to all threads IPIs and  to clean up stale XIRR
-        TRACFCOMP(g_trac_intr,"Issue blind EOIs to all ISRN and IPIs");
-        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
-            (proc != funcProc.end()) && !err;
-            ++proc)
-        {
-            err = blindIssueEOIs(*proc);
-        }
-        if(err)
-        {
-            break;
-        }
-
-        err = syncNodes(INTR_MPIPL_DRAINED);
-        if( err )
-        {
-            break;
-        }
-
-        // Disable all interrupt presenters
-        for(TARGETING::TargetHandleList::iterator core = procCores.begin();
-            core != procCores.end();
-            ++core)
-        {
-            disableAllInterrupts(*core);
-        }
-
-        // disable downstream routing and clean up IRSN regs
-        for(TARGETING::TargetHandleList::iterator proc = funcProc.begin();
-            proc != funcProc.end();
-            ++proc)
-        {
-            // disable downstream routing
-            err = hw_disableRouting(*proc,INTR_DOWNSTREAM);
-            if(err)
-            {
-                break;
-            }
-
-            // reset IRSN values
-            err = hw_resetIRSNregs(*proc);
-            if(err)
-            {
-                break;
-            }
-
-            //Now mask off all XIVRs under the PSI unit
-            //This prevents hot PSI mbox interrupts from flowing up to HB
-            //and allows PHYP to deal with them
-            err = maskXIVR(*proc);
-            if(err)
-            {
-                break;
-            }
-        }
-        if(err)
-        {
-            break;
-        }
-    } while(0);
-    return err;
-}
-#endif
-
 errlHndl_t syncNodesError(void * i_p, uint64_t i_len)
 {
     TRACFCOMP(g_trac_intr,"Failure calling mm_block_map: phys_addr=%p",
@@ -2909,7 +2480,6 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
             err = syncNodesError(this_node_info, INTERNODE_INFO_SIZE);
             break;
         }
-
 
         if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
         {
@@ -3011,7 +2581,6 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
     return err;
 }
 
-#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t  IntrRp::initializeMpiplSyncArea()
 {
     errlHndl_t err = NULL;
@@ -3071,9 +2640,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
     }
     return err;
 }
-#endif
 
-#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
 {
     errlHndl_t err = NULL;
@@ -3122,77 +2689,6 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
     }
     return err;
 }
-#endif
-
-#ifdef CONFIG_MPIPL_ENABLED
-errlHndl_t  IntrRp::extractHbNodeInfo(void)
-{
-    errlHndl_t err = NULL;
-    uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
-    TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
-    void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
-                                 VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
-
-    internode_info_t * this_node_info =
-        reinterpret_cast<internode_info_t *>
-        (mm_block_map(node_info_ptr,INTERNODE_INFO_SIZE));
-
-    if(this_node_info)
-    {
-        if(this_node_info->eye_catcher != NODE_INFO_EYE_CATCHER)
-        {
-            TRACFCOMP(g_trac_intr, INFO_MRK
-                      "MPIPL, but INTR node data sync area unintialized."
-                      " Assuming single HB Intance system");
-        }
-        else //multinode
-        {
-            TARGETING::ATTR_HB_EXISTING_IMAGE_type mask = 0x1 <<
-              (MAX_NODES_PER_SYS -1);
-
-            for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
-            {
-                //If comm area indicates node exists, add to map
-                if(this_node_info->exist[node])
-                {
-                    hb_existing_image |= (mask >> node);
-                }
-            }
-        }
-
-        mm_block_unmap(this_node_info);
-    }
-    else
-    {
-        TRACFCOMP( g_trac_intr, "Failure calling mm_block_map : phys_addr=%p",
-                   node_info_ptr);
-        /*@
-         * @errortype    ERRL_SEV_UNRECOVERABLE
-         * @moduleid     INTR::MOD_INTR_EXTRACTNODEINFO
-         * @reasoncode   INTR::RC_CANNOT_MAP_MEMORY
-         * @userdata1    physical address
-         * @userdata2    Size
-         * @devdesc      Error mapping in memory
-         */
-        err = new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      INTR::MOD_INTR_EXTRACTNODEINFO,
-                                      INTR::RC_CANNOT_MAP_MEMORY,
-                                      reinterpret_cast<uint64_t>(node_info_ptr),
-                                      INTERNODE_INFO_SIZE,
-                                      true /*Add HB Software Callout*/);
-
-    }
-
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
-    sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
-    TRACFCOMP( g_trac_intr, "extractHbNodeInfo found map: %x", hb_existing_image);
-
-    return err;
-}
-#endif
 
 //----------------------------------------------------------------------------
 // External interfaces

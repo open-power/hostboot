@@ -574,6 +574,15 @@ namespace INTR
             errlHndl_t sendXiveEOI(uint64_t& i_intSource, PIR_t& i_pir);
 
             /**
+             * Send the PSI Host Bridge portion of the EOI (End of Interrupt)
+             *      sequence
+             * @param[in] i_proc, the proc intrp handler
+             * @param[in] i_intSource, interrupt source to perform EOI for
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t sendPsiHbEOI(intr_hdlr_t* i_proc, uint64_t& i_intSource);
+
+            /**
              * Function completes interrupt processing
              *   - Unmasks interrupt source
              *   - Sends XIVE EOI
@@ -841,13 +850,6 @@ namespace INTR
              * @return error log handle
              */
             errlHndl_t  addHbNodeToMpiplSyncArea(uint64_t i_hbNode);
-
-            /**
-             * Extract node information stored away and restore into
-             * ATTR for MPIPL
-             * @return error log handle
-             */
-            errlHndl_t  extractHbNodeInfo(void);
 
             /**
              * Calculate the address offset for the given cpu

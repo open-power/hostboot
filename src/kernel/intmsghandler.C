@@ -202,7 +202,7 @@ void InterruptMsgHdlr::sendIpcMsg(uint64_t i_pir)
         //a duplicate doorbell happens before kernel clears first
         //message.
         //Since the kernel will drop any message with the same PIR
-        //key on the floor, need to make it unique with a incrementing
+        //key on the floor, need to make it unique with an incrementing
         //counter
 
         cv_ipc_salt += MSG_IPC_SALT;
