@@ -152,63 +152,78 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
     {
         #if !defined(__HOSTBOOT_RUNTIME) && defined(__HOSTBOOT_MODULE)
 
-        // At IPL time we want to try avoiding calling out both DIMMs on a
-        // rank if possible, so we use mssIplUeIsolation to just callout
-        // the dimms with bad bits instead of calling out the entire rank. At
-        // runtime we can't do this to preserve data integrity.
+        MemRank rank = i_addr.getRank();
 
-        MbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-
-        MemDqBitmap<DIMMS_PER_RANK::MBA> l_dqBitmap;
-        o_rc = mssIplUeIsolation<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
-            i_addr.getRank(), l_dqBitmap );
-        if ( SUCCESS != o_rc )
+        if ( isInMdiaMode() )
         {
-            PRDF_ERR( PRDF_FUNC "mssIplUeIsolation(0x%08x, 0x%02x) failed",
-                      i_chip->getHuid(), i_addr.getRank().getKey() );
-            break;
-        }
+            // During MemDiags, we want to try avoiding calling out both DIMMs
+            // on a rank, if possible. So we use mssIplUeIsolation() to callout
+            // only the DIMMs with bad bits instead of calling out the entire
+            // rank. We cannot call this procedure once mainline traffic is
+            // running because it will modify contents of memory.
 
-        // Add UE data to capture data
-        l_dqBitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
+            MbaDataBundle * mbadb = getMbaDataBundle( i_chip );
 
-        // Add all DIMMs with bad bits to the callout list.
-        for ( uint8_t ps = 0; ps < DIMMS_PER_RANK::MBA; ps++ )
-        {
-            bool badDqs = false;
-            o_rc = l_dqBitmap.badDqs( badDqs, ps );
+            MemDqBitmap<DIMMS_PER_RANK::MBA> l_dqBitmap;
+            o_rc = mssIplUeIsolation<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
+                                                           rank, l_dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "badDqs(%d) failed", ps );
+                PRDF_ERR( PRDF_FUNC "mssIplUeIsolation(0x%08x, 0x%02x) failed",
+                          i_chip->getHuid(), rank.getKey() );
                 break;
             }
 
-            if ( !badDqs ) continue;
+            // Add UE data to capture data
+            l_dqBitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
 
-            TargetHandle_t l_dimm = getConnectedDimm( i_chip->getTrgt(),
-                                                      i_addr.getRank(), ps );
-            if ( l_dimm == nullptr ) continue;
-
-            io_sc.service_data->SetCallout( l_dimm, MRU_HIGH );
-
-            if ( isMfgCeCheckingEnabled() )
+            // Add all DIMMs with bad bits to the callout list.
+            for ( uint8_t ps = 0; ps < DIMMS_PER_RANK::MBA; ps++ )
             {
-                // As we are doing callout for UE, we dont need to do callout
-                // during CE for this rank on given port
-                mbadb->getIplCeStats()->banAnalysis(
-                    i_addr.getRank().getDimmSlct(), ps );
+                bool badDqs = false;
+                o_rc = l_dqBitmap.badDqs( badDqs, ps );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "badDqs(%d) failed", ps );
+                    break;
+                }
+
+                if ( !badDqs ) continue;
+
+                TargetHandle_t l_dimm = getConnectedDimm( i_chip->getTrgt(),
+                                                          rank, ps );
+                if ( l_dimm == nullptr ) continue;
+
+                io_sc.service_data->SetCallout( l_dimm, MRU_HIGH );
+
+                if ( isMfgCeCheckingEnabled() )
+                {
+                    // Because this is a UE, no need to do further MNFG CE
+                    // analysis on this rank.
+                    mbadb->getIplCeStats()->banAnalysis(rank.getDimmSlct(), ps);
+                }
+            }
+
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+
+            // Add entry to UE table.
+            MemDbUtils::addUeTableEntry<TYPE_MBA>( i_chip, i_type, i_addr );
+        }
+        else
+        {
+            o_rc = __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
+                          i_chip->getHuid(), i_type );
+                break;
             }
         }
 
-        // Make the error log predictive.
-        io_sc.service_data->setServiceCall();
-
-        // Add entry to UE table.
-        MemDbUtils::addUeTableEntry<TYPE_MBA>( i_chip, i_type, i_addr );
-
         #else
 
-        o_rc =  __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
+        o_rc = __handleMemUe<TYPE_MBA>( i_chip, i_addr, i_type, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
