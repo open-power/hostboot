@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,9 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /** @file prdfMemoryMru.C */
-
 #include <prdfMemoryMru.H>
-//#include <prdfCalloutUtil.H> TODO RTC 162077
+#include <prdfTargetServices.H>
 #include <prdfTrace.H>
 
 using namespace TARGETING;
@@ -216,15 +215,13 @@ TargetHandleList MemoryMru::getCalloutList() const
             {
                 switch ( iv_special )
                 {
-                    /*TODO RTC 162077 - reenable/update for Cumulus/MBA
                     case CALLOUT_RANK:
-                        //o_list = CalloutUtil::getConnectedDimms( iv_target,
-                        //                                         iv_rank );
+                        o_list = PlatServices::getConnectedDimms( iv_target,
+                                                                  iv_rank );
                         break;
                     case CALLOUT_ALL_MEM:
-                        //o_list = CalloutUtil::getConnectedDimms( iv_target );
+                        o_list = getConnected( iv_target, TYPE_DIMM );
                         break;
-                    */
                     default:
                         PRDF_ERR( PRDF_FUNC "MemoryMruData::Callout 0x%02x not "
                                 "supported", iv_special );
@@ -232,13 +229,22 @@ TargetHandleList MemoryMru::getCalloutList() const
             }
             else
             {
-                //TODO RTC 162077 - reenable/update for Cumulus/MBA
-                //uint8_t ps = iv_symbol.getPortSlct<TYPE_MBA>();
+                uint8_t ps = iv_symbol.getPortSlct();
 
-                //// Add DIMM represented by symbol
-                //if ( iv_memMruMeld.s.eccSpared ) ps = 1; // Adjust for ECC spare
-                //o_list = CalloutUtil::getConnectedDimms( iv_target,
-                //        iv_rank, ps );
+                // Add DIMM represented by symbol
+                if ( iv_memMruMeld.s.eccSpared ) ps = 1; // Adjust for ECC spare
+                TARGETING::TargetHandle_t l_dimm = getConnectedDimm( iv_target,
+                                                                 iv_rank, ps );
+                if (l_dimm != nullptr)
+                {
+                  o_list.push_back(l_dimm);
+                }
+                else
+                {
+                  PRDF_ERR( PRDF_FUNC "getConnectedDimm(0x%08x, 0x%02X, %d) "
+                      "returned nullptr", getHuid(iv_target),
+                      iv_rank.getDimmSlct(), ps );
+                }
             }
         }
         else if ( TARGETING::TYPE_MCA == getTargetType(iv_target) )
