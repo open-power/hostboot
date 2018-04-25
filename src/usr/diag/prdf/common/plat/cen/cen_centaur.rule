@@ -1425,47 +1425,48 @@ rule rMBSECCFIR_0
     MBSECCFIR_0 & ~MBSECCFIR_0_MASK & ~MBSECCFIR_0_ACT0 &  MBSECCFIR_0_ACT1;
 };
 
-group gMBSECCFIR_0 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
+group gMBSECCFIR_0 filter priority ( 19, 41 ),
+                          cs_root_cause( 19, 44, 47, 49 )
 {
     /** MBSECCFIR_0[0]
      *  Memory chip mark on rank 0
      */
-    (rMBSECCFIR_0, bit(0)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(0)) ? verify_chip_mark_0_0;
 
     /** MBSECCFIR_0[1]
      *  Memory chip mark on rank 1
      */
-    (rMBSECCFIR_0, bit(1)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(1)) ? verify_chip_mark_0_1;
 
     /** MBSECCFIR_0[2]
      *  Memory chip mark on rank 2
      */
-    (rMBSECCFIR_0, bit(2)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(2)) ? verify_chip_mark_0_2;
 
     /** MBSECCFIR_0[3]
      *  Memory chip mark on rank 3
      */
-    (rMBSECCFIR_0, bit(3)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(3)) ? verify_chip_mark_0_3;
 
     /** MBSECCFIR_0[4]
      *  Memory chip mark on rank 4
      */
-    (rMBSECCFIR_0, bit(4)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(4)) ? verify_chip_mark_0_4;
 
     /** MBSECCFIR_0[5]
      *  Memory chip mark on rank 5
      */
-    (rMBSECCFIR_0, bit(5)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(5)) ? verify_chip_mark_0_5;
 
     /** MBSECCFIR_0[6]
      *  Memory chip mark on rank 6
      */
-    (rMBSECCFIR_0, bit(6)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(6)) ? verify_chip_mark_0_6;
 
     /** MBSECCFIR_0[7]
      *  Memory chip mark on rank 7
      */
-    (rMBSECCFIR_0, bit(7)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(7)) ? verify_chip_mark_0_7;
 
     /** MBSECCFIR_0[8:15]
      *  Reserved
@@ -1475,12 +1476,12 @@ group gMBSECCFIR_0 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_0[16]
      *  Memory NCE
      */
-    (rMBSECCFIR_0, bit(16)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(16)) ? mainline_nce_handling_0;
 
     /** MBSECCFIR_0[17]
      *  Memory RCE
      */
-    (rMBSECCFIR_0, bit(17)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(17)) ? mainline_rce_pue_handling_0;
 
     /** MBSECCFIR_0[18]
      *  Memory SUE
@@ -1490,7 +1491,7 @@ group gMBSECCFIR_0 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_0[19]
      *  Memory UE
      */
-    (rMBSECCFIR_0, bit(19)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(19)) ? mainline_ue_handling_0_UERE;
 
     /** MBSECCFIR_0[20:27]
      *  Maintenance chip mark
@@ -1540,7 +1541,7 @@ group gMBSECCFIR_0 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_0[43]
      *  Prefetch Memory UE
      */
-    (rMBSECCFIR_0, bit(43)) ? TBDDefaultCallout;
+    (rMBSECCFIR_0, bit(43)) ? mainline_rce_pue_handling_0;
 
     /** MBSECCFIR_0[44]
      *  Memory RCD parity error
@@ -1596,47 +1597,48 @@ rule rMBSECCFIR_1
     MBSECCFIR_1 & ~MBSECCFIR_1_MASK & ~MBSECCFIR_1_ACT0 &  MBSECCFIR_1_ACT1;
 };
 
-group gMBSECCFIR_1 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
+group gMBSECCFIR_1 filter priority ( 19, 41 ),
+                          cs_root_cause( 19, 44, 47, 49 )
 {
     /** MBSECCFIR_1[0]
      *  Memory chip mark on rank 0
      */
-    (rMBSECCFIR_1, bit(0)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(0)) ? verify_chip_mark_1_0;
 
     /** MBSECCFIR_1[1]
      *  Memory chip mark on rank 1
      */
-    (rMBSECCFIR_1, bit(1)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(1)) ? verify_chip_mark_1_1;
 
     /** MBSECCFIR_1[2]
      *  Memory chip mark on rank 2
      */
-    (rMBSECCFIR_1, bit(2)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(2)) ? verify_chip_mark_1_2;
 
     /** MBSECCFIR_1[3]
      *  Memory chip mark on rank 3
      */
-    (rMBSECCFIR_1, bit(3)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(3)) ? verify_chip_mark_1_3;
 
     /** MBSECCFIR_1[4]
      *  Memory chip mark on rank 4
      */
-    (rMBSECCFIR_1, bit(4)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(4)) ? verify_chip_mark_1_4;
 
     /** MBSECCFIR_1[5]
      *  Memory chip mark on rank 5
      */
-    (rMBSECCFIR_1, bit(5)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(5)) ? verify_chip_mark_1_5;
 
     /** MBSECCFIR_1[6]
      *  Memory chip mark on rank 6
      */
-    (rMBSECCFIR_1, bit(6)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(6)) ? verify_chip_mark_1_6;
 
     /** MBSECCFIR_1[7]
      *  Memory chip mark on rank 7
      */
-    (rMBSECCFIR_1, bit(7)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(7)) ? verify_chip_mark_1_7;
 
     /** MBSECCFIR_1[8:15]
      *  Reserved
@@ -1646,12 +1648,12 @@ group gMBSECCFIR_1 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_1[16]
      *  Memory NCE
      */
-    (rMBSECCFIR_1, bit(16)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(16)) ? mainline_nce_handling_1;
 
     /** MBSECCFIR_1[17]
      *  Memory RCE
      */
-    (rMBSECCFIR_1, bit(17)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(17)) ? mainline_rce_pue_handling_1;
 
     /** MBSECCFIR_1[18]
      *  Memory SUE
@@ -1661,7 +1663,7 @@ group gMBSECCFIR_1 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_1[19]
      *  Memory UE
      */
-    (rMBSECCFIR_1, bit(19)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(19)) ? mainline_ue_handling_1_UERE;
 
     /** MBSECCFIR_1[20:27]
      *  Maintenance chip mark
@@ -1711,7 +1713,7 @@ group gMBSECCFIR_1 filter singlebit, cs_root_cause( 19, 44, 47, 49 )
     /** MBSECCFIR_1[43]
      *  Prefetch Memory UE
      */
-    (rMBSECCFIR_1, bit(43)) ? TBDDefaultCallout;
+    (rMBSECCFIR_1, bit(43)) ? mainline_rce_pue_handling_1;
 
     /** MBSECCFIR_1[44]
      *  Memory RCD parity error

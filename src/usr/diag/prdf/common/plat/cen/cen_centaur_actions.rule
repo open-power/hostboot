@@ -183,3 +183,43 @@ actionclass l4_cache_co_ue_UERE
     SueSource;
 };
 
+/** Verify Chip Mark */
+actionclass verify_chip_mark_0_0 { funccall("AnalyzeFetchMpe0_0"); };
+actionclass verify_chip_mark_0_1 { funccall("AnalyzeFetchMpe0_1"); };
+actionclass verify_chip_mark_0_2 { funccall("AnalyzeFetchMpe0_2"); };
+actionclass verify_chip_mark_0_3 { funccall("AnalyzeFetchMpe0_3"); };
+actionclass verify_chip_mark_0_4 { funccall("AnalyzeFetchMpe0_4"); };
+actionclass verify_chip_mark_0_5 { funccall("AnalyzeFetchMpe0_5"); };
+actionclass verify_chip_mark_0_6 { funccall("AnalyzeFetchMpe0_6"); };
+actionclass verify_chip_mark_0_7 { funccall("AnalyzeFetchMpe0_7"); };
+actionclass verify_chip_mark_1_0 { funccall("AnalyzeFetchMpe1_0"); };
+actionclass verify_chip_mark_1_1 { funccall("AnalyzeFetchMpe1_1"); };
+actionclass verify_chip_mark_1_2 { funccall("AnalyzeFetchMpe1_2"); };
+actionclass verify_chip_mark_1_3 { funccall("AnalyzeFetchMpe1_3"); };
+actionclass verify_chip_mark_1_4 { funccall("AnalyzeFetchMpe1_4"); };
+actionclass verify_chip_mark_1_5 { funccall("AnalyzeFetchMpe1_5"); };
+actionclass verify_chip_mark_1_6 { funccall("AnalyzeFetchMpe1_6"); };
+actionclass verify_chip_mark_1_7 { funccall("AnalyzeFetchMpe1_7"); };
+
+/** Fetch NCE */
+actionclass mainline_nce_handling_0 { funccall("AnalyzeFetchNce0"); };
+actionclass mainline_nce_handling_1 { funccall("AnalyzeFetchNce1"); };
+
+/** Fetch UE */
+actionclass mainline_ue_handling_0_UERE
+{
+    funccall("AnalyzeFetchUe0");
+    threshold( field(33 / 30 min) );
+    SueSource;
+};
+actionclass mainline_ue_handling_1_UERE
+{
+    funccall("AnalyzeFetchUe1");
+    threshold( field(33 / 30 min) );
+    SueSource;
+};
+
+/** Fetch RCE or Prefetch UE */
+actionclass mainline_rce_pue_handling_0 { funccall("AnalyzeFetchRcePue0"); };
+actionclass mainline_rce_pue_handling_1 { funccall("AnalyzeFetchRcePue1"); };
+

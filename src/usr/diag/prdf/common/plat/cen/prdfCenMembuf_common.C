@@ -30,6 +30,8 @@
 #include <prdfPluginMap.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
+#include <prdfMemEccAnalysis.H>
 #include <prdfMemUtils.H>
 
 using namespace TARGETING;
@@ -193,6 +195,122 @@ PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( 0 )
 PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( 1 )
 
 #undef PLUGIN_RCD_PARITY_UE_SIDEEFFECTS
+
+//##############################################################################
+//
+//                                  MBSECCFIRs
+//
+//##############################################################################
+
+/**
+ * @brief  MBSECCFIR[0:7] - Mailine MPE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_MPE_ERROR( POS, RANK ) \
+int32_t AnalyzeFetchMpe##POS##_##RANK( ExtensibleChip * i_chip, \
+                                       STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemRank rank { RANK }; \
+    MemEcc::analyzeFetchMpe<TYPE_MBA>( mbaChip, rank, io_sc );\
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchMpe##POS##_##RANK );
+
+PLUGIN_FETCH_MPE_ERROR( 0, 0 )
+PLUGIN_FETCH_MPE_ERROR( 0, 1 )
+PLUGIN_FETCH_MPE_ERROR( 0, 2 )
+PLUGIN_FETCH_MPE_ERROR( 0, 3 )
+PLUGIN_FETCH_MPE_ERROR( 0, 4 )
+PLUGIN_FETCH_MPE_ERROR( 0, 5 )
+PLUGIN_FETCH_MPE_ERROR( 0, 6 )
+PLUGIN_FETCH_MPE_ERROR( 0, 7 )
+
+PLUGIN_FETCH_MPE_ERROR( 1, 0 )
+PLUGIN_FETCH_MPE_ERROR( 1, 1 )
+PLUGIN_FETCH_MPE_ERROR( 1, 2 )
+PLUGIN_FETCH_MPE_ERROR( 1, 3 )
+PLUGIN_FETCH_MPE_ERROR( 1, 4 )
+PLUGIN_FETCH_MPE_ERROR( 1, 5 )
+PLUGIN_FETCH_MPE_ERROR( 1, 6 )
+PLUGIN_FETCH_MPE_ERROR( 1, 7 )
+
+#undef PLUGIN_FETCH_MPE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[16] - Mainline CE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_NCE_ERROR( POS ) \
+int32_t AnalyzeFetchNce##POS( ExtensibleChip * i_chip, \
+                              STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemEcc::analyzeFetchNceTce<TYPE_MBA, MbaDataBundle *>( mbaChip, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchNce##POS );
+
+PLUGIN_FETCH_NCE_ERROR( 0 )
+PLUGIN_FETCH_NCE_ERROR( 1 )
+
+#undef PLUGIN_FETCH_NCE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[19] - Mainline UE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_UE_ERROR( POS ) \
+int32_t AnalyzeFetchUe##POS( ExtensibleChip * i_chip, \
+                             STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemEcc::analyzeFetchUe<TYPE_MBA>( mbaChip, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchUe##POS );
+
+PLUGIN_FETCH_UE_ERROR( 0 )
+PLUGIN_FETCH_UE_ERROR( 1 )
+
+#undef PLUGIN_FETCH_UE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  MBSECCFIR[17] - Mainline RCE / MBSECCFIR[43] Prefetch UE.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_RCE_PUE_ERROR( POS ) \
+int32_t AnalyzeFetchRcePue##POS( ExtensibleChip * i_chip, \
+                                 STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
+    PRDF_ASSERT( nullptr != mbaChip ); \
+    MemEcc::analyzeFetchRcePue<TYPE_MBA>( mbaChip, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchRcePue##POS );
+
+PLUGIN_FETCH_RCE_PUE_ERROR( 0 )
+PLUGIN_FETCH_RCE_PUE_ERROR( 1 )
+
+#undef PLUGIN_FETCH_RCE_PUE_ERROR
 
 //------------------------------------------------------------------------------
 

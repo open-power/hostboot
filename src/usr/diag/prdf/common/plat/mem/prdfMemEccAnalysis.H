@@ -194,6 +194,16 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
 template<TARGETING::TYPE T>
 uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
+/**
+ * @brief  Analyzes fetch retry CE or prefetch UE errors.
+ * @param  i_chip   MBA.
+ * @param  io_sc    The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t analyzeFetchRcePue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc );
+
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
