@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/mem/prdfP9McaExtraSig.H $       */
+/* $Source: src/usr/diag/prdf/common/plat/cen/prdfCenMbaExtraSig.H $      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,17 +23,35 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9McaExtraSig_H
-#define __prdfP9McaExtraSig_H
+#ifndef __prdfCenMbaExtraSig_H
+#define __prdfCenMbaExtraSig_H
 
 #include <prdrSignatures.H>
 #include <prdfMemExtraSig.H>
 
-PRDR_ERROR_SIGNATURE(TpsSymUeRisk,    0xaaaa0065, "", "TPS: placing symbol mark risks UE");
-PRDR_ERROR_SIGNATURE(TpsChipUeRisk,   0xaaaa0066, "", "TPS: placing chip mark risks UE");
-PRDR_ERROR_SIGNATURE(TpsPotentialUe,  0xaaaa0067, "", "TPS: potential UE");
-PRDR_ERROR_SIGNATURE(TpsDramDisabled, 0xaaaa0068, "", "TPS: DRAM repairs disabled");
+PRDR_ERROR_SIGNATURE(CmdComplete_ERROR, 0xeeee0000, "",
+                     "ERROR: command complete analysis failed" );
 
-#endif // __prdfP9McaExtraSig_H
+PRDR_ERROR_SIGNATURE(MaintNCE_CTE,   0xbbbb0016, "", "Maint SOFT/INTER CTE");
+
+PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xbbbb0022, "", "VCM: bad DRAM spare");
+PRDR_ERROR_SIGNATURE(VcmCmAndSpare,   0xbbbb0023, "",
+                     "VCM: Both spare and chip mark used");
+PRDR_ERROR_SIGNATURE(VcmCmAndSm,      0xbbbb0024, "",
+                     "VCM: Both symbol and chip mark used");
+
+PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xbbbb0030, "", "DSD: DRAM spared");
+PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xbbbb0031, "", "DSD: DRAM spare is bad");
+
+PRDR_ERROR_SIGNATURE(MnfgIplFail,    0xbbbb0050, "",
+                     "MNFG IPL Internal failure");
+
+PRDR_ERROR_SIGNATURE(TpsMarksUnavail, 0xbbbb0065, "",
+                     "TPS: No more marks available");
+PRDR_ERROR_SIGNATURE(TpsCmAndSpare, 0xbbbb0066, "",
+                     "TPS: Both spare and chip mark used");
+
+#endif // __prdfCenMbaExtraSig_H
+
 
 
