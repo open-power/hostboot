@@ -26,14 +26,13 @@
 /** @file prdfMemTps_rt.C */
 
 // Platform includes
-#include <prdfCenMbaDataBundle.H>
+#include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemTps.H>
 #include <prdfP9McaExtraSig.H>
-#include <prdfP9McaDataBundle.H>
 #include <prdfTargetServices.H>
 
 using namespace TARGETING;
@@ -350,9 +349,7 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
     // If iv_ban is true and this procedure is done, then ban TPS on this rank.
     if ( iv_ban && o_done )
     {
-        // It doesn't matter what we set the value to, we just need to
-        // make sure the rank exists in the map.
-        getMcaDataBundle(iv_chip)->iv_tpsBans[iv_rank] = true;
+        MemDbUtils::banTps<T>( iv_chip, iv_rank );
 
         // Permanently mask mainline NCEs and TCEs.
         getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
@@ -1145,14 +1142,6 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
     do
     {
-        // Check if TPS is banned on this rank.
-        if ( 1 == getMcaDataBundle(iv_chip)->iv_tpsBans.count(iv_rank) )
-        {
-            // If TPS is banned, abort the procedure.
-            o_done = true;
-            break;
-        }
-
         // Runtime TPS is slightly different than IPL TPS or any other TD event.
         // There really is only one phase, but we use two phases to help
         // differentiate between the CE types that are collected. So only one of

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,9 +201,6 @@ class McaDataBundle : public DataBundle
      *  is checked at the end of targeted diagnostics before background
      *  scrubbing is resumed. */
     bool iv_maskMainlineNceTce = false;
-
-    /** Map to keep track of ranks that have banned TPS. */
-    std::map<MemRank, bool> iv_tpsBans;
 
     #endif
 };

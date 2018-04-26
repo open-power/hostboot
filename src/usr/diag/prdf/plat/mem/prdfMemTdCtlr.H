@@ -85,7 +85,20 @@ class MemTdCtlr
      *         diagnostics, if not already in progress.
      * @param  i_entry  The new TD queue entry.
      */
-    void pushToQueue( TdEntry * i_entry ) { iv_queue.push(i_entry); }
+    void pushToQueue( TdEntry * i_entry )
+    {
+        #ifdef __HOSTBOOT_RUNTIME
+        if ( TdEntry::TPS_EVENT == i_entry->getType() &&
+             isTpsBanned(i_entry->getChip(), i_entry->getRank()) )
+        {
+            PRDF_ERR( "[MemTdCtlr::pushToQueue] TPS banned on 0x%08x 0x%02x",
+                      i_entry->getChip()->getHuid(), i_entry->getRank() );
+            return; // prevent the entry from being added to the queue.
+        }
+        #endif
+
+        iv_queue.push(i_entry);
+    }
 
     #ifdef __HOSTBOOT_RUNTIME
 
@@ -105,6 +118,18 @@ class MemTdCtlr
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     uint32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief  Bans TPS on the given rank. Any attempts to add a TPS procedure
+     *         to the queue for this rank will be ignored.
+     * @param  i_rank The target slave rank.
+     */
+    void banTps( ExtensibleChip * i_chip, const MemRank & i_rank )
+    {
+        // It doesn't matter what we set the value to, we just need to make sure
+        // the rank exists in the map.
+        iv_tpsBans[std::make_pair(i_chip, i_rank)] = true;
+    }
 
     /**
      * @brief Handles reset-reload or FO scenario.
@@ -238,6 +263,17 @@ class MemTdCtlr
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
+     * @param  i_rank The target slave rank.
+     * @return True, if this slave rank has been banned. False, otherwise.
+     */
+    bool isTpsBanned( ExtensibleChip * i_chip, const MemRank & i_rank )
+    {
+        // Check if this rank exists in the map.
+        std::pair<ExtensibleChip *, MemRank> e = std::make_pair(i_chip, i_rank);
+        return ( iv_tpsBans.end() != iv_tpsBans.find(e) );
+    }
+
+    /**
      * @brief  Masks NCE and TCE ECC attentions.
      * @note   Only intended to be used just before starting a new TD procedure.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
@@ -287,9 +323,8 @@ class MemTdCtlr
      *  to be restarted with a new command. */
     bool iv_resumeBgScrub = false;
 
-    /** Keeps track if the fetch attentions have been masked during a TD
-     *  procedure. */
-    bool iv_fetchAttnsMasked = false;
+    /** Map to keep track of ranks that have banned TPS. */
+    std::map< std::pair<ExtensibleChip *, MemRank>, bool > iv_tpsBans;
 
     #else // IPL only
 

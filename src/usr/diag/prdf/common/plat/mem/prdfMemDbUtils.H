@@ -157,6 +157,28 @@ uint32_t handleTdEvent<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
     return getMbaDataBundle(i_chip)->getTdCtlr()->handleTdEvent( io_sc );
 }
 
+/**
+ * @brief Generic wrapper to tell the TD controller to ban TPS on a rank.
+ * @param i_chip  MCA or MBA.
+ * @param i_rank  The target slave rank.
+ */
+template<TARGETING::TYPE T>
+void banTps( ExtensibleChip * i_chip, const MemRank & i_rank );
+
+template<> inline
+void banTps<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                  const MemRank & i_rank )
+{
+    getMcaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
+}
+
+template<> inline
+void banTps<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                  const MemRank & i_rank )
+{
+    getMbaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
+}
+
 #endif // Hostboot Runtime only
 
 } // end namespace MemDbUtils

@@ -119,6 +119,9 @@ class TdEntry
     /** @return The event type */
     TdType getType() const { return iv_tdType; }
 
+    /** @return The chip in which this event occurred */
+    ExtensibleChip * getChip() const { return iv_chip; }
+
     /** @return The rank in which this event occurred */
     MemRank getRank() const { return iv_rank; }
 
