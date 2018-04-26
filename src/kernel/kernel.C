@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,8 +102,9 @@ extern "C"
 int main()
 {
     printk("Booting %s kernel...\n\n", "Hostboot");
-    printk("CPU=%s\n",
-           ProcessorCoreTypeStrings[CpuID::getCpuType()]);
+    printk("CPU=%s  PIR=%ld\n",
+           ProcessorCoreTypeStrings[CpuID::getCpuType()],
+           static_cast<uint64_t>(getPIR()));
     MAGIC_INST_PRINT_ISTEP(6,2);
 
     // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.

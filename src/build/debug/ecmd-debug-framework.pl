@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -45,7 +45,7 @@ my $toolOptions = "";
 my $cfgHelp = 0;
 my $cfgMan = 0;
 my $toolHelp = 0;
-my $forceHRMOR = DEFAULT_HRMOR;
+my $forceHRMOR = 0;
 my $node = 0;  # -nX parm to ecmd
 my $proc = 0;  # -pX parm to ecmd
 my $memMode = "check";
@@ -148,7 +148,14 @@ sub getEnv
 #
 sub getHRMOR
 {
-    return $forceHRMOR + ($node * PER_NODE_OFFSET);
+    if( $forceHRMOR != 0 )
+    {
+        return $forceHRMOR;
+    }
+    else
+    {
+        return DEFAULT_HRMOR + ($node * PER_NODE_OFFSET);
+    }
 }
 
 # @sub readData
