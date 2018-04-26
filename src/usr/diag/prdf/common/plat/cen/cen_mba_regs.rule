@@ -88,6 +88,52 @@
     };
 
     ############################################################################
+    # Error Report Registers
+    ############################################################################
+
+    register MBA_ERR_REPORT
+    {
+        name        "MBU.MBA_SRQ.MBA_ERR_REPORTQ";
+        scomaddr    0x0301041A;
+        capture     group default;
+    };
+
+    register MBA_MCBERRPTQ
+    {
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBA_MCBERRPTQ";
+        scomaddr    0x030106E7;
+        capture     group default;
+    };
+
+    register DDRPHY_APB_FIR_ERR0_P0
+    {
+        name        "DDRPHY_APB_FIR_ERR0_P0";
+        scomaddr    0x8000D0060301143F;
+        capture     group default;
+    };
+
+    register DDRPHY_APB_FIR_ERR1_P0
+    {
+        name        "DDRPHY_APB_FIR_ERR1_P0";
+        scomaddr    0x8000D0070301143F;
+        capture     group default;
+    };
+
+    register DDRPHY_APB_FIR_ERR0_P1
+    {
+        name        "DDRPHY_APB_FIR_ERR0_P1";
+        scomaddr    0x8001D0060301143F;
+        capture     group default;
+    };
+
+    register DDRPHY_APB_FIR_ERR1_P1
+    {
+        name        "DDRPHY_APB_FIR_ERR1_P1";
+        scomaddr    0x8001D0070301143F;
+        capture     group default;
+    };
+
+    ############################################################################
     # Maintenance Command Registers
     ############################################################################
 

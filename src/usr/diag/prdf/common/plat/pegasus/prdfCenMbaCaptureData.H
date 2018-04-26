@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,19 +44,6 @@ struct STEP_CODE_DATA_STRUCT;
 
 namespace CenMbaCaptureData
 {
-
-/**
- * @brief Adds all Mem chiplet and MBA regs to the capture data for any MBA
- *        reporting an active attention via the MEM_CHIPLET_FIRs.
- * @note  This is only intended to be called in the MCS or MEMBUF PreAnalysis()
- *        plugins to capture the required FIR registers for FFDC.
- * @note  We are required to do the active attention check because there is a
- *        small window during the IPL where we may get an MCS or MEMBUF
- *        attention and the MBAs are not SCOMable at the time.
- * @param i_membChip A MEMBUF chip.
- * @param io_cd     Capture data struct.
- */
-void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd );
 
 /**
  * @brief Adds Memory ECC FFDC to an error log.

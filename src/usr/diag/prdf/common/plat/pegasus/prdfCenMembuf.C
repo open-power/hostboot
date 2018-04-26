@@ -136,18 +136,6 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
 
     o_analyzed = false;
 
-    // Get memory capture data.
-    CaptureData & cd = i_sc.service_data->GetCaptureData();
-    CenMembufDataBundle * mbdb = getMembufDataBundle( i_mbChip );
-    ExtensibleChip * mcsChip = mbdb->getMcsChip();
-    if ( NULL != mcsChip )
-    {
-        mcsChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
-        mcsChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
-
-        CenMbaCaptureData::addMemChipletFirRegs( i_mbChip, cd );
-    }
-
     // Check for a Centaur Checkstop
     do
     {
