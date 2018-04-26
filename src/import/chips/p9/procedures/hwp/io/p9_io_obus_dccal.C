@@ -61,6 +61,9 @@
 //  Function Definitions
 //-----------------------------------------------------------------------------
 
+namespace P9_IO_OBUS_DCCAL
+{
+
 /**
  * @brief Converts a decimal value to a thermometer code
  * @param[in] i_dec Decimal Value
@@ -636,7 +639,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+} // end namespace P9_IO_OBUS_DCCAL
 
+using namespace P9_IO_OBUS_DCCAL;
 
 /**
  * @brief A I/O Obus Procedure that runs Rx Dccal and Tx Z Impedance calibration
