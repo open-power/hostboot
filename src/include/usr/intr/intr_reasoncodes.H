@@ -27,6 +27,9 @@
 
 #include <hbotcompid.H>
 
+#define INTR_TRACE_NAME INTR_COMP_NAME
+
+
 namespace INTR
 {
     enum IntrModuleID

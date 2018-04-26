@@ -57,8 +57,6 @@
 #include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
 
-#define INTR_TRACE_NAME INTR_COMP_NAME
-
 using namespace INTR;
 using namespace TARGETING;
 
@@ -3224,7 +3222,7 @@ void* INTR::IntrRp::handleCpuTimeout(void* _pir)
     msg->data[0] = pir;
     msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
 
-    TRACFCOMP( g_trac_intr,"handleCpuTimeout for pir: %lx", pir);
+    TRACFCOMP( g_trac_intr,"handleCpuTimeout for pir: 0x%lx", pir);
 
     do
     {
