@@ -677,16 +677,7 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
             o_rc = FAIL; break;
         }
 
-        bool isCenDimm = false;
-        o_rc = isMembufOnDimm( i_mba, isCenDimm );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed on MBA 0x%08x",
-                      getHuid(i_mba) );
-            break;
-        }
-
-        if ( !isCenDimm )
+        if ( !isMembufOnDimm<TYPE_MBA>(i_mba) )
         {
             PRDF_ERR( PRDF_FUNC "MBA 0x%08x is not on a buffered DIMM",
                       getHuid(i_mba) );
@@ -721,14 +712,8 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
             o_rc = FAIL; break;
         }
 
-        uint8_t   l_version = 0;
-        o_rc = getDramGen(i_mba, l_version);
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR(PRDF_FUNC "Fail DramVers x%08X"" HUID:x%08X",
-                     l_version, getHuid(i_mba) );
-            break;
-        }
+        uint8_t l_version = getDramGen<TYPE_MBA>( i_mba );
+
         // Centaur raw card types are only used for DRAM site locations. If an
         // invalid wiring type is passed to the error log parser, the parser
         // will simply print out the symbol and other data instead of

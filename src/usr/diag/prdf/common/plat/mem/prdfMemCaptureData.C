@@ -62,8 +62,6 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
     do
     {
-        int32_t l_rc = SUCCESS;
-
         TargetHandle_t trgt = i_memMru.getTrgt();
 
         // Get the DRAM width.
@@ -71,12 +69,9 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
         // Get the DIMM type.
         bool isBufDimm = false;
-        l_rc = isMembufOnDimm( trgt, isBufDimm );
-        if ( SUCCESS != l_rc )
+        if ( TYPE_MBA == getTargetType(trgt) )
         {
-            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed. Trgt:0x%08x",
-                      getHuid(trgt) );
-            break;
+            isBufDimm = isMembufOnDimm<TYPE_MBA>( trgt );
         }
         extMemMru.isBufDimm = isBufDimm ? 1 : 0;
 
@@ -85,7 +80,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
             // TODO RTC 169956
             //// Get the raw card type (Centaur DIMMs only).
             //CEN_SYMBOL::WiringType cardType = CEN_SYMBOL::WIRING_INVALID;
-            //l_rc = getMemBufRawCardType( trgt, cardType );
+            //int32_t l_rc = getMemBufRawCardType( trgt, cardType );
             //if ( SUCCESS != l_rc )
             //{
             //    PRDF_ERR( PRDF_FUNC "getMemBufRawCardType() failed. MBA:0x%08x",

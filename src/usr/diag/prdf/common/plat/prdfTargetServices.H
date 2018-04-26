@@ -373,12 +373,14 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget );
 
 /**
  * @brief   Determines if a given target is associated with a memory buffer that
- *          is located on the DIMM card.
- * @param   i_target Any memory target or parent or a mba
- * @param   o_memBuf true if associated MBA is non IS MBA
- * @return  FAIL if internal function fails. Success otherwise
+ *          is located on the DIMM card (as opposed to IS DIMMs connected to the
+ *          memory buffer).
+ * @param   i_trgt MBA
+ * @return  True if the DIMMs connected to this target have a memory buffer on
+ *          the DIMM card. False otherwise.
  */
-int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget, bool &o_memBuf);
+template<TARGETING::TYPE T>
+bool isMembufOnDimm( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   Obtain the port select for the given Dimm.
@@ -404,12 +406,11 @@ uint8_t getDimmSlct( TARGETING::TargetHandle_t i_trgt );
 bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);
 
 /**
- * @brief   Get DRAM generation
- * @param   i_mba     MBA target
- * @param   o_dramGen DRAM generation ( 1 - DDR3,  2 - DDR4 )
- * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
+ * @param   i_trgt MBA
+ * @return  The DRAM generation ( 1 - DDR3,  2 - DDR4 )
  */
-int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen );
+template<TARGETING::TYPE T>
+uint8_t getDramGen( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   Get DIMM number of rows and columns

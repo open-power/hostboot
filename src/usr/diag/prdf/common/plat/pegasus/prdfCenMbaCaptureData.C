@@ -285,14 +285,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
         extMemMru.isX4Dram = isDramWidthX4( mbaTrgt ) ? 1 : 0;
 
         // Get the DIMM type.
-        bool isBufDimm = false;
-        l_rc = isMembufOnDimm( mbaTrgt, isBufDimm );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed. MBA:0x%08x",
-                      getHuid(mbaTrgt) );
-            break;
-        }
+        bool isBufDimm = isMembufOnDimm<TYPE_MBA>( mbaTrgt );
         extMemMru.isBufDimm = isBufDimm ? 1 : 0;
 
         if ( isBufDimm )
