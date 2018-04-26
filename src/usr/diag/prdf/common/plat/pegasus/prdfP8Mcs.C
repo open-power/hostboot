@@ -84,18 +84,6 @@ int32_t PreAnalysis( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
 {
     o_analyzed = false;
 
-    // Get memory capture data.
-    CaptureData & cd = i_sc.service_data->GetCaptureData();
-    P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
-    ExtensibleChip * membChip = mcsdb->getMembChip();
-    if ( NULL != membChip )
-    {
-        membChip->CaptureErrorData( cd, Util::hashString("FirRegs") );
-        membChip->CaptureErrorData( cd, Util::hashString("CerrRegs") );
-
-        CenMbaCaptureData::addMemChipletFirRegs( membChip, cd );
-    }
-
     // Check for a Centaur Checkstop
     int32_t o_rc = MemUtils::checkMcsChannelFail( i_mcsChip, i_sc );
     if ( SUCCESS != o_rc )

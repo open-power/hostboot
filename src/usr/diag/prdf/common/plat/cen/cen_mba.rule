@@ -143,6 +143,7 @@ chip cen_mba
         reset       (&, 0x03010612);
         mask        (|, 0x03010614);
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     register MBASPA_MASK
@@ -150,6 +151,7 @@ chip cen_mba
         name        "Centaur chip MBA target MBASPA MASK";
         scomaddr    0x03010614;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     ############################################################################

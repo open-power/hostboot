@@ -327,6 +327,7 @@ chip cen_centaur
         reset       (&, 0x02011441);
         mask        (|, 0x02011445);
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBSECCFIR_0_MASK
@@ -334,6 +335,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 0 MASK";
         scomaddr    0x02011443;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBSECCFIR_0_ACT0
@@ -341,6 +343,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 0 ACT0";
         scomaddr    0x02011446;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
         capture     req nonzero("MBSECCFIR_0");
     };
 
@@ -349,6 +352,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 0 ACT1";
         scomaddr    0x02011447;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
         capture     req nonzero("MBSECCFIR_0");
     };
 
@@ -363,6 +367,7 @@ chip cen_centaur
         reset       (&, 0x02011481);
         mask        (|, 0x02011485);
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBSECCFIR_1_MASK
@@ -370,6 +375,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 1 MASK";
         scomaddr    0x02011483;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBSECCFIR_1_ACT0
@@ -377,6 +383,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 1 ACT0";
         scomaddr    0x02011486;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
         capture     req nonzero("MBSECCFIR_1");
     };
 
@@ -385,6 +392,7 @@ chip cen_centaur
         name        "Centaur chip MBSECCFIR 1 ACT1";
         scomaddr    0x02011487;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
         capture     req nonzero("MBSECCFIR_1");
     };
 
@@ -504,21 +512,21 @@ chip cen_centaur
     {
         name        "MEM Chiplet Checkstop FIR";
         scomaddr    0x03040000;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_RE_FIR
     {
         name        "MEM Chiplet Recoverable FIR";
         scomaddr    0x03040001;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_FIR_MASK
     {
         name        "MEM Chiplet FIR MASK";
         scomaddr    0x03040002;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -529,14 +537,14 @@ chip cen_centaur
     {
         name        "MEM Chiplet Special Attention FIR";
         scomaddr    0x03040004;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     register MEM_CHIPLET_SPA_FIR_MASK
     {
         name        "MEM Chiplet Special Attention FIR MASK";
         scomaddr    0x03040007;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     ############################################################################
@@ -549,21 +557,21 @@ chip cen_centaur
         scomaddr    0x0304000A;
         reset       (&, 0x0304000B);
         mask        (|, 0x0304000F);
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     register MEM_LFIR_MASK
     {
         name        "Centaur chip MEM_LFIR MASK";
         scomaddr    0x0304000D;
-        capture     group default;
+        capture     group MemChipletRegs;
     };
 
     register MEM_LFIR_ACT0
     {
         name        "Centaur chip MEM_LFIR ACT0";
         scomaddr    0x03040010;
-        capture     group default;
+        capture     group MemChipletRegs;
         capture     req nonzero("MEM_LFIR");
     };
 
@@ -571,7 +579,7 @@ chip cen_centaur
     {
         name        "Centaur chip MEM_LFIR ACT1";
         scomaddr    0x03040011;
-        capture     group default;
+        capture     group MemChipletRegs;
         capture     req nonzero("MEM_LFIR");
     };
 
@@ -618,7 +626,7 @@ group gGLOBAL_FIR attntype UNIT_CS, RECOVERABLE filter singlebit
     /** GLOBAL_FIR[3]
      *  Attention from MEM chiplet
      */
-    (rGLOBAL_FIR, bit(3)) ? analyze(gMEM_CHIPLET_FIR);
+    (rGLOBAL_FIR, bit(3)) ? analyzeMemChipletFir;
 
 };
 
@@ -637,7 +645,7 @@ group gGLOBAL_SPA_FIR attntype HOST_ATTN filter singlebit
     /** GLOBAL_SPA_FIR[3]
      *  Attention from MEM chiplet
      */
-    (rGLOBAL_SPA_FIR, bit(3)) ? analyze(gMEM_CHIPLET_SPA_FIR);
+    (rGLOBAL_SPA_FIR, bit(3)) ? analyzeMemChipletSpa;
 
 };
 

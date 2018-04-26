@@ -23,6 +23,20 @@
 #
 # IBM_PROLOG_END_TAG
 
+/** There is a small window during the IPL where the MEM chiplet may be offline
+ *  while the rest of the chip is working. Therefore, we cannot capture those
+ *  registers unless we have an active attention from the MEM chiplet. */
+actionclass analyzeMemChipletFir
+{
+    capture(MemChipletRegs);
+    analyze(gMEM_CHIPLET_FIR);
+};
+actionclass analyzeMemChipletSpa
+{
+    capture(MemChipletRegs);
+    analyze(gMEM_CHIPLET_SPA_FIR);
+};
+
 /** Callout the connected MBA 0 */
 actionclass calloutMba0 { callout(connected(TYPE_MBA, 0), MRU_MED); };
 
@@ -206,17 +220,25 @@ actionclass mainline_nce_handling_0 { funccall("AnalyzeFetchNce0"); };
 actionclass mainline_nce_handling_1 { funccall("AnalyzeFetchNce1"); };
 
 /** Fetch UE */
-actionclass mainline_ue_handling_0_UERE
+actionclass mainline_ue_0
 {
     funccall("AnalyzeFetchUe0");
     threshold( field(33 / 30 min) );
     SueSource;
 };
-actionclass mainline_ue_handling_1_UERE
+actionclass mainline_ue_1
 {
     funccall("AnalyzeFetchUe1");
     threshold( field(33 / 30 min) );
     SueSource;
+};
+actionclass mainline_ue_handling_0_UERE
+{
+    try ( funccall("analyzeMbaRcdParityError0"), mainline_ue_0 );
+};
+actionclass mainline_ue_handling_1_UERE
+{
+    try ( funccall("analyzeMbaRcdParityError1"), mainline_ue_1 );
 };
 
 /** Fetch RCE or Prefetch UE */
