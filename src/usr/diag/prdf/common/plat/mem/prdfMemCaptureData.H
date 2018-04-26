@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
  *        capture data struct. Other functions can call this function and
  *        update the error log.
  */
-template<TARGETING::TYPE T>
+template<TARGETING::TYPE T, DIMMS_PER_RANK D>
 void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
                             CaptureData & io_cd );
 
