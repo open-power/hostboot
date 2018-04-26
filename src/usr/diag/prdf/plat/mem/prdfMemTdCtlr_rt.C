@@ -185,6 +185,22 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
         // Don't interrupt a TD procedure if one is already in progress.
         if ( nullptr != iv_curProcedure ) break;
 
+        // If the queue is empty, there is nothing to do. So there is no point
+        // to stopping background scrub. This could have happen if TPS was
+        // banned on a rank and the TPS request was never added to the queue. In
+        // that case, mask fetch attentions temporarily to prevent flooding.
+        if ( iv_queue.empty() )
+        {
+            o_rc = maskEccAttns();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                break;
+            }
+
+            break; // Don't stop background scrub.
+        }
+
         // Stop background scrubbing.
         o_rc = stopBgScrub<T>( iv_chip );
         if ( SUCCESS != o_rc )
@@ -849,8 +865,6 @@ uint32_t MemTdCtlr<TYPE_MBA>::maskEccAttns()
             break;
         }
 
-        iv_fetchAttnsMasked = true;
-
     } while (0);
 
     return o_rc;
@@ -902,8 +916,6 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
             PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
             break;
         }
-
-        iv_fetchAttnsMasked = false;
 
     } while (0);
 
