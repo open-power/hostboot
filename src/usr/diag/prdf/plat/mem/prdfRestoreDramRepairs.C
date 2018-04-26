@@ -287,99 +287,90 @@ bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
 
-    bool isCen = false;
-    int32_t l_rc = isMembufOnDimm( i_mba, isCen );
-    if ( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed" );
-        analysisErrors = true;
-    }
-    else
-    {
-        bool isX4 = isDramWidthX4( i_mba );
+    bool isCen = isMembufOnDimm<TYPE_MBA>( i_trgt );
+    bool isX4 = isDramWidthX4( i_trgt );
 
-        for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
+    for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
+    {
+        if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
         {
-            if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
+            continue; // this rank didn't have any repairs
+        }
+
+        CenRank rank ( r );
+        CenMark mark;
+
+        if ( SUCCESS != mssGetMarkStore(i_trgt, rank, mark) )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed: MBA=0x%08x "
+                      "rank=%d", getHuid(i_trgt), rank.getMaster() );
+            analysisErrors = true;
+            continue; // skip this rank
+        }
+
+        CenSymbol sp0, sp1, ecc;
+
+        if ( SUCCESS != mssGetSteerMux(i_trgt, rank, sp0, sp1, ecc) )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed: MBA=0x%08x "
+                      "rank=%d", getHuid(i_trgt), rank.getMaster() );
+            analysisErrors = true;
+            continue; // skip this rank
+        }
+
+        bool isCm  = mark.getCM().isValid();            // chip mark
+        bool isSm  = mark.getSM().isValid();            // symbol mark
+        bool isSp  = (sp0.isValid() || sp1.isValid());  // either DRAM spare
+        bool isEcc = ecc.isValid();                     // ECC spare
+
+        if ( isCm &&                                    // CM used
+             ( ( isCen && isSp && (!isX4 || isEcc)) ||  // all spares used
+               (!isCen &&         ( isSm || isEcc)) ) ) // SM or ECC used
+        {
+            // All repairs on the rank have been used. Callout all repairs.
+
+            if ( NULL == errl )
             {
-                continue; // this rank didn't have any repairs
+                errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE,
+                                             i_trgt,
+                                             PRDFSIG_RdrRepairsUsed );
             }
 
-            CenRank rank ( r );
-            CenMark mark;
+            std::vector<CenSymbol> list;
+            list.push_back( mark.getCM() );
+            list.push_back( mark.getSM() );
+            list.push_back( sp0          );
+            list.push_back( sp1          );
+            list.push_back( ecc          );
 
-            if ( SUCCESS != mssGetMarkStore(i_mba, rank, mark) )
+            for ( std::vector<CenSymbol>::iterator it = list.begin();
+                  it != list.end(); it++ )
             {
-                PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed: MBA=0x%08x "
-                          "rank=%d", getHuid(i_mba), rank.getMaster() );
-                analysisErrors = true;
-                continue; // skip this rank
-            }
+                if ( !it->isValid() ) continue;
 
-            CenSymbol sp0, sp1, ecc;
-
-            if ( SUCCESS != mssGetSteerMux(i_mba, rank, sp0, sp1, ecc) )
-            {
-                PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed: MBA=0x%08x "
-                          "rank=%d", getHuid(i_mba), rank.getMaster() );
-                analysisErrors = true;
-                continue; // skip this rank
-            }
-
-            bool isCm  = mark.getCM().isValid();            // chip mark
-            bool isSm  = mark.getSM().isValid();            // symbol mark
-            bool isSp  = (sp0.isValid() || sp1.isValid());  // either DRAM spare
-            bool isEcc = ecc.isValid();                     // ECC spare
-
-            if ( isCm &&                                    // CM used
-                 ( ( isCen && isSp && (!isX4 || isEcc)) ||  // all spares used
-                   (!isCen &&         ( isSm || isEcc)) ) ) // SM or ECC used
-            {
-                // All repairs on the rank have been used. Callout all repairs.
-
-                if ( NULL == errl )
+                // Add all parts to the error log.
+                TargetHandleList partList = i_memmru.getCalloutList();
+                for ( auto &part : partList )
                 {
-                    errl = createErrl<TYPE_MBA>( PRDF_DETECTED_FAIL_HARDWARE,
-                                                 i_mba,
-                                                 PRDFSIG_RdrRepairsUsed );
+                    errl->addHwCallout( part, MRU_HIGH,
+                                        HWAS::DELAYED_DECONFIG,
+                                        HWAS::GARD_Predictive );
                 }
 
-                std::vector<CenSymbol> list;
-                list.push_back( mark.getCM() );
-                list.push_back( mark.getSM() );
-                list.push_back( sp0          );
-                list.push_back( sp1          );
-                list.push_back( ecc          );
-
-                for ( std::vector<CenSymbol>::iterator it = list.begin();
-                      it != list.end(); it++ )
-                {
-                    if ( !it->isValid() ) continue;
-
-                    // Add all parts to the error log.
-                    TargetHandleList partList = i_memmru.getCalloutList();
-                    for ( auto &part : partList )
-                    {
-                        errl->addHwCallout( part, MRU_HIGH,
-                                            HWAS::DELAYED_DECONFIG,
-                                            HWAS::GARD_Predictive );
-                    }
-
-                    // Add the MemoryMru to the capture data.
-                    MemCaptureData::addExtMemMruData( i_memmru, errl );
-                }
-
-                o_calloutMade = true;
+                // Add the MemoryMru to the capture data.
+                MemCaptureData::addExtMemMruData( i_memmru, errl );
             }
+
+            o_calloutMade = true;
         }
     }
 
     // Commit the error log, if needed.
-    commitErrl( errl, i_mba );
+    commitErrl( errl, i_trgt );
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.
-    commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
+    commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
                      PRDFSIG_RdrInternalFail, analysisErrors );
     */
 
@@ -566,13 +557,7 @@ void deployDramSpares( TargetHandle_t i_mba,
 {
     /* TODO RTC 178743
     bool x4 = isDramWidthX4(i_mba);
-
-    bool cenDimm = false;
-    if ( SUCCESS != isMembufOnDimm(i_mba, cenDimm) )
-    {
-        // Traces will be printed. Assume no spare DRAMs for now.
-        cenDimm = false;
-    }
+    bool cenDimm = isMembufOnDimm<TYPE_MBA>( i_mba );
 
     for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
           rank != i_ranks.end(); rank++ )

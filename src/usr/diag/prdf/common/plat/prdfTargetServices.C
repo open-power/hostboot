@@ -1318,65 +1318,24 @@ uint32_t getMemChnl( TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-int32_t isMembufOnDimm( TARGETING::TargetHandle_t i_memTarget,
-                        bool & o_isBuffered )
+template<>
+bool isMembufOnDimm<TYPE_MBA>( TargetHandle_t i_trgt )
 {
-    int32_t o_rc = FAIL;
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
-    o_isBuffered = false;
-
-    do
-    {
-        // The DIMMs in a node should either all be buffered or all not. So
-        // we can check the attribute from ANY MBA.
-        TargetHandleList list = getConnected( i_memTarget, TYPE_MBA );
-        if ( 0 == list.size() )
-        {
-            PRDF_ERR( "[isMembufOnDimm] Couldn't find an MBA target" );
-            break;
-        }
-
-         const TargetHandle_t mbaTarget = list[0];
-         o_isBuffered = mbaTarget->getAttr<ATTR_CEN_EFF_CUSTOM_DIMM>();
-
-        o_rc = SUCCESS;
-
-    } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( "[isMembufOnDimm] Failed: i_memTarget=0x%08x",
-                  getHuid(i_memTarget) );
-    }
-
-    return o_rc;
+    return i_trgt->getAttr<ATTR_CEN_EFF_CUSTOM_DIMM>();
 }
 
 //------------------------------------------------------------------------------
 
-int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen )
+template<>
+uint8_t getDramGen<TYPE_MBA>( TargetHandle_t i_trgt )
 {
-    #define PRDF_FUNC "[PlatServices::getDramGen] "
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
-    int32_t o_rc = FAIL;
-    do
-    {
-        if ( TYPE_MBA != getTargetType( i_mba ) )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid Target. HUID:0X%08X",
-                      getHuid( i_mba ) );
-            break;
-        }
-
-        o_dramGen = i_mba->getAttr<ATTR_CEN_EFF_DRAM_GEN>( );
-
-        o_rc = SUCCESS;
-
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return i_trgt->getAttr<ATTR_CEN_EFF_DRAM_GEN>();
 }
 
 //------------------------------------------------------------------------------

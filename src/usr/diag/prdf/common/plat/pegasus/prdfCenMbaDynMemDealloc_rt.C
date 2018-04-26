@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -356,14 +356,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         }
 
         // Get the DDR verion of the DIMM (DDR3, DDR4, etc...)
-        uint8_t ddrVer;
-        o_rc = getDramGen( mba, ddrVer );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getDramGen() failed. HUID:0x%08X",
-                      i_mbaChip->GetId() );
-            break;
-        }
+        uint8_t ddrVer = getDramGen<TYPE_MBA>( mba );
 
         // Get the Centaur interleave mode (MBSXCR[0:4]).
         SCAN_COMM_REGISTER_CLASS * mbsxcr = i_mbChip->getRegister("MBSXCR");
