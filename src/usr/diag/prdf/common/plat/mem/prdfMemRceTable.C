@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaRceTable.C $  */
+/* $Source: src/usr/diag/prdf/common/plat/mem/prdfMemRceTable.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,16 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfCenMbaRceTable.H>
+#include <prdfMemRceTable.H>
 
 // Framwork includes
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 #include <prdfParserEnums.H>
 
-// Pegasus includes
-#include <prdfCenMbaThresholds.H>
-#include <prdfCenAddress.H>
+// Platform includes
+#include <prdfMemThresholds.H>
 
 using namespace TARGETING;
 
@@ -43,8 +42,8 @@ using namespace RCE_TABLE;
 
 //------------------------------------------------------------------------------
 
-bool CenMbaRceTable::addEntry( const CenRank & i_rank,
-                               STEP_CODE_DATA_STRUCT & i_sc, uint8_t i_count )
+bool MemRceTable::addEntry( const MemRank & i_rank,
+                            STEP_CODE_DATA_STRUCT & i_sc, uint8_t i_count )
 {
     bool o_doTps = false;
 
@@ -64,7 +63,7 @@ bool CenMbaRceTable::addEntry( const CenRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void CenMbaRceTable::flushEntry( const CenRank & i_rank )
+void MemRceTable::flushEntry( const MemRank & i_rank )
 {
     RceTable::iterator it = iv_table.find( i_rank );
     if ( iv_table.end() != it )
@@ -72,7 +71,7 @@ void CenMbaRceTable::flushEntry( const CenRank & i_rank )
 }
 //------------------------------------------------------------------------------
 
-void CenMbaRceTable::addCapData( CaptureData & io_cd )
+void MemRceTable::addCapData( CaptureData & io_cd )
 {
     static const size_t sz_word = sizeof(CPU_WORD);
     static const size_t sz_entryCnt = sizeof( uint8_t ); // entry count
@@ -97,9 +96,8 @@ void CenMbaRceTable::addCapData( CaptureData & io_cd )
         }
         uint32_t mrnk = it->first.getMaster();            //  3-bit
         uint32_t srnk = it->first.getSlave();             //  3-bit
-        uint32_t svld = it->first.isSlaveValid() ? 1 : 0; //  1-bit
 
-        data[sz_actData] = (mrnk << 5) | (srnk << 2) | (svld << 1);
+        data[sz_actData] = (mrnk << 5) | (srnk << 2);
         uint32_t count = it->second.getCount();
         data[sz_actData + 1] = ( count > 255 ) ? 255 : count;
         sz_actData += ENTRY_SIZE;
@@ -115,7 +113,7 @@ void CenMbaRceTable::addCapData( CaptureData & io_cd )
 
         // Add data to capture data.
         BitString bs ( sz_actData*8, (CPU_WORD *) &data );
-        io_cd.Add( iv_mbaTrgt, Util::hashString("MEM_RCE_TABLE"), bs );
+        io_cd.Add( iv_chip->getTrgt(), Util::hashString("MEM_RCE_TABLE"), bs );
     }
 }
 
