@@ -44,6 +44,7 @@ prd_obj += prdfMemCeTable.o
 prd_obj += prdfMemDqBitmap.o
 prd_obj += prdfMemEccAnalysis.o
 prd_obj += prdfMemMark.o
+prd_obj += prdfMemRceTable.o
 prd_obj += prdfMemSymbol.o
 prd_obj += prdfMemoryMru.o
 prd_obj += prdfMemUeTable.o

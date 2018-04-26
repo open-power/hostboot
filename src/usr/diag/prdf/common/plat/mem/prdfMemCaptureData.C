@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <utilmem.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 
@@ -579,12 +580,11 @@ void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
 {
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-/* TODO: RTC 157888
     CaptureData & cd = io_sc.service_data->GetCaptureData();
-    CenMbaDataBundle * db = getMbaDataBundle( i_chip );
+    MbaDataBundle * db = getMbaDataBundle( i_chip );
 
     // Add UE table to capture data.
-    db->iv_ueTable.addCapData( i_chip, cd );
+    db->iv_ueTable.addCapData( cd );
 
     // Add CE table to capture data.
     db->iv_ceTable.addCapData( cd );
@@ -592,6 +592,7 @@ void addEccData<TYPE_MBA>( ExtensibleChip * i_chip,
     // Add RCE table to capture data.
     db->iv_rceTable.addCapData( cd );
 
+/* TODO: RTC 157888
     // Add DRAM repairs data from hardware.
     captureDramRepairsData( i_chip->getTrgt(), cd );
 

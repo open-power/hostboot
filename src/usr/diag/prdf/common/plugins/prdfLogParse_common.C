@@ -453,12 +453,10 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 parseIueCounts( sigData, sigDataSize, i_parser );
             }
-/*  TODO: RTC 157888
             else if ( Util::hashString("MEM_RCE_TABLE") == sigId )
             {
                  parseMemRceTable( sigData, sigDataSize, i_parser );
             }
-*/
             else if ( Util::hashString("DRAM_REPAIRS_DATA") == sigId )
             {
                  parseDramRepairsData( sigData, sigDataSize, i_parser );

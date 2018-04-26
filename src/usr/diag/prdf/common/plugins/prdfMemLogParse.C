@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3229,7 +3229,6 @@ bool parseIueCounts( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 157888
 bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )
 {
@@ -3249,23 +3248,12 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
         uint32_t mrnk  = (i_buffer[idx  ] >> 5) & 0x7;  //  3-bit
         uint32_t srnk  = (i_buffer[idx  ] >> 2) & 0x7;  //  3-bit
-        uint32_t svld  = (i_buffer[idx  ] >> 1) & 0x1;  //  1-bit
         uint32_t count =  i_buffer[idx+1];              //  8-bit
-
-        // Get the rank string.
-        char rank_str[DATA_SIZE] = "";
-        if ( 1 == svld )
-        {
-            snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk );
-        }
-        else
-        {
-            snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );
-        }
 
         // Build the data string.
         char data[DATA_SIZE] = "";
-        snprintf( data, DATA_SIZE, "rank = %s  count = %d", rank_str, count );
+        snprintf( data, DATA_SIZE, "rank = m%ds%d  count = %d",
+                  mrnk, srnk, count );
 
         // Print the line.
         i_parser.PrintString( "", data );
@@ -3273,7 +3261,6 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 
