@@ -49,6 +49,8 @@
 #endif
 
 #include    <scom/scomif.H>
+#include    <errl/errludprintk.H>
+#include    <intr/intr_reasoncodes.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -121,11 +123,12 @@ void* call_host_activate_slave_cores (void *io_pArgs)
             int rc = cpu_start_core(pir, en_threads);
 
             // Handle time out error
+            uint32_t l_checkidle_eid = 0;
             if (-ETIME == rc)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_activate_slave_cores: "
-                        "Time out rc from kernel %d on core %x",
+                        "Time out rc from kernel %d on core 0x%x",
                         rc,
                         pir);
 
@@ -157,6 +160,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                     // Create IStep error log
                     l_stepError.addErrorDetails(l_timeout_errl);
 
+                    l_checkidle_eid = l_timeout_errl->eid();
+
                     // Commit error
                     errlCommit( l_timeout_errl, HWPF_COMP_ID );
                 }
@@ -176,7 +181,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                   * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
                   * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
                   * @userdata1   PIR of failing core.
-                  * @userdata2   rc of cpu_start_core().
+                  * @userdata2[00:31]   EID from p9_check_idle_stop_done().
+                  * @userdata2[32:63]   rc of cpu_start_core().
                   *
                   * @devdesc Kernel returned error when trying to activate
                   *          core.
@@ -186,13 +192,21 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                              MOD_HOST_ACTIVATE_SLAVE_CORES,
                              RC_BAD_RC,
                              pir,
-                             rc );
+                             TWO_UINT32_TO_UINT64(
+                                 l_checkidle_eid,
+                                 rc) );
 
                 // Callout core that failed to wake up.
                 l_errl->addHwCallout(*l_core,
                         HWAS::SRCI_PRIORITY_MED,
                         HWAS::DECONFIG,
                         HWAS::GARD_Predictive);
+
+                // Could be an interrupt issue
+                l_errl->collectTrace(INTR_TRACE_NAME,256);
+
+                // Throw printk in there too in case it is a kernel issue
+                ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
                 l_stepError.addErrorDetails( l_errl );
                 errlCommit( l_errl, HWPF_COMP_ID );
