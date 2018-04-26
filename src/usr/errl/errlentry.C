@@ -103,16 +103,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 
 #ifndef __HOSTBOOT_RUNTIME
     // Add the istep data to the vector of sections for this error log
-    ErrlUserDetailsSysState * l_pErrlUserDetailsSysState =
-            new ErrlUserDetailsSysState();
+    ErrlUserDetailsSysState l_UserDetailsSysState;
 
-    ErrlUD * l_pUdSection = new ErrlUD( l_pErrlUserDetailsSysState,
-                                        sizeof(ErrlUserDetailsSysState),
-                                        ERRL_COMP_ID,
-                                        1,
-                                        ERRL_UDT_SYSSTATE );
-
-    iv_SectionVector.push_back( l_pUdSection );
+    l_UserDetailsSysState.addToLog( this );
 #endif
 
     // Automatically add a software callout if asked
