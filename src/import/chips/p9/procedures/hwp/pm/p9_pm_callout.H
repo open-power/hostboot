@@ -48,23 +48,7 @@
 // Includes
 // ------------------------------------------------------------------------------
 #include <fapi2.H>
-
-///@brief models a sub-section of STOP Recovery summary.
-///@note  caller of HWP passes in an empty vector however,
-///HWP populates it with pointers to all summary sub-section.
-struct StopErrLogSectn
-{
-    uint8_t*    iv_pBufPtr;
-    uint16_t    iv_bufSize;
-    StopErrLogSectn( uint8_t* i_bufPtr, uint16_t i_bufSize )
-        : iv_pBufPtr( i_bufPtr ), iv_bufSize( i_bufSize )
-    { }
-
-    StopErrLogSectn( )
-        : iv_pBufPtr( NULL ),
-          iv_bufSize( 0 )
-    { }
-};
+#include <p9_pm_recovery_ffdc_defines.H>
 
 enum RasAction
 {
