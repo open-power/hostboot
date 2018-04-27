@@ -25,6 +25,8 @@
 #ifndef __PM_RECOVERY_FFDC_DEFINES_
 #define __PM_RECOVERY_FFDC_DEFINES_
 
+#include <stdint.h>
+#include <stdlib.h>
 #include <p9_hcd_memmap_base.H>
 #include <endian.h>
 
