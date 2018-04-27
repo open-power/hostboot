@@ -57,6 +57,8 @@
     void CppmRegs::initRegList()
     {
         std::vector < uint32_t> l_scomRegList;
+        //NOTE: Update major or minor number as appropriate if this list
+        //ever changes. Failing to do so can break the error log parser.
         l_scomRegList.push_back( C_PPM_SSHSRC );
         l_scomRegList.push_back( C_PPM_VDMCR );
         PlatPmComplex::updateSummaryList( l_scomRegList );
@@ -169,8 +171,8 @@
 
         PpmFfdcHeader * l_CppmFfdcHdr       =   (PpmFfdcHeader *) i_pHomerBuf ;
         l_CppmFfdcHdr->iv_ppmMagicWord      =  htobe32(FFDC_CPPM_MAGIC_NUM);
-        l_CppmFfdcHdr->iv_versionMajor      =  1;
-        l_CppmFfdcHdr->iv_versionMinor      =  0;
+        l_CppmFfdcHdr->iv_versionMajor      =  CPPM_MAJ_NUM;
+        l_CppmFfdcHdr->iv_versionMinor      =  CPPM_MIN_NUM;
         l_CppmFfdcHdr->iv_Instance          =  i_corePos; // CHIP_UNIT_POS
         l_CppmFfdcHdr->iv_ppmHeaderSize     =  htobe16 (sizeof(PpmFfdcHeader));
         l_CppmFfdcHdr->iv_sectionSize       =  htobe16 (FFDC_CPPM_REGION_SIZE);
