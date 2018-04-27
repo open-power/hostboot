@@ -71,6 +71,8 @@
     void QppmRegs::initRegList()
     {
         std::vector < uint32_t> l_scomRegList;
+        //NOTE: Update major or minor number as appropriate if this list
+        //ever changes. Failing to do so can break the error log parser.
         l_scomRegList.push_back( EQ_PPM_GPMMR_SCOM );
         l_scomRegList.push_back( EQ_PPM_SSHSRC );
         l_scomRegList.push_back( EQ_QPPM_DPLL_FREQ );
@@ -181,8 +183,8 @@
             FfdcSummSubSectHdr * l_pQppmSummaryHdr
                             =  (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_qpmmRegSummary[l_ppmPos][0];
             l_pQppmSummaryHdr->iv_subSectnId    =   PLAT_QPPM;
-            l_pQppmSummaryHdr->iv_majorNum      =   1;
-            l_pQppmSummaryHdr->iv_minorNum      =   0;
+            l_pQppmSummaryHdr->iv_majorNum      =   QPPM_MAJ_NUM;
+            l_pQppmSummaryHdr->iv_minorNum      =   QPPM_MIN_NUM;
             l_pQppmSummaryHdr->iv_secValid      =   htobe16(l_pQppmHdr->iv_ffdcValid);
 
             if( !l_pQppmSummaryHdr->iv_secValid )
