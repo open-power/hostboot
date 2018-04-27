@@ -35,6 +35,45 @@
     ( (((WORD) >> 8) & 0x00FF) | (((WORD) << 8) & 0xFF00) )
 #endif
 
+typedef uint8_t errlver_t;
+
+///@brief    models a sub-section of STOP Recovery summary.
+///@note     caller of p9_pm_callout passes in an empty vector
+///          however, HWP populates it with pointers to all
+///          summary sub-section.
+struct StopErrLogSectn
+{
+    uint8_t*            iv_pBufPtr;
+    uint16_t            iv_bufSize;
+    errlver_t           iv_subsec;
+    StopErrLogSectn( uint8_t* i_bufPtr, uint16_t i_bufSize, errlver_t i_subSectn )
+        : iv_pBufPtr( i_bufPtr ), iv_bufSize( i_bufSize ), iv_subsec( i_subSectn )
+    { }
+
+    StopErrLogSectn( )
+        : iv_pBufPtr( NULL ),
+          iv_bufSize( 0 ),
+          iv_subsec(  0 )
+    { }
+};
+
+/**
+ * @brief       sections of STOP Recovery FFDC summary
+ */
+enum  VerList_t
+{
+    STATE_CONFIG_SECTN         =   0x00,
+    SGPE_SECTN                 =   0x01,
+    PGPE_SECTN                 =   0x02,
+    CME_SECTN                  =   0x03,
+    QPPM_SECTN                 =   0x04,
+    CPPM_SECTN                 =   0x05,
+    SGPE_GLOBAL_VAR_SECTN      =   0x06,
+    PGPE_GLOBAL_VAR_SECTN      =   0x07,
+    CME_GLOBAL_VAR_SECTN       =   0x08,
+    MAX_FFDC_SUMMARY_SECTN_CNT =   0x09,
+};
+
 namespace p9_stop_recov_ffdc
 {
 
@@ -65,6 +104,25 @@ enum PmResetStep
     PM_RESET_PSS,
     PM_RESET_NOTIFY_PRD,
     PM_RESET_DONE = 0xFF  // Always the last
+};
+
+/**
+ * @brief miscellaneous constants
+ */
+enum SectionVer
+{
+    SYS_CONFIG_MAJ_NUM  =   1,
+    SYS_CONFIG_MIN_NUM  =   0,
+    SGPE_MAJ_NUM        =   1,
+    SGPE_MIN_NUM        =   0,
+    PGPE_MAJ_NUM        =   1,
+    PGPE_MIN_NUM        =   0,
+    CME_MAJ_NUM         =   1,
+    CME_MIN_NUM         =   0,
+    QPPM_MAJ_NUM        =   1,
+    QPPM_MIN_NUM        =   0,
+    CPPM_MAJ_NUM        =   1,
+    CPPM_MIN_NUM        =   0,
 };
 
 /**
