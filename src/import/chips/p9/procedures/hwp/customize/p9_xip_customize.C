@@ -1974,41 +1974,57 @@ ReturnCode p9_xip_customize (
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {
-        uint8_t    l_filterPllBucket = 0;
-        uint32_t   l_sizeMvpdFieldExpected = 4;
-        uint32_t   l_sizeMvpdField = 0;
-        uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
-        P9XipItem  l_item;
+        fapi2::ATTR_MRW_FILTER_PLL_BUCKET_Type l_filterPllBucketMRW = 0;
+        uint8_t l_filterPllBucket = 0;
+        P9XipItem l_item;
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_AW,
-                               i_procTarget,
-                               NULL,
-                               l_sizeMvpdField),
-                  "getMvpdField(NULL buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_FILTER_PLL_BUCKET,
+                               FAPI_SYSTEM,
+                               l_filterPllBucketMRW),
+                 "Error from FAPI_ATTR_GET (ATTR_MRW_FILTER_PLL_BUCKET)");
 
-        FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
-                     fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_MVPD_FIELD_SIZE(l_sizeMvpdField).
-                     set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
-                     "MVPD field size bug:\n"
-                     "  Returned MVPD field size of AW keyword = %d\n"
-                     "  Anticipated MVPD field size = %d",
-                     l_sizeMvpdField,
-                     l_sizeMvpdFieldExpected );
+        // set bucket based on MRW attribute if it is non zero
+        if (l_filterPllBucketMRW != 0)
+        {
+            l_filterPllBucket = l_filterPllBucketMRW;
+        }
+        // otherwise, set bucket from AW VPD data
+        else
+        {
+            uint32_t   l_sizeMvpdFieldExpected = 4;
+            uint32_t   l_sizeMvpdField = 0;
+            uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
 
-        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
-                               MVPD_KEYWORD_AW,
-                               i_procTarget,
-                               l_bufMvpdField,
-                               l_sizeMvpdField),
-                  "getMvpdField(valid buffer) failed w/rc=0x%08x",
-                  (uint64_t)fapi2::current_err );
+            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                                   MVPD_KEYWORD_AW,
+                                   i_procTarget,
+                                   NULL,
+                                   l_sizeMvpdField),
+                      "getMvpdField(NULL buffer) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
 
-        // extract data
-        l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
+            FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
+                         fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_MVPD_FIELD_SIZE(l_sizeMvpdField).
+                         set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
+                         "MVPD field size bug:\n"
+                         "  Returned MVPD field size of AW keyword = %d\n"
+                         "  Anticipated MVPD field size = %d",
+                         l_sizeMvpdField,
+                         l_sizeMvpdFieldExpected );
+
+            FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                                   MVPD_KEYWORD_AW,
+                                   i_procTarget,
+                                   l_bufMvpdField,
+                                   l_sizeMvpdField),
+                      "getMvpdField(valid buffer) failed w/rc=0x%08x",
+                      (uint64_t)fapi2::current_err );
+
+            // extract data
+            l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
+        }
 
         FAPI_ASSERT( l_filterPllBucket <= MAX_FILTER_PLL_BUCKETS,
                      fapi2::XIPC_MVPD_AW_FIELD_VALUE_ERR().
