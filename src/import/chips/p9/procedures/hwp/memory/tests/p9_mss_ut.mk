@@ -26,11 +26,13 @@
 -include 00common.mk
 
 MSS_UT_SOURCE := $(shell find $(ROOTPATH)/chips/p9/procedures/hwp/memory/tests -name '*.C' -exec basename {} \;)
+MSS_UT_SOURCE += $(shell find $(ROOTPATH)/generic/memory/tests -name '*.C' -exec basename {} \;)
 
 WRAPPER=p9_mss_ut
 OBJS += $(patsubst %.C,%.o,$(MSS_UT_SOURCE))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(MSS_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CATCH_UNIT_TESTS_INCLUDES))
+$(call ADD_EXE_SRCDIR,$(WRAPPER),$(ROOTPATH)/generic/memory/tests)
 
 $(WRAPPER)_DEPLIBS+=mss
 $(WRAPPER)_DEPLIBS+=mss_generic
