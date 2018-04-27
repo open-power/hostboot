@@ -29,6 +29,8 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfMemVcm.H>
 #include <prdfP9McaDataBundle.H>
+#include <prdfCenMbaDataBundle.H>
+#include <prdfCenMbaExtraSig.H>
 
 using namespace TARGETING;
 
@@ -55,9 +57,7 @@ VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MCA>( ExtensibleChip * i_chip )
 template<>
 VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
 {
-    // TODO: RTC 157888
-    //return getMbaDataBundle(i_chip)->getVcmFalseAlarmCounter();
-    return nullptr;
+    return getMbaDataBundle(i_chip)->getVcmFalseAlarmCounter();
 }
 
 //##############################################################################
@@ -232,15 +232,71 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
 
     if ( TD_PHASE_2 == iv_phase ) stopCond |= mss_MaintCmd::STOP_ON_MCE;
 
-    // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
-    if ( SUCCESS != o_rc )
+    if ( iv_canResumeScrub )
     {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
+        // Resume the command from the next address to the end of this master
+        // rank.
+        o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, MASTER_RANK, stopCond );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
+                      iv_chip->getHuid() );
+        }
+    }
+    else
+    {
+        // Start the time based scrub procedure on this master rank.
+        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK, stopCond);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                      iv_chip->getHuid(), getKey() );
+        }
     }
 
     return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    uint32_t signature = 0;
+
+    if ( iv_canResumeScrub )
+    {
+        signature = PRDFSIG_VcmResume;
+
+        PRDF_TRAC( "[VcmEvent] Resuming VCM Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
+    }
+    else
+    {
+        switch ( iv_phase )
+        {
+            case TD_PHASE_0:
+                iv_phase  = TD_PHASE_1;
+                signature = PRDFSIG_StartVcmPhase1;
+                break;
+
+            case TD_PHASE_1:
+                iv_phase  = TD_PHASE_2;
+                signature = PRDFSIG_StartVcmPhase2;
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        PRDF_TRAC( "[VcmEvent] Starting VCM Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
+    }
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
 
     #undef PRDF_FUNC
 }
@@ -277,10 +333,8 @@ uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
-            /* TODO: RTC 157888
             o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
                                                   UE_TABLE::SCRUB_UE, io_sc );
-            */
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
@@ -307,6 +361,102 @@ uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
         }
 
     } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t VcmEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
+                                           bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent::analyzePhase] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TD_PHASE_0 == iv_phase ) break; // Nothing to analyze yet.
+
+        // Look for any ECC errors that occurred during the command.
+        uint32_t eccAttns;
+        o_rc = checkEccFirs<TYPE_MBA>( iv_chip, eccAttns );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Analyze the ECC errors, if needed.
+        o_rc = checkEcc( eccAttns, io_sc, o_done );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        if ( o_done ) break; // abort the procedure.
+
+        // Determine if the command stopped on the last address.
+        bool lastAddr = false;
+        o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, MASTER_RANK, lastAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // It is important to initialize iv_canResumeScrub here, so that we will
+        // know to resume the current phase in startNextPhase() instead of
+        // starting phase.
+        iv_canResumeScrub = !lastAddr;
+
+        if ( TD_PHASE_2 == iv_phase )
+        {
+            if ( eccAttns & MAINT_MCE )
+            {
+                // The chip mark has been verified.
+                o_rc = verified( io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
+                              iv_chip->getHuid() );
+                    break;
+                }
+
+                // Procedure is complete.
+                o_done = true;
+            }
+            else if ( !iv_canResumeScrub )
+            {
+                // The chip mark is not verified and the command has reached the
+                // end of the rank. So this is a false alarm.
+                o_rc = falseAlarm( io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "falseAlarm() failed on 0x%08x",
+                            iv_chip->getHuid() );
+                    break;
+                }
+
+                // Procedure is complete.
+                o_done = true;
+            }
+        }
+
+    } while (0);
+
+    if ( (SUCCESS == o_rc) && o_done )
+    {
+        // Clear the ECC FFDC for this master rank.
+        MemDbUtils::resetEccFfdc<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK );
+    }
 
     return o_rc;
 
