@@ -76,12 +76,16 @@ enum TargetType
     TARGET_TYPE_PHB           = 0x00800000, ///< PHB type
     TARGET_TYPE_MC            = 0x01000000, ///< MC type
     TARGET_TYPE_OMI           = 0x02000000, ///< OMI type
+    TARGET_TYPE_OMIC          = 0x04000000, ///< OMIC type
+    TARGET_TYPE_MCC           = 0x08000000, ///< MCC type
+    TARGET_TYPE_OCMB_CHIP     = 0x10000000, ///< OCMB type
 
     TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
     // Compound target types
     TARGET_TYPE_CHIPS         = TARGET_TYPE_PROC_CHIP |
-                                TARGET_TYPE_MEMBUF_CHIP,
+                                TARGET_TYPE_MEMBUF_CHIP |
+                                TARGET_TYPE_OCMB_CHIP,
 
     TARGET_TYPE_CHIPLETS      = TARGET_TYPE_EX     |
                                 TARGET_TYPE_MBA    |
@@ -103,7 +107,9 @@ enum TargetType
                                 TARGET_TYPE_PEC    |
                                 TARGET_TYPE_PHB    |
                                 TARGET_TYPE_MC     |
-                                TARGET_TYPE_OMI,
+                                TARGET_TYPE_OMI    |
+                                TARGET_TYPE_OMIC   |
+                                TARGET_TYPE_MCC,
 
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
