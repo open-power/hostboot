@@ -3437,8 +3437,8 @@ errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc, bool i_enable)
         uint64_t l_barValue = l_baseBarValue;
 
         TRACFCOMP(g_trac_intr,"INTR: Setting PSI BRIDGE Bar Address value for -"
-                              " Target %p. PSI BRIDGE BAR value: 0x%016lx",
-                  l_target,l_barValue);
+                              " Target %.8x. PSI BRIDGE BAR value: 0x%016lx",
+                  TARGETING::get_huid(l_target),l_barValue);
 
         //Set base BAR Value
         uint64_t size = sizeof(l_barValue);
@@ -3457,8 +3457,8 @@ errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc, bool i_enable)
         l_barValue += PSI_BRIDGE_BAR_ENABLE;
         size = sizeof(l_barValue);
 
-        TRACDCOMP(g_trac_intr,"INTR: Setting PSI BRIDGE Bar enable value for Target - %p. PSI BRIDGE BAR value: 0x%016lx",
-                  l_target,l_barValue);
+        TRACFCOMP(g_trac_intr,"INTR: Setting PSI BRIDGE Bar enable value for Target - %.8x. PSI BRIDGE BAR value: 0x%016lx",
+                  TARGETING::get_huid(l_target),l_barValue);
 
         l_err = deviceWrite(l_target,
                             &l_barValue,
@@ -3492,9 +3492,9 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
     do {
 
         uint64_t l_barValue = l_baseBarValue;
-        TRACFCOMP(g_trac_intr,"INTR: Target %p. "
+        TRACFCOMP(g_trac_intr,"INTR: Target %.8x. "
                               "PSI BRIDGE ESB BASE BAR value: 0x%016lx",
-                  l_target,l_barValue);
+                  TARGETING::get_huid(l_target),l_barValue);
 
         uint64_t size = sizeof(l_barValue);
         l_err = deviceWrite(l_target,
@@ -3512,8 +3512,8 @@ errlHndl_t IntrRp::setPsiHbEsbBAR(intr_hdlr_t *i_proc,
         if (i_enable)
         {
             l_barValue += PSI_BRIDGE_ESB_BAR_VALID;
-            TRACFCOMP(g_trac_intr,"INTR: Target %p. PSI BRIDGE ESB BAR value: 0x%016lx",
-                  l_target,l_barValue);
+            TRACFCOMP(g_trac_intr,"INTR: Target %.8x. PSI BRIDGE ESB BAR value: 0x%016lx",
+                  TARGETING::get_huid(l_target),l_barValue);
 
             size = sizeof(l_barValue);
             l_err = deviceWrite(l_target,
@@ -3555,8 +3555,8 @@ errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target,
             l_barValue += XIVE_IVPE_TM_BAR1_VALIDATE;
         }
 
-        TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IVPE TM BAR1 value: 0x%016lx",
-                  i_target,l_barValue);
+        TRACDCOMP(g_trac_intr,"INTR: Target %.8x. XIVE IVPE TM BAR1 value: 0x%016lx",
+                  TARGETING::get_huid(i_target),l_barValue);
 
         uint64_t size = sizeof(l_barValue);
         l_err = deviceWrite(i_target,
@@ -3599,8 +3599,8 @@ errlHndl_t IntrRp::setXiveIcBAR(intr_hdlr_t *i_proc, bool i_enable)
             l_barValue += XIVE_IC_BAR_VALID;
         }
 
-        TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IC BAR value: 0x%016lx",
-                  l_target, l_barValue);
+        TRACDCOMP(g_trac_intr,"INTR: Target %.8x. XIVE IC BAR value: 0x%016lx",
+                  TARGETING::get_huid(l_target), l_barValue);
 
         uint64_t size = sizeof(l_barValue);
         l_err = deviceWrite(l_target,
