@@ -76,6 +76,8 @@ namespace p9_stop_recov_ffdc
     {
         FAPI_DBG (">> PlatOcc::initRegList" );
         std::vector < uint32_t> l_scomRegList;
+        //NOTE: Update major or minor number as appropriate if this list
+        //ever changes. Failing to do so can break the error log parser.
         l_scomRegList.push_back( PU_OCB_OCI_CCSR_SCOM );
         l_scomRegList.push_back( PU_OCB_OCI_QSSR_SCOM );
         l_scomRegList.push_back( P9N2_PU_OCB_OCI_OCCFLG_SCOM );
@@ -479,8 +481,8 @@ namespace p9_stop_recov_ffdc
        FfdcSummSubSectHdr * l_pSysConfigHdr   =
                     (FfdcSummSubSectHdr *)&l_pSysConfig->iv_subSecHdr;
        l_pSysConfigHdr->iv_subSectnId   =   PLAT_OCC;
-       l_pSysConfigHdr->iv_majorNum     =   1;
-       l_pSysConfigHdr->iv_minorNum     =   0;
+       l_pSysConfigHdr->iv_majorNum     =   SYS_CONFIG_MAJ_NUM;
+       l_pSysConfigHdr->iv_minorNum     =   SYS_CONFIG_MIN_NUM;
        l_pSysConfigHdr->iv_secValid     =   l_pOccFfdcHdr->iv_sectionsValid;
 
        if( l_pSysConfigHdr->iv_secValid )
