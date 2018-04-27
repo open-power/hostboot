@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,28 @@
 
 namespace fapi2
 {
+
+// CDIMM attribute table
+const uint8_t NUM_OF_CDIMM_ATTRS = 8;
+uint32_t CDIMM_ATTR_ID[NUM_OF_CDIMM_ATTRS] =
+{
+   ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT,
+   ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT,
+   ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT,
+   ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE,
+   ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE,
+   ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE,
+   ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT,
+   ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_SLOPE
+};
+
+// ISDIMM attribute table
+const uint8_t NUM_OF_ISDIMM_ATTRS = 2;
+uint32_t ISDIMM_ATTR_ID[NUM_OF_ISDIMM_ATTRS] =
+{
+    ATTR_CEN_VPD_ISDIMMTOC4DQS,
+    ATTR_CEN_VPD_ISDIMMTOC4DQ
+};
 
 //******************************************************************************
 // Global Variables
@@ -548,13 +570,10 @@ void AttrOverrideSync::sendFapiAttrSyncs()
 
     }
 
-    //Let the tool know we are finished syncing with magic address
-    Util::writeDebugCommRegs(Util::MSG_TYPE_ATTRDUMP,
-                             0xFFFFCAFE, 0);
-
     // Clear Sync tank
     l_attributes.clear();
     iv_syncTank.clearAllAttributes();
+
 #endif
 }
 
@@ -717,6 +736,10 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
                                        uint32_t i_fapiPos, uint32_t i_attrHash)
 {
     uint8_t * l_buf = NULL;
+    uint64_t l_totalBytes = 0;
+
+    uint32_t l_targetCount = 0;
+    iv_syncTank.clearAllAttributes();
 
     //Walk through all HB targets and see if there is a matching FAPI target
     //If so then get the list of ATTR for FAPI target and add to sync list
@@ -768,6 +791,20 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
         //Need a generic fapi target to use later
         fapi2::Target<TARGET_TYPE_ALL> l_fapiTarget( l_pTarget);
 
+        // For membuf, see if it has CDIMMs
+        uint8_t l_cdimm = 0;
+        if (l_fType == TARGET_TYPE_MEMBUF_CHIP)
+        {
+            const auto l_mbas = l_fapiTarget.getChildren<fapi2::TARGET_TYPE_MBA>();
+            if ( !l_mbas.empty() )
+            {
+                // Debug tool, ignore error handling
+                fapi2::Target<TARGET_TYPE_MBA> l_mbaTarget(l_mbas[0]);
+                FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM,
+                              l_mbaTarget, l_cdimm);
+            }
+        }
+
         //Determine the target location info
         uint16_t l_pos = 0;
         uint8_t l_unitPos = 0;
@@ -798,6 +835,41 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
                 continue;
             }
 
+            // Skip CDIMM specific attributes for non-cdimms
+            if (l_fType == TARGET_TYPE_MEMBUF_CHIP)
+            {
+                bool skip_attr = false;
+                if (l_cdimm) // CDIMM
+                {
+                    for (uint8_t ii = 0; ii < NUM_OF_ISDIMM_ATTRS; ii++)
+                    {
+                         if (l_attrs[i].iv_attrId == ISDIMM_ATTR_ID[ii])
+                         {
+                             skip_attr = true;
+                             break;
+                         }
+                    }
+                }
+                else // ISDIMM
+                {
+                    for (uint8_t ii = 0; ii < NUM_OF_CDIMM_ATTRS; ii++)
+                    {
+                         if (l_attrs[i].iv_attrId == CDIMM_ATTR_ID[ii])
+                         {
+                             skip_attr = true;
+                             break;
+                         }
+                    }
+                }
+
+                // Skip attr if wrong dimm type to avoid error
+                if (skip_attr == true)
+                {
+                    continue;
+                }
+
+            }
+
             // Write the attribute to the SyncAttributeTank to sync to Cronus
             size_t l_bytes =
               l_attrs[i].iv_attrElemSizeBytes * l_attrs[i].iv_dims[0] *
@@ -813,6 +885,7 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
                          l_attrs[i].iv_attrId, l_bytes);
                 continue;
             }
+
             l_buf = reinterpret_cast<uint8_t *>(realloc(l_buf, l_bytes));
             ReturnCode l_rc =
               rawAccessAttr(
@@ -831,13 +904,27 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
             {
                 delete l_pErr; //Debug tool, ignore errors
             }
+
+            l_targetCount++;
+            l_totalBytes += l_bytes;
         }
+
+        // Done with this target, release l_buf
+        free(l_buf);
+        l_buf = NULL;
+
+        // Push the target attributes to debug tool
+        sendFapiAttrSyncs();
     }
 
-    free(l_buf);
+#ifndef __HOSTBOOT_RUNTIME
+    //Let the tool know we are finished syncing with magic address
+    Util::writeDebugCommRegs(Util::MSG_TYPE_ATTRDUMP,
+                             0xFFFFCAFE, 0);
+#endif
 
-    //Now push the data to the debug tool
-    sendFapiAttrSyncs();
+    FAPI_INF("triggerAttrSync - Finished sending all target attributes. "
+             "Total targets %d, Total bytes %d", l_targetCount, l_totalBytes);
 }
 
 //******************************************************************************
