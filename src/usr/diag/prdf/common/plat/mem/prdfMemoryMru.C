@@ -293,9 +293,22 @@ void MemoryMru::getCommonVars()
     #define PRDF_FUNC "[MemoryMru::getCommonVars] "
 
     TARGETING::TYPE trgtType = getTargetType( iv_target );
-    PRDF_ASSERT( TYPE_MCA == trgtType || TYPE_MBA == trgtType );
 
-    TargetHandle_t proc = getConnectedParent( iv_target, TYPE_PROC );
+    TargetHandle_t proc = nullptr;
+    if ( TYPE_MBA == trgtType )
+    {
+        TargetHandle_t membuf = getConnectedParent( iv_target, TYPE_MEMBUF );
+        proc = getConnectedParent( membuf, TYPE_PROC );
+    }
+    else if ( TYPE_MCA == trgtType )
+    {
+        proc = getConnectedParent( iv_target, TYPE_PROC );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid target type" );
+        PRDF_ASSERT(false);
+    }
     TargetHandle_t node = getConnectedParent( proc, TYPE_NODE );
 
     // If our target is an MBA, get the chnlPos from the membuf and the
