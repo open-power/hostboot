@@ -211,8 +211,11 @@ errlHndl_t getTargetVirtualAddress(Target* i_target,
             Target* l_parentChip =
                     const_cast<Target *>(getParentChip(parentDMI));
 
-            uint8_t l_groupId = l_parentChip->getAttr<ATTR_FABRIC_GROUP_ID>();
-            uint8_t l_chipId  = l_parentChip->getAttr<ATTR_FABRIC_CHIP_ID>();
+            // grab the effective group id
+            uint8_t l_groupId =
+                l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+            uint8_t l_chipId  =
+                l_parentChip->getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>();
 
             l_IBScomAddr = computeMemoryMapOffset( IBSCOM_BASE,
                                                    l_groupId,
