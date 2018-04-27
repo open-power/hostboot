@@ -142,6 +142,8 @@ namespace p9_stop_recov_ffdc
     {
         FAPI_DBG( ">> PlatPmComplex::initRegList" );
         iv_summaryReg.clear();
+        //NOTE: Update major or minor number as appropriate if this list
+        //ever changes. Failing to do so can break the error log parser.
         iv_summaryReg.push_back( XSR );
         iv_summaryReg.push_back( IAR );
         iv_summaryReg.push_back( IR );
