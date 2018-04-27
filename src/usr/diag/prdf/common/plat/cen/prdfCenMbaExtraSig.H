@@ -32,6 +32,10 @@
 PRDR_ERROR_SIGNATURE(CmdComplete_ERROR, 0xeeee0000, "",
                      "ERROR: command complete analysis failed" );
 
+PRDR_ERROR_SIGNATURE(VcmResume, 0xbbbb0000, "", "VCM: Resuming procedure");
+PRDR_ERROR_SIGNATURE(TpsResume, 0xbbbb0001, "", "TPS: Resuming procedure");
+PRDR_ERROR_SIGNATURE(DsdResume, 0xbbbb0003, "", "DSD: Resuming procedure");
+
 PRDR_ERROR_SIGNATURE(MaintNCE_CTE,   0xbbbb0016, "", "Maint SOFT/INTER CTE");
 
 PRDR_ERROR_SIGNATURE(VcmBadSpare,     0xbbbb0022, "", "VCM: bad DRAM spare");

@@ -74,6 +74,7 @@ class MbaDataBundle : public DataBundle
 
         #ifdef __HOSTBOOT_RUNTIME
 
+        delete iv_vcmFalseAlarmCounter;
         delete iv_tpsFalseAlarmCounter;
 
         #else // IPL only
@@ -104,6 +105,18 @@ class MbaDataBundle : public DataBundle
     }
 
     #ifdef __HOSTBOOT_RUNTIME
+
+    /** @return The VCM false alarm counter. */
+    VcmFalseAlarm * getVcmFalseAlarmCounter()
+    {
+        if ( nullptr == iv_vcmFalseAlarmCounter )
+        {
+            iv_vcmFalseAlarmCounter = new VcmFalseAlarm(
+                       TimeBasedThreshold { 4, ThresholdResolution::ONE_DAY } );
+        }
+
+        return iv_vcmFalseAlarmCounter;
+    }
 
     /** @return The TPS false alarm counter. */
     TpsFalseAlarm * getTpsFalseAlarmCounter()
@@ -145,6 +158,9 @@ class MbaDataBundle : public DataBundle
     MemTdCtlr<TARGETING::TYPE_MBA> * iv_tdCtlr = nullptr;
 
     #ifdef __HOSTBOOT_RUNTIME
+
+    /** VCM false alarm counter. */
+    VcmFalseAlarm * iv_vcmFalseAlarmCounter = nullptr;
 
     /** TPS false alarm counter. */
     TpsFalseAlarm * iv_tpsFalseAlarmCounter = nullptr;
