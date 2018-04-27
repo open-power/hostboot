@@ -62,16 +62,6 @@ enum
     CFG_PM_MUX_DISABLE          =   7,
     TP_FENCE_PCB                =   25,
     OCC_FLAG2_SCOM1_ADDR        =   0x0006C18B,
-    STATE_CONFIG_SECTN          =   0x00,
-    SGPE_SECTN                  =   0x01,
-    PGPE_SECTN                  =   0x02,
-    CME_SECTN                   =   0x03,
-    QPPM_SECTN                  =   0x04,
-    CPPM_SECTN                  =   0x05,
-    SGPE_GLOBAL_VAR_SECTN       =   0x06,
-    PGPE_GLOBAL_VAR_SECTN       =   0x07,
-    CME_GLOBAL_VAR_SECTN        =   0x08,
-    MAX_FFDC_SUMMARY_SECTN_CNT  =   0x09,
 };
 
 /**
@@ -305,6 +295,7 @@ extern "C"
         using namespace p9_stop_recov_ffdc;
         FAPI_IMP(">> p9_pm_callout" );
 
+        errlver_t  l_summSectn;
         HomerFfdcRegion* l_pHomerFfdc =
             ( HomerFfdcRegion*)( (uint8_t*)i_pHomerBase + FFDC_REGION_HOMER_BASE_OFFSET );
         uint8_t* l_pSummary     =   NULL;
@@ -330,29 +321,33 @@ extern "C"
 
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
 
-        for( uint8_t l_ffdcSecId = 0; l_ffdcSecId < MAX_FFDC_SUMMARY_SECTN_CNT;
-             l_ffdcSecId++ )
+        for( uint8_t l_secId = 0; l_secId < MAX_FFDC_SUMMARY_SECTN_CNT;
+             l_secId++ )
         {
-            switch( l_ffdcSecId )
+            switch( l_secId )
             {
                 case STATE_CONFIG_SECTN:
                     l_pSummary   =  (uint8_t*) &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sysState;
                     l_sectnSize  =  sizeof(SysState);
+                    l_summSectn  =  STATE_CONFIG_SECTN;
                     break;
 
                 case SGPE_SECTN:
                     l_pSummary   =  &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeSummary[0];
                     l_sectnSize  =  FFDC_SUMMARY_SIZE_SGPE;
+                    l_summSectn  =  SGPE_SECTN;
                     break;
 
                 case PGPE_SECTN:
                     l_pSummary   =  &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeSummary[0];
                     l_sectnSize  =  FFDC_SUMMARY_SIZE_PGPE;
+                    l_summSectn  =  PGPE_SECTN;
                     break;
 
                 case CME_SECTN:
                     l_pSummary   =  &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeSummary[0][0];
                     l_sectnSize  =  (FFDC_SUMMARY_SIZE_CME * MAX_CMES_PER_CHIP);
+                    l_summSectn  =  CME_SECTN;
                     break;
 
                 case QPPM_SECTN:
@@ -360,6 +355,7 @@ extern "C"
                     //section of error log.
                     l_pSummary   =  &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_qpmmRegSummary[0][0];
                     l_sectnSize  =  (FFDC_SUMMARY_SIZE_QPPM_REG * MAX_QUADS_PER_CHIP);
+                    l_summSectn  =  QPPM_SECTN;
                     break;
 
                 case CPPM_SECTN:
@@ -367,16 +363,19 @@ extern "C"
                     //section of error log.
                     l_pSummary   =  &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cpmmRegSummary[0][0];
                     l_sectnSize  =  (FFDC_SUMMARY_SIZE_CPPM_REG * MAX_CORES_PER_CHIP);
+                    l_summSectn  =  CPPM_SECTN;
                     break;
 
                 case SGPE_GLOBAL_VAR_SECTN:
                     l_pSummary   =   l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataPtr;
                     l_sectnSize  =   l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataSize;
+                    l_summSectn  =   SGPE_GLOBAL_VAR_SECTN;
                     break;
 
                 case PGPE_GLOBAL_VAR_SECTN:
                     l_pSummary   =   l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeScoreBoard.iv_dataPtr;
                     l_sectnSize  =   l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeScoreBoard.iv_dataSize;
+                    l_summSectn  =   PGPE_GLOBAL_VAR_SECTN;
                     break;
 
                 case CME_GLOBAL_VAR_SECTN:
@@ -387,21 +386,25 @@ extern "C"
                         {
                             l_pSummary  = l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeScoreBoard[l_corePos].iv_dataPtr;
                             l_sectnSize = l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeScoreBoard[l_corePos].iv_dataSize;
-                            StopErrLogSectn l_coreGlobalVarSectn( l_pSummary, l_sectnSize );
+                            StopErrLogSectn l_coreGlobalVarSectn( l_pSummary, l_sectnSize, CME_GLOBAL_VAR_SECTN );
                             o_ffdcList.push_back( l_coreGlobalVarSectn );
                         }
                     }
 
+                    l_summSectn = CME_GLOBAL_VAR_SECTN;
                     break;
 
                 default:
                     //Skip the addition of this section to error log
-                    FAPI_ERR("Section Number %d Not Defined in STOP Recovery Summary", l_ffdcSecId );
+                    FAPI_ERR("Section Number %d Not Defined in STOP Recovery Summary", l_secId );
                     continue;
             }
 
-            StopErrLogSectn l_ffdcSubSectn( l_pSummary, l_sectnSize );
-            o_ffdcList.push_back( l_ffdcSubSectn );
+            if( l_summSectn < MAX_FFDC_SUMMARY_SECTN_CNT )
+            {
+                StopErrLogSectn l_ffdcSubSectn( l_pSummary, l_sectnSize, l_summSectn );
+                o_ffdcList.push_back( l_ffdcSubSectn );
+            }
         }
 
         if( o_ffdcList.size() > 0 )

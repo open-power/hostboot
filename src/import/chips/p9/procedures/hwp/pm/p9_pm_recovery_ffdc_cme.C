@@ -432,8 +432,8 @@
             l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeScoreBoard[l_exPos].iv_dataSize    =   FFDC_PPE_SCORE_BOARD_SIZE;
 
             l_pCmeSummaryHdr->iv_subSectnId     =   PLAT_CME;
-            l_pCmeSummaryHdr->iv_majorNum       =   1;
-            l_pCmeSummaryHdr->iv_minorNum       =   0;
+            l_pCmeSummaryHdr->iv_majorNum       =   CME_MAJ_NUM;
+            l_pCmeSummaryHdr->iv_minorNum       =   CME_MIN_NUM;
             l_pCmeSummaryHdr->iv_secValid       =   l_pCmeLayout->iv_ppeFfdcHdr.iv_ppeFfdcHdr.iv_sectionsValid;
 
             if( !l_pCmeSummaryHdr->iv_secValid )

@@ -335,8 +335,8 @@
        PpeFfdcHeader* l_pSgpeFfdcHdr    =   ( PpeFfdcHeader* )&l_pHomerFfdc->iv_sgpeFfdcRegion;
        FfdcSummSubSectHdr * l_pSgpeSummaryHdr   =   (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeSummary[0];
        l_pSgpeSummaryHdr->iv_subSectnId =   PLAT_SGPE;
-       l_pSgpeSummaryHdr->iv_majorNum   =   1;
-       l_pSgpeSummaryHdr->iv_minorNum   =   0;
+       l_pSgpeSummaryHdr->iv_majorNum   =   SGPE_MAJ_NUM;
+       l_pSgpeSummaryHdr->iv_minorNum   =   SGPE_MIN_NUM;
        l_pSgpeSummaryHdr->iv_secValid   =   l_pSgpeFfdcHdr->iv_sectionsValid;
 
        if( l_pSgpeSummaryHdr->iv_secValid )
