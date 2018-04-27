@@ -143,10 +143,24 @@
 <attribute>
   <id>ATTR_FILTER_PLL_BUCKET</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Select Filter PLL BGoffset programming</description>
+  <description>Select Filter PLL bucket</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MRW_FILTER_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    System specific value for Filter PLL bucket, provided by MRW.
+    If non-zero, this value will directly set ATTR_FILTER_PLL_BUCKET (used by SBE to select bucket).
+    If zero, VPD MK content will set ATTR_FILTER_PLL_BUCKET.
+  </description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
   <initToZero/>
 </attribute>
 
