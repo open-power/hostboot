@@ -288,8 +288,8 @@
 
        FfdcSummSubSectHdr * l_pPgpeSummaryHdr   =   (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeSummary[0];
        l_pPgpeSummaryHdr->iv_subSectnId =   PLAT_PGPE;
-       l_pPgpeSummaryHdr->iv_majorNum   =   1;
-       l_pPgpeSummaryHdr->iv_minorNum   =   0;
+       l_pPgpeSummaryHdr->iv_majorNum   =   PGPE_MAJ_NUM;
+       l_pPgpeSummaryHdr->iv_minorNum   =   PGPE_MIN_NUM;
        l_pPgpeSummaryHdr->iv_secValid   =   l_pPgpeFfdcHdr->iv_sectionsValid;
 
        if( l_pPgpeSummaryHdr->iv_secValid )
