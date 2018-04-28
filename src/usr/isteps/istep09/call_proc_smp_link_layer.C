@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include    <hwas/common/hwasCommon.H>
 
 #include    <sbe/sbeif.H>
+#include    <secureboot/nodecommif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -80,9 +81,13 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError  l_StepError;
+    bool l_run_xbus_test = true;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer entry" );
+
+    do
+    {
 
     //
     //  get a list of all the procs in the system
@@ -111,8 +116,25 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
                      TARGETING::get_huid(l_cpu_target) );
             l_StepError.addErrorDetails(l_errl);
             errlCommit(l_errl, HWPF_COMP_ID);
+            l_run_xbus_test = false;
         }
     }
+
+    // Test sending messages between procs via XBUS mailbox
+    if (l_run_xbus_test)
+    {
+        l_errl = SECUREBOOT::NODECOMM::nodeCommXbus2ProcTest();
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                       "call_proc_smp_link_layer> "
+                       "nodeCommXbus2ProcTest Failed!");
+            l_StepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, HWPF_COMP_ID);
+        }
+    }
+
+    } while(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer exit" );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -366,6 +366,18 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
+
+        /**
+         * @brief   Node Communications Device Driver library
+         */
+        {
+            "libnode_comm.so" ,                 // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
 
         /**
          * @brief   Common istep functions
