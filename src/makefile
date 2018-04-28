@@ -208,6 +208,7 @@ EXTENDED_MODULES += nestmemutils
 EXTENDED_MODULES += fab_iovalid
 EXTENDED_MODULES += isteps_nest
 EXTENDED_MODULES += isteps_io
+EXTENDED_MODULES += node_comm
 
 #***************************************
 # Working test modules
