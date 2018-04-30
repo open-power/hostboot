@@ -1490,6 +1490,10 @@
     <default>MC</default>
   </attribute>
   <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
   <attribute><id>PARENT_PERVASIVE</id></attribute>
   <attribute>
     <id>CDM_DOMAIN</id>
@@ -1503,6 +1507,11 @@
   <attribute>
     <id>MODEL</id>
     <default>CUMULUS</default>
+  </attribute>
+  <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
 </targetType>
 
@@ -1521,6 +1530,10 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
     <id>PARENT_PERVASIVE</id>
   </attribute>
   <attribute>
@@ -1535,6 +1548,11 @@
   <attribute>
     <default>CUMULUS</default>
     <id>MODEL</id>
+  </attribute>
+  <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
 </targetType>
 
@@ -1553,6 +1571,10 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
     <id>PARENT_PERVASIVE</id>
   </attribute>
   <attribute>
@@ -1567,6 +1589,11 @@
   <attribute>
     <default>CUMULUS</default>
     <id>MODEL</id>
+  </attribute>
+  <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+  <attribute>
+    <default>0x00000003</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
 </targetType>
 
@@ -2106,6 +2133,9 @@
     <default>1</default>
     <id>DECONFIG_GARDABLE</id>
   </attribute>
+  <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    <default>0x00000003</default>
+  </attribute>
 </targetType>
 
 <targetType>
@@ -2119,6 +2149,13 @@
     <id>CDM_DOMAIN</id>
     <default>MEM</default>
   </attribute>
+  <attribute>
+    <default>1</default>
+    <id>DECONFIG_GARDABLE</id>
+  </attribute>
+  <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    <default>0x00000003</default>
+  </attribute>
 </targetType>
 
 <!-- Centaur MBA -->
@@ -2131,7 +2168,7 @@
   </attribute>
   <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
   <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    <default>0x00000001</default> <!--GARD -->
+    <default>0x00000003</default>
   </attribute>
   <attribute>
     <id>CDM_DOMAIN</id>
