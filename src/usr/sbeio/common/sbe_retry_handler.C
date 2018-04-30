@@ -185,6 +185,35 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 #ifndef __HOSTBOOT_RUNTIME
         if(INITSERVICE::spBaseServicesEnabled())
         {
+            if(iv_initialPowerOn)
+            {
+                // If this is the initial power on there will be no logs that point out this fail
+                // so we need to create one now
+                /*@
+                * @errortype  ERRL_SEV_UNRECOVERABLE
+                * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                * @reasoncode SBEIO_SLAVE_FAILED_TO_BOOT
+                * @userdata1  Bool to describe if FFDC data is found
+                * @userdata2  HUID of proc
+                * @devdesc    There was a problem attempting to boot SBE
+                *             on the slave processor
+                * @custdesc   Processor Error
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_SLAVE_FAILED_TO_BOOT,
+                            this->iv_ffdcSetAction,
+                            TARGETING::get_huid(i_target));
+
+                l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+                // Set the PLID of the error log to master PLID
+                // if the master PLID is set
+                updatePlids(l_errl);
+
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
             // This function will TI Hostboot so don't expect to return
             handleFspIplTimeFail(i_target);
             SBE_TRACF("main_sbe_handler(): We failed to TI the system when we should have, forcing an assert(0) call");
@@ -290,7 +319,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 // if the master PLID is set
                 updatePlids(l_errl);
 
-                errlCommit(l_errl, ISTEP_COMP_ID);
+                errlCommit(l_errl, SBEIO_COMP_ID);
                 this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
                 SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
                 break;
@@ -337,7 +366,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 l_errl = this->switch_sbe_sides(i_target);
                 if(l_errl)
                 {
-                    errlCommit(l_errl, ISTEP_COMP_ID);
+                    errlCommit(l_errl, SBEIO_COMP_ID);
                     // If any error occurs while we are trying to switch sides
                     // this indicates big problems so we want to break out of the
                     // retry loop
@@ -424,7 +453,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     // if the master PLID is set
                     updatePlids(l_errl);
 
-                    errlCommit( l_errl, ISTEP_COMP_ID);
+                    errlCommit( l_errl, SBEIO_COMP_ID);
                     // If we got an errlog while attempting start_cbs
                     // we will assume that no future retry actions
                     // will work so we will break out of the retry loop
@@ -470,7 +499,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     // if the master PLID is set
                     updatePlids(l_errl);
 
-                    errlCommit( l_errl, ISTEP_COMP_ID);
+                    errlCommit( l_errl, SBEIO_COMP_ID);
                     // If we got an errlog while attempting p9_sbe_hreset
                     // we will assume that no future retry actions
                     // will work so we will exit
@@ -531,7 +560,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
             // if the master PLID is set
             updatePlids(l_errl);
 
-            errlCommit(l_errl, ISTEP_COMP_ID);
+            errlCommit(l_errl, SBEIO_COMP_ID);
         }
 
     }while(0);
@@ -858,7 +887,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
         if(l_pkgs > MAX_EXPECTED_FFDC_PACKAGES)
         {
             /*@
-            * @errortype
+            * @errortype    ERRORLOG::ERRL_SEV_INFORMATIONAL
             * @moduleid     SBEIO_GET_FFDC_HANDLER
             * @reasoncode   SBEIO_MORE_FFDC_THAN_EXPECTED
             * @userdata1    Maximum expected packages
@@ -874,6 +903,10 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 
             l_errl->collectTrace( SBEIO_COMP_NAME, 256);
 
+            // Set the PLID of the error log to master PLID
+            // if the master PLID is set
+            updatePlids(l_errl);
+
             // Also log the failing proc as FFDC
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
             errlCommit(l_errl, SBEIO_COMP_ID);
@@ -883,7 +916,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
         if(l_pkgs > 0)
         {
             /*@
-             * @errortype
+             * @errortype    ERRORLOG::ERRL_SEV_PREDICTIVE
              * @moduleid     SBEIO_GET_FFDC_HANDLER
              * @reasoncode   SBEIO_RETURNED_FFDC
              * @userdata1    Processor Target
@@ -891,7 +924,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
              * @devdesc      FFDC returned by SBE after failing to reach runtime
              * @custdesc     FFDC associated with boot device failing to boot
              */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                              SBEIO_GET_FFDC_HANDLER,
                                              SBEIO_RETURNED_FFDC,
                                              TARGETING::get_huid(i_target),
@@ -947,7 +980,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             // if the master PLID is set
             updatePlids(l_errl);
 
-            errlCommit(l_errl, ISTEP_COMP_ID);
+            errlCommit(l_errl, SBEIO_COMP_ID);
         }
     }
 #endif
