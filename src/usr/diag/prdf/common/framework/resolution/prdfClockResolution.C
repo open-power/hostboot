@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,11 +49,32 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     if ( (iv_targetType == TYPE_PROC) ||
          (iv_targetType == TYPE_MEMBUF) )
     {
-        // even though we pass in pos=0 for systemref clk,
-        // getActiveRefClk will make sure it returns the active osc.
         TargetHandle_t l_ptargetClock =
-            PlatServices::getActiveRefClk(iv_ptargetClock,
-                                     TYPE_OSCREFCLK, 0);
+            PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCREFCLK);
+
+        // Callout this chip if nothing else.
+        // Or in the case of hostboot, use this chip for addClockCallout
+        if(NULL == l_ptargetClock)
+        {
+            l_ptargetClock = iv_ptargetClock;
+        }
+
+        // callout the clock source
+        // HB does not have the osc target modeled
+        // so we need to use the proc target with
+        // osc clock type to call out
+        #ifndef __HOSTBOOT_MODULE
+        serviceData.service_data->SetCallout(l_ptargetClock);
+        #else
+        serviceData.service_data->SetCallout(
+                            PRDcallout(l_ptargetClock,
+                            PRDcalloutData::TYPE_PROCCLK));
+        #endif
+    }
+    else if (iv_targetType == TYPE_PEC)
+    {
+        TargetHandle_t l_ptargetClock =
+            PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCPCICLK);
 
         // Callout this chip if nothing else.
         if(NULL == l_ptargetClock)
@@ -70,7 +91,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
         #else
         serviceData.service_data->SetCallout(
                             PRDcallout(l_ptargetClock,
-                            PRDcalloutData::TYPE_PROCCLK));
+                            PRDcalloutData::TYPE_PCICLK));
         #endif
     }
     // Get all connected chips for non-CLOCK_CARD types.

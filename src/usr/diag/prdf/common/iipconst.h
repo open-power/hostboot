@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ enum DOMAIN_ID
 
     CLOCK_DOMAIN_FAB          = 0x90,
     CLOCK_DOMAIN_MEMBUF       = 0x91,
+    CLOCK_DOMAIN_IO           = 0x92,
 
     END_DOMAIN_ID
 };

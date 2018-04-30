@@ -262,12 +262,9 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
 TARGETING::TargetHandle_t getActiveRefClk(TARGETING::TargetHandle_t
                             i_procTarget,
-                            TARGETING::TYPE i_connType,
-                            uint32_t i_oscPos)
+                            TARGETING::TYPE i_connType)
 {
-    return PlatServices::getClockId( i_procTarget,
-                                     i_connType,
-                                     i_oscPos );
+    return nullptr;
 }
 
 //##############################################################################
