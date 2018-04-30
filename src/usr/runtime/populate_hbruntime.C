@@ -1569,13 +1569,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
             break;
         }
 
-        // TODO RTC 190522 - Remove the following two lines of code once FSP
-        // adds missing eyecatch and magic number to non-master nodes
-        l_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
-        memcpy(l_hdatTpmData->hdatHdr.hdatStructName,
-           HDAT::g_hdatTpmDataEyeCatch,
-           strlen(HDAT::g_hdatTpmDataEyeCatch));
-
         // check that hdat structure format and eye catch were filled out
         if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
         {
