@@ -36,8 +36,12 @@
 #include <console/consoleif.H>
 #include <initservice/initserviceif.H>
 
+using namespace TARGETING;
+
 namespace ISTEP_06
 {
+
+constexpr uint8_t PROC_EC_DD2 = 0x22;
 
 void* host_set_ipl_parms( void *io_pArgs )
 {
@@ -122,6 +126,67 @@ void* host_set_ipl_parms( void *io_pArgs )
         // Create IStep error log and cross ref error that occurred
         l_stepError.addErrorDetails( l_err );
         errlCommit( l_err, ISTEP_COMP_ID );
+    }
+
+
+    // OP920: Any proc EC less than Nimbus DD2.2 is NOT supported
+    // Generate an error but still continue to boot
+
+    // Get the system target
+    Target * l_sys = nullptr;
+    targetService().getTopLevelTarget(l_sys);
+
+    // Get the child proc chips
+    TargetHandleList l_procList;
+    getChildAffinityTargets( l_procList,
+                             l_sys,
+                             CLASS_CHIP,
+                             TYPE_PROC );
+
+    // For each proc target
+    for( const auto & l_proc : l_procList )
+    {
+        if( (l_proc->getAttr<ATTR_MODEL>() == MODEL_NIMBUS) &&
+            (l_proc->getAttr<TARGETING::ATTR_EC>() < PROC_EC_DD2) )
+        {
+#ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(ISTEP_COMP_NAME,
+                "P9N (Nimbus) less than DD2.2 is not supported in this driver");
+            CONSOLE::displayf(ISTEP_COMP_NAME,
+                "Please update the system's processor modules");
+#endif
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "P9N less than DD2.2 is NOT SUPPORTED anymore. "
+                    "Please upgrade proc modules");
+            /*@
+            * @errortype
+            * @moduleid     ISTEP::MOD_SET_IPL_PARMS
+            * @reasoncode   ISTEP::RC_P9N_LESS_THAN_DD22_NOT_SUPPORTED
+            * @userdata1    PVR of master proc
+            * @devdesc      P9N (Nimbus) less than DD2.2 is not supported
+            *               in this firmware driver.  Please update
+            *               your module or use a different driver
+            * @custdesc     Down-level processor detected causing IPL to fail
+            */
+            uint64_t l_dummy = 0x0;
+            l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                    ISTEP::MOD_SET_IPL_PARMS,
+                                    ISTEP::RC_P9N_LESS_THAN_DD22_NOT_SUPPORTED,
+                                    l_pvr.word,
+                                    l_dummy);
+            l_err->addHwCallout(l_proc,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL );
+            l_err->addProcedureCallout(
+                                HWAS::EPUB_PRC_INVALID_PART,
+                                HWAS::SRCI_PRIORITY_HIGH);
+            // Create IStep error log and cross ref error that occurred
+            l_stepError.addErrorDetails( l_err );
+            errlCommit( l_err, ISTEP_COMP_ID );
+        }
     }
 
 
