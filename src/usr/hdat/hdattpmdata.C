@@ -175,10 +175,10 @@ errlHndl_t HdatTpmData::hdatLoadTpmData(uint32_t &o_size, uint32_t &o_count)
         // work here would just be duplicated later during the runtime istep.
 
         // add the format magic number
-        iv_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
+        l_hdatTpmData->hdatHdr.hdatStructId = HDAT::HDAT_HDIF_STRUCT_ID;
 
         // add the eyecatcher
-        memcpy(iv_hdatTpmData->hdatHdr.hdatStructName,
+        memcpy(l_hdatTpmData->hdatHdr.hdatStructName,
            g_hdatTpmDataEyeCatch,
            strlen(g_hdatTpmDataEyeCatch));
 
