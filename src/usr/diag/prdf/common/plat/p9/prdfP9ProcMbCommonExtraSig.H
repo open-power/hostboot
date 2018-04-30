@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,4 +35,7 @@ PRDR_ERROR_SIGNATURE( ERepair_FWThrExceeded, 0xffff0001, "",
 
 /* PLL Extra signatures */
 PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
+PRDR_ERROR_SIGNATURE( MF_REF_FAILOVER, 0x00ed0001, "", "MF Ref Clk failover" );
+PRDR_ERROR_SIGNATURE( SYS_REF_FAILOVER, 0x00ed0002, "",
+                      "Sys Ref Clk failover" );
 #endif // __prdfP9ProcMbCommonExtraSig_H

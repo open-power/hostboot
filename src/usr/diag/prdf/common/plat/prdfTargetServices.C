@@ -1717,7 +1717,9 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
 
         PredicateIsFunctional l_funcFilter;
         PredicateCTM l_oscFilter(CLASS_CHIP, i_connType);
-        PredicateCTM l_peerFilter(CLASS_UNIT, TYPE_MFREFCLKENDPT);
+        PredicateCTM l_peerFilter(CLASS_UNIT,
+                                  (i_connType == TYPE_OSCREFCLK ?
+                                   TYPE_SYSREFCLKENDPT:TYPE_MFREFCLKENDPT));
         PredicatePostfixExpr l_funcAndOscFilter, l_funcAndPeerFilter;
         l_funcAndOscFilter.push(&l_oscFilter).push(&l_funcFilter).And();
         l_funcAndPeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();

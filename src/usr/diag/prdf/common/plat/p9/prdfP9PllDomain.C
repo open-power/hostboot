@@ -206,9 +206,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         serviceData.service_data->SetUERE();
     }
 
-    // TODO: RTC 155673 - use attributes to callout active clock sources
-    // For Nimbus sys ref and mf ref clock source is the same
-
     // always suspect the clock source
     closeClockSource.Resolve(serviceData);
     if(&closeClockSource != &farClockSource)
@@ -298,19 +295,23 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
     }
 
-    // TODO: RTC 155673 - Handle redundant Osc failovers
-    // Shouldn't see these on nimbus
     if (mfFoList.size() > 0)
     {
-        PRDF_ERR( PRDF_FUNC "Unexpected PCI osc failover detected" );
         mskErrType |= PCI_OSC_FAILOVER;
-        serviceData.service_data->SetCallout( LEVEL2_SUPPORT, MRU_LOW );
+
+        // Set Signature
+        serviceData.service_data->GetErrorSignature()->
+            setChipId(pciList[0]->getHuid());
+        serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
     }
     if (sysRefFoList.size() > 0)
     {
-        PRDF_ERR( PRDF_FUNC "Unexpected Sys osc failover detected" );
         mskErrType |= SYS_OSC_FAILOVER;
-        serviceData.service_data->SetCallout( LEVEL2_SUPPORT, MRU_LOW );
+
+        // Set Signature
+        serviceData.service_data->GetErrorSignature()->
+            setChipId(pciList[0]->getHuid());
+        serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
     }
 
     if (serviceData.service_data->IsAtThreshold())

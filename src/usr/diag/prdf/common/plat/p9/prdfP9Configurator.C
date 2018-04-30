@@ -318,7 +318,8 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         }
 
         // Generic empty PLL domain map
-        PllDomainMap pllDmnMap;
+        PllDomainMap sysRefPllDmnMap;
+        PllDomainMap mfRefPllDmnMap;
 
         // Add each chip to the chip domain.
         for ( const auto & trgt : trgtList )
@@ -340,13 +341,16 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
             switch ( i_type )
             {
                 case TYPE_PROC:
-                    addChipToPllDomain( CLOCK_DOMAIN_FAB, pllDmnMap,
+                    addChipToPllDomain( CLOCK_DOMAIN_FAB, sysRefPllDmnMap,
                                         chip, trgt, TYPE_PROC,
+                                        scanFac, resFac );
+                    addChipToPllDomain( CLOCK_DOMAIN_IO, mfRefPllDmnMap,
+                                        chip, trgt, TYPE_PEC,
                                         scanFac, resFac );
                     break;
 
                 case TYPE_MEMBUF:
-                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
+                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, sysRefPllDmnMap,
                                         chip, trgt, TYPE_MEMBUF,
                                         scanFac, resFac );
                     break;
@@ -356,7 +360,10 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         }
 
         // Add the PLL domain maps to the PLL domain map list.
-        if ( !pllDmnMap.empty() ) io_pllDmnLst.push_back( pllDmnMap );
+        if ( !sysRefPllDmnMap.empty() )
+            io_pllDmnLst.push_back( sysRefPllDmnMap );
+        if ( !mfRefPllDmnMap.empty() )
+            io_pllDmnLst.push_back( mfRefPllDmnMap );
 
         // Flush rule table cache since objects are all built.
         Prdr::LoadChipCache::flushCache();
@@ -381,7 +388,7 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
     //       that is not very maintainable code. Instead, we should be querying
     //       clock domain attributes so that this code does not need to be
     //       modified if the clock domains change.
-    uint32_t pos = 0;
+    uint32_t pos = getTargetPosition( getConnectedParent( i_trgt, TYPE_NODE ) );
 
     if ( io_pllDmnMap.end() == io_pllDmnMap.find(pos) )
     {
@@ -389,10 +396,10 @@ void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
 
         #ifdef __HOSTBOOT_MODULE
         io_pllDmnMap[pos] = new PllDomain( i_domainId, clock,
-                                        ThresholdResolution::cv_mnfgDefault );
+                                     ThresholdResolution::cv_mnfgDefault );
         #else
         io_pllDmnMap[pos] = new PllDomain( i_domainId, clock, CONTENT_HW,
-                                        ThresholdResolution::cv_mnfgDefault );
+                                     ThresholdResolution::cv_mnfgDefault );
         #endif
     }
 
