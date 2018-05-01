@@ -174,4 +174,46 @@ struct eRepairMemBus
     uint32_t            failBit  : 24; // Bit stream value: Bit 0:Lane 0; Bit 1:Lane 1 ...
 };
 
+/**
+ * @brief This function combines the eRepair lane numbers read from
+ *        Manufacturing VPD and Field VPD
+ *
+ * @param [in]  i_mnfgFaillanes  The eRepair lane numbers read from the
+ *                               Manufacturing VPD
+ * @param [in]  i_fieldFaillanes The eRepair lane numbers read from the
+ *                               Field VPD
+ * @param [out] o_allFaillanes   The eRepair lane numbers which is the union
+ *                               of the Field and Manufacturing eRepair lanes
+ *                               passed as first iand second params
+ *
+ * @return void
+ */
+void combineFieldandMnfgLanes(std::vector<uint8_t>& i_mnfgFaillanes,
+                              std::vector<uint8_t>& i_fieldFaillanes,
+                              std::vector<uint8_t>& o_allFailLanes);
+
+
+/**
+ * @brief This function checks to see if the passed vectors have matching
+ *        fail lane numbers. If no matching lane number is found, such lane
+ *        value will be invalidated in the vector
+ *
+ * @param [in]  io_endp1_txFaillanes        Reference to vector which has fail
+ *                                          lane numbers of Tx side
+ * @param [in]  io_endp2_rxFaillanes        Reference to vector which has fail
+ *                                          lane numbers of Rx side
+ * @param [out] o_invalidFails_inTx_Ofendp1 If TRUE, indicates that Tx has fail
+ *                                          lane numbers for which there is no
+ *                                          matching entry on Rx side
+ * @param [out] o_invalidFails_inRx_Ofendp2 If TRUE, indicates that Tx has fail
+ *                                          lane numbers for which there is no
+ *                                          matching entry on Tx side
+ *
+ * @return void
+ */
+void invalidateNonMatchingFailLanes(std::vector<uint8_t>& io_endp1_txFaillanes,
+                                    std::vector<uint8_t>& io_endp2_rxFaillanes,
+                                    bool& o_invalidFails_inTx_Ofendp1,
+                                    bool& o_invalidFails_inRx_Ofendp2);
+
 #endif
