@@ -80,9 +80,13 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_link_en(
     {
         o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
     }
-    else
+    else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)
     {
         o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+    }
+    else
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
     }
 
 fapi_try_exit:
@@ -105,7 +109,7 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_link_en(
 
     if (l_link_config_mode != fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
     {
-        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE;
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
     }
     else
     {
@@ -123,9 +127,13 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_link_en(
         {
             o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
         }
-        else
+        else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)
         {
             o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+        }
+        else
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE;
         }
     }
 
