@@ -103,16 +103,20 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_FAB_IOVALID_DL_NOT_TRAINED_ERR</rc>
+    <rc>RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_NONE_ERR</rc>
     <description>
       Procedure: p9_fab_iovalid
-      Link DL training did not complete successfully
+      Link DL training did not complete successfully,
+      both halves of link pair are incapable of training.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>LOC_ENDP_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
     <ffdc>LOC_LINK_TRAIN</ffdc>
+    <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+    <ffdc>LOC_LINK_FAILED0</ffdc>
+    <ffdc>LOC_LINK_FAILED1</ffdc>
     <ffdc>REM_ENDP_TARGET</ffdc>
     <ffdc>REM_ENDP_TYPE</ffdc>
     <ffdc>REM_ENDP_UNIT_ID</ffdc>
@@ -140,6 +144,38 @@
     <gard>
       <target>REM_ENDP_TARGET</target>
     </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_DL_NOT_TRAINED_RETRAIN_HALF_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      Link DL training did not complete successfully,
+      attempt retraining on half link basis.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>LOC_ENDP_TARGET</ffdc>
+    <ffdc>LOC_ENDP_TYPE</ffdc>
+    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>LOC_LINK_TRAIN</ffdc>
+    <ffdc>LOC_LINK_TRAIN_NEXT</ffdc>
+    <ffdc>LOC_LINK_FAILED0</ffdc>
+    <ffdc>LOC_LINK_FAILED1</ffdc>
+    <ffdc>REM_ENDP_TARGET</ffdc>
+    <ffdc>REM_ENDP_TYPE</ffdc>
+    <ffdc>REM_ENDP_UNIT_ID</ffdc>
+    <callout>
+      <target>LOC_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>REM_ENDP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <bus>LOC_ENDP_TARGET,REM_ENDP_TARGET</bus>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
