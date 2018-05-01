@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,7 +110,7 @@ fapi2::ReturnCode p9_fbc_eff_config_aggregate_link_setup(
             // flip default value for link address disable
             for (uint8_t l_loc_link_id = 0; l_loc_link_id < i_max_links; l_loc_link_id++)
             {
-                o_addr_dis[l_loc_link_id] = i_en[l_loc_link_id];
+                o_addr_dis[l_loc_link_id] = (i_en[l_loc_link_id]) ? (1) : (0);
             }
 
             // scan link delays for smallest value
