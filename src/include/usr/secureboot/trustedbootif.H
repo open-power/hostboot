@@ -135,13 +135,18 @@ namespace TRUSTEDBOOT
     void* host_update_master_tpm( void *io_pArgs );
 
     /**
-     * @brief Extend a measurement into the TPMs and log atomically
+     * @brief Extend a measurement into the TPM(s) and log atomically
      * @param[in] i_pcr PCR to write to
      * @param[in] i_eventType Event type to log
      * @param[in] i_digest Digest value to write to PCR
      * @param[in] i_digestSize Byte size of i_digest data
      * @param[in] i_logMsg Null terminated log message, truncated at 128 chars
      * @param[in] i_sendAsync Perform extension asynchronously, default true
+     * @param[in] i_pTpm A specific TPM to singly extend a measurement into,
+                  default is nullptr, which indicates all of the TPMs will be
+                  extended.
+     * @param[in] i_mirrorToLog After extending the measurement, mirror to log.
+     *            default is true. Typically, false is used to poison the TPM.
      * @return errlHndl_t NULL if successful, otherwise a pointer to the
      *      error log.
      * Digest will be right padded with zeros or truncated to match TPM digest
@@ -152,7 +157,9 @@ namespace TRUSTEDBOOT
                          const uint8_t* i_digest,
                          size_t  i_digestSize,
                          const char* i_logMsg,
-                         bool i_sendAsync = true);
+                         bool i_sendAsync = true,
+                         const TpmTarget* i_pTpm = nullptr,
+                         bool i_mirrorToLog = true);
 
     /**
      * @brief Extend a separator into the TPMs and log atomically
@@ -249,6 +256,22 @@ namespace TRUSTEDBOOT
      */
     errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum);
     #endif
+
+    /**
+     *  @brief Poison a TPM. Poisoning a TPM's PCR means extending a random
+     *         number measurement to the TPM, but not to the corresponding log
+     *         entry. This includes extending random numbers to every bank/PCR
+     *         combo in use by the firmware (sha1/sha256 banks of PCR 0-7). The
+     *         random number along with the absent log entry makes remote
+     *         attestation impossible with that TPM for that boot.
+     *
+     *  @parm[in] i_pTpm Pointer to the TPM target to be poisoned. Must be a TPM
+     *                   and must not be nullptr
+     *
+     *  @return errlHndl_t nullptr if successful or error log otherwise. Failure
+     *                     to poison a TPM will result in deconfiguring the TPM.
+     */
+    errlHndl_t poisonTpm(const TpmTarget* i_pTpm);
 
     /**
      *  @brief Helper function for validating TPM handles. Returns an error log

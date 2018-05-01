@@ -812,20 +812,24 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
         if (hwasState.present &&
              hwasState.functional)
         {
-            // Fill in TCG_PCR_EVENT2 and add to log
-            eventLog = TpmLogMgr_genLogEventPcrExtend(pcr, i_eventType,
-                                                      i_algId, i_digest,
-                                                      i_digestSize,
-                                                      TPM_ALG_SHA1, i_digest,
-                                                      i_digestSize,
-                                                      i_logMsg);
-            if(useStaticLog)
+            if (i_logMsg != nullptr) // null log indicates we don't log
             {
-                auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
-                err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
-                if (nullptr != err)
+                // Fill in TCG_PCR_EVENT2 and add to log
+                eventLog = TpmLogMgr_genLogEventPcrExtend(pcr, i_eventType,
+                                                          i_algId, i_digest,
+                                                          i_digestSize,
+                                                          TPM_ALG_SHA1,
+                                                          i_digest,
+                                                          i_digestSize,
+                                                          i_logMsg);
+                if(useStaticLog)
                 {
-                    break;
+                    auto * const pTpmLogMgr = getTpmLogMgr(i_pTpm);
+                    err = TpmLogMgr_addEvent(pTpmLogMgr,&eventLog);
+                    if (nullptr != err)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -1440,7 +1444,17 @@ void* tpmDaemon(void* unused)
                          && msgData != nullptr, "Invalid PCRExtend Message");
 
                   TARGETING::TargetHandleList tpmList;
-                  getTPMs(tpmList);
+                  // if null TPM was passed extend all TPMs.  Otherwise, extend
+                  // only the TPM that was passed
+                  if (msgData->mSingleTpm == nullptr)
+                  {
+                      getTPMs(tpmList);
+                  }
+                  else
+                  {
+                      tpmList.push_back(const_cast<TpmTarget*>(
+                                                         msgData->mSingleTpm));
+                  }
                   for (auto tpm : tpmList)
                   {
                       // Add the event to this TPM,
@@ -1453,7 +1467,8 @@ void* tpmDaemon(void* unused)
                                    msgData->mAlgId,
                                    msgData->mDigest,
                                    msgData->mDigestSize,
-                                   msgData->mLogMsg);
+                                   msgData->mMirrorToLog? msgData->mLogMsg:
+                                                                      nullptr);
                   }
 
                   // Lastly make sure we are in a state
@@ -1818,5 +1833,127 @@ errlHndl_t tpmDrtmReset(TpmTarget* const i_pTpm)
     return err;
 }
 #endif
+
+#ifdef CONFIG_TPMDD
+errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
+{
+    errlHndl_t err = nullptr;
+    Message* msg = nullptr;
+
+    do {
+
+    auto pData = new struct GetRandomMsgData;
+    memset(pData, 0, sizeof(*pData));
+
+    pData->i_pTpm = const_cast<TpmTarget*>(i_pTpm);
+
+    msg = Message::factory(MSG_TYPE_GETRANDOM, sizeof(*pData),
+                           reinterpret_cast<uint8_t*>(pData), MSG_MODE_SYNC);
+
+    assert(msg != nullptr, "BUG! Message is null");
+    pData = nullptr; // Message owns msgData now
+
+    int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
+    if (0 == rc)
+    {
+        err = msg->iv_errl;
+        msg->iv_errl = nullptr; // taking over ownership of error log
+        if (err != nullptr)
+        {
+            break;
+        }
+    }
+    else // sendrecv failure
+    {
+        /*@
+         * @errortype       ERRL_SEV_UNRECOVERABLE
+         * @moduleid        MOD_TPM_GETRANDOM
+         * @reasoncode      RC_SENDRECV_FAIL
+         * @userdata1       rc from msq_sendrecv()
+         * @userdata2       TPM HUID if it's not nullptr
+         * @devdesc         msg_sendrecv() failed
+         * @custdesc        Trusted boot failure
+         */
+        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      MOD_TPM_GETRANDOM,
+                                      RC_SENDRECV_FAIL,
+                                      rc,
+                                      TARGETING::get_huid(i_pTpm),
+                                      true);
+        break;
+    }
+
+    pData = reinterpret_cast<struct GetRandomMsgData*>(msg->iv_data);
+    assert(pData != nullptr,
+        "BUG! Completed send/recv to random num generator has null data ptr!");
+
+    o_randNum = pData->o_randNum;
+
+    } while (0);
+
+    if (msg != nullptr)
+    {
+        delete msg; // also deletes the msg->iv_data
+        msg = nullptr;
+    }
+
+    if (err)
+    {
+        err->collectTrace(SECURE_COMP_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
+    }
+
+    return err;
+}
+#endif // CONFIG_TPMDD
+
+errlHndl_t poisonTpm(const TpmTarget* i_pTpm)
+{
+    uint64_t l_randNum = 0;
+    errlHndl_t l_errl = nullptr;
+
+#ifdef CONFIG_TPMDD
+
+    do {
+
+    // Note: GetRandom validates the TPM handle internally and returns an
+    // error log if invalid
+    l_errl = GetRandom(i_pTpm, l_randNum);
+
+    if (l_errl)
+    {
+        break;
+    }
+
+    const TPM_Pcr l_pcrRegs[] = {PCR_0, PCR_1, PCR_2, PCR_3,
+                                 PCR_4, PCR_5, PCR_6, PCR_7};
+
+    // poison all PCR banks
+    for (const auto l_pcrReg : l_pcrRegs)
+    {
+        l_errl = pcrExtend(l_pcrReg,
+                           TRUSTEDBOOT::EV_INVALID,
+                           reinterpret_cast<sha2_byte*>(&l_randNum),
+                           sizeof(l_randNum),
+                           nullptr, // log not needed for poison operation
+                           false,   // call synchronously to daemon
+                           i_pTpm,  // only extend to pcr banks for this TPM
+                           false);  // don't add PCR measurement to the log
+        if (l_errl)
+        {
+            break;
+        }
+
+    }
+
+    } while (0);
+
+    TRACFCOMP(g_trac_trustedboot, "%ssuccessfully poisoned TPM with huid 0x%X",
+              l_errl? "Un":"", TARGETING::get_huid(i_pTpm));
+
+#endif
+    return l_errl;
+}
+
 
 } // end TRUSTEDBOOT

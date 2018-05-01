@@ -62,12 +62,14 @@ namespace TRUSTEDBOOT
     /// PCREXTEND message data
     struct PcrExtendMsgData
     {
-        TPM_Pcr    mPcrIndex;
-        TPM_Alg_Id mAlgId;
-        EventTypes mEventType;
-        size_t     mDigestSize;
-        uint8_t    mDigest[TPM_ALG_SHA256_SIZE];
-        char       mLogMsg[MAX_TPM_LOG_MSG];
+        TPM_Pcr          mPcrIndex;
+        TPM_Alg_Id       mAlgId;
+        EventTypes       mEventType;
+        size_t           mDigestSize;
+        uint8_t          mDigest[TPM_ALG_SHA256_SIZE];
+        char             mLogMsg[MAX_TPM_LOG_MSG];
+        const TpmTarget* mSingleTpm;
+        bool             mMirrorToLog;
     };
 
     struct GetRandomMsgData

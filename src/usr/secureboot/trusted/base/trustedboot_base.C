@@ -200,7 +200,9 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                      const uint8_t* i_digest,
                      size_t  i_digestSize,
                      const char* i_logMsg,
-                     bool i_sendAsync)
+                     bool i_sendAsync,
+                     const TpmTarget* i_pTpm,
+                     const bool i_mirrorToLog)
 {
     errlHndl_t err = NULL;
 #ifdef CONFIG_TPMDD
@@ -208,7 +210,8 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend() pcr=%d msg='%s'", i_pcr, i_logMsg);
+               ENTER_MRK"pcrExtend() pcr=%d msg='%s'",
+               i_pcr, i_logMsg? i_logMsg: "(null)");
     TRACUBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
     // msgData will be freed when message is freed
@@ -219,16 +222,21 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     msgData->mEventType = i_eventType;
     msgData->mDigestSize = (i_digestSize < sizeof(msgData->mDigest) ?
                             i_digestSize : sizeof(msgData->mDigest));
+    msgData->mSingleTpm = i_pTpm;
+    msgData->mMirrorToLog = i_mirrorToLog;
 
 
     // copy over the incoming digest and truncate to what we need
     memcpy(msgData->mDigest, i_digest, msgData->mDigestSize);
 
     // Truncate logMsg if required
-    memcpy(msgData->mLogMsg, i_logMsg,
+    if (i_logMsg)
+    {
+        memcpy(msgData->mLogMsg, i_logMsg,
            (strlen(i_logMsg) < sizeof(msgData->mLogMsg) ? strlen(i_logMsg) :
             sizeof(msgData->mLogMsg)-1)  // Leave room for NULL termination
            );
+    }
 
     if (!i_sendAsync)
     {
@@ -793,78 +801,5 @@ errlHndl_t testCmpPrimaryAndBackupTpm()
 #endif
     return l_err;
 }
-
-#ifdef CONFIG_TPMDD
-errlHndl_t GetRandom(const TpmTarget* i_pTpm, uint64_t& o_randNum)
-{
-    errlHndl_t err = nullptr;
-    Message* msg = nullptr;
-
-    do {
-
-    auto pData = new struct GetRandomMsgData;
-    memset(pData, 0, sizeof(*pData));
-
-    pData->i_pTpm = const_cast<TpmTarget*>(i_pTpm);
-
-    msg = Message::factory(MSG_TYPE_GETRANDOM, sizeof(*pData),
-                           reinterpret_cast<uint8_t*>(pData), MSG_MODE_SYNC);
-
-    assert(msg != nullptr, "BUG! Message is null");
-    pData = nullptr; // Message owns msgData now
-
-    int rc = msg_sendrecv(systemData.msgQ, msg->iv_msg);
-    if (0 == rc)
-    {
-        err = msg->iv_errl;
-        msg->iv_errl = nullptr; // taking over ownership of error log
-        if (err != nullptr)
-        {
-            break;
-        }
-    }
-    else // sendrecv failure
-    {
-        /*@
-         * @errortype       ERRL_SEV_UNRECOVERABLE
-         * @moduleid        MOD_TPM_GETRANDOM
-         * @reasoncode      RC_SENDRECV_FAIL
-         * @userdata1       rc from msq_sendrecv()
-         * @userdata2       TPM HUID if it's not nullptr
-         * @devdesc         msg_sendrecv() failed
-         * @custdesc        Trusted boot failure
-         */
-        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      MOD_TPM_GETRANDOM,
-                                      RC_SENDRECV_FAIL,
-                                      rc,
-                                      TARGETING::get_huid(i_pTpm),
-                                      true);
-        break;
-    }
-
-    pData = reinterpret_cast<struct GetRandomMsgData*>(msg->iv_data);
-    assert(pData != nullptr,
-        "BUG! Completed send/recv to random num generator has null data ptr!");
-
-    o_randNum = pData->o_randNum;
-
-    } while (0);
-
-    if (msg != nullptr)
-    {
-        delete msg; // also deletes the msg->iv_data
-        msg = nullptr;
-    }
-
-    if (err)
-    {
-        err->collectTrace(SECURE_COMP_NAME);
-        err->collectTrace(TRBOOT_COMP_NAME);
-    }
-
-    return err;
-}
-#endif // CONFIG_TPMDD
 
 } // end TRUSTEDBOOT
