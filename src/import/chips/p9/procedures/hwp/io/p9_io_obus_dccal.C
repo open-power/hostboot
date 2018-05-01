@@ -667,7 +667,7 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
         goto fapi_try_exit;
     }
 
-    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
+    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
 
     // Power up Clock Distribution & Lanes
     FAPI_TRY( obus_powerup( i_tgt, i_lane_vector ) );
