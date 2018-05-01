@@ -1732,6 +1732,43 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     // fill in the values for each Secure Boot TPM Instance Info in the array
     for (auto pTpm : tpmList)
     {
+        uint8_t poisonedFlag = 0;
+        #ifdef CONFIG_TPMDD
+        if (!TARGETING::UTIL::isCurrentMasterNode()) // if not master node TPM
+        {
+
+            auto l_tpmHwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if (l_tpmHwasState.functional)
+            {
+
+                // poison the TPM's PCRs
+                l_elog = TRUSTEDBOOT::poisonTpm(pTpm);
+                if (l_elog)
+                {
+                    l_tpmHwasState = pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                    if (l_tpmHwasState.functional)
+                    {
+                        // The TPM was still functional, we have a software bug
+                        // on our hands. We need to break out of here and quit.
+                        break;
+                    }
+                    else
+                    {
+                        // There was a hardware problem with the TPM. It was
+                        // marked failed and deconfigured, so we commit the
+                        // error log and move on as though it were not
+                        // functional to begin with
+                        ERRORLOG::errlCommit(l_elog, RUNTIME_COMP_ID);
+                    }
+                }
+                else
+                {
+                    poisonedFlag = 1;
+                }
+            }
+        }
+        #endif // CONFIG_TPMDD
+
         auto l_tpmInstInfo = reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>
                                                     (l_baseAddr + l_currOffset);
 
@@ -1806,7 +1843,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         }
 
         // Set TPM configuration flag
-        l_tpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag = 0;
+        l_tpmInstInfo->hdatTpmConfigFlags.pcrPoisonedFlag = poisonedFlag;
 
         // advance the current offset to account for this tpm instance info
         l_currOffset += sizeof(*l_tpmInstInfo);
@@ -1814,6 +1851,11 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // advance the SRTM log offset to account for this tpm instance info
         l_srtmLogOffset += sizeof(*l_tpmInstInfo);
 
+    }
+
+    if (l_elog)
+    {
+        break;
     }
 
     for (auto tpmInstPair : fixList)

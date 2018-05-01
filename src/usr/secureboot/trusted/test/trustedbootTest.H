@@ -933,6 +933,161 @@ class TrustedBootTest: public CxxTest::TestSuite
                    EXIT_MRK "testGetRandom: %d/%d fails",
                    fails, num_ops );
     }
+
+    /**
+     * @brief Poison TPM test
+     */
+    void testPoisonTpm ( void )
+    {
+        TRACFCOMP( g_trac_trustedboot,
+                   ENTER_MRK "testPoisonTpm" );
+
+        errlHndl_t err = nullptr;
+        size_t fails = 0;
+        size_t num_ops = 0;
+
+        // used for looping thru all the PCRs
+        const TPM_Pcr l_pcrRegs[] = {PCR_0, PCR_1, PCR_2, PCR_3,
+                                     PCR_4, PCR_5, PCR_6, PCR_7};
+
+        const TPM_Alg_Id l_algIds[] = {TPM_ALG_SHA1, TPM_ALG_SHA256};
+
+        auto pcrReadFail = false;
+        // loop through all the TPMs
+        TARGETING::TargetHandleList tpmList;
+        TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_FUNCTIONAL);
+        for (auto pTpm: tpmList)
+        {
+            size_t l_digestSize = 0;
+
+            auto * const pTpmLogMgr = getTpmLogMgr(pTpm);
+            if (pTpmLogMgr == nullptr)
+            {
+                TS_FAIL("testPoisonTpm: log manager does not exist");
+                break;
+            }
+            auto l_initialLogSize = TpmLogMgr_getLogSize(pTpmLogMgr);
+
+            // save the PCR values for later comparison
+            std::vector<uint8_t*> savedPcrs;
+
+            // loop thru all algorithms and all pcr regs and save off values
+            for(const auto l_algId : l_algIds)
+            {
+                l_digestSize = getDigestSize(l_algId);
+
+                for(const auto l_pcrReg : l_pcrRegs)
+                {
+                    auto l_pDigest = new uint8_t[l_digestSize]();
+                    err = tpmCmdPcrRead(pTpm,
+                                        l_pcrReg,
+                                        l_algId,
+                                        l_pDigest,
+                                        l_digestSize);
+                    if(err)
+                    {
+                        TRACFCOMP(g_trac_trustedboot,
+                            ERR_MRK"testPoisonTpm: failed to read PCR %d"
+                            " of Tpm with HUID = 0x%08X; algId = 0x%.04x",
+                            l_pcrReg,
+                            TARGETING::get_huid(pTpm),
+                            l_algId);
+                        errlCommit(err, TRBOOT_COMP_ID);
+                        TS_FAIL("testPoisonTpm: can't read PCR ");
+                        pcrReadFail = true;
+                        delete [] l_pDigest;
+                        l_pDigest = nullptr;
+                        break;
+                    }
+                    savedPcrs.push_back(l_pDigest);
+                }
+                if (pcrReadFail)
+                {
+                    break;
+                }
+            }
+
+            if (pcrReadFail)
+            {
+                break;
+            }
+
+            err = TRUSTEDBOOT::poisonTpm(pTpm);
+            num_ops ++;
+            if(err)
+            {
+                fails++;
+                TS_FAIL( "testPoisonTpm: Error return from poisonTpm" );
+                errlCommit( err, TRBOOT_COMP_ID );
+                break;
+            }
+
+            auto l_postPoisonLogSize = TpmLogMgr_getLogSize(pTpmLogMgr);
+
+            if (l_initialLogSize != l_postPoisonLogSize)
+            {
+                TS_FAIL("testPoisonTpm: Log size mismatch");
+                break;
+            }
+
+            auto savedPcrItr = savedPcrs.begin();
+            // loop thru all algorithms/regs and compare with previous values
+            for(const auto l_algId : l_algIds)
+            {
+                l_digestSize = getDigestSize(l_algId);
+
+                for(const auto l_pcrReg : l_pcrRegs)
+                {
+                    auto l_pDigest = new uint8_t[l_digestSize]();
+                    err = tpmCmdPcrRead(pTpm,
+                                          l_pcrReg,
+                                          l_algId,
+                                          l_pDigest,
+                                          l_digestSize);
+                    if(err)
+                    {
+                        TRACFCOMP(g_trac_trustedboot,
+                            "testPoisonTpm: failed to read PCR %d"
+                            " of Tpm with HUID = 0x%08X; algId = 0x%.04x",
+                            l_pcrReg,
+                            TARGETING::get_huid(pTpm),
+                            l_algId);
+                        errlCommit(err, TRBOOT_COMP_ID);
+                        TS_FAIL("testPoisonTpm: failed to read PCR");
+                        pcrReadFail = true;
+                        delete [] l_pDigest;
+                        l_pDigest = nullptr;
+                        break;
+                    }
+
+                    if (memcmp(l_pDigest,*savedPcrItr, l_digestSize) == 0)
+                    {
+                        fails++;
+                        TS_FAIL("testPoisonTpm: Digest unchanged");
+                    }
+                    delete [] l_pDigest;
+                    l_pDigest = nullptr;
+
+                    ++savedPcrItr;
+                }
+                if (pcrReadFail)
+                {
+                    break;
+                }
+            }
+
+            for (const auto savedPcr : savedPcrs)
+            {
+                delete [] savedPcr;
+            }
+
+        }
+
+        TRACFCOMP( g_trac_trustedboot,
+                   EXIT_MRK "testPoisonTpm: %d/%d fails",
+                   fails, num_ops );
+    }
+
 };
 
 #endif
