@@ -84,6 +84,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_errl = NULL;
+    std::vector<fapi2::ReturnCode> l_fapiRcs;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid entry" );
@@ -122,16 +123,21 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                  "Running p9_fab_iovalid HWP on processor target %.8X",
                  TARGETING::get_huid(l_cpu_target) );
-        
+
         if (INITSERVICE::isSMPWrapConfig())
         {
             FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
-                        true, true, true);
+                        true, true, true, l_fapiRcs);
         }
         else
         {
+            // Note:
+            // When this HWP gets run under HB, it should only train X PHYS, not Os.
+            // The HWP shouldn't fill anydata into vector l_fapiRcs for X's,
+            // only for O's that could be used to trigger a reconfig loop in FSP.
+            // Therefore, we ignore the check for l_fapiRcs here.
             FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
-                        true, true, false);
+                        true, true, false, l_fapiRcs);
         }
         if(l_errl)
         {

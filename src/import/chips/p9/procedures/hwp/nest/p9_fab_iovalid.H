@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,8 @@ typedef fapi2::ReturnCode (*p9_fab_iovalid_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
     const bool,
     const bool,
-    const bool);
+    const bool,
+    std::vector<fapi2::ReturnCode>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -82,13 +83,16 @@ extern "C"
 /// @param[in] i_set_not_clear       Define iovalid operation (true=set, false=clear)
 /// @param[in] i_manage_electrical   Manage electrical links?
 /// @param[in] i_manage_optical      Manage optical links?
+/// @param[out] o_obus_dl_fail_rcs   Vector of return code objects, to append
+///                                  in case of OBUS DL training failures
 ///
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                      const bool i_set_not_clear,
                                      const bool i_manage_electrical,
-                                     const bool i_manage_optical);
+                                     const bool i_manage_optical,
+                                     std::vector<fapi2::ReturnCode>& o_obus_dl_fail_rcs);
 
 } // extern "C"
 
