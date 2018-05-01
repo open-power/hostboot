@@ -533,10 +533,11 @@
   <enum>
     BOTH = 0x0,
     EVEN_ONLY = 0x1,
-    ODD_ONLY = 0x2
+    ODD_ONLY = 0x2,
+    NONE = 0x3
   </enum>
   <initToZero/>
-  <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
