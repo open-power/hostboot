@@ -22,6 +22,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/* Ibm_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: chips/centaur/procedures/hwp/perv/cen_scominits.C $           */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
 ///
 /// @file cen_scominits.C
 /// @brief: Centaur scom inits (FAPI2)
@@ -46,6 +62,7 @@
 //------------------------------------------------------------------------------
 #include <cen_scominits.H>
 #include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fixes.H>
 #include <cen_gen_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
@@ -139,6 +156,164 @@ cen_scominits(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
                                 CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG,
                                 l_trctrl_config),
                  "Error from putScom (CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG)");
+    }
+
+    // TP pervasive LFIR setup
+    {
+        fapi2::buffer<uint64_t> l_tp_perv_lfir_mask_or;
+        fapi2::buffer<uint64_t> l_tp_perv_lfir_mask_and;
+        fapi2::buffer<uint64_t> l_tp_perv_lfir_action0;
+        fapi2::buffer<uint64_t> l_tp_perv_lfir_action1;
+        l_tp_perv_lfir_mask_and.flush<1>();
+
+        // 0    CFIR internal parity error          recoverable     unmask
+        l_tp_perv_lfir_action0.clearBit<0>();
+        l_tp_perv_lfir_action1.setBit<0>();
+        l_tp_perv_lfir_mask_and.clearBit<0>();
+
+        // 1    GPIO (PCB error)                    recoverable     mask (forever)
+        // 2    CC (PCB error)                      recoverable     mask (forever)
+        // 3    CC (OPCG, parity, scan collision)   recoverable     mask (forever)
+        // 4    PSC (PCB error)                     recoverable     mask (forever)
+        // 5    PSC (parity error)                  recoverable     mask (forever)
+        // 6    Thermal (parity error)              recoverable     mask (forever)
+        // 7    Thermal (PCB error)                 recoverable     mask (forever)
+        // 8    Thermal (critical Trip error)       recoverable     mask (forever)
+        // 9    Thermal (fatal Trip error)          recoverable     mask (forever)
+        // 10   Thermal (Voltage trip error)        recoverable     mask (forever)
+        // 11   Trace Array                         recoverable     mask (forever)
+        // 12   Trace Array                         recoverable     mask (forever)
+        l_tp_perv_lfir_action0.clearBit<1, 12>();
+        l_tp_perv_lfir_action1.setBit<1, 12>();
+        l_tp_perv_lfir_mask_or.setBit<1, 12>();
+
+        // 13   ITR                                 recoverable     unmask
+        l_tp_perv_lfir_action0.clearBit<13>();
+        l_tp_perv_lfir_action1.setBit<13>();
+        l_tp_perv_lfir_mask_and.clearBit<13>();
+
+        // 14   ITR                                 recoverable     unmask
+        l_tp_perv_lfir_action0.clearBit<14>();
+        l_tp_perv_lfir_action1.setBit<14>();
+        l_tp_perv_lfir_mask_and.clearBit<14>();
+
+        // 15   ITR (itr_tc_pcbsl_slave_fir_err)    recoverable     mask (forever)
+        // 16   PIB                                 recoverable     mask (forever)
+        // 17   PIB                                 recoverable     mask (forever)
+        // 18   PIB                                 recoverable     mask (forever)
+        l_tp_perv_lfir_action0.clearBit<15, 4>();
+        l_tp_perv_lfir_action1.setBit<15, 4>();
+        l_tp_perv_lfir_mask_or.setBit<15, 4>();
+
+        // 19   nest PLLlock                        recoverable     unmask
+        // 20   mem PLLlock                         recoverable     unmask
+        l_tp_perv_lfir_action0.clearBit<19, 2>();
+        l_tp_perv_lfir_action1.setBit<19, 2>();
+        l_tp_perv_lfir_mask_and.clearBit<19, 2>();
+
+        // 21:39 unused local errors                recoverable     mask (forever)
+        // 40   local xstop in another chiplet      recoverable     mask (forever)
+        l_tp_perv_lfir_action0.clearBit<21, 20>();
+        l_tp_perv_lfir_action1.setBit<21, 20>();
+        l_tp_perv_lfir_mask_or.setBit<21, 20>();
+
+        // 41:63 Reserved                           not implemented, so won't touch these
+
+        FAPI_TRY(fapi2::putScom(i_target, CEN_LOCAL_FIR_ACTION0_PCB, l_tp_perv_lfir_action0),
+                 "Error from putScom (CEN_PERV_TP_LOCAL_FIR_ACTION0)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_LOCAL_FIR_ACTION1_PCB, l_tp_perv_lfir_action1),
+                 "Error from putScom (CEN_PERV_TP_LOCAL_FIR_ACTION1)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_PERV_TP_LOCAL_FIR_MASK_OR, l_tp_perv_lfir_mask_or),
+                 "Error from putScom (CEN_PERV_TP_LOCAL_FIR_MASK_OR)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_PERV_TP_LOCAL_FIR_MASK_AND, l_tp_perv_lfir_mask_and),
+                 "Error from putScom (CEN_PERV_TP_LOCAL_FIR_MASK_AND)");
+    }
+
+    // Nest pervasive LFIR setup
+    {
+        fapi2::buffer<uint64_t> l_nest_perv_lfir_mask_or;
+        fapi2::buffer<uint64_t> l_nest_perv_lfir_mask_and;
+        fapi2::buffer<uint64_t> l_nest_perv_lfir_action0;
+        fapi2::buffer<uint64_t> l_nest_perv_lfir_action1;
+        l_nest_perv_lfir_mask_and.flush<1>();
+
+        // 0    CFIR internal parity error          recoverable     unmask
+        l_nest_perv_lfir_action0.clearBit<0>();
+        l_nest_perv_lfir_action1.setBit<0>();
+        l_nest_perv_lfir_mask_and.clearBit<0>();
+
+        // 1    GPIO (PCB error)                    recoverable     mask (forever)
+        // 2    CC (PCB error)                      recoverable     mask (forever)
+        // 3    CC (OPCG, parity, scan collision)   recoverable     mask (forever)
+        // 4    PSC (PCB error)                     recoverable     mask (forever)
+        // 5    PSC (parity error)                  recoverable     mask (forever)
+        // 6    Thermal (parity error)              recoverable     mask (forever)
+        // 7    Thermal (PCB error)                 recoverable     mask (forever)
+        // 8    Thermal (critical Trip error)       recoverable     mask (forever)
+        // 9    Thermal (fatal Trip error)          recoverable     mask (forever)
+        // 10   Thermal (Voltage trip error)        recoverable     mask (forever)
+        // 11   Trace Array                         recoverable     mask (forever)
+        // 12   Trace Array                         recoverable     mask (forever)
+        // 13:39 unused local errors                recoverable     mask (forever)
+        // 40   local xstop in another chiplet      recoverable     mask (forever)
+        l_nest_perv_lfir_action0.clearBit<1, 40>();
+        l_nest_perv_lfir_action1.setBit<1, 40>();
+        l_nest_perv_lfir_mask_or.setBit<1, 40>();
+
+        // 41:63 Reserved                           not implemented, so won't touch these
+
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCN_LOCAL_FIR_ACTION0_PCB, l_nest_perv_lfir_action0),
+                 "Error from putScom (CEN_NEST_TP_LOCAL_FIR_ACTION0)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCN_LOCAL_FIR_ACTION1_PCB, l_nest_perv_lfir_action1),
+                 "Error from putScom (CEN_NEST_TP_LOCAL_FIR_ACTION1)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCN_LOCAL_FIR_MASK_PCB2, l_nest_perv_lfir_mask_or),
+                 "Error from putScom (CEN_NEST_TP_LOCAL_FIR_MASK_OR)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCN_LOCAL_FIR_MASK_PCB1, l_nest_perv_lfir_mask_and),
+                 "Error from putScom (CEN_NEST_TP_LOCAL_FIR_MASK_AND)");
+    }
+
+    // Mem pervasive LFIR setup
+    {
+        fapi2::buffer<uint64_t> l_mem_perv_lfir_mask_or;
+        fapi2::buffer<uint64_t> l_mem_perv_lfir_mask_and;
+        fapi2::buffer<uint64_t> l_mem_perv_lfir_action0;
+        fapi2::buffer<uint64_t> l_mem_perv_lfir_action1;
+        l_mem_perv_lfir_mask_and.flush<1>();
+
+        // 0    CFIR internal parity error          recoverable     unmask
+        l_mem_perv_lfir_action0.clearBit<0>();
+        l_mem_perv_lfir_action1.setBit<0>();
+        l_mem_perv_lfir_mask_and.clearBit<0>();
+
+        // 1    GPIO (PCB error)                    recoverable     mask (forever)
+        // 2    CC (PCB error)                      recoverable     mask (forever)
+        // 3    CC (OPCG, parity, scan collision)   recoverable     mask (forever)
+        // 4    PSC (PCB error)                     recoverable     mask (forever)
+        // 5    PSC (parity error)                  recoverable     mask (forever)
+        // 6    Thermal (parity error)              recoverable     mask (forever)
+        // 7    Thermal (PCB error)                 recoverable     mask (forever)
+        // 8    Thermal (critical Trip error)       recoverable     mask (forever)
+        // 9    Thermal (fatal Trip error)          recoverable     mask (forever)
+        // 11   mba01 Trace Array                   recoverable     mask (forever)
+        // 12   mba01 Trace Array                   recoverable     mask (forever)
+        // 13   mba23 Trace Array                   recoverable     mask (forever)
+        // 14   mba23 Trace Array                   recoverable     mask (forever)
+        // 15:39 unused local errors                recoverable     mask (forever)
+        // 40   local xstop in another chiplet      recoverable     mask (forever)
+        l_mem_perv_lfir_action0.clearBit<1, 40>();
+        l_mem_perv_lfir_action1.setBit<1, 40>();
+        l_mem_perv_lfir_mask_or.setBit<1, 40>();
+
+        // 41:63 Reserved                           not implemented, so won't touch these
+
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCM_LOCAL_FIR_ACTION0_PCB, l_mem_perv_lfir_action0),
+                 "Error from putScom (CEN_MEM_TP_LOCAL_FIR_ACTION0)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCM_LOCAL_FIR_ACTION1_PCB, l_mem_perv_lfir_action1),
+                 "Error from putScom (CEN_MEM_TP_LOCAL_FIR_ACTION1)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCM_LOCAL_FIR_MASK_PCB2, l_mem_perv_lfir_mask_or),
+                 "Error from putScom (CEN_MEM_TP_LOCAL_FIR_MASK_OR)");
+        FAPI_TRY(fapi2::putScom(i_target, CEN_TCM_LOCAL_FIR_MASK_PCB1, l_mem_perv_lfir_mask_and),
+                 "Error from putScom (CEN_MEM_TP_LOCAL_FIR_MASK_AND)");
     }
 
 fapi_try_exit:
