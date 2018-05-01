@@ -748,16 +748,14 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
-        else if( TARGETING::is_phyp_load() )
+
+        //Update the MDRT value (for MS Dump)
+        l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
+        if(l_err != NULL)
         {
-            //Update the MDRT value (for MS Dump)
-            l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
-            if(l_err != NULL)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "write_MDRT_Count failed" );
-                break;
-            }
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "write_MDRT_Count failed" );
+            break;
         }
 
 #if 0 //@TODO-RTC:147565-Core checkstop escalation
