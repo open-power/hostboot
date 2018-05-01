@@ -505,6 +505,46 @@ fapi_try_exit:
 }
 
 
+///
+/// @brief Reset attributes related to link usage
+///
+/// @param[in]     i_target                System target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode
+p9_fbc_eff_config_reset_attrs(
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target)
+{
+    FAPI_DBG("Start");
+
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE;
+
+    for (auto l_proc_target : i_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
+    {
+        for (auto l_obus_chiplet_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_OBUS>())
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
+                                   l_obus_chiplet_target,
+                                   l_link_active),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE (OBUS)");
+        }
+
+        for (auto l_xbus_chiplet_target : l_proc_target.getChildren<fapi2::TARGET_TYPE_XBUS>())
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
+                                   l_xbus_chiplet_target,
+                                   l_link_active),
+                     "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE (XBUS)");
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 // NOTE: see doxygen comments in header
 fapi2::ReturnCode
 p9_fbc_eff_config()
@@ -532,6 +572,10 @@ p9_fbc_eff_config()
                  l_freq_fbc,
                  l_freq_core_ceiling),
              "Error from p9_fbc_eff_config_calc_epsilons");
+
+    FAPI_TRY(p9_fbc_eff_config_reset_attrs(
+                 FAPI_SYSTEM),
+             "Error from p9_fbc_eff_config_reset_attrs");
 
 fapi_try_exit:
     FAPI_DBG("End");
