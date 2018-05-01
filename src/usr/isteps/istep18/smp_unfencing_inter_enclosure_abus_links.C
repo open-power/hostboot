@@ -120,10 +120,10 @@ namespace   EDI_EI_INITIALIZATION
             assert(sys != NULL, "isPeerPresent system target is NULL");
 
             TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images;
-            
+
             l_exists =
                 sys->tryGetAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_images);
-                
+
             if( false == l_exists )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -184,6 +184,7 @@ namespace   EDI_EI_INITIALIZATION
     errlHndl_t  smp_unfencing_inter_enclosure_abus_links()
     {
         errlHndl_t l_errl = NULL;
+        std::vector<fapi2::ReturnCode> l_fapiRcs;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "smp_unfencing_inter_enclosure_abus_links entry" );
@@ -202,8 +203,14 @@ namespace   EDI_EI_INITIALIZATION
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_fab_iovalid HWP on processor target %.8X",
                      TARGETING::get_huid(l_cpu_target) );
+
+            // Note:
+            // When this HWP gets run under HB, it should only train X PHYS, not Os.
+            // The HWP shouldn't fill anydata into vector l_fapiRcs for X's,
+            // only for O's that could be used to trigger a reconfig loop in FSP.
+            // Therefore, we ignore the check for l_fapiRcs here.
             FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target,
-                            true, true, false);
+                            true, true, false, l_fapiRcs);
             if(l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
