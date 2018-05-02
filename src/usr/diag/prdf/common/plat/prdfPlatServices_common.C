@@ -272,14 +272,13 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     #ifdef __HOSTBOOT_MODULE
 
-    // Don't proceed unless the DIMM exists
-    PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
-                                              i_rank.getDimmSlct()) );
-
     uint8_t data[T][DQ_BITMAP::BITMAP_SIZE] = {0};
 
     for ( int32_t ps = 0; ps < T; ps++ )
     {
+        // Don't proceed unless the DIMM exists
+        PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
+
         errlHndl_t errl = nullptr;
 
         constexpr fapi2::TargetType l_trgtType = ( T == DIMMS_PER_RANK::MBA ) ?
@@ -335,16 +334,15 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     #ifdef __HOSTBOOT_MODULE
 
-    // Don't proceed unless the DIMM exists
-    PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
-                                              i_rank.getDimmSlct()) );
-
     if ( !areDramRepairsDisabled() )
     {
         const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
 
         for ( int32_t ps = 0; ps < T; ps++ )
         {
+            // Don't proceed unless the DIMM exists
+            PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
+
             errlHndl_t errl = nullptr;
 
             constexpr fapi2::TargetType l_trgtType =
