@@ -114,7 +114,6 @@ namespace SBEIO
                                   HWAS::GARD_NULL );
 
             l_err->collectTrace( SBEIO_COMP_NAME, 256);
-            // @todo - RTC:180244 - Disable the OCC
         }
         // Inform OPAL the state of the SBE after a retry is successful
         else
@@ -164,12 +163,23 @@ namespace SBEIO
                                 TARGETING::get_huid(i_procTarg),
                                 l_ret);
         }
-
-        //We want to deconfigure the processor where the error was detected
+// If this code happens to get called on a FSP system during runtime we definitely do not
+// want to add a deconfig record. If we do it will cause conflict with HWSV code which might
+// be trying to handle the SBE error
+#ifndef CONFIG_FSP_BUILD
+        // We want to deconfigure the processor where the error was detected
         l_err->addHwCallout( i_procTarg,
                                 HWAS::SRCI_PRIORITY_HIGH,
                                 HWAS::DELAYED_DECONFIG,
                                 HWAS::GARD_NULL );
+#else
+        // We want to only add a hw callout for the processor where the error was detected
+        // if we fall down this path on an FSP system.
+        l_err->addHwCallout( i_procTarg,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL );
+#endif
 #endif
 
 
