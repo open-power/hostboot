@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/functional.C $                                    */
+/* $Source: src/include/functional $                                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,26 +30,27 @@
 namespace std
 {
     template<typename A1, typename A2, typename R>
-        struct binary_function
-        {
-            typedef A1 first_argument_type;   ///< type of the first argument
-            typedef A2 second_argument_type;  ///< type of the second argument
-            typedef R result_type;            ///< type of the return type
-        };
+    struct binary_function
+    {
+        typedef A1 first_argument_type;   ///< type of the first argument
+        typedef A2 second_argument_type;  ///< type of the second argument
+        typedef R result_type;            ///< type of the return type
+    };
 
     template<typename A, typename R>
-        struct unary_function
-        {
-            typedef A argument_type;
-            typedef R result_type;
-        };
+    struct unary_function
+    {
+        typedef A argument_type;
+        typedef R result_type;
+    };
 
     /**
      * less template
      */
     template<typename T>
-        struct less : public binary_function<T, T, bool>
+    struct less : public binary_function<T, T, bool>
     {
+
         /**
          * operator()
          * @param[in] x first object
@@ -62,8 +63,29 @@ namespace std
         }
     };
 
+    /**
+     * less_equal template
+     */
     template<typename T>
-        struct greater : public binary_function<T, T, bool>
+    struct less_equal : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x <= y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+        {
+            return x <= y;
+        }
+    };
+
+    /**
+     * greater template
+     */
+    template<typename T>
+    struct greater : public binary_function<T, T, bool>
     {
         /**
          * operator()
@@ -72,7 +94,63 @@ namespace std
          * @return true if x > y otherwise false
          */
         bool operator()(const T& x, const T& y) const
-            { return x > y; }
+        {
+             return x > y;
+        }
+    };
+
+    /**
+     * greater_equal template
+     */
+    template<typename T>
+    struct greater_equal : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x >= y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+        {
+            return x >= y;
+        }
+    };
+
+    /**
+     * not_equal_to template
+     */
+    template<typename T>
+    struct not_equal_to : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x != y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+        {
+            return x != y;
+        }
+    };
+
+    /**
+     * equal_to template
+     */
+    template<typename T>
+    struct equal_to : public binary_function<T, T, bool>
+    {
+        /**
+         * operator()
+         * @param[in] x first object
+         * @param[in] y second object
+         * @return true if x == y otherwise false
+         */
+        bool operator()(const T& x, const T& y) const
+        {
+            return x == y;
+        }
     };
 
 // --------------- ptr_fun templates --------------- //
@@ -130,7 +208,7 @@ namespace std
         protected:
             Result (X::*func)() const;
     };
-        
+
     template<typename Result, typename X>
     mem_fun_t<Result, X> mem_fun(Result (X::*f)())
     {
@@ -198,7 +276,7 @@ namespace std
         protected:
             Result (X::*func)() const;
     };
-        
+
     template<typename Result, typename X>
     mem_fun_ref_t<Result, X> mem_fun_ref(Result (X::*f)())
     {
@@ -248,9 +326,9 @@ namespace std
 // --------------- bind1st templates --------------- //
 
     template<typename AdaptableBinaryFunction>
-    struct binder1st : 
+    struct binder1st :
         public unary_function<
-                    typename AdaptableBinaryFunction::second_argument_type, 
+                    typename AdaptableBinaryFunction::second_argument_type,
                     typename AdaptableBinaryFunction::result_type
                >
     {
@@ -258,10 +336,10 @@ namespace std
                   typename AdaptableBinaryFunction::first_argument_type c) :
             func(F), arg(c) {}
 
-        typename AdaptableBinaryFunction::result_type 
-            operator()(const typename 
+        typename AdaptableBinaryFunction::result_type
+            operator()(const typename
                        AdaptableBinaryFunction::second_argument_type& x) const
-        { 
+        {
             return func(arg, x);
         }
 
@@ -275,16 +353,16 @@ namespace std
         bind1st(const AdaptableBinaryFunction& F,
                 const T& c)
     {
-        return binder1st<AdaptableBinaryFunction>(F, 
+        return binder1st<AdaptableBinaryFunction>(F,
                     typename AdaptableBinaryFunction::first_argument_type(c));
     };
 
 // --------------- bind2nd templates --------------- //
 
     template<typename AdaptableBinaryFunction>
-    struct binder2nd : 
+    struct binder2nd :
         public unary_function<
-                    typename AdaptableBinaryFunction::first_argument_type, 
+                    typename AdaptableBinaryFunction::first_argument_type,
                     typename AdaptableBinaryFunction::result_type
                >
     {
@@ -292,10 +370,10 @@ namespace std
                   typename AdaptableBinaryFunction::second_argument_type c) :
             func(F), arg(c) {}
 
-        typename AdaptableBinaryFunction::result_type 
-            operator()(const typename 
+        typename AdaptableBinaryFunction::result_type
+            operator()(const typename
                        AdaptableBinaryFunction::first_argument_type& x) const
-        { 
+        {
             return func(x, arg);
         }
 
@@ -309,7 +387,7 @@ namespace std
         bind2nd(const AdaptableBinaryFunction& F,
                 const T& c)
     {
-        return binder2nd<AdaptableBinaryFunction>(F, 
+        return binder2nd<AdaptableBinaryFunction>(F,
                     typename AdaptableBinaryFunction::second_argument_type(c));
     };
 
