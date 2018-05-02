@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,9 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
+
 #ifndef __LIB_STL_FUNCTIONAL_H
 #define __LIB_STL_FUNCTIONAL_H
 
@@ -169,6 +172,63 @@ class STLFunctionalTest : public CxxTest::TestSuite
 
         }
 
+        void test_lessFun()
+        {
+            TS_ASSERT( std::less<uint32_t>()(1,2) );
+            TS_ASSERT( std::less<uint16_t>()(5,20) );
+            TS_ASSERT( !std::less<uint8_t>()(100,2) );
+            TS_ASSERT( !std::less<int>()(-40,-40) );
+            TS_ASSERT( !std::less<int32_t>()(-40,-30) );
+        }
+
+        void test_lessEqualFun()
+        {
+            TS_ASSERT( std::less_equal<int>()(-40,-40) );
+            TS_ASSERT( std::less_equal<uint8_t>()(4,4) );
+            TS_ASSERT( std::less_equal<uint8_t>()(4,200) );
+            TS_ASSERT( std::less_equal<uint32_t>()(5,20) );
+            TS_ASSERT( !std::less_equal<uint16_t>()(300,50) );
+        }
+
+        void test_greaterFun()
+        {
+            TS_ASSERT( !std::greater<int>()(-40,-40) );
+            TS_ASSERT( !std::greater<uint8_t>()(4,4) );
+            TS_ASSERT( !std::greater<uint8_t>()(4,200) );
+            TS_ASSERT( !std::greater<uint32_t>()(5,20) );
+            TS_ASSERT( std::greater<int64_t>()(-5,-20) );
+            TS_ASSERT( std::greater<uint16_t>()(300,50) );
+        }
+
+        void test_greaterEqualFun()
+        {
+            TS_ASSERT( std::greater_equal<int>()(-40,-40) );
+            TS_ASSERT( std::greater_equal<uint8_t>()(4,4) );
+            TS_ASSERT( !std::greater_equal<uint8_t>()(4,200) );
+            TS_ASSERT( !std::greater_equal<uint32_t>()(5,20) );
+            TS_ASSERT( std::greater_equal<int64_t>()(-5,-20) );
+            TS_ASSERT( std::greater_equal<uint16_t>()(300,50) );
+        }
+
+        void test_equalTolFun()
+        {
+            TS_ASSERT( std::equal_to<int>()(-40,-40) );
+            TS_ASSERT( std::equal_to<uint8_t>()(4,4) );
+            TS_ASSERT( !std::equal_to<uint8_t>()(4,200) );
+            TS_ASSERT( !std::equal_to<uint32_t>()(5,20) );
+            TS_ASSERT( !std::equal_to<int64_t>()(-5,-20) );
+            TS_ASSERT( !std::equal_to<uint16_t>()(300,50) );
+        }
+
+        void test_NotEqualTolFun()
+        {
+            TS_ASSERT( std::not_equal_to<int>()(-40,-40) );
+            TS_ASSERT( std::not_equal_to<uint8_t>()(4,4) );
+            TS_ASSERT( !std::not_equal_to<uint8_t>()(4,200) );
+            TS_ASSERT( !std::not_equal_to<uint32_t>()(5,20) );
+            TS_ASSERT( !std::not_equal_to<int64_t>()(-5,-20) );
+            TS_ASSERT( !std::not_equal_to<uint16_t>()(300,50) );
+        }
 };
 
 #endif
