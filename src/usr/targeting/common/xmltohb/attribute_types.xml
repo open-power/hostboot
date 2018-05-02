@@ -1065,7 +1065,6 @@
         <default>0</default>
       </uint8_t>
     </simpleType>
-    <writeable></writeable>
   </attribute>
 
   <attribute>
@@ -1087,7 +1086,6 @@
         <default>0</default>
       </uint8_t>
     </simpleType>
-    <writeable></writeable>
   </attribute>
 
   <attribute>
