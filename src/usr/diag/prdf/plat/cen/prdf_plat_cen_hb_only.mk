@@ -54,5 +54,8 @@ endif
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 
+# plat/cen/ (non-rule plugin related)
+prd_obj += prdfCenMbaDomain_rt.o
+
 endif
 

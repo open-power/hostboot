@@ -37,9 +37,6 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/cen
 # Object files common to both FSP and Hostboot
 ################################################################################
 
-# plat/cen/ (non-rule plugin related)
-prd_obj += prdfCenMbaDomain.o
-
 # plat/cen/ (rule plugin related)
 prd_rule_plugin += prdfCenMba_common.o
 prd_rule_plugin += prdfCenMembuf_common.o
