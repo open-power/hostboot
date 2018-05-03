@@ -55,7 +55,11 @@
 
 #ifdef __HOSTBOOT_MODULE
 // Generated
+
+#include <arch/pirformat.H>
 #include <mutexattributes.H>
+#include <sys/task.h>
+#include <sys/misc.h>
 #endif
 
 #undef EXTRA_SANITY_CHECKING
@@ -267,6 +271,46 @@ void TargetService::_getFirstTargetForIterators(Target*& o_firstTargetPtr) const
     }
     #undef TARG_FN
 }
+
+#if defined (__HOSTBOOT_MODULE) && !defined (__HOSTBOOT_RUNTIME)
+void TargetService::_getMasterProcChipTargetHandle(
+                                Target*& o_masterProcChipTargetHandle,
+                                bool i_onlyFunctional) const
+{
+    #define TARG_FN "_getMasterProcChipTargetHandle()"
+    TARG_ASSERT(iv_initialized, TARG_ERR_LOC
+               "USAGE: TargetService not initialized");
+
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+    uint64_t cpuid = task_getcpuid();
+    task_affinity_unpin();
+    uint64_t l_masterGroupID = PIR_t::groupFromPir(cpuid);
+    uint64_t l_masterChipID  = PIR_t::chipFromPir(cpuid);
+
+    // Get all Proc targets
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC, i_onlyFunctional);
+
+    // Find the master chip pointer
+    TARGETING::Target* l_masterChip = nullptr;
+    for (auto & l_chip: l_procTargetList)
+    {
+        TARGETING::ATTR_FABRIC_CHIP_ID_type l_chipId =
+            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+        TARGETING::ATTR_FABRIC_GROUP_ID_type l_groupId =
+            (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+        if( l_chipId == l_masterChipID && l_groupId == l_masterGroupID )
+        {
+            l_masterChip = (l_chip);
+            break;
+        }
+    }
+
+    o_masterProcChipTargetHandle = l_masterChip;
+    #undef TARG_FN
+}
+#endif
 
 #ifdef __HOSTBOOT_RUNTIME
 //******************************************************************************
@@ -751,6 +795,12 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
            || PLAT::PROPERTIES::MULTINODE_AWARE
            || i_onlyFunctional )
         {
+
+#if defined (__HOSTBOOT_MODULE) && !defined (__HOSTBOOT_RUNTIME)
+            _getMasterProcChipTargetHandle(pMasterProc, i_onlyFunctional);
+            pActingMasterTarget = pMasterProc;
+#else
+
             // Create filter that finds acting master processors
             PredicateCTM procFilter(CLASS_CHIP, TYPE_PROC);
             PredicateAttrVal<ATTR_PROC_MASTER_TYPE> actingMasterFilter(
@@ -795,6 +845,7 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
             {
                 pActingMasterTarget = pMasterProc;
             }
+#endif
         }
         else
         {
@@ -807,6 +858,22 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
     else if( (i_pNodeTarget->getAttr<ATTR_CLASS>() == CLASS_ENC) &&
         (i_pNodeTarget->getAttr<ATTR_TYPE>() == TYPE_NODE) )
     {
+#if defined (__HOSTBOOT_MODULE) && !defined (__HOSTBOOT_RUNTIME)
+        TARGETING::Target* l_masterChip = NULL;
+        _getMasterProcChipTargetHandle(l_masterChip, i_onlyFunctional);
+
+        //To hook back in with the implementation below for commonality --
+        // either return an empty list (error) or push the master proc as
+        // the one and only element to the list
+        TARGETING::TargetHandleList l_masterProclist;
+        if (l_masterChip)
+        {
+            l_masterProclist.push_back(l_masterChip);
+        }
+
+        TRACFCOMP( g_trac_targeting, "Found Master chip with HUID: %08x", l_masterChip->getAttr<ATTR_HUID>());
+
+#else
         // Create predicate which looks for an acting master processor chip
         PredicateAttrVal<ATTR_PROC_MASTER_TYPE> l_procMasterMatches(
             PROC_MASTER_TYPE_ACTING_MASTER);
@@ -817,7 +884,6 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
         PredicatePostfixExpr  l_masterProcFilter;
         l_masterProcFilter.push(&l_procPredicate).push(
             &l_procMasterMatches).And();
-
 
         // Limit to only functional procs if requested
         if (i_onlyFunctional)
@@ -831,6 +897,7 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
             const_cast<const Target*>(i_pNodeTarget), CHILD, ALL,
                     &l_masterProcFilter);
 
+#endif
         if(!l_masterProclist.empty())
         {
             pMasterProc = l_masterProclist[0];
