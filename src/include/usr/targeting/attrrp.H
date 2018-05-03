@@ -49,6 +49,10 @@ namespace TARGETING
 // Forward declaration of attribute section parsed information structure.
 struct AttrRP_Section;
 
+// These constexprs are used by editPagePermissions function
+constexpr uint32_t DEFAULT_PERMISSIONS = 0xFFFFFFFF;
+constexpr uint8_t ALL_SECTION_TYPES = 0xFF;
+
 #ifdef __HOSTBOOT_RUNTIME
 /**
  *  @brief Structure used to store Node specific information
@@ -264,6 +268,46 @@ class AttrRP
         static void init(errlHndl_t& io_taskRetErrl, bool i_isMpipl = false);
 
 #ifndef __HOSTBOOT_RUNTIME
+
+        /**
+        *  @brief Modifies the memory R/W permissions on VMM pages for a
+        *         given type of AttrRP_Section. Valid types can be found
+        *         in the generated file pnorheader.H. Valid permissions
+        *         can be found in src/include/sys/mm.h . It was chosen to
+        *         not use the enums to avoid needing to include the headers
+        *         all over.
+        *
+        *  @param[in] i_type The type of AttrRP_Section we want to apply the permission
+        *                    edits to. Valid options for the attrrp types are:
+        *                    SECTION_TYPE_PNOR_RO           = 0x00
+        *                    SECTION_TYPE_PNOR_RW           = 0x01
+        *                    SECTION_TYPE_HEAP_PNOR_INIT    = 0x02
+        *                    SECTION_TYPE_HEAP_ZERO_INIT    = 0x03
+        *                    SECTION_TYPE_HB_HEAP_ZERO_INIT = 0x0A
+        *                    ALL_SECTION_TYPES              = 0xFF
+        *
+        *  @param[in] i_permission The R/W permissions the user desires to apply to a
+        *                          given section. Note that values can be OR'ed
+        *                          together. Valid options are :
+        *                          READ_ONLY             = 0x00000001
+        *                          WRITABLE              = 0x00000002
+        *                          EXECUTABLE            = 0x00000004
+        *                          WRITE_TRACKED         = 0x00000008
+        *                          ALLOCATE_FROM_ZERO    = 0x00000010
+        *                          NO_ALLOCATE_FROM_ZERO = 0x00000020
+        *                          NO_ACCESS             = 0x00000040
+        *                          BYPASS_HRMOR          = 0x00000080
+        *                          GUARDED               = 0x00000100
+        *                          DEFAULT_PERMISSIONS    = 0xFFFFFFFF
+        *
+        *  @note If the value 0xFF is passed in for i_type then all types will
+        *         get permissions updated to i_permission.
+        *        If the value 0xFFFF is passed in for i_permission then the sections
+        *        will have their R/W permissions set up to the default values given
+        *        in PNOR
+        */
+        errlHndl_t editPagePermissions(uint8_t i_type, uint32_t i_permission);
+
         /**
          *  @brief Copies all present attribute sections to memory.
          *

@@ -194,7 +194,33 @@ static void initTargeting(errlHndl_t& io_pError)
         //Ensure all mutex attributes are reset on MPIPL
         if(l_isMpipl)
         {
-            l_targetService.resetMutexAttributes();
+            // updatePeerTargets will write to read-only attribute pages
+            // to get around vmm fails we need to allow writes to readonly
+            // memory for the duration of this loop
+            l_targetService.modifyReadOnlyPagePermissions(true);
+            uint32_t l_peerTargetsAdjusted = 0;
+            uint32_t l_numberMutexAttrsReset = 0;
+            for( auto targ_iter = l_targetService.begin();
+                 targ_iter != l_targetService.end();
+                 targ_iter++)
+            {
+                const Target* l_pTarget = *targ_iter;
+                // Check if there any mutex attributes we need to reset on this target
+                l_numberMutexAttrsReset += l_targetService.resetMutexAttributes(l_pTarget);
+
+                // Update any peer target addresses if necessary
+                if(l_targetService.updatePeerTarget(l_pTarget))
+                {
+                    l_peerTargetsAdjusted++;
+                }
+            }
+            // Now that the loop is complete we can re-apply
+            // the read only permissions to the read only attr pages
+            l_targetService.modifyReadOnlyPagePermissions(false);
+            TARG_INF("Number of peer target addresses adjusted: %d",
+                     l_peerTargetsAdjusted);
+            TARG_INF("Number of mutex attributes reset: %d",
+                     l_numberMutexAttrsReset);
         }
 
         checkProcessorTargeting(l_targetService);

@@ -101,6 +101,14 @@ namespace TARGETING
                 break;
             }
 
+            // Now that the VMM blocks have been created we must set
+            // the appropriate R/W permissions
+            l_errl = this->editPagePermissions(ALL_SECTION_TYPES, DEFAULT_PERMISSIONS);
+            if (l_errl)
+            {
+                break;
+            }
+
             // Spawn daemon thread.
             task_create(&AttrRP::startMsgServiceTask, this);
 
@@ -649,6 +657,95 @@ namespace TARGETING
 
     }
 
+    errlHndl_t AttrRP::editPagePermissions(uint8_t i_type, uint32_t i_permission)
+    {
+        errlHndl_t l_errl = NULL;
+        int rc;
+        uint32_t l_perm = i_permission;
+        do
+        {
+            // Create VMM block for each section, assign permissions.
+            for (size_t i = 0; i < iv_sectionCount; ++i)
+            {
+                if(i_permission == DEFAULT_PERMISSIONS)
+                {
+                    switch(iv_sections[i].type)
+                    {
+                        case SECTION_TYPE_PNOR_RO:
+                            l_perm = READ_ONLY;
+                            break;
+
+                        case SECTION_TYPE_PNOR_RW:
+                            l_perm = WRITABLE | WRITE_TRACKED;
+                            break;
+
+                        case SECTION_TYPE_HEAP_PNOR_INIT:
+                            l_perm = WRITABLE;
+                            break;
+
+                        case SECTION_TYPE_HEAP_ZERO_INIT:
+                        case SECTION_TYPE_HB_HEAP_ZERO_INIT:
+                            l_perm = WRITABLE | ALLOCATE_FROM_ZERO;
+                            break;
+
+                        default:
+
+                            /*@
+                            *   @errortype  ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                            *   @moduleid   TARG_EDIT_PAGE_PERMISSIONS
+                            *   @reasoncode TARG_RC_UNHANDLED_ATTR_SEC_TYPE
+                            *   @userdata1  Section type
+                            *
+                            *   @devdesc    Found unhandled attribute section type
+                            *   @custdesc   FW error, unexpected Attribute section type
+                            */
+                            const bool hbSwError = true;
+                            l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                                TARG_EDIT_PAGE_PERMISSIONS,
+                                                TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
+                                                iv_sections[i].type,
+                                                0, hbSwError);
+                                                break;
+                    }
+                }
+                if( i_type == ALL_SECTION_TYPES || i_type == iv_sections[i].type)
+                {
+                    rc = mm_set_permission(reinterpret_cast<void*>(
+                                    iv_sections[i].vmmAddress),
+                                    iv_sections[i].size,
+                                    l_perm);
+                }
+
+                if (rc)
+                {
+                    /*@
+                        *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                        *   @moduleid          TARG_EDIT_PAGE_PERMISSIONS
+                        *   @reasoncode        TARG_RC_MM_PERM_FAIL
+                        *   @userdata1         vAddress attempting to allocate.
+                        *   @userdata2         (kernel-rc << 32) | (Permissions)
+                        *
+                        *   @devdesc   While attempting to set permissions on
+                        *              a virtual memory block for an attribute
+                        *              section, the kernel returned an error.
+                        *
+                        *   @custdesc  Kernel failed to set permissions on
+                        *              virtual memory block
+                        */
+                    const bool hbSwError = true;
+                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                            TARG_EDIT_PAGE_PERMISSIONS,
+                                            TARG_RC_MM_PERM_FAIL,
+                                            iv_sections[i].vmmAddress,
+                                            TWO_UINT32_TO_UINT64(rc, l_perm),
+                                            hbSwError);
+                    break;
+                }
+            }
+        } while(0);
+        return l_errl;
+    }
+
     errlHndl_t AttrRP::createVmmSections()
     {
         errlHndl_t l_errl = NULL;
@@ -667,51 +764,6 @@ namespace TARGETING
             // Create VMM block for each section, assign permissions.
             for (size_t i = 0; i < iv_sectionCount; ++i)
             {
-                uint64_t l_perm = 0;
-                switch(iv_sections[i].type)
-                {
-                    case SECTION_TYPE_PNOR_RO:
-                        l_perm = READ_ONLY;
-                        break;
-
-                    case SECTION_TYPE_PNOR_RW:
-                        l_perm = WRITABLE | WRITE_TRACKED;
-                        break;
-
-                    case SECTION_TYPE_HEAP_PNOR_INIT:
-                        l_perm = WRITABLE;
-                        break;
-
-                    case SECTION_TYPE_HEAP_ZERO_INIT:
-                    case SECTION_TYPE_HB_HEAP_ZERO_INIT:
-                        l_perm = WRITABLE | ALLOCATE_FROM_ZERO;
-                        break;
-
-                    default:
-
-                        /*@
-                         *   @errortype  ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                         *   @moduleid   TARG_CREATE_VMM_SECTIONS
-                         *   @reasoncode TARG_RC_UNHANDLED_ATTR_SEC_TYPE
-                         *   @userdata1  Section type
-                         *
-                         *   @devdesc    Found unhandled attribute section type
-                         *   @custdesc   FW error, unexpected Attribute section type
-                         */
-                        const bool hbSwError = true;
-                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                               TARG_CREATE_VMM_SECTIONS,
-                                               TARG_RC_UNHANDLED_ATTR_SEC_TYPE,
-                                               iv_sections[i].type,
-                                               0, hbSwError);
-                        break;
-                }
-
-                if(l_errl)
-                {
-                    break;
-                }
-
                 int rc = 0;
                 msg_q_t l_msgQ = iv_msgQ;
 
@@ -750,8 +802,6 @@ namespace TARGETING
 
                 if(iv_sections[i].type == SECTION_TYPE_PNOR_RW)
                 {
-                    // TODO RTC:164480 For MPIPL we need to map the RW section
-                    // in real memory to virtual address of the section in PNOR
                     /*
                      * Register this memory range to be FLUSHed during
                      * a shutdown.
@@ -759,37 +809,6 @@ namespace TARGETING
                     INITSERVICE::registerBlock(
                         reinterpret_cast<void*>(iv_sections[i].vmmAddress),
                         iv_sections[i].size,ATTR_PRIORITY);
-                }
-
-                rc = mm_set_permission(reinterpret_cast<void*>(
-                                       iv_sections[i].vmmAddress),
-                                       iv_sections[i].size,
-                                       l_perm);
-
-                if (rc)
-                {
-                    /*@
-                     *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     *   @moduleid          TARG_CREATE_VMM_SECTIONS
-                     *   @reasoncode        TARG_RC_MM_PERM_FAIL
-                     *   @userdata1         vAddress attempting to allocate.
-                     *   @userdata2         (kernel-rc << 32) | (Permissions)
-                     *
-                     *   @devdesc   While attempting to set permissions on
-                     *              a virtual memory block for an attribute
-                     *              section, the kernel returned an error.
-                     *
-                     *   @custdesc  Kernel failed to set permissions on
-                     *              virtual memory block
-                     */
-                    const bool hbSwError = true;
-                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                           TARG_CREATE_VMM_SECTIONS,
-                                           TARG_RC_MM_PERM_FAIL,
-                                           iv_sections[i].vmmAddress,
-                                           TWO_UINT32_TO_UINT64(rc, l_perm),
-                                           hbSwError);
-                    break;
                 }
             } // End iteration through each section
 
