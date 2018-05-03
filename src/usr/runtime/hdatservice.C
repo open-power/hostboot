@@ -1800,9 +1800,10 @@ errlHndl_t clear_host_data_section(const RUNTIME::SectionId i_section)
 }
 
 
-void findHdatLocation(const uint64_t i_payloadBase_va, uint64_t& o_hdat_offset)
+void findHdatLocation(const uint64_t i_payloadBase_va,
+                      uint64_t& o_hdat_offset,
+                      size_t& o_hdat_size)
 {
-
     TRACFCOMP( g_trac_runtime, ENTER_MRK"findHdatLocation> i_payloadBase_va = 0x%.16llX", i_payloadBase_va);
 
     do {
@@ -1814,22 +1815,27 @@ void findHdatLocation(const uint64_t i_payloadBase_va, uint64_t& o_hdat_offset)
           (HDAT_NACA_OFFSET + i_payloadBase_va);
         TRACFCOMP( g_trac_runtime, "findHdatLocation> NACA=0x%.X->0x%p", HDAT_NACA_OFFSET, naca );
 
-       // Find SpiraH information in NACA
-       const hdatSpira_t* spiraH = reinterpret_cast<const hdatSpira_t*>
+        // Find SpiraH information in NACA
+        const hdatSpira_t* spiraH = reinterpret_cast<const hdatSpira_t*>
           (naca->spiraH + i_payloadBase_va);
-       TRACFCOMP( g_trac_runtime, "findHdatLocation> SPIRA-H=0x%X->0x%p", naca->spiraH, spiraH );
+        TRACFCOMP( g_trac_runtime, "findHdatLocation> SPIRA-H=0x%X->0x%p", naca->spiraH, spiraH );
 
-       // SPIRA-S is at the beginning of the Host Data Area Tuple of SpiraH
-       const hdat5Tuple_t* tuple = reinterpret_cast<const hdat5Tuple_t*>
-         (&(spiraH->hdatDataArea[SPIRAH_HOST_DATA_AREAS]));
-       TRACFCOMP( g_trac_runtime, "findHdatLocation> SPIRA-S tuple at 0x%p, tuple->hdatAbsAddr=0x%X", tuple, tuple->hdatAbsAddr );
+        // SPIRA-S is at the beginning of the Host Data Area Tuple of SpiraH
+        const hdat5Tuple_t* tuple = reinterpret_cast<const hdat5Tuple_t*>
+          (&(spiraH->hdatDataArea[SPIRAH_HOST_DATA_AREAS]));
+        TRACFCOMP( g_trac_runtime, "findHdatLocation> SPIRA-S tuple at 0x%p: "
+                   "hdatAbsAddr=0x%X, hdatAllocCnt=0x%X, hdatAllocSize=0x%X",
+                   tuple, tuple->hdatAbsAddr, tuple->hdatAllocCnt,
+                   tuple->hdatAllocSize  );
 
         o_hdat_offset = tuple->hdatAbsAddr;
+        o_hdat_size = tuple->hdatAllocCnt * tuple->hdatAllocSize;
 
     } while (0);
 
-   TRACFCOMP( g_trac_runtime, EXIT_MRK"findHdatLocation> o_hdat_offset = 0x%X", o_hdat_offset);
-
+    TRACFCOMP( g_trac_runtime, EXIT_MRK"findHdatLocation> "
+               "o_hdat_offset = 0x%X, o_hdat_size=0x%X",
+               o_hdat_offset, o_hdat_size);
 }
 
 

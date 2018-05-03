@@ -117,6 +117,7 @@ namespace ISTEP
         RC_FAILED_WRITE_SPR                      = ISTEP_COMP_ID | 0x37,
         RC_FAILED_TO_BOOT_SBE                    = ISTEP_COMP_ID | 0x38,
         RC_REDISCOVERED_TARGETS                  = ISTEP_COMP_ID | 0x39,
+        RC_HDAT_SIZE_CHECK_FAILED                = ISTEP_COMP_ID | 0x3A,
     };
 
 };

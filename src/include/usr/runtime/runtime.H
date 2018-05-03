@@ -351,8 +351,11 @@ errlHndl_t openUntrustedSpCommArea(uint64_t i_commbase);
  *
  * @param[in] payloadBase_va - Virtual Address pointing to start of PAYLOAD
  * @param[out] o_hdat_offset - Offset of HDAT Location from start of PAYLOAD
+ * @param[out] o_hdat_size   - Size of HDAT Location reserved by PAYLOAD
  */
-void findHdatLocation(uint64_t payloadBase_va, uint64_t& o_hdat_offset);
+void findHdatLocation(uint64_t payloadBase_va,
+                      uint64_t& o_hdat_offset,
+                      size_t& o_hdat_size);
 
 }
 
