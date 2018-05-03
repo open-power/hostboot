@@ -46,6 +46,9 @@ prd_rule_plugin += prdfCenMembuf.o
 
 ifneq (${HOSTBOOT_RUNTIME},1)
 
+# plat/cen/ (non-rule plugin related)
+prd_obj += prdfCenMbaDomain_ipl.o
+
 endif
 
 ################################################################################

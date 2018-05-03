@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,7 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
 }
 
 /** @brief Specialization for MCBIST. */
-template<>
+template<> inline
 uint32_t startInitialBgScrub<TARGETING::TYPE_MCBIST>( ExtensibleChip * i_chip )
 {
     using namespace TARGETING;
