@@ -2779,6 +2779,186 @@
   </attribute>
 
   <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CEN_MSS_VOLT</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <id>CEN_MSS_VOLT_VDDR_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+          DRAM VPP Voltage, each voltage rail would need to have a value.
+          Computed in mss_volt C code - in millivolts.  0V - DDR3, 2.5V - DDR4
+          creator: mss_volt
+          consumer: mss_eff_cnfg, others
+          firmware notes: none
+    </description>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CEN_MSS_VOLT_VPP</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <id>CEN_MSS_VOLT_VPP_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_VCS_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_VDD_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_AVDD_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+   </description>
+    <hwpfToHbAttrMap>
+      <id>ATTR_CEN_MSS_VDDR_OFFSET</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <id>CEN_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+          DRAM VPP Voltage, each voltage rail would need to have a value.
+          Computed in mss_volt C code - in millivolts.  0V - DDR3, 2.5V - DDR4
+          creator: mss_volt
+          consumer: mss_eff_cnfg, others
+          firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_VPP_OFFSET_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_VCS_OFFSET_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_VDD_OFFSET_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
+    <description>
+      DRAM Voltage, each voltage rail would need to have a value.
+      Computed in mss_volt C code - in millivolts
+      creator: mss_volt
+      consumer: mss_eff_cnfg, others
+      firmware notes: none
+    </description>
+    <id>CEN_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable></readable>
+    <simpleType>
+      <uint32_t></uint32_t>
+    </simpleType>
+    <writeable></writeable>
+  </attribute>
+
+  <attribute>
     <description>Units: uV/Membuf
     </description>
     <hwpfToHbAttrMap>
