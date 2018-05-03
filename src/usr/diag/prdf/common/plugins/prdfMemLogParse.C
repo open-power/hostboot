@@ -3413,8 +3413,10 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 
     enum Version
     {
-        IPL = 1,
-        RT  = 2,
+        IPL       = 1,
+        RT        = 2,
+        IPL_PORTS = 3,
+        RT_PORTS  = 4
     };
 
     do
@@ -3434,7 +3436,7 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
         }
 
         uint32_t curPos = 0;
-
+        uint8_t  port   = 0x0F;  // not valid
 
         //######################################################################
         // Header data (18 bits)
@@ -3446,11 +3448,24 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
         uint8_t phase   = bs.getFieldJustify( curPos, 4 ); curPos+=4;
         uint8_t type    = bs.getFieldJustify( curPos, 4 ); curPos+=4;
 
+        // Verify if we have new format with port information
+        bool     versWithPorts = ( (IPL_PORTS == version) ||
+                                   (RT_PORTS  == version) )  ? true : false;
+        if ( versWithPorts )
+        {
+            // 0:3 is valid MCA,  xF is for MBA case
+            port = bs.getFieldJustify( curPos, 4 ); curPos+=4;
+        } // end if new format with ports
+
         const char * version_str = "   ";
         switch ( version )
         {
-            case IPL: version_str = "IPL"; break;
-            case RT : version_str = "RT "; break;
+            case IPL:
+            case IPL_PORTS:
+                version_str = "IPL"; break;
+            case RT :
+            case RT_PORTS:
+                version_str = "RT "; break;
         }
 
         const char * type_str = "         ";
@@ -3485,6 +3500,12 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
         i_parser.PrintString( "   TD Phase",    phase_str   );
         i_parser.PrintString( "   Target Rank", rank_str    );
 
+        // Do we actually have MCA port number ?
+        if ( versWithPorts )
+        {
+            i_parser.PrintNumber( "   Port Num   ", "%d", port );
+        } // end if MCA  (not MBA)
+
 
         //######################################################################
         // TD Request Queue (min 4 bits, max 164 bits)
@@ -3503,6 +3524,12 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
             uint8_t queueMrnk = bs.getFieldJustify( curPos, 3 ); curPos+=3;
             uint8_t queueSrnk = bs.getFieldJustify( curPos, 3 ); curPos+=3;
             uint8_t queueType = bs.getFieldJustify( curPos, 4 ); curPos+=4;
+
+            // Verify if we have new format with port information
+            if ( versWithPorts )
+            {
+                port = bs.getFieldJustify( curPos, 4 ); curPos+=4;
+            } // end if new format with ports
 
             const char * type_str = "         ";
             switch ( queueType )
@@ -3524,7 +3551,17 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
             }
 
             char data[DATA_SIZE] = "";
+
+            // Verify if we have valid port information
+            if ( versWithPorts )
+            {
+                snprintf( data, DATA_SIZE, "%s on %s Port:%d",
+                          type_str, rank_str, port );
+            } // end if MCA  (not MBA)
+            else
+            {
                 snprintf( data, DATA_SIZE, "%s on %s", type_str, rank_str );
+            } // end if MCA  (not MBA)
 
             i_parser.PrintString( "   TD Request", data );
         }

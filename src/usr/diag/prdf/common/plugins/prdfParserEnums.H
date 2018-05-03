@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -341,8 +341,11 @@ namespace TD_CTLR_DATA
     // is non-zero when we add the tdCtlr state to the capture data
     enum Version
     {
-        IPL = 1,
-        RT  = 2,
+        IPL       = 1,
+        RT        = 2,
+        // These 2 versions include the MCA port number
+        IPL_PORTS = 3,
+        RT_PORTS  = 4
     };
 } // namespace TD_CTLR_DATA
 

@@ -394,27 +394,37 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 {
     #define PRDF_FUNC "[MemTdCtlr<T>::collectStateCaptureData] "
 
+    ExtensibleChip *l_memChip = nullptr;
+
     // Get the number of entries in the TD queue (limit 15)
     TdQueue::Queue queue = iv_queue.getQueue();
     uint8_t queueCount = queue.size();
     if ( 15 < queueCount ) queueCount = 15;
 
     // Get the buffer
-    uint32_t bitLen = 22 + queueCount*10; // Header + TD queue
+    uint32_t bitLen = 32 + queueCount*14; // Header + TD queue
     BitStringBuffer bsb( bitLen );
     uint32_t curPos = 0;
+    uint8_t  filler = 0x00;
 
     //######################################################################
-    // Header data (18 bits)
+    // Header data (28 bits) - 6 bits currently unused (filler)
     //######################################################################
 
-    // Specifies running at IPL. Also ensures our data is non-zero. 4-bit
-    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::IPL ); curPos+=4;
+    // Specifies when running. Also ensures our data is non-zero. 4-bit
+    #ifndef __HOSTBOOT_RUNTIME
+    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::IPL_PORTS );
+    curPos+=4;
+    #else
+    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::RT_PORTS  );
+    curPos+=4;
+    #endif
 
     uint8_t mrnk  = 0;
     uint8_t srnk  = 0;
     uint8_t phase = TdEntry::Phase::TD_PHASE_0;
     uint8_t type  = TdEntry::TdType::INVALID_EVENT;
+    uint8_t port  = 0;
 
     if ( nullptr != iv_curProcedure )
     {
@@ -422,15 +432,26 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         srnk  = iv_curProcedure->getRank().getSlave();  // 3-bit
         phase = iv_curProcedure->getPhase();            // 4-bit
         type  = iv_curProcedure->getType();             // 4-bit
-    }
+
+        // Want MCA port number (if any)
+        l_memChip = iv_curProcedure->getChip();
+        if ( TYPE_MCA == l_memChip->getType() )
+        {
+            port = l_memChip->getPos() % MAX_MCA_PER_MCBIST; // 2-bit
+        } // if MCBIST
+
+    } // if Non-Null iv_curProcedure
 
     bsb.setFieldJustify( curPos, 3, mrnk  ); curPos+=3;
     bsb.setFieldJustify( curPos, 3, srnk  ); curPos+=3;
     bsb.setFieldJustify( curPos, 4, phase ); curPos+=4;
     bsb.setFieldJustify( curPos, 4, type  ); curPos+=4;
+    bsb.setFieldJustify( curPos, 4, port  ); curPos+=4;
+    bsb.setFieldJustify( curPos, 6, filler); curPos+=6;
+
 
     //######################################################################
-    // TD Request Queue (min 4 bits, max 164 bits)
+    // TD Request Queue (min 4 bits, max 228 bits)
     //######################################################################
 
     bsb.setFieldJustify( curPos, 4, queueCount ); curPos+=4; // 4-bit
@@ -441,9 +462,20 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         uint8_t itSrnk = queue[n]->getRank().getSlave();  // 3-bit
         uint8_t itType = queue[n]->getType();             // 4-bit
 
+        l_memChip = queue[n]->getChip();
+        if ( TYPE_MCA == l_memChip->getType() )
+        {
+            port = l_memChip->getPos() % MAX_MCA_PER_MCBIST; // 2-bit
+        }
+        else
+        {
+            port = 0xFF;
+        }
+
         bsb.setFieldJustify( curPos, 3, itMrnk ); curPos+=3;
         bsb.setFieldJustify( curPos, 3, itSrnk ); curPos+=3;
         bsb.setFieldJustify( curPos, 4, itType ); curPos+=4;
+        bsb.setFieldJustify( curPos, 4, port   ); curPos+=4;
     }
 
     //######################################################################
