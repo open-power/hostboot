@@ -214,6 +214,8 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
         // relevant registers that may have changed since the initial capture.
         __recaptureRegs<T>( io_sc, iv_chip );
 
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
+
         // It is possible that background scrub could have found an ECC error
         // before we had a chance to stop the command. Therefore, we need to
         // call analyzeCmdComplete() first so that any ECC errors found can be
