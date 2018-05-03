@@ -374,6 +374,9 @@ errlHndl_t verifyAndMovePayload(void)
             payload_tmp_virt_addr,
             payload_size);
 
+    // Convert the move payloadBase_va to after secure header for PHYP
+    uint64_t payloadBase_va = reinterpret_cast<uint64_t>(payloadBase_virt_addr);
+    payloadBase_va += (is_phyp ? PAGESIZE : 0 );
 
     // Move HDAT into its proper place after it was temporarily put into
     // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
@@ -395,14 +398,43 @@ errlHndl_t verifyAndMovePayload(void)
         break;
     }
 
-    // Determine location of HDAT from NACA section of PAYLOAD
+    // Determine location and size of HDAT from NACA section of PAYLOAD
     uint64_t hdat_cpy_offset = 0;
+    size_t   hdat_cpy_size   = 0;
 
-    // Convert the move payloadBase_va to after secure header for PHYP
-    uint64_t payloadBase_va = reinterpret_cast<uint64_t>(payloadBase_virt_addr);
-    payloadBase_va += (is_phyp ? PAGESIZE : 0 );
+    RUNTIME::findHdatLocation(payloadBase_va, hdat_cpy_offset, hdat_cpy_size);
 
-    RUNTIME::findHdatLocation(payloadBase_va, hdat_cpy_offset);
+
+    // Check that the size PAYLOAD allocated for HDAT is less than
+    // temporary HDAT space
+    if ( hdat_cpy_size > HDAT_TMP_SIZE)
+    {
+       TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                  "verifyAndMovePayload(): PAYLOAD's allocated HDAT size 0x%X "
+                  "Exceeds Maximum Temporary HDAT Size 0x%X",
+                  hdat_cpy_size, HDAT_TMP_SIZE);
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_HDAT_SIZE_CHECK_FAILED
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+         * @userdata1        Allocated HDAT size from PAYLOAD
+         * @userdata2        Temporary HDAT size
+         * @devdesc          PAYLOAD allocated more HDAT space than temporary
+         *                   space that Hostboot uses
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                              MOD_VERIFY_AND_MOVE_PAYLOAD,
+                              RC_HDAT_SIZE_CHECK_FAILED,
+                              hdat_cpy_size,
+                              HDAT_TMP_SIZE,
+                              true /*Add HB SW Callout*/);
+        l_err ->collectTrace("ISTEPS_TRACE",256);
+        break;
+    }
 
     // PHYP images require adding 1 PAGESIZE since our virtual address starts
     // at the secure header of PAYLOAD before PAYLOAD_BASE
@@ -412,13 +444,13 @@ errlHndl_t verifyAndMovePayload(void)
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "verifyAndMovePayload(): hdat_copy_offset = 0x%X",
-               hdat_cpy_offset);
+               "verifyAndMovePayload(): hdat_copy_offset = 0x%X and size=0x%X",
+               hdat_cpy_offset, hdat_cpy_size);
 
     hdat_final_virt_addr = mm_block_map(
                               reinterpret_cast<void*>(payloadBase +
                                                       hdat_cpy_offset),
-                              HDAT_TMP_SIZE);
+                              hdat_cpy_size);
 
     // Check for nullptr being returned
     if (hdat_final_virt_addr == nullptr)
@@ -436,11 +468,12 @@ errlHndl_t verifyAndMovePayload(void)
                 "verifyAndMovePayload(): Copy HDAT from 0x%.16llX (va="
                 "0x%llX) to HDAT_FINAL = 0x%.16llX (va=0x%llX), size=0x%llX",
                 hdat_tmp_phys_addr, hdat_tmp_virt_addr,
-                payloadBase+hdat_cpy_offset, hdat_final_virt_addr, HDAT_TMP_SIZE);
+                payloadBase+hdat_cpy_offset, hdat_final_virt_addr,
+                hdat_cpy_size);
 
     memcpy(hdat_final_virt_addr,
            hdat_tmp_virt_addr,
-           HDAT_TMP_SIZE);
+           hdat_cpy_size);
 
     } while(0);
 
