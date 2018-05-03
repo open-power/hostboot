@@ -40,7 +40,7 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
-//#include <prdfMbaDomain.H> TODO RTC 157888
+#include <prdfCenMbaDomain.H>
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistDomain.H>
@@ -152,33 +152,23 @@ errlHndl_t startScrub()
 
         PRDF_ENTER( PRDF_FUNC "HUID=0x%08x", nodeId );
 
-        //master proc is CUMULUS, use MBA
-        if ( MODEL_CUMULUS == getChipModel( getMasterProc() ) )
+        // Start background scrubbing.
+        TARGETING::MODEL procModel = getChipModel( getMasterProc() );
+        if ( MODEL_CUMULUS == procModel )
         {
-            //TODO RTC 157888
-            // Start scrubbing on all MBAs.
-            //MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
-            //if ( nullptr == domain )
-            //{
-            //    PRDF_ERR( PRDF_FUNC "MBA_DOMAIN not found. nodeId=0x%08x",
-            //              nodeId );
-            //    l_rc = FAIL; break;
-            //}
-            //l_rc = domain->startScrub();
+            MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
+            l_rc = domain->startScrub();
         }
-        //else use MCBIST
+        else if ( MODEL_NIMBUS == procModel )
+        {
+            McbistDomain * domain =
+                            (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
+            l_rc = domain->startScrub();
+        }
         else
         {
-            //Start scrubbing on all MCBISTs
-            McbistDomain * domain =
-                (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
-            if ( nullptr == domain )
-            {
-                PRDF_ERR( PRDF_FUNC "MCBIST_DOMAIN not found. nodeId=0x%08x",
-                        nodeId );
-                l_rc = FAIL; break;
-            }
-            l_rc = domain->startScrub();
+            PRDF_ERR(PRDF_FUNC "Master PROC model %d not supported", procModel);
+            PRDF_ASSERT(false);
         }
 
         PRDF_EXIT( PRDF_FUNC "HUID=0x%08x", nodeId );

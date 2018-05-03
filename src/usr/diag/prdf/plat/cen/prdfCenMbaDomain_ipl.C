@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfMbaDomain.C $              */
+/* $Source: src/usr/diag/prdf/plat/cen/prdfCenMbaDomain_ipl.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,19 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfMbaDomain.H>
+/**
+ * @file prdfCenMbaDomain.C
+ * @brief chip Plug-in code for mcbist domain
+ */
+
+#include <prdfCenMbaDomain.H>
 
 // Framework includes
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
+
+// Platform includes
 #include <prdfMemBgScrub.H>
 
 using namespace TARGETING;
@@ -56,7 +63,7 @@ int32_t MbaDomain::startScrub()
             if ( SUCCESS != l_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: MBA=0x%08x",
-                          mbaChip->GetId() );
+                          mbaChip->getHuid() );
                 o_rc = FAIL; continue; // Keep going.
             }
         }
