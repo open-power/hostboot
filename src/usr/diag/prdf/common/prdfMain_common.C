@@ -56,8 +56,12 @@
 
 #include <prdfPlatConfigurator.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
+
+using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 // Forward references
@@ -159,20 +163,19 @@ errlHndl_t noLock_initialize()
     #ifdef __HOSTBOOT_RUNTIME
 
     // Handle R/R scenario.
-    TARGETING::Target* masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-    if (TARGETING::MODEL_NIMBUS == masterProc->getAttr<TARGETING::ATTR_MODEL>())
+    TARGETING::MODEL procModel = getChipModel( getMasterProc() );
+    if ( MODEL_NIMBUS == procModel )
     {
-        McbistDomain * domain =
-            (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
-        domain->handleRrFo();
+        ((McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN))->handleRrFo();
+    }
+    else if ( MODEL_CUMULUS == procModel )
+    {
+        ((MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN))->handleRrFo();
     }
     else
     {
-        MbaDomain * domain =
-            (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
-        domain->handleRrFo();
+        PRDF_ERR( PRDF_FUNC "Master PROC model %d not supported", procModel );
+        PRDF_ASSERT(false);
     }
 
     #endif

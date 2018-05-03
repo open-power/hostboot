@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/cen/prdfCenMbaDomain.C $        */
+/* $Source: src/usr/diag/prdf/plat/cen/prdfCenMbaDomain_rt.C $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,9 +34,9 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
-#ifdef __HOSTBOOT_RUNTIME
+
+// Platform includes
 #include <prdfCenMbaDataBundle.H>
-#endif
 
 using namespace TARGETING;
 
@@ -45,7 +45,6 @@ namespace PRDF
 
 using namespace PlatServices;
 
-#ifdef __HOSTBOOT_RUNTIME
 void MbaDomain::handleRrFo()
 {
     #define PRDF_FUNC "[MbaDomain::handleRrFo] "
@@ -75,6 +74,5 @@ void MbaDomain::handleRrFo()
 
     #undef PRDF_FUNC
 }
-#endif
 
 } // end namespace PRDF
