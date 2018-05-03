@@ -33,7 +33,7 @@ using namespace TARGETING;
 
 namespace RT_TARG
 {
-    void adjustTargeting4Runtime();
+    void adjustTargetingForRuntime();
 
     static void initTargeting() __attribute__((constructor));
     static void initTargeting()
@@ -50,17 +50,14 @@ namespace RT_TARG
         TargetService& l_targetService = targetService();
         l_targetService.init(Singleton<AttrRP>::instance().getNodeCount());
 
-        // Reset hb mutex attributes in case they got stuck in a locked state
-        l_targetService.resetMutexAttributes();
-
-        adjustTargeting4Runtime();
+        adjustTargetingForRuntime();
 
         // set global that TARG is ready
         Util::setIsTargetingLoaded();
     }
 
     // Make any adjustments needed to targeting for runtime
-    void adjustTargeting4Runtime()
+    void adjustTargetingForRuntime()
     {
         TRACDCOMP(g_trac_targeting,"adjustTargeting4Runtime");
 
@@ -77,109 +74,41 @@ namespace RT_TARG
         // was at IPL. Using this "old" address would seg fault at run time.
         // The value of the ATTR_PEER_TARGET attributes must be translated
         // for run time.
-        // The _trySetAttr is used directly to avoid the trySetAttr template
-        // error check that ATTR_PEER_TARGET is only readable, not writable.
-        // adjustTargeting4Runtime has been included as a friend to allow
-        // access to the private target class methods.
-        size_t l_xlateCnt = 0;
-        uint8_t l_maxNodeId =
-            TARGETING::targetService().getNumInitializedNodes();
+
+        // Also in this function we will reset any mutex attributes we find
+        // on any target incase they got left in the locked state when hostboot
+        // passed the payload to the hypervisor.
+
+        TargetService& l_targetService = targetService();
+        size_t   l_updatedCount = 0;
+        uint32_t l_numberMutexAttrsReset = 0;
+        uint8_t  l_maxNodeId = l_targetService.getNumInitializedNodes();
         for(uint8_t l_nodeId = NODE0; l_nodeId < l_maxNodeId; ++l_nodeId)
         {
-            for (TargetIterator target = targetService().begin(l_nodeId);
-                    target != targetService().end();
-                    ++target)
+            for (TargetIterator target = l_targetService.begin(l_nodeId);
+                 target != l_targetService.end();
+                 ++target)
             {
                 const TARGETING::Target * l_target = *target;
-                TARGETING::Target * l_peer =  static_cast<Target*>(NULL);
-                bool l_hasPeer = l_target->tryGetAttr<ATTR_PEER_TARGET>(l_peer);
-                if (l_hasPeer && (l_peer != nullptr))
+                // Check if there any mutex attributes we need to reset on this target
+                l_numberMutexAttrsReset += l_targetService.resetMutexAttributes(l_target);
+
+                // Check if there is any PEER_TARAGET attribute to update on this target
+                if(l_targetService.updatePeerTarget(l_target))
                 {
-                    TRACDCOMP(g_trac_targeting,
-                            "translate the peer target %p for HUID %x",
-                            l_peer, get_huid(l_target));
-
-                    ATTR_PEER_TARGET_type l_xlated = (TARGETING::Target *)
-                                       Singleton<AttrRP>::instance().
-                                       AttrRP::translateAddr(l_peer,l_target);
-                    bool l_fixed = false;
-                    l_fixed = l_target->_trySetAttr(ATTR_PEER_TARGET,
-                                          sizeof(l_xlated),
-                                          &l_xlated);
-                    if (l_fixed)
-                    {
-                        TRACDCOMP(g_trac_targeting, "   to=%p", l_xlated);
-                        l_xlateCnt++;
-                    }
-                    // Not good if could not be fixed. But might not be
-                    // referenced. A segment fault will occur if used.
-                    else
-                    {
-                        TRACFCOMP(g_trac_targeting,
-                            "failed to translate peer target for HUID=0x%x",
-                            get_huid(l_target));
-                    }
-                }
-                else if(l_hasPeer && l_peer == nullptr)
-                {
-                    TRACDCOMP(g_trac_targeting,
-                              "looking up peer path and target for HUID %x",
-                              get_huid(l_target));
-                    // Create variables entity path variable to write PEER_PATH into
-                    // as well as a Target pointer to set once we get the PEER_PATH
-                    TARGETING::EntityPath l_peerPath;
-                    TARGETING::Target * l_newTargPtr;
-
-                    // Look up the PEER_PATH attribute if it exists on the target
-                    bool l_hasPeerPath = l_target->tryGetAttr<ATTR_PEER_PATH>(l_peerPath);
-
-                    //If we find a PEER_PATH we need to next look up the PEER_TARGET
-                    if(l_hasPeerPath)
-                    {
-                        TRACDCOMP(g_trac_targeting,
-                                  "Found peer path for HUID %x",get_huid(l_target));
-                        // Look up the PEER_TARGET based on what the PEER_PATH is
-                        l_newTargPtr = targetService().toTarget(l_peerPath);
-
-                        bool l_fixed = false;
-
-                        // If the pointer returned from toTarget isn't null then
-                        // we will try to set PEER_TARGET with that value
-                        if(l_newTargPtr != nullptr)
-                        {
-                            l_fixed = l_target->_trySetAttr(ATTR_PEER_TARGET,
-                                                            sizeof(l_newTargPtr),
-                                                            &l_newTargPtr);
-                        }
-
-                        if (l_fixed)
-                        {
-                            TRACDCOMP(g_trac_targeting, "Peer target for HUID %x found to be %p",
-                                    get_huid(l_target), l_newTargPtr);
-                            l_xlateCnt++;
-                        }
-                        // Not good if could not be fixed. But might not be
-                        // referenced. A segment fault will occur if used.
-                        else
-                        {
-                            TRACFCOMP(g_trac_targeting,
-                                "failed to find peer target for HUID=0x%x",
-                                get_huid(l_target));
-                        }
-                    }
-                    else
-                    {
-                        TRACFCOMP(g_trac_targeting,
-                                  "Failed to find peer path for HUID=0x%x",
-                                  get_huid(l_target));
-                    }
+                    l_updatedCount++;
                 }
             }
         }
         TRACFCOMP(g_trac_targeting,
-                  "adjustTargeting4Runtime: %d peer target addresses "
+                  "adjustTargetingForRuntime: %d peer target addresses "
                   "translated on %d nodes",
-                  l_xlateCnt,
+                  l_updatedCount,
+                  l_maxNodeId);
+        TRACFCOMP(g_trac_targeting,
+                  "adjustTargetingForRuntime: %d mutex attributes reset "
+                  "on %d nodes",
+                  l_numberMutexAttrsReset,
                   l_maxNodeId);
     }
 }

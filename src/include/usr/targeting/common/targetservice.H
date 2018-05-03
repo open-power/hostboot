@@ -563,6 +563,33 @@ class TargetService
         void dump() const;
 
 #ifndef __HOSTBOOT_RUNTIME
+
+        /**
+         *  @brief This func changes the readOnly section of the targeting data
+         *         to be writeable, allowing hostboot to update attributes that
+         *         are read-only. After attributes are updated the user should
+         *         toggle back to making the section readOnly
+         *
+         *  This top level interface calls the lower level attribute resource
+         *  provider interface to modify R/W permissions on the VMM pages it has
+         *  mapped for each of the different sections of the targeting data. This
+         *  function specifically provides a way to toggle the ability to write to
+         *  the readOnly pages of the targeting data.
+         *
+         *  @param[in] i_allowWrites If TRUE will change R/W permissions of readOnly
+         *                           targeting data to be writable
+         *                           If FALSE will change R/W permissions of readOnly
+         *                           targeting data to be readOnly
+         *
+         *  @pre AttrRp must be initialized
+         *
+         *  @post R/W permissions of the readOnly section of the targeting data will
+         *        be modified depending on boolean parameter.
+         *
+         *  @return Error handle holding any errors accrued during execution
+         */
+        errlHndl_t modifyReadOnlyPagePermissions(bool i_allowWrites);
+
         /**
          *  @brief Updates the targeting/attribute section data with the
          *  specified vector parameters.
@@ -790,23 +817,46 @@ class TargetService
                                      AttrRP *i_attrRP,
                                      ATTRIBUTE_ID* &o_pAttrId,
                                      AbstractPointer<void>* &o_ppAttrAddr);
-#ifdef __HOSTBOOT_MODULE
         /**
-         *  @brief Reset all hostboot mutex attributes
+         *  @brief Update the address that PEER_TARGET points to for a given target
          *
          *  @par Detailed Description:
-         *  Iterates through all targets and check each of their attributes to
-         *  see if they are of type hbmutex. If we find a mutex attribute we will
-         *  run mutex_init on it to reset it.
+         *  The PEER_TARGET attribute is a pointer to a target's peer. The location
+         *  of the target changes when we transition from Hostboot<->HBRT. After
+         *  transitioning to runtime, or if we perform an MPIPL this function needs
+         *  to be run on all targets in order to insure any target with a PEER_TARGET
+         *  attribute gets the PEER_TARGET's pointer looked up again and set to the
+         *  new value.
+         *
+         *  @param[in] i_pTarget pointer to target to update PEER_TARGET attr for
+         *
+         *  @pre TargetService must be initialized.
+         *
+         *  @post If the target passed in has a PEER_TARGET , its value will be updated
+         *
+         *  @return TRUE if target was updated , FALSE if PEER_TARGET was not updated
+         */
+        bool updatePeerTarget( const Target* i_pTarget);
+
+#ifdef __HOSTBOOT_MODULE
+        /**
+         *  @brief Reset all hostboot mutex attributes on a given target
+         *
+         *  @par Detailed Description:
+         *  Take in target and check each of its attributes to see if they are
+         *  of type hbmutex. If we find a mutex attribute we will run mutex_init
+         *  on it to reset it.
+         *
+         *  @param[in] i_pTarget pointer to target to reset mutex attrs on
          *
          *  @pre TargetService must be initialized.
          *       AttrRp must be initialized
          *
-         *  @post All hb mutex attributes on all targets have been reset
+         *  @post All hb mutex attributes on given target have been reset
          *
-         *  @return void
+         *  @return number of mutex attributes reset
          */
-        void resetMutexAttributes();
+        uint32_t resetMutexAttributes( const Target* i_pTarget);
 #endif
     private:
 

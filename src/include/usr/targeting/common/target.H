@@ -61,7 +61,6 @@ namespace ERRORLOG
 }
 namespace RT_TARG
 {
-    void adjustTargeting4Runtime();
     ERRORLOG::ErrlEntry* saveRestoreAttrs(void *i_rsvdMemPtr,
                                           void *io_lidStructPtr,
                                           uint8_t i_instance);
@@ -811,7 +810,6 @@ class Target
         friend class AttributeTank;
 
 #ifdef __HOSTBOOT_RUNTIME
-        friend void RT_TARG::adjustTargeting4Runtime();
         friend ERRORLOG::ErrlEntry* RT_TARG::saveRestoreAttrs(void *,
                                                               void *,
                                                               uint8_t);
