@@ -367,32 +367,32 @@ void HBToHwsvVoltageMsg::createVddrData(
             {
                 (void)addMemoryVoltageDomains<
                   TARGETING::ATTR_MSS_VDD_PROGRAM,
-                TARGETING::ATTR_MSS_VOLT_VDD_MILLIVOLTS,
-                TARGETING::ATTR_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VDD_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
                 TARGETING::ATTR_VDD_ID>(
                                         pMembuf,
                                         io_request);
 
                 (void)addMemoryVoltageDomains<
                   TARGETING::ATTR_MSS_AVDD_PROGRAM,
-                TARGETING::ATTR_MSS_VOLT_AVDD_MILLIVOLTS,
-                TARGETING::ATTR_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_AVDD_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
                 TARGETING::ATTR_AVDD_ID>(
                                          pMembuf,
                                          io_request);
 
                 (void)addMemoryVoltageDomains<
                   TARGETING::ATTR_MSS_VCS_PROGRAM,
-                TARGETING::ATTR_MSS_VOLT_VCS_MILLIVOLTS,
-                TARGETING::ATTR_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VCS_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
                 TARGETING::ATTR_VCS_ID>(
                                         pMembuf,
                                         io_request);
 
                 (void)addMemoryVoltageDomains<
                   TARGETING::ATTR_MSS_VPP_PROGRAM,
-                TARGETING::ATTR_MSS_VOLT_VPP_MILLIVOLTS,
-                TARGETING::ATTR_CEN_MSS_VOLT_VPP,
+                TARGETING::ATTR_CEN_MSS_VOLT_VPP_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VPP_OFFSET_MILLIVOLTS,
                 TARGETING::ATTR_VPP_ID>(
                                         pMembuf,
                                         io_request);
@@ -400,8 +400,8 @@ void HBToHwsvVoltageMsg::createVddrData(
 
             (void)addMemoryVoltageDomains<
               TARGETING::ATTR_MSS_VDDR_PROGRAM,
-            TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS,
-            TARGETING::ATTR_CEN_MSS_VOLT,
+            TARGETING::ATTR_CEN_MSS_VOLT_VDDR_MILLIVOLTS,
+            TARGETING::ATTR_CEN_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS,
             TARGETING::ATTR_VDDR_ID>(
                                      pMembuf,
                                      io_request);
