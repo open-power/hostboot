@@ -54,6 +54,8 @@
 #include <targeting/common/utilFilter.H>
 
 #ifdef __HOSTBOOT_MODULE
+// System
+#include <sys/mm.h>
 // Generated
 
 #include <arch/pirformat.H>
@@ -1703,72 +1705,143 @@ uint32_t TargetService::getTargetAttributes(Target*i_target,
     // Return the number of attributes for this target
     return i_target->iv_attrs;
 }
+
 #ifdef __HOSTBOOT_MODULE
-void TargetService::resetMutexAttributes()
+
+#ifndef __HOSTBOOT_RUNTIME
+errlHndl_t TargetService::modifyReadOnlyPagePermissions(bool i_allowWrites)
+{
+    #define TARG_FN "modifyReadOnlyPagePermissions(...)"
+    TARG_ENTER();
+    errlHndl_t l_errl = NULL;
+    TARGETING::AttrRP *l_pAttrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
+    if(i_allowWrites)
+    {
+        l_errl = l_pAttrRP->editPagePermissions(SECTION_TYPE_PNOR_RO, WRITABLE);
+    }
+    else
+    {
+        l_errl = l_pAttrRP->editPagePermissions(SECTION_TYPE_PNOR_RO, READ_ONLY);
+    }
+    TARG_EXIT();
+    #undef TARG_FN
+    return l_errl;
+}
+#endif
+
+bool TargetService::updatePeerTarget(const Target* i_pTarget)
+{
+    #define TARG_FN "updatePeerTarget(...)"
+    // Variable which holds return value
+    bool l_peerTargetUpdated = false;
+    do
+    {
+        TARGETING::Target * l_peer =  static_cast<Target*>(NULL);
+        if(! i_pTarget->tryGetAttr<ATTR_PEER_TARGET>(l_peer))
+        {
+            // This is a normal path, many targets do not have PEERS
+            TRACDCOMP(g_trac_targeting, "No PEER_TARGET found for target 0x%x",
+                      get_huid(i_pTarget));
+            // Skip the rest of the function in this case
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_targeting, "Initial PEER_TARGET address for HUID 0x%x found to be %p",
+                      get_huid(i_pTarget), l_peer);
+        }
+
+        TARGETING::ATTR_PEER_PATH_type l_peerPath;
+        if(i_pTarget->tryGetAttr<ATTR_PEER_PATH>(l_peerPath))
+        {
+            // If we find a PEER_PATH we need to next look up the PEER_TARGET with toTarget
+            l_peer = targetService().toTarget(l_peerPath);
+
+            // Make sure the path resolved to a non-null target
+            if (l_peer != NULL)
+            {
+                l_peerTargetUpdated = i_pTarget->_trySetAttr(ATTR_PEER_TARGET,
+                                                             sizeof(l_peer),
+                                                             &l_peer);
+                TRACFCOMP(g_trac_targeting, "Updated PEER_TARGET address for HUID 0x%x found to be %p",
+                          get_huid(i_pTarget), l_peer);
+            }
+            else
+            {
+                // This is unexpected so make the trace visible, but no need to assert
+                TRACFCOMP(g_trac_targeting,
+                          "PEER_PATH did not resolve to a valid target for the entity path %s",
+                          l_peerPath.toString());
+            }
+        }
+        else
+        {
+            // This is unexpected so make the trace visible, but no need to assert
+            TRACFCOMP(g_trac_targeting,
+                      "No PEER_PATH found for target 0x%x which does have a PEER_TARGET attribute",
+                      get_huid(i_pTarget));
+        }
+    } while(0);
+
+    return l_peerTargetUpdated;
+    #undef TARG_FN
+}
+
+uint32_t TargetService::resetMutexAttributes(const Target* i_pTarget)
 {
     #define TARG_FN "resetMutexAttributes(...)"
     TARGETING::AttrRP *l_pAttrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
     ATTRIBUTE_ID* l_pAttrIds = nullptr;
     AbstractPointer<void>* l_ppAttrAddrs = nullptr;
-    for( auto targ_iter = targetService().begin();
-        targ_iter != targetService().end();
-         targ_iter++)
+    uint32_t l_numberMutexAttrsReset = 0;
+    uint32_t l_attrCount = 0;
+    l_attrCount = targetService().getTargetAttributes(const_cast<TARGETING::Target*>(i_pTarget),
+                                                      l_pAttrRP,
+                                                      l_pAttrIds,
+                                                      l_ppAttrAddrs );
+
+    for ( uint32_t l_attrIndex = 0; l_attrIndex < l_attrCount; l_attrIndex++)
     {
-        uint32_t l_attrCount = 0;
-        Target* l_pTarget = *targ_iter;
-        l_attrCount = targetService().getTargetAttributes(l_pTarget, l_pAttrRP,
-                                            l_pAttrIds, l_ppAttrAddrs );
-
-        // Make sure that attributes were found
-        if(l_attrCount == 0)
+        const ATTRIBUTE_ID l_attrId = l_pAttrIds[l_attrIndex];
+        for( const auto mutexId : hbMutexAttrIds)
         {
-            TRACFCOMP( g_trac_targeting,
-                       "Target 0x%X has no attributes", get_huid(l_pTarget) );
-            // Continue to next target if there were no attributes
-            continue;
-        }
-
-        for ( uint32_t l_attrIndex = 0; l_attrIndex < l_attrCount; l_attrIndex++)
-        {
-            const ATTRIBUTE_ID l_attrId = l_pAttrIds[l_attrIndex];
-            for( const auto mutexId : hbMutexAttrIds)
+            if(l_attrId == mutexId)
             {
-                if(l_attrId == mutexId)
+                mutex_t* l_mutex;
+                if(i_pTarget->_tryGetHbMutexAttr(l_attrId, l_mutex))
                 {
-                    mutex_t* l_mutex;
-                    if(l_pTarget->_tryGetHbMutexAttr(l_attrId, l_mutex))
-                    {
-                        mutex_init(l_mutex);
-                    }
-                    else
-                    {
-                        /*@
-                        *   @errortype         ERRORLOG::ERRL_SEV_PREDICTIVE
-                        *   @moduleid          TARG_SVC_RESET_MUTEX
-                        *   @reasoncode        TARG_SVC_MISSING_ATTR
-                        *   @userdata1         Attribute Id we attempted to read
-                        *   @userdata2         Huid of target we attempted to read
-                        *
-                        *   @devdesc   For some reason attr IDs in hbMutexAttrIds list
-                        *              are not matching the attribute IDs that target
-                        *              service is seeing. This is causing incorrect matching
-                        *              Make sure mutexattribute.H in genfiles has good values
-                        *
-                        *   @custdesc  Attempted to perform an invalid attribute look up
-                        */
-                        errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                                          TARG_SVC_RESET_MUTEX,
-                                                          TARG_SVC_MISSING_ATTR,
-                                                          l_attrId,
-                                                          get_huid(l_pTarget),
-                                                          true); // software error
-                        errlCommit(l_errl, TARG_COMP_ID);
-                    }
+                    mutex_init(l_mutex);
+                    l_numberMutexAttrsReset++;
+                }
+                else
+                {
+                    /*@
+                    *   @errortype         ERRORLOG::ERRL_SEV_PREDICTIVE
+                    *   @moduleid          TARG_SVC_RESET_MUTEX
+                    *   @reasoncode        TARG_SVC_MISSING_ATTR
+                    *   @userdata1         Attribute Id we attempted to read
+                    *   @userdata2         Huid of target we attempted to read
+                    *
+                    *   @devdesc   For some reason attr IDs in hbMutexAttrIds list
+                    *              are not matching the attribute IDs that target
+                    *              service is seeing. This is causing incorrect matching
+                    *              Make sure mutexattribute.H in genfiles has good values
+                    *
+                    *   @custdesc  Attempted to perform an invalid attribute look up
+                    */
+                    errlHndl_t l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                        TARG_SVC_RESET_MUTEX,
+                                                        TARG_SVC_MISSING_ATTR,
+                                                        l_attrId,
+                                                        get_huid(i_pTarget),
+                                                        true); // software error
+                    errlCommit(l_errl, TARG_COMP_ID);
                 }
             }
         }
     }
     #undef TARG_FN
+    return l_numberMutexAttrsReset;
 }
 #endif
 
