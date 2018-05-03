@@ -874,6 +874,24 @@ class TargetService
                                           NODE_ID i_nodeId) const;
 #endif
 
+#if defined (__HOSTBOOT_MODULE) && !defined (__HOSTBOOT_RUNTIME)
+       /**
+        *  @brief Returns the master processor chip target
+        *
+        *  @param[out] o_masterProcChipTargetHandle - The master proc chip
+        *       target handle or nullptr
+        *
+        *  @param[in] i_onlyFunctional - only functional procs be considered
+        *
+        *  @pre Target service must be initialized
+        *
+        *  @post Target Service returns the master proc target handle
+        */
+        void _getMasterProcChipTargetHandle(
+                                  Target*& o_masterProcChipTargetHandle,
+                                  bool i_onlyFunctional) const;
+#endif
+
         /**
          *  @brief Configures the pool of targets
          *
