@@ -767,11 +767,15 @@ void InitService::doShutdown(uint64_t i_status,
     // check if console msg not needed or already displayed by caller
     if ((SHUTDOWN_STATUS_GOOD != i_status) &&
         (SBE::SBE_UPDATE_REQUEST_REIPL != i_status) &&
-        (SHUTDOWN_NOT_RECONFIG_LOOP != i_status)  )
+        (SHUTDOWN_NOT_RECONFIG_LOOP != i_status))
     {
         CONSOLE::displayf(NULL, "System shutting down with error status 0x%X",
                          i_status);
-        CONSOLE::flush();
+        if(VFS::module_is_loaded("libconsole.so"))
+        {
+            // Only flush the trace when the console module is loaded
+            CONSOLE::flush();
+        }
     }
 #endif
 
