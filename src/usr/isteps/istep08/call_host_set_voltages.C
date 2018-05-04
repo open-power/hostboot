@@ -137,14 +137,15 @@ void* call_host_set_voltages(void *io_pArgs)
             break;
         }
 
-#ifdef CONFIG_SMP_WRAP_TEST
-        // Make the FAPI call to p9_fbc_eff_config_links
-        // Make the FAPI call to p9_sys_chiplet_scominit, if previous call succeeded
-        fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_F_T, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)                  &&
-        fapiHWPCallWrapperHandler(P9_SYS_CHIPLET_SCOMINIT, l_stepError,
-                                       HWPF_COMP_ID, TYPE_PROC);
-#endif
+        if (INITSERVICE::isSMPWrapConfig())
+        {
+            // Make the FAPI call to p9_fbc_eff_config_links
+            // Make the FAPI call to p9_sys_chiplet_scominit, if previous call succeeded
+            fapiHWPCallWrapperHandler(P9_FBC_EFF_CONFIG_LINKS_F_T, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC)                  &&
+            fapiHWPCallWrapperHandler(P9_SYS_CHIPLET_SCOMINIT, l_stepError,
+                                           HWPF_COMP_ID, TYPE_PROC);
+        }
     }while( 0 );
 
 

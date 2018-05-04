@@ -353,7 +353,7 @@ ZZ2U_HBD_IMG = ${HBFW_TARGPATH:FZZ-2U_hb_targeting.bin}
 ZEPPELIN_HBD_IMG = ${HBFW_TARGPATH:FZEPPELIN_hb_targeting.bin}
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
-FLEETWOOD_HBD_IMGS = HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_3_hb_targeting.bin}:P}
+FLEETWOOD_HBD_IMGS = HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_MST_node_0_hb_targeting.bin}:P}
 
 # Input fake images
 NIMBUS_VPO_HBD_IMG = vbu_NIMBUS_targeting.bin
@@ -382,7 +382,7 @@ FLEETWOOD_MEMD_FINAL_IMG = FLEETWOOD.MEMD.bin
 # defined in fipsfs.db.
 ZZ_HBD_FINAL_IMG = ZZ.HBD.bin
 ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
-FLEETWOOD_HBD_FINAL_IMGS = FLEETWOOD.HBD_NODE_0.bin,FLEETWOOD.HBD_NODE_1.bin,FLEETWOOD.HBD_NODE_2.bin,FLEETWOOD.HBD_NODE_3.bin
+FLEETWOOD_HBD_FINAL_IMGS = FLEETWOOD.HBD_NODE_0.bin,FLEETWOOD.HBD_NODE_1.bin,FLEETWOOD.HBD_NODE_2.bin,FLEETWOOD.HBD_NODE_3.bin,FLEETWOOD_MST.HBD_NODE_0.bin
 ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
 
 
