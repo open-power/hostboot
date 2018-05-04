@@ -35,6 +35,7 @@ constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_28 = 28;
+constexpr uint64_t literal_0b01010 = 0b01010;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0x1 = 0x1;
@@ -125,6 +126,7 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             constexpr auto l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF = 0x0;
             l_scom_buffer.insert<18, 1, 63, uint64_t>(l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF );
             l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_28 );
+            l_scom_buffer.insert<55, 5, 59, uint64_t>(literal_0b01010 );
 
             if ((l_def_ENABLE_DYNAMIC_64_128B_READS == literal_1))
             {
