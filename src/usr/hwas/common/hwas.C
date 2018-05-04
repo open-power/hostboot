@@ -39,6 +39,7 @@
 #include <algorithm>
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
+#include <initservice/initserviceif.H>
 #endif
 
 #include <targeting/common/commontargeting.H>
@@ -193,7 +194,6 @@ bool allCoresBad(const uint8_t & i_firstCore,
     return coresBad;
 }
 
-#ifdef CONFIG_SMP_WRAP_TEST
 /**
  * @brief disable obuses in wrap config.
  *        Due to fabric limitations, we can only have 2 parallel OBUS
@@ -289,7 +289,6 @@ errlHndl_t disableOBUSes()
     } while (0);
     return l_err;
 }
-#endif
 
 errlHndl_t discoverTargets()
 {
@@ -582,21 +581,23 @@ errlHndl_t discoverTargets()
         // targets that need to be deconfigured
         invokePresentByAssoc();
 
-#ifdef CONFIG_SMP_WRAP_TEST
-        //Due to fabric limitations, we can only have 2 parallel OBUS
-        //connections at a time in wrap config. So, deconfigure appropriate
-        //OBUSes using the following rule. If the value of
-        //MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE (on the system target) does
-        //not match with the value of MFG_WRAP_TEST_ABUS_LINKS_SET (on the
-        //OBUS target), then deconfigure the OBUSes.
-        errl = disableOBUSes();
-        if (errl)
+#ifdef __HOSTBOOT_MODULE
+        if (INITSERVICE::isSMPWrapConfig())
         {
-            HWAS_ERR ("discoverTargets:: disableOBUSes failed");
-            break;
+            //Due to fabric limitations, we can only have 2 parallel OBUS
+            //connections at a time in wrap config. So, deconfigure appropriate
+            //OBUSes using the following rule. If the value of
+            //MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE (on the system target) does
+            //not match with the value of MFG_WRAP_TEST_ABUS_LINKS_SET (on the
+            //OBUS target), then deconfigure the OBUSes.
+            errl = disableOBUSes();
+            if (errl)
+            {
+                HWAS_ERR ("discoverTargets:: disableOBUSes failed");
+                break;
+            }
         }
 #endif
-
     } while (0);
 
     if (errl)

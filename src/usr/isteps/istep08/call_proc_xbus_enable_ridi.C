@@ -49,6 +49,7 @@
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
+#include <initservice/initserviceif.H>
 
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapper
@@ -78,23 +79,24 @@ void* call_proc_xbus_enable_ridi( void *io_pArgs )
             break;
         }
 
-#ifdef CONFIG_SMP_WRAP_TEST
-        // Make the FAPI call to p9_chiplet_scominit
-        // Make the FAPI call to p9_psi_scominit, if previous call succeeded
-        // Make the FAPI call to p9_io_obus_scominit, if previous call succeeded
-        // Make the FAPI call to p9_npu_scominit, if previous call succeeded
-        // Make the FAPI call to p9_chiplet_enable_ridi, if previous call succeeded
-        fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)             &&
-        fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)             &&
-        fapiHWPCallWrapperHandler(P9_IO_OBUS_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_OBUS)             &&
-        fapiHWPCallWrapperHandler(P9_NPU_SCOMINIT, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC)             &&
-        fapiHWPCallWrapperHandler(P9_CHIPLET_ENABLE_RIDI, l_stepError,
-                                  HWPF_COMP_ID, TYPE_PROC);
-#endif  // end #ifdef CONFIG_SMP_WRAP_TEST
+        if (INITSERVICE::isSMPWrapConfig())
+        {
+            // Make the FAPI call to p9_chiplet_scominit
+            // Make the FAPI call to p9_psi_scominit, if previous call succeeded
+            // Make the FAPI call to p9_io_obus_scominit, if previous call succeeded
+            // Make the FAPI call to p9_npu_scominit, if previous call succeeded
+            // Make the FAPI call to p9_chiplet_enable_ridi, if previous call succeeded
+            fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC)             &&
+            fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC)             &&
+            fapiHWPCallWrapperHandler(P9_IO_OBUS_SCOMINIT, l_stepError,
+                                      HWPF_COMP_ID, TYPE_OBUS)             &&
+            fapiHWPCallWrapperHandler(P9_NPU_SCOMINIT, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC)             &&
+            fapiHWPCallWrapperHandler(P9_CHIPLET_ENABLE_RIDI, l_stepError,
+                                      HWPF_COMP_ID, TYPE_PROC);
+        }
     } while (0);
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_xbus_enable_ridi exit");
 

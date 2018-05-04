@@ -48,6 +48,7 @@
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
+#include <initservice/initserviceif.H>  // isSMPWrapConfig
 
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
@@ -67,13 +68,12 @@ void* call_proc_npu_scominit( void *io_pArgs )
     IStepError l_stepError;
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_npu_scominit entry");
-
-#ifndef CONFIG_SMP_WRAP_TEST
-    // Make the FAPI call to p9_npu_scominit
-    fapiHWPCallWrapperHandler(P9_NPU_SCOMINIT, l_stepError,
-                              HWPF_COMP_ID, TYPE_PROC);
-#endif
-
+    if (!INITSERVICE::isSMPWrapConfig())
+    {
+        // Make the FAPI call to p9_npu_scominit
+        fapiHWPCallWrapperHandler(P9_NPU_SCOMINIT, l_stepError,
+                                  HWPF_COMP_ID, TYPE_PROC);
+    }
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_npu_scominit exit");
 
     return l_stepError.getErrorHandle();

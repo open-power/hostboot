@@ -50,7 +50,7 @@
 //  Tracing support
 #include <trace/interface.H>           // TRACFCOMP
 #include <initservice/isteps_trace.H>  // g_trac_isteps_trace
-
+#include <initservice/initserviceif.H>  // isSMPWrapConfig
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperForChip
 
@@ -74,14 +74,15 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
 
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_proc_chiplet_scominit entry" );
 
-#ifndef CONFIG_SMP_WRAP_TEST
-    // Make the FAPI call to p9_chiplet_scominit
-    // Make the FAPI call to p9_psi_scominit, if previous call succeeded
-    fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
-                              HWPF_COMP_ID, TYPE_PROC)                &&
-    fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
-                              HWPF_COMP_ID, TYPE_PROC);
-#endif
+    if (!INITSERVICE::isSMPWrapConfig())
+    {
+        // Make the FAPI call to p9_chiplet_scominit
+        // Make the FAPI call to p9_psi_scominit, if previous call succeeded
+        fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
+                                  HWPF_COMP_ID, TYPE_PROC)                &&
+        fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
+                                  HWPF_COMP_ID, TYPE_PROC);
+    }
 
     // Enable TCEs with an empty TCE Table, if necessary
     // This will prevent the FSP from DMAing to system memory without

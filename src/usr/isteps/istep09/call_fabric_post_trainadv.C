@@ -44,6 +44,7 @@
 //  Tracing support
 #include <trace/interface.H>            // TRACFCOMP
 #include <initservice/isteps_trace.H>   // g_trac_isteps_trace
+#include <initservice/initserviceif.H>  // isSMPWrapConfig
 
 //  Error handling support
 #include <errl/errlentry.H>             // errlHndl_t
@@ -107,8 +108,8 @@ void* call_fabric_post_trainadv( void *io_pArgs )
                 break;
             }
         }  // end if (TYPE_XBUS == l_busSet[ii])
-#ifdef CONFIG_SMP_WRAP_TEST
-        else if (TYPE_OBUS == l_busSet[ii])
+        else if (INITSERVICE::isSMPWrapConfig() &&
+                (TYPE_OBUS == l_busSet[ii]))
         {
             // Make the FAPI call to p9_io_obus_post_trainadv
             if (!trainBusHandler(l_busSet[ii],
@@ -120,7 +121,6 @@ void* call_fabric_post_trainadv( void *io_pArgs )
                 break;
             }
         }  // end else if (TYPE_OBUS == l_busSet[ii])
-#endif
     } // end for (uint32_t ii = 0; ii < l_maxBusSet; ++ii)
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_fabric_post_trainadv exit");

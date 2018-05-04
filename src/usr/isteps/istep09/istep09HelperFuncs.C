@@ -340,7 +340,7 @@ bool trainBusHandler(TYPE                     i_busType,
         }
         else if (TYPE_XBUS == i_busType)
         {
-            l_numberOfTrainFailures = trainObus(i_hwpCall,
+            l_numberOfTrainFailures = trainXbus(i_hwpCall,
                                                 o_stepError,
                                                 i_componentId,
                                                 l_pbusConnection.first,

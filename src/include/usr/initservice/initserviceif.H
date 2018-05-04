@@ -176,6 +176,24 @@ inline bool spBaseServicesEnabled()
     return spBaseServicesEnabled;
 }
 
+/**
+ * @brief Returns if we are in smp wrap config
+ *
+ * If true then we are running in wrap config
+ *
+ * @return bool - true if wrap config, else false 
+ */
+inline bool isSMPWrapConfig()
+{
+    TARGETING::Target * sys {nullptr};
+    TARGETING::targetService().getTopLevelTarget( sys );
+    TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags;
+    return
+        ( sys &&
+            sys->tryGetAttr<TARGETING::ATTR_MNFG_FLAGS>(mnfg_flags) &&
+            (mnfg_flags & TARGETING::MNFG_FLAG_BRAZOS_WRAP_CONFIG)) ;
+
+}
 
 /**
  * @brief Save Istep Step and Substep for use by error logging
