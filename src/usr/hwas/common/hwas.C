@@ -1804,17 +1804,59 @@ errlHndl_t restrictECunits(
         // inner loop and EXs as the outer to distribute the functional ECs
         // evenly between procs. After we run out of ECs, we deconfigure the
         // remaining ones.
-        for (uint32_t j = 0; j < NUM_EX_PER_CHIP; j++)
+
+        // Mark the ECs that have been accounted for
+        uint8_t EC_checkedList[procs][NUM_EX_PER_CHIP];
+        memset(EC_checkedList, 0, sizeof(EC_checkedList));
+
+        for (uint32_t l_EX = 0; l_EX < NUM_EX_PER_CHIP; l_EX++)
         {
-            for (int i = 0; i < procs; i++)
+            for (int l_proc = 0; l_proc < procs; l_proc++)
             {
+                // Save l_EX value to current EX, this is to be restored later
+                uint32_t currrentEX = l_EX;
+
+                // If core doesn't exist or already checked, find the
+                // next available core on this proc in order to balance
+                // the core distribution.
+                uint8_t nextEXwithCore = 0;
+                if ( (!pECList[l_proc][l_EX].size()) ||
+                     (EC_checkedList[l_proc][l_EX]) )
+                {
+                    HWAS_INF("Current EX = %d, PROC %d: Need to find next "
+                             "avail EX with cores.", l_EX, l_proc);
+                    for (nextEXwithCore = l_EX+1;
+                         nextEXwithCore < NUM_EX_PER_CHIP;
+                         nextEXwithCore++)
+                    {
+                         if ( (pECList[l_proc][nextEXwithCore].size()) &&
+                              (!(EC_checkedList[l_proc][nextEXwithCore]) ) )
+                         {
+                             l_EX = nextEXwithCore;
+                             HWAS_INF("Next avail EX with cores = %d",
+                                      nextEXwithCore);
+                             break;
+                         }
+                    }
+                    // No more core in this proc
+                    if (nextEXwithCore == NUM_EX_PER_CHIP)
+                    {
+                        HWAS_INF("No more EX with cores in proc %d", l_proc);
+                        l_EX = currrentEX;
+                        continue;
+                    }
+                }
+
+                // Mark this core has been checked.
+                EC_checkedList[l_proc][l_EX] = 1;
+
                 // Walk through the EC list from this EX
-                while (pEC_it[i][j] != pECList[i][j].end())
+                while (pEC_it[l_proc][l_EX] != pECList[l_proc][l_EX].end())
                 {
                     // Check if EC pair for this EX
-                    if ((pECList[i][j].size() == 2) &&
+                    if ((pECList[l_proc][l_EX].size() == 2) &&
                         (pairedECs_remaining != 0)  &&
-                         (i==l_masterProc || // is master or
+                         (l_proc==l_masterProc || // is master or
                           l_allocatedToMaster || // was allocated to master
                           pairedECs_remaining > 2)) // save 2 cores for master
                     {
@@ -1822,18 +1864,18 @@ errlHndl_t restrictECunits(
                         goodECs++;
                         pairedECs_remaining--;
                         HWAS_DBG("pEC   0x%.8X - is good %d! (paired) pi:%d EXi:%d pairedECs_remaining %d",
-                                 (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
-                                 goodECs, i, j, pairedECs_remaining);
-                        if (i == l_masterProc)
+                                 (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
+                                 goodECs, l_proc, l_EX, pairedECs_remaining);
+                        if (l_proc == l_masterProc)
                         {
                             HWAS_DBG("Allocated to master");
                             l_allocatedToMaster = true;
                         }
                     }
                     // Check if single EC for this EX
-                    else if ((pECList[i][j].size() == 1) &&
+                    else if ((pECList[l_proc][l_EX].size() == 1) &&
                              (singleECs_remaining != 0) &&
-                              (i==l_masterProc || // is master or
+                              (l_proc==l_masterProc || // is master or
                                l_allocatedToMaster || // was allocated to master
                                singleECs_remaining > 1)) // save core for master
 
@@ -1842,9 +1884,9 @@ errlHndl_t restrictECunits(
                         goodECs++;
                         singleECs_remaining--;
                         HWAS_DBG("pEC   0x%.8X - is good %d! (single) pi:%d EXi:%d singleECs_remaining %d",
-                                 (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
-                                 goodECs, i, j, singleECs_remaining);
-                        if (i == l_masterProc)
+                                 (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
+                                 goodECs, l_proc, l_EX, singleECs_remaining);
+                        if (l_proc == l_masterProc)
                         {
                             HWAS_DBG("Allocated to master");
                             l_allocatedToMaster = true;
@@ -1854,18 +1896,25 @@ errlHndl_t restrictECunits(
                     else
                     {
                         // got an EC to be restricted and marked not functional
-                        TargetHandle_t l_pEC = *(pEC_it[i][j]);
+                        TargetHandle_t l_pEC = *(pEC_it[l_proc][l_EX]);
                         forceEcExEqDeconfig(l_pEC, i_present, i_deconfigReason);
                         HWAS_DBG("pEC   0x%.8X - deconfigured! (%s) pi:%d EXi:%d",
-                            (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
-                            (pECList[i][j].size() == 1)? "single": "paired",
-                            i, j);
+                            (*(pEC_it[l_proc][l_EX]))->getAttr<ATTR_HUID>(),
+                            (pECList[l_proc][l_EX].size() == 1)? "single": "paired",
+                            l_proc, l_EX);
                     }
 
-                    (pEC_it[i][j])++; // next ec in this ex's list
-                } // while pEC_it[i][j] != pECList[i][j].end()
-            } // for i < procs
-        } // for j < NUM_EX_PER_CHIP
+                    (pEC_it[l_proc][l_EX])++; // next ec in this ex's list
+
+                } // while pEC_it[l_proc][l_EX] != pECList[l_proc][l_EX].end()
+
+                // Restore current EX
+                l_EX = currrentEX;
+
+            } // for l_proc < procs
+
+        } // for l_EX < NUM_EX_PER_CHIP
+
     } // for procIdx < l_ProcCount
 
     } while(0); // do {
