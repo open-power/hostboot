@@ -327,6 +327,7 @@ int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
  * @param   io_dqMapPtr   Pointer to area to receive DIMM DQ map (80 bytes)
  * @return  Non-Null if error log occurs
  */
+template <TARGETING::TYPE>
 void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
 
