@@ -81,7 +81,7 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
             else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21))
                      || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6)
                              && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12))
-                     || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                     || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<0, 53, 11, uint64_t>(literal_0x0000000000000 );
             }
@@ -101,7 +101,7 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
             else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21))
                      || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6)
                              && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12))
-                     || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                     || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0b1 );
                 l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0b1 );
@@ -130,7 +130,8 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                        && (l_chip_ec == 0x13)) )
             {
                 l_scom_buffer.insert<21, 4, 60, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID );
                 l_scom_buffer.insert<25, 3, 61, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID );
@@ -168,8 +169,8 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
-                        && (l_chip_ec == 0x10)) )
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                        && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<45, 3, 61, uint64_t>(literal_0b111 );
             }
@@ -181,8 +182,8 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7)
-                        && (l_chip_ec == 0x10)) )
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                        && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0010 );
             }

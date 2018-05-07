@@ -73,7 +73,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x901080aull, l_scom_buffer ));
 
@@ -94,7 +94,8 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 }
                 else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21))
                          || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6)
-                                 && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
+                                 && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12))
+                         || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
                 {
                     l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0x0F );
                 }
@@ -103,7 +104,8 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
 
                 if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                         && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                    || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
+                    || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                            && (l_chip_ec == 0x13)) )
                 {
                     l_scom_buffer.insert<32, 4, 60, uint64_t>(literal_0x0 );
                 }
@@ -132,7 +134,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 if ((l_def_OBUS_FBC_ENABLED && (l_TGT0_ATTR_LINK_TRAIN != fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)))
                 {
@@ -149,7 +151,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 if ((l_def_OBUS_FBC_ENABLED && (l_TGT0_ATTR_LINK_TRAIN != fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)))
                 {
@@ -196,7 +198,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 if (l_def_IS_SIM)
                 {
@@ -230,7 +232,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 if ((l_def_OBUS_FBC_ENABLED && (l_TGT0_ATTR_LINK_TRAIN != fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY)))
                 {
@@ -242,7 +244,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
 
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                   || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                          && (l_chip_ec == 0x12)) )
+                          && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
 
             {
                 if ((l_def_OBUS_FBC_ENABLED && (l_TGT0_ATTR_LINK_TRAIN != fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)))
@@ -255,7 +257,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
 
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                   || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                          && (l_chip_ec == 0x12)) )
+                          && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
 
             {
                 l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x5 );
@@ -264,7 +266,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 l_scom_buffer.insert<9, 7, 57, uint64_t>(literal_0b0001111 );
             }
@@ -272,14 +274,14 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_ELEVEN_LANE_MODE_ON = 0x1;
                 l_scom_buffer.insert<37, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_ELEVEN_LANE_MODE_ON );
             }
 
             if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                    && (l_chip_ec == 0x12)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
+                    && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) || ((l_chip_id == 0x7) && (l_chip_ec == 0x10)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_FAST_ASYNC_CROSS_ON = 0x1;
                 l_scom_buffer.insert<59, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_FAST_ASYNC_CROSS_ON );
@@ -287,7 +289,8 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                        && (l_chip_ec == 0x13)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_LINK_FAIL_CRC_ERROR_ON = 0x1;
                 l_scom_buffer.insert<3, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_LINK_FAIL_CRC_ERROR_ON );
@@ -296,7 +299,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0x5 );
             }
@@ -304,14 +307,15 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 l_scom_buffer.insert<25, 7, 57, uint64_t>(literal_0b0111111 );
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10))
-                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) )
+                || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6)
+                        && (l_chip_ec == 0x13)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_LINK_FAIL_NO_SPARE_ON = 0x1;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_IOO_LL0_CONFIG_LINK_FAIL_NO_SPARE_ON );
@@ -320,7 +324,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 constexpr auto l_PB_IOO_LL0_CONFIG_REPLAY_BUFFER_SIZE_REPLAY_255 = 0x2;
                 l_scom_buffer.insert<56, 2, 62, uint64_t>(l_PB_IOO_LL0_CONFIG_REPLAY_BUFFER_SIZE_REPLAY_255 );
@@ -329,7 +333,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 constexpr auto l_PB_IOO_LL0_LINK1_ELEVEN_LANE_SHIFT_ON = 0x1;
                 l_scom_buffer.insert<39, 1, 63, uint64_t>(l_PB_IOO_LL0_LINK1_ELEVEN_LANE_SHIFT_ON );
@@ -363,7 +367,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5)
                     && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x23))
                 || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x11)) || ((l_chip_id == 0x6)
-                        && (l_chip_ec == 0x12)) )
+                        && (l_chip_ec == 0x12)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x13)) )
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x9010819ull, l_scom_buffer ));
 
