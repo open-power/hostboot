@@ -634,10 +634,11 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 */
 
 //------------------------------------------------------------------------------
-void getDimmDqAttr( TargetHandle_t i_target,
-                    uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
+template<>
+void getDimmDqAttr<TYPE_MCA>( TargetHandle_t i_target,
+                              uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
 {
-    #define PRDF_FUNC "[PlatServices::getDimmDqAttr] "
+    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_MCA>] "
 
     PRDF_ASSERT( TYPE_MCA == getTargetType(i_target) );
 
@@ -653,6 +654,29 @@ void getDimmDqAttr( TargetHandle_t i_target,
     }
 
     memcpy( &o_dqMapPtr[0], &tmpData[mcaRelMcs][0], DQS_PER_DIMM );
+
+    #undef PRDF_FUNC
+} // end function getDimmDqAttr
+
+template<>
+void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
+                               uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
+{
+    #define PRDF_FUNC "[PlatServices::getDimmDqAttr<TYPE_DIMM>] "
+
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_target) );
+
+    const uint8_t DIMM_BAD_DQ_SIZE_BYTES = 80;
+
+    uint8_t tmpData[DIMM_BAD_DQ_SIZE_BYTES];
+
+    if ( !i_target->tryGetAttr<ATTR_CEN_DQ_TO_DIMM_CONN_DQ>(tmpData) )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CEN_DQ_TO_DIMM_CONN_DQ" );
+        PRDF_ASSERT( false );
+    }
+
+    memcpy( &o_dqMapPtr[0], &tmpData[0], DQS_PER_DIMM );
 
     #undef PRDF_FUNC
 } // end function getDimmDqAttr

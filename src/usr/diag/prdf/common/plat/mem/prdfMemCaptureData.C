@@ -103,7 +103,19 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
                               "single DIMM." );
                     break;
                 }
-                getDimmDqAttr( trgt, extMemMru.dqMapping );
+                if ( TYPE_MCA == getTargetType(trgt) )
+                {
+                    getDimmDqAttr<TYPE_MCA>( trgt, extMemMru.dqMapping );
+                }
+                else if ( TYPE_MBA == getTargetType(trgt) )
+                {
+                    getDimmDqAttr<TYPE_DIMM>(partList[0], extMemMru.dqMapping);
+                }
+                else
+                {
+                    PRDF_ERR( PRDF_FUNC "Invalid target type." );
+                    PRDF_ASSERT(false);
+                }
             }
         }
 
