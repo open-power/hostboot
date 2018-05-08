@@ -1129,6 +1129,8 @@ sub processProcessor
 
         $targetObj->setAttribute($target,"FABRIC_GROUP_ID",$grp_id);
         $targetObj->setAttribute($target,"FABRIC_CHIP_ID",$chip_id);
+        $targetObj->setAttribute($target,"PROC_EFF_FABRIC_GROUP_ID",$grp_id);
+        $targetObj->setAttribute($target,"PROC_EFF_FABRIC_CHIP_ID",$chip_id);
     }
 
     setupBars($targetObj,$target);
