@@ -1015,6 +1015,31 @@
   </attribute>
 
   <attribute>
+    <id>TPM_UNUSABLE</id>
+    <description>
+        Indicates whether the TPM is unusable. Hostboot should not read this
+        value for any purpose other than tracing. This value should only be
+        written to when there is a certainty that the TPM is not usable.
+        This attribute is consumed by FSP during alignment check to determine
+        the optimal boot configuration. This attribute can be removed if TPM
+        gard is ever supported.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+      <range>
+        <min>0</min>
+        <max>1</max>
+      </range>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+    <writeable></writeable>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
        Indicates the chip's EC level, distinct from ATTR_EC to handle
        non-standard mini-ECs, e.g. 1.01, separate from the real
