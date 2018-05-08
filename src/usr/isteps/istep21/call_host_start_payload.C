@@ -227,35 +227,10 @@ void* call_host_start_payload (void *io_pArgs)
         task_affinity_unpin();
 
 #ifdef CONFIG_BMC_IPMI
-
-        // TODO ISSUE 118082
-        // ENABLE CODE BELOW ONCE OPAL COMPLETES ipmi WATCHDOG
-#if 0
-                //run the ipmi watchdog for a longer period to transition
-                // to opel
-                errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                        IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN);
-
-                if(err_ipmi)
-                {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                "init: ERROR: Set IPMI watchdog Failed");
-                    err_ipmi->collectTrace("ISTEPS_TRACE",256);
-                    errlCommit(err_ipmi, ISTEP_COMP_ID );
-
-                }
-#endif
-
-        // TODO ISSUE 118082
-        // REMOVE CODE BELOW ONCE OPAL COMPLETES IPMI WATCHDOG
-        // THE CODE BELOW STOPS THE IPMI TIMER FROM RUNNING
-        // TO PREVENT IT GETTING TRIGGERED DURING HB_OPAL TRANSITION
-
-        // Call setWatchdogTimer without the default DON'T STOP
-        // flag to stop the watchdog timer
+        // Run the watchdog with a longer expiration during the transition
+        // into OPAL.
         errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN,
-                IPMIWATCHDOG::BIOS_FRB2);
+                IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN);
 
         if(err_ipmi)
         {
@@ -264,7 +239,6 @@ void* call_host_start_payload (void *io_pArgs)
                 err_ipmi->collectTrace("ISTEPS_TRACE",256);
                 errlCommit(err_ipmi, ISTEP_COMP_ID );
         }
-
 #endif
 
         // broadcast shutdown to other HB instances.
