@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -463,14 +463,6 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
         {
             PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL" );
             l_rc = FAIL; break;
-        }
-
-        // Do channel fail cleanup.
-        l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "chnlCsCleanup() failed" );
-            break;
         }
 
     } while (0);

@@ -119,15 +119,6 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
- * @brief  Cleanup for channel CS.
- * @param  i_mbChip   Membuf chip.
- * @param  i_sc  Service Data Collector.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
-                       STEP_CODE_DATA_STRUCT & i_sc );
-
-/**
  * @brief  determines the type of Centaur based raw card  associated with MBA.
  * @param  i_mba    mba target
  * @param  o_type   raw card type.
@@ -148,6 +139,18 @@ int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
  */
 template<TARGETING::TYPE T>
 void cleanupChnlAttns( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief  After analyzing a memory channel failure, we want to mask off all
+ *         possible attentions on that channel to ensure we don't get any errant
+ *         attentions.
+ * @note   Intended to be called in the memory buffer PostAnalysis after the
+ *         rule code has cleared the analyzed attention.
+ * @param  i_chip MEMBUF, DMI, or MC chip.
+ * @param  io_sc  The step code data struct.
+ */
+template<TARGETING::TYPE T>
+void cleanupChnlFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 } // end namespace MemUtils
 
