@@ -7288,23 +7288,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
     <readable/>
 </attribute>
 
-<enumerationType>
-    <id>MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</id>
-    <description>Enum for MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</description>
-    <enumerator>
-        <name>SET_NONE</name>
-        <value>0x0</value>
-    </enumerator>
-    <enumerator>
-        <name>SET_1</name>
-        <value>0x1</value>
-    </enumerator>
-    <enumerator>
-        <name>SET_2</name>
-        <value>0x2</value>
-    </enumerator>
-</enumerationType>
-
 <attribute>
     <id>MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</id>
     <description>
@@ -7316,10 +7299,9 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
       OBUSes configured. Otherwise, we deconfigure them.
     </description>
     <simpleType>
-        <enumeration>
-            <default>SET_NONE</default>
-            <id>MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE</id>
-        </enumeration>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

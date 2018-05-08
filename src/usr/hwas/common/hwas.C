@@ -253,7 +253,7 @@ errlHndl_t disableOBUSes()
         //only if MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE was overidden
         //because that means we are trying to run in wrap mode.
         //Otherwise, it will be defaulted to SET_NONE
-        if (l_links_set_enable != MFG_WRAP_TEST_ABUS_LINKS_SET_ENABLE_SET_NONE)
+        if (l_links_set_enable)
         {
             TargetHandleList l_procList;
             getAllChips(l_procList, TYPE_PROC);
