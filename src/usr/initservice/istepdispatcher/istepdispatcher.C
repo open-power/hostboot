@@ -389,6 +389,17 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 errlCommit(err_ipmi, INITSVC_COMP_ID );
 
             }
+
+            // Start the watchdog
+            err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
+            if(err_ipmi)
+            {
+               TRACFCOMP(g_trac_initsvc,
+                              "init: ERROR: Starting IPMI watchdog Failed");
+                err_ipmi->collectTrace("INITSVC", 1024);
+                errlCommit(err_ipmi, INITSVC_COMP_ID );
+
+            }
 #endif
 
             // Non-IStep mode (run all isteps automatically)
@@ -2942,6 +2953,17 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
             {
                TRACFCOMP(g_trac_initsvc,
                               "init: ERROR: Set IPMI watchdog Failed");
+                err_ipmi->collectTrace("INITSVC", 1024);
+                errlCommit(err_ipmi, INITSVC_COMP_ID );
+
+            }
+
+            // Start the watchdog timer
+            err_ipmi = IPMIWATCHDOG::resetWatchDogTimer();
+            if(err_ipmi)
+            {
+               TRACFCOMP(g_trac_initsvc,
+                              "init: ERROR: Start IPMI watchdog Failed");
                 err_ipmi->collectTrace("INITSVC", 1024);
                 errlCommit(err_ipmi, INITSVC_COMP_ID );
 
