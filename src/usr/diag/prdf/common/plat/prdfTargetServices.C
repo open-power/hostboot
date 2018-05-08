@@ -1007,7 +1007,7 @@ uint8_t getDimmPort<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTrgt )
     PRDF_ASSERT( nullptr != i_dimmTrgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
 
-    return i_dimmTrgt->getAttr<ATTR_MBA_PORT>();
+    return i_dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
 }
 
 //------------------------------------------------------------------------------
@@ -1018,7 +1018,7 @@ uint8_t getDimmSlct<TYPE_MBA>( TargetHandle_t i_trgt )
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_trgt) );
 
-    return i_trgt->getAttr<ATTR_MBA_DIMM>();
+    return i_trgt->getAttr<ATTR_CEN_MBA_DIMM>();
 }
 
 template<>
