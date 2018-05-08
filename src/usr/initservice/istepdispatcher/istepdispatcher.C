@@ -2888,9 +2888,7 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
 #ifdef CONFIG_BMC_IPMI
             errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
                                IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN,
-                               static_cast<uint8_t>
-                                          (IPMIWATCHDOG::DO_NOT_STOP |
-                                           IPMIWATCHDOG::BIOS_FRB2), // default
+                               IPMIWATCHDOG::BIOS_FRB2,
                                IPMIWATCHDOG::NO_ACTIONS); // do nothing when
                                                           // timeout occurs
             if(err_ipmi)
