@@ -199,13 +199,6 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     #define PRDF_FUNC "[Membuf::PostAnalysis] "
     int32_t l_rc;
 
-    // In hostboot, we need to clear associated bits in the MCIFIR bits.
-    l_rc = MemUtils::mcifirCleanup( i_mbChip, i_sc );
-    if( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "mcifirCleanup() failed");
-    }
-
     l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
     if( SUCCESS != l_rc )
     {

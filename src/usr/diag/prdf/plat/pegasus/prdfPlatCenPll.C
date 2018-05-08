@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,14 +47,14 @@ namespace Membuf
 /**
  * @brief  Optional plugin function called after analysis is complete but
  *         before PRD exits.
- * @param  i_cenChip A Centaur MBA chip.
- * @param  i_sc      The step code data struct.
+ * @param  i_chip A MEMBUF chip.
+ * @param  io_sc  The step code data struct.
  * @note   This is especially useful for any analysis that still needs to be
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
-int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
-                         STEP_CODE_DATA_STRUCT & i_sc )
+int32_t PllPostAnalysis( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[Membuf::PllPostAnalysis] "
 
@@ -63,43 +63,27 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
 
     do
     {
-        // need to clear associated bits in the MCIFIR bits.
-        o_rc = MemUtils::mcifirCleanup( i_cenChip, i_sc );
-        if( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mcifirCleanup() failed");
-            break;
-        }
-
-        // Check to make sure we are at threshold and have something garded.
-        if ( !i_sc.service_data->IsAtThreshold() ||
-             ( !i_sc.service_data->isGardRequested() ) )
-        {
-            break; // nothing to do
-        }
+        // The PLL FIR bits have been cleared on the MEMBUF, but there are some
+        // bits on the processor side of the bus that need to be cleared in
+        // order to complete clear the attentions.
+        MemUtils::cleanupChnlAttns<TYPE_MEMBUF>( i_chip, io_sc );
 
         #ifndef __HOSTBOOT_RUNTIME
 
-        TargetHandle_t cenTrgt = i_cenChip->GetChipHandle();
-        TargetHandleList list = getConnected( cenTrgt, TYPE_MBA );
-        if ( 0 == list.size() )
+        if ( isInMdiaMode() &&
+             io_sc.service_data->IsAtThreshold() &&
+             io_sc.service_data->isGardRequested() )
         {
-            PRDF_ERR( PRDF_FUNC "getConnected(0x%08x, TYPE_MBA) failed",
-                      getHuid(cenTrgt) );
-            o_rc = FAIL; break;
-        }
-
-        // Send SKIP_MBA message for each MBA.
-        for ( TargetHandleList::iterator mbaIt = list.begin();
-              mbaIt != list.end(); ++mbaIt )
-        {
-            int32_t l_rc = mdiaSendEventMsg( *mbaIt, MDIA::SKIP_MBA );
-            if ( SUCCESS != l_rc )
+            // Tell MDIA to stop testing on all attached MBAs.
+            for ( auto & trgt : getConnected(i_chip->getTrgt(), TYPE_MBA) )
             {
-                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x, SKIP_MBA) failed",
-                          getHuid(*mbaIt) );
-                o_rc |= FAIL;
-                continue; // keep going
+                if ( SUCCESS != mdiaSendEventMsg(trgt, MDIA::STOP_TESTING) )
+                {
+                    PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x,STOP_TESTING) "
+                              "failed", getHuid(trgt) );
+                    o_rc |= FAIL;
+                    continue; // keep going
+                }
             }
         }
 

@@ -53,25 +53,18 @@ namespace cen_centaur
 /**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
- * @param  i_mbChip A Centaur chip.
- * @param  io_sc    The step code data struct.
+ * @param  i_chip A MEMBUF chip.
+ * @param  io_sc  The step code data struct.
  * @note   This is especially useful for any analysis that still needs to be
  *         done after the framework clears the FIR bits that were at attention.
  * @return SUCCESS.
  */
-int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & io_sc )
+int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[cen_centaur::PostAnalysis] "
 
-    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
-    {
-        // Cleanup processor FIR bits on the other side of the channel.
-        if ( SUCCESS != MemUtils::chnlFirCleanup(i_mbChip) )
-        {
-            PRDF_ERR( PRDF_FUNC "chnlFirCleanup(0x%08x) failed",
-                      i_mbChip->getHuid() );
-        }
-    }
+    // Cleanup processor FIR bits on the other side of the channel.
+    MemUtils::cleanupChnlAttns<TYPE_MEMBUF>( i_chip, io_sc );
 
     return SUCCESS;
 

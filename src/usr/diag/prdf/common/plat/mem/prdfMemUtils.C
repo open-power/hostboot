@@ -28,15 +28,19 @@
  */
 
 #include <prdfMemUtils.H>
-#include <prdfExtensibleChip.H>
-#include <prdfPlatServices.H>
-#include <prdfParserUtils.H>
-#include <prdfMemSymbol.H>
-#include <prdfCenMbaDataBundle.H>
-#include <prdfPlatServices_common.H>
 
-#if defined(__HOSTBOOT_RUNTIME) || !defined(__HOSTBOOT_MODULE)
-//  #include <prdfCenMbaDynMemDealloc_rt.H>
+// Framework includes
+#include <iipServiceDataCollector.h>
+#include <prdfExtensibleChip.H>
+
+// Platform includes
+#include <prdfCenMbaDataBundle.H>
+#include <prdfMemSymbol.H>
+#include <prdfParserUtils.H>
+#include <prdfPlatServices.H>
+
+#if __HOSTBOOT_RUNTIME
+  #include <prdfMemDynDealloc.H>
 #endif
 
 using namespace TARGETING;
@@ -463,17 +467,26 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 
 //------------------------------------------------------------------------------
 
-uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip )
+template<>
+void cleanupChnlAttns<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemUtils::chnlFirCleanup] "
+    #define PRDF_FUNC "[MemUtils::cleanupChnlAttns] "
 
-    uint32_t o_rc = SUCCESS;
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
 
-    ExtensibleChip * dmiChip = getConnectedParent( i_mbChip, TYPE_DMI );
+    // No cleanup if this is a checkstop attention.
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) return;
+
+    #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
+
+    ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
 
     // Clear the associated FIR bits for all attention types.
     // NOTE: If there are any active attentions left in the Centaur the
-    //       associated FIR bit will be redriven with the next packet on the bus
+    //       associated FIR bits in the CHIFIR will be redriven with the
+    //       next packet on the bus.
 
     SCAN_COMM_REGISTER_CLASS * reg = dmiChip->getRegister("CHIFIR_AND");
 
@@ -483,17 +496,11 @@ uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip )
     reg->ClearBit(20); // SPA
     reg->ClearBit(21); // maintenance command complete
 
-    o_rc = reg->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "CHIFIR_AND write failed on 0x%08x",
-                  dmiChip->getHuid() );
-    }
+    reg->Write();
 
-    return o_rc;
+    #endif // Hostboot only
 
     #undef PRDF_FUNC
-
 }
 
 //------------------------------------------------------------------------------

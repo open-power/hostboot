@@ -139,12 +139,15 @@ int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
 
 /**
  * @brief  When handling attentions on a memory buffer, there will be FIR bits
- *         on the processor side of the bus that must be manually cleaned up in
+ *         on the processor side of the bus that must be manually cleared in
  *         order to completely clear the attention.
- * @param  i_mbChip MEMBUF chip.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @note   Intended to be called in the memory buffer PostAnalysis after the
+ *         rule code has cleared the analyzed attention.
+ * @param  i_chip MEMBUF chip.
+ * @param  io_sc  The step code data struct.
  */
-uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip );
+template<TARGETING::TYPE T>
+void cleanupChnlAttns( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 } // end namespace MemUtils
 
