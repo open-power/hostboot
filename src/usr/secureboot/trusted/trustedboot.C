@@ -193,8 +193,8 @@ bool functionalPrimaryTpmExists()
         [&presentAndFunctional, &initialized, &isPrimaryTpm](
             const TARGETING::Target* const i_pTpm)
         {
-            return (isPrimaryTpm(i_pTpm) && (presentAndFunctional(i_pTpm)
-                    || !initialized(i_pTpm)));
+            return (isPrimaryTpm(i_pTpm) &&
+                    (presentAndFunctional(i_pTpm) || !initialized(i_pTpm)));
         });
 
     exists = (itr!=tpmList.end()) ? true : false;
@@ -324,6 +324,7 @@ void* host_update_master_tpm( void *io_pArgs )
                 !primaryHwasState.present)
             {
                 primaryTpmAvail = false;
+                pPrimaryTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
             }
         }
 
@@ -414,13 +415,15 @@ void* host_update_master_tpm( void *io_pArgs )
     {
         TRACUCOMP( g_trac_trustedboot,
                    "host_update_master_tpm() - "
-                   "Primary TPM Present:%d Functional:%d Init Attempted:%d",
+                   "Primary TPM Present:%d Functional:%d Init Attempted:%d"
+                   " Usable:%d",
                    pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
                        present,
                    pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
                        functional,
                    pPrimaryTpm->getAttr<
-                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>());
+                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(),
+                   !(pPrimaryTpm->getAttr<TARGETING::ATTR_TPM_UNUSABLE>()));
     }
 
     TARGETING::Target* pBackupTpm = nullptr;
@@ -429,14 +432,16 @@ void* host_update_master_tpm( void *io_pArgs )
     {
         TRACUCOMP( g_trac_trustedboot,
                    "host_update_master_tpm() - "
-                   "Backup TPM Present:%d Functional:%d Init Attempted:%d. "
+                   "Backup TPM Present:%d Functional:%d Init Attempted:%d "
+                   "Usable: %d. "
                    "Backup TPM initialization is deferred to istep 10.14.",
                    pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
                        present,
                    pBackupTpm->getAttr<TARGETING::ATTR_HWAS_STATE>().
                        functional,
                    pBackupTpm->getAttr<
-                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>());
+                       TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(),
+                   !(pPrimaryTpm->getAttr<TARGETING::ATTR_TPM_UNUSABLE>()));
     }
 
     TRACDCOMP( g_trac_trustedboot,
@@ -998,6 +1003,9 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     i_pTpm->setAttr<
         TARGETING::ATTR_HWAS_STATE>(hwasState);
 
+    // Mark the TPM as unusable so that FSP can perform alignment check
+    i_pTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+
     #ifdef CONFIG_SECUREBOOT
     TARGETING::Target* l_tpm = i_pTpm;
 
@@ -1374,6 +1382,10 @@ void doInitBackupTpm()
     if(l_backupTpm)
     {
         l_backupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
+        auto l_backupHwasState = l_backupTpm->getAttr<
+                                                  TARGETING::ATTR_HWAS_STATE>();
+        l_backupTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(
+                  !(l_backupHwasState.present && l_backupHwasState.functional));
     }
 }
 
