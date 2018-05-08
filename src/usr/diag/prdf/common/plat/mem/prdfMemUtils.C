@@ -35,6 +35,7 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
+#include <prdfCenMembufDataBundle.H>
 #include <prdfMemSymbol.H>
 #include <prdfParserUtils.H>
 #include <prdfPlatServices.H>
@@ -542,6 +543,9 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         io_sc.service_data->setSecondaryAttnType(UNIT_CS);
         io_sc.service_data->SetThresholdMaskId(0);
 
+        // Set it as SUE generation point.
+        io_sc.service_data->SetUERE();
+
         // Indicate that cleanup is required.
         P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
         ExtensibleChip * membChip =  mcsdb->getMembChip();
@@ -564,151 +568,142 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
-int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
-                       STEP_CODE_DATA_STRUCT & i_sc )
+template<TARGETING::TYPE T1, TARGETING::TYPE T2>
+void __cleanupChnlFail( ExtensibleChip * i_chip1, ExtensibleChip * i_chip2,
+                        STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
+                                              ExtensibleChip * i_membChip,
+                                              STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemUtils::chnlCsCleanup] "
+    #define PRDF_FUNC "[MemUtils::__cleanupChnlFail] "
 
-    int32_t o_rc = SUCCESS;
+    PRDF_ASSERT( nullptr != i_dmiChip );
+    PRDF_ASSERT( TYPE_DMI == i_dmiChip->getType() );
 
-    do
+    PRDF_ASSERT( nullptr != i_membChip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_membChip->getType() );
+
+    // No cleanup if this is a checkstop attention.
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() ) return;
+
+    // Check if cleanup is still required or has already been done.
+    if ( ! getMembufDataBundle(i_membChip)->iv_doChnlFailCleanup ) return;
+
+    // Cleanup is complete and no longer required on this channel.
+    getMembufDataBundle(i_membChip)->iv_doChnlFailCleanup = false;
+
+    #ifdef __HOSTBOOT_MODULE // only do cleanup in Hostboot, no-op in FSP
+
+    // Note that this is a clean up function. If there are any SCOM errors
+    // we will just move on and try the rest.
+
+    SCAN_COMM_REGISTER_CLASS * reg = nullptr;
+    ExtensibleChip * mcChip = getConnectedParent( i_dmiChip, TYPE_MC );
+    uint32_t dmiPos = i_dmiChip->getPos() % MAX_DMI_PER_MC;
+
+    // Mask off all attentions from the DMI target in the chiplet FIRs.
+    reg = mcChip->getRegister( "MC_CHIPLET_FIR_MASK" );
+    if ( SUCCESS == reg->Read() )
     {
-        if( (  NULL == i_mbChip ) ||
-            ( TYPE_MEMBUF != getTargetType( i_mbChip->GetChipHandle() )))
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid parameters" );
-            o_rc = FAIL; break;
-        }
+        reg->SetBit( 4 + (dmiPos * 2) ); // 4, 6, 8, 10
+        reg->Write();
+    }
 
-        if (( ! i_sc.service_data->IsUnitCS() ) ||
-              (CHECK_STOP == i_sc.service_data->getPrimaryAttnType()) )
-            break;
+    reg = mcChip->getRegister( "MC_CHIPLET_UCS_FIR_MASK" );
+    if ( SUCCESS == reg->Read() )
+    {
+        reg->SetBit( 1 + (dmiPos * 2) ); // 1, 3, 5, 7
+        reg->Write();
+    }
 
-        CenMembufDataBundle * mbdb = getMembufDataBundle( i_mbChip );
-        if ( !mbdb->iv_doChnlFailCleanup )
-            break; // Cleanup has already been done.
+    reg = mcChip->getRegister( "MC_CHIPLET_HA_FIR_MASK" );
+    if ( SUCCESS == reg->Read() )
+    {
+        reg->SetBit( 1 + (dmiPos * 2) ); // 1, 3, 5, 7
+        reg->Write();
+    }
 
-        // Set it as SUE generation point.
-        i_sc.service_data->SetUERE();
+    // Mask off all attentions from the DMI target in the IOMCFIR.
+    reg = mcChip->getRegister( "IOMCFIR_MASK_OR" );
+    reg->SetBitFieldJustified( 8 + (dmiPos * 8), 8, 0xff ); // 8, 16, 24, 32
+    reg->Write();
 
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
-        if ( NULL == mcsChip )
-        {
-            PRDF_ERR( PRDF_FUNC "MCS chip is NULL for Membuf:0x%08X",
-                      i_mbChip->GetId() );
-            o_rc = FAIL; break;
-        }
+    // Mask off all attentions from the MEMBUF target in the chiplet FIRs.
+    const char * reg_strs[] { "TP_CHIPLET_FIR_MASK",
+                              "NEST_CHIPLET_FIR_MASK",
+                              "MEM_CHIPLET_FIR_MASK",
+                              "MEM_CHIPLET_SPA_FIR_MASK" };
+    for ( auto & reg_str : reg_strs )
+    {
+        reg = i_membChip->getRegister( reg_str );
+        reg->setAllBits(); // Blindly mask everything
+        reg->Write();
+    }
 
-        TargetHandle_t mcs = mcsChip->GetChipHandle();
-        ExtensibleChip * procChip = NULL;
-        uint8_t pos = getTargetPosition( mcs );
-        TargetHandle_t proc = getParentChip ( mcs );
+    // For all attached MBAs:
+    //   During runtime, send a dynamic memory deallocation message.
+    //   During Memory Diagnostics, tell MDIA to stop pattern tests.
+    for ( auto & mbaChip : getConnected(i_membChip, TYPE_MBA) )
+    {
+        #ifdef __HOSTBOOT_RUNTIME
+        MemDealloc::port<TYPE_MBA>( mbaChip );
+        #else
+        if ( isInMdiaMode() )
+            mdiaSendEventMsg( mbaChip->getTrgt(), MDIA::STOP_TESTING );
+        #endif
+    }
 
-        if ( NULL == proc )
-        {
-            PRDF_ERR( PRDF_FUNC "Proc is NULL for Mcs:0x%08X", getHuid( mcs ) );
-            o_rc = FAIL; break;
-        }
-
-        procChip = (ExtensibleChip *)systemPtr->GetChip( proc );
-
-        if( NULL == procChip )
-        {
-            PRDF_ERR( PRDF_FUNC "Can not find Proc chip for HUID:0x%08X",
-                      getHuid( proc) );
-            o_rc = FAIL; break;
-        }
-
-        // This is a cleanup function. If we get any error from scom
-        // operations, we will still continue with cleanup.
-        SCAN_COMM_REGISTER_CLASS * l_tpMask =
-              procChip->getRegister("TP_CHIPLET_FIR_MASK");
-        o_rc |= l_tpMask->Read();
-        if ( SUCCESS == o_rc )
-        {
-            // Bits 5-12 maps to attentions from MCS0-MCS7.
-            l_tpMask->SetBit( 5 + pos );
-            o_rc |= l_tpMask->Write();
-        }
-
-        // Mask attentions from the Centaur
-        const char *iomcFirMask = ( pos < 4 )?
-                                  "IOMCFIR_0_MASK_OR":"IOMCFIR_1_MASK_OR";
-
-        SCAN_COMM_REGISTER_CLASS * iomcMask =
-                                 procChip->getRegister( iomcFirMask);
-        if ( pos >= 4 ) pos -= 4;
-
-        // 8 bits are reserved for each Centaur in IOMCFIR.
-        // There are total 4 ( for P system ) centaur supported
-        // in MCS. Bits for first centaur starts from bit 8.
-
-        iomcMask->SetBitFieldJustified( 8+ ( pos*8 ), 8, 0xff);
-
-        o_rc |= iomcMask->Write();
-
-        SCAN_COMM_REGISTER_CLASS * l_tpfirmask   = NULL;
-        SCAN_COMM_REGISTER_CLASS * l_nestfirmask = NULL;
-        SCAN_COMM_REGISTER_CLASS * l_memfirmask  = NULL;
-        SCAN_COMM_REGISTER_CLASS * l_memspamask  = NULL;
-
-        l_tpfirmask   = i_mbChip->getRegister("TP_CHIPLET_FIR_MASK");
-        l_nestfirmask = i_mbChip->getRegister("NEST_CHIPLET_FIR_MASK");
-        l_memfirmask  = i_mbChip->getRegister("MEM_CHIPLET_FIR_MASK");
-        l_memspamask  = i_mbChip->getRegister("MEM_CHIPLET_SPA_FIR_MASK");
-
-        l_tpfirmask->setAllBits();   o_rc |= l_tpfirmask->Write();
-        l_nestfirmask->setAllBits(); o_rc |= l_nestfirmask->Write();
-        l_memfirmask->setAllBits();  o_rc |= l_memfirmask->Write();
-        l_memspamask->setAllBits();  o_rc |= l_memspamask->Write();
-
-
-        for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++ )
-        {
-            ExtensibleChip * mbaChip = mbdb->getMbaChip( i );
-            if( NULL != mbaChip )
-            {
-                TargetHandle_t mba = mbaChip->GetChipHandle();
-                if ( NULL != mba )
-                {
-                    #if  defined(__HOSTBOOT_MODULE) && \
-                        !defined(__HOSTBOOT_RUNTIME)
-                    // This is very small platform specific code. So not
-                    // creating a separate file for this.
-                    int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
-                    if ( SUCCESS != l_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x, SKIP_MBA)"
-                                  " failed", getHuid( mba ) );
-                        o_rc |= l_rc;
-                    }
-                    #else
-                    int32_t l_rc = DEALLOC::mbaGard( mbaChip  );
-                    if ( SUCCESS != l_rc )
-                    {
-                        PRDF_ERR( PRDF_FUNC "mbaGard failed. HUID: 0x%08x",
-                                  getHuid( mba ) );
-                        o_rc |= l_rc;
-                    }
-                    #endif // __HOSTBOOT_MODULE
-                }
-            }
-        }
-
-        // Clean up complete an is no longer required.
-        mbdb->iv_doChnlFailCleanup = false;
-
-    } while(0);
-
-    return o_rc;
+    #endif // Hostboot only
 
     #undef PRDF_FUNC
 }
+
+template<>
+void cleanupChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
+
+    __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( dmiChip, i_chip, io_sc );
+}
+
+template<>
+void cleanupChnlFail<TYPE_DMI>( ExtensibleChip * i_chip,
+                                STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    ExtensibleChip * membChip = getConnectedChild( i_chip, TYPE_MEMBUF, 0 );
+    PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
+
+    __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( i_chip, membChip, io_sc );
+}
+
+template<>
+void cleanupChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
+
+    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
+    {
+        cleanupChnlFail<TYPE_DMI>( dmiChip, io_sc );
+    }
+}
+
 //------------------------------------------------------------------------------
-*/
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

@@ -183,34 +183,6 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
 }
 PRDF_PLUGIN_DEFINE( Membuf, PreAnalysis );
 
-//------------------------------------------------------------------------------
-
-/**
- * @brief  Plugin function called after analysis is complete but before PRD
- *         exits.
- * @param  i_mbChip A Centaur chip.
- * @param  i_sc     The step code data struct.
- * @note   This is especially useful for any analysis that still needs to be
- *         done after the framework clears the FIR bits that were at attention.
- * @return SUCCESS.
- */
-int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
-{
-    #define PRDF_FUNC "[Membuf::PostAnalysis] "
-    int32_t l_rc;
-
-    l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
-    if( SUCCESS != l_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "ChnlCsCleanup() failed");
-    }
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( Membuf, PostAnalysis );
-
 //##############################################################################
 //
 //                               DMIFIR

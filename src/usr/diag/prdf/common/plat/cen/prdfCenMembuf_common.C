@@ -31,6 +31,7 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
+#include <prdfCenMembufDataBundle.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemUtils.H>
 
@@ -51,6 +52,18 @@ namespace cen_centaur
 //##############################################################################
 
 /**
+ * @brief  Plugin that initializes the data bundle.
+ * @param  i_chip A MEMBUF chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( ExtensibleChip * i_chip )
+{
+    i_chip->getDataBundle() = new MembufDataBundle( i_chip );
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( cen_centaur, Initialize );
+
+/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_chip A MEMBUF chip.
@@ -61,14 +74,14 @@ namespace cen_centaur
  */
 int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[cen_centaur::PostAnalysis] "
-
     // Cleanup processor FIR bits on the other side of the channel.
     MemUtils::cleanupChnlAttns<TYPE_MEMBUF>( i_chip, io_sc );
 
-    return SUCCESS;
+    // If there was a channel failure some cleanup is required to ensure
+    // there are no more attentions from this channel.
+    MemUtils::cleanupChnlFail<TYPE_MEMBUF>( i_chip, io_sc );
 
-    #undef PRDF_FUNC
+    return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( cen_centaur, PostAnalysis );
 
