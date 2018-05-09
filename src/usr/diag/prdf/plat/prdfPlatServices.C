@@ -52,6 +52,7 @@
 #include <iipMopRegisterAccess.h>
 #include <ibscomreasoncodes.H>
 #include <p9_proc_gettracearray.H>
+#include <fapi2_spd_access.H>
 
 using namespace TARGETING;
 
@@ -194,6 +195,56 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
     return rc;
 }
 
+//------------------------------------------------------------------------------
+uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
+                      uint8_t *& o_data,
+                      size_t & o_len)
+{
+#define PRDF_FUNC "[PlatServices::getSPDdata] "
+    uint32_t rc = SUCCESS;
+    fapi2::ReturnCode l_rc;
+
+    o_len = 0;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_fapi2_dimm(i_target);
+
+    do {
+      // SPD interface call with NULL blob to get size data
+      l_rc = fapi2::getSPD(l_fapi2_dimm, NULL, o_len);
+
+      // Expect to return the size or non failure
+      if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+      {
+          PRDF_ERR( PRDF_FUNC "Failed to get SPD size from DIMM with HUID= 0x%x, rc: 0x%02X",
+            TARGETING::get_huid(i_target), uint32_t(l_rc) );
+          rc = FAIL;
+          break;
+      }
+      else if (o_len == 0)
+      {
+         PRDF_ERR( PRDF_FUNC "Failed to get SPD size data of DIMM with HUID= 0x%x",
+                    TARGETING::get_huid(i_target) );
+         rc = FAIL;
+         break;
+      }
+
+      //  allocate the blob data of mem size length to hold data
+      o_data = reinterpret_cast<uint8_t *>(malloc(o_len));
+      memset(o_data,0 ,o_len);
+
+      l_rc = fapi2::getSPD(l_fapi2_dimm, o_data, o_len);
+      if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
+      {
+          PRDF_ERR( PRDF_FUNC "Failed to read data from DIMM with HUID= 0x%x",
+                    TARGETING::get_huid(i_target) );
+          rc = FAIL;
+          break;
+      }
+    } while (0);
+
+    return rc;
+#undef PRDF_FUNC
+}
 
 //##############################################################################
 //##                       Processor specific functions

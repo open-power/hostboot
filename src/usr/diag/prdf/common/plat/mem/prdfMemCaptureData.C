@@ -77,17 +77,16 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
         if ( isBufDimm )
         {
-            // TODO RTC 169956
-            //// Get the raw card type (Centaur DIMMs only).
-            //CEN_SYMBOL::WiringType cardType = CEN_SYMBOL::WIRING_INVALID;
-            //int32_t l_rc = getMemBufRawCardType( trgt, cardType );
-            //if ( SUCCESS != l_rc )
-            //{
-            //    PRDF_ERR( PRDF_FUNC "getMemBufRawCardType() failed. MBA:0x%08x",
-            //              getHuid(trgt) );
-            //    break;
-            //}
-            //extMemMru.cardType = cardType;
+            // Get the raw card type (Centaur DIMMs only).
+            CEN_SYMBOL::WiringType cardType = CEN_SYMBOL::WIRING_INVALID;
+            int32_t l_rc = getMemBufRawCardType( trgt, cardType );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemBufRawCardType() failed. MBA:0x%08x",
+                          getHuid(trgt) );
+                break;
+            }
+            extMemMru.cardType = cardType;
         }
         else
         {
