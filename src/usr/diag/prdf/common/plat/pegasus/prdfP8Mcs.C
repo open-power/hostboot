@@ -73,29 +73,6 @@ int32_t Initialize( ExtensibleChip * i_mcsChip )
 PRDF_PLUGIN_DEFINE( Mcs, Initialize );
 
 /**
- * @brief Analysis code that is called before the main analyze() function.
- * @param i_mcsChip An MCS chip.
- * @param i_sc Step Code Data structure
- * @param o_analyzed TRUE if analysis has been done on this chip
- * @return failure or success
- */
-int32_t PreAnalysis( ExtensibleChip * i_mcsChip, STEP_CODE_DATA_STRUCT & i_sc,
-                     bool & o_analyzed )
-{
-    o_analyzed = false;
-
-    // Check for a Centaur Checkstop
-    int32_t o_rc = MemUtils::checkMcsChannelFail( i_mcsChip, i_sc );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( "[Mcs::PreAnalysis] MemUtils::checkMcsChannelFail() failed" );
-    }
-
-    return o_rc;
-}
-PRDF_PLUGIN_DEFINE( Mcs, PreAnalysis );
-
-/**
  * @fn ClearMbsSecondaryBits
  * @brief Clears MBS secondary Fir bits which may come up because of MCIFIR
  * @param  i_chip       The Mcs chip.

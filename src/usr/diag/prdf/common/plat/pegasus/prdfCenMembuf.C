@@ -70,20 +70,6 @@ namespace Membuf
 //##############################################################################
 
 /**
- * @brief  Plugin that initializes the P8 Centaur Membuf data bundle.
- * @param  i_mbaChip A Centaur Membuf chip.
- * @return SUCCESS
- */
-int32_t Initialize( ExtensibleChip * i_mbaChip )
-{
-    i_mbaChip->getDataBundle() = new CenMembufDataBundle( i_mbaChip );
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE( Membuf, Initialize );
-
-//------------------------------------------------------------------------------
-
-/**
  * @fn CheckForRecovered
  * @brief Used when the chip has a CHECK_STOP attention to check for the
  * presence of recovered errors.
@@ -117,71 +103,6 @@ int32_t CheckForRecovered(ExtensibleChip * i_chip,
     return SUCCESS;
 
 } PRDF_PLUGIN_DEFINE( Membuf, CheckForRecovered );
-
-//------------------------------------------------------------------------------
-
-/**
- * @brief Analysis code that is called before the main analyze() function.
- * @param i_mbChip A MEMBUF chip.
- * @param i_sc Step Code Data structure
- * @param o_analyzed TRUE if analysis has been done on this chip
- * @return failure or success
- */
-int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
-                     bool & o_analyzed )
-{
-    #define PRDF_FUNC "[Membuf::PreAnalysis] "
-
-    int32_t o_rc = SUCCESS;
-
-    o_analyzed = false;
-
-    // Check for a Centaur Checkstop
-    do
-    {
-        // Skip if we're already analyzing a unit checkstop
-        if ( i_sc.service_data->IsUnitCS() )
-            break;
-
-        // Skip if we're analyzing a special attention.
-        // This is a required for a rare scenario when Centaur CS bit comes
-        // up after attention has called PRD and PRD was still at start of
-        // analysis.
-        if ( SPECIAL == i_sc.service_data->getPrimaryAttnType() )
-            break;
-
-        // MCIFIR[31] is not always reliable if the unit CS originated on the
-        // Centaur. This is due to packets not getting forwarded to the MCS.
-        // Instead, check for non-zero GLOBAL_CS_FIR.
-
-        SCAN_COMM_REGISTER_CLASS * fir = i_mbChip->getRegister("GLOBAL_CS_FIR");
-        o_rc = fir->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
-                      i_mbChip->GetId() );
-            break;
-        }
-
-        if ( fir->BitStringIsZero() ) break; // No unit checkstop
-
-        // Set Unit checkstop flag
-        i_sc.service_data->setFlag(ServiceDataCollector::UNIT_CS);
-        i_sc.service_data->SetThresholdMaskId(0);
-
-        // Set the cause attention type
-        i_sc.service_data->setSecondaryAttnType(UNIT_CS);
-
-        // Indicate that cleanup is required.
-        mbdb->iv_doChnlFailCleanup = true;
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( Membuf, PreAnalysis );
 
 //##############################################################################
 //
