@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -670,7 +670,7 @@ fapi2::ReturnCode mss_ccs_fail_type(
                 "CCS returned a FAIL condition of \"Calibration Operation Time Out\" ");
 
 fapi_try_exit:
-    return fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
 }
 
 ///
