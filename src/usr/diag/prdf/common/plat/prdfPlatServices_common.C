@@ -39,6 +39,10 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
+#ifdef __HOSTBOOT_MODULE // TODO SW431530
+#include <p9c_query_channel_failure.H>
+#endif
+
 #ifdef __HOSTBOOT_MODULE
 #include <dimmBadDqBitmapFuncs.H>
 #include <p9_io_xbus_read_erepair.H>
@@ -676,6 +680,40 @@ void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
 
     #undef PRDF_FUNC
 } // end function getDimmDqAttr
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
+{
+    #define PRDF_FUNC "[PlatServices::queryChnlFail] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+#ifdef __HOSTBOOT_MODULE // TODO SW431530
+    errlHndl_t errl = nullptr;
+
+    fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt ( i_chip->getTrgt() );
+
+    FAPI_INVOKE_HWP( errl, p9c_query_channel_failure, fapiTrgt, o_chnlFail );
+    if ( nullptr != errl )
+    {
+        PRDF_ERR( PRDF_FUNC "p9c_query_channel_failure(0x%08x) failed",
+                  i_chip->getHuid() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+#else
+    PRDF_ERR( PRDF_FUNC "p9c_query_channel_failure() not supported yet" );
+#endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 // Constants defined from Serial Presence Detect (SPD) specs

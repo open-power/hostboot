@@ -439,14 +439,6 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
             l_rc = FAIL; break;
         }
 
-        // Check for channel fails on the MCS side of this bus.
-        l_rc = MemUtils::checkMcsChannelFail( mcsChip, i_sc );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "checkMcsChannelFail() failed" );
-            break;
-        }
-
         // Do additional bus analysis.
         l_rc = handleLaneRepairEvent( i_procChip, TYPE_MCS, i_mcsPos, i_sc,
                                       false );
