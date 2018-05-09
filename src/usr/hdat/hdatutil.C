@@ -26,6 +26,7 @@
 #include "hdatutil.H"
 #include <i2c/eepromif.H>
 #include <stdio.h>
+#include <string.h>
 #include <p9_frequency_buckets.H>
 #include <util/utilcommonattr.H>
 
@@ -458,12 +459,17 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
                                              char *o_locCode)
 {
     TARGETING::ATTR_PHYS_PATH_type l_physPath;
+    TARGETING::ATTR_LOCATION_CODE_type l_locationCode;
     char *l_pPhysPath;
     char l_locCode[64] = {0};
-
-//@TODO:RTC 149347: Add methods to generate location codes
-
-    if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_physPath))
+    
+    
+    if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_LOCATION_CODE>(l_locationCode)
+                    && (strlen(l_locationCode) > 0))
+    {
+        sprintf(l_locCode, "%s-%s",i_locCodePrefix,l_locationCode);
+    }   
+    else if(i_pFruTarget->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_physPath))
     {
         char *l_cutString;
         char *l_suffix;
@@ -480,31 +486,22 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
             l_cutString = strchr(l_cutString+1, '/');
         }
 
-#if USE_PHYS_PATH_FOR_LOC_CODE
-
-        strncpy(l_hdatslcaentry.location_code,
-        reinterpret_cast<const char *>
-                    (i_Target->getAttr<TARGETING::ATTR_PHYS_PATH>().toString()),
-                                         l_hdatslcaentry.max_location_code_len);
-#else
-
         sprintf(l_locCode, "%s-%s",i_locCodePrefix,(l_suffix+1));
-
-        uint8_t l_index = 0;
-        while(l_index < strlen(l_locCode))
-        {
-            if(l_locCode[l_index] != ' ')
-            {
-                *o_locCode++ = l_locCode[l_index];
-            }
-            l_index++;
-        }
-       // *o_locCode = 0;
-#endif
     }
     else
     {
-        HDAT_ERR("Error accessing ATTR_PHYS_PATH attribute");
+        HDAT_ERR("Error accessing ATTR_PHYS_PATH or ATTR_LOCATION_CODE attribute");
+        return;
+    }
+
+    uint8_t l_index = 0;
+    while(l_index < strlen(l_locCode))
+    {
+        if(l_locCode[l_index] != ' ')
+        {
+            *o_locCode++ = l_locCode[l_index];
+        }
+        l_index++;
     }
 }
 

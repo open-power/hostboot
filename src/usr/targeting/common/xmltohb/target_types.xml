@@ -276,6 +276,9 @@
   <attribute>
     <id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id>
   </attribute>
+  <attribute>
+    <id>LOCATION_CODE</id>
+  </attribute>
 </targetType>
 
 <targetType>
@@ -469,6 +472,9 @@
   <attribute>
     <default>CARD</default>
     <id>CLASS</id>
+  </attribute>
+  <attribute>
+    <id>LOCATION_CODE</id>
   </attribute>
 </targetType>
 
