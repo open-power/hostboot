@@ -1288,6 +1288,9 @@ sub processDimms
             my $proc_target         = $self->getTargetParent($mcbist_target);
             my $dimm_connector_tgt  = $self->getTargetParent($dimm);
 
+            #Get the loc code from connector and update to dimm targ
+            my $loc_code = $self->getAttribute($dimm_connector_tgt,"LOCATION_CODE");
+
             my $mca     = $self->getAttribute($mca_target,       "CHIP_UNIT")%2;
             my $mcs     = $self->getAttribute($mcs_target,       "CHIP_UNIT")%2;
             my $mcbist  = $self->getAttribute($mcbist_target,    "CHIP_UNIT");
@@ -1308,6 +1311,7 @@ sub processDimms
             $self->setAttribute($dimm, "REL_POS", $port_num);
             $self->setAttribute($dimm, "MBA_DIMM", $port_num); #which dimm
             $self->setAttribute($dimm, "MBA_PORT", 0);  #0, each MCA is a port
+            $self->setAttribute($dimm, "LOCATION_CODE",$loc_code);
 
             ## set all FAPI_POS
             my $MCBIST_PER_CHIP = $self->{UNIT_COUNTS}->

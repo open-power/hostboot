@@ -130,6 +130,18 @@
   </attribute>
 
   <attribute>
+    <description>Location code of the Fru target</description>
+    <id>LOCATION_CODE</id>
+    <simpleType>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+  </attribute>
+
+  <attribute>
     <description>Physical hierarchical path to the target</description>
     <id>PHYS_PATH</id>
     <nativeType>
