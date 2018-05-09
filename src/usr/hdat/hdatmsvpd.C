@@ -1208,7 +1208,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                          ++l_mcbistIdx)
             {
                 TARGETING::Target *l_pMcbistTarget = l_mcbistList[l_mcbistIdx];
-
+                
                 TARGETING::PredicateCTM l_mcsPredicate(TARGETING::CLASS_UNIT,
                                                        TARGETING::TYPE_MCS);
 
@@ -1223,6 +1223,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                     TARGETING::TargetService::CHILD,
                                     TARGETING::TargetService::ALL,
                                     &l_funcMcs);
+                uint32_t l_memBusFreq = getMemBusFreq(l_pMcbistTarget);
 
                 //scan all mcs in this proc to get sharing counit
                 for(uint32_t l_mcsIdx = 0;l_mcsIdx<l_mcsList.size(); ++l_mcsIdx)
@@ -1432,7 +1433,6 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                             
                             uint32_t l_dimmId = 
                                     1 << (31 - (l_pDimmTarget->getAttr<TARGETING::ATTR_FAPI_POS>() % MAX_DIMMS_PER_MCBIST));
-                            uint32_t l_memBusFreq = getMemBusFreq(l_pDimmTarget);
                             l_err = addRamFru(l_index,
                                               l_pDimmTarget,
                                               l_dimmRid,

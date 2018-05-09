@@ -2191,20 +2191,10 @@ uint32_t getMemBusFreq(const TARGETING::Target* i_pTarget)
                         i_pTarget->getAttr<TARGETING::ATTR_HUID>());
             }
     }
-    else if((l_class == TARGETING::CLASS_UNIT) && (l_type == TARGETING::TYPE_DIMM))
-    {
-        TARGETING::TYPE  l_mcbistType = TARGETING::TYPE_MCBIST;
-        if(getParent(i_pTarget,l_mcbistType)
-                ->tryGetAttr<TARGETING::ATTR_MSS_FREQ>(l_MemBusFreqInMHz) == false )
-            {
-                HDAT_ERR(" MSS_FREQ not present for MCBIST with huid [0x%08X]",
-                getParent(i_pTarget,l_mcbistType)->getAttr<TARGETING::ATTR_HUID>());
-            }
-    }
     else
     {
 
-        HDAT_ERR(" Input target with HUID [0x%08X] is not of proc/mcbist/dimm target type",
+        HDAT_ERR(" Input target with HUID [0x%08X] is not of proc/mcbist target type",
                         i_pTarget->getAttr<TARGETING::ATTR_HUID>());
     }
  
