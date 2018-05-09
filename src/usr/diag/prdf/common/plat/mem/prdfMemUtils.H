@@ -110,15 +110,6 @@ template<TARGETING::TYPE T>
 uint8_t getDramSize( ExtensibleChip * i_chip, uint8_t i_dimmSlct = 0 );
 
 /**
- * @brief  Check for channel fail attentions on the MCS side of the DMI bus.
- * @param  i_mcsChip An MCS chip.
- * @param  io_sc     The step code data struct.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
-                             STEP_CODE_DATA_STRUCT & io_sc );
-
-/**
  * @brief  determines the type of Centaur based raw card  associated with MBA.
  * @param  i_mba    mba target
  * @param  o_type   raw card type.
@@ -139,6 +130,25 @@ int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
  */
 template<TARGETING::TYPE T>
 void cleanupChnlAttns( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief  Checks for channel fail attentions on the target side of the bus.
+ * @note   If a channel fail attention is present, this function will set the
+ *         secondary attention type to UNIT_CS, among other appropriate flags
+ *         in the SDC. It is important that this is called in the PreAnalysis
+ *         plugin so that PRD knows to look for UNIT_CS attentions instead of
+ *         recoverable attentions.
+ * @note   This only checks one side of the bus. It does not check both sides.
+ * @note   If the secondary attention type is HOST_ATTN, the function exits and
+ *         waits for the next attention. This is for the rare scenario where a
+ *         channel failure occurs after PRD is called to handle a HOST_ATTN.
+ * @param  i_chip MEMBUF, DMI, or MC chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t handleChnlFail( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  After analyzing a memory channel failure, we want to mask off all

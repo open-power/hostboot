@@ -319,7 +319,6 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
 
-
 /**
  * @brief   get DIMM DQ map from FAPI routines
  * @param   i_target      DIMM target
@@ -329,6 +328,16 @@ int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
 template <TARGETING::TYPE>
 void getDimmDqAttr( TARGETING::TargetHandle_t i_target,
                     uint8_t (&io_dqMapPtr)[DQS_PER_DIMM] );
+
+/**
+ * @brief  Queries for a channel fail on the given target.
+ * @param  i_chip     DMI chip.
+ * @param  o_chnlFail True if a channel failure has been detected on this
+ *                    target. False, otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE>
+uint32_t queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
 
 //##############################################################################
 //##                        util functions

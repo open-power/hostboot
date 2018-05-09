@@ -172,6 +172,7 @@ prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 prd_obj_no_sim += p9c_mss_maint_cmds.o
 prd_obj_no_sim += p9c_dimmBadDqBitmapFuncs.o
+prd_obj_no_sim += p9c_query_channel_failure.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the

@@ -64,6 +64,23 @@ int32_t Initialize( ExtensibleChip * i_chip )
 PRDF_PLUGIN_DEFINE( cen_centaur, Initialize );
 
 /**
+ * @brief  Analysis code that is called before the main analyze() function.
+ * @param  i_chip     A MEMBUF chip.
+ * @param  io_sc      The step code data struct.
+ * @param  o_analyzed True if analysis is done on this chip, false otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                     bool & o_analyzed )
+{
+    o_analyzed = false;
+
+    // Check for a channel failure before analyzing this chip.
+    return MemUtils::handleChnlFail<TYPE_MEMBUF>( i_chip, io_sc );
+}
+PRDF_PLUGIN_DEFINE( cen_centaur, PreAnalysis );
+
+/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_chip A MEMBUF chip.
@@ -108,11 +125,15 @@ int32_t analyzeDmiChnlFail( ExtensibleChip * i_mbChip,
 
     do
     {
+        // Query the connected DMI for channel fail attentions.
         ExtensibleChip * dmiChip = getConnectedParent( i_mbChip, TYPE_DMI );
-
-        // TODO: RTC 136123 Need to call new interface that queries if there was
-        //       a channel fail attention on the other side of the interface.
         bool dmiChnlFail = false;
+        if ( SUCCESS != queryChnlFail<TYPE_DMI>(dmiChip, dmiChnlFail) )
+        {
+            PRDF_ERR( PRDF_FUNC "queryChnlFail(0x%08x) failed",
+                      dmiChip->getHuid() );
+            break;
+        }
 
         // If there is a channel fail attention on the other side of the bus,
         // analyze the DMI target.

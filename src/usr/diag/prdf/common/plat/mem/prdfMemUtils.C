@@ -506,69 +506,153 @@ void cleanupChnlAttns<TYPE_MEMBUF>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 136123
-int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
-                             STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemUtils::checkMcsChannelFail] "
+template<TARGETING::TYPE T>
+uint32_t __queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
 
-    int32_t o_rc = SUCCESS;
+template<>
+uint32_t __queryChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                       bool & o_chnlFail )
+{
+    #define PRDF_FUNC "[MemUtils::__queryChnlFail] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    o_chnlFail = false;
 
     do
     {
-        // Skip if already handling unit checkstop.
-        if ( io_sc.service_data->IsUnitCS() )
-            break;
-
-        // Must be an MCS.
-        if ( TYPE_MCS != getTargetType(i_mcsChip->GetChipHandle()) )
-        {
-            PRDF_ERR( PRDF_FUNC "i_mcsChip is not TYPE_MCS" );
-            o_rc = FAIL; break;
-        }
-
-        // Check MCIFIR[31] for presence of channel fail.
-        SCAN_COMM_REGISTER_CLASS * mcifir = i_mcsChip->getRegister("MCIFIR");
-        o_rc = mcifir->Read();
+        // Simply check the Centaur CS global reg for active attentions.
+        SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_CS_FIR");
+        o_rc = fir->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MCIFIR" );
+            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
+                      i_chip->getHuid() );
             break;
         }
 
-        if ( !mcifir->IsBitSet(31) ) break; // No channel fail, so exit.
-
-        // Set unit checkstop flag and cause attention type.
-        io_sc.service_data->setFlag(ServiceDataCollector::UNIT_CS);
-        io_sc.service_data->setSecondaryAttnType(UNIT_CS);
-        io_sc.service_data->SetThresholdMaskId(0);
-
-        // Set it as SUE generation point.
-        io_sc.service_data->SetUERE();
-
-        // Indicate that cleanup is required.
-        P8McsDataBundle * mcsdb = getMcsDataBundle( i_mcsChip );
-        ExtensibleChip * membChip =  mcsdb->getMembChip();
-        if ( NULL == membChip )
-        {
-            PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL" );
-            o_rc = FAIL; break;
-        }
-        MembufDataBundle * mbdb = getMembufDataBundle( membChip );
-        mbdb->iv_doChnlFailCleanup = true;
+        o_chnlFail = !fir->BitStringIsZero();
 
     } while (0);
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed: i_mcsChip=0x%08x", i_mcsChip->GetId() );
-    }
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-*/
+
+template<>
+uint32_t __queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
+{
+    // There is a HWP on the processor side that will query the CHIFIR, IOMCFIR,
+    // and associated configuration registers for a valid channel failure
+    // attention.
+    return PlatServices::queryChnlFail<TYPE_DMI>( i_chip, o_chnlFail );
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __setChnlFailCleanup( ExtensibleChip * i_chip );
+
+template<>
+void __setChnlFailCleanup<TYPE_MEMBUF>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    getMembufDataBundle(i_chip)->iv_doChnlFailCleanup = true;
+}
+
+template<>
+void __setChnlFailCleanup<TYPE_DMI>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    ExtensibleChip * membChip = getConnectedChild( i_chip, TYPE_MEMBUF, 0 );
+    PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
+
+    __setChnlFailCleanup<TYPE_MEMBUF>( membChip );
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+uint32_t handleChnlFail( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Skip if already handling channel failure.
+        if ( io_sc.service_data->IsUnitCS() ) break;
+
+        // Skip if currently analyzing a host attention. This is a required for
+        // a rare scenario when a channel failure occurs after PRD is called to
+        // handle the host attention.
+        if ( HOST_ATTN == io_sc.service_data->getPrimaryAttnType() ) break;
+
+        // Look for the channel fail attention.
+        bool isChnlFail = false;
+        uint32_t o_rc = __queryChnlFail<T>( i_chip, isChnlFail );
+        if ( SUCCESS != o_rc ) break;
+
+        if ( ! isChnlFail ) break; // No channel fail, nothing more to do.
+
+        // Change the secondary attention type to UNIT_CS so the rule code will
+        // start looking for UNIT_CS attentions instead of recoverable.
+        io_sc.service_data->setSecondaryAttnType( UNIT_CS );
+
+        // Set the UNIT_CS flag in the SDC to indicate a channel failure has
+        // been detected and there is no need to check again.
+        io_sc.service_data->setFlag( ServiceDataCollector::UNIT_CS );
+
+        // Make the error log predictive and set threshold.
+        io_sc.service_data->setFlag( ServiceDataCollector::SERVICE_CALL );
+        io_sc.service_data->setFlag( ServiceDataCollector::AT_THRESHOLD );
+
+        // Channel failures will always send SUEs.
+        io_sc.service_data->setFlag( ServiceDataCollector::UERE );
+
+        // Indicate cleanup is required on this channel.
+        __setChnlFailCleanup<T>( i_chip );
+
+    } while (0);
+
+    return o_rc;
+}
+
+template
+uint32_t handleChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                      STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t handleChnlFail<TYPE_DMI>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+uint32_t handleChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
+                                  STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
+    {
+        o_rc = handleChnlFail<TYPE_DMI>( dmiChip, io_sc );
+        if ( SUCCESS != o_rc ) break;
+    }
+
+    return o_rc;
+}
 
 //------------------------------------------------------------------------------
 
