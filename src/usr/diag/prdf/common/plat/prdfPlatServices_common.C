@@ -682,8 +682,113 @@ void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
 } // end function getDimmDqAttr
 
 //------------------------------------------------------------------------------
+// Constants defined from Serial Presence Detect (SPD) specs
+//---------------------------------------------------------------------
+const uint8_t SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE = 0x02;
+const uint8_t SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD_EXT = 0x3e;
+const uint8_t SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD     = 0x3e;
+const uint8_t SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD_EXT = 0x82;
+const uint8_t SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD     = 0x82;
 
-/* TODO RTC 169956
+const uint8_t RAW_CARD_EXT_MASK         = 0x80;
+const uint8_t RAW_CARD_EXT_SHIFT        = 0x07;
+const uint8_t RAW_CARD_MASK             = 0x1f;
+const uint8_t BASIC_MEMORY_TYPE_DDR4    = 0x0c;
+
+enum SPD_MODSPEC_COM_REF_RAW_CARD
+{
+  SPD_MODSPEC_COM_REF_RAW_CARD_A = 0x00,
+  SPD_MODSPEC_COM_REF_RAW_CARD_B = 0x01,
+  SPD_MODSPEC_COM_REF_RAW_CARD_C = 0x02,
+  SPD_MODSPEC_COM_REF_RAW_CARD_D = 0x03,
+};
+//---------------------------------------------------------------------
+
+int32_t  getSpdModspecComRefRawCard(
+                      const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_pTarget,
+                      uint8_t & o_rawCard )
+{
+#define PRDF_FUNC "[PlatServices::getSpdModspecComRefRawCard] "
+
+    int32_t rc = SUCCESS;
+    o_rawCard = WIRING_INVALID;
+    size_t l_size = 0;
+    uint8_t * l_blobData = nullptr;
+
+    do{
+      // Grab the SPD data for this DIMM
+      // This has an FSP and Hostboot implementation
+      rc = getSpdData(i_pTarget, l_blobData, l_size);
+      if (rc != SUCCESS)
+      {
+        break;
+      }
+
+      // Now parse the SPD data for the RawCard
+      uint8_t l_card = 0;
+      uint8_t l_cardExt = 0;  // 0 or 1
+
+      uint8_t RawCardIdx = SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD;
+      uint8_t RawCardExtIdx = SPD_IDX_DDR3_MODSPEC_COM_REF_RAW_CARD_EXT;
+
+      if ( (l_size > SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE) &&
+           l_blobData[SPD_IDX_MODSPEC_COM_REF_BASIC_MEMORY_TYPE] ==
+           BASIC_MEMORY_TYPE_DDR4 )
+      {
+         RawCardIdx = SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD;
+         RawCardExtIdx = SPD_IDX_DDR4_MODSPEC_COM_REF_RAW_CARD_EXT;
+      }
+
+      // Get the Reference Raw Card Extension (0 or 1)
+      if (l_size > RawCardExtIdx)
+      {
+         l_cardExt = ( (l_blobData[RawCardExtIdx] & RAW_CARD_EXT_MASK) >>
+                       RAW_CARD_EXT_SHIFT );
+      }
+      else
+      {
+         PRDF_ERR( PRDF_FUNC "SPD data size too small (%ld, RAW_CARD_EXT %d)",
+                    l_size, RawCardExtIdx );
+         rc = FAIL;
+         break;
+      }
+
+      // Get the References Raw Card (bits 4-0)
+      // When Reference Raw Card Extension = 0
+      //    Reference raw cards A through AL
+      // When Reference Raw Card Extension = 1
+      //    Reference raw cards AM through CB
+      if (l_size > RawCardIdx)
+      {
+         l_card = (l_blobData[RawCardIdx] & RAW_CARD_MASK);
+      }
+      else
+      {
+         PRDF_ERR( PRDF_FUNC "SPD data size too small (%d, RAW_CARD %d)",
+                    l_size, RawCardIdx );
+         rc = FAIL;
+         break;
+      }
+
+      // Raw Card = 0x1f(ZZ) means no JEDEC reference raw card design used.
+      // Have one ZZ in the return merged enumeration.
+      if (0x1f == l_card)
+      {
+          l_cardExt = 1;  //Just one ZZ in the enumeration (0x3f)
+      }
+
+      // Merge into a single enumeration
+      o_rawCard = (l_cardExt << 5) | l_card;
+
+    } while (0);
+
+    free(l_blobData);
+
+    return rc;
+#undef PRDF_FUNC
+}
+
+
 int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                               WiringType & o_cardType )
 {
@@ -718,22 +823,11 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 
         // All logical DIMMs connected to this MBA are on the same card as the
         // MBA so we can use any connected DIMM to query for the raw card type.
-
-        errlHndl_t errl = NULL;
-        fapi::Target fapiDimm = getFapiTarget( l_dimmList[0] );
         uint8_t l_cardType = WIRING_INVALID;
-
-        FAPI_INVOKE_HWP( errl,
-                         fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard,
-                         &fapiDimm,
-                         l_cardType );
-
-        if ( NULL != errl )
+        o_rc = getSpdModspecComRefRawCard(l_dimmList[0], l_cardType);
+        if ( o_rc != SUCCESS )
         {
-            PRDF_ERR( PRDF_FUNC "fapiPlatGetSpdModspecComRefRawCard() failed on"
-                      "DIMM 0x%08X", getHuid(l_dimmList[0]) );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
+            break;
         }
 
         uint8_t l_version = getDramGen<TYPE_MBA>( i_mba );
@@ -748,12 +842,12 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 
         switch ( l_cardType )
         {
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_A:
-                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+            case SPD_MODSPEC_COM_REF_RAW_CARD_A:
+                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
                     o_cardType = CEN_TYPE_A;
                 }
-                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
                     o_cardType = CEN_TYPE_A4;
                 }
@@ -763,12 +857,12 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 }
                 break;
 
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B:
-                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+            case SPD_MODSPEC_COM_REF_RAW_CARD_B:
+                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
                     o_cardType = CEN_TYPE_B;
                 } // end if DDR3
-                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
                     o_cardType = CEN_TYPE_B4;
                 } // end else if DDR4
@@ -778,12 +872,12 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 } // end else unknown DRAM version
                 break;
 
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_C:
-                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+            case SPD_MODSPEC_COM_REF_RAW_CARD_C:
+                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
                     o_cardType = CEN_TYPE_C;
                 }
-                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
                     o_cardType = CEN_TYPE_C4;
                 }
@@ -793,12 +887,12 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 }
                 break;
 
-            case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_D:
-                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+            case SPD_MODSPEC_COM_REF_RAW_CARD_D:
+                if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
                     o_cardType = CEN_TYPE_D;
                 }
-                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
                     o_cardType = CEN_TYPE_D4;
                 }
@@ -812,13 +906,16 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 o_cardType = WIRING_INVALID; // Anything unsupported
         }
 
+        PRDF_INF( PRDF_FUNC "DIMM 0x%08x - RawType 0x%02x, version = 0x%02x => 0x%02x card type",
+          getHuid(l_dimmList[0]), l_cardType, l_version, o_cardType );
+
     } while(0);
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-*/
+
 
 //##############################################################################
 //##                    Maintenance Command class wrapper

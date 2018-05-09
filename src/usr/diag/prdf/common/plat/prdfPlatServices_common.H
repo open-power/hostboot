@@ -316,10 +316,9 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
  *                      the raw card type currently is not supported.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 169956
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
-*/
+
 
 /**
  * @brief   get DIMM DQ map from FAPI routines
