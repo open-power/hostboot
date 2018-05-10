@@ -59,10 +59,6 @@ namespace DUMP
 errlHndl_t doDumpCollect(void)
 {
     TRACFCOMP(g_trac_dump, "doDumpCollect - start ");
-
-    // Use relocated payload base to get MDST, MDDT, MDRT details
-    RUNTIME::useRelocatedPayloadAddr(true);
-
     errlHndl_t l_err = NULL;
 
     // Table Sizes
@@ -102,8 +98,6 @@ errlHndl_t doDumpCollect(void)
         }
 
     }while (0);
-
-    RUNTIME::useRelocatedPayloadAddr(false);
 
     return (l_err);
 }
@@ -608,10 +602,15 @@ errlHndl_t copySrcToDest(dumpEntry *srcTableEntry,
             break;
         }
 
+        // Update the MDRT Count to Attribute to be fetched in istep 21
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_sys = NULL;
+        l_targetService.getTopLevelTarget(l_sys);
+        l_sys->setAttr<TARGETING::ATTR_MPIPL_HB_MDRT_COUNT>(l_resultCount);
+
         //Update actual count in RUNTIME
         RUNTIME::saveActualCount(RUNTIME::MS_DUMP_RESULTS_TBL,
                                  l_resultCount);
-
 
         //Write actual count into memory as well
         // We know this will get whacked when FSP reloads the PHYP

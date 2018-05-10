@@ -35,6 +35,8 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/targplatutil.H>
 
+#include <runtime/runtime.H>
+
 #include <p9_mpipl_chip_cleanup.H>
 #include <fapi2/plat_hwp_invoker.H>
 
@@ -150,99 +152,80 @@ void* call_host_mpipl_service (void *io_pArgs)
 
             errlHndl_t l_errMsg = NULL;
 
-            // Dump relies upon the runtime module
-            // Not declaring in istep DEP list cause if we load it
-            // we want it to stay loaded
-            if (  !VFS::module_is_loaded( "libruntime.so" ) )
+            // Use relocated payload base to get MDST, MDDT, MDRT details
+            RUNTIME::useRelocatedPayloadAddr(true);
+
+            do
             {
-                l_err = VFS::module_load( "libruntime.so" );
+                // send the start message
+                l_errMsg = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
 
-                if ( l_err )
-                {
-                    //  load module returned with errl set
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "Could not load runtime module" );
-                }
-            }
-
-            // If dump module successfully loaded then continue with DumpCollect
-            // and messaging
-            if (!l_err)
-            {
-                do
-                {
-                    // send the start message
-                    l_errMsg = DUMP::sendMboxMsg(DUMP::DUMP_MSG_START_MSG_TYPE);
-
-                    // If error, commit and send error message.
-                    if (l_errMsg)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR : returned from DUMP::sendMboxMsg - dump start" );
-
-                        errlCommit( l_errMsg, HWPF_COMP_ID );
-
-                        // don't break in this case because we not want to fail
-                        // the istep on the dump collect so we will continue
-                        // after we log the errhandle that we can't send a
-                        // message.
-                    }
-
-                    // Call the dump collect
-                    l_err = DUMP::doDumpCollect();
-
-                    // Got a Dump Collect error.. Commit the dumpCollect
-                    // errorlog and then send an dump Error mbox message
-                    // and FSP will decide what to do.
-                    // We do not want dump Collect failures to terminate the
-                    // istep.
-                    if (l_err)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                             "ERROR : returned from DUMP::HbDumpCopySrcToDest");
-
-                        break;
-                    }
-
-                } while(0);
-
-                DUMP::DUMP_MSG_TYPE msgType = DUMP::DUMP_MSG_END_MSG_TYPE;
-
-                // Send dumpCollect success trace
-                if (!l_err)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "SUCCESS : doDumpCollect" );
-                }
-                // got an error that we need to send a ERROR message to FSP
-                // and commit the errorlog from dumpCollect.
-                else
-                {
-                    msgType = DUMP::DUMP_MSG_ERROR_MSG_TYPE;
-
-                    // Commit the dumpCollect errorlog from above as
-                    // we dont want dump collect to kill the istep
-                    errlCommit( l_err, HWPF_COMP_ID );
-
-                }
-
-                // Send an Error mbox msg to FSP (either end or error)
-                l_errMsg = DUMP::sendMboxMsg(msgType);
-
+                // If error, commit and send error message.
                 if (l_errMsg)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : returned from DUMP::sendMboxMsg" );
+                   "ERROR : returned from DUMP::sendMboxMsg - dump start" );
 
                     errlCommit( l_errMsg, HWPF_COMP_ID );
+
+                    // don't break in this case because we not want to fail
+                    // the istep on the dump collect so we will continue
+                    // after we log the errhandle that we can't send a
+                    // message.
                 }
 
+                // Call the dump collect
+                l_err = DUMP::doDumpCollect();
+
+                // Got a Dump Collect error.. Commit the dumpCollect
+                // errorlog and then send an dump Error mbox message
+                // and FSP will decide what to do.
+                // We do not want dump Collect failures to terminate the
+                // istep.
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                         "ERROR : returned from DUMP::HbDumpCopySrcToDest");
+
+                    break;
+                }
+
+            } while(0);
+
+            DUMP::DUMP_MSG_TYPE msgType = DUMP::DUMP_MSG_END_MSG_TYPE;
+
+            // Send dumpCollect success trace
+            if (!l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS : doDumpCollect" );
             }
+            // got an error that we need to send a ERROR message to FSP
+            // and commit the errorlog from dumpCollect.
             else
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : returned from VFS::module_load (libruntime.so)");
+                msgType = DUMP::DUMP_MSG_ERROR_MSG_TYPE;
+
+                // Commit the dumpCollect errorlog from above as
+                // we dont want dump collect to kill the istep
+                errlCommit( l_err, HWPF_COMP_ID );
+
             }
+
+            // Send an Error mbox msg to FSP (either end or error)
+            l_errMsg = DUMP::sendMboxMsg(msgType);
+
+            if (l_errMsg)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : returned from DUMP::sendMboxMsg" );
+
+                errlCommit( l_errMsg, HWPF_COMP_ID );
+            }
+
+             RUNTIME::useRelocatedPayloadAddr(false);
+             // Wipe out our cache of the NACA/SPIRA pointers
+             RUNTIME::rediscover_hdat();
         }
 
         // If got an error in the procedure or collection of the dump kill the

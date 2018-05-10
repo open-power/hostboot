@@ -119,6 +119,20 @@
 </attribute>
 
 <attribute>
+    <id>MPIPL_HB_MDRT_COUNT</id>
+    <description>Actual MDRT count in Memory Preserving IPL mode.</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
     <id>IS_SLAVE_DRAWER</id>
     <description>0 = is master node, 1 = is slave node</description>
     <simpleType>
