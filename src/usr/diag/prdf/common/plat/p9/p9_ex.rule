@@ -330,7 +330,7 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     /** L2FIR[16]
      *  Cache line inhibited hit cacheable space
      */
-    (rL2FIR, bit(16)) ? self_th_1;
+    (rL2FIR, bit(16)) ? self_nogard_th_1;
 
     /** L2FIR[17]
      *  (RC) load received pb cresp addr error
@@ -375,7 +375,7 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     /** L2FIR[25]
      *  L2 castout or CN cresp addr err
      */
-    (rL2FIR, bit(25)) ? self_M_level2_L_th_1;
+    (rL2FIR, bit(25)) ? self_M_nogard_level2_L_th_1;
 
     /** L2FIR[26]
      *  LVDIR tracking PE

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -82,3 +82,17 @@ actionclass core_recovery_workaround
     try( analyze(connected(TYPE_CORE, 0)),
          analyze(connected(TYPE_CORE, 1)) );
 };
+
+actionclass self_nogard_th_1
+{
+    calloutSelfMedNoGard;
+    threshold1;
+};
+
+actionclass self_M_nogard_level2_L_th_1
+{
+    calloutSelfMedNoGard;
+    callout2ndLvlLow;
+    threshold1;
+};
+
