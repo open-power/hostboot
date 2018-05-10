@@ -3463,6 +3463,40 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
             }
         }
 
+        // Open Unsecure Memory Region for HBRT Rsvd Mem Trace Section
+        uint64_t l_RsvdMemRtTraceAddr = 0;
+        uint64_t l_RsvdMemRtTraceSize = 0;
+
+        //get the HBRT Rsvd Mem Trace Section addr and size
+        l_err = getRsvdMemTraceBuf(l_RsvdMemRtTraceAddr,l_RsvdMemRtTraceSize);
+
+        if(l_err)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): getRsvdMemTraceBuf() failed proc = 0x%X",
+                  l_id);
+
+            break;
+        }
+
+        if((l_RsvdMemRtTraceAddr != 0) && (l_RsvdMemRtTraceSize != 0))
+        {
+            // Open Unsecure Memory Region for HBRT Rsvd Mem Trace Section
+            l_err = SBEIO::openUnsecureMemRegion(l_RsvdMemRtTraceAddr,
+                                                 l_RsvdMemRtTraceSize,
+                                                 false, //Read-Only
+                                                 l_procChip);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK "openUntrustedSpCommArea(): openUnsecureMemRegion() failed proc = 0x%X addr = 0x%016llx size = 0x%X",
+                          l_id,
+                          l_RsvdMemRtTraceAddr,
+                          l_RsvdMemRtTraceSize);
+
+                break;
+            }
+
+        }
+
     }
     if(l_err)
     {
@@ -3481,6 +3515,79 @@ void setPayloadBaseAddress(uint64_t i_payloadAddress)
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     sys->setAttr<TARGETING::ATTR_PAYLOAD_BASE>(i_payloadAddress);
+}
+
+errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
+{
+    errlHndl_t l_elog = nullptr;
+    uint64_t l_rsvMemDataAddr = 0;
+    uint64_t l_rsvMemDataSize = 0;
+    hdatMsVpdRhbAddrRange_t* l_rngPtr = nullptr;
+    Util::hbrtTableOfContents_t * l_hbTOC = nullptr;
+
+    do{
+        // We have only one HBRT_MEM_LABEL_TRACEBUF section across the system.
+        // Loop through all RESERVED_MEM sections in the system (of all nodes),
+        // and find out the section with label HBRT_MEM_LABEL_TRACEBUF
+        uint64_t l_StartInstance = 0;  //start from 0
+        uint64_t l_EndInstance = 0;
+
+        l_elog = RUNTIME::get_instance_count(RUNTIME::RESERVED_MEM,l_EndInstance);
+        if(l_elog != nullptr)
+        {
+            TRACFCOMP( g_trac_runtime,
+                        "getRsvdMemTraceBuf() fail get_instance_count");
+            break;
+        }
+
+
+        for (uint64_t l_instance = l_StartInstance ; l_instance < l_EndInstance; l_instance++)
+        {
+
+            // Get the address of the section
+            l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
+                    l_instance,
+                    l_rsvMemDataAddr,
+                    l_rsvMemDataSize );
+            if(l_elog != nullptr)
+            {
+                TRACFCOMP( g_trac_runtime,
+                        "getRsvdMemTraceBuf fail get_host_data_section instance = %d",
+                        l_instance);
+                break;
+            }
+
+            l_rngPtr = reinterpret_cast<hdatMsVpdRhbAddrRange_t *>(l_rsvMemDataAddr);
+
+            assert(l_rngPtr != nullptr, "get_host_data_section returned nullptr");
+
+            const char* l_region = reinterpret_cast<const char *>(l_rngPtr->hdatRhbLabelString);
+
+            if (strcmp(l_region,"HBRT_RSVD_MEM__DATA")== 0)
+            {
+                TRACFCOMP( g_trac_runtime,
+                        "getRsvdMemTraceBuf() Found HBRT_RSVD_MEM__DATA section");
+
+                 l_hbTOC = reinterpret_cast<Util::hbrtTableOfContents_t *>(
+                            l_rngPtr->hdatRhbAddrRngStrAddr);
+                o_RsvdMemAddress = Util::hb_find_rsvd_mem_label(Util::HBRT_MEM_LABEL_TRACEBUF,
+                                                                         l_hbTOC,
+                                                                         o_size);
+                if((o_RsvdMemAddress != 0)  && (o_size != 0))
+                {
+                    TRACFCOMP( g_trac_runtime,
+                            "getRsvdMemTraceBuf() Found HBRT_MEM_LABEL_TRACEBUF section 0x%016llx size = 0x%X",
+                            o_RsvdMemAddress,o_size);
+                    break;
+                }
+            }
+
+        }
+
+    }while(0);
+
+    return l_elog;
+
 }
 
 } //namespace RUNTIME
