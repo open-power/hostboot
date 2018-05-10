@@ -313,31 +313,28 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Return whether a given freq is supported
-/// @param[in] a freq to check for
-/// @param[in] reference to a std::vector of supported freqs (sorted)
-/// @return bool, true iff input freq is supported
-///
-bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs)
-{
-    return std::binary_search(i_freqs.begin(), i_freqs.end(), i_freq);
-}
-
-///
 /// @brief Create a vector of support freq based on VPD config
-/// @param[in] MCBIST target for which to get the DIMM configs
-/// @param[out] reference to a std::vector of supported VPD frequencies
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[out] o_vpd_supported_freqs reference to a 2 dimensional vector of supported VPD frequencies for each MCA
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                       std::vector<uint32_t>& o_vpd_supported_freqs)
+                                       std::vector<std::vector<uint32_t>>& o_vpd_supported_freqs)
 {
     uint8_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {};
     uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {};
-    bool is_first_supported_freq = true;
+
+    // This bitmap will keep track of the ports we visit.
+    // Any we don't are not configured, so will support all frequencies in the scoreboard
+    fapi2::buffer<uint8_t> configured_ports;
 
     // Clearing output Just.In.Case
     o_vpd_supported_freqs.clear();
+
+    for ( size_t l_index = 0; l_index < PORTS_PER_MCBIST; ++l_index )
+    {
+        o_vpd_supported_freqs.push_back(std::vector<uint32_t>());
+    }
 
     fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> l_vpd_info(fapi2::MemVpdData::MR);
 
@@ -345,9 +342,17 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
     {
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(mcs) )
         {
+            const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(p);
+            FAPI_TRY( configured_ports.setBit(l_port_pos) );
+
             if( mss::count_dimm(p) == 0 )
             {
-                // Cronus lets you have an MCA w/no DIMMs...
+                // Cronus lets you have an MCA w/no DIMMs. In this case, we say the port supports all frequencies
+                for( const auto& freq : NIMBUS_SUPPORTED_FREQS )
+                {
+                    o_vpd_supported_freqs[l_port_pos].push_back(freq);
+                }
+
                 continue;
             }
 
@@ -373,16 +378,6 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
                 {
                     FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
 
-                    // If we added a freq that was supported in one MCA, but isn't supported for
-                    // another MCA under the same MCBIST (such as one port running single drop and another dual drop),
-                    // we remove it from the VPD supported freq list.
-                    auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
-
-                    if( l_it != o_vpd_supported_freqs.end()  )
-                    {
-                        o_vpd_supported_freqs.erase(l_it);
-                    }
-
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                     continue;
                 }
@@ -401,35 +396,33 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MC
                 {
                     FAPI_INF("Couldn't retrieve MR data from VPD for this config %s -- skipping freq %d MT/s", mss::c_str(p), freq );
 
-                    // If we added a freq that was supported in one MCA, but isn't supported for
-                    // another MCA under the same MCBIST (such as one port running single drop and another dual drop),
-                    // we remove it from the VPD supported freq list.
-                    auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
-
-                    if( l_it != o_vpd_supported_freqs.end()  )
-                    {
-                        o_vpd_supported_freqs.erase(l_it);
-                    }
-
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                     continue;
                 }
 
-                // Add non-repeating supported freqs
-                auto l_it = std::find(o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end(), freq);
-
-                if( l_it == o_vpd_supported_freqs.end() || is_first_supported_freq )
-                {
-                    is_first_supported_freq = false;
-                    FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
-                    o_vpd_supported_freqs.push_back(freq);
-                }
+                // Add supported freqs to our output
+                FAPI_INF("VPD supported freq added: %d for %s", freq, mss::c_str(p) );
+                o_vpd_supported_freqs[l_port_pos].push_back(freq);
             }// freqs
         }// mca
     }//mcs
 
+    // Mark any ports we didn't visit as supporting all frequencies
+    for ( uint64_t l_port_pos = 0; l_port_pos < PORTS_PER_MCBIST; ++l_port_pos )
+    {
+        if ( !configured_ports.getBit(l_port_pos) )
+        {
+            for ( const auto l_freq : NIMBUS_SUPPORTED_FREQS )
+            {
+                o_vpd_supported_freqs[l_port_pos].push_back(l_freq);
+            }
+        }
+    }
 
-    std::sort( o_vpd_supported_freqs.begin(), o_vpd_supported_freqs.end() );
+    for ( auto& l_freqs : o_vpd_supported_freqs )
+    {
+        std::sort( l_freqs.begin(), l_freqs.end() );
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -438,42 +431,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Removes frequencies unsupported by SPD from a sorted list of supported freqs -- helper function for testing
+/// @brief Retrieves max frequency each port supports due to DIMM SPD
 /// @param[in] i_target the MCBIST target
-/// @param[in] i_highest_freq largest SPD supported freq
-/// @param[in,out] io_freqs std::vector of VPD supported freqs (sorted)
-///
-void rm_unsupported_spd_freqs(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                              const uint32_t i_highest_freq,
-                              std::vector<uint32_t>& io_freqs)
-{
-
-    // Don't use 'auto' since I want a const iterator and HB compiler
-    // bombs out using 'const auto'...
-    // The idea here is that if SPD across and MC can only support 2133 MT/s,
-    // we remove any supported frequencies in the vector higher than that (e.g. 2400, 2666)
-    auto it = std::upper_bound(io_freqs.begin(), io_freqs.end(), i_highest_freq);
-
-    // Remove all frequencies higher than max supported SPD freq per MCBIST
-    // since we set freq at that level
-    if( it != io_freqs.end() )
-    {
-        io_freqs.erase(it, io_freqs.end());
-    }
-
-    return;
-}
-
-///
-/// @brief Retrieves largest supported frequency the MC supports due to DIMM SPD
-/// @param[in] i_target the MCBIST target
-/// @param[out] o_highest_freq the largest SPD supported freq
+/// @param[out] o_supported_freqs reference to vector of max SPD supported freq for each port
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode largest_spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-        uint32_t& o_highest_freq)
+fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                     std::vector<uint32_t>& o_supported_freqs)
 {
     uint64_t l_largest_tck = 0;
+
+    // Start with a really high value so we can use std::min to reduce it below
+    o_supported_freqs = std::vector<uint32_t>(PORTS_PER_MCBIST, ~(0));
 
     // Get cached decoder
     std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
@@ -486,8 +455,11 @@ fapi2::ReturnCode largest_spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCB
     for ( const auto& l_cache : l_factory_caches )
     {
         const auto l_dimm = l_cache->iv_target;
+        const auto l_mca = mss::find_target<TARGET_TYPE_MCA>(l_dimm);
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(l_mca);
         uint64_t l_tckmax_in_ps = 0;
         uint64_t l_tck_min_in_ps = 0;
+        uint32_t l_dimm_freq = 0;
 
         FAPI_TRY( get_tckmax(l_cache, l_tckmax_in_ps),
                   "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
@@ -498,11 +470,13 @@ fapi2::ReturnCode largest_spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCB
         // But less than tCKmax
         l_largest_tck = std::max(l_largest_tck, l_tck_min_in_ps);
         l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
-    }
 
-    FAPI_TRY( mss::ps_to_freq(l_largest_tck, o_highest_freq) );
-    FAPI_INF("Biggest freq supported from SPD %d MT/s for %s",
-             o_highest_freq, mss::c_str(i_target));
+        FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq) );
+        FAPI_INF("Biggest freq supported from SPD %d MT/s for %s",
+                 l_dimm_freq, mss::c_str(l_dimm));
+
+        o_supported_freqs[l_port_pos] = std::min(l_dimm_freq, o_supported_freqs[l_port_pos]);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -522,47 +496,58 @@ fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
 {
     o_freqs.clear();
 
-    std::vector<uint32_t> l_vpd_supported_freqs;
-    uint32_t l_largest_spd_freq = 0;
-    uint8_t l_req_sync_mode = 0;
-
-    // Retrieve system MRW constraints
+    freq_scoreboard l_scoreboard;
     std::vector<uint32_t> l_max_freqs(NUM_MAX_FREQS, 0);
+    std::vector<std::vector<uint32_t>> l_vpd_supported_freqs;
+    std::vector<uint32_t> l_spd_supported_freq(NUM_MAX_FREQS, 0);
+    uint8_t l_req_sync_mode = 0;
+    std::vector<uint8_t> l_deconfigured = {0};
+
+    // Retrieve system MRW, SPD, and VPD constraints
     FAPI_TRY( mss::max_allowed_dimm_freq(l_max_freqs.data()) );
-
-    // Retrieve frequency constraints due to DIMM SPD and VPD per MCBIST
-    FAPI_TRY( largest_spd_supported_freq(i_target, l_largest_spd_freq) );
+    FAPI_TRY( spd_supported_freq(i_target, l_spd_supported_freq) );
     FAPI_TRY( vpd_supported_freqs(i_target, l_vpd_supported_freqs) );
-    rm_unsupported_spd_freqs(i_target, l_largest_spd_freq, l_vpd_supported_freqs);
 
+    // Limit frequency scoreboard according to MRW constraints
+    FAPI_TRY( limit_freq_by_mrw(i_target, l_max_freqs, l_scoreboard) );
+
+    // Limit frequency scoreboard according to VPD constraints
+    FAPI_TRY( limit_freq_by_vpd(i_target, l_vpd_supported_freqs, l_scoreboard) );
+
+    // Limit frequency scoreboard according to SPD (DIMM) constraints
+    FAPI_TRY( limit_freq_by_spd(i_target, l_spd_supported_freq, l_scoreboard) );
+
+    // Callout the fewest number of MCAs to achieve a common shared freq
     FAPI_TRY( mss::required_synch_mode(l_req_sync_mode) );
+    FAPI_TRY( l_scoreboard.resolve(i_target,
+                                   l_req_sync_mode == fapi2::ENUM_ATTR_REQUIRED_SYNCH_MODE_ALWAYS,
+                                   l_vpd_supported_freqs,
+                                   l_deconfigured,
+                                   o_freqs) );
 
-    FAPI_TRY( supported_freqs_helper( i_target,
-                                      l_vpd_supported_freqs,
-                                      l_max_freqs,
-                                      l_req_sync_mode == fapi2::ENUM_ATTR_REQUIRED_SYNCH_MODE_ALWAYS,
-                                      o_freqs) );
+    FAPI_INF("%s supported freqs:", mss::c_str(i_target));
+
+    for (const auto l_freq : o_freqs)
+    {
+        FAPI_INF("%s            %d", mss::c_str(i_target), l_freq);
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Create and sort a vector of supported MT/s (freq) - helper for testing purposes
+/// @brief Update supported frequency scoreboard according to MRW/config limits
 /// @param[in] i_target MCBIST target for which to get the DIMM configs
-/// @param[in] i_hw_freqs vector of hardware supported freqs -- from VPD and SPD
 /// @param[in] i_max_mrw_freqs vector of max allowed freqs
-/// @param[in] i_req_sync_mode bool whether or not we're forced into sync mode
-/// @param[out] o_freqs reference to a std::vector to put the sorted vector
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
-/// @note the attributes which drive this are read-only so they're hard to change when
-/// testing. So this helper allows us to use the attributes for the main path but
-/// have a path for testing (DFT I think the cool kids call it.)
+/// @note This helper allows us to use the attributes for the main path but
+/// have a path for testing
 ///
-fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-        const std::vector<uint32_t>& i_hw_freqs,
-        const std::vector<uint32_t>& i_max_mrw_freqs,
-        const bool i_req_sync_mode,
-        std::vector<uint32_t>& o_freqs)
+fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<uint32_t>& i_max_mrw_freqs,
+                                    freq_scoreboard& io_scoreboard)
 {
     // Indexes into the ATTR_MAX_ALLOWED_DIMM_FREQ arrary. e.g., [0][0] is 1R 1 drop
     constexpr size_t l_indexes[MAX_DIMM_PER_PORT][MAX_PRIMARY_RANKS_PER_PORT] =
@@ -570,10 +555,6 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>
         {0, 1, 0xFF, 2},
         {3, 4, 0xFF, 0xFF}
     };
-
-    // Holds the max freq allowed for this configuration of DIMMs. This is the minimum of maximum
-    // frequencies allowed by the DIMM. So, we start way off the charts so std::min can do the lifting for us.
-    uint32_t l_our_max_freq = ~(0);
 
     // This is the number of elements in the max_allowed_dimm_freq attribute, not the frequencies of
     // the system.
@@ -590,23 +571,15 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>
              i_max_mrw_freqs[0], i_max_mrw_freqs[1], i_max_mrw_freqs[2], i_max_mrw_freqs[3], i_max_mrw_freqs[4],
              mss::c_str(i_target));
 
-    // This is the list of supported frequencies for VPD and SPD
-    FAPI_ASSERT( !i_hw_freqs.empty(),
-                 fapi2::MSS_EMPTY_VECTOR().
-                 set_FUNCTION(SUPPORTED_FREQS).
-                 set_TARGET(i_target),
-                 "Supported system freqs from VPD and SPD are empty for %s",
-                 mss::c_str(i_target));
-
-    for( const auto& freq : i_hw_freqs )
-    {
-        FAPI_DBG("VPD supported freqs %d for %s", freq, mss::c_str(i_target) );
-    }
-
     for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(p);
         const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(p);
         const uint64_t l_dimms_on_port = l_dimms.size();
+
+        // Holds the max freq allowed for this port. This is the minimum of maximum
+        // frequencies allowed by the DIMM. So, we start way off the charts so std::min can do the lifting for us.
+        uint32_t l_mca_max_freq = ~(0);
 
         FAPI_ASSERT( (l_dimms_on_port <= MAX_DIMM_PER_PORT),
                      fapi2::MSS_TOO_MANY_DIMMS_ON_PORT()
@@ -616,6 +589,7 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>
                      l_dimms_on_port,
                      mss::c_str(p));
 
+        // Find the max supported frequency for this port
         for (const auto& d : l_dimms)
         {
             uint8_t l_num_master_ranks = 0;
@@ -649,80 +623,466 @@ fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<TARGET_TYPE_MCBIST>
                      l_indexes[l_dimms_on_port - 1][l_num_master_ranks - 1],
                      i_max_mrw_freqs[l_index] );
 
-            l_our_max_freq = std::min(l_our_max_freq, i_max_mrw_freqs[l_index]);
+            l_mca_max_freq = std::min(l_mca_max_freq, i_max_mrw_freqs[l_index]);
         }// dimm
+
+        // Remove any frequencies bigger than this port's max from the scoreboard
+        io_scoreboard.remove_freqs_above_limit(l_port_pos, l_mca_max_freq);
+
+        FAPI_INF("%s after processing MRW, max freq is %d", mss::c_str(p), l_mca_max_freq);
     }// mca
 
-    FAPI_INF("after processing DIMM, max freq is %d", l_our_max_freq);
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    // We need to push things as the memcpy doesn't update the vector's count, etc. and we don't
-    // create the vector, we get it passed in. It's not a big deal as we want to touch all the elements
-    // to check for 0's anyway.
-    for (size_t i = 0; i < i_hw_freqs.size(); ++i)
+///
+/// @brief Update supported frequency scoreboard according to VPD limits
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_hw_freqs vector of hardware supported freqs -- from VPD
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note This helper allows us to use the attributes for the main path but
+/// have a path for testing
+///
+fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<std::vector<uint32_t>>& i_hw_freqs,
+                                    freq_scoreboard& io_scoreboard)
+{
+    FAPI_ASSERT(i_hw_freqs.size() == PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_VPD_FREQ_LIST_PASSED()
+                .set_SIZE(i_hw_freqs.size())
+                .set_EXPECTED(PORTS_PER_MCBIST),
+                "Wrong size VPD frequency vector passed to limit_freq_by_vpd (got %d, expected %d)",
+                i_hw_freqs.size(), PORTS_PER_MCBIST);
+
+    for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
-        // Funky if-tree makes things clearer than a combinatorialy explosive conditional
-        if (i_hw_freqs[i] == 0)
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(p);
+        const auto& l_port_freqs = i_hw_freqs[l_port_pos];
+
+        // This is the list of supported frequencies for VPD
+        FAPI_ASSERT( !l_port_freqs.empty(),
+                     fapi2::MSS_EMPTY_VECTOR().
+                     set_FUNCTION(LIMIT_FREQ_BY_VPD).
+                     set_TARGET(p),
+                     "Supported system freqs from VPD are empty for %s",
+                     mss::c_str(p));
+
+        for( const auto& freq : l_port_freqs )
         {
-            // Skip 0's
-            continue;
+            FAPI_DBG("VPD supported freqs %d for %s", freq, mss::c_str(p) );
         }
 
-        if (i_hw_freqs[i] > l_our_max_freq)
-        {
-            // Skip freqs larger than our max
-            continue;
-        }
+        // Remove any frequencies that aren't in this port's list from the scoreboard
+        io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_port_freqs);
 
-        // Add this freq if we're not in sync mode, or, if we are, add it if it matches a nest freq
-        FAPI_INF("attribute required sync mode %d for %s", i_req_sync_mode, mss::c_str(i_target));
+        uint32_t l_max_freq = 0;
+        FAPI_TRY( io_scoreboard.max_supported_freq(l_port_pos, l_max_freq) );
+        FAPI_INF("%s after processing VPD, max freq is %d", mss::c_str(p), l_max_freq);
+    }// mca
 
-        if( i_req_sync_mode && !is_nest_freq_valid(i_hw_freqs[i]) )
-        {
-            continue;
-        }
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-        o_freqs.push_back(i_hw_freqs[i]);
+///
+/// @brief Update supported frequency scoreboard according to SPD limits
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_hw_freqs vector of hardware supported freqs -- from SPD
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note This helper allows us to use the attributes for the main path but
+/// have a path for testing
+///
+fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<uint32_t>& i_hw_freqs,
+                                    freq_scoreboard& io_scoreboard)
+{
+    for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+    {
+        const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(p);
 
-    }//end for
+        // Remove any frequencies that aren't in this port's list from the scoreboard
+        io_scoreboard.remove_freqs_above_limit(l_port_pos, i_hw_freqs);
+
+        uint32_t l_max_freq = 0;
+        FAPI_TRY( io_scoreboard.max_supported_freq(l_port_pos, l_max_freq) );
+        FAPI_INF("%s after processing SPD, max freq is %d", mss::c_str(p), l_max_freq);
+    }// mca
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Remove frequencies above a limit from the scoreboard
+/// @param[in] i_port_pos position index of port within parent MCBIST
+/// @param[in] i_freq_limit upper limit for frequency
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::remove_freqs_above_limit(const uint64_t i_port_pos,
+        const uint32_t i_freq_limit)
+{
+    FAPI_ASSERT(i_port_pos < PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_PORT_INDEX_PASSED()
+                .set_INDEX(i_port_pos)
+                .set_FUNCTION(ffdc_function_codes::FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT),
+                "Invalid port index passed to remove_freqs_above_limit (%d)",
+                i_port_pos);
 
     {
-        // Doing this because the HB compiler freaks out if we have it within the FAPI_ASSERT.
-        // Outputting the value and then incrementing the iterator, that's why it's a post increment
-        // We have at most 4 memory freqs (1866, 2133, 2400, & 2666), if we ever get a list with < 4 items
-        // a value of 0 is logged in FFDC once we hit i_hw_freqs.end()...which is better than no logging.
-        auto l_supported = i_hw_freqs.begin();
+        auto& l_port_supported_freqs = iv_freq_mca_supported[i_port_pos];
 
-        const auto l_freq0 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
-        const auto l_freq1 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
-        const auto l_freq2 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
-        const auto l_freq3 = (l_supported != i_hw_freqs.end()) ? *(l_supported++) : 0;
+        // Can't do a ranged for loop here because we need the index to get the frequency out of NIMBUS_SUPPORTED_FREQS
+        for ( size_t l_index = 0; l_index < l_port_supported_freqs.size(); ++l_index )
+        {
+            const auto l_scoreboard_freq = NIMBUS_SUPPORTED_FREQS[l_index];
 
-        // If we have an empty set, we have a problem
-        FAPI_ASSERT(o_freqs.size() != 0,
-                    fapi2::MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
-                    .set_MSS_VPD_FREQ_0(l_freq0)
-                    .set_MSS_VPD_FREQ_1(l_freq1)
-                    .set_MSS_VPD_FREQ_2(l_freq2)
-                    .set_MSS_VPD_FREQ_3(l_freq3)
-                    .set_MSS_MAX_FREQ_0(i_max_mrw_freqs[0])
-                    .set_MSS_MAX_FREQ_1(i_max_mrw_freqs[1])
-                    .set_MSS_MAX_FREQ_2(i_max_mrw_freqs[2])
-                    .set_MSS_MAX_FREQ_3(i_max_mrw_freqs[3])
-                    .set_MSS_MAX_FREQ_4(i_max_mrw_freqs[4])
-                    .set_MSS_NEST_FREQ_0(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1600)
-                    .set_MSS_NEST_FREQ_1(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1866)
-                    .set_MSS_NEST_FREQ_2(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2000)
-                    .set_MSS_NEST_FREQ_3(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2133)
-                    .set_MSS_NEST_FREQ_4(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2400)
-                    .set_REQUIRED_SYNC_MODE(i_req_sync_mode)
-                    .set_MAX_FREQ_FROM_DIMM(l_our_max_freq)
-                    .set_MCBIST_TARGET(i_target),
-                    "%s didn't find a frequency which was in VPD and was allowable max", mss::c_str(i_target));
+            if ( l_scoreboard_freq > i_freq_limit )
+            {
+                FAPI_INF("Removing freq %d on port %d since it's above the limit %d", l_scoreboard_freq, i_port_pos, i_freq_limit);
+                l_port_supported_freqs[l_index] = false;
+            }
+        }
     }
 
-    // We now know o_freqs contains valid frequencies for this DIMM config, system contraints, and sync mode.
-    // Sort it so we know supported min is o_freq.begin and supported max is o_freq.end - 1
-    std::sort(o_freqs.begin(), o_freqs.end());
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Remove frequencies above a limit from the scoreboard
+/// @param[in] i_port_pos position index of port within parent MCBIST
+/// @param[in] i_freq_limits reference to vector of upper limits for frequency per port
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::remove_freqs_above_limit(const uint64_t i_port_pos,
+        const std::vector<uint32_t> i_freq_limits)
+{
+    FAPI_ASSERT(i_port_pos < PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_PORT_INDEX_PASSED()
+                .set_INDEX(i_port_pos)
+                .set_FUNCTION(ffdc_function_codes::FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT_VECTOR),
+                "Invalid port index passed to remove_freqs_above_limit (%d)",
+                i_port_pos);
+
+    FAPI_ASSERT(i_freq_limits.size() == PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_FREQ_LIST_PASSED()
+                .set_SIZE(i_freq_limits.size())
+                .set_EXPECTED(PORTS_PER_MCBIST),
+                "Invalid frequency list passed to remove_freqs_above_limit (size should be %d but got %d)",
+                PORTS_PER_MCBIST, i_freq_limits.size());
+
+    {
+        const auto l_freq_limit = i_freq_limits[i_port_pos];
+        FAPI_TRY( this->remove_freqs_above_limit(i_port_pos, l_freq_limit) );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Remove frequencies not on a given list from the scoreboard
+/// @param[in] i_port_pos position index of port within parent MCBIST
+/// @param[in] i_freq_list vector of supported frequencies
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::remove_freqs_not_on_list(const uint64_t i_port_pos,
+        const std::vector<uint32_t>& i_freq_list)
+{
+    FAPI_ASSERT(i_port_pos < PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_PORT_INDEX_PASSED()
+                .set_INDEX(i_port_pos)
+                .set_FUNCTION(ffdc_function_codes::FREQ_SCOREBOARD_REMOVE_FREQS_NOT_ON_LIST),
+                "Invalid port index passed to remove_freqs_not_on_list (%d)",
+                i_port_pos);
+
+    for ( size_t l_index = 0; l_index < NIMBUS_SUPPORTED_FREQS.size(); ++l_index )
+    {
+        const auto l_it = std::find(i_freq_list.begin(), i_freq_list.end(), NIMBUS_SUPPORTED_FREQS[l_index]);
+
+        if (l_it == i_freq_list.end())
+        {
+            FAPI_INF("Removing freq %d on port %d since it's not supported", NIMBUS_SUPPORTED_FREQS[l_index], i_port_pos);
+            iv_freq_mca_supported[i_port_pos][l_index] = false;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return the maximum supported frequency for a given port
+/// @param[in] i_port_pos position index of port within parent MCBIST
+/// @param[out] o_freq max supported frequency
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::max_supported_freq(const uint64_t i_port_pos,
+        uint32_t& o_freq) const
+{
+    FAPI_ASSERT(i_port_pos < PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_PORT_INDEX_PASSED()
+                .set_INDEX(i_port_pos)
+                .set_FUNCTION(ffdc_function_codes::FREQ_SCOREBOARD_MAX_SUPPORTED_FREQ),
+                "Invalid port index passed to max_supported_freq (%d)",
+                i_port_pos);
+
+    {
+        std::vector<uint32_t> l_supported_freqs;
+        FAPI_TRY( this->supported_freqs(i_port_pos, l_supported_freqs) );
+
+        o_freq = l_supported_freqs.empty() ? 0 : l_supported_freqs.back();
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Return a list of supported frequencies for a given port
+/// @param[in] i_port_pos position index of port within parent MCBIST
+/// @param[out] o_freq vector of supported frequencies
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::supported_freqs(const uint64_t i_port_pos,
+        std::vector<uint32_t>& o_freqs) const
+{
+    FAPI_ASSERT(i_port_pos < PORTS_PER_MCBIST,
+                fapi2::MSS_INVALID_PORT_INDEX_PASSED()
+                .set_INDEX(i_port_pos)
+                .set_FUNCTION(ffdc_function_codes::FREQ_SCOREBOARD_SUPPORTED_FREQS),
+                "Invalid port index passed to supported_freqs (%d)",
+                i_port_pos);
+
+    {
+        o_freqs.clear();
+        auto& l_port_supported_freqs = iv_freq_mca_supported[i_port_pos];
+
+        for ( size_t l_index = 0; l_index < NIMBUS_SUPPORTED_FREQS.size(); ++l_index )
+        {
+            if (l_port_supported_freqs[l_index])
+            {
+                o_freqs.push_back(NIMBUS_SUPPORTED_FREQS[l_index]);
+            }
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resolve frequency scoreboard by deconfiguring any non-conforming ports
+/// and return a list of the supported frequencies
+/// @param[in] i_target MCBIST target
+/// @param[in] i_req_sync_mode bool whether or not we're forced into sync mode
+/// @param[in] i_vpd_supported_freqs vector of hardware supported freqs -- from VPD
+/// @param[out] o_deconfigured vector of port positions that were deconfigured by this function
+/// @param[out] o_freqs vector of frequencies supported by all ports
+/// @return FAPI2_RC_SUCCESS if successful
+///
+fapi2::ReturnCode freq_scoreboard::resolve(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        const bool i_req_sync_mode,
+        const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
+        std::vector<uint8_t>& o_deconfigured,
+        std::vector<uint32_t>& o_freqs)
+{
+    // This vector will hold the number of ports that support each frequency in NIMBUS_SUPPORTED_FREQS
+    std::vector<uint64_t> l_support_counts(NIMBUS_SUPPORTED_FREQS.size(), 0);
+
+    o_freqs.clear();
+    FAPI_INF("%s Attribute required sync mode %d", mss::c_str(i_target), i_req_sync_mode);
+
+    const auto l_mcas = mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
+    const auto l_port_count = l_mcas.size();
+
+    // empty_port_count is the number of MCA that are deconfigured
+    // We use it later to make sure our common freq is supported by at least one configured port
+    const auto l_empty_port_count = PORTS_PER_MCBIST - l_port_count;
+
+    // Get a count of how many ports support each frequency
+    for ( size_t l_index = 0; l_index < NIMBUS_SUPPORTED_FREQS.size(); ++l_index )
+    {
+        size_t l_pos = 0;
+
+        for ( const auto& l_supported : iv_freq_mca_supported )
+        {
+            if (l_supported[l_index])
+            {
+                FAPI_INF("%s Frequency %d is supported by port%d", mss::c_str(i_target), NIMBUS_SUPPORTED_FREQS[l_index], l_pos);
+                // Add this freq if we're not in sync mode, or, if we are, add it if it matches a nest freq
+
+                if( i_req_sync_mode && !is_nest_freq_valid(NIMBUS_SUPPORTED_FREQS[l_index]) )
+                {
+                    FAPI_INF("%s Frequency %d is not supported by the nest logic", mss::c_str(i_target), NIMBUS_SUPPORTED_FREQS[l_index]);
+                    ++l_pos;
+                    continue;
+                }
+
+                ++l_support_counts[l_index];
+            }
+
+            // Add any frequencies supported by all configured ports to our output list
+            // Note that deconfigured ports will support all frequencies due to the way the scoreboard is built
+            if (l_support_counts[l_index] == PORTS_PER_MCBIST)
+            {
+                FAPI_INF("%s Frequency %d is supported by all ports", mss::c_str(i_target), NIMBUS_SUPPORTED_FREQS[l_index]);
+                o_freqs.push_back(NIMBUS_SUPPORTED_FREQS[l_index]);
+            }
+
+            ++l_pos;
+        }
+    }
+
+    // If we have at least one common frequency, we're done
+    if (!o_freqs.empty())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we made it here, that means we don't have a common supported freq for all ports
+    // So let's deconfigure the least number of ports to get a common freq
+
+    // Find the last instance of the most ports that support a given frequency
+    // That way we get the highest frequency supported by the most ports
+    // Note: this may be inefficient, but this is a small vector and HB doesn't support reverse iterators
+    uint64_t l_common_ports = 0;
+    size_t l_best_freq_index = 0;
+
+    for ( size_t l_index = 0; l_index < l_support_counts.size(); ++l_index )
+    {
+        if (l_support_counts[l_index] >= l_common_ports)
+        {
+            l_common_ports = l_support_counts[l_index];
+            l_best_freq_index = l_index;
+        }
+    }
+
+    FAPI_INF("%s Max ports supporting a common frequency is %d", mss::c_str(i_target), l_common_ports);
+    FAPI_INF("%s Fastest common frequency is %d", mss::c_str(i_target), NIMBUS_SUPPORTED_FREQS[l_best_freq_index]);
+
+    // Assert if we don't have any frequencies supported by at least one configured port
+    // Note: we know max_allowed_dimm_freq is size 5 because we checked it in limit_freq_by_mrw
+    std::vector<uint32_t> l_max_mrw_freqs(NUM_MAX_FREQS, 0);
+    FAPI_TRY( mss::max_allowed_dimm_freq(l_max_mrw_freqs.data()) );
+    FAPI_ASSERT(l_common_ports > l_empty_port_count,
+                fapi2::MSS_NO_SUPPORTED_FREQ()
+                .set_REQUIRED_SYNC_MODE(i_req_sync_mode)
+                .set_MCBIST_TARGET(i_target)
+                .set_NUM_PORTS(l_port_count)
+                .set_MRW_MAX_FREQ_0(l_max_mrw_freqs[0])
+                .set_MRW_MAX_FREQ_1(l_max_mrw_freqs[1])
+                .set_MRW_MAX_FREQ_2(l_max_mrw_freqs[2])
+                .set_MRW_MAX_FREQ_3(l_max_mrw_freqs[3])
+                .set_MRW_MAX_FREQ_4(l_max_mrw_freqs[4]),
+                "%s didn't find a frequency that was supported on any ports", mss::c_str(i_target));
+
+    // Now find and deconfigure all ports that don't support our selected frequency
+    o_deconfigured.clear();
+
+    for ( size_t l_pos = 0; l_pos < PORTS_PER_MCBIST; ++l_pos )
+    {
+        // Find the MCA with this position
+        const auto l_it_mca = std::find_if(l_mcas.begin(),
+                                           l_mcas.end(),
+                                           [l_pos]( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_rhs) -> bool
+        {
+            return (mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_rhs) != l_pos);
+        });
+
+        // If we didn't find an MCA for a given position, there wasn't one configured there
+        if (l_it_mca == l_mcas.end())
+        {
+            continue;
+        }
+
+        // and call it out if it doesn't support the selected freq
+        const auto& p = *l_it_mca;
+        FAPI_INF("Checking if port %d (%s) supports common frequency", l_pos, mss::c_str(p));
+
+        if (!iv_freq_mca_supported[l_pos][l_best_freq_index])
+        {
+            FAPI_INF("Port %d (%s) does not support the common frequency so will be deconfigured", l_pos, mss::c_str(p));
+            auto& l_port_supported_freqs = iv_freq_mca_supported[l_pos];
+
+            o_deconfigured.push_back(l_pos);
+            FAPI_ASSERT_NOEXIT( false,
+                                fapi2::MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ()
+                                .set_MCBIST_TARGET(i_target)
+                                .set_MCA_TARGET(p)
+                                .set_FREQUENCY(NIMBUS_SUPPORTED_FREQS[l_best_freq_index]),
+                                "%s does not support the majority frequency (%d) so will be deconfigured",
+                                mss::c_str(p), NIMBUS_SUPPORTED_FREQS[l_best_freq_index] );
+
+            // Now mark all frequencies as supported by that port since it was deconfigured
+            for ( size_t l_index = 0; l_index < l_port_supported_freqs.size(); ++l_index )
+            {
+                l_port_supported_freqs[l_index] = true;
+            }
+        }
+    }
+
+    // Now find all the frequencies supported by the ports that are left over
+    FAPI_TRY(this->resolve(i_target, i_req_sync_mode, i_vpd_supported_freqs, o_deconfigured, o_freqs));
+
+#ifndef __HOSTBOOT_MODULE
+
+    // Cronus doesn't deconfigure, so let's bail out if we didn't find a common frequency
+    if (!o_deconfigured.empty())
+    {
+        std::vector<uint32_t> l_port_vpd_max_freq;
+
+        {
+            // Get the max freq supported on each port
+            for ( const auto& l_port_supported_freqs : i_vpd_supported_freqs )
+            {
+                l_port_vpd_max_freq.push_back(l_port_supported_freqs.back());
+            }
+
+            FAPI_ASSERT(false,
+                        fapi2::MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET()
+                        .set_MSS_VPD_FREQ_0(l_port_vpd_max_freq[0])
+                        .set_MSS_VPD_FREQ_1(l_port_vpd_max_freq[1])
+                        .set_MSS_VPD_FREQ_2(l_port_vpd_max_freq[2])
+                        .set_MSS_VPD_FREQ_3(l_port_vpd_max_freq[3])
+                        .set_MSS_VPD_FREQ_4(l_port_vpd_max_freq[4])
+                        .set_MSS_VPD_FREQ_5(l_port_vpd_max_freq[5])
+                        .set_MSS_VPD_FREQ_6(l_port_vpd_max_freq[6])
+                        .set_MSS_VPD_FREQ_7(l_port_vpd_max_freq[7])
+                        .set_MSS_MAX_FREQ_0(l_max_mrw_freqs[0])
+                        .set_MSS_MAX_FREQ_1(l_max_mrw_freqs[1])
+                        .set_MSS_MAX_FREQ_2(l_max_mrw_freqs[2])
+                        .set_MSS_MAX_FREQ_3(l_max_mrw_freqs[3])
+                        .set_MSS_MAX_FREQ_4(l_max_mrw_freqs[4])
+                        .set_MSS_NEST_FREQ_0(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1600)
+                        .set_MSS_NEST_FREQ_1(fapi2::ENUM_ATTR_FREQ_PB_MHZ_1866)
+                        .set_MSS_NEST_FREQ_2(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2000)
+                        .set_MSS_NEST_FREQ_3(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2133)
+                        .set_MSS_NEST_FREQ_4(fapi2::ENUM_ATTR_FREQ_PB_MHZ_2400)
+                        .set_REQUIRED_SYNC_MODE(i_req_sync_mode)
+                        .set_MCBIST_TARGET(i_target),
+                        "%s didn't find a common frequency for all ports", mss::c_str(i_target));
+        }
+    }
+
+#endif
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
