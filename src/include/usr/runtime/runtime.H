@@ -357,6 +357,17 @@ void findHdatLocation(uint64_t payloadBase_va,
                       uint64_t& o_hdat_offset,
                       size_t& o_hdat_size);
 
+/**
+ * @brief Finds the Rsvd Mem Trace Buffer section and returns the address and
+ *        size of the section
+ *
+ * @param[out] o_RsvdMemAddress - tarting address of the Rsvd Mem Trace Buffer section
+ * @param[out] o_size - Size of the Rsvd Mem Trace Buffer section
+ * @return errlHndl_t Returns nullptr on success; otherwise errlog
+ */
+errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size);
+
 }
 
 #endif
+
