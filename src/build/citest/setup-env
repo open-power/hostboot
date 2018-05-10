@@ -32,6 +32,7 @@ export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
 # Limit pnor image to be built to murano for standalone simics
 
 export MACHINE=$CHIP
+echo "MACHINE IS $MACHINE"
 
 if [ "$CHIP" == "NIMBUS" ];
 then
@@ -39,6 +40,9 @@ then
 elif [ "$CHIP" == "CUMULUS" ];
 then
     export PNOR=cumulus.pnor
+elif [ "$CHIP" == "CUMULUS_CDIMM" ];
+then
+    export PNOR=cumulus_cdimm.pnor
 fi
 
 # If we are running under Jenkins we need to pick a random-ish sandbox name
