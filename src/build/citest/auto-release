@@ -324,11 +324,6 @@ function build {
     ### Push tag to gerrit, create track and checkin files
     git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
     git checkout gerrit/master || exit -1
-    echo -e "The list of commits included in ${RELEASE_NAME}:\n" > $RELEASENOTESTXT
-    echo -e "---------------------------------------------" >> $RELEASENOTESTXT
-    git log --date=short --pretty=format:"%h - %an, %ad : %s" ${PREVIOUS_RELEASE}..${RELEASE_NAME}|egrep -v "$RELEASE_NAME|$PREVIOUS_RELEASE" >> $RELEASENOTESTXT
-    echo -e "#-----------<E-O-F>---------------#\n" >> $RELEASENOTESTXT
-    cat $RELEASENOTESTXT | mail -s "List of commit(s) in $RELEASE_NAME, details inside" $RELEASE_ADMINS
     #
     hbRelease pre-release --level $RELEASE_NAME --release $FIPS_RELEASE --checkInDir $CMVC_DIR --released $PREVIOUS_RELEASE --track $EXISTING_TRACK || exit -1
     # Check if feature was successfully created and if so set $FEATURE
@@ -338,7 +333,13 @@ function build {
         echo "No feature created"
         exit -1
     fi
-
+    #
+    echo -e "The list of commits included in track:$FEATURE (release:${RELEASE_NAME}):\n" > $RELEASENOTESTXT
+    echo -e "---------------------------------------------" >> $RELEASENOTESTXT
+    git log --date=short --pretty=format:"%h - %an, %ad : %s" ${PREVIOUS_RELEASE}..${RELEASE_NAME}|egrep -v "$RELEASE_NAME|$PREVIOUS_RELEASE" >> $RELEASENOTESTXT
+    echo -e "#-----------<E-O-F>---------------#\n" >> $RELEASENOTESTXT
+    cat $RELEASENOTESTXT | mail -s "List of commit(s) in track:$FEATURE (release: $RELEASE_NAME)" $RELEASE_ADMINS
+    #
     ### @todo RTC:171143
     ### Sleep for 5 minutes to allow time for CMVC req's to take effect
 
