@@ -77,6 +77,93 @@ inline bool is_nest_freq_valid (const uint64_t i_proposed_freq)
 }
 
 ///
+/// @class freq_scoreboard
+/// @brief class that encapsulates MCA supported frequencies
+///
+class freq_scoreboard
+{
+    public:
+        ///
+        /// @brief Create a new frequency scoreboard
+        ///
+        freq_scoreboard()
+        {
+            iv_freq_mca_supported = std::vector<std::vector<bool>>(PORTS_PER_MCBIST,
+                                    std::vector<bool>(NIMBUS_SUPPORTED_FREQS.size(), true));
+        }
+
+        ///
+        /// @brief default destructor
+        ///
+        ~freq_scoreboard() = default;
+
+        ///
+        /// @brief Remove frequencies above a limit from the scoreboard
+        /// @param[in] i_port_pos position index of port within parent MCBIST
+        /// @param[in] i_freq_limit upper limit for frequency
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode remove_freqs_above_limit(const uint64_t i_port_pos,
+                const uint32_t i_freq_limit);
+
+        ///
+        /// @brief Remove frequencies above a limit from the scoreboard
+        /// @param[in] i_port_pos position index of port within parent MCBIST
+        /// @param[in] i_freq_limits reference to vector of upper limits for frequency per port
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode remove_freqs_above_limit(const uint64_t i_port_pos,
+                const std::vector<uint32_t> i_freq_limits);
+
+        ///
+        /// @brief Remove frequencies not on a given list from the scoreboard
+        /// @param[in] i_port_pos position index of port within parent MCBIST
+        /// @param[in] i_freq_list vector of supported frequencies
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode remove_freqs_not_on_list(const uint64_t i_port_pos,
+                const std::vector<uint32_t>& i_freq_list);
+
+        ///
+        /// @brief Return the maximum supported frequency for a given port
+        /// @param[in] i_port_pos position index of port within parent MCBIST
+        /// @param[out] o_freq max supported frequency
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode max_supported_freq(const uint64_t i_port_pos,
+                                             uint32_t& o_freq) const;
+
+        ///
+        /// @brief Return a list of supported frequencies for a given port
+        /// @param[in] i_port_pos position index of port within parent MCBIST
+        /// @param[out] o_freq vector of supported frequencies
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode supported_freqs(const uint64_t i_port_pos,
+                                          std::vector<uint32_t>& o_freqs) const;
+
+        ///
+        /// @brief Resolve frequency scoreboard by deconfiguring any non-conforming ports
+        /// and return a list of the supported frequencies
+        /// @param[in] i_target MCBIST target
+        /// @param[in] i_req_sync_mode bool whether or not we're forced into sync mode
+        /// @param[in] i_vpd_supported_freqs vector of hardware supported freqs -- from VPD
+        /// @param[out] o_deconfigured vector of port positions that were deconfigured by this function
+        /// @param[out] o_freqs vector of frequencies supported by all ports
+        /// @return FAPI2_RC_SUCCESS if successful
+        ///
+        fapi2::ReturnCode resolve(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                  const bool i_req_sync_mode,
+                                  const std::vector<std::vector<uint32_t>>& i_vpd_supported_freqs,
+                                  std::vector<uint8_t>& o_deconfigured,
+                                  std::vector<uint32_t>& o_freqs);
+
+    private:
+        std::vector<std::vector<bool>> iv_freq_mca_supported;
+
+};
+
+///
 /// @brief Retrieves a mapping of MSS frequency values per mcbist target
 /// @param[in] i_targets vector of controller targets
 /// @param[out] o_freq_map dimm speed map <key, value> = (mcbist target, frequency)
@@ -116,39 +203,22 @@ fapi2::ReturnCode select_sync_mode(const std::map< fapi2::Target<fapi2::TARGET_T
                                    uint64_t& o_selected_freq);
 
 ///
-/// @brief Return whether a given freq is supported
-/// @param[in] a freq to check for
-/// @param[in] reference to a std::vector of supported freqs (sorted)
-/// @return bool true iff input freq is supported
-///
-bool is_freq_supported(const uint32_t i_freq, const std::vector<uint32_t>& i_freqs);
-
 /// @brief Create a vector of support freq based on VPD config
-/// @param[in] MCBIST target for which to get the DIMM configs
-/// @param[out] reference to a std::vector of supported VPD frequencies
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[out] reference to a 2 dimensional std::vector of supported VPD frequencies for each MCA
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                                       std::vector<uint32_t>& o_vpd_supported_freqs);
+                                       std::vector<std::vector<uint32_t>>& o_vpd_supported_freqs);
 
 ///
-/// @brief Removes frequencies unsupported by SPD from a sorted list of supported freqs -- helper function for testing
+/// @brief Retrieves max frequency each port supports due to DIMM SPD
 /// @param[in] i_target the MCBIST target
-/// @param[in] i_highest_freq largest SPD supported freq
-/// @param[in,out] io_freqs std::vector of VPD supported freqs (sorted)
-///
-void rm_unsupported_spd_freqs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-                              const uint32_t l_current_freq,
-                              std::vector<uint32_t>& io_freqs);
-
-///
-/// @brief Retrieves largest supported frequency the MC supports due to DIMM SPD
-/// @param[in] i_target the MCBIST target
-/// @param[out] o_highest_freq the largest SPD supported freq
+/// @param[out] o_supported_freqs reference to vector of max SPD supported freq for each port
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode largest_spd_supported_freq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-        uint32_t& o_highest_freq);
+fapi2::ReturnCode spd_supported_freq(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                     std::vector<uint32_t>& o_supported_freqs);
 
 ///
 /// @brief Create and sort a vector of supported MT/s (freq)
@@ -163,22 +233,47 @@ fapi2::ReturnCode supported_freqs(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
                                   std::vector<uint32_t>& o_freqs);
 
 ///
-/// @brief Create and sort a vector of supported MT/s (freq) - helper for testing purposes
-/// @param[in] MCA target for which to get the DIMM configs
-/// @param[in] vector of VPD freqs
-/// @param[in] vector of max allowed freqs
-/// @param[in] bool whether or not we're forced into sync mode
-/// @param[out] reference to a std::vector to put the sorted vector
+/// @brief Update supported frequency scoreboard according to MRW/config limits
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_max_mrw_freqs vector of max allowed freqs
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note the attributes which drive this are read-only so they're hard to change when
 /// testing. So this helper allows us to use the attributes for the main path but
-/// have a path for testing (DFT I think the cool kids call it.)
+/// have a path for testing
 ///
-fapi2::ReturnCode supported_freqs_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-        const std::vector<uint32_t>& i_vpd_freqs,
-        const std::vector<uint32_t>& i_max_freqs,
-        const bool i_req_sync_mode,
-        std::vector<uint32_t>& o_freqs);
+fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<uint32_t>& i_max_mrw_freqs,
+                                    freq_scoreboard& io_scoreboard);
+
+///
+/// @brief Update supported frequency scoreboard according to VPD limits
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_hw_freqs vector of hardware supported freqs -- from VPD
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note the attributes which drive this are read-only so they're hard to change when
+/// testing. So this helper allows us to use the attributes for the main path but
+/// have a path for testing
+///
+fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<std::vector<uint32_t>>& i_hw_freqs,
+                                    freq_scoreboard& io_scoreboard);
+
+///
+/// @brief Update supported frequency scoreboard according to SPD limits
+/// @param[in] i_target MCBIST target for which to get the DIMM configs
+/// @param[in] i_hw_freqs vector of hardware supported freqs -- from SPD
+/// @param[in,out] io_scoreboard scoreboard of MCA targets supporting each frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note the attributes which drive this are read-only so they're hard to change when
+/// testing. So this helper allows us to use the attributes for the main path but
+/// have a path for testing
+///
+fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                    const std::vector<uint32_t>& i_hw_freqs,
+                                    freq_scoreboard& io_scoreboard);
+
 }// mss
 
 #endif

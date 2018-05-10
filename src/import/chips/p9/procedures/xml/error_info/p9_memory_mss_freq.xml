@@ -246,6 +246,32 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into limit_freq_by_vpd function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
+    <description>
+       Wrong size vector passed into frequency scoreboard function
+    </description>
+    <ffdc>SIZE</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_ERROR_FINDING_DIMM_SPEED_MAP</rc>
     <description>
        Empty MCBIST target vector found when constructing dimm speed mapping
@@ -325,6 +351,10 @@
     <ffdc>MSS_VPD_FREQ_1</ffdc>
     <ffdc>MSS_VPD_FREQ_2</ffdc>
     <ffdc>MSS_VPD_FREQ_3</ffdc>
+    <ffdc>MSS_VPD_FREQ_4</ffdc>
+    <ffdc>MSS_VPD_FREQ_5</ffdc>
+    <ffdc>MSS_VPD_FREQ_6</ffdc>
+    <ffdc>MSS_VPD_FREQ_7</ffdc>
     <ffdc>MSS_MAX_FREQ_0</ffdc>
     <ffdc>MSS_MAX_FREQ_1</ffdc>
     <ffdc>MSS_MAX_FREQ_2</ffdc>
@@ -336,7 +366,6 @@
     <ffdc>MSS_NEST_FREQ_3</ffdc>
     <ffdc>MSS_NEST_FREQ_4</ffdc>
     <ffdc>REQUIRED_SYNC_MODE</ffdc>
-    <ffdc>MAX_FREQ_FROM_DIMM</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -344,6 +373,54 @@
      <callout>
       <childTargets>
           <parent>MCBIST_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_NO_SUPPORTED_FREQ</rc>
+    <description>
+      When considering the frequencies in the MRW and the max supported
+      frequencies based on DIMM config, there are no applicable frequencies
+      remaining
+      If sync mode required, frequencies have to match a nest frequency
+    </description>
+    <ffdc>REQUIRED_SYNC_MODE</ffdc>
+    <ffdc>MCBIST_TARGET</ffdc>
+    <ffdc>NUM_PORTS</ffdc>
+    <ffdc>MRW_MAX_FREQ_0</ffdc>
+    <ffdc>MRW_MAX_FREQ_1</ffdc>
+    <ffdc>MRW_MAX_FREQ_2</ffdc>
+    <ffdc>MRW_MAX_FREQ_3</ffdc>
+    <ffdc>MRW_MAX_FREQ_4</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <childTargets>
+          <parent>MCBIST_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
+    <description>
+      When considering the frequencies in the MRW and the max supported
+      frequencies based on DIMM config, the indicated port's DIMM do not support
+      the frequency of the majority of other ports' DIMM, so it will be deconfigured
+    </description>
+    <ffdc>MCBIST_TARGET</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+     <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
