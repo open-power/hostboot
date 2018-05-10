@@ -178,7 +178,7 @@ uint32_t getMemReadAddr<TYPE_MEMBUF>( ExtensibleChip * i_chip, uint32_t i_pos,
     }
 
     char reg_str[64];
-    sprintf( reg_str, "MCB%d_%s", i_pos, tmp );
+    sprintf( reg_str, "MBA%d_%s", i_pos, tmp );
 
     // Read the address register
     SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( reg_str );
