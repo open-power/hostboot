@@ -785,6 +785,18 @@ void* call_host_runtime_setup (void *io_pArgs)
                 break;
             }
         }
+        
+        // Update the MDRT Count from Attribute
+        TargetService& l_targetService = targetService();
+        Target* l_sys = nullptr;
+        l_targetService.getTopLevelTarget(l_sys);
+        if(l_sys->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+            uint32_t l_mdrtCount =
+                l_sys->getAttr<TARGETING::ATTR_MPIPL_HB_MDRT_COUNT>();
+            //Update actual count in RUNTIME
+            RUNTIME::saveActualCount(RUNTIME::MS_DUMP_RESULTS_TBL, l_mdrtCount);
+        }
 
         //Update the MDRT value (for MS Dump)
         l_err = RUNTIME::writeActualCount(RUNTIME::MS_DUMP_RESULTS_TBL);
