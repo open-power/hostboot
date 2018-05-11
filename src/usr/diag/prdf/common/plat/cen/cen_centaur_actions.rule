@@ -62,7 +62,7 @@ actionclass threshold_and_mask_mba0 { calloutMba0; threshold_and_mask; };
 actionclass threshold_and_mask_mba1 { calloutMba1; threshold_and_mask; };
 
 /** Callout the connected L4 */
-actionclass calloutL4 { callout(connected(TYPE_L4), MRU_MED); };
+actionclass calloutL4 { callout(connected(TYPE_L4, 0), MRU_MED); };
 
 /** Callout the connected L4, threshold 1 */
 actionclass l4_th_1 { calloutL4; threshold1; };
