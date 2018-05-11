@@ -150,6 +150,22 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             l_mirrored = l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>();
         }
 
+        // In Simics mode disable mirroring for now - @todo-CQ:SW427497
+        // need action file changes for P9 to enable MM
+        // SW427497 addresses these changes
+        // also force payload to zero
+        // @todo-RTC:192854 to enable it back once the defect SW427497
+        // is integrated.
+        if(Util::isSimicsRunning())
+        {
+            l_mirrored = false;
+
+            l_sys->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(0);
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Disabling memory mirroring temporarily");
+        }
+
         if(l_mirrored)
         {
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
@@ -364,7 +380,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                                 scom_size, //Size of Scom
                                 DEVICE_SCOM_ADDRESS(EXIT_CACHE_CONTAINED_SCOM_ADDR));
                     }
-        
+
                     if ( l_errl )
                     {
                         // Create IStep error log and cross reference to error
