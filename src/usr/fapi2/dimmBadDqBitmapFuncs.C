@@ -91,12 +91,12 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
             for ( auto &dimmTrgt : l_dimmList )
             {
                 // Get and compare the port
-                l_port = dimmTrgt->getAttr<ATTR_MBA_PORT>();
+                l_port = dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
 
                 if ( l_port == i_port )
                 {
                     // Get and compare the dimm
-                    l_dimm = dimmTrgt->getAttr<ATTR_MBA_DIMM>();
+                    l_dimm = dimmTrgt->getAttr<ATTR_CEN_MBA_DIMM>();
 
                     if ( l_dimm == i_dimm )
                     {
