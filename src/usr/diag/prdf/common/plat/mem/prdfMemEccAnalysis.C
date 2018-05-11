@@ -178,6 +178,7 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
             l_dqBitmap.getCaptureData( io_sc.service_data->GetCaptureData() );
 
             // Add all DIMMs with bad bits to the callout list.
+            TargetHandleList callouts;
             for ( uint8_t ps = 0; ps < DIMMS_PER_RANK::MBA; ps++ )
             {
                 bool badDqs = false;
@@ -194,7 +195,7 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                                                           rank, ps );
                 if ( l_dimm == nullptr ) continue;
 
-                io_sc.service_data->SetCallout( l_dimm, MRU_HIGH );
+                callouts.push_back( l_dimm );
 
                 if ( isMfgCeCheckingEnabled() )
                 {
@@ -202,6 +203,28 @@ uint32_t handleMemUe<TYPE_MBA>( ExtensibleChip * i_chip, const MemAddr & i_addr,
                     // analysis on this rank.
                     mbadb->getIplCeStats()->banAnalysis(rank.getDimmSlct(), ps);
                 }
+            }
+
+            if ( 0 == callouts.size() )
+            {
+                // It is possible the scrub counters have rolled over to zero
+                // due to a known DD1.0 hardware bug. In this case, the best
+                // we can do is callout both DIMMs, because at minimum we know
+                // there was a UE, we just don't know where.
+                // NOTE: If this condition happens because of a DD2.0+ bug, the
+                //       mssIplUeIsolation procedure will callout the Centaur.
+                callouts = getConnectedDimms( i_chip->getTrgt(), rank );
+                if ( 0 == callouts.size() )
+                {
+                    PRDF_ERR( PRDF_FUNC "getConnectedDimms() failed" );
+                    o_rc = FAIL; break;
+                }
+            }
+
+            // Callout all DIMMs in the list.
+            for ( auto & dimm : callouts )
+            {
+                io_sc.service_data->SetCallout( dimm, MRU_HIGH );
             }
 
             // Make the error log predictive.
