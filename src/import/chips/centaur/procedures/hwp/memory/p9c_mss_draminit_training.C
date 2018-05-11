@@ -663,6 +663,8 @@ extern "C" {
             uint8_t& io_dqs_try
                                             )
     {
+        // Used to determine if the error should be logged as recovered or not
+        bool l_training_error = false;
         fapi2::buffer<uint64_t> l_cal_error_buffer_64;
         fapi2::buffer<uint64_t> l_disable_bit_data_for_dp18_buffer_64;
         uint8_t l_mbaPosition = 0;
@@ -682,7 +684,7 @@ extern "C" {
         if(l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR, CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RANK_PAIR_LEN>())
         {
             io_status = MSS_INIT_CAL_FAIL;
-
+            l_training_error = true;
             FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_WR_LEVEL>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR().
                         set_MBA_POSITION(l_mbaPosition).
@@ -697,6 +699,7 @@ extern "C" {
                 // DQS Alignment Work Around:
                 if (io_dqs_try < MAX_DQS_RETRY)
                 {
+                    l_training_error = false;
                     ++io_dqs_try;
                     --io_cur_cal_step;
                     FAPI_INF( "+++ DQS Alignment recovery attempt %d on %s port: %d rank group: %d! +++", io_dqs_try, mss::c_str(i_target),
@@ -721,6 +724,7 @@ extern "C" {
                 } // if dqs_try < max
                 else
                 {
+                    l_training_error = true;
                     FAPI_ASSERT(false,
                                 fapi2::CEN_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR().
                                 set_TARGET_MBA_ERROR(i_target).
@@ -732,6 +736,7 @@ extern "C" {
                 }
             } // if getBit<50>
 
+            l_training_error = true;
             FAPI_ASSERT(!l_cal_error_buffer_64.getBit<CEN_MBA_DDRPHY_PC_INIT_CAL_ERROR_P0_ERROR_RDCLK_ALIGN>(),
                         fapi2::CEN_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR().
                         set_TARGET_MBA_ERROR(i_target).
@@ -837,7 +842,26 @@ extern "C" {
             io_status = MSS_INIT_CAL_PASS;
         }
 
+        return fapi2::FAPI2_RC_SUCCESS;
     fapi_try_exit:
+#ifdef __HOSTBOOT_MODULE
+
+        // If we took a training fail, log it as recovered - memdiags will sort it out
+        if(l_training_error)
+        {
+            auto l_temp_rc = fapi2::current_err;
+            fapi2::logError(l_temp_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
+#else
+
+        if(l_training_error)
+        {
+            FAPI_ERR("%s error was caused by a training error", mss::c_str(i_target));
+        }
+
+#endif
         return fapi2::current_err;
     }
 

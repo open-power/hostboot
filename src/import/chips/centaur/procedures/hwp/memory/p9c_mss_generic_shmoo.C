@@ -542,6 +542,20 @@ extern "C"
         }
 
         //////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
+
+#ifdef __HOSTBOOT_MODULE
+        FAPI_ASSERT_NOEXIT(!l_memory_health,
+                           fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
+                           set_MBA_TARGET(i_target).
+                           set_MBA_PORT_NUMBER(l_faulted_port).
+                           set_MBA_DIMM_NUMBER(l_faulted_dimm),
+                           "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",
+                           mss::c_str(i_target),
+                           l_faulted_port,
+                           l_faulted_rank,
+                           l_faulted_dimm);
+
+#else
         FAPI_ASSERT(!l_memory_health,
                     fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
                     set_MBA_TARGET(i_target).
@@ -552,6 +566,8 @@ extern "C"
                     l_faulted_port,
                     l_faulted_rank,
                     l_faulted_dimm);
+
+#endif
 
     fapi_try_exit:
         return fapi2::current_err;
