@@ -245,10 +245,8 @@ uint32_t getMemMaintAddr<TYPE_MCBIST>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
 
     // Read the address register
-    // We need to use ForceRead() here because it is possible we needed to stop
-    // the maintenance command after capturing the initial register data.
     SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MCBMCAT" );
-    uint32_t o_rc = reg->ForceRead();
+    uint32_t o_rc = reg->Read();
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "Read() failed on MCBMCAT: i_chip=0x%08x",
@@ -296,13 +294,11 @@ uint32_t getMemMaintAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr & o_addr )
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
     // Read the address register
-    // We need to use ForceRead() here because it is possible we needed to stop
-    // the maintenance command after capturing the initial register data.
     SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
-    uint32_t o_rc = reg->ForceRead();
+    uint32_t o_rc = reg->Read();
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Read() failed on MCBMCAT: i_chip=0x%08x",
+        PRDF_ERR( PRDF_FUNC "Read() failed on MBMACA: i_chip=0x%08x",
                   i_chip->getHuid() );
     }
     else
@@ -334,17 +330,13 @@ uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
 
     o_mcaList.clear();
 
-   // Note that we will need to use ForceRead() on these registers because it is
-   // possible we needed to stop the maintenance command after capturing the
-   // initial register data.
-
    SCAN_COMM_REGISTER_CLASS * mcbagra  = i_mcbChip->getRegister( "MCBAGRA" );
    SCAN_COMM_REGISTER_CLASS * mcbmcat  = i_mcbChip->getRegister( "MCBMCAT" );
    SCAN_COMM_REGISTER_CLASS * mcb_cntl = i_mcbChip->getRegister( "MCB_CNTL" );
 
     do
     {
-        o_rc = mcbagra->ForceRead();
+        o_rc = mcbagra->Read();
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on MCBAGRA: i_mcbChip=0x%08x",
@@ -358,7 +350,7 @@ uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
         uint8_t portMask = 0;
         if ( !mcbagra->IsBitSet(10) || mcbagra->IsBitSet(11) ) // broadcast mode
         {
-            o_rc = mcb_cntl->ForceRead();
+            o_rc = mcb_cntl->Read();
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "Read() failed on MCB_CNTL: "
@@ -370,7 +362,7 @@ uint32_t getMcbistMaintPort( ExtensibleChip * i_mcbChip,
         }
         else // non-broadcast mode
         {
-            o_rc = mcbmcat->ForceRead();
+            o_rc = mcbmcat->Read();
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "Read() failed on MCBMCAT: "
