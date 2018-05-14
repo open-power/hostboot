@@ -342,10 +342,9 @@ ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
                 // return the ring lenght in bits
                 o_ringLength    = l_ringSizeInBits;
 
-                // grab the address from the Generic ring id list
-                GenRingIdList* l_idList;
-
-                rc = ringid_get_ring_list(CT_CEN, l_ringId, &l_idList);
+                // grab the address from the main ring id list
+                uint32_t l_ringAddress = UNDEFINED_SCOM_ADDR;
+                rc = ringid_get_scanScomAddr(CID_CEN, l_ringId, &l_ringAddress);
 
                 if (rc != INFRASTRUCT_RC_SUCCESS)
                 {
@@ -377,8 +376,7 @@ ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
                     break;
                 }
 
-                o_ringAddress = l_idList->scanScomAddress;
-
+                o_ringAddress = l_ringAddress;
             }
             else
             {
