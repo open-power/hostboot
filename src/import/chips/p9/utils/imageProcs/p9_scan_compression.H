@@ -349,7 +349,7 @@ void print_raw_ring( uint8_t*  data, uint32_t  bits);
 /// @{
 
 /// Normal return code
-#define SCAN_COMPRESSION_OK (uint8_t)0
+#define SCAN_COMPRESSION_OK  INFRASTRUCT_RC_SUCCESS
 
 /// The (de)compression algorithm could not allocate enough memory for the
 /// (de)compression.
