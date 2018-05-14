@@ -32,8 +32,8 @@
 
 // *INDENT-OFF*
 
-#ifndef __P9_XIP_IMAGE_H
-#define __P9_XIP_IMAGE_H
+#ifndef __P9_XIP_IMAGE_H__
+#define __P9_XIP_IMAGE_H__
 
 /// Current version (fields, layout, sections) of the P9_XIP header
 ///
@@ -708,7 +708,7 @@ int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
                    P9XipSection* o_hostSection,
-#if defined(__PPE__)
+#ifdef __PPE__
                    uint8_t i_ddLevel);
 #else
                    uint8_t i_ddLevel=UNDEFINED_DD_LEVEL);
@@ -1489,8 +1489,8 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
 /// Attempt to grow the image past its defined memory allocation
 #define P9_XIP_WOULD_OVERFLOW 14
 
-/// Error associated with the disassembler occured.
-#define P9_XIP_DISASSEMBLER_ERROR 15
+/// Error returned from an TOR API function.
+#define P9_XIP_TOR_API_ERROR 15
 
 /// Hash collision creating the .fixed_toc section
 #define P9_XIP_HASH_COLLISION 16
@@ -1997,8 +1997,8 @@ typedef enum
     P9_XIP_SECTION_NAMES(var)
 
 
-#endif  /* !__ASSEMBLER__ */
+#endif  // ifndef __ASSEMBLER__
 
-#endif  // __P9_XIP_IMAGE_H
+#endif  // __P9_XIP_IMAGE_H__
 
 // *INDENT-ON*
