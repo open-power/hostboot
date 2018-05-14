@@ -52,29 +52,8 @@ const uint32_t  MAX_HBBL_SIZE           = 20 * 1024;     // Max hbbl section siz
 
 const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 
-//@FIXME: CMO: Aren't these defined somewhere else?
-#define NUM_OF_CORES     (uint8_t)24
-#define NUM_OF_CMES      (uint8_t)12
-#define NUM_OF_QUADS     (uint8_t) 6
-#define CORES_PER_QUAD   (NUM_OF_CORES/NUM_OF_QUADS)
-
 #define INSTANCE_ID_MIN        (uint8_t)0x01
 #define INSTANCE_ID_MAX        (uint8_t)0x37
-
-enum SYSPHASE
-{
-    SYSPHASE_HB_SBE = 0,
-    SYSPHASE_RT_CME = 1,
-    SYSPHASE_RT_SGPE = 2,
-    NOOF_SYSPHASES = 3,
-};
-
-enum MODEBUILD
-{
-    MODEBUILD_IPL = 0,
-    MODEBUILD_REBUILD = 1,
-    NOOF_MODEBUILDS = 2,
-};
 
 #if defined(__FAPI)
     #include <fapi2.H>
