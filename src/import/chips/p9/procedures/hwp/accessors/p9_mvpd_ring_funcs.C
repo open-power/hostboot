@@ -424,7 +424,6 @@ extern "C"
         return fapi2::current_err;
     }
 
-
 // Returns a matching MVPD ring in RS4 format at given buffer address,
 // NULL otherwise.
 // Adjusts buffer pointer and remaining length for the consumed portion
