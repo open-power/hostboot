@@ -28,6 +28,19 @@
 #ifndef WIN32
 #include <fapi2.H>
 
+#define NUM_OF_CORES     (uint8_t)24
+#define NUM_OF_CMES      (uint8_t)12
+#define NUM_OF_QUADS     (uint8_t) 6
+#define CORES_PER_QUAD   (NUM_OF_CORES/NUM_OF_QUADS)
+
+enum SYSPHASE
+{
+    SYSPHASE_HB_SBE = 0,
+    SYSPHASE_RT_CME = 1,
+    SYSPHASE_RT_SGPE = 2,
+    NOOF_SYSPHASES = 3,
+};
+
 typedef fapi2::ReturnCode (*p9_xip_customize_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
     void*     i_hwImage,
@@ -83,7 +96,7 @@ extern "C"
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
 /// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
-/// @param[in] i_modeBuild               => ={IPL, REBUILD}
+/// @param[in] i_modeBuild               => ={IPL, REBUILD} - Not used in P9
 /// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
 ///                                         for VPD rings
 /// @param[in] i_ringBufSize1            => Max size of VPD ring buffer
