@@ -36,6 +36,7 @@
 #include <prdfTrace.H>
 
 // Platform includes
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
 
@@ -243,25 +244,83 @@ uint32_t stopBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+uint32_t __resumeScrub( ExtensibleChip * i_chip,
+                        AddrRangeType i_rangeType, uint32_t i_stopCond,
+                        mss_MaintCmd::TimeBaseSpeed i_cmdSpeed );
+
 template<>
-uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
+uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
+                                  AddrRangeType i_rangeType,
+                                  uint32_t i_stopCond,
+                                  mss_MaintCmd::TimeBaseSpeed i_cmdSpeed )
 {
-    #define PRDF_FUNC "[PlatServices::resumeBgScrub<TYPE_MBA>] "
+    #define PRDF_FUNC "[PlatServices::__resumeScrub<TYPE_MBA>] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
 
-    uint32_t rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
+    if ( getMbaDataBundle(i_chip)->iv_scrubResumeCounter.atTh() )
+    {
+        // We have resumed scrubbing on this rank too many times. We still want
+        // the scrub to continue to the end of the rank, if possible, but we
+        // need to prevent flooding. So mask off all the CE/UE stop-on-error
+        // conditions. Note that there is only one chip mark per rank so we
+        // don't need to worry about getting flooded with those attentions.
 
-    /* TODO: RTC 157888 - Not entirely sure how to do this. Will require a inc
-     *       command followed by a start command. May need the stop conditions
-     *       for the start command. */
+        i_stopCond &= ~mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
+        i_stopCond &= ~mss_MaintCmd::STOP_ON_INT_NCE_ETE;
+        i_stopCond &= ~mss_MaintCmd::STOP_ON_SOFT_NCE_ETE;
+        i_stopCond &= ~mss_MaintCmd::STOP_ON_RETRY_CE_ETE;
+        i_stopCond &= ~mss_MaintCmd::STOP_ON_UE;
+    }
 
-    return rc;
+    do
+    {
+        // TODO: Clear ECC counters/FIRs. Increment the current address. Clear
+        //       FIRs again. Start the command from the current address to the
+        //       end of the rank.
+
+        // Resume successful. So increment the resume counter.
+        getMbaDataBundle(i_chip)->iv_scrubResumeCounter.inc();
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeBgScrub<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    /* TODO:
+    return __resumeScrub<TYPE_MBA>( i_chip, SLAVE_RANK, stopCond, cmdSpeed );
+    */
+    return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
+                                  AddrRangeType i_rangeType,
+                                  uint32_t i_stopCond )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    /* TODO:
+    return __resumeScrub<TYPE_MBA>( i_chip, i_rangeType, i_stopCond, cmdSpeed );
+    */
+    return SUCCESS;
 }
 
 //##############################################################################

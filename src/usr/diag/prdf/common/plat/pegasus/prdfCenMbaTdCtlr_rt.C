@@ -1124,9 +1124,6 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
 
 int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // Starting a new phase of VCM procedure. Reset the scrub resume counter
-    iv_scrubResumeCounter.reset();
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // moved to VcmEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1138,9 +1135,6 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // Starting a new phase of VCM procedure. Reset the scrub resume counter
-    iv_scrubResumeCounter.reset();
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // moved to VcmEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1152,9 +1146,6 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
 
 int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    // Starting a new DSD procedure. Reset the scrub resume counter.
-    iv_scrubResumeCounter.reset();
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // moved to VcmEvent class
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1168,9 +1159,6 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 {
     // Initially true, until hardware error is found.
     iv_tpsFalseAlarm = true;
-
-    // Starting a new TPS procedure. Reset the scrub resume counter.
-    iv_scrubResumeCounter.reset();
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // moved to TpsEvent class
@@ -1191,9 +1179,6 @@ int32_t CenMbaTdCtlr::startBgScrub( STEP_CODE_DATA_STRUCT & io_sc )
 
     do
     {
-        // Starting a scrub on a new rank. Reset the scrub resume counter.
-        iv_scrubResumeCounter.reset();
-
         // Cleanup hardware before starting the maintenance command. This will
         // clear the ECC counters, which must be done before setting the ETE
         // thresholds.
@@ -1420,19 +1405,6 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
             stopCond = COND_RT_VCM_DSD | mss_MaintCmd::STOP_ON_MCE;
         }
 
-        // If the command had been resumed 16 times on this rank, clear the stop
-        // on error flags (everything except MPE) and continue on to the end of
-        // the rank. This is needed so that the scrub can complete without
-        // getting flooded with attentions.
-        if ( iv_scrubResumeCounter.isTh() )
-        {
-            stopCond &= ~mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
-            stopCond &= ~mss_MaintCmd::STOP_ON_INT_NCE_ETE;
-            stopCond &= ~mss_MaintCmd::STOP_ON_SOFT_NCE_ETE;
-            stopCond &= ~mss_MaintCmd::STOP_ON_RETRY_CE_ETE;
-            stopCond &= ~mss_MaintCmd::STOP_ON_UE;
-        }
-
         if ( NO_OP == iv_tdState )
         {
             // Resume background scrub.
@@ -1453,9 +1425,6 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
                 break;
             }
         }
-
-        // The resume was successful. Increment the resume counter.
-        iv_scrubResumeCounter.incCount();
 
     } while(0);
 
@@ -1707,12 +1676,8 @@ int32_t CenMbaTdCtlr::handleUe_Td( STEP_CODE_DATA_STRUCT & io_sc,
 
     do
     {
-        // Add entry to UE table. Note that it is possible that there was a
-        // resume threshold during TPS, which means that the stop-on-UE
-        // condition was cleared and the scrub was forced to go to the end of
-        // the rank. In this case, we cannot be certain which address the UE had
-        // occurred on, so do not add the address to the UE table.
-        if ( (TPS_PHASE_1 != iv_tdState) || !iv_scrubResumeCounter.isTh() )
+        // Add entry to UE table.
+        if ( (TPS_PHASE_1 != iv_tdState) )
         {
             CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
             mbadb->iv_ueTable.addEntry( UE_TABLE::SCRUB_UE, i_stopAddr );
@@ -2849,7 +2814,6 @@ void CenMbaTdCtlr::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     uint8_t srnk        = iv_rank.getSlave();               // 3-bit
     uint8_t fetchMsk    = iv_fetchAttnsMasked ? 1 : 0;      // 1-bit
     uint8_t state       = iv_tdState & 0x0f;                // 4-bit
-    uint8_t rescount    = iv_scrubResumeCounter.getCount(); // 8-bit
     uint8_t badRankMask = 0x00;                             // 8-bit
 
     TdRankList::List list = iv_masterRanks.getList();
@@ -2865,7 +2829,6 @@ void CenMbaTdCtlr::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     // not be added to the capture data.
     uint8_t hack = 1; // 1-bit
 
-    data[0] = rescount;
     data[1] = badRankMask;
     data[2] = state << 4 | mrnk << 1 | fetchMsk;
     data[3] = srnk  << 5 | hack << 4;                           // 4 extra bits
