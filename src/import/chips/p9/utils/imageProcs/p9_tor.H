@@ -184,10 +184,6 @@ int tor_get_single_ring ( void*          i_ringSection,
 /// TOR API uses Ppe type to extract single ring or block of rings
 /// on either hw_image or SBE image
 ///
-/// \param[in]  i_RingVariant A enum to indicate which variant type of
-/// requested for single ring extract. There are three major types.
-/// They are base, Cache contained and Risk level ring
-///
 /// \param[in/out] io_ringBlockPtr A void point to pointer. Returns data
 /// which copied block of rings. Note: Caller's responsibility for free()
 /// to avoid memory leak
@@ -206,7 +202,6 @@ int tor_get_single_ring ( void*          i_ringSection,
 int tor_get_block_of_rings ( void*          i_ringSection,
                              uint8_t        i_ddLevel,
                              PpeType_t      i_PpeType,
-                             RingVariant_t  i_RingVariant,
                              void**         io_ringBlockPtr,
                              uint32_t&      io_ringBlockSize,
                              uint32_t       i_dbgl = 0 );
