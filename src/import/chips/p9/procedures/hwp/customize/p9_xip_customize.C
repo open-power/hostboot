@@ -326,11 +326,12 @@ fapi2::ReturnCode get_overlays_ring(
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(0xff).
+                     set_MAX_RING_BYTE_SIZE(l_maxRingByteSize).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(2),
+                     set_OCCURRENCE(1),
                      "rs4_decompress() failed w/rc=%i for "
-                     "ringId=0x%x, chipletId=0xff, occurrence=2 ",
-                     l_rc, i_ringId );
+                     "ringId=0x%x, chipletId=0xff, maxRingByteSize=%d, occurrence=1",
+                     l_rc, i_ringId, l_maxRingByteSize );
 
         // For debug and testing
         FAPI_DBG("Overlay raw ring size=%d bits", l_ovlyUncmpSize);
@@ -342,16 +343,17 @@ fapi2::ReturnCode get_overlays_ring(
     }
     else
     {
-        FAPI_ASSERT( l_rc == TOR_RING_NOT_FOUND,
+        FAPI_ASSERT( l_rc == TOR_RING_IS_EMPTY,
                      fapi2::XIPC_GPTR_GET_SINGLE_RING_ERROR().
                      set_CHIP_TARGET(i_procTarget).
                      set_RING_ID(i_ringId).
                      set_CHIPLET_ID(0xff).
+                     set_DD_LEVEL(i_ddLevel).
                      set_LOCAL_RC(l_rc).
-                     set_OCCURRENCE(2),
+                     set_OCCURRENCE(1),
                      "tor_get_single_ring() for gptr: Failed w/rc=%i for "
-                     "ringId=0x%x, chipletId=0xff, occurrence=2 ",
-                     l_rc, i_ringId );
+                     "ringId=0x%x, chipletId=0xff and ddLevel=0x%x",
+                     l_rc, i_ringId, i_ddLevel );
 
         *io_ringBuf2 = NULL;
         *io_ringBuf3 = NULL;
@@ -418,10 +420,12 @@ fapi2::ReturnCode apply_overlays_ring(
                  set_CHIP_TARGET(i_procTarget).
                  set_RING_ID(0xff).
                  set_CHIPLET_ID(0xff).
+                 set_MAX_RING_BYTE_SIZE(maxRingByteSize).
                  set_LOCAL_RC(l_rc).
                  set_OCCURRENCE(2),
                  "rs4_decompress() for gptr: Failed w/rc=%i for "
-                 "ringId=0xff, chipletId=0xff, occurrence=2 ", l_rc );
+                 "ringId=0xff, chipletId=0xff, maxRingByteSize=%d, occurrence=2",
+                 l_rc, maxRingByteSize );
 
     // For debug and testing
     FAPI_DBG("Mvpd raw ring size=%d bits)", vpdUncmpSize);
@@ -560,8 +564,7 @@ fapi2::ReturnCode process_gptr_rings(
     RingId_t l_vpdRingId   = (RingId_t)be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId);
     uint32_t l_vpdScanAddr = be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr);
 
-    FAPI_DBG("Entering process_gptr_rings");
-    FAPI_DBG("Processing GPTR ringId=0x%x", l_vpdRingId);
+    FAPI_DBG("process_gptr_rings(): Processing ringId=0x%x", l_vpdRingId);
 
     // Used for getting Gptr ring from overlays section
     void* l_ovlyRs4Ring = io_ringBuf2; //This content will be destroyed later in this function!
@@ -692,8 +695,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err  = fapi2::FAPI2_RC_SUCCESS;
     int        l_rc = 0;
-
-    FAPI_DBG("Entering _fetch_and_insert_vpd_ring");
 
     FAPI_INF("_fetch_and_insert_vpd_ring: (ringId,chipletId) = (0x%02X,0x%02x)",
              i_ring.ringId, i_chipletId);
@@ -915,14 +916,14 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                    l_chipletTorId,  // Chiplet instance TOR Index
                    i_vpdRing );     // The VPD RS4 ring container
 
-        FAPI_ASSERT( l_rc == TOR_SUCCESS,
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                      fapi2::XIPC_TOR_APPEND_RING_FAILED().
                      set_CHIP_TARGET(i_procTarget).
                      set_TOR_RC(l_rc).
                      set_RING_ID(i_ring.ringId).
                      set_OCCURRENCE(1),
-                     "tor_append_ring() failed in phase %d w/l_rc=%d for ringId=0x%x",
-                     l_ppeType, l_rc, i_ring.ringId );
+                     "tor_append_ring() failed in sysPhase=%d w/rc=%d for ringId=0x%x",
+                     i_sysPhase, l_rc, i_ring.ringId );
 
         FAPI_INF("Successfully added VPD ring: (ringId,evenOdd,chipletId)=(0x%02X,0x%X,0x%02X)",
                  i_ring.ringId, i_evenOdd, i_chipletId);
@@ -1879,8 +1880,7 @@ ReturnCode p9_xip_customize (
     MyBool_t     l_bDdSupport = UNDEFINED_BOOLEAN;
 
 
-
-    FAPI_DBG ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
+    FAPI_IMP ("Entering p9_xip_customize w/sysPhase=%d...", i_sysPhase);
 
 
     // Make copy of the requested bootCoreMask
@@ -1889,7 +1889,7 @@ ReturnCode p9_xip_customize (
 
     //-------------------------------------------
     // Check some input buffer parameters:
-    // - sysPhase, modeBuild are checked later
+    // - sysPhase is checked later
     // - log the initial image size
     // - more buffer size checks in big switch()
     //-------------------------------------------
@@ -2600,7 +2600,6 @@ ReturnCode p9_xip_customize (
             l_rc = tor_get_block_of_rings( l_hwRingsSection,
                                            attrDdLevel,
                                            l_ppeType,
-                                           UNDEFINED_RING_VARIANT,
                                            &io_ringSectionBuf,
                                            io_ringSectionBufSize );
 
