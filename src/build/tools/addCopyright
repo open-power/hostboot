@@ -683,7 +683,18 @@ sub createYearString($)
 
     # The list of years starts with the years in the current prolog and the
     # current release year.
-    my @years = ( @CopyRightYears, $ReleaseYear );
+    my @years = ();
+
+    # Get size of arrar @CopyRightYears
+    my $size = @CopyRightYears;
+    if ( $size < 2 )   ## If less than 2 then date entry has only a year mentioned
+    {
+        @years = @CopyRightYears;
+    }
+    else
+    {
+        @years = ( @CopyRightYears, $ReleaseYear );
+    }
 
     ##  Make a call to git to find the earliest commit date of the file
     ##  new files will not have a log, so the "git log" call above will
