@@ -375,7 +375,7 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     /** L2FIR[25]
      *  L2 castout or CN cresp addr err
      */
-    (rL2FIR, bit(25)) ? self_M_nogard_level2_L_th_1;
+    (rL2FIR, bit(25)) ? self_M_level2_L_th_1;
 
     /** L2FIR[26]
      *  LVDIR tracking PE
@@ -707,7 +707,7 @@ group gL3FIR filter singlebit, cs_root_cause( 5, 8, 11, 17, 21 )
     /** L3FIR[25]
      *  Cache inhitited op in L3 directory
      */
-    (rL3FIR, bit(25)) ? self_M_level2_L_th_1;
+    (rL3FIR, bit(25)) ? self_M_nogard_level2_L_th_1;
 
     /** L3FIR[26]
      *  L3 line delete CE done
