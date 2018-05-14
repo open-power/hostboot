@@ -42,21 +42,24 @@
 //     INFRASTRUCT TEAM. (These defs affect packing assumptions
 //     of ring structures that go into the image ringSections.)
 typedef uint16_t  RingId_t;         // Type for RingID enum
-typedef uint8_t   ChipletType_t;    // Type for CHIPLET_TYPE enum
-typedef uint8_t   PpeType_t;        // Type for PpeType
-typedef uint8_t   ChipType_t;       // Type for ChipType enum
+typedef uint16_t  RingClass_t;      // Type for RingClass enum vectors used in non-SBE
+typedef uint8_t   ChipletType_t;    // Type for Chiplets enum
+typedef uint8_t   PpeType_t;        // Type for PpeType enum
+typedef uint8_t   ChipId_t;         // Type for ChipId enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
 typedef uint8_t   RingBlockType_t;  // Type for RingBlockType enum, e.g. GET_SINGLE_RING
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
 typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
-#define  UNDEFINED_RING_ID      (RingId_t)0xffff
-#define  UNDEFINED_CHIPLET_TYPE (ChipletType_t)0xff
-#define  UNDEFINED_PPE_TYPE     (PpeType_t)0xff
-#define  UNDEFINED_CHIP_TYPE    (ChipType_t)0xff
-#define  INVALID_RING_TYPE      (RingType_t)0xff
-#define  UNDEFINED_RING_VARIANT (RingVariant_t)0xff
+#define  UNDEFINED_RING_ID         (RingId_t)0xffff
+#define  UNDEFINED_SCOM_ADDR       (uint32_t)0xffffffff
+#define  UNDEFINED_RING_CLASS      (RingClass_t)0xffff
+#define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
+#define  UNDEFINED_PPE_TYPE        (PpeType_t)0xff
+#define  UNDEFINED_CHIP_ID         (ChipId_t)0xff
+#define  INVALID_RING_TYPE         (RingType_t)0xff
+#define  UNDEFINED_RING_VARIANT    (RingVariant_t)0xff
 #define  UNDEFINED_RING_BLOCK_TYPE (RingBlockType_t)0xff;
 
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
@@ -82,12 +85,12 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 //
 typedef struct
 {
-    uint32_t   magic;       // =TOR_MAGIC_xyz
-    uint8_t    version;     // =TOR version
-    ChipType_t chipType;    // Value from ChipType enum
-    uint8_t    ddLevel;     // Actual DD level of ringSection
-    uint8_t    undefined;
-    uint32_t   size;        // Size of ringSection.
+    uint32_t  magic;       // =TOR_MAGIC_xyz
+    uint8_t   version;     // =TOR_VERSION
+    ChipId_t  chipId;      // Value from ChipId enum
+    uint8_t   ddLevel;     // Actual DD level of ringSection
+    uint8_t   undefined;
+    uint32_t  size;        // Size of ringSection.
 } TorHeader_t;
 
 //
@@ -145,57 +148,39 @@ enum TorMagicNum
 //
 // Chip types and List to represent p9n, p9c, p9a, cen (centaur)
 //
-enum ChipType
+enum ChipId
 {
-    CT_P9N,
-    CT_P9C,
-    CT_P9A,
-    CT_CEN,
-    NUM_CHIP_TYPES
+    CID_P9N,
+    CID_P9C,
+    CID_P9A,
+    CID_CEN,
+    NUM_CHIP_IDS = 4
 };
 
-typedef struct
+//
+// Ring classes
+// - Specified whether root ring:            ROOT (only applied in RING_PROPERTIES list)
+// - Specifies origination repo:             EKB or MVPD
+// - Specifies chip ID:                      P9 or Centaur
+// - Specifies MVPD subclass:                #G or #R
+// - Specifies flush status assumption:      Flushed or non-flushed (prev scanned)
+// - Specifies various special ring classes: FSM, OVLY, STUMPED, CMSK
+//
+enum RingClass
 {
-    const char*  name;
-    ChipType_t   type;
-} ChipTypeList_t;
-
-static const ChipTypeList_t CHIP_TYPE_LIST[] =
-{
-    {"p9n", CT_P9N},
-    {"p9c", CT_P9C},
-    {"p9a", CT_P9A},
-    {"cen", CT_CEN},
+    RCLS_ROOT_RING         = 0b0000000000000001, // ENGD root ring marker bit
+    RCLS_FLUSH_RING        = 0b0000000000000010, // Flush-scan marker bit
+    RCLS_NONFLUSH_RING     = 0b0000000000000100, // Nonflush-scan marker bit
+    RCLS_EKB_FLUSH_RING    = 0b0000000000001010, // EKB P9 ring. Flush-scanned
+    RCLS_EKB_NONFLUSH_RING = 0b0000000000001100, // EKB P9 ring. Nonflush-scanned
+    RCLS_MVPD_PDG_RING     = 0b0000000000010010, // MVPD #G P9 ring. Flush-scanned
+    RCLS_MVPD_PDR_RING     = 0b0000000000100010, // MVPD #R P9 ring. Flush-scanned
+    RCLS_EKB_CEN_RING      = 0b0000000001000010, // EKB Cen ring. Flush-scanned
+    RCLS_EKB_FSM_RING      = 0b0000000010000110, // EKB P9 ring for eq_ana_bndy. Mixed-scanned
+    RCLS_EKB_OVLY_RING     = 0b0000000100010010, // EKB P9 ovly for MVPD GPTR ring. Flush-scanned
+    RCLS_EKB_STUMPED_RING  = 0b0000001000000010, // EKB P9 CMSK stump ring. Flush-scanned
+    RCLS_EKB_CMSK_RING     = 0b0000010000000010, // EKB P9 CMSK ring. Flush-scanned
 };
-
-
-//
-// Ring related data structs and types
-//
-typedef enum RingClass
-{
-    EKB_RING,
-    EKB_FSM_RING,
-    EKB_STUMPED_RING,
-    EKB_CMSK_RING,
-    EKB_NONFLUSH_RING,
-    VPD_RING,
-    CEN_RING,
-    NUM_RING_CLASSES
-} RingClass_t;
-
-//
-// General Ring ID list structure
-//
-typedef struct
-{
-    const char*  ringName;
-    RingId_t     ringId;
-    uint8_t      instanceIdMin;
-    uint8_t      instanceIdMax;
-    RingClass_t  ringClass;
-    uint32_t     scanScomAddress;
-} GenRingIdList;
 
 // PPE types supported.
 // - This enum also reflects the order with which they appear in the HW image's .rings section.
@@ -223,16 +208,6 @@ enum RingVariant
     NUM_RING_VARIANTS = 0x07,
 };
 
-extern const char* ppeTypeName[];
-extern const char* ringVariantName[];
-
-// Variant order for Common rings
-typedef struct
-{
-    RingVariant_t  variant[NUM_RING_VARIANTS];
-} RingVariantOrder;
-
-
 // Ring types supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
@@ -250,44 +225,53 @@ enum RingBlockType
     PUT_SINGLE_RING     = 0x02
 };
 
+extern const char* ppeTypeName[];
+extern const char* ringVariantName[];
+
+
+//
+// Main ring properties structure
+// - This structure is the basis for the RING_PROPERTIES list (further below) which, through the
+//   enumerated ringId index, associates (ringId, ringName, scanScomAddr, torOffset, chipletType)
+// - For PPE we omit the ringName and scanScomAddr to save space in the SBE h-code.
+//
 typedef struct
 {
-    // Chiplet ID of the first instance of the Chiplet
-    uint8_t iv_base_chiplet_number;
+#ifndef __PPE__
+    char          ringName[MAX_RING_NAME_LENGTH];
+    uint32_t      scanScomAddr;
+#endif
+    uint8_t       idxRing;
+    ChipletType_t chipletType;
+#ifndef __PPE__
+    RingClass_t   ringClass;
+#endif
+} RingProperties_t;
 
-    // Number of common rings for the Chiplet
-    uint8_t iv_num_common_rings;
-
-    // Number of instance rings for the Chiplet (w/different ringId values)
-    uint8_t iv_num_instance_rings;
-
-    // Number of instance rings for the Chiplet (w/different ringId values
-    // AND different scanAddress values)
-    uint8_t iv_num_instance_rings_scan_addrs;
-
-    // Number of variants for common rings (instance rings only have BASE variant)
-    uint8_t iv_num_common_ring_variants;
+//
+// Main chiplet properties structure
+//
+typedef struct
+{
+    // This is the instance ID range of the chiplet.
+    uint8_t chipletBaseId;  // This is also the chiplet base ID for the COMMON rings in the chiplet
+    uint8_t numChipletInstances;      // Num of chiplet instances
+    uint8_t numCommonRings;           // Num of common rings
+    uint8_t numInstanceRings;         // Num of instance rings (w/different ringId values)
+    uint8_t numInstanceRingsScanAddr; // Num of instance rings for (w/diff ringId && diff scanAddrs)
+    uint8_t numCommonRingVariants;    // Num of Common rings variants. Only one for Instance rings
+    RingVariant_t  ringVariantOrder[NUM_RING_VARIANTS]; // Order of ring variants in ring section
 } ChipletData_t;
 
 // This is used to Set (Mark) the left-most bit
 #define  INSTANCE_RING_MARK  (uint8_t)0x80
 //
-// This is used to Set (Mark) the left-most bit
+// This is used to Clear the left-most bit
 #define  INSTANCE_RING_MASK  (uint8_t)0x7F
 
 // This is used to mark an invalid ring in the ring properties list
 #define INVALID_RING_OFFSET  (uint8_t)0xFF
 
-// This structure is needed for mapping a RingID to it's corresponding name.
-// The names will be used by the build scripts when generating the TOR.
-typedef struct
-{
-    uint8_t       iv_torOffSet;
-#ifndef __PPE__
-    char          iv_name[MAX_RING_NAME_LENGTH];
-#endif
-    ChipletType_t iv_type;
-} RingProperties_t;
 
 
 //
@@ -298,7 +282,7 @@ typedef struct
 #define INFRASTRUCT_RC_CODE_BUG               2
 #define INFRASTRUCT_RC_USER_ERROR             3
 #define INFRASTRUCT_RC_ENV_ERROR              4
-#define INFRASTRUCT_RC_NOOF_CODES             5 // Do not use as RC code
+#define INFRASTRUCT_NOOF_RCS                  5 // Do not use as RC code
 //
 // TOR specific error codes
 //
@@ -306,29 +290,27 @@ typedef struct
 #define TOR_FAILURE                           INFRASTRUCT_RC_FAILURE
 #define TOR_CODE_BUG                          INFRASTRUCT_RC_CODE_BUG
 #define TOR_USER_ERROR                        INFRASTRUCT_RC_USER_ERROR
-#define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_RC_NOOF_CODES + 1
-#define TOR_INVALID_CHIPTYPE                  INFRASTRUCT_RC_NOOF_CODES + 3
-#define TOR_INVALID_CHIPLET                   INFRASTRUCT_RC_NOOF_CODES + 4
-#define TOR_INVALID_VARIANT                   INFRASTRUCT_RC_NOOF_CODES + 5
-#define TOR_INVALID_RING_ID                   INFRASTRUCT_RC_NOOF_CODES + 6
-#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_RC_NOOF_CODES + 7
-#define TOR_INVALID_RING_BLOCK_TYPE           INFRASTRUCT_RC_NOOF_CODES + 8
-#define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_RC_NOOF_CODES + 9
-#define TOR_RING_NOT_FOUND                    INFRASTRUCT_RC_NOOF_CODES + 10
-#define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_RC_NOOF_CODES + 11
-#define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_RC_NOOF_CODES + 12
-#define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_RC_NOOF_CODES + 13
-#define TOR_OP_BUFFER_INVALID                 INFRASTRUCT_RC_NOOF_CODES + 14
-#define TOR_OP_BUFFER_SIZE_EXCEEDED           INFRASTRUCT_RC_NOOF_CODES + 15
-#define TOR_IMAGE_DOES_NOT_SUPPORT_CME        INFRASTRUCT_RC_NOOF_CODES + 16
-#define TOR_IMAGE_DOES_NOT_SUPPORT_SGPE       INFRASTRUCT_RC_NOOF_CODES + 17
-#define TOR_IMAGE_DOES_NOT_SUPPORT_DD_LEVEL   INFRASTRUCT_RC_NOOF_CODES + 18
-#define TOR_IMAGE_DOES_NOT_SUPPORT_PPE_LEVEL  INFRASTRUCT_RC_NOOF_CODES + 19
-#define TOR_RING_AVAILABLE_IN_RINGSECTION     INFRASTRUCT_RC_NOOF_CODES + 20
-#define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_RC_NOOF_CODES + 21
-#define TOR_TOO_MANY_DD_LEVELS                INFRASTRUCT_RC_NOOF_CODES + 22
-#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_RC_NOOF_CODES + 23
-#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_RC_NOOF_CODES + 24
+#define TOR_INVALID_MAGIC_NUMBER              INFRASTRUCT_NOOF_RCS + 1
+#define TOR_INVALID_CHIP_ID                   INFRASTRUCT_NOOF_RCS + 3
+#define TOR_INVALID_CHIPLET_TYPE              INFRASTRUCT_NOOF_RCS + 4
+#define TOR_INVALID_VARIANT                   INFRASTRUCT_NOOF_RCS + 5
+#define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 6
+#define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_NOOF_RCS + 7
+#define TOR_INVALID_RING_BLOCK_TYPE           INFRASTRUCT_NOOF_RCS + 8
+#define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 9
+#define TOR_RING_NOT_FOUND                    INFRASTRUCT_NOOF_RCS + 10 // to be phased out
+#define TOR_RING_IS_EMPTY                     INFRASTRUCT_NOOF_RCS + 10 // non-fatal replace
+#define TOR_RING_IS_POPULATED                 INFRASTRUCT_NOOF_RCS + 11
+#define TOR_RING_HAS_NO_TOR_SLOT              INFRASTRUCT_NOOF_RCS + 12 // fatal replace
+#define TOR_AMBIGUOUS_API_PARMS               INFRASTRUCT_NOOF_RCS + 13
+#define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_NOOF_RCS + 14
+#define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 15
+#define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_NOOF_RCS + 16
+#define TOR_TOO_MANY_DD_LEVELS                INFRASTRUCT_NOOF_RCS + 17
+#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 18
+#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_NOOF_RCS + 19
+#define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
+#define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 21
 
 #ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
 int ringid_get_raw_ring_file_path( uint32_t       i_magic,
@@ -336,26 +318,99 @@ int ringid_get_raw_ring_file_path( uint32_t       i_magic,
                                    char*          io_directory );
 #endif
 
-int ringid_get_noof_ring_ids( ChipType_t  i_chipType,
-                              RingId_t*   o_numRingIds);
+// This function returns the main ring properties list associated w/the chip ID.
+int ringid_get_ringProps( ChipId_t           i_chipId,
+                          RingProperties_t** o_ringProps );
 
-int ringid_get_noof_chiplets( ChipType_t  i_chipType,
-                              uint32_t    i_torMagic,
-                              uint8_t*    o_numChiplets );
+int ringid_get_chipletProps( ChipId_t           i_chipId,
+                             uint32_t           i_torMagic,
+                             uint8_t            i_torVersion,
+                             ChipletType_t      i_chipletType, // Ignored if one chiplet in torMagic
+                             ChipletData_t**    o_chipletData,
+                             uint8_t*           o_numVariants);
 
-int ringid_get_ring_list( ChipType_t       i_chipType,
-                          RingId_t         i_ringId,
-                          GenRingIdList**  o_ringIdList);
+int ringid_get_num_ring_ids( ChipId_t   i_chipId,
+                             RingId_t*  o_numRingIds);
 
-int ringid_get_properties( ChipType_t         i_chipType,
-                           uint32_t           i_torMagic,
-                           uint8_t            i_torVersion,
-                           ChipletType_t      i_chipletType,
-                           ChipletData_t**    o_chipletData,
-                           GenRingIdList**    o_ringIdListCommon,
-                           GenRingIdList**    o_ringIdListInstance,
-                           RingVariantOrder** o_ringVariantOrder,
-                           RingProperties_t** o_ringProps,
-                           uint8_t*           o_numVariants);
+int ringid_get_num_chiplets( ChipId_t  i_chipId,
+                             uint32_t  i_torMagic,
+                             uint8_t*  o_numChiplets );
+
+// This function returns the scanScomAddr associated with the ringId.
+int ringid_get_scanScomAddr( ChipId_t   i_chipId,
+                             RingId_t   i_ringId,
+                             uint32_t*  o_scanScomAddr );
+
+// This fumction returns the ringClass associated with the ringId.
+int ringid_get_ringClass( ChipId_t      i_chipId,
+                          RingId_t      i_ringId,
+                          RingClass_t*  o_ringClass );
+
+// Check for valid chip ID and ring ID.
+int ringid_check_ringId( ChipId_t  i_chipId,
+                         RingId_t  i_ringId );
+
+// Check and resolve the effective chipletType's index in a given TOR magic ring section
+int ringid_get_chipletIndex( ChipId_t        i_chipId,
+                             uint32_t        i_torMagic,
+                             ChipletType_t   i_chipletType,
+                             ChipletType_t*  o_chipletIndex );
+
+#if !defined(__PPE__) && !defined(NO_STD_LIB_IN_PPE) && !defined(__HOSTBOOT_MODULE) && !defined(FIPSODE)
+
+// The following prototypes are needed by the initCompiler and so it's practical to use C++
+// features.
+
+#include <map>
+#include <string>
+
+extern std::map <ChipId_t, std::string> chipIdIsMap;
+extern std::map <std::string, ChipId_t> chipTypeIsMap;
+extern std::map <uint8_t, ChipId_t> chipIdIcToIsMap;
+
+// This function returns the root ringId of a given scanScomAddr.
+// Notes:
+// - The "root" ringId is the ringId which has a ringName identical to that associated with the
+//   scanScomAddr in the engineering data (engd).
+// - In IS's ring list, we can have multiple ringId for the same scanScomAddr since a ring may have
+//   multiple variations of itself, e.g. due to different frequency, filter or FSM settings, and
+//   which are identified through an "_bucket" extension on their ringName.  All those rings,
+//   however, are non-ROOT_RINGs.
+// - If the fully "qualified" unique ringId is required, then use ringidGetRingId1() and supply
+//   the ringName instead of the scanScomAddr.
+//
+int ringidGetRootRingId( ChipId_t   i_chipId,
+                         uint32_t   i_scanScomAddr,
+                         RingId_t&  o_ringId,
+                         bool       i_bTest = false );
+
+// This function returns the ringId associated with the ringName.
+int ringidGetRingId1( ChipId_t     i_chipId,
+                      std::string  i_ringName,
+                      RingId_t&    o_ringId,
+                      bool         i_bTest = false );
+
+// This function returns the ringId associated with the effective ring index within a chiplet.
+// (Note that "effective" means the index is void of the instance marker bit.)
+int ringidGetRingId2( ChipId_t       i_chipId,
+                      uint32_t       i_torMagic,
+                      ChipletType_t  i_chipletType, // Ignored if only one chiplet in torMagic
+                      uint8_t        i_idxRing,     // The eEffective ring index within chiplet's
+                      // common or instance ring section
+                      MyBool_t       i_bInstCase,   // =0 common ring, =1 instance ring
+                      RingId_t&      o_ringId,
+                      bool           i_bTest = false );
+
+// This function returns the ringName associated with the ringId.
+int ringidGetRingName( ChipId_t     i_chipId,
+                       RingId_t     i_ringId,
+                       std::string& o_ringName );
+
+// This fumction returns the ringClass associated with the ringId.
+int ringidGetRingClass( ChipId_t      i_chipId,
+                        RingId_t      i_ringId,
+                        RingClass_t&  o_ringClass );
+
+#endif // __PPE__ && NO_STD_LIB_IN_PPE
 
 #endif  // _COMMON_RINGID_H_
