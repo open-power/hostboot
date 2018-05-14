@@ -40,9 +40,12 @@
   #include <prdfMemTdCtlr.H>
   #include <prdfMemTdFalseAlarm.H>
 
-  #ifndef __HOSTBOOT_RUNTIME
+  #ifdef __HOSTBOOT_RUNTIME
+    #include <prdfMemScrubUtils.H>
+  #else
     #include <prdfMemIplCeStats.H>
   #endif
+
 #endif
 
 namespace PRDF
@@ -167,6 +170,14 @@ class MbaDataBundle : public DataBundle
      *  the command has finished. After starting the command, we have to store
      *  the command object until we get the command complete attention. */
     mss_SuperFastRead * iv_sfCmd = nullptr;
+
+    #endif
+
+    #if defined(__HOSTBOOT_MODULE) && defined(__HOSTBOOT_RUNTIME)
+
+    /** To prevent flooding during runtime scrub commands, this is used to limit
+     *  the number of times a scrub command is resumed on a rank. */
+    ScrubResumeCounter iv_scrubResumeCounter;
 
     #endif
 };

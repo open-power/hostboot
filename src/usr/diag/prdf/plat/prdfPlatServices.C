@@ -38,6 +38,7 @@
 #include <prdfTrace.H>
 #include <prdfAssert.h>
 
+#include <prdfCenMbaDataBundle.H>
 #include <prdfMemScrubUtils.H>
 
 #include <iipServiceDataCollector.h>
@@ -664,11 +665,79 @@ uint32_t startTdScrub<TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
 //##############################################################################
 //##                   Centaur Maintenance Command wrappers
 //##############################################################################
+
+template<TARGETING::TYPE T>
+uint32_t __startScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       AddrRangeType i_rangeType, uint32_t i_stopCond,
+                       mss_MaintCmd::TimeBaseSpeed i_cmdSpeed );
+
+template<>
+uint32_t __startScrub<TYPE_MBA>( ExtensibleChip * i_chip,
+                                 const MemRank & i_rank,
+                                 AddrRangeType i_rangeType,
+                                 uint32_t i_stopCond,
+                                 mss_MaintCmd::TimeBaseSpeed i_cmdSpeed )
+{
+    #define PRDF_FUNC "[PlatServices::__startScrub<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        #ifdef __HOSTBOOT_RUNTIME
+        // Starting a new command. So clear the resume counter.
+        getMbaDataBundle(i_chip)->iv_scrubResumeCounter.reset();
+        #endif
+
+        // Get the address range of the given rank.
+        fapi2::buffer<uint64_t> saddr, eaddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Start the scrub command.
+        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, i_cmdSpeed,
+                                i_stopCond, false };
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template<>
 uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
@@ -708,17 +777,6 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
                                             : mss_MaintCmd::BG_SCRUB;
     do
     {
-        // Get the first address of the given rank.
-        fapi2::buffer<uint64_t> saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
-                                          SLAVE_RANK );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            break;
-        }
-
         // Set the required thresholds for background scrubbing.
         o_rc = setBgScrubThresholds<TYPE_MBA>( i_chip, i_rank );
         if ( SUCCESS != o_rc )
@@ -728,27 +786,8 @@ uint32_t startBgScrub<TYPE_MBA>( ExtensibleChip * i_chip,
             break;
         }
 
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Start the background scrub command.
-        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
-                                stopCond, false };
-        errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
+        o_rc = __startScrub<TYPE_MBA>( i_chip, i_rank, SLAVE_RANK, stopCond,
+                                       cmdSpeed );
 
     } while (0);
 
@@ -773,8 +812,6 @@ uint32_t startTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
 
     // Make sure there is a command complete attention when the command stops.
     i_stopCond |= mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
@@ -811,47 +848,8 @@ uint32_t startTdScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 
     #endif
 
-    do
-    {
-        // Get the address range of the given rank.
-        fapi2::buffer<uint64_t> saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, i_rank, saddr, eaddr,
-                                          i_rangeType );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            break;
-        }
-
-        // Clear all of the counters and maintenance ECC attentions.
-        o_rc = prepareNextCmd<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Get the MBA fapi target.
-        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
-
-        // Start the background scrub command.
-        mss_TimeBaseScrub cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
-                                i_stopCond, false };
-        errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
-                      i_chip->getHuid(), i_rank.getKey() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-    } while (0);
-
-    return o_rc;
+    return __startScrub<TYPE_MBA>( i_chip, i_rank, i_rangeType, i_stopCond,
+                                   cmdSpeed );
 
     #undef PRDF_FUNC
 }

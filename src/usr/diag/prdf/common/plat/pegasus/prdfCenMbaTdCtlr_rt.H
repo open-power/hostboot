@@ -91,7 +91,7 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     explicit CenMbaTdCtlr( ExtensibleChip * i_mbaChip ) :
         CenMbaTdCtlrCommon(i_mbaChip), iv_queue(), iv_masterRanks(),
         iv_vcmRankData(), iv_tpsRankData(), iv_tpsFalseAlarm(false),
-        iv_scrubResumeCounter(), iv_fetchAttnsMasked(false)
+        iv_fetchAttnsMasked(false)
     {}
 
   public: // Overloaded functions
@@ -433,22 +433,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     void collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
                                   const char * i_descTag );
 
-  private: // classes
-
-    /** @brief Simple class to abstract the common actions done on
-     *         iv_scrubResumeCounter. */
-    class ScrubResumCounter
-    {
-      public:
-        ScrubResumCounter() : iv_counter(0) {}
-        void reset()             { iv_counter = 0;          }
-        void incCount()          { iv_counter++;            }
-        bool isTh() const        { return 16 <= iv_counter; }
-        uint8_t getCount() const { return iv_counter;       }
-      private:
-        uint8_t iv_counter;
-    };
-
   private: // instance variables
 
     /** Array of functions pointers for TD controller states. This is used to
@@ -462,10 +446,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     VcmRankData iv_vcmRankData;   ///< VCM specific data for each rank.
     TpsRankData iv_tpsRankData;   ///< TPS specific data for each rank.
     bool        iv_tpsFalseAlarm; ///< TPS false alarm
-
-    /** This is used to limit the number of times a scrub is resumed on a rank
-     *  in order to prevent flooding of attentions */
-    ScrubResumCounter iv_scrubResumeCounter;
 
     /** Keeps track if the fetch attentions have been masked during a TD
      *  procedure. */

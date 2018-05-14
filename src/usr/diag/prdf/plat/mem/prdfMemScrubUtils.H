@@ -37,6 +37,18 @@
 namespace PRDF
 {
 
+/** Simple container to keep track of the number of time a scrub command has
+ *  been resumed. */
+class ScrubResumeCounter
+{
+  public:
+    void reset()      { iv_count = 0;                      }
+    void inc()        { if ( 255 != iv_count ) iv_count++; }
+    bool atTh() const { return 16 <= iv_count;             }
+  private:
+    uint8_t iv_count = 0;
+};
+
 /**
  * @brief  Clears the command complete and WAT workaround attentions.
  * @param  i_chip MBA, MCA, or MCBIST.

@@ -95,6 +95,17 @@ uint32_t stopBgScrub( ExtensibleChip * i_chip );
 template<TARGETING::TYPE T>
 uint32_t resumeBgScrub( ExtensibleChip * i_chip );
 
+/**
+ * @brief  Resumes TD scrubbing after it has paused on error.
+ * @param  i_chip      MBA chip.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename SCT>
+uint32_t resumeTdScrub( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
+                        SCT i_stopCond );
+
 //##############################################################################
 //##                       Line delete functions
 //##############################################################################
