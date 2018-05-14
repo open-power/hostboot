@@ -51,245 +51,280 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                                 uint32_t        i_dbgl )           // Debug option
 {
     int               rc = TOR_SUCCESS;
-    uint8_t           iInst, iRing, iVariant;
     TorHeader_t*      torHeader;
     uint32_t          torMagic;
     uint8_t           torVersion;
-    uint8_t           chipType;
+    ChipId_t          chipId;
     TorCpltBlock_t*   cpltBlock;
     TorCpltOffset_t   cpltOffset; // Offset from ringSection to chiplet section
     TorRingOffset_t   ringOffset; // Offset to actual ring container
     uint32_t          torSlotNum; // TOR slot number (within a chiplet section)
     uint32_t          ringSize;   // Size of whole ring container/block.
-    RingVariantOrder* ringVariantOrder;
+    RingVariant_t*    ringVariantOrder;
     RingId_t          numRings;
-    GenRingIdList*    ringIdListCommon;
-    GenRingIdList*    ringIdListInstance;
-    GenRingIdList*    ringIdList;
-    uint8_t           bInstCase = 0;
-    ChipletData_t*    cpltData;
+    ChipletType_t     chipletType = UNDEFINED_CHIPLET_TYPE;
+    ChipletType_t     chipletIndex = UNDEFINED_CHIPLET_TYPE; // Effective chiplet index
+    MyBool_t          bInstCase = UNDEFINED_BOOLEAN;
+    ChipletData_t*    chipletData;
+    uint8_t           numInstances;
     uint8_t           numVariants;
-    ChipletType_t     numChiplets;
-    RingProperties_t* ringProps;
+    RingProperties_t* ringProps = NULL;
+    uint8_t           idxRingEff;      // Effective chiplet ring index
+    uint8_t           iInst, iRing, iVariant; // Index counters for instance, chiplet rings, variant
 
     torHeader = (TorHeader_t*)i_ringSection;
     torMagic  = be32toh(torHeader->magic);
     torVersion = torHeader->version;
-    chipType  = torHeader->chipType;
+    chipId    = torHeader->chipId;
 
-    rc = ringid_get_noof_chiplets( chipType,
-                                   torMagic,
-                                   &numChiplets);
+    //
+    // Get main ring properties list for the chip ID
+    //
+    rc = ringid_get_ringProps( chipId,
+                               &ringProps );
 
     if (rc)
     {
-        MY_ERR("ringid_get_noof_chiplets() failed w/rc=0x%08x\n", rc);
+        MY_ERR("ringid_get_ringProps() failed w/rc=0x%08x\n", rc);
         return rc;
     }
 
+    chipletType = ringProps[i_ringId].chipletType;
+
     //
-    // Looper for each SBE chipleti
+    // Get all other metadata for the chipletType
     //
-    for (ChipletType_t iCplt = 0; iCplt < numChiplets; iCplt++)
+    rc = ringid_get_chipletProps( chipId,
+                                  torMagic,
+                                  torHeader->version,
+                                  chipletType,
+                                  &chipletData,
+                                  &numVariants );
+
+    if (rc)
     {
-        rc = ringid_get_properties( chipType,
-                                    torMagic,
-                                    torHeader->version,
-                                    iCplt,
-                                    &cpltData,
-                                    &ringIdListCommon,
-                                    &ringIdListInstance,
-                                    &ringVariantOrder,
-                                    &ringProps,
-                                    &numVariants );
-
-        if (rc)
-        {
-            MY_ERR("ringid_get_properties() failed w/rc=0x%08x\n", rc);
-            return rc;
-        }
-
-        //
-        // Sequentially traverse ring offset slots within a chiplet's CMN or INST section
-        //
-        for ( bInstCase = 0; bInstCase <= 1; bInstCase++ )
-        {
-            numRings = bInstCase ? cpltData->iv_num_instance_rings : cpltData->iv_num_common_rings;
-            ringIdList = bInstCase ? ringIdListInstance : ringIdListCommon;
-
-            // Adjust number of variants according to TOR version of image
-            if (torVersion < 7)
-            {
-                // Nothing to do. Number of variants is the same for Common and Instance rings.
-            }
-            else
-            {
-                numVariants = bInstCase ? 1 : numVariants; // Only BASE variant for Instance rings
-            }
-
-            if (ringIdList) // Only proceed if chiplet has [Common/Instance] rings.
-            {
-                // Calc offset to chiplet's CMN or INST section, cpltOffset (steps 1-3)
-                //
-                // 1. Calc offset to TOR slot pointing to chiplet's COM or INST section
-                cpltOffset = sizeof(TorHeader_t) +
-                             iCplt * sizeof(TorCpltBlock_t) +
-                             bInstCase * sizeof(cpltBlock->cmnOffset);
-                // 2. Retrive offset, endian convert and make it relative to ring section origin
-                cpltOffset = *(uint32_t*)( (uint8_t*)i_ringSection + cpltOffset );
-                cpltOffset = be32toh(cpltOffset);
-                // 3. Make offset relative to ring section origin
-                cpltOffset = sizeof(TorHeader_t) + cpltOffset;
-
-                torSlotNum = 0;
-
-                for ( iInst = ringIdList->instanceIdMin;
-                      iInst <= ringIdList->instanceIdMax;
-                      iInst++ )
-                {
-                    for ( iRing = 0; iRing < numRings; iRing++ )
-                    {
-                        for ( iVariant = 0; iVariant < numVariants; iVariant++ )
-                        {
-                            if ( strcmp( (ringIdList + iRing)->ringName,
-                                         ringProps[i_ringId].iv_name ) == 0 &&
-                                 ( i_ringVariant == ringVariantOrder->variant[iVariant] ||
-                                   numVariants == 1 ) &&  // If no variants, ignore i_ringVariant and assume "BASE" ring
-                                 ( !bInstCase || ( bInstCase && iInst == io_instanceId ) ) )
-                            {
-                                strcpy(o_ringName, (ringIdList + iRing)->ringName);
-
-                                // Calc offset to actual ring, ringOffset (steps 1-3)
-                                //
-                                // 1. Calc offset to TOR slot pointing to actual ring
-                                ringOffset = cpltOffset + torSlotNum * sizeof(ringOffset);
-                                // 2. Retrieve offset and endian convert
-                                ringOffset = *(TorRingOffset_t*)( (uint8_t*)i_ringSection + ringOffset );
-                                ringOffset = be16toh(ringOffset);
-
-                                if (i_ringBlockType == GET_SINGLE_RING)
-                                {
-                                    ringSize = 0;
-
-                                    if (ringOffset)
-                                    {
-                                        // 3. Make offset relative to ring section origin
-                                        ringOffset = cpltOffset + ringOffset;
-
-                                        ringSize = be16toh( ((CompressedScanData*)
-                                                             ((uint8_t*)i_ringSection + ringOffset))->iv_size );
-
-                                        if (io_ringBlockSize == 0)
-                                        {
-                                            if (i_dbgl > 0)
-                                            {
-                                                MY_DBG("io_ringBlockSize is zero. Returning required size.\n");
-                                            }
-
-                                            io_ringBlockSize =  ringSize;
-                                            return TOR_SUCCESS;
-                                        }
-
-                                        if (io_ringBlockSize < ringSize)
-                                        {
-                                            MY_ERR("io_ringBlockSize is less than required size.\n");
-                                            return TOR_BUFFER_TOO_SMALL;
-                                        }
-
-                                        // Produce return parms
-                                        memcpy( *io_ringBlockPtr, (uint8_t*)i_ringSection + ringOffset, ringSize);
-                                        io_ringBlockSize = ringSize;
-                                        io_instanceId = (bInstCase) ? io_instanceId : (ringIdList + iRing)->instanceIdMin;
-
-                                        if (i_dbgl > 0)
-                                        {
-                                            MY_DBG("Found a ring:\n" \
-                                                   "  Name: %s\n" \
-                                                   "  Blocksize: %d\n",
-                                                   o_ringName, io_ringBlockSize);
-                                        }
-
-                                        rc = TOR_SUCCESS;
-                                    }
-                                    else
-                                    {
-                                        if (i_dbgl > 0)
-                                        {
-                                            MY_DBG("Ring %s was not found.\n", o_ringName);
-                                        }
-
-                                        rc = TOR_RING_NOT_FOUND;
-                                    }
-
-                                    if (i_dbgl > 0)
-                                    {
-                                        MY_DBG("Details for chiplet ring index=%d: \n"
-                                               "  Full offset to chiplet section = 0x%08x \n"
-                                               "  Full offset to RS4 header = 0x%08x \n"
-                                               "  Ring size = 0x%08x \n",
-                                               iRing, cpltOffset, ringOffset, ringSize);
-                                    }
-
-                                    return rc;
-
-                                }
-                                else if (i_ringBlockType == PUT_SINGLE_RING)
-                                {
-                                    if (ringOffset)
-                                    {
-                                        MY_ERR("Ring container is already present in image\n");
-                                        MY_ERR("  Ring section addr: 0x%016lx  (First 8B: 0x%016lx)\n",
-                                               (uintptr_t)i_ringSection,
-                                               be64toh(*((uint64_t*)i_ringSection)));
-                                        MY_ERR("  cpltOffset=0x%08x, torSlotNum=0x%x, TOR offset=0x%04x\n",
-                                               cpltOffset, torSlotNum, ringOffset);
-                                        return TOR_RING_AVAILABLE_IN_RINGSECTION;
-                                    }
-
-                                    // Special [mis]use of io_ringBlockPtr and io_ringBlockSize:
-                                    // Put location of chiplet's CMN or INST section into ringBlockPtr
-                                    memcpy( *io_ringBlockPtr, &cpltOffset, sizeof(cpltOffset));
-                                    // Put location of ringOffset slot into ringBlockSize
-                                    io_ringBlockSize = cpltOffset + (torSlotNum * sizeof(ringOffset));
-
-                                    return TOR_SUCCESS;
-                                }
-                                else
-                                {
-                                    MY_ERR("Ring block type (i_ringBlockType=%d) is not supported\n", i_ringBlockType);
-                                    return TOR_INVALID_RING_BLOCK_TYPE;
-                                }
-                            }
-
-                            torSlotNum++; // Next TOR ring slot
-                        }
-                    }
-                }
-            }
-            else // Since there's no Common/Instance rings, set RING_NOT_FOUND
-            {
-                // Note that if we get here, it's because the chiplet doesn't have either
-                // a Common or Instance rings. This happens e.g. for Centaur which has
-                // no Instance rings. And theoretically, it's possible to only have
-                // Instance rings and no Common rings, so accommodating that as well here.
-                if (i_dbgl > 0)
-                {
-                    MY_DBG("Chiplet=%d has no CMN(%d) or INST(%d) section\n",
-                           iCplt, (1 - bInstCase), bInstCase);
-                }
-
-                rc = TOR_RING_NOT_FOUND;
-
-            } // if (ringIdList)
-        } // for (bInstCase)
-    } // for (iCplt)
-
-    if (i_dbgl > 0)
-    {
-        MY_DBG("i_ringId=0x%x is an invalid ring ID\n", i_ringId);
+        MY_ERR("ringid_get_chipletProps() failed w/rc=0x%08x\n", rc);
+        return rc;
     }
 
-    return TOR_INVALID_RING_ID;
+    ringVariantOrder = chipletData->ringVariantOrder;
+
+    //
+    // Check the scope of chipletType and Get the effective chipletType's index
+    //
+    rc = ringid_get_chipletIndex( chipId,
+                                  torMagic,
+                                  chipletType,
+                                  &chipletIndex );
+
+    if (rc)
+    {
+        if ( rc == TOR_INVALID_CHIPLET_TYPE )
+        {
+            // Many things could have lead to this error. It's not necessarily fatal or even
+            // unacceptable. For example, xip_tool will hit this one a lot, so we can't trace
+            // out here. Instead, for now, we're just returning TOR_INVALID_CHIPLET_TYPE.
+            // But maybe this needs to change in future.
+            return rc;
+        }
+        else
+        {
+            MY_ERR("ringid_get_chipletIndex() failed w/rc=0x%08x\n", rc);
+            return rc;
+        }
+    }
+
+    //
+    // Determine whether Common or Instance section based on the INSTANCE_RING_MARK
+    //
+    if ( ringProps[i_ringId].idxRing & INSTANCE_RING_MARK )
+    {
+        bInstCase = 1;
+    }
+    else
+    {
+        bInstCase = 0;
+    }
+
+    //
+    // Calculate various loop upper limits
+    //
+    numInstances = bInstCase ?
+                   chipletData->numChipletInstances :
+                   1;
+
+    numRings     = bInstCase ?
+                   chipletData->numInstanceRings :
+                   chipletData->numCommonRings;
+
+    idxRingEff   = ringProps[i_ringId].idxRing & INSTANCE_RING_MASK; // Always safe
+
+    // Adjust number of variants according to TOR version of image
+    if (torVersion >= 7)
+    {
+        numVariants = bInstCase ?
+                      1 :          // Only BASE variant for Instance rings
+                      numVariants;
+    }
+
+    // Unless we find a ring, then the following rc will be returned
+    rc = TOR_RING_HAS_NO_TOR_SLOT;
+
+    //
+    // Now traverse the chiplet's Common or Instance ring section
+    //
+    if (numRings) // Only proceed if chiplet has [Common/Instance] rings.
+    {
+        // Calc offset to chiplet's CMN or INST section, cpltOffset (steps 1-3)
+        //
+        // 1. Calc offset to TOR slot pointing to chiplet's COM or INST section
+        cpltOffset = sizeof(TorHeader_t) +
+                     chipletIndex * sizeof(TorCpltBlock_t) +
+                     bInstCase * sizeof(cpltBlock->cmnOffset);
+        // 2. Retrive offset, endian convert and make it relative to ring section origin
+        cpltOffset = *(uint32_t*)( (uint8_t*)i_ringSection + cpltOffset );
+        cpltOffset = be32toh(cpltOffset);
+        // 3. Make offset relative to ring section origin
+        cpltOffset = sizeof(TorHeader_t) + cpltOffset;
+
+        torSlotNum = 0;
+
+        for ( iInst = 0; iInst < numInstances; iInst++ )
+        {
+            for ( iRing = 0; iRing < numRings; iRing++ )
+            {
+                for ( iVariant = 0; iVariant < numVariants; iVariant++ )
+                {
+                    // Remember in the following "busy" if that we're already in the correct
+                    // chiplet ring section and that we're merely trying to determine if we have
+                    // hit the proper combination of (iRing,iVariant,iInst).
+                    if ( idxRingEff == iRing                                                     &&
+                         ( i_ringVariant == ringVariantOrder[iVariant] ||
+                           // Support overrides etc where ringVariant doesn't necessarily apply
+                           ( numVariants == 1 && i_ringVariant == UNDEFINED_RING_VARIANT ) )     &&
+                         ( !bInstCase || ( bInstCase && iInst == (io_instanceId - chipletData->chipletBaseId) ) ) )
+                    {
+                        strcpy(o_ringName, ringProps[i_ringId].ringName);
+
+                        // Calc offset to actual ring, ringOffset (steps 1-3)
+                        //
+                        // 1. Calc offset to TOR slot pointing to actual ring
+                        ringOffset = cpltOffset + torSlotNum * sizeof(ringOffset);
+                        // 2. Retrieve offset and endian convert
+                        ringOffset = *(TorRingOffset_t*)( (uint8_t*)i_ringSection + ringOffset );
+                        ringOffset = be16toh(ringOffset);
+
+                        if (i_ringBlockType == GET_SINGLE_RING)
+                        {
+                            ringSize = 0;
+
+                            if (ringOffset)
+                            {
+                                // 3. Make offset relative to ring section origin
+                                ringOffset = cpltOffset + ringOffset;
+
+                                ringSize = be16toh( ((CompressedScanData*)
+                                                     ((uint8_t*)i_ringSection + ringOffset))->iv_size );
+
+                                if (io_ringBlockSize == 0)
+                                {
+                                    if (i_dbgl > 0)
+                                    {
+                                        MY_DBG("io_ringBlockSize is zero. Returning required size.\n");
+                                    }
+
+                                    io_ringBlockSize =  ringSize;
+                                    return TOR_SUCCESS;
+                                }
+
+                                if (io_ringBlockSize < ringSize)
+                                {
+                                    MY_ERR("io_ringBlockSize is less than required size.\n");
+                                    return TOR_BUFFER_TOO_SMALL;
+                                }
+
+                                // Produce return parms
+                                memcpy( *io_ringBlockPtr, (uint8_t*)i_ringSection + ringOffset, ringSize);
+                                io_ringBlockSize = ringSize;
+                                io_instanceId = bInstCase ?
+                                                io_instanceId :
+                                                chipletData->chipletBaseId;
+
+                                if (i_dbgl > 0)
+                                {
+                                    MY_DBG("Found a ring:\n" \
+                                           "  Name: %s\n" \
+                                           "  Blocksize: %d\n",
+                                           o_ringName, io_ringBlockSize);
+                                }
+
+                                rc = TOR_SUCCESS;
+                            }
+                            else
+                            {
+                                if (i_dbgl > 0)
+                                {
+                                    MY_DBG("ringName=%s was found but is empty\n",
+                                           o_ringName);
+                                }
+
+                                rc = TOR_RING_IS_EMPTY;
+                            }
+
+                            if (i_dbgl > 0)
+                            {
+                                MY_DBG("Details for chiplet ring index=%d: \n"
+                                       "  Full offset to chiplet section = 0x%08x \n"
+                                       "  Full offset to RS4 header = 0x%08x \n"
+                                       "  Ring size = 0x%08x \n",
+                                       iRing, cpltOffset, ringOffset, ringSize);
+                            }
+
+                            return rc;
+
+                        }
+                        else if (i_ringBlockType == PUT_SINGLE_RING)
+                        {
+                            if (ringOffset)
+                            {
+                                MY_ERR("Ring container is already present in image\n");
+                                MY_ERR("  Ring section addr: 0x%016lx  (First 8B: 0x%016lx)\n",
+                                       (uintptr_t)i_ringSection,
+                                       be64toh(*((uint64_t*)i_ringSection)));
+                                MY_ERR("  cpltOffset=0x%08x, torSlotNum=0x%x, TOR offset=0x%04x\n",
+                                       cpltOffset, torSlotNum, ringOffset);
+                                return TOR_RING_IS_POPULATED;
+                            }
+
+                            // Special [mis]use of io_ringBlockPtr and io_ringBlockSize:
+                            // Put location of chiplet's CMN or INST section into ringBlockPtr
+                            memcpy( *io_ringBlockPtr, &cpltOffset, sizeof(cpltOffset));
+                            // Put location of ringOffset slot into ringBlockSize
+                            io_ringBlockSize = cpltOffset + (torSlotNum * sizeof(ringOffset));
+
+                            return TOR_SUCCESS;
+                        }
+                        else
+                        {
+                            MY_ERR("Ring block type (i_ringBlockType=%d) is not supported\n", i_ringBlockType);
+                            return TOR_INVALID_RING_BLOCK_TYPE;
+                        }
+                    }
+
+                    torSlotNum++; // Next TOR ring slot
+                }
+            }
+        }
+    }
+    else
+    {
+        // Unusual to get here. Most likely due to caller error but not necessarily so. For
+        // ex, xip_tool will cycle through here because it assumes nothing about whether a
+        // chiplet has both common and instance rings.
+        return TOR_RING_HAS_NO_TOR_SLOT;
+    } // if (numRings)
+
+    return rc;
 
 } // End of get_ring_from_ring_section()
 
@@ -330,14 +365,14 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         MY_DBG("TOR header fields\n"
                "  magic:         0x%08x\n"
                "  version:       %d\n"
-               "  chipType:      %d\n"
+               "  chipId:        %d\n"
                "  ddLevel:       0x%x\n"
                "  size:          %d\n"
                "API parms\n"
                "  i_ddLevel:     0x%x\n"
                "  i_ppeType:     %d\n"
                "  i_ringVariant: %d\n",
-               torMagic, torHeader->version, torHeader->chipType,
+               torMagic, torHeader->version, torHeader->chipId,
                torHeader->ddLevel,
                be32toh(torHeader->size),
                i_ddLevel, i_ppeType, i_ringVariant);
@@ -360,19 +395,23 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
 
     if ( torMagic >> 8 != TOR_MAGIC ||
-         torHeader->version > TOR_VERSION || // Code cannot be forward compatible to a newer image
+         // Check that we're not trying to be "forward" compatible to a newer image
+         torHeader->version > TOR_VERSION ||
+         // Make sure version is set
          torHeader->version == 0 ||
-         torHeader->chipType >= NUM_CHIP_TYPES )
+         // Check for valid chip ID and for valid ring ID
+         ringid_check_ringId(torHeader->chipId, i_ringId) != INFRASTRUCT_RC_SUCCESS )
     {
-        MY_ERR("Invalid TOR header:\n"
-               "  magic:       0x%08x\n"
-               "  version:     %d\n"
-               "  chipType:    %d\n"
+        MY_ERR("Invalid TOR header or ringId:\n"
+               "  magic:       0x%08x (TOR_MAGIC: 0x%08x)\n"
+               "  version:     %d (TOR_VERSION: %d)\n"
+               "  chipId:      %d\n"
+               "  ringId:      0x%x\n"
                "  ddLevel:     0x%x  (requested ddLevel=0x%x)\n"
                "  size:        %d\n",
-               torMagic, torHeader->version, torHeader->chipType,
-               torHeader->ddLevel, i_ddLevel,
-               be32toh(torHeader->size));
+               torMagic, TOR_MAGIC, torHeader->version, TOR_VERSION,
+               torHeader->chipId, i_ringId, torHeader->ddLevel,
+               i_ddLevel, be32toh(torHeader->size));
         return TOR_INVALID_MAGIC_NUMBER;
     }
 
@@ -413,7 +452,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
         return rc;
     }
-
     else if ( i_ringBlockType == GET_PPE_LEVEL_RINGS &&
               torMagic == TOR_MAGIC_HW &&
               (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE) )
@@ -525,7 +563,6 @@ int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
 int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section ptr
                              uint8_t         i_ddLevel,         // DD level
                              PpeType_t       i_ppeType,         // SBE,CME,SGPE
-                             RingVariant_t   i_ringVariant,     // Base,CC,RL
                              void**          io_ringBlockPtr,   // Output ring buffer
                              uint32_t&       io_ringBlockSize,  // Size of ring data
                              uint32_t        i_dbgl )           // Debug option
@@ -534,7 +571,7 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
     uint8_t      l_instanceId;
     char i_ringName[MAX_RING_NAME_LENGTH];
     uint32_t     torMagic;
-    ChipType_t   chipType = UNDEFINED_CHIP_TYPE;
+    ChipId_t     chipId = UNDEFINED_CHIP_ID;
     TorHeader_t* torHeader;
 
     if (i_dbgl > 1)
@@ -544,9 +581,9 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
 
     torHeader = (TorHeader_t*)i_ringSection;
     torMagic  = be32toh(torHeader->magic);
-    chipType  = torHeader->chipType;
+    chipId    = torHeader->chipId;
 
-    if ( torMagic == TOR_MAGIC_HW && chipType != CT_CEN )
+    if ( torMagic == TOR_MAGIC_HW && chipId != CID_CEN )
     {
         if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
         {
@@ -555,7 +592,7 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
                                   UNDEFINED_RING_ID,
                                   i_ddLevel,
                                   i_ppeType,
-                                  i_ringVariant,
+                                  UNDEFINED_RING_VARIANT,
                                   l_instanceId,
                                   GET_PPE_LEVEL_RINGS,
                                   io_ringBlockPtr,
@@ -571,8 +608,8 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
     }
     else
     {
-        MY_ERR("tor_get_block_of_rings(): Only the P9 HW ring section is supported. However, torMagic=0x%08x and chipType=%d\n",
-               torMagic, chipType);
+        MY_ERR("tor_get_block_of_rings(): Only the P9 HW ring section is supported. However, torMagic=0x%08x and chipId=%d\n",
+               torMagic, chipId);
         return TOR_UNSUPPORTED_RING_SECTION;
     }
 
