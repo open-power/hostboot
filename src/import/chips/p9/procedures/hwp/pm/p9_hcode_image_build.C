@@ -2169,7 +2169,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                        i_ringData.iv_pRingBuffer,
                        i_ringData.iv_ringBufSize,
                        (i_ppeType == PLAT_CME) ? SYSPHASE_RT_CME : SYSPHASE_RT_SGPE,
-                       MODEBUILD_IPL,
+                       0, // Was MODEBUILD_IPL=0 but not used in P9
                        i_ringData.iv_pWorkBuf1,
                        i_ringData.iv_sizeWorkBuf1,
                        i_ringData.iv_pWorkBuf2,
@@ -2260,7 +2260,7 @@ uint32_t getPpeScanRings( void* const     i_pHwImage,
                                       tempBufSize,
                                       i_debugMode );
 
-            if( TOR_RING_NOT_FOUND == rc )
+            if( TOR_RING_IS_EMPTY == rc )
             {
                 tempBufSize = 0;
                 continue;
@@ -2752,9 +2752,9 @@ fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
                                       ringSize,
                                       i_debugMode );
 
-            if( TOR_RING_NOT_FOUND == rc )
+            if( TOR_RING_IS_EMPTY == rc )
             {
-                FAPI_INF( "Did not find core common ring %s ",
+                FAPI_INF( "Core common ring %s has no content",
                           io_cmeRings.getRingName( coreCmnRingId ) );
                 ringSize = 0;
                 continue;
@@ -2869,7 +2869,7 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                                           tempSize,
                                           i_debugMode );
 
-                if( TOR_RING_NOT_FOUND == rc )
+                if( TOR_RING_IS_EMPTY == rc )
                 {
                     FAPI_DBG( "could not determine size of ring id %d of core %d",
                               io_cmeRings.getInstRingId(0), ((2 * exId) + coreId) );
@@ -2933,9 +2933,9 @@ fapi2::ReturnCode layoutInstRingsForCme(    Homerlayout_t*   i_pHomer,
                                           tempSize,
                                           i_debugMode );
 
-                if( TOR_RING_NOT_FOUND == rc )
+                if( TOR_RING_IS_EMPTY == rc )
                 {
-                    FAPI_INF("Instance ring Id %d not found for EX %d core %d",
+                    FAPI_INF("Instance ring Id %d has no content for EX %d core %d",
                              io_cmeRings.getInstRingId(0), exId, coreId );
                     tempSize = 0;
                     continue;
@@ -3043,7 +3043,7 @@ fapi2::ReturnCode layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
                                       tempBufSize,
                                       i_debugMode );
 
-            if( TOR_RING_NOT_FOUND == rc )
+            if( TOR_RING_IS_EMPTY == rc )
             {
                 tempBufSize = 0;
                 continue;
@@ -3412,9 +3412,9 @@ fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
                                       i_debugMode );
 
 
-            if( TOR_RING_NOT_FOUND == rc )
+            if( TOR_RING_IS_EMPTY == rc )
             {
-                FAPI_INF( "did not find quad common ring %s",
+                FAPI_INF( "Quad common ring %s has no content",
                           io_sgpeRings.getRingName( torRingId ) );
                 tempBufSize = 0;
                 continue;
@@ -3511,7 +3511,7 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
             uint32_t tempBufSize = 0;
             uint32_t tempLength = 0;
 
-            for( uint32_t ringIndex = 0; ringIndex < EQ::g_chipletData.iv_num_instance_rings_scan_addrs;
+            for( uint32_t ringIndex = 0; ringIndex < EQ::g_chipletData.numInstanceRingsScanAddr;
                  ringIndex++ )
             {
                 tempBufSize = i_ringData.iv_sizeWorkBuf1;
@@ -3528,9 +3528,9 @@ fapi2::ReturnCode layoutInstRingsForSgpe( Homerlayout_t*     i_pHomer,
                                           tempBufSize,
                                           i_debugMode );
 
-                if( TOR_RING_NOT_FOUND == rc )
+                if( TOR_RING_IS_EMPTY == rc )
                 {
-                    FAPI_DBG( "did not find quad spec ring %s for cache Inst %d",
+                    FAPI_DBG( "Quad spec ring %s has no content for cache Inst %d",
                               io_sgpeRings.getRingName( quadSpecRingId ), cacheInst );
                     tempBufSize = 0;
                     continue;
