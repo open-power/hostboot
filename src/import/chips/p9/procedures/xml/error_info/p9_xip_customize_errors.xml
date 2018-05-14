@@ -369,6 +369,7 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>DD_LEVEL</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
@@ -383,6 +384,7 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>MAX_RING_BYTE_SIZE</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
