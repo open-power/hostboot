@@ -66,9 +66,8 @@ fapi2::ReturnCode p9_cpu_special_wakeup_ex(
     uint8_t l_spWakeUpInProg  =  0;
     auto l_eqTarget           =  i_target.getParent<fapi2::TARGET_TYPE_EQ>();
     auto l_procChip           =  i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target,  l_exPos );
-    FAPI_TRY( getScom( l_procChip, PU_OCB_OCI_OCCFLG_SCOM, l_sgpeActive ) );
 
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target,  l_exPos );
     FAPI_ATTR_GET( fapi2::ATTR_EX_INSIDE_SPECIAL_WAKEUP,
                    i_target,
                    l_spWakeUpInProg );
@@ -85,6 +84,14 @@ fapi2::ReturnCode p9_cpu_special_wakeup_ex(
     }
 
     p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::BLOCK );
+
+    l_rc = getScom( l_procChip, PU_OCB_OCI_OCCFLG_SCOM, l_sgpeActive );
+
+    if( l_rc )
+    {
+        FAPI_ERR( "Failed To Read OCC Flag Register" );
+        return l_rc;
+    }
 
     //Special wakeup request can't be serviced if
     //SGPE did not boot auto Special wakeup not enabled
