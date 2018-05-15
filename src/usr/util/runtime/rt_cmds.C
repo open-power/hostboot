@@ -780,6 +780,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
 
     sprintf(o_output, "cmd_reload_pm_complex >>\n");
     UTIL_FT("cmd_reload_pm_complex >>");
+#if 0 //fixme
     uint64_t l_chip;
     uint64_t l_occ_common_addr;
     uint64_t l_homerPhysAddr;
@@ -940,6 +941,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
     }
     delete coreThreadRestoreBEFORE;
 
+#endif //fixme
     sprintf(l_tmpstr, "<< cmd_reload_pm_complex\n");
     strcat(o_output, l_tmpstr);
     UTIL_FT("<< cmd_reload_pm_complex");
