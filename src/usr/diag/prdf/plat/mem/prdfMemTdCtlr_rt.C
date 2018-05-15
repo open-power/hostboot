@@ -1149,6 +1149,79 @@ uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub( bool & o_canResume )
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::canResumeBgScrub] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_canResume = false;
+
+    // It is possible that we were running a TD procedure and the PRD service
+    // was reset. Therefore, we must check if background scrubbing was actually
+    // configured. There really is not a good way of doing this. A scrub command
+    // is a scrub command the only difference is the speed. Unfortunately, that
+    // speed can change depending on how the hardware team tunes it. For now, we
+    // can use the stop conditions, which should be unique for background scrub,
+    // to determine if it has been configured.
+
+    SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( "MBSTR" );
+    o_rc = reg->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read() failed on MBSTR: iv_chip=0x%08x",
+                  iv_chip->getHuid() );
+    }
+    else if ( 0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
+              0xf != reg->GetBitFieldJustified(4,4) && // NCE soft TH
+              0xf != reg->GetBitFieldJustified(8,4) && // NCE hard TH
+              reg->IsBitSet(34)                     && // pause on MPE
+              reg->IsBitSet(35)                     )  // pause on UE
+    {
+        o_canResume = true;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t MemTdCtlr<TYPE_MBA>::canResumeBgScrub( bool & o_canResume )
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::canResumeBgScrub] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_canResume = false;
+
+    // It is possible that we were running a TD procedure and the PRD service
+    // was reset. Assuming the command did not stop on the last address of the
+    // current slave rank, we will simply "resume" the command from the next
+    // address to the end of the rank. The MBA resume actually starts a new
+    // command, unlike MCBIST. Therefore, we can get away with blindly starting
+    // the command without trying to assess what type of command was actually
+    // running.
+
+    bool lastAddr = false;
+    o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, SLAVE_RANK, lastAddr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
+                  iv_chip->getHuid() );
+    }
+    else
+    {
+        o_canResume = !lastAddr;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;

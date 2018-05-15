@@ -348,21 +348,18 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
         if ( iv_queue.empty() )
         {
             // The queue is empty so it is possible that background scrubbing
-            // only stopped for FFDC. Simply resume the command instead of
-            // starting a new one. Note that it is possible to get here if we
-            // were running a TD procedure and the PRD service is reset.
-            // Therefore, we must check if background scrubbing was actually
-            // configured.
-            bool isBgScrub;
-            o_rc = isBgScrubConfig<T>( iv_chip, isBgScrub );
+            // only stopped for FFDC. If possible, simply resume the command
+            // instead of starting a new one. This must be checked here instead
+            // of in defaultStep() because a TD procedure could have been run
+            // before defaultStep() and it is possible that canResumeBgScrub()
+            // could give as a false positive in that case.
+            o_rc = canResumeBgScrub( iv_resumeBgScrub );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "isBgScrubConfig(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "canResumeBgScrub(0x%08x) failed",
                           iv_chip->getHuid() );
                 break;
             }
-
-            if ( isBgScrub ) iv_resumeBgScrub = true;
         }
         else
         {

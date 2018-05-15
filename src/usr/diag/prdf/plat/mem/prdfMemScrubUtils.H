@@ -155,16 +155,6 @@ template<TARGETING::TYPE T>
 uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
 
 /**
- * @brief  Checks if the command currently configured in hardware is background
- *         scrubbing.
- * @param  i_chip      MCBIST, MCA, or MBA.
- * @param  o_isBgScrub TRUE if background scrub is configured, FALSE otherwise.
- * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-uint32_t isBgScrubConfig( ExtensibleChip * i_chip, bool & o_isBgScrub );
-
-/**
  * @brief  Sets the ETE thresholds needed for background scrubbing.
  * @param  i_chip An MBA.
  * @param  i_rank A rank on the target DIMM.
@@ -173,6 +163,19 @@ uint32_t isBgScrubConfig( ExtensibleChip * i_chip, bool & o_isBgScrub );
 template<TARGETING::TYPE T>
 uint32_t setBgScrubThresholds( ExtensibleChip * i_chip,
                                const MemRank & i_rank );
+
+/**
+ * @param  i_chip              MBA.
+ * @param  i_rangeType         See enum AddrRangeType.
+ * @param  o_stoppedOnLastAddr True, if the current maintenance command stopped
+ *                             on the last address of the given rank range.
+ *                             False, otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
+                               AddrRangeType i_rangeType,
+                               bool & o_stoppedOnLastAddr );
 
 } //end namespace PRDF
 

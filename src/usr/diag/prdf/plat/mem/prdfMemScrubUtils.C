@@ -386,96 +386,6 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t isBgScrubConfig<TYPE_MCBIST>( ExtensibleChip * i_chip,
-                                       bool & o_isBgScrub )
-{
-    #define PRDF_FUNC "[isBgScrubConfig] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    o_isBgScrub = false;
-
-    do
-    {
-        // There really is not a good way of doing this. A scrub command is a
-        // scrub command the only difference is the speed. Unfortunately, that
-        // speed can change depending on how the hardware team tunes it. For
-        // now, we can use the stop conditions, which should be unique for
-        // background scrub, to determine if it has been configured.
-
-        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBSTR" );
-        o_rc = reg->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MBSTR: i_chip=0x%08x",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        if ( 0xf != reg->GetBitFieldJustified(0,4) && // NCE int TH
-             0xf != reg->GetBitFieldJustified(4,4) && // NCE soft TH
-             0xf != reg->GetBitFieldJustified(8,4) && // NCE hard TH
-             reg->IsBitSet(34)                     && // pause on MPE
-             reg->IsBitSet(35)                     )  // pause on UE
-        {
-            o_isBgScrub = true;
-        }
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-template<>
-uint32_t isBgScrubConfig<TYPE_MCA>( ExtensibleChip * i_chip,
-                                    bool & o_isBgScrub )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
-
-    ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
-
-    return isBgScrubConfig<TYPE_MCBIST>( mcbChip, o_isBgScrub );
-}
-
-template<>
-uint32_t isBgScrubConfig<TYPE_MBA>( ExtensibleChip * i_chip,
-                                    bool & o_isBgScrub )
-{
-    #define PRDF_FUNC "[isBgScrubConfig] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    o_isBgScrub = false;
-
-    do
-    {
-        // There really is not a good way of doing this. A scrub command is a
-        // scrub command the only difference is the speed. Unfortunately, that
-        // speed can change depending on how the hardware team tunes it. For
-        // now, we can use the stop conditions, which should be unique for
-        // background scrub, to determine if it has been configured.
-
-        // TODO RTC 157888
-
-    } while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
 uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
                                          const MemRank & i_rank )
 {
@@ -526,6 +436,52 @@ uint32_t setBgScrubThresholds<TYPE_MBA>( ExtensibleChip * i_chip,
         }
 
     } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t didCmdStopOnLastAddr<TYPE_MBA>( ExtensibleChip * i_chip,
+                                         AddrRangeType i_rangeType,
+                                         bool & o_stoppedOnLastAddr )
+{
+    #define PRDF_FUNC "[didCmdStopOnLastAddr] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_stoppedOnLastAddr = false;
+
+    do
+    {
+        // Get the current address.
+        MemAddr curAddr;
+        o_rc = getMemMaintAddr<TYPE_MBA>( i_chip, curAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Get the end address of the current rank.
+        MemAddr junk, endAddr;
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, curAddr.getRank(), junk,
+                                          endAddr, i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), curAddr.getRank().getKey() );
+            break;
+        }
+
+        // Compare the addresses.
+        o_stoppedOnLastAddr = ( curAddr == endAddr );
+
+    } while (0);
 
     return o_rc;
 

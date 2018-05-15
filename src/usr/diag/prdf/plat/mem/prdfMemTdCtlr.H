@@ -290,6 +290,13 @@ class MemTdCtlr
      */
     uint32_t unmaskEccAttns();
 
+    /**
+     * @param  o_canResume True, if background scrubbing can be resumed. False,
+     *                     if a new background scrub command must be started.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t canResumeBgScrub( bool & o_canResume );
+
     #endif
 
   private: // instance variables
