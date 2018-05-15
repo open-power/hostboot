@@ -61,6 +61,7 @@
 #include    <sys/misc.h>
 
 #include <p9_query_core_access_state.H>
+#include <p9_setup_sbe_config.H>
 #include <p9_query_cache_access_state.H>
 #include <p9_hcd_core_stopclocks.H>
 #include <p9_hcd_cache_stopclocks.H>
@@ -207,8 +208,46 @@ errlHndl_t sendContinueMpiplChipOp()
             }
         }
     }
+    return l_err;
+}
 
-return l_err;
+/**
+*  @brief  Walk through list of PROC chip targets and run p9_setup_sbe_config
+*          HWP on all of the slave PROC chips to ensure scratch regs are updated
+*
+*  @return     errlHndl_t
+*/
+errlHndl_t updateSlaveSbeScratchRegs()
+{
+    errlHndl_t l_err = nullptr;
+
+    TARGETING::TargetHandleList l_procChips;
+    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+    TARGETING::PROC_SBE_MASTER_CHIP_ATTR l_is_master_chip = 1;
+
+    for(const auto & l_chip : l_procChips)
+    {
+        l_is_master_chip = l_chip->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>();
+        if(!l_is_master_chip)
+        {
+            fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target (l_chip);
+            // Run the setup_sbe_config hwp on all of the slave procs to make sure
+            // the scratch registers are up to date prior to sending the continueMPIPL
+            // operation
+            FAPI_INVOKE_HWP(l_err,
+                            p9_setup_sbe_config,
+                            l_fapi_proc_target);
+
+            if(l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Failed during updateSlaveSbeScratchRegs request on this proc = %x",
+                          l_chip->getAttr<TARGETING::ATTR_HUID>());
+                break;
+            }
+        }
+    }
+    return l_err;
 }
 
 
@@ -444,14 +483,22 @@ void* host_discover_targets( void *io_pArgs )
                   "when the targeting service started");
         do
         {
-            //Need to power down the slave quads
+            // Need to power down the slave quads
             l_err = powerDownSlaveQuads();
             if (l_err)
             {
                 break;
             }
 
-            //Send continue mpipl op to slave procs
+            // Need to ensure slave SBE's scratch registers are
+            // up to date prior to sending continueMPIPL op
+            l_err = updateSlaveSbeScratchRegs();
+            if (l_err)
+            {
+                break;
+            }
+
+            // Send continue mpipl op to slave procs
             l_err = sendContinueMpiplChipOp();
             if (l_err)
             {
