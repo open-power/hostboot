@@ -141,6 +141,17 @@ enum
 };
 
 /**
+ * @brief models a CPU register restoration area in STOP section of homer image.
+ */
+typedef struct
+{
+    uint8_t iv_threadRestoreArea[MAX_THREADS_PER_CORE][CORE_RESTORE_THREAD_AREA_SIZE];
+    uint8_t iv_threadSaveArea[MAX_THREADS_PER_CORE][SELF_SAVE_THREAD_AREA_SIZE];
+    uint8_t iv_coreRestoreArea[CORE_RESTORE_CORE_AREA_SIZE];
+    uint8_t iv_coreSaveArea[CORE_SAVE_CORE_AREA_SIZE];
+} SprRestoreRegion_t;
+
+/**
  * @brief   struct used to manipulate scan ring in HOMER.
  */
 struct RingBufData
@@ -672,6 +683,101 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
     FAPI_INF("<< validateInputArguments ...");
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode initSelfRestoreRegion( Homerlayout_t* i_pChipHomer )
+{
+    FAPI_INF(">> initSelfRestoreRegion");
+    uint32_t l_fillBlr          =   SWIZZLE_4_BYTE(SELF_RESTORE_BLR_INST);
+    uint32_t l_fillAttn         =   SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
+    uint32_t l_byteCnt          =   0;
+    uint32_t * l_pSelfRestLoc   =
+            (uint32_t *)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[0];
+
+    SprRestoreRegion_t * l_pSaveRestore   =
+            (SprRestoreRegion_t *)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[0];
+
+    while( l_byteCnt < SELF_RESTORE_CORE_REGS_SIZE )
+    {
+        memcpy( l_pSelfRestLoc, &l_fillAttn, sizeof( uint32_t ) );
+        l_byteCnt += 4;
+        l_pSelfRestLoc++;
+    }
+
+    //Initialize Core SPR and Thread SPR start boundary with BLR instruction.
+
+    FAPI_INF( " Size of SprRestoreRegion_t 0x%08x", sizeof( SprRestoreRegion_t ) );
+    for( uint8_t l_coreId = 0; l_coreId < MAX_CORES_PER_CHIP; l_coreId++ )
+    {
+        memcpy( (uint32_t *)&l_pSaveRestore->iv_coreRestoreArea[0], &l_fillBlr, sizeof(uint32_t) );
+
+        for( uint8_t l_threadId = 0; l_threadId < MAX_THREADS_PER_CORE; l_threadId++ )
+        {
+            memcpy( &l_pSaveRestore->iv_threadRestoreArea[l_threadId][0],
+                    &l_fillBlr,
+                    sizeof(uint32_t) );
+
+            if( 0 == l_threadId )
+            {
+                memcpy( &l_pSaveRestore->iv_coreRestoreArea[0],
+                        &l_fillBlr,
+                        sizeof(uint32_t) );
+            }
+        }
+
+        l_pSaveRestore++;
+    }
+
+    FAPI_INF("<< initSelfRestoreRegion");
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode   initSelfSaveRestoreEntries( Homerlayout_t* i_pChipHomer,
+                                                P9FuncModel & i_procFuncModel )
+{
+    FAPI_DBG(">> initSelfSaveRestoreEntries" );
+    StopReturnCode_t    l_retCode;
+    uint32_t            l_corePos   =   0;
+
+    for( l_corePos = 0; l_corePos < MAX_CORES_PER_CHIP; l_corePos++ )
+    {
+        if( !i_procFuncModel.isCoreFunctional( l_corePos ) )
+        {
+            continue;
+        }
+
+        FAPI_INF( "Core Pos 0x%02d", l_corePos );
+        l_retCode   =  p9_stop_init_cpureg( (void *)i_pChipHomer, l_corePos );
+
+        FAPI_ASSERT( ( STOP_SAVE_SUCCESS == l_retCode ),
+                     fapi2::SELF_RESTORE_INIT_FAILED()
+                     .set_HOMER_PTR( i_pChipHomer )
+                     .set_CORE_POS( l_corePos )
+                     .set_FAILURE_CODE( l_retCode )
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     "Failed To Initialize The Self-Restore Region 0x%08x", l_retCode );
+
+        l_retCode   =  p9_stop_init_self_save( (void *)i_pChipHomer, l_corePos );
+
+        FAPI_ASSERT( ( STOP_SAVE_SUCCESS == l_retCode ),
+                     fapi2::SELF_SAVE_INIT_FAILED()
+                     .set_HOMER_PTR( i_pChipHomer )
+                     .set_CORE_POS( l_corePos )
+                     .set_FAILURE_CODE( l_retCode )
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() ),
+                     "Failed To Initialize The Self-Save Region 0x%08x", (uint32_t)l_retCode );
+    }
+
+    fapi_try_exit:
+    FAPI_DBG("<< initSelfSaveRestoreEntries" );
     return fapi2::current_err;
 }
 
@@ -1277,8 +1383,9 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
  * @brief   updates various CPMR fields which are associated with self restore code.
  * @param[in]   i_pChipHomer    points to start of P9 HOMER.
  * @param[in]   i_fuseState     core fuse status
+ * @param[in]   i_urmorFix      true if URMOR correction is needed else false.
  */
-void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
+void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState, uint8_t i_urmorFix )
 {
     FAPI_INF(">> updateCpmrHeaderSR");
     cpmrHeader_t* pCpmrHdr =
@@ -1290,6 +1397,11 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
                                 uint32_t(NONFUSED_CORE_MODE);
     pCmeHdr->g_cme_mode_flags = SWIZZLE_4_BYTE(i_fusedState ? 1 : 0);
 
+    if( i_urmorFix )
+    {
+        pCpmrHdr->urmorFix  =   0x01;
+    }
+
     FAPI_INF("CPMR SR");
     FAPI_INF("Fuse Mode                 :   0x%08X", pCpmrHdr->fusedModeStatus );
     FAPI_INF("CME Image Flag            :   0x%08X", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
@@ -1297,6 +1409,7 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
              SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset) * 32,
              SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
     FAPI_DBG("CME Image Size            :   0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
+    FAPI_DBG("URMOR WorkAround Needed   :   %s",  pCpmrHdr->urmorFix ? "Yes" : "No" );
 
     FAPI_INF("<< updateCpmrHeaderSR");
 }
@@ -1546,10 +1659,7 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
     fapi2::current_err  =   fapi2::FAPI2_RC_SUCCESS;
     //Let us find XIP Header for Core Self Restore Image
     P9XipSection ppeSection;
-    uint8_t* pSelfRestImg = NULL;
-    uint32_t wordCnt = 0;
-    uint32_t l_fillBlr  = SWIZZLE_4_BYTE(SELF_RESTORE_BLR_INST);
-    uint32_t l_fillAttn = SWIZZLE_4_BYTE(CORE_RESTORE_PAD_OPCODE);
+    uint8_t* pSelfRestImg   =   NULL;
 
     rcTemp = p9_xip_get_section( i_pImageIn, P9_XIP_SECTION_HW_RESTORE, &ppeSection );
 
@@ -1609,32 +1719,15 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
         //Padding SPR restore area with ATTN Opcode
         FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
 
-        while( wordCnt < SELF_RESTORE_CORE_REGS_SIZE )
-        {
-            uint32_t l_fillPattern = 0;
+        FAPI_TRY( initSelfRestoreRegion( i_pChipHomer ),
+                  "Failed To Initialize The Self-Restore Region" );
 
-            if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % CORE_RESTORE_SIZE_PER_THREAD ) ))
-            {
-                l_fillPattern = l_fillBlr;
-            }
-            else
-            {
-                l_fillPattern = l_fillAttn;
-            }
+        FAPI_TRY( initSelfSaveRestoreEntries( i_pChipHomer, i_procFuncModel ),
+                  "Failed To Initialize The Self-Save Region" );
 
-            //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
-            //This helps in a specific lab scenario. If Self Restore region is populated only for
-            //select number of threads, other threads will not hit attention during the self restore
-            //sequence. Instead, execution will hit a blr and control should return to thread launcher
-            //region.
-
-            memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
-                    &l_fillPattern,
-                    sizeof( uint32_t ));
-            wordCnt += 4;
-        }
     }
-    updateCpmrHeaderSR( i_pChipHomer, i_fusedState );
+
+    updateCpmrHeaderSR( i_pChipHomer, i_fusedState, i_procFuncModel.hasUrmorBug() );
 
     if( i_imgType.coreScomBuild )
     {
@@ -4378,6 +4471,145 @@ void customizeMagicWord( Homerlayout_t*     i_pHomer )
 
 //---------------------------------------------------------------------------
 
+/**
+ * @brief returns PIR value for a given core and thread.
+ * @param[in]   i_corePos       core position
+ * @param[in]   i_threadPos     thread position
+ * @param[in]   i_fuseMode      fuse status of core.
+ * @return      PIR value
+ */
+uint64_t getPirValue( uint32_t i_corePos, uint32_t i_threadPos, uint8_t i_fuseMode )
+{
+    uint64_t l_pir      = 0;
+    uint8_t  l_tempPir  = 0;
+    l_tempPir = 0;
+    l_tempPir = (i_corePos / MAX_CORES_PER_QUAD ) << MAX_CORES_PER_QUAD;
+    i_corePos = i_corePos % MAX_CORES_PER_QUAD;
+
+    switch( i_corePos )
+    {
+        case 0:
+            break;
+
+        case 1:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT3;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT1;
+            }
+
+            break;
+
+        case 2:
+            l_tempPir |= FUSED_CORE_BIT0;
+            break;
+
+        case 3:
+            if( i_fuseMode )
+            {
+                l_tempPir |= ( FUSED_CORE_BIT0 | FUSED_CORE_BIT3 );
+            }
+            else
+            {
+                l_tempPir |= (FUSED_CORE_BIT0 | FUSED_CORE_BIT1 );
+            }
+
+            break;
+    }
+
+    switch( i_threadPos )
+    {
+        case 0:
+            break;
+
+        case 1:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT2;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT3;
+            }
+
+            break;
+
+        case 2:
+            if( i_fuseMode )
+            {
+                l_tempPir |= FUSED_CORE_BIT1;
+            }
+            else
+            {
+                l_tempPir |= FUSED_CORE_BIT2;
+            }
+
+            break;
+
+        case 3:
+            if( i_fuseMode )
+            {
+                l_tempPir |= ( FUSED_CORE_BIT1 | FUSED_CORE_BIT2 );
+            }
+            else
+            {
+                l_tempPir |= ( FUSED_CORE_BIT2 | FUSED_CORE_BIT3);
+            }
+
+            break;
+    }
+
+    l_pir = l_tempPir;
+
+    return l_pir;
+}
+
+//---------------------------------------------------------------------------
+
+/**
+ * @brief creates URMOR restore value in HOMER.
+ * @param[in]   i_pHomerImage       points to P9 chip's HOMER.
+ * @param[in]   i_fuseMode          fuse status of core
+ * @param[in]   i_chipFuncModel     describes config details of the P9 chip
+ * @return      PIR value
+ */
+fapi2::ReturnCode addUrmorRestore( void * const i_pHomerImage,
+                                   uint8_t i_fuseMode,
+                                   P9FuncModel & i_chipFuncModel  )
+{
+    #ifdef __URMOR_TEST
+
+    // to verify UV and HV exit in Cronus environment.
+    uint64_t l_pir      =   0;
+    StopReturnCode_t l_rc;
+
+    for( uint8_t l_corePos = 0; l_corePos < MAX_CORES_PER_CHIP; l_corePos++ )
+    {
+        if( i_chipFuncModel.isCoreFunctional( l_corePos ) )
+        {
+            l_pir = getPirValue( l_corePos, 0, i_fuseMode );
+            l_rc = stopImageSection::p9_stop_save_cpureg( i_pHomerImage,
+                                                          P9_STOP_SPR_URMOR,
+                                                          0x00,
+                                                          l_pir );
+            FAPI_ASSERT( ( !l_rc ),
+                         fapi2::URMOR_RESTORE_ENTRY_FAILED()
+                         .set_PIR( l_pir )
+                         .set_STOP_API_RC( l_rc ),
+                         "Failed To Create URMOR Restore Entry" );
+        }
+    }
+
+fapi_try_exit:
+    #endif
+    return fapi2::current_err;
+}
+
+//---------------------------------------------------------------------------
+
 fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                         void* const     i_pImageIn,
                                         void*           i_pHomerImage,
@@ -4601,6 +4833,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
 
     //customize magic word based on endianess
     customizeMagicWord( pChipHomer );
+
+    FAPI_TRY( addUrmorRestore( i_pHomerImage, fuseModeState, l_chipFuncModel ),
+              "Failed to create URMOR restore entry" );
 
 fapi_try_exit:
     FAPI_IMP("<< p9_hcode_image_build" );
