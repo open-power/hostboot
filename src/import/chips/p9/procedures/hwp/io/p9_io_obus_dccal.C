@@ -313,6 +313,11 @@ fapi2::ReturnCode tx_zcal_apply( const OBUS_TGT i_tgt, const uint32_t i_pvalx4, 
             {
                 p_margin_pd_en_x2 -= 2;
             }
+            else
+            {
+                p_margin_pu_en_x2 -= 2;
+            }
+
         }
 
         pvalx2_int += 2; // Add a full segment
