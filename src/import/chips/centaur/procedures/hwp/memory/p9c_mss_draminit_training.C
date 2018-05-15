@@ -70,6 +70,7 @@ enum size
 };
 
 extern "C" {
+
     ///
     /// @brief Training procedure.   Find dram delay values
     /// @param[in] i_target const reference to centaur.mba target
@@ -1961,7 +1962,7 @@ extern "C" {
         uint16_t l_nmask = 0;
         uint16_t l_wrclk_nmask = 0;
         uint8_t l_port = 0;
-        FAPI_INF("Running flash->registers(set)");
+        FAPI_INF("%s Running flash->registers(set)", mss::c_str(i_mba_target));
         uint8_t l_prank = 0;
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_mba_dimms;
         l_mba_dimms = i_mba_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
@@ -2413,7 +2414,7 @@ extern "C" {
         fapi2::variable_buffer l_db_reg_dimm1_rank2(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_dimm1_rank3(LANES_PER_PORT);
 
-        FAPI_INF("Running (get)registers->flash");
+        FAPI_INF("%s Running (get)registers->flash", mss::c_str(i_mba_target));
 
         const auto l_mba_dimms = i_mba_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
 
@@ -2464,7 +2465,7 @@ extern "C" {
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("Primary rank group %i is INVALID, continuing...",
+                    FAPI_DBG("%s Primary rank group %i is INVALID, continuing...", mss::c_str(i_mba_target),
                              l_prank);
 
                     if ( l_prg[l_prank][l_port] == 0)
@@ -2513,7 +2514,7 @@ extern "C" {
                 // create the db_reg (all the failed bits of the port)
                 l_db_reg.flush<0>();
 
-                FAPI_DBG("Port%i, dimm=%i, prg%i rank=%i", l_port, l_dimm, l_prank, l_rank);
+                FAPI_DBG("%s Port%i, dimm=%i, prg%i rank=%i", mss::c_str(i_mba_target), l_port, l_dimm, l_prank, l_rank);
 
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
@@ -2524,14 +2525,14 @@ extern "C" {
                                             l_data_buffer));
 
                     FAPI_TRY(l_data_buffer.extract(l_data, 3 * 16, 16));
-                    FAPI_DBG("dp18_%i  0x%llx = 0x%x", i,
+                    FAPI_DBG("%s dp18_%i  0x%llx = 0x%x", mss::c_str(i_mba_target), i,
                              l_disable_reg[l_port][l_prank][i], l_data);
 
                     if (l_data != 0)
                     {
                         FAPI_TRY(l_db_reg.insert(l_data, i * 16, 16, 0));
-                        FAPI_INF("+++ Setting Bad Bit Mask p%i: DIMM%i PRG%i "
-                                 "Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", l_port,
+                        FAPI_INF("+++ %s Setting Bad Bit Mask p%i: DIMM%i PRG%i "
+                                 "Rank%i \tdp18_%i addr=0x%llx, data=0x%04X", mss::c_str(i_mba_target), l_port,
                                  l_dimm, l_prank, l_prg[l_prank][l_port], i,
                                  l_disable_reg[l_port][l_prank][i], l_data);
                     }
@@ -2539,7 +2540,7 @@ extern "C" {
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("Primary rank group %i: INVALID, continuing...",
+                    FAPI_DBG("%s Primary rank group %i: INVALID, continuing...", mss::c_str(i_mba_target),
                              l_prank);
                     continue;
                 }
@@ -2548,22 +2549,22 @@ extern "C" {
                 {
                     if (l_rank == 0)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm0_rank0));
+                        l_db_reg_dimm0_rank0 = l_db_reg;
                         l_rank0_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 1)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm0_rank1));
+                        l_db_reg_dimm0_rank1 = l_db_reg;
                         l_rank1_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 2)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm0_rank2));
+                        l_db_reg_dimm0_rank2 = l_db_reg;
                         l_rank2_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 3)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm0_rank3));
+                        l_db_reg_dimm0_rank3 = l_db_reg;
                         l_rank3_invalid = 0; //0 = valid, 1 = invalid
                     }
                 }
@@ -2571,27 +2572,26 @@ extern "C" {
                 {
                     if (l_rank == 0)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm1_rank0));
+                        l_db_reg_dimm1_rank0 = l_db_reg;
                         l_rank4_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 1)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm1_rank1));
+                        l_db_reg_dimm1_rank1 = l_db_reg;
                         l_rank5_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 2)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm1_rank2));
+                        l_db_reg_dimm1_rank2 = l_db_reg;
                         l_rank6_invalid = 0; //0 = valid, 1 = invalid
                     }
                     else if (l_rank == 3)
                     {
-                        FAPI_TRY(l_db_reg.insert(l_db_reg_dimm1_rank3));
+                        l_db_reg_dimm1_rank3 = l_db_reg;
                         l_rank7_invalid = 0; //0 = valid, 1 = invalid
                     }
                 }
             } // end primary rank loop
-
 
             // loop through primary ranks [0:3]
             for (uint8_t l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
@@ -2601,12 +2601,12 @@ extern "C" {
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("Primary rank group %i is INVALID, continuing...",
+                    FAPI_DBG("%s Primary rank group %i is INVALID, continuing...", mss::c_str(i_mba_target),
                              l_prank);
                     continue;
                 }
 
-                FAPI_DBG("Port%i, dimm=%i, prg%i rank=%i", l_port, l_dimm, l_prank, l_rank);
+                FAPI_DBG("%s Port%i, dimm=%i, prg%i rank=%i", mss::c_str(i_mba_target), l_port, l_dimm, l_prank, l_rank);
 
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
@@ -2667,18 +2667,21 @@ extern "C" {
 
                         if ((l_nmask & l_data_curr_vpd) == l_nmask)
                         {
-                            FAPI_DBG("BYTE DISABLE WORKAROUND: Found a 0XF on nibble=%i Port%i, dimm=%i, prg%i rank=%i data= 0x%04X", n, l_port,
+                            FAPI_DBG("BYTE DISABLE WORKAROUND: %s Found a 0XF on nibble=%i Port%i, dimm=%i, prg%i rank=%i data= 0x%04X",
+                                     mss::c_str(i_mba_target), n, l_port,
                                      l_dimm,
                                      l_prank, l_rank, l_data);
-                            FAPI_DBG("BYTE DISABLE WORKAROUND: data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                     l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                            FAPI_DBG("BYTE DISABLE WORKAROUND: %s data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                     mss::c_str(i_mba_target), l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5,
+                                     l_data_rank6, l_data_rank7 );
 
                             if (i_training_success)
                             {
                                 //Leave it an F.
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: Training was successful so writing an 0xF to VPD. PRE data: 0x%04X", l_data);
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s Training was successful so writing an 0xF to VPD. PRE data: 0x%04X",
+                                         mss::c_str(i_mba_target), l_data);
                                 l_data = l_data | l_nmask;
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: POST DATA: 0x%04X", l_data);
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s POST DATA: 0x%04X", mss::c_str(i_mba_target), l_data);
                             }
                             else
                             {
@@ -2691,13 +2694,15 @@ extern "C" {
                                      ( ((l_nmask & l_data_rank6) == l_nmask) || (l_rank6_invalid) ) &&
                                      ( ((l_nmask & l_data_rank7) == l_nmask) || (l_rank7_invalid) )   )
                                 {
-                                    FAPI_DBG("BYTE DISABLE WORKAROUND: All ranks were F's and training was not successful.  Uncool.");
+                                    FAPI_DBG("BYTE DISABLE WORKAROUND: %s All ranks were F's and training was not successful.  Uncool.",
+                                             mss::c_str(i_mba_target));
                                     continue;
                                 }
                                 else
                                 {
                                     //Replacing E nibble with F nibble
-                                    FAPI_DBG("BYTE DISABLE WORKAROUND: Training failed so writing an 0xF to VPD for all ranks.");
+                                    FAPI_DBG("BYTE DISABLE WORKAROUND: %s Training failed so writing an 0xF to VPD for all ranks.",
+                                             mss::c_str(i_mba_target));
                                     l_data = l_data  | l_nmask;
                                     l_data_rank0 = l_data_rank0  | l_nmask;
                                     l_data_rank1 = l_data_rank1  | l_nmask;
@@ -2712,16 +2717,19 @@ extern "C" {
                         }
                         else if ( ((l_nmask & l_data_curr_vpd) != l_nmask) && ((l_nmask & l_data_curr_vpd) > 0))
                         {
-                            FAPI_DBG("BYTE DISABLE WORKAROUND: Found a non-zero, non-F nibble. Applying to all ranks.");
+                            FAPI_DBG("BYTE DISABLE WORKAROUND: %s Found a non-zero, non-F nibble. Applying to all ranks.",
+                                     mss::c_str(i_mba_target));
 
                             if (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4)
                             {
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x4 so turning it to a 0xF. PRE DATA: 0x%04X", l_data);
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s Its a x4 so turning it to a 0xF. PRE DATA: 0x%04X", mss::c_str(i_mba_target),
+                                         l_data);
                                 l_data = l_data  | l_nmask;
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: POST DATA: 0x%04X", l_data);
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s POST DATA: 0x%04X", mss::c_str(i_mba_target), l_data);
 
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                         l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                         mss::c_str(i_mba_target), l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5,
+                                         l_data_rank6, l_data_rank7 );
                                 l_data_rank0 = l_data_rank0  | l_nmask;
                                 l_data_rank1 = l_data_rank1  | l_nmask;
                                 l_data_rank2 = l_data_rank2  | l_nmask;
@@ -2730,16 +2738,18 @@ extern "C" {
                                 l_data_rank5 = l_data_rank5  | l_nmask;
                                 l_data_rank6 = l_data_rank6  | l_nmask;
                                 l_data_rank7 = l_data_rank7  | l_nmask;
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                         l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                         mss::c_str(i_mba_target), l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5,
+                                         l_data_rank6, l_data_rank7 );
 
                             }
                             else if (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8)
                             {
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: Its a x8 so leaving it the same.");
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s Its a x8 so leaving it the same.", mss::c_str(i_mba_target));
 
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                         l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s PRE data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                         mss::c_str(i_mba_target), l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5,
+                                         l_data_rank6, l_data_rank7 );
                                 l_data_rank0 = (l_data_rank0) | ( l_data & l_nmask);
                                 l_data_rank1 = (l_data_rank1) | ( l_data & l_nmask);
                                 l_data_rank2 = (l_data_rank2) | ( l_data & l_nmask);
@@ -2749,8 +2759,9 @@ extern "C" {
                                 l_data_rank6 = (l_data_rank6) | ( l_data & l_nmask);
                                 l_data_rank7 = (l_data_rank7) | ( l_data & l_nmask);
 
-                                FAPI_DBG("BYTE DISABLE WORKAROUND: POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
-                                         l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5, l_data_rank6, l_data_rank7 );
+                                FAPI_DBG("BYTE DISABLE WORKAROUND: %s POST data rank 0 =0x%04X rank 1 =0x%04X rank 2 =0x%04X rank 3 =0x%04X rank 4 =0x%04X rank 5 =0x%04X rank 6 =0x%04X rank 7 =0x%04X",
+                                         mss::c_str(i_mba_target), l_data_rank0, l_data_rank1, l_data_rank2, l_data_rank3, l_data_rank4, l_data_rank5,
+                                         l_data_rank6, l_data_rank7 );
                             }
                         }
 
@@ -2811,12 +2822,12 @@ extern "C" {
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 uint8_t l_rank = l_prg[l_prank][l_port] & 0x03;
-                FAPI_DBG("BYTE DISABLE WORKAROUND: Looping through dimm: %d rank: %d ", l_dimm, l_rank);
+                FAPI_DBG("%s BYTE DISABLE WORKAROUND: Looping through dimm: %d rank: %d ", mss::c_str(i_mba_target), l_dimm, l_rank);
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("Primary rank group %i is INVALID, continuing...",
-                             l_prank);
+                    FAPI_DBG("%s Primary rank group %i is INVALID, continuing...",
+                             mss::c_str(i_mba_target), l_prank);
                     continue;
                 }
 
@@ -2860,7 +2871,7 @@ extern "C" {
                     }
                 }
 
-                FAPI_INF("Setting BBM across dimm: %d rank: %d", l_dimm, l_rank);
+                FAPI_INF("%s Setting BBM across dimm: %d rank: %d", mss::c_str(i_mba_target), l_dimm, l_rank);
                 FAPI_TRY(setC4dq2reg(i_mba_target, l_port, l_dimm, l_rank, l_db_reg));
 
             }// end of primary rank loop
@@ -2956,16 +2967,16 @@ extern "C" {
                         // block lanes + 1st lane{0,8}
                         l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x07);
                         o_reg.setBit(l_loc, 8);   // set dq byte
-                        FAPI_DBG("0xFF  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
-                                 byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
+                        FAPI_DBG("%s 0xFF  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+                                 mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
                         continue;
                     }
 
                     // block lanes + 1st lane{0,4,8,12}
                     l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x0C);
                     o_reg.setBit(l_loc, 4);       // set dq nibble0
-                    FAPI_DBG("0xF0  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
-                             byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
+                    FAPI_DBG("%s 0xF0  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+                             mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
 
                     if (l_bbm[byte] == 0xF0)            // done with byte
                     {
@@ -2982,8 +2993,8 @@ extern "C" {
 
                     // block lanes + 1st lane{0,4,8,12}
                     l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x0C);
-                    FAPI_DBG("0x0F  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
-                             byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
+                    FAPI_DBG("%s 0x0F  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
+                             mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
                     o_reg.setBit(l_loc, 4);               // set dq nibble1
 
                     if (l_bbm[byte] == 0x0F)            // done with byte
@@ -3012,8 +3023,8 @@ extern "C" {
 
                         l_loc = (l_phy_block * LANES_PER_BLOCK) + l_phy_lane;
                         o_reg.setBit(l_loc);
-                        FAPI_DBG("b=%i  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i "
-                                 "loc=%i bs=%i be=%i", b, byte, l_bbm[byte],
+                        FAPI_DBG("%s b=%i  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i "
+                                 "loc=%i bs=%i be=%i", mss::c_str(i_mba), b, byte, l_bbm[byte],
                                  l_phy_block, l_phy_lane, l_dq, l_loc, l_bs, l_be);
                     }
                 }
