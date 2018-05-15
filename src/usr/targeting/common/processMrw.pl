@@ -1654,6 +1654,7 @@ sub processAbus
             $link_set = $targetObj->getBusAttribute($aBus->{SOURCE},$aBus->{BUS_NUM},"MFG_WRAP_TEST_ABUS_LINKS_SET");
         }
         $targetObj->setAttribute($target, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
+        $targetObj->setAttribute($abus_dest_parent, "MFG_WRAP_TEST_ABUS_LINKS_SET", $link_set);
     }
 }
 
