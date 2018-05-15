@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,7 @@ OBJS += call_host_voltage_config.o
 
 SUBDIRS	+= thread_activate.d
 
+PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
 CORE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/core
@@ -43,6 +44,7 @@ CACHE_HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache
 LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib
 
 VPATH += ${NEST_HWP_PATH}
+VPATH += ${PERV_HWP_PATH}
 VPATH += ${PM_HWP_PATH}
 VPATH += ${LIB_HWP_PATH}
 VPATH += ${CORE_HWP_PATH}
@@ -54,6 +56,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 EXTRAINCDIR += ${NEST_HWP_PATH}
+EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
@@ -74,6 +77,7 @@ include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
 # Take another look at PM lib
 include $(PM_HWP_PATH)/p9_pm_utils.mk
 
+include $(PERV_HWP_PATH)/p9_setup_sbe_config.mk
 include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 include $(PM_HWP_PATH)/p9_quad_power_off.mk
