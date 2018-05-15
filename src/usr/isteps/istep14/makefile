@@ -77,8 +77,6 @@ OBJS += p9c_mss_thermal_init.o
 OBJS += p9c_mss_unmask_errors.o
 OBJS += p9c_mss_power_cleanup.o
 OBJS += p9c_cen_stopclocks.o
-OBJS += p9c_mss_maint_cmds.o
-OBJS += p9c_dimmBadDqBitmapFuncs.o
 # TODO: RTC 184860 Remove MCS acker workaround
 OBJS += p9_revert_sbe_mcs_setup.o
 
