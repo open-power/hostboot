@@ -868,6 +868,10 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             {
                 itr = list.end(); // just in case it is not found
             }
+            else
+            {
+                *itr = trgt;
+            }
         }
         else if ( TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType )
         {
