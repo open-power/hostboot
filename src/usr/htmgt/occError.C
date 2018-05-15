@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,9 @@ namespace HTMGT
             // Check if we need a WOF requested reset
             if(iv_needsWofReset == true)
             {
-                if( iv_wofResetCount < WOF_RESET_COUNT_THRESHOLD )
+                // We compare against one less than the threshold because
+                // the WOF reset count doesnt get incremented until resetPrep
+                if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
                 {
                     // Not at WOF reset threshold yet. Set sev to INFO
                     severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
