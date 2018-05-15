@@ -63,8 +63,21 @@ namespace stopImageSection
 
 enum
 {
-    MAX_SPR_RESTORE_INST = 0x08,
-    SIZE_PER_SPR_RESTORE_INST = ((4 * sizeof(uint8_t)) / sizeof(uint32_t)),
+    MAX_SPR_RESTORE_INST        =   0x08,
+    SIZE_PER_SPR_RESTORE_INST   =   ((4 * sizeof(uint8_t)) / sizeof(uint32_t)),
+    MAX_THREAD_LEVEL_SPRS       =   11,
+    MAX_CORE_LEVEL_SPRS         =   6,
+    MAX_SPR_BIT_POS             =   31,
+    SPR_BIT_POS_8               =    8,
+    SPR_BIT_POS_19              =   19,
+    SPR_BIT_POS_25              =   25,
+    SPR_BIT_POS_27              =   27,
+};
+
+enum SprEntryUpdateMode
+{
+    INIT_SPR_REGION       =   0x01,
+    UPDATE_SPR_ENTRY      =   0x02,
 };
 
 typedef struct
@@ -79,8 +92,10 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t threadArea[CORE_RESTORE_THREAD_AREA_SIZE];
-    uint8_t coreArea[CORE_RESTORE_CORE_AREA_SIZE];
+    uint8_t iv_threadRestoreArea[MAX_THREADS_PER_CORE][CORE_RESTORE_THREAD_AREA_SIZE];
+    uint8_t iv_threadSaveArea[MAX_THREADS_PER_CORE][SELF_SAVE_THREAD_AREA_SIZE];
+    uint8_t iv_coreRestoreArea[CORE_RESTORE_CORE_AREA_SIZE];
+    uint8_t iv_coreSaveArea[CORE_SAVE_CORE_AREA_SIZE];
 } SprRestoreArea_t;
 
 /**
@@ -90,10 +105,10 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t occ_host_sgpe_area[ TWO_MB ];  // CPU restore area starts at an offset of 2MB from chip HOMER
-    uint8_t interrruptHandler[SELF_RESTORE_INT_SIZE];
-    uint8_t threadLauncher[THREAD_LAUNCHER_SIZE];
-    SprRestoreArea_t coreThreadRestore[MAX_CORES_PER_CHIP][MAX_THREADS_PER_CORE];
+    uint8_t iv_occ_host_sgpe_area[ TWO_MB ];  // CPU restore area starts at an offset of 2MB from chip HOMER
+    uint8_t iv_interrruptHandler[SELF_RESTORE_INT_SIZE];
+    uint8_t iv_threadLauncher[THREAD_LAUNCHER_SIZE];
+    SprRestoreArea_t iv_coreThreadRestore[MAX_CORES_PER_CHIP];
     uint8_t reserve[(ONE_KB * ONE_KB) - SELF_RESTORE_SIZE_TOTAL];
 } HomerSection_t;
 
@@ -116,14 +131,19 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t sprId;
-    bool isThreadScope;
+    uint32_t iv_sprId;
+    bool     iv_isThreadScope;
+    uint32_t iv_saveMaskPos;
+
 } StopSprReg_t;
 
 enum
 {
-    SIZE_SCOM_ENTRY = sizeof( ScomEntry_t ),
-    SCOM_ENTRY_START = 0xDEADDEAD,
+    SIZE_SCOM_ENTRY     =   sizeof( ScomEntry_t ),
+    SCOM_ENTRY_START    =   0xDEADDEAD,
+    BAD_SAVE_MASK       =   0x007FF000,
+    MAX_SPR_INDEX       =   31,
+    TEST_BIT_PATTERN    =   0x80000000,
 };
 
 #ifdef __FAPI_2_
