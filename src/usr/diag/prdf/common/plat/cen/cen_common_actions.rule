@@ -117,6 +117,10 @@ actionclass calloutSelfLow  { callout(MRU_LOW);  };
 actionclass callout2ndLvlMed
 { callout(procedure(LEVEL2_SUPPORT), MRU_MED); };
 
+/** Callout self with  low priority but don't gard it */
+actionclass calloutSelfLowNoGard
+{ callout(MRU_LOW, NO_GARD); };
+
 ################################################################################
 #                           Callouts with thresholds                           #
 ################################################################################
