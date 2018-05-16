@@ -855,23 +855,14 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
         }
         else if ( TYPE_PROC == trgtType && TYPE_MEMBUF == i_connType )
         {
-            // Get the interim DMI target.
-            TargetHandle_t trgt = getConnectedChild( i_target, TYPE_DMI,
-                                                     i_connPos );
-            if ( nullptr != trgt )
-            {
-                // Get the the MEMBUF connected to the DMI target.
-                trgt = getConnectedChild( trgt, TYPE_MEMBUF, 0 );
-            }
-
-            if ( nullptr == trgt )
-            {
-                itr = list.end(); // just in case it is not found
-            }
-            else
-            {
-                *itr = trgt;
-            }
+            // i_connPos is position relative to PROC (0-7)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mbPos = getTargetPosition(t);
+                        return (trgtPos   == (mbPos / MAX_MEMBUF_PER_PROC)) &&
+                               (i_connPos == (mbPos % MAX_MEMBUF_PER_PROC));
+                    } );
         }
         else if ( TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType )
         {
