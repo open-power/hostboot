@@ -59,7 +59,7 @@ namespace MemEcc
  * @param  i_isHard True if this is a hard CE. Default is false.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       const MemSymbol & i_symbol, bool & o_doTps,
                       STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard = false );
@@ -150,7 +150,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
