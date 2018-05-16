@@ -61,34 +61,51 @@ void* call_proc_build_smp (void *io_pArgs)
 
     IStepError l_StepError;
 
-    errlHndl_t  l_errl  =   NULL;
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-
-    //
-    //  Identify the master processor
-    //
-    TARGETING::Target * l_masterProc =   NULL;
-    (void)TARGETING::targetService().masterProcChipTargetHandle( l_masterProc );
-
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_procList;
-
-    // Loop through all proc chips and convert them to FAPI targets
-    for (const auto & curproc: l_cpuTargetList)
-    {
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_fapi2_proc_target (curproc);
-        l_procList.push_back(l_fapi2_proc_target);
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_build_smp entry" );
-
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_fapi2_master_proc (l_masterProc);
-
     do
     {
+        errlHndl_t  l_errl  =   nullptr;
+        TARGETING::TargetHandleList l_cpuTargetList;
+        getAllChips(l_cpuTargetList, TYPE_PROC);
+
+        //
+        //  Identify the master processor
+        //
+        TARGETING::Target * l_masterProc =   nullptr;
+        TARGETING::Target * l_masterNode =   nullptr;
+        bool l_onlyFunctional = true; // Make sure masterproc is functional
+        l_errl = TARGETING::targetService().queryMasterProcChipTargetHandle(
+                                                 l_masterProc,
+                                                 l_masterNode,
+                                                 l_onlyFunctional);
+
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : call_proc_build_smp: "
+                       "queryMasterProcChipTargetHandle() returned PLID=0x%x",
+                       l_errl->plid() );
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails(l_errl);
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_procList;
+
+        // Loop through all proc chips and convert them to FAPI targets
+        for (const auto & curproc: l_cpuTargetList)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2_proc_target (curproc);
+            l_procList.push_back(l_fapi2_proc_target);
+        }
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "call_proc_build_smp entry" );
+
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                            l_fapi2_master_proc (l_masterProc);
 
         FAPI_INVOKE_HWP( l_errl, p9_build_smp,
                          l_procList,

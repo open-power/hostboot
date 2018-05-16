@@ -421,6 +421,12 @@ class TargetService
          *      processor.  If NULL, HB will search whatever node it's
          *      running on, and FSP will search the physical drawer containing
          *      the lowest ordered fabric node ID.         *
+         *  @param[in] i_onlyFunctional
+         *      Specifies whether to limit the search to only functional chips.
+         *      If true, will only return a functional chip.  If false, which
+         *      is the default, the functional state of the chips are not
+         *      checked.
+         *
          *  @pre Target Service must be initialized
          *
          *  @post Master processor chip target returned or NULL is returned if
@@ -429,7 +435,8 @@ class TargetService
          */
         void masterProcChipTargetHandle(
             Target*& o_masterProcChipTargetHandle,
-            const Target* i_pNodeTarget = NULL) const;
+            const Target*  i_pNodeTarget = NULL,
+            const bool     i_onlyFunctional = false) const;
 
         /**
          *  @brief Returns the master processor chip target handle
@@ -450,6 +457,11 @@ class TargetService
          *      Target handle of node to search.  If NULL, HB will search
          *      whatver node it's running on, andFSP will search the physical
          *      drawer containing the lowest orderd fabric node ID
+         *  @param[in] i_onlyFunctional
+         *      Specifies whether to limit the search to only functional chips.
+         *      If true, will only return a functional chip.  If false, which
+         *      is the default, the functional state of the chips are not
+         *      checked.
          *
          *  @pre Target Service must be initialized
          *
@@ -465,7 +477,8 @@ class TargetService
          */
         errlHndl_t queryMasterProcChipTargetHandle(
                   Target*& o_masterProcChipTargetHandle,
-            const Target*  i_pNodeTarget = NULL) const;
+            const Target*  i_pNodeTarget = NULL,
+            const bool     i_onlyFunctional = false) const;
 
         /**
          *  @brief Returns whether the specified entity path attribute exists
