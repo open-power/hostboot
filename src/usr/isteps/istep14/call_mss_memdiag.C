@@ -150,7 +150,6 @@ void* call_mss_memdiag (void* io_pArgs)
         {
             TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
 
-            // @todo RTC 178802 Enable test cases turned off during bring up
             if ( Util::isSimicsRunning() == false )
             {
                 // Start Memory Diagnostics
