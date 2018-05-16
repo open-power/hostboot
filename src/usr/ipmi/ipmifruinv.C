@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Jim Yuan                                                           */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -379,6 +380,11 @@ void IpmiFruInv::setAreaSize(std::vector<uint8_t> &io_data, uint8_t i_offset)
     return;
 }
 
+static inline uint8_t bcd2_to_int(uint8_t bcd)
+{
+    return ((bcd >> 4) & 0xF) * 10 + (bcd & 0xF);
+}
+
 // Function to compute the correct data for the Mfg date/time section.
 // IPMI expects the time to be in seconds from 01/01/1996.
 errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
@@ -426,12 +432,13 @@ errlHndl_t IpmiFruInv::formatMfgData(std::vector<uint8_t> i_mfgDateData,
         // into a uint64 representing number of minute since 1/1/96
 
         // The vpd data is expected to be in this format VVCCYYmmDDHHMMSS
-        uint8_t century = i_mfgDateData.at(1);
-        uint8_t year = i_mfgDateData.at(2);
-        uint8_t month = i_mfgDateData.at(3);
-        uint8_t day = i_mfgDateData.at(4);
-        uint8_t hour = i_mfgDateData.at(5);
-        uint8_t minute = i_mfgDateData.at(6);
+        // Note that it is Binary Coded Decimal(BCD). Need to translate to int.
+        uint8_t century = bcd2_to_int(i_mfgDateData.at(1));
+        uint8_t year = bcd2_to_int(i_mfgDateData.at(2));
+        uint8_t month = bcd2_to_int(i_mfgDateData.at(3));
+        uint8_t day = bcd2_to_int(i_mfgDateData.at(4));
+        uint8_t hour = bcd2_to_int(i_mfgDateData.at(5));
+        uint8_t minute = bcd2_to_int(i_mfgDateData.at(6));
 
         // Subtract year
         uint8_t numOfYears = (century*100 + year) - 1996;
