@@ -702,14 +702,16 @@ Target* TargetService::toTarget(
 
 void TargetService::masterProcChipTargetHandle(
           Target*& o_masterProcChipTargetHandle,
-    const Target*  i_pNodeTarget) const
+    const Target*  i_pNodeTarget,
+    const bool     i_onlyFunctional) const
 {
     #define TARG_FN "masterProcChipTargetHandle(...)"
     errlHndl_t pError = NULL;
 
     pError = queryMasterProcChipTargetHandle(
         o_masterProcChipTargetHandle,
-        i_pNodeTarget);
+        i_pNodeTarget,
+        i_onlyFunctional);
     if(pError != NULL)
     {
         /* Error is already traced w.r.t api called, not repeating here*/
@@ -727,7 +729,8 @@ void TargetService::masterProcChipTargetHandle(
 
 errlHndl_t TargetService::queryMasterProcChipTargetHandle(
           Target*&      o_masterProcChipTargetHandle,
-    const Target* const i_pNodeTarget) const
+    const Target* const i_pNodeTarget,
+    const bool          i_onlyFunctional) const
 {
     #define TARG_FN "queryMasterProcChipTargetHandle(...)"
 
@@ -744,15 +747,25 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
     {
         static Target* pActingMasterTarget = NULL;
 
-        if(!pActingMasterTarget || PLAT::PROPERTIES::MULTINODE_AWARE)
+        if(!pActingMasterTarget
+           || PLAT::PROPERTIES::MULTINODE_AWARE
+           || i_onlyFunctional )
         {
             // Create filter that finds acting master processors
             PredicateCTM procFilter(CLASS_CHIP, TYPE_PROC);
             PredicateAttrVal<ATTR_PROC_MASTER_TYPE> actingMasterFilter(
                 PROC_MASTER_TYPE_ACTING_MASTER);
+            PredicateHwas functionalFilter;
+            functionalFilter.functional(true);
             PredicatePostfixExpr actingMasterProcFilter;
             actingMasterProcFilter.push(&procFilter).push(
-                    &actingMasterFilter).And();
+                        &actingMasterFilter).And();
+
+            // Limit to only functional procs if requested
+            if (i_onlyFunctional)
+            {
+                actingMasterProcFilter.push(&functionalFilter).And();
+            }
 
             // Find all the acting master processors (max one per physical
             // node), sorted by fabric node ID, and return the one with the
@@ -777,7 +790,8 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
             }
 
             if(   (pMasterProc)
-               && (!PLAT::PROPERTIES::MULTINODE_AWARE))
+               && (!PLAT::PROPERTIES::MULTINODE_AWARE)
+               && (!i_onlyFunctional))
             {
                 pActingMasterTarget = pMasterProc;
             }
@@ -798,9 +812,18 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
             PROC_MASTER_TYPE_ACTING_MASTER);
         PredicateCTM
               l_procPredicate(TARGETING::CLASS_CHIP,TARGETING::TYPE_PROC);
+        PredicateHwas functionalFilter;
+        functionalFilter.functional(true);
         PredicatePostfixExpr  l_masterProcFilter;
         l_masterProcFilter.push(&l_procPredicate).push(
             &l_procMasterMatches).And();
+
+
+        // Limit to only functional procs if requested
+        if (i_onlyFunctional)
+        {
+            l_masterProcFilter.push(&functionalFilter).And();
+        }
 
         // Find the acting master within the node
         TARGETING::TargetHandleList l_masterProclist;
