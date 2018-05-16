@@ -37,6 +37,16 @@
     <ffdc>RINGID</ffdc>
     <ffdc>RINGMODE</ffdc>
     <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -50,6 +60,16 @@
     <ffdc>ROTATE_COUNT</ffdc>
     <ffdc>RINGID</ffdc>
     <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>TARGET</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
