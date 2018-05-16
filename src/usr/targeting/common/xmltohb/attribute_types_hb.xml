@@ -1141,4 +1141,18 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>IPC_NODE_BUFFER_GLOBAL_ADDRESS</id>
+    <description>Global IPC Buffer Addresseses for each Node
+        dimension: node number (0:7)
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable />
+    <writeable />
+</attribute>
+
 </attributes>
