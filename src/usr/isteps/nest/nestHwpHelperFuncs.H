@@ -74,6 +74,7 @@ enum HWP_CALL_TYPE
     P9_PSI_SCOMINIT,
     P9_SYS_CHIPLET_SCOMINIT,  // Although it says chiplet, this uses proc chip
     P9_XBUS_ENABLE_RIDI,
+    P9_OBUS_FIRMASK_SAVE_RESTORE, // loops on proc chip
 };
 
 /**

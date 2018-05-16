@@ -54,6 +54,7 @@
 #include <p9_fbc_eff_config_links.H>
 #include <p9_sys_chiplet_scominit.H>
 #include <p9_chiplet_fabric_scominit.H>
+#include <p9_io_obus_firmask_save_restore.H>
 
 namespace ISTEP
 {
@@ -81,6 +82,7 @@ const char * hwpCallToString( HWP_CALL_TYPE i_hwpCall )
         { P9_PSI_SCOMINIT, "p9_psi_scominit" },
         { P9_SYS_CHIPLET_SCOMINIT, "p9_sys_chiplet_scominit" },
         { P9_XBUS_ENABLE_RIDI, "p9_xbus_enable_ridi" },
+        { P9_OBUS_FIRMASK_SAVE_RESTORE, "p9_io_obus_firmask_save_restore" },
     };
 
     if (hwpCallToStringMap.count(i_hwpCall) > 0)
@@ -207,6 +209,12 @@ void fapiHWPCallWrapper(HWP_CALL_TYPE    i_hwpCall,
                 FAPI_INVOKE_HWP(l_err,
                                 p9_chiplet_fabric_scominit,
                                 l_fapi2Target);
+            }
+            else if (P9_OBUS_FIRMASK_SAVE_RESTORE == i_hwpCall)
+            {
+                FAPI_INVOKE_HWP(l_err,
+                                p9_io_obus_firmask_save_restore,
+                                l_fapi2Target, p9iofirmasksaverestore::SAVE);
             }
             else
             {

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,5 +23,16 @@
 #
 # IBM_PROLOG_END_TAG
 
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+
 ATTN_RT_OBJS += attn_rt.o
 ATTN_RT_OBJS += attnsvc.o
+ATTN_RT_OBJS += p9_io_obus_firmask_save_restore.o

@@ -39,6 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 
 OBJS += nestHwpHelperFuncs.o
+OBJS += p9_io_obus_firmask_save_restore.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/initfiles
 VPATH += ${PROCEDURES_PATH}/hwp/io

@@ -77,8 +77,11 @@ void* call_proc_chiplet_scominit( void *io_pArgs )
     if (!INITSERVICE::isSMPWrapConfig())
     {
         // Make the FAPI call to p9_chiplet_scominit
+        // Make the FAPI call to p9_io_obus_firmask_save_restore, if previous call succeeded
         // Make the FAPI call to p9_psi_scominit, if previous call succeeded
         fapiHWPCallWrapperHandler(P9_CHIPLET_SCOMINIT, l_stepError,
+                                  HWPF_COMP_ID, TYPE_PROC)                &&
+        fapiHWPCallWrapperHandler(P9_OBUS_FIRMASK_SAVE_RESTORE, l_stepError,
                                   HWPF_COMP_ID, TYPE_PROC)                &&
         fapiHWPCallWrapperHandler(P9_PSI_SCOMINIT, l_stepError,
                                   HWPF_COMP_ID, TYPE_PROC);

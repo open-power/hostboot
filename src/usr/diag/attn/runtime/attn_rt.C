@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,10 @@
 #include <errno.h>
 #include <prdf/common/prdfMain_common.H>
 
+#include <p9_io_obus_firmask_save_restore.H>
+#include <fapi2_target.H>              // fapi2::Target
+#include <fapi2/plat_hwp_invoker.H>    // FAPI_INVOKE_HWP
+
 using namespace std;
 using namespace TARGETING;
 using namespace ATTN;
@@ -57,8 +61,29 @@ namespace ATTN_RT
 
         do
         {
+            // Get a list of all the processors in the system
+            TARGETING::TargetHandleList l_targetList;
+            getAllChips(l_targetList, TARGETING::TYPE_PROC);
+            // Loop through all processors chip targets
+            for (const auto & l_target: l_targetList)
+            {
+                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2Target(l_target);
+                // Restore firmask values that were stored in attributes after chiplet_scominit.
+                // Now that we are in HBRT , OBUS peer targets are known so it is okay to
+                // re-enable the firs that we masked off during Hostboot IPL
+                FAPI_INVOKE_HWP(err,
+                                p9_io_obus_firmask_save_restore,
+                                l_fapi2Target, p9iofirmasksaverestore::RESTORE);
+                if(err)
+                {
+                    // Commit error but don't fail, we lose debug capabilties but this
+                    // should not fail the boot
+                    errlCommit(err, FAPI2_COMP_ID);
+                }
+            }
+
             err = initialize();
-            if ( nullptr != err )
+            if (err)
             {
                 ATTN_ERR( "ATTN_RT::enableAttns: Failed to initialize PRD" );
 
