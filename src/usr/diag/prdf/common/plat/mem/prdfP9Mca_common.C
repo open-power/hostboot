@@ -211,7 +211,7 @@ PLUGIN_FETCH_MPE_ERROR( 7 )
 int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeFetchNceTce<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
+    MemEcc::analyzeFetchNceTce<TYPE_MCA>( i_chip, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchNceTce );

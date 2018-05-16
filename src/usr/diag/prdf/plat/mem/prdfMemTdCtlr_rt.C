@@ -457,7 +457,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
                          const MemAddr & i_addr, STEP_CODE_DATA_STRUCT & io_sc,
                          bool i_isHard = false )
@@ -496,8 +496,8 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
         {
             // Add the symbol(s) to the callout list and CE table.
             bool doTps;
-            o_rc = MemEcc::handleMemCe<T,D>( i_chip, i_addr, d.symbol, doTps,
-                                             io_sc, i_isHard );
+            o_rc = MemEcc::handleMemCe<T>( i_chip, i_addr, d.symbol, doTps,
+                                           io_sc, i_isHard );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x) failed",
@@ -595,7 +595,7 @@ uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template <TARGETING::TYPE T, typename D>
+template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
@@ -630,10 +630,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintINTER_CTE);
 
-            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
                           huid );
                 break;
             }
@@ -644,10 +644,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintSOFT_CTE );
 
-            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
                           huid );
                 break;
             }
@@ -658,10 +658,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            o_rc = __handleNceEte<T,D>( i_chip, io_queue, i_addr, io_sc, true );
+            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc, true );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T,D>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
                           huid );
                 break;
             }
@@ -734,17 +734,13 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                TdQueue & io_queue,
-                                                const MemAddr & i_addr,
-                                                bool & o_errorsFound,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemAddr & i_addr, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 template<>
-uint32_t __checkEcc<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
-                                                TdQueue & io_queue,
-                                                const MemAddr & i_addr,
-                                                bool & o_errorsFound,
-                                                STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemAddr & i_addr, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc )
 {
     // TODO: remove this once runtime support is abled for MBA.
     return SUCCESS;

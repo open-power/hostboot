@@ -165,7 +165,7 @@ bool __mnfgCeCheck<TYPE_MBA>( uint32_t i_eccAttns )
     return ( 0 != (i_eccAttns & MAINT_HARD_NCE_ETE) );
 }
 
-template <TARGETING::TYPE T, typename D>
+template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
@@ -244,17 +244,13 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                TdQueue & io_queue,
-                                                const MemAddr & i_addr,
-                                                bool & o_errorsFound,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemAddr & i_addr, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t __checkEcc<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
-                                                TdQueue & io_queue,
-                                                const MemAddr & i_addr,
-                                                bool & o_errorsFound,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+                               const MemAddr & i_addr, bool & o_errorsFound,
+                               STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 

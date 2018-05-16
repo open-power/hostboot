@@ -218,7 +218,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 // some way to change the template to use the MCA. It is also a local function
 // because this is only for MemTdCtlr internal use and it didn't make much sense
 // to create a public function.
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc );
@@ -272,11 +272,8 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
         for ( auto & mcaChip : portList )
         {
             bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA, McaDataBundle *>( mcaChip,
-                                                                   io_queue,
-                                                                   i_addr,
-                                                                   errorsFound,
-                                                                   io_sc );
+            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, io_queue, i_addr,
+                                                  errorsFound, io_sc );
             if ( SUCCESS != l_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_MCA>(0x%08x) failed",
@@ -307,8 +304,7 @@ uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
     o_stoppedRank = __getStopRank<TYPE_MBA>( i_chip, i_addr );
 
     // Check the MBA for ECC errors.
-    return __checkEcc<TYPE_MBA, MbaDataBundle *>( i_chip, io_queue, i_addr,
-                                                  o_errorsFound, io_sc );
+    return __checkEcc<TYPE_MBA>(i_chip, io_queue, i_addr, o_errorsFound, io_sc);
 }
 
 //------------------------------------------------------------------------------

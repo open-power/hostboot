@@ -260,7 +260,7 @@ int32_t AnalyzeFetchNce##POS( ExtensibleChip * i_chip, \
 { \
     ExtensibleChip * mbaChip = getConnectedChild( i_chip, TYPE_MBA, POS ); \
     PRDF_ASSERT( nullptr != mbaChip ); \
-    MemEcc::analyzeFetchNceTce<TYPE_MBA, MbaDataBundle *>( mbaChip, io_sc ); \
+    MemEcc::analyzeFetchNceTce<TYPE_MBA>( mbaChip, io_sc ); \
     return SUCCESS; \
 } \
 PRDF_PLUGIN_DEFINE( cen_centaur, AnalyzeFetchNce##POS );

@@ -40,6 +40,38 @@ namespace MemDbUtils
 //##############################################################################
 
 /**
+ * @brief  Generic wrapper to add an entry to the CE table.
+ * @param  i_chip   MCA or MBA.
+ * @param  i_addr   CE address.
+ * @param  i_symbol CE symbol.
+ * @param  i_isHard True if this was a hard CE. False otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t addCeTableEntry( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                          const MemSymbol & i_symbol, bool i_isHard );
+
+template<> inline
+uint32_t addCeTableEntry<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                               const MemAddr & i_addr,
+                                               const MemSymbol & i_symbol,
+                                               bool i_isHard )
+{
+    return getMcaDataBundle(i_chip)->iv_ceTable.addEntry( i_addr, i_symbol,
+                                                          i_isHard );
+}
+
+template<> inline
+uint32_t addCeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                               const MemAddr & i_addr,
+                                               const MemSymbol & i_symbol,
+                                               bool i_isHard )
+{
+    return getMbaDataBundle(i_chip)->iv_ceTable.addEntry( i_addr, i_symbol,
+                                                          i_isHard );
+}
+
+/**
  * @brief  Generic wrapper to add an entry to the UE table.
  * @param  i_chip MCA or MBA.
  * @param  i_type UE table entry type.

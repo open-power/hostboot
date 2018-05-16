@@ -585,7 +585,7 @@ uint32_t analyzeFetchMpe<TYPE_MBA>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       const MemSymbol & i_symbol, bool & o_doTps,
                       STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard )
@@ -604,8 +604,8 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     io_sc.service_data->SetCallout( memmru, MRU_MEDA );
 
     // Add data to the CE table.
-    D db = static_cast<D>(i_chip->getDataBundle());
-    uint32_t ceTableRc = db->iv_ceTable.addEntry( i_addr, i_symbol, i_isHard );
+    uint32_t ceTableRc = MemDbUtils::addCeTableEntry<T>( i_chip, i_addr,
+                                                         i_symbol, i_isHard );
 
     // Check MNFG thresholds, if needed.
     // NOTE: We will only check the MNFG thresholds if DRAM repairs is disabled.
@@ -688,7 +688,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T, typename D>
+template<TARGETING::TYPE T>
 uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -726,7 +726,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
         bool doTps = false;
         if ( sym1.isValid() )
         {
-            o_rc = handleMemCe<T,D>( i_chip, addr, sym1, doTps, io_sc );
+            o_rc = handleMemCe<T>( i_chip, addr, sym1, doTps, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
@@ -747,7 +747,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
         if ( sym2.isValid() )
         {
             bool tmp;
-            o_rc = handleMemCe<T,D>( i_chip, addr, sym2, tmp, io_sc );
+            o_rc = handleMemCe<T>( i_chip, addr, sym2, tmp, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
@@ -790,11 +790,11 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
 // To resolve template linker errors.
 template
-uint32_t analyzeFetchNceTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeFetchNceTce<TYPE_MCA>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t analyzeFetchNceTce<TYPE_MBA, MbaDataBundle *>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeFetchNceTce<TYPE_MBA>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
