@@ -1375,24 +1375,25 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW393547_HW413718</id>
+    <id>ATTR_CHIP_EC_FEATURE_DIS_241</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD1/DD2.0, Cumulus DD1.0: HW393547, HW413718
+      HW447773 - Fixed in Nimbus DD2.3 and Cumulus DD1.3
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
+          <value>0x22</value>
           <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x10</value>
-          <test>EQUAL</test>
+          <value>0x12</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
