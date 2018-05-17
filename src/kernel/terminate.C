@@ -71,11 +71,9 @@ void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
                   uint32_t i_error_data)
 {
     // Update the TI structure with the type of TI, who called,
-    // and indicator flag for doing HB dump
     // and extra error data (if applicable, otherwise 0)
     kernel_TIDataArea.type = TI_WITH_SRC;
     kernel_TIDataArea.source = i_source;
-    kernel_TIDataArea.hbDumpFlag = 1;
     kernel_TIDataArea.error_data = i_error_data;
 
     // Update TID data area with the SRC info we have avail
