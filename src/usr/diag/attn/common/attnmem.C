@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,7 +186,8 @@ TargetHandle_t attnGetMembuf( const TargetHandle_t &i_mc,
 
 bool MemOps::resolve(
         PRDF::AttnData &  i_AttnData,
-        const uint32_t  i_mcNumber )
+        const uint32_t  i_mcNumber,
+        TARGETING::TargetHandle_t  i_procTarg )
 {
     errlHndl_t  l_err = 0;
     bool        l_attnFound = false;
@@ -198,7 +199,22 @@ bool MemOps::resolve(
 
 
     TargetHandleList l_mcTargetList;
-    getAllChiplets(l_mcTargetList, TYPE_MC, true );
+
+    // predicate of functional MC units
+    PredicateCTM           l_unitMatch(CLASS_UNIT, TYPE_MC);
+    PredicateIsFunctional  l_functional;
+    PredicatePostfixExpr   l_pred;
+
+    l_pred.push(&l_unitMatch).push(&l_functional).And();
+
+    // Get all MC units associated with input processor
+    targetService().getAssociated(
+            l_mcTargetList,
+            i_procTarg,
+            TARGETING::TargetService::CHILD_BY_AFFINITY,
+            TARGETING::TargetService::ALL,
+            &l_pred);
+
 
     // Find correct MC chiplet
     for ( auto  l_mc : l_mcTargetList )
