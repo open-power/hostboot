@@ -262,31 +262,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
-     * @brief  Handles UEs during background scrub.
-     * @param  io_sc  The step code data struct.
-     * @param  i_addr The address in which the maintenance command stopped.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleUe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
-                            const CenAddr & i_addr );
-
-    /**
-     * @brief  Handles MPEs during background scrub.
-     * @param  io_sc  The step code data struct.
-     * @param  i_addr The address in which the maintenance command stopped.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleMpe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
-                             const CenAddr & i_addr );
-
-    /**
-     * @brief  Handles RCE ETEs during background scrub.
-     * @param  io_sc The step code data struct.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleRceEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
      * @brief  Handles hard CE ETEs during background scrub.
      * @param  io_sc  The step code data struct.
      * @param  i_addr The address in which the maintenance command stopped.
