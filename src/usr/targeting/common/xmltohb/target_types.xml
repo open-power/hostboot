@@ -1660,6 +1660,12 @@
     <id>PROC_PCIE_LANE_MASK</id>
   </attribute>
   <attribute>
+    <id>PEC_PCIE_HX_KEYWORD_DATA</id>
+  </attribute>
+  <attribute>
+    <id>PEC_IS_BIFURCATABLE</id>
+  </attribute>
+  <attribute>
     <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
   </attribute>
   <attribute>
