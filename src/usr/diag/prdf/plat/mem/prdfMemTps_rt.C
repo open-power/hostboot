@@ -329,7 +329,6 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         }
         if ( o_done ) break;
 
-
         // Analyze CEs
         o_rc = analyzeCe( io_sc );
         if ( SUCCESS != o_rc )
@@ -341,18 +340,21 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         // At this point, we are done with the procedure.
         o_done = true;
 
-        // Since TPS is complete, clear the CE table for this slave rank.
-        getMcaDataBundle(iv_chip)->iv_ceTable.deactivateRank( iv_rank );
+    } while (0);
 
-    }while(0);
-
-    // If iv_ban is true and this procedure is done, then ban TPS on this rank.
-    if ( iv_ban && o_done )
+    if ( (SUCCESS == o_rc) && o_done )
     {
-        MemDbUtils::banTps<T>( iv_chip, iv_rank );
+        // Clear the ECC FFDC for this master rank.
+        MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
 
-        // Permanently mask mainline NCEs and TCEs.
-        getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
+        if ( iv_ban )
+        {
+            // Ban TPS on this rank.
+            MemDbUtils::banTps<T>( iv_chip, iv_rank );
+
+            // Permanently mask mainline NCEs and TCEs.
+            getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
+        }
     }
 
     return o_rc;

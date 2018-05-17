@@ -49,6 +49,9 @@ uint32_t DsdEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 
     uint32_t o_rc = SUCCESS;
 
+    // TODO: RTC 189221 remove once function is supported
+    PRDF_ERR( PRDF_FUNC "not supported yet" );
+
     do
     {
         if ( TD_PHASE_0 == iv_phase )
@@ -69,11 +72,16 @@ uint32_t DsdEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 
         // TODO: RTC 189221 finish supporting this function.
 
+        // At this point, we are done with the procedure.
+        o_done = true;
+
     } while (0);
 
-    // TODO: RTC 189221 remove once function is supported
-    PRDF_ERR( PRDF_FUNC "not supported yet" );
-    o_done = true; // to ensure nothing else gets executed
+    if ( (SUCCESS == o_rc) && o_done )
+    {
+        // Clear the ECC FFDC for this master rank.
+        MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
+    }
 
     return o_rc;
 
@@ -116,7 +124,6 @@ uint32_t DsdEvent<TYPE_MBA>::startCmd()
 
     #undef PRDF_FUNC
 }
-
 
 //------------------------------------------------------------------------------
 

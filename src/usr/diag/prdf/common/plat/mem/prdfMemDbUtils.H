@@ -98,6 +98,34 @@ void addUeTableEntry<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
     getMbaDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
 }
 
+/**
+ * @brief  Generic wrapper to reset ECC FFDC for a rank.
+ * @param  i_chip MCA or MBA.
+ * @param  i_rank Target rank.
+ * @param  i_type See enum AddrRangeType.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+void resetEccFfdc( ExtensibleChip * i_chip, const MemRank & i_rank,
+                   AddrRangeType i_type );
+
+template<> inline
+void resetEccFfdc<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank,
+                                        AddrRangeType i_type )
+{
+    getMcaDataBundle(i_chip)->iv_ceTable.deactivateRank( i_rank, i_type );
+}
+
+template<> inline
+void resetEccFfdc<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                        const MemRank & i_rank,
+                                        AddrRangeType i_type )
+{
+    getMbaDataBundle(i_chip)->iv_ceTable.deactivateRank( i_rank, i_type );
+    getMbaDataBundle(i_chip)->iv_rceTable.flushEntry( i_rank, i_type );
+}
+
 //##############################################################################
 //                         Hostboot IPL/Runtime wrappers
 //##############################################################################

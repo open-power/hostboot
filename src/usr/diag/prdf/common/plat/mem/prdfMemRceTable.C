@@ -63,11 +63,17 @@ bool MemRceTable::addEntry( const MemRank & i_rank,
 
 //------------------------------------------------------------------------------
 
-void MemRceTable::flushEntry( const MemRank & i_rank )
+void MemRceTable::flushEntry( const MemRank & i_rank, AddrRangeType i_type )
 {
-    RceTable::iterator it = iv_table.find( i_rank );
-    if ( iv_table.end() != it )
-        it->second.reset();
+    for ( auto & entry : iv_table )
+    {
+        if ( ( (SLAVE_RANK  == i_type) && (entry.first == i_rank) ) ||
+             ( (MASTER_RANK == i_type) &&
+               (entry.first.getMaster() == i_rank.getMaster()) ) )
+        {
+            entry.second.reset();
+        }
+    }
 }
 //------------------------------------------------------------------------------
 
