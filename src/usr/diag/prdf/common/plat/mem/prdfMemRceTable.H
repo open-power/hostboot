@@ -79,8 +79,9 @@ class MemRceTable
     /**
      * @brief Flush entry covered by a rank.
      * @param i_rank The target rank.
+     * @param i_type See enum AddrRangeType.
      */
-    void flushEntry( const MemRank & i_rank );
+    void flushEntry( const MemRank & i_rank, AddrRangeType i_type );
 
     /**
      * @brief Gathers all table data to be stored in capture data.

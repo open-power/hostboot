@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,8 +114,9 @@ class MemCeTable
     /**
      * @brief Deactivates all entries covered by a rank.
      * @param i_rank The target rank.
+     * @param i_type See enum AddrRangeType.
      */
-    void deactivateRank( const MemRank & i_rank );
+    void deactivateRank( const MemRank & i_rank, AddrRangeType i_type );
 
     /**
      * @brief Gathers all table data to be stored in capture data.

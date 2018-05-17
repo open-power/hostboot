@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,15 +167,20 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-void MemCeTable<T>::deactivateRank( const MemRank & i_rank )
+void MemCeTable<T>::deactivateRank( const MemRank & i_rank,
+                                    AddrRangeType i_type )
 {
     // NOTE: We don't want to reset the count here because it will be used for
     //       FFDC. Instead the count will be reset in addEntry() if the entry is
     //       not active.
     for ( auto & entry : iv_table )
     {
-        if ( entry.addr.getRank() == i_rank )
+        if ( ( (SLAVE_RANK  == i_type) && (entry.addr.getRank() == i_rank) ) ||
+             ( (MASTER_RANK == i_type) &&
+               (entry.addr.getRank().getMaster() == i_rank.getMaster()) ) )
+        {
             entry.active = false;
+        }
     }
 }
 

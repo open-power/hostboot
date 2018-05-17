@@ -29,6 +29,7 @@
 #define __prdfMemVcm_H
 
 // Platform includes
+#include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
@@ -232,6 +233,14 @@ class VcmEvent : public TdEntry
             o_done = true;
 
         } while (0);
+
+        #ifdef __HOSTBOOT_RUNTIME
+        if ( (SUCCESS == o_rc) && o_done )
+        {
+            // Clear the ECC FFDC for this master rank.
+            MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
+        }
+        #endif
 
         return o_rc;
 

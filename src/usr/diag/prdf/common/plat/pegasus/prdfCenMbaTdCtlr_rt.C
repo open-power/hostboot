@@ -596,51 +596,6 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlr::handleTdComplete( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[CenMbaTdCtlr::handleTdComplete] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        // A TD procedure has completed. Deactivate all entries in the CE table
-        // for the rank that was just targeted. This must be done before finding
-        // the next good rank so that iv_rank will contain the rank that was
-        // just targeted. Also remove the entry from RCE table.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        mbadb->iv_ceTable.deactivateRank( iv_rank );
-        mbadb->iv_rceTable.flushEntry( iv_rank );
-
-        // Clear out the mark, just in case. This is so we don't accidentally
-        // callout this mark on another rank in an error path scenario.
-        iv_mark = CenMark();
-
-        // Remove TD request from the queue.
-        o_rc = removeTdQueueEntry();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "removeTdQueueEntry() failed" );
-            break;
-        }
-
-        // Move on to the next TD procedure or restart background scrubbing.
-        o_rc = startNextTd( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startNextTd() failed" );
-            break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 int32_t CenMbaTdCtlr::addTdQueueEntryTPS( const CenRank & i_rank,
                                           STEP_CODE_DATA_STRUCT & io_sc,
                                           bool i_banTps )
