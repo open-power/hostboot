@@ -646,7 +646,8 @@ sub buildAffinity
     my $node_aff        = "";
     my $sys_pos         = 0; # There is always a single system target
     my $mcbist          = -1;
-    my $num_mc = 0 ;
+    my $num_mc          = 0 ;
+    my @tpm_list        = (); # The list of TPMs found on the system
 
     $multiNode = 0;
 
@@ -725,18 +726,16 @@ sub buildAffinity
         elsif ($type eq "TPM")
         {
             $tpm++;
+            push @tpm_list, $target;
 
             $self->{targeting}{SYS}[0]{NODES}[$node]{TPMS}[$tpm]{KEY} = $target;
 
             my $tpm_phys = $node_phys . "/tpm-$tpm";
-            my $tpm_aff  = $node_aff  . "/tpm-$tpm";
-
 
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
-            $self->setAttribute($target, "AFFINITY_PATH", $tpm_aff);
             $self->setAttribute($target, "ORDINAL_ID",    $tpm);
         }
         elsif ($type eq "BMC")
@@ -872,9 +871,73 @@ sub buildAffinity
             $self->processMc($target, $sys_pos, $node, $proc, $parent_affinity,
                              $parent_physical, $node_phys);
         }
+    } # foreach
+
+    # Now populate the affinity path of each TPM. Do this after the main loop
+    # because we need to make sure that all of the procs have been processed
+    $tpm = 0;
+    foreach my $tpm_target (@tpm_list)
+    {
+        my $affinity_path = $self->getTpmAffinityPath($tpm_target, $tpm);
+        $self->
+           setAttribute($tpm_target, "AFFINITY_PATH", $affinity_path);
+        $tpm++;
     }
 }
 
+
+# Get the affinity path of the passed TPM target. The affinity path
+# is the physical path of the TPM's I2C master (necessarily a PROC)
+# with TPM number appended.
+sub getTpmAffinityPath
+{
+    my $self   = shift;
+    my $target = shift;
+    my $tpm_number = shift;
+
+    my $affinity_path = "";
+
+    my $target_type = $self->getAttribute($target, "TYPE");
+    if($target_type ne "TPM")
+    {
+        die "Attempted to get TPM affinity path" .
+                                            " on non-TPM target ($target_type)";
+    }
+
+    my $parentProcsPtr = $self->findDestConnections($target, "I2C", "");
+
+    if($parentProcsPtr eq "")
+    {
+        $affinity_path = "affinity:sys-0/node-0/proc-0/tpm-$tpm_number";
+    }
+    else
+    {
+        my @parentProcsList = @{$parentProcsPtr->{CONN}};
+        my $numConnections = scalar @parentProcsList;
+
+        if($numConnections != 1)
+        {
+            die "Incorrect number of parent procs ($numConnections)".
+                " found for TPM$tpm_number";
+        }
+
+        # TPM is only connected to one proc, so we can fetch just the
+        # first connection.
+        my $parentProc = $parentProcsList[0]{SOURCE_PARENT};
+        if($self->getAttribute($parentProc, "TYPE") ne "PROC")
+        {
+            die "Upstream I2C connection to TPM$tpm_number is not type PROC!";
+        }
+
+        # Look at the I2C master's physical path; replace
+        # "physical" with "affinity" and append tpm number
+        $affinity_path = $self->getAttribute($parentProc, "PHYS_PATH");
+        $affinity_path =~ s/physical/affinity/g;
+        $affinity_path = $affinity_path . "/tpm-$tpm_number";
+    }
+
+    return $affinity_path;
+}
 
 sub iterateOverChiplets
 {

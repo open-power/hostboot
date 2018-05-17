@@ -6268,7 +6268,7 @@ sub generate_tpm
     # Compute the rest of the attributes
     my $huidAttr = sprintf("0x%02X31%04X",${node},$position);
     my $physPathAttr = "physical:sys-$sys/node-$node/tpm-$position";
-    my $affinityPathAttr = "affinity:sys-$sys/node-$node/tpm-$position";
+    my $affinityPathAttr = "affinity:sys-$sys/node-$node/proc-$proc/tpm-$position";
     my $ordinalIdAttr = "$ordinalId";
     my $positionAttr = $position;
     my $instancePathAttr = "$instancePath";

@@ -733,7 +733,7 @@
     <type>chip-tpm-cectpm</type>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/tpm-0</default>
+        <default>affinity:sys-0/node-0/proc-0/tpm-0</default>
     </attribute>
     <attribute>
         <id>HUID</id>
