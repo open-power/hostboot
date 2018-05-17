@@ -262,22 +262,6 @@ class CenMbaTdCtlr : public CenMbaTdCtlrCommon
     int32_t handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
-     * @brief  Handles hard CE ETEs during background scrub.
-     * @param  io_sc  The step code data struct.
-     * @param  i_addr The address in which the maintenance command stopped.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleHardCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
-                                   const CenAddr & i_addr );
-
-    /**
-     * @brief  Handles soft and intermittent CEs during background scrub.
-     * @param  io_sc The step code data struct.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t handleSoftIntCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
      * @brief  Handles TPS false alarms.
      * @param  io_sc The step code data struct.
      * @note   Should only be called at the end of TPS phase 2 if no ECC errors
