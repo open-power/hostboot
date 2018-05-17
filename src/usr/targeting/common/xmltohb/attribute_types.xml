@@ -3426,6 +3426,96 @@
   </attribute>
 
   <attribute>
+      <description>
+          This attribute holds the contents of the HX keyword read by the FSP
+          from a PCIe card. The keyword data is used to determine the PHB
+          bifurcation settings.
+          byte    0 = Keyword Version
+                        0x00 - Keyword not used, ignore remaining data
+                        0x01 - Data describes this enitity's logical PCIe device
+                               to physical PCIe lane mapping as one or more
+                               logical devices, each connected to a set of PCIe
+                               lanes (always an integral multiple of 8 lanes)
+          byte    1 = Number of x8 lane set entries X (0 to 7)
+                      Each lane set entry is a one-byte value which indicates
+                      whether the lane set is used by any logical device, and if
+                      used, the logical device ID to which the lane set
+                      is assigned, if this byte is zero the remaining keyword
+                      data should be ignored.
+          bytes 2+N = Lane set entry N
+                      where N={0,1..X-1}
+                      Each lane set entry maps a set of physical lanes
+                      (8*N through N*8+7) to a logical device. Bit 0 indicates
+                      whether the lane set is used by a logical device. If used,
+                      the next three bits indicate which logical device ID
+                      uses those lanes.
+
+                      Bit0:
+                         0b0 = Lanes not used by a logical device; ignore
+                         0b1 = Lanes used by a logical device; logical device
+                               id below is valid
+                      Bit 1-3:
+                         0b000 = reserved (when bit 0 = 0b0)
+                         0b001 -> 0b111
+                      Bit 4-7
+                      reserved
+
+          Example: bifurcate PEC into 2-x8 devices PHB3 and PHB4
+          HX keyword data  kw = { 01 02 B0 C0 xx xx xx xx xx }
+              kw[0] = 01 - data is valid
+              kw[1] = 02 - there are two lane sets defined
+              kw[2] = B0 - b0   = 1 lane set 0xFF00 is used
+                           b1:3 = 011 - lane set is assigned to device ID3
+              kw[3] = C0 - b0   = 1 lane set 0x00FF is used
+                           b1:3 = 100 - lane set is assigned to device ID4
+              kw[4:8]   - remaining data is ignored
+
+
+         Example: un-bifurcate a slot which is by default bifurcated
+          HX keyword data  kw = { 01 02 B0 B0 xx xx xx xx xx }
+              kw[0] = 01 - data is valid
+              kw[1] = 02 - there are two lane sets defined
+              kw[2] = B0 - b0   = 1 lane set 0xFF00 is used
+                           b1:3 = 011 - lane set is assigned to device ID3
+              kw[3] = B0 - b0   = 1 lane set 0x00FF is used
+                           b1:3 = 011 - lane set is assigned to device ID3
+              kw[4:8]   - remaining data is ignored
+
+         HX keyword data must map to a valid slot configuration as defined by
+         the system workbook.
+    </description>
+    <id>PEC_PCIE_HX_KEYWORD_DATA</id>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+    <writeable></writeable>
+    <simpleType>
+      <array>9</array>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+  <attribute>
+    <description>
+        This attribute indicates if the PEC can be bifurcated. The value is determined from the workbook.
+        0 - PEC is not bifurcateable
+        1 - PEC can be bifurcated
+        Note: Altering the lane map can be done using the HX keyword.
+    </description>
+    <id>PEC_IS_BIFURCATABLE</id>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+    <writeable></writeable>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>Effective PCIE Lane Mask
         Creator: Firmware
         Purpose: Holds the effective PCIE lane mask of each PEC after taking
