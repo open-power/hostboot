@@ -524,6 +524,42 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
+uint32_t __handleSoftInterCeEte( ExtensibleChip * i_chip, TdQueue & io_queue,
+                                 const MemAddr & i_addr,
+                                 STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+uint32_t __handleSoftInterCeEte<TYPE_MCA>( ExtensibleChip * i_chip,
+                                           TdQueue & io_queue,
+                                           const MemAddr & i_addr,
+                                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    return __handleNceEte<TYPE_MCA>( i_chip, io_queue, i_addr, io_sc );
+}
+
+template<>
+uint32_t __handleSoftInterCeEte<TYPE_MBA>( ExtensibleChip * i_chip,
+                                           TdQueue & io_queue,
+                                           const MemAddr & i_addr,
+                                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // Due to workarounds on the Centaur we are unable to stop on each
+    // occurrence of the soft or intermittent CEs like we do for Nimbus.
+    // Instead, the threshold is set much higher. If the threshold is hit we
+    // simply want to add the rank to the callout list and trigger TPS.
+
+    MemoryMru mm { i_chip->getTrgt(), i_addr.getRank(),
+                   MemoryMruData::CALLOUT_RANK };
+    io_sc.service_data->SetCallout( mm );
+
+    io_queue.push( new TpsEvent<TYPE_MBA>(i_chip, i_addr.getRank()) );
+
+    return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
 uint32_t __handleRceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
                          const MemRank & i_rank, bool & o_errorsFound,
                          STEP_CODE_DATA_STRUCT & io_sc );
@@ -673,10 +709,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintINTER_CTE);
 
-            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleSoftInterCeEte<T>( i_chip, io_queue, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "__handleSoftInterCeEte<T>(0x%08x) failed",
                           huid );
                 break;
             }
@@ -687,10 +723,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintSOFT_CTE );
 
-            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleSoftInterCeEte<T>( i_chip, io_queue, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "__handleSoftInterCeEte<T>(0x%08x) failed",
                           huid );
                 break;
             }
@@ -781,14 +817,10 @@ template
 uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
-template<>
+template
 uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
                                const MemAddr & i_addr, bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc )
-{
-    // TODO: remove this once runtime support is abled for MBA.
-    return SUCCESS;
-}
+                               STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
