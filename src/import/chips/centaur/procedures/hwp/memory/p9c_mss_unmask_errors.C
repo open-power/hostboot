@@ -27,8 +27,8 @@
 /// @file p9c_mss_unmask_errors.C
 /// @brief Tools for DDR4 DIMMs centaur procedures
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
-/// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+/// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
 /// *HWP Consumed by: HB:CI
@@ -42,6 +42,7 @@
 #include <p9c_mss_unmask_errors.H>
 #include <cen_gen_scom_addresses.H>
 #include <fapi2.H>
+#include <generic/memory/lib/utils/find.H>
 
 ///
 /// @brief Sets action regs and mask settings for pervasive errors to their runtime settings.
@@ -284,6 +285,29 @@ fapi_try_exit:
 fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 
 {
+    const auto l_attached_proc_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+
+    // Get attribute for HW414700 workaround
+    uint8_t l_hw414700 = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
+             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
+
+    FAPI_TRY(unmask_inband_errors_helper(i_target, l_hw414700));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function for unit testing mss_unmask_inband_errors
+/// @param[in]  i_target Centaur target
+/// @param[in]  i_hw414700 value of ATTR_CHIP_EC_FEATURE_HW414700
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode unmask_inband_errors_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+        const uint8_t i_hw414700)
+
+{
     FAPI_INF("ENTER mss_unmask_inband_errors()");
 
     //*************************
@@ -299,15 +323,6 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::buffer<uint64_t> l_mbs_fir_action1;
 
     uint8_t l_dd2_fir_bit_defn_changes = 0;
-    uint8_t l_hw414700 = 0;
-
-    fapi2::Target<fapi2::TARGET_TYPE_DMI> l_attached_dmi_target = i_target.getParent<fapi2::TARGET_TYPE_DMI>();
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_attached_proc_target =
-        l_attached_dmi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-
-    // Get attribute for HW414700 workaround
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
-             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
 
     // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES, i_target,
@@ -385,7 +400,7 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     // 10    cache_srw_ue           recoverable         mask (until unmask_fetch_errors)
     //       hw414700               channel checkstop   mask (until unmask_fetch_errors)
 
-    if (l_hw414700)
+    if (i_hw414700)
     {
         l_mbs_fir_action0.clearBit<10>();
         l_mbs_fir_action1.clearBit<10>();
@@ -410,7 +425,7 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
 
     // 13    cache_co_ue            recoverable         mask (until unmask_fetch_errors)
     //       hw414700               channel checkstop   mask (until unmask_fetch_errors)
-    if (l_hw414700)
+    if (i_hw414700)
     {
         l_mbs_fir_action0.clearBit<13>();
         l_mbs_fir_action1.clearBit<13>();
@@ -489,10 +504,20 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     l_mbs_fir_action1.setBit<26>();
     l_mbs_fir_mask_or.setBit<26>();
 
-    // 27    srb_buffer_ue           channel checkstop   mask (until unmask_fetch_errors)
-    l_mbs_fir_action0.clearBit<27>();
-    l_mbs_fir_action1.clearBit<27>();
-    l_mbs_fir_mask_or.setBit<27>();
+    // 27    srb_buffer_ue           recoverable         mask (until unmask_fetch_errors)
+    //       hw414700                channel checkstop   mask (until unmask_fetch_errors)
+    if (i_hw414700)
+    {
+        l_mbs_fir_action0.clearBit<27>();
+        l_mbs_fir_action1.clearBit<27>();
+        l_mbs_fir_mask_or.setBit<27>();
+    }
+    else
+    {
+        l_mbs_fir_action0.clearBit<27>();
+        l_mbs_fir_action1.setBit<27>();
+        l_mbs_fir_mask_or.setBit<27>();
+    }
 
     // 28    srb_buffer_sue          recoverable         mask (forever)
     l_mbs_fir_action0.clearBit<28>();

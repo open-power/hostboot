@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,14 @@ fapi2::ReturnCode mss_unmask_pervasive_errors( const fapi2::Target<fapi2::TARGET
 ///
 fapi2::ReturnCode mss_unmask_inband_errors( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target);
 
+///
+/// @brief Helper function for unit testing mss_unmask_inband_errors
+/// @param[in]  i_target Centaur target
+/// @param[in]  i_hw414700 value of ATTR_CHIP_EC_FEATURE_HW414700
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode unmask_inband_errors_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+        const uint8_t i_hw414700);
 
 //------------------------------------------------------------------------------
 // mss_unmask_ddrphy_errors
