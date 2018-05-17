@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,8 @@ errlHndl_t ProcOps::query(AttnData & i_attnToCheck, bool & o_active)
                     if ( scomData & ((MC::firstChiplet) >> l_mc) )
                     {
                         // Will handle the first attention
-                        l_cenAttnFound = memOps.resolve( i_attnToCheck, l_mc);
+                        l_cenAttnFound = memOps.resolve( i_attnToCheck, l_mc,
+                                                     i_attnToCheck.targetHndl );
                         // i_attnToCheck gets altered to membuf
                         // if we found valid attention there
 

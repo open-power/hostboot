@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,14 +48,16 @@ class MemOps : public AttentionOps
          * @brief resolve Find membuf attentions behind the supplied proc.
          *
          * @param[in] i_AttnData Where to put membuf target and attn type
-         * @param[out] i_mcNumber  MC unit to examine (0 or 1)
+         * @param[in] i_mcNumber  MC unit to examine (0 or 1)
+         * @param[in] i_procTarg  Processor to examine for active MC units
          *
          * @retval true  if i_AttnData was set to valid values
          * @retval false if i_AttnData is invalid (no memory attns)
          */
         bool resolve(
                 PRDF::AttnData &  i_AttnData,
-                const uint32_t  i_mcNumber );
+                const uint32_t  i_mcNumber,
+                TARGETING::TargetHandle_t  i_procTarg );
 
         /**
          * @brief dtor
