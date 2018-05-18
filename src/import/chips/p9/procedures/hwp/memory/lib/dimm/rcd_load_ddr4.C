@@ -129,6 +129,10 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
               "Failed to load 4-bit RC09 control word for %s",
               mss::c_str(i_target));
 
+    // Toggle RC06 again to ensure the DRAM is reset properly
+    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, io_inst), "%s failed to add reset workaround functionality",
+              mss::c_str(i_target));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
