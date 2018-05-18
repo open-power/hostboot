@@ -42,8 +42,10 @@
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
 #include <secureboot/secure_reasoncodes.H>
+
 #include "node_comm_dd.H"
 #include "node_comm.H"
+#include "../common/errlud_secure.H"
 
 // ----------------------------------------------
 // Globals
@@ -197,7 +199,19 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
 
-        // @TODO RTC:191008 Add FFDC - call to new UserDetails Section
+        UdNodeCommInfo(i_opType,
+                       io_buflen,
+                       i_accessType,
+                       node_comm_args)
+                      .addToLog(err);
+
+        if (err->reasonCode() != RC_NCDD_INVALID_ARGS)
+        {
+            // Collect FFDC - Target and Registers
+            getNodeCommFFDC(node_comm_args.mode,
+                            node_comm_args.tgt,
+                            err);
+        }
     }
 
     TRACFCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
@@ -530,6 +544,30 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args)
     return err;
 
 } // end ncddWaitForCmdComp
+
+
+void ncddHandleError( errlHndl_t & io_err,
+                      node_comm_args_t & i_args )
+{
+    TRACFCOMP( g_trac_nc,ENTER_MRK"ncddHandleError: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(io_err));
+
+    do
+    {
+// @TODO RTC:191008 Implement simple reset functionality
+
+    } while (0);
+
+    TRACFCOMP( g_trac_nc,EXIT_MRK"ncddHandleError: "
+               TRACE_ERR_FMT,
+               TRACE_ERR_ARGS(io_err));
+
+    return;
+
+} // end ncddHandleError
+
+
 
 errlHndl_t ncddRegisterOp ( DeviceFW::OperationType i_opType,
                             uint64_t * io_data_64,

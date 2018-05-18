@@ -102,6 +102,7 @@ namespace SECUREBOOT
         SECURE_UDT_TARGET_HW_KEY_HASH = 0x2,
         SECURE_UDT_SECURITY_SETTINGS  = 0x3,
         SECURE_UDT_VERIFY_INFO        = 0x4,
+        SECURE_UDT_NODECOMM_INFO      = 0x5,
     };
 
 }

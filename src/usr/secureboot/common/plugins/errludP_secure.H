@@ -334,6 +334,108 @@ class UdParserVerifyInfo : public ERRORLOG::ErrlUserDetailsParser
     UdParserVerifyInfo & operator=(const UdParserVerifyInfo&);
 };
 
+/**
+ * @class UdParserNodeCommInfo
+ *
+ * Parses UdSecureNodeCommInfo
+ */
+class UdParserNodeCommInfo : public ERRORLOG::ErrlUserDetailsParser
+{
+  public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserNodeCommInfo() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserNodeCommInfo() {}
+
+    /**
+     *  @brief Parses information from Node Communications operation
+     *         user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+
+        //***** Node Comm SECURE_UDT_VERSION_1 Memory Layout *****
+        // 4 bytes  : Target HUID
+        // 8 bytes  : Length of In/Out Buffer
+        // 8 bytes  : Access Type (DeviceFW::AccessType)
+        // 1 byte   : Op Type (DeviceFW::OperationType)
+        // 1 byte   : Mode (XBUS or ABUS)
+        // 1 byte   : LinkId
+        // 1 byte   : MboxId
+
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        bool l_parseError = false;
+
+        do
+        {
+        i_parser.PrintHeading("Secure Node Comm Info");
+
+        i_parser.PrintNumber("Target HUID 0x","%.8lX",TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+        i_parser.PrintNumber("Length I/O Buff 0x","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+        i_parser.PrintNumber("Access Type 0x","%.16lX",TO_UINT64(l_databuf));
+        l_databuf += sizeof(uint64_t);
+
+        uint8_t op = TO_UINT8(l_databuf);
+        if( op == 0 )
+        {
+            i_parser.PrintHeading("Node Comm Read");
+        }
+        else if( op == 1 )
+        {
+            i_parser.PrintHeading("Node Comm Write");
+        }
+        else
+        {
+            i_parser.PrintHeading("Unknown Node Comm Operation");
+        }
+        i_parser.PrintNumber("Op Type Value 0x","%.2lX",TO_UINT8(l_databuf));
+        l_databuf += sizeof(uint8_t);
+
+
+        op = TO_UINT8(l_databuf);
+        if( op == 0 )
+        {
+            i_parser.PrintHeading("Node Comm Mode: XBUS");
+        }
+        else if( op == 1 )
+        {
+            i_parser.PrintHeading("Node Comm Mode: ABUS");
+        }
+        else
+        {
+            i_parser.PrintHeading("INVALID Node Comm Mode");
+        }
+        i_parser.PrintNumber("MODE 0x","%.2lX",TO_UINT8(l_databuf));
+        l_databuf += sizeof(uint8_t);
+
+        i_parser.PrintNumber("LinkId 0x","%.2lX",TO_UINT8(l_databuf));
+        l_databuf += sizeof(uint8_t);
+        i_parser.PrintNumber("MboxId 0x","%.2lX",TO_UINT8(l_databuf));
+        l_databuf += sizeof(uint8_t);
+
+        } while(0);
+    }
+
+  private:
+    // Disabled
+    UdParserNodeCommInfo(const UdParserNodeCommInfo&);
+    UdParserNodeCommInfo & operator=(const UdParserNodeCommInfo&);
+};
 
 } // end SECUREBOOT namespace
 

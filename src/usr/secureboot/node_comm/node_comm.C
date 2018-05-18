@@ -36,6 +36,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
@@ -45,7 +46,6 @@
 #include <targeting/common/utilFilter.H>
 
 #include "node_comm.H"
-
 
 using   namespace   TARGETING;
 
@@ -162,6 +162,9 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                            HWAS::NO_DECONFIG,
                            HWAS::GARD_NULL );
 
+        // Collect FFDC
+        getNodeCommFFDC(i_mode, i_pProc, err);
+
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
 
@@ -193,6 +196,71 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
     return err;
 
 } // end of nodeCommMapAttn
+
+
+/**
+ * @brief Add FFDC for the target to an error log
+ */
+void getNodeCommFFDC( node_comm_modes_t   i_mode,
+                      TARGETING::Target*  i_pProc,
+                      errlHndl_t          &io_log)
+{
+    TRACFCOMP(g_trac_nc,ENTER_MRK
+              "getNodeCommFFDC: tgt=0x%X, mode=%s, err_plid=0x%X",
+              get_huid(i_pProc),
+              (i_mode == NCDD_MODE_ABUS)
+                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
+              ERRL_GETPLID_SAFE(io_log));
+
+    do
+    {
+    if (io_log == nullptr)
+    {
+        TRACFCOMP(g_trac_nc,INFO_MRK"getNodeCommFFDC: io_log==nullptr, so "
+                  "no FFDC has been collected for tgt=0x%X, mode=%s",
+                  get_huid(i_pProc),
+                  (i_mode == NCDD_MODE_ABUS)
+                    ? NCDD_ABUS_STRING : NCDD_XBUS_STRING);
+        break;
+    }
+
+    // Add Target to log
+    ERRORLOG::ErrlUserDetailsTarget(i_pProc,"Proc Target").addToLog(io_log);
+
+    // Add HW regs
+    ERRORLOG::ErrlUserDetailsLogRegister ffdc(i_pProc);
+
+    // FIR/Control/Status/Data Registers
+    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_FIR,i_mode)));
+    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_CTRL,i_mode)));
+    ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(NCDD_REG_DATA,i_mode)));
+
+    // Loop Through All of the Mailbox Registers Where the Data Could End Up
+    uint64_t l_reg = 0;
+    const auto max_linkId = (i_mode==NCDD_MODE_ABUS)
+                              ? NCDD_MAX_ABUS_LINK_ID
+                              : NCDD_MAX_XBUS_LINK_ID;
+
+    for (size_t linkId=0;  linkId <= max_linkId ; ++linkId)
+    {
+        for (size_t mboxId=0; mboxId <= NCDD_MAX_MBOX_ID; ++mboxId)
+        {
+            l_reg = getLinkMboxReg(linkId, mboxId);
+            ffdc.addData(DEVICE_SCOM_ADDRESS(getLinkMboxRegAddr(l_reg,i_mode)));
+        }
+    }
+
+    ffdc.addToLog(io_log);
+
+
+    } while( 0 );
+
+    TRACFCOMP(g_trac_nc,EXIT_MRK"getNodeCommFFDC");
+
+    return;
+
+} // end of getNodeCommFFDC
+
 
 } // End NODECOMM namespace
 

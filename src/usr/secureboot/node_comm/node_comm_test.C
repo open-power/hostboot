@@ -263,6 +263,9 @@ errlHndl_t nodeCommXbus2ProcTest(void)
                            HWAS::NO_DECONFIG,
                            HWAS::GARD_NULL );
 
+        // Collect FFDC
+        getNodeCommFFDC(mode,read_tgt, err);
+
     }
 
     } while( 0 );
@@ -278,7 +281,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
 
-        // @TODO RTC:191008 Delete for now as it will fail in simics and
+        // @TODO RTC:184518 Delete for now as it will fail in simics and
         // cause a processor deconfig.
         delete err;
         err = nullptr;
