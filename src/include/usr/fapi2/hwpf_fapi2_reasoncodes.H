@@ -65,6 +65,7 @@ namespace fapi2
         MOD_FAPI2_GET_PLL_BUCKET                    = 0x16,
         MOD_FAPI2_GET_RING                          = 0x17,
         MOD_FAPI2_SET_ATTR_FREQ_MCA_MHZ             = 0x18,
+        MOD_FAPI2_PLAT_GET_PROC_TEST                = 0x19,
     };
 
     /**

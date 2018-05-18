@@ -30,6 +30,7 @@
 #include <fapi2TestUtils.H>
 #include <cxxtest/TestSuite.H>
 #include <functional>
+#include <plat_utils.H>
 
 
 #include <error_scope.H>
@@ -58,6 +59,61 @@ public:
             size_t (*actualSize)(Target<fapi2::TARGET_TYPE_PERV>&);
 
         };
+
+//******************************************************************************
+// getProc
+// Determine if cumulus or nimbus system and return pointer to first processor
+// target of that type
+//******************************************************************************
+errlHndl_t getProc(TARGETING::Target*& o_nimbusProc,
+        TARGETING::Target*& o_cumulusProc)
+{
+    errlHndl_t l_err = nullptr;
+    FAPI_DBG("start of getProc()");
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get a list of all of the proc chips
+    TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+    //Take the first NIMBUS proc and use it
+    for(uint32_t i = 0; i < l_chipList.size(); i++)
+    {
+        if(TARGETING::MODEL_NIMBUS ==
+                l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+        {
+            o_nimbusProc = l_chipList[i];
+            break;
+        }
+        if(TARGETING::MODEL_CUMULUS ==
+                l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+        {
+            o_cumulusProc = l_chipList[i];
+            break;
+        }
+    }
+    if((o_nimbusProc == nullptr) && (o_cumulusProc == nullptr))
+    {
+        // Send an errorlog because we cannot find any procs.
+        FAPI_ERR("getProc: could not find any procs, skipping tests");
+        /*@
+         * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_PROC_TEST
+         * @reasoncode   fapi2::RC_NO_PROCS_FOUND
+         * @userdata1    Model Type we looked for
+         * @userdata2    Other Model Type we looked for
+         * @devdesc      Could not find any procs in system model
+         */
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                fapi2::MOD_FAPI2_PLAT_GET_PROC_TEST,
+                fapi2::RC_NO_PROCS_FOUND,
+                TARGETING::MODEL_NIMBUS,
+                TARGETING::MODEL_CUMULUS,
+                true/*SW Error*/);
+    }
+    return l_err;
+}
 
 //******************************************************************************
 // test_fapi2GetChildren
@@ -665,7 +721,6 @@ void test_fapi2GetChildren()
     FAPI_INF("fapi2GetChildrenTest:: Test Complete. %d/%d fails",  numFails , numTests);
 }
 
-
 //******************************************************************************
 // test_fapi2GetChildrenFilter
 //******************************************************************************
@@ -843,6 +898,140 @@ void test_fapi2GetChildrenFilter()
     FAPI_INF("test_fapi2GetChildrenFilter: Test Complete. %d/%d fails",  numFails , numTests);
 }
 
+//******************************************************************************
+// test_fapi2GetChildrenFilter
+// Currently only test DIMM aspects of interface
+//******************************************************************************
+void test_fapi2getChildTargetsForCDG()
+{
+    int numTests = 0;
+    int numFails = 0;
+    errlHndl_t l_err = nullptr;
+    TARGETING::Target * l_nimbusProc = nullptr;
+    TARGETING::Target * l_cumulusProc = nullptr;
+    TARGETING::Target * l_proc = nullptr;
+    size_t l_expectedDimms = 0;
+    do
+    {
+        FAPI_DBG("start of test_fapi2getChildTargetsForCDG()");
+
+        numTests++;
+        l_err = getProc(l_nimbusProc, l_cumulusProc);
+        if(l_err)
+        {
+            errlCommit(l_err,HWPF_COMP_ID);
+            numFails++;
+            TS_FAIL("test_fapi2getChildTargetsForCDG Fail: could not find any proc, skipping tests");
+            break;
+        }
+
+        if (l_nimbusProc != nullptr)
+        {
+            l_proc = l_nimbusProc;
+            l_expectedDimms = 16;
+
+        }
+        else if (l_cumulusProc != nullptr)
+        {
+            l_proc = l_cumulusProc;
+            l_expectedDimms = 8;
+        }
+        else //both are nullptr
+        {
+            // Should never get here since error should have been returned
+            // above
+            FAPI_ERR("fapi2getChildTargetsForCDG: Never Should Happen");
+            numFails++;
+            break;
+        }
+
+        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_proc);
+        // Now get all dimms under this processor
+        TARGETING::TargetHandleList l_dimmList;
+        fapi2::getChildTargetsForCDG(fapi2_procTarget,
+                fapi2::TARGET_TYPE_DIMM,
+                0xff,  // All ports
+                0xff,  // All sockets
+                l_dimmList);
+
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X is %d",
+                TARGETING::get_huid(l_proc),l_dimmList.size());
+        numTests++;
+        if(l_dimmList.size() != l_expectedDimms)
+        {
+            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d not equal expected %d",
+                    l_dimmList.size(),l_expectedDimms);
+            numFails++;
+        }
+
+        // All dimms under port 0
+        fapi2::getChildTargetsForCDG(fapi2_procTarget,
+                fapi2::TARGET_TYPE_DIMM,
+                0x0,   // Port 0
+                0xff,  // All sockets
+                l_dimmList);
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 0 is %d",
+                TARGETING::get_huid(l_proc),l_dimmList.size());
+        numTests++;
+        if(l_dimmList.size() != l_expectedDimms)
+        {
+            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
+                    l_dimmList.size(),l_expectedDimms);
+            numFails++;
+        }
+
+        // All dimms under port 1
+        fapi2::getChildTargetsForCDG(fapi2_procTarget,
+                fapi2::TARGET_TYPE_DIMM,
+                0x1,   // Port 1
+                0xff,  // All sockets
+                l_dimmList);
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 1 is %d",
+                TARGETING::get_huid(l_proc),l_dimmList.size());
+        numTests++;
+        if(l_dimmList.size() != 0)
+        {
+            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
+                    l_dimmList.size(),0);
+            numFails++;
+        }
+
+        // All dimms under socket 0
+        fapi2::getChildTargetsForCDG(fapi2_procTarget,
+                fapi2::TARGET_TYPE_DIMM,
+                0xff,  // All ports
+                0x0,   // Socket 0
+                l_dimmList);
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X socket 0 is %d",
+                TARGETING::get_huid(l_proc),l_dimmList.size());
+        numTests++;
+        if(l_dimmList.size() != l_expectedDimms)
+        {
+            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 0 not equal expected %d",
+                    l_dimmList.size(),l_expectedDimms);
+            numFails++;
+        }
+
+        // All dimms under socket 1
+        fapi2::getChildTargetsForCDG(fapi2_procTarget,
+                fapi2::TARGET_TYPE_DIMM,
+                0xff,  // All ports
+                0x1,   // Socket 1
+                l_dimmList);
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X socket 1 is %d",
+                TARGETING::get_huid(l_proc),l_dimmList.size());
+        numTests++;
+        if(l_dimmList.size() != 0)
+        {
+            FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under socket 1 not equal expected %d",
+                    l_dimmList.size(),0);
+            numFails++;
+        }
+
+    }while(0);
+
+    FAPI_INF("test_fapi2getChildTargetsForCDG: Test Complete. %d/%d fails",  numFails , numTests);
+}
 
 };
 
