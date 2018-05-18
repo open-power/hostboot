@@ -131,29 +131,16 @@ void test_fapi2GetChildren()
     TARGETING::Target * l_proc = nullptr;
     do
     {
-        // Create a vector of TARGETING::Target pointers
-        TARGETING::TargetHandleList l_chipList;
-
-        // Get a list of all of the proc chips
-        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
-
-        //Take the first proc and use it
-        for(uint32_t i = 0; i < l_chipList.size(); i++)
-        {
-            if(TARGETING::MODEL_NIMBUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_nimbusProc = l_chipList[i];
-              break;
-            }
-            if(TARGETING::MODEL_CUMULUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_cumulusProc = l_chipList[i];
-              break;
-            }
-        }
         numTests++;
+        l_err = getProc(l_nimbusProc, l_cumulusProc);
+        if(l_err)
+        {
+            errlCommit(l_err,HWPF_COMP_ID);
+            numFails++;
+            TS_FAIL("test_fapi2GetChildren Fail: could not find any proc, skipping tests");
+            break;
+        }
+
         if (l_nimbusProc != nullptr)
         {
             l_proc = l_nimbusProc;
@@ -164,24 +151,10 @@ void test_fapi2GetChildren()
         }
         else //both are nullptr
         {
-            // Send an errorlog because we cannot find any NIMBUS procs.
-            FAPI_ERR("FAPI2_GETCHILDREN:: could not find any procs, skipping tests");
+            // Should never get here since error should have been returned
+            // above
+            FAPI_ERR("test_fapi2GetChildren: Never Should Happen");
             numFails++;
-            /*@
-            * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_TEST
-            * @reasoncode   fapi2::RC_NO_PROCS_FOUND
-            * @userdata1    Model Type we looked for
-            * @userdata2    Other Model Type we looked for
-            * @devdesc      Could not find any procs in system model
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            fapi2::MOD_FAPI2_PLAT_GET_CHILDREN_TEST,
-                                            fapi2::RC_NO_PROCS_FOUND,
-                                            TARGETING::MODEL_NIMBUS,
-                                            TARGETING::MODEL_CUMULUS,
-                                            true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
             break;
         }
 
@@ -739,29 +712,15 @@ void test_fapi2GetChildrenFilter()
     {
         FAPI_DBG("start of test_fapi2GetChildrenFilter()");
 
-        // Create a vector of TARGETING::Target pointers
-        TARGETING::TargetHandleList l_chipList;
-
-        // Get a list of all of the proc chips
-        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
-
-        //Take the first NIMBUS proc and use it
-        for(uint32_t i = 0; i < l_chipList.size(); i++)
-        {
-            if(TARGETING::MODEL_NIMBUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_nimbusProc = l_chipList[i];
-              break;
-            }
-            if(TARGETING::MODEL_CUMULUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_cumulusProc = l_chipList[i];
-              break;
-            }
-        }
         numTests++;
+        l_err = getProc(l_nimbusProc, l_cumulusProc);
+        if(l_err)
+        {
+            errlCommit(l_err,HWPF_COMP_ID);
+            numFails++;
+            TS_FAIL("test_fapi2GetChildrenFilter Fail: could not find any proc, skipping tests");
+            break;
+        }
 
         if (l_nimbusProc != nullptr)
         {
@@ -773,10 +732,10 @@ void test_fapi2GetChildrenFilter()
         }
         else //both are nullptr
         {
-            // Send an errorlog because we cannot find any procs.
-            FAPI_ERR("FAPI2_GETCHILDREN:: could not find any proc, skipping tests");
+            // Should never get here since error should have been returned
+            // above
+            FAPI_ERR("test_fapi2GetChildrenFilter: Never Should Happen");
             numFails++;
-            TS_FAIL("test_fapi2GetChildrenFilter Fail: could not find any proc, skipping tests");
             break;
         }
 
