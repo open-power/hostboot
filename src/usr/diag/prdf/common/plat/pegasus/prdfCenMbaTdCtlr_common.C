@@ -43,53 +43,6 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
-int32_t CenMbaTdCtlrCommon::initialize()
-{
-    #define PRDF_FUNC "[CenMbaTdCtlrCommon::initialize] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Set iv_mbaTrgt
-        iv_mbaTrgt = iv_mbaChip->GetChipHandle();
-
-        // Validate iv_mbaChip.
-        if ( TYPE_MBA != getTargetType(iv_mbaTrgt) )
-        {
-            PRDF_ERR( PRDF_FUNC "iv_mbaChip is not TYPE_MBA" );
-            o_rc = FAIL; break;
-        }
-
-        // Set iv_membChip.
-        CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
-        iv_membChip = mbadb->getMembChip();
-        if ( NULL == iv_membChip )
-        {
-            PRDF_ERR( PRDF_FUNC "getMembChip() failed" );
-            o_rc = FAIL; break;
-        }
-
-        // Set iv_mbaPos.
-        iv_mbaPos = getTargetPosition( iv_mbaTrgt );
-        if ( MAX_MBA_PER_MEMBUF <= iv_mbaPos )
-        {
-            PRDF_ERR( PRDF_FUNC "iv_mbaPos=%d is invalid", iv_mbaPos );
-            o_rc = FAIL; break;
-        }
-
-        // Set iv_x4Dimm.
-        iv_x4Dimm = isDramWidthX4(iv_mbaTrgt);
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 bool CenMbaTdCtlrCommon::isInTdMode()
 {
     return ( (NO_OP != iv_tdState) && (MAX_TD_STATE > iv_tdState) );

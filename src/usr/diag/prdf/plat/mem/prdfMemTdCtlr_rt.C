@@ -35,6 +35,8 @@
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
+#include <prdfCenMbaExtraSig.H>
+#include <prdfMemCaptureData.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTps.H>
@@ -241,152 +243,22 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
     } while (0);
 
-    return o_rc;
+    // Gather capture data even if something failed above.
+    collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
+    MemCaptureData::addEccData<T>( iv_chip, io_sc );
 
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template <>
-uint32_t MemTdCtlr<TYPE_MBA>::initialize()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::initialize] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
+    if ( SUCCESS != o_rc )
     {
-        if ( iv_initialized ) break; // nothing to do
+        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
 
-        // Add any unverified chip marks to the TD queue.
+        // Change signature indicating there was an error in analysis.
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_CmdComplete_ERROR );
 
-        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
-
-        for ( auto & entry : vectorList )
-        {
-            ExtensibleChip * mbaChip = entry.getChip();
-            MemRank rank = entry.getRank();
-
-            // Call readChipMark to get MemMark.
-            MemMark chipMark;
-            o_rc = MarkStore::readChipMark<TYPE_MBA>( mbaChip, rank, chipMark );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MBA>(0x%08x,%d) "
-                        "failed", mbaChip->getHuid(), rank.getMaster() );
-                break;
-            }
-
-            if ( !chipMark.isValid() ) continue; // no chip mark present
-
-            // Get the DQ Bitmap data.
-            TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
-            MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
-
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>(mbaTrgt, rank, dqBitmap);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MBA>"
-                        "(0x%08x, %d)", getHuid(mbaTrgt), rank.getMaster() );
-                break;
-            }
-
-            // Check if the chip mark is verified or not.
-            bool cmVerified = false;
-            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed." );
-                break;
-            }
-
-            // If the chip mark is unverified, add a VcmEvent to the TD queue
-            if ( !cmVerified )
-            {
-                TdEntry * vcmEntry = new VcmEvent<TYPE_MBA>( mbaChip, rank,
-                        chipMark );
-                iv_queue.push( vcmEntry );
-            }
-        }
-
-        // At this point, the TD controller is initialized.
-        iv_initialized = true;
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template <>
-uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
-{
-    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::initialize] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( iv_initialized ) break; // nothing to do
-
-        // Add any unverified chip marks to the TD queue.
-
-        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
-
-        for ( auto & entry : vectorList )
-        {
-            ExtensibleChip * mcaChip = entry.getChip();
-            MemRank rank = entry.getRank();
-
-            // Call readChipMark to get MemMark.
-            MemMark chipMark;
-            o_rc = MarkStore::readChipMark<TYPE_MCA>( mcaChip, rank, chipMark );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MCA>(0x%08x,%d) "
-                        "failed", mcaChip->getHuid(), rank.getMaster() );
-                break;
-            }
-
-            if ( !chipMark.isValid() ) continue; // no chip mark present
-
-            // Get the DQ Bitmap data.
-            TargetHandle_t mcaTrgt = mcaChip->GetChipHandle();
-            MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
-
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, rank, dqBitmap);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
-                        "(0x%08x, %d)", getHuid(mcaTrgt), rank.getMaster() );
-                break;
-            }
-
-            // Check if the chip mark is verified or not.
-            bool cmVerified = false;
-            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed." );
-                break;
-            }
-
-            // If the chip mark is unverified, add a VcmEvent to the TD queue
-            if ( !cmVerified )
-            {
-                TdEntry * vcmEntry = new VcmEvent<TYPE_MCA>( mcaChip, rank,
-                        chipMark );
-                iv_queue.push( vcmEntry );
-            }
-        }
-
-        // At this point, the TD controller is initialized.
-        iv_initialized = true;
-    }while(0);
-
+        // Something definitely failed, so callout 2nd level support.
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
+        io_sc.service_data->setServiceCall();
+    }
 
     return o_rc;
 
@@ -990,6 +862,179 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
             PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
             break;
         }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+SCAN_COMM_REGISTER_CLASS * __getEccFirAnd( ExtensibleChip * i_chip );
+
+template<>
+SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MCA>( ExtensibleChip * i_chip )
+{
+    return i_chip->getRegister( "MCAECCFIR_AND" );
+}
+
+template<>
+SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    ExtensibleChip * membChip = getConnectedParent( i_chip, TYPE_MEMBUF );
+    return membChip->getRegister( (0 == i_chip->getPos()) ? "MBSECCFIR_0_AND"
+                                                          : "MBSECCFIR_1_AND" );
+}
+
+template <TARGETING::TYPE TP, DIMMS_PER_RANK D, TARGETING::TYPE TC>
+uint32_t __findChipMarks( TdQueue & o_queue, TdRankList<TC> & i_rankList )
+{
+    #define PRDF_FUNC "[__findChipMarks] "
+
+    uint32_t o_rc = SUCCESS;
+
+    for ( auto & entry : i_rankList.getList() )
+    {
+        ExtensibleChip * chip = entry.getChip();
+        MemRank          rank = entry.getRank();
+
+        // Call readChipMark to get MemMark.
+        MemMark chipMark;
+        o_rc = MarkStore::readChipMark<TP>( chip, rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
+                      chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        if ( !chipMark.isValid() ) continue; // no chip mark present
+
+        // Get the DQ Bitmap data.
+        MemDqBitmap<D> dqBitmap;
+        o_rc = getBadDqBitmap( chip->getTrgt(), rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
+                      chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // Check if the chip mark is verified or not.
+        bool cmVerified = false;
+        o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark() failed on 0x%08x "
+                      "0x%02x", chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // If the chip mark is unverified, add a VcmEvent to the TD queue.
+        if ( !cmVerified )
+        {
+            // Chip mark is not present in VPD. Add it to queue.
+            o_queue.push( new VcmEvent<TP>(chip, rank, chipMark) );
+
+            // We will want to clear the MPE attention for the unverified chip
+            // mark so we don't get any redundant attentions for chip marks that
+            // are already in the queue. This is reset/reload safe because
+            // initialize() will be called again and we can redetect the
+            // unverified chip marks.
+            SCAN_COMM_REGISTER_CLASS * reg = __getEccFirAnd<TP>( chip );
+            reg->setAllBits();
+            reg->ClearBit(  0 + rank.getMaster() ); // fetch
+            reg->ClearBit( 20 + rank.getMaster() ); // scrub
+            o_rc = reg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on ECC FIR AND: 0x%08x",
+                          chip->getHuid() );
+                break;
+            }
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::initialize] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( iv_initialized ) break; // nothing to do
+
+        // Unmask the fetch attentions just in case there were masked during a
+        // TD procedure prior to a reset/reload.
+        o_rc = unmaskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+            break;
+        }
+
+        // Find all unverified chip marks.
+        o_rc = __findChipMarks<TYPE_MCA,DIMMS_PER_RANK::MCA>( iv_queue,
+                                                              iv_rankList );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // At this point, the TD controller is initialized.
+        iv_initialized = true;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t MemTdCtlr<TYPE_MBA>::initialize()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::initialize] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( iv_initialized ) break; // nothing to do
+
+        // Unmask the fetch attentions just in case there were masked during a
+        // TD procedure prior to a reset/reload.
+        o_rc = unmaskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+            break;
+        }
+
+        // Find all unverified chip marks.
+        o_rc = __findChipMarks<TYPE_MBA,DIMMS_PER_RANK::MBA>( iv_queue,
+                                                              iv_rankList );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // At this point, the TD controller is initialized.
+        iv_initialized = true;
 
     } while (0);
 
