@@ -33,6 +33,8 @@
 
 #include <secureboot/service.H>
 #include <errl/errluserdetails.H>
+#include <devicefw/driverif.H>
+#include "../node_comm/node_comm_dd.H"
 
 namespace SECUREBOOT
 {
@@ -221,6 +223,54 @@ class UdVerifyInfo : public ERRORLOG::ErrlUserDetails
      * Delete Move Assignment
      */
     UdVerifyInfo& operator = (UdVerifyInfo&&) = delete;
+};
+
+/**
+ * @class UdNodeCommInfo
+ *
+ * Adds information about the Node Communications Operation to an
+ * error log as user detail data
+ */
+class UdNodeCommInfo : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_opType       Operation Type
+     *  @param i_buflen       Length of In/Out Buffer
+     *  @param i_accessType   Access Type
+     *  @param i_args         Miscellaneous Parameters
+     */
+    UdNodeCommInfo(const uint8_t i_opType,
+                   const uint64_t i_buflen,
+                   const int64_t i_accessType,
+                   const NODECOMM::node_comm_args_t i_args  );
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdNodeCommInfo() {}
+
+    /**
+     * Delete Copy Constructor
+     */
+    UdNodeCommInfo(const UdNodeCommInfo&) = delete;
+
+    /**
+     * Delete Copy Assignment
+     */
+    UdNodeCommInfo& operator= (const UdNodeCommInfo&) = delete;
+
+    /**
+     * Delete Move Constructor
+     */
+    UdNodeCommInfo (UdNodeCommInfo&&) = delete;
+
+    /**
+     * Delete Move Assignment
+     */
+    UdNodeCommInfo& operator = (UdNodeCommInfo&&) = delete;
 };
 
 } // end SECUREBOOT namespace

@@ -47,6 +47,9 @@ namespace SECUREBOOT
 
                 registerParser<SECUREBOOT::UdParserVerifyInfo>
                   (SECURE_UDT_VERIFY_INFO);
+
+                registerParser<SECUREBOOT::UdParserNodeCommInfo>
+                  (SECURE_UDT_NODECOMM_INFO);
             }
 
         private:

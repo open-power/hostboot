@@ -34,6 +34,8 @@
 #include <securerom/ROM.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <devicefw/driverif.H>
+#include <secureboot/nodecommif.H>
 
 namespace SECUREBOOT
 {
@@ -43,6 +45,7 @@ namespace SECUREBOOT
 //------------------------------------------------------------------------------
 enum {
     PARSER_SIZEOF_SHA512_t           = 64,
+    PARSER_SIZEOF_UINT64_t           =  8,
     PARSER_SIZEOF_UINT32_t           =  4,
     PARSER_SIZEOF_UINT8_t            =  1,
     PARSER_SIZEOF_TARGET_HKH_SECTION = 69,
@@ -218,6 +221,79 @@ UdVerifyInfo::UdVerifyInfo(const char* i_compId,
     memcpy(l_pBuf,i_expectedHash, PARSER_SIZEOF_SHA512_t);
     l_pBuf+=PARSER_SIZEOF_SHA512_t;
 }
+
+
+//------------------------------------------------------------------------------
+//  SECURE Node Communications Info User Details
+//------------------------------------------------------------------------------
+UdNodeCommInfo::UdNodeCommInfo(const uint8_t i_opType,
+                   const uint64_t i_buflen,
+                   const int64_t i_accessType,
+                   const NODECOMM::node_comm_args_t i_args  )
+
+{
+    // Set up Ud instance variables
+    iv_CompId = SECURE_COMP_ID;
+    iv_Version = SECURE_UDT_VERSION_1;
+    iv_SubSection = SECURE_UDT_NODECOMM_INFO;
+
+    //***** Node Comm SECURE_UDT_VERSION_1 Memory Layout *****
+    // 4 bytes  : Target HUID
+    // 8 bytes  : Length of In/Out Buffer
+    // 8 bytes  : Access Type (DeviceFW::AccessType)
+    // 1 byte   : Op Type (DeviceFW::OperationType)
+    // 1 byte   : Mode (XBUS or ABUS)
+    // 1 byte   : LinkId
+    // 1 byte   : MboxId
+
+    static_assert(sizeof(uint64_t)==PARSER_SIZEOF_UINT64_t,
+                  "Expected sizeof(uint64_t) is 8");
+
+    // These are necessary to keep the parsing in errludP_secure.H correct
+    static_assert(DeviceFW::READ==0, "Expected opType READ == 0");
+    static_assert(DeviceFW::WRITE==1, "Expected opType WRITE == 1");
+    static_assert(SECUREBOOT::NODECOMM::NCDD_MODE_XBUS==0,
+                  "Expected NCDD_MODE_XBUS==0");
+    static_assert(SECUREBOOT::NODECOMM::NCDD_MODE_ABUS==1,
+                  "Expected NCDD_MODE_ABUS==1");
+
+    char * l_pBuf = reinterpret_cast<char *>(
+                          reallocUsrBuf(sizeof(uint32_t)
+                                        +sizeof(uint64_t)*2
+                                        +sizeof(uint8_t)*4 ) );
+    uint64_t tmp64 = 0;
+    uint32_t tmp32 = 0;
+    uint8_t tmp8 = 0;
+
+    tmp32 = i_args.tgt_huid;
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+
+    tmp64 = i_buflen;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp64 = i_accessType;
+    memcpy(l_pBuf, &tmp64, sizeof(tmp64));
+    l_pBuf += sizeof(tmp64);
+
+    tmp8 = i_opType;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = i_args.mode;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = i_args.linkId;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+    tmp8 = i_args.mboxId;
+    memcpy(l_pBuf, &tmp8, sizeof(tmp8));
+    l_pBuf += sizeof(tmp8);
+
+};
 
 } // end SECUREBOOT namespace
 

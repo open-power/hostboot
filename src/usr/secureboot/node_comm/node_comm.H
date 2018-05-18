@@ -72,8 +72,8 @@ enum node_comm_registers_t : uint64_t
     NCDD_REG_CTRL         =  0x501342E,
     NCDD_REG_DATA         =  0x501342F,
 
-   //MailBox Registers:
-   NCDD_REG_LINK_MBOX_00  =  0x5013430, //(secure)
+    //MailBox Registers:
+    NCDD_REG_LINK_MBOX_00  =  0x5013430, //(secure)
 
 /* These registers are calculated by getLinkMboxReg() below
    NCDD_REG_LINK_MBOX_01  =  0x5013431,
@@ -153,6 +153,19 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                            bool & o_attn_found,
                            uint64_t & o_linkId,
                            uint64_t & o_mboxId);
+
+/**
+ * @brief Add FFDC for the target to an error log
+ *
+ * @param[in] i_mode       Specifies XBUS or ABUS mode
+ * @param[in] i_pProc      Proc Chip Target used to collect info from
+ * @param[in,out] io_log   Error Log to add FFDC to
+ *
+ * @return void
+ */
+void getNodeCommFFDC(node_comm_modes_t   i_mode,
+                     TARGETING::Target*  i_pProc,
+                     errlHndl_t          &io_log);
 
 } // end NODECOMM namespace
 

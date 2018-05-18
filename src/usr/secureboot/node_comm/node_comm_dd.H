@@ -179,14 +179,13 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args);
  * @brief Analyzes an error handle object and performs any
  *        reset activity, if necessary
  *
- * @param[in] i_err - The error to analyze
- * @param[in] i_args - miscellaneous arguments
+ * @param[in/out] io_err - The error to analyze
+ * @param[in]     i_args - miscellaneous arguments
  *
  * @return void
  */
-// @TODO RTC:191008 Implement simple reset functionality
-void ncddHandleError( errlHndl_t & i_err,
-                      node_comm_args_t & i_args ){};
+void ncddHandleError( errlHndl_t & io_err,
+                      node_comm_args_t & i_args );
 
 
 /**
