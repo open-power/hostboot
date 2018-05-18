@@ -50,6 +50,7 @@
 ///      Clear CME flags and scratch registers as these will be setup
 ///          via CME booting during SGPE boot
 ///      Clear PPM Errors
+///      Clear Hcode Error Injection enable bits
 ///      Restore PPM Error mask value from HWP attribute
 ///    }
 ///  }
@@ -92,6 +93,7 @@
 #include <p9_ppe_defs.H>
 #include <p9_resclk_defines.H>
 #include <p9_pstates_cmeqm.h>
+#include <p9_pm_hcd_flags.h>
 #include <p9_pm_utils.H>
 
 // -----------------------------------------------------------------------------
@@ -339,6 +341,20 @@ fapi2::ReturnCode pm_corequad_init(
             l_address = C_CPPM_ERR;
             FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
                      "ERROR: Failed to clear CORE PPM ERROR");
+
+            FAPI_INF("Clearing Hcode Error Injection and other CSAR settings ...");
+            // *INDENT-OFF*
+            l_data64.flush<0>()
+                    .setBit<p9hcd::CPPM_CSAR_FIT_HCODE_ERROR_INJECT>()
+                    .setBit<p9hcd::CPPM_CSAR_ENABLE_PSTATE_REGISTRATION_INTERLOCK>()
+                    .setBit<p9hcd::CPPM_CSAR_PSTATE_HCODE_ERROR_INJECT>()
+                    .setBit<p9hcd::CPPM_CSAR_STOP_HCODE_ERROR_INJECT>();
+            // Note:  CPPM_CSAR_DISABLE_CME_NACK_ON_PROLONGED_DROOP is NOT
+            //        cleared as this is a persistent, characterization setting
+            // *INDENT-ON*
+            l_address =  C_CPPM_CSAR_CLEAR;
+            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_data64),
+                     "ERROR: Failed to clear the CSAR register");
 
             // Restore CORE PPM Error Mask
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_PPM_ERRMASK,
