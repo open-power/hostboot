@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,6 +127,10 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
     // Load RC09
     FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, io_inst, CKE_HIGH),
               "Failed to load 4-bit RC09 control word for %s",
+              mss::c_str(i_target));
+
+    // Toggle RC06 again to ensure the DRAM is reset properly
+    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, io_inst), "%s failed to add reset workaround functionality",
               mss::c_str(i_target));
 
 fapi_try_exit:
