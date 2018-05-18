@@ -62,9 +62,8 @@ fapi2::ReturnCode rcw_reset_dram( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     constexpr uint64_t RESET_CW = 6;
     constexpr uint64_t RESET_DRAM = 0x02;
     constexpr uint64_t CLEAR_RESET = 0x03;
-    // Using a delay of 2000 cycles to ensure we're holding everything for a long enough time
-    // Note: this value is set using "engineering judgement" and was considered arbitrarily high enough
-    constexpr uint64_t DELAY = 2000;
+    // Note: the minimum for a FORC06 soft reset is 32 cycles, but we empirically tested it at 8k cycles
+    constexpr uint64_t DELAY = 8000;
     // Function space 0
     constexpr uint8_t FS0 = 0;
 
