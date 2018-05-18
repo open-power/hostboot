@@ -5320,7 +5320,6 @@
         <default>0</default>
       </uint8_t>
     </simpleType>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -6147,7 +6146,7 @@
             A lane set mask indicates which groups of lanes are assigned to an
             IOP.  For instance, lane set 0 value of 0xFFFF and lane set 1 value
             of 0x0000 for PEC0 means PEC0 is a x16. Lane set 0 value of 0xFF00
-            and lane set 1 value of 0x00FF for PEC0, means the IOP is bifurcated
+            and lane set 2 value of 0x00FF for PEC0, means the IOP is bifurcated
             into two x8s.
     </description>
     <id>PROC_PCIE_LANE_MASK</id>

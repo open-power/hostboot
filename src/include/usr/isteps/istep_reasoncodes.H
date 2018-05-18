@@ -64,6 +64,7 @@ namespace ISTEP
         MOD_FREQ_ATTR_DATA                                = 0x21,
         MOD_SMP_WRAP_PROC_IOVALID                         = 0x22,
         MOD_APPLY_HCODE_GEN_CPU_REGS                      = 0x23,
+        MOD_GET_LANEMASK_FROM_HX_KEYWORD                  = 0x24,
     };
 
     /**
@@ -133,6 +134,7 @@ namespace ISTEP
         RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL       = ISTEP_COMP_ID | 0x49,
         RC_LINK_TRAIN_ERRORS_FROM_HWP            = ISTEP_COMP_ID | 0x4A,
         RC_RISK_LEVEL_TOO_LOW                    = ISTEP_COMP_ID | 0x4B,
+        RC_INVALID_HX_KEYWORD_DATA               = ISTEP_COMP_ID | 0x4C,
     };
 
 };

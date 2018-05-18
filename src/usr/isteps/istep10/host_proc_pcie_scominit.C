@@ -26,10 +26,12 @@
 // Includes
 /******************************************************************************/
 #include <stdint.h>
+#include <map>
 
 #include <trace/interface.H>
 #include <initservice/taskargs.H>
 #include <errl/errlentry.H>
+#include <errl/errludattribute.H>
 #include <isteps/hwpisteperror.H>
 #include <errl/errludtarget.H>
 #include <initservice/isteps_trace.H>
@@ -55,6 +57,31 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+
+// Maps the iop number to a mask which indicates which
+// PHB numbers are valid for the given PEC
+std::vector<uint8_t> allowablePHBsforPEC =
+{
+    static_cast<uint8_t>(PHB0_MASK), //PEC0
+    (PHB1_MASK|PHB2_MASK),           //PEC1
+    (PHB3_MASK|PHB4_MASK|PHB5_MASK)  //PEC2
+};
+
+//HX keyword data format
+typedef struct {
+    uint8_t lane_enabled:1; // if set to 1, then this lane is assiged
+                            // to the device (phb) number defined by the
+                            // next 3 bits
+    uint8_t deviceId:3;     // phb number
+    uint8_t reserve:4;
+}LaneEntry_t;
+
+typedef struct {
+    uint8_t version;
+    uint8_t laneSetCount;  // how many lane set definitions
+    LaneEntry_t laneEntry[7];
+}hxKeywordData;
+
 
 //******************************************************************************
 // Local logical equality operator for matching lane configuration rows
@@ -243,6 +270,7 @@ errlHndl_t _queryIopsToBifurcateAndPhbsToDisable(
 
 #endif
 
+
 /******************************************************************
 * compareChipUnits
 *
@@ -261,12 +289,285 @@ bool compareChipUnits(TARGETING::Target *l_t1,
     return l_result;
 }
 
+enum hxKeywordRc
+{
+   KEYWORD_VALID   = 0,
+   KEYWORD_NOT_SET,
+   VERSION_NOT_SUPPORTED,
+   TOO_MANY_LANE_SETS,
+   INVALID_DEVICE_NUMBER
+};
+
+// parse the hx keyword data into a useable lane mask
+hxKeywordRc getLaneMaskFromHxKeyword( ATTR_PEC_PCIE_HX_KEYWORD_DATA_type &i_kw,
+                                     ATTR_PROC_PCIE_LANE_MASK_type& o_laneMask,
+                                     uint8_t i_pec_num)
+{
+
+    size_t l_keywordSize =
+        sizeof(ATTR_PEC_PCIE_HX_KEYWORD_DATA_type);
+
+    hxKeywordRc l_rc = KEYWORD_VALID;
+
+    hxKeywordData l_keyword = {0};
+
+    memcpy (&l_keyword, i_kw, l_keywordSize);
+
+
+    do
+    {
+        // Version 0 means HX Keyword is not set, so use defaults
+        // This is the most likely case
+        if( l_keyword.version == 0 )
+        {
+            l_rc = KEYWORD_NOT_SET;
+            break;
+        }
+
+        // Currently only version 1 is defined for firmware support
+        if( l_keyword.version != 1 )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "HX keyword version %d is not supported yet, "
+                "using default lane mask", l_keyword.version );
+            l_rc = VERSION_NOT_SUPPORTED;
+            break;
+        }
+
+
+        // Even though the HW supports x4 bifurcation on PEC2 (using 3rd lane),
+        // our firmware supported HX keyword version only allows for x8 bifurcation.
+        // version 1 of the HX keyword spec defines a set of lanes as x8 so
+        // we need to make sure that we don't have more than 2 sets of lanes
+        // defined per PEC
+        if( l_keyword.laneSetCount > 2)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "HX keyword has too many lane sets (%d) defined for this PEC",
+                l_keyword.laneSetCount);
+            l_rc = TOO_MANY_LANE_SETS;
+            break;
+        }
+
+        // get a mask to indicate which PHB numbers are supported in this PEC
+        assert((i_pec_num < allowablePHBsforPEC.size()),
+            "getLaneMaskFromHxKeyword: i_pec_num is over maximum");
+
+        uint8_t validPhbMask = allowablePHBsforPEC[i_pec_num];
+
+        uint8_t l_deviceID = 0xFF;
+
+        for (auto x = 0; x < l_keyword.laneSetCount; ++x)
+        {
+            if (l_keyword.laneEntry[x].lane_enabled)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "lane set %d assigned to PHB%d",
+                        x, l_keyword.laneEntry[x].deviceId);
+
+                if (l_keyword.laneEntry[x].deviceId != l_deviceID)
+                {
+                    l_deviceID = l_keyword.laneEntry[x].deviceId;
+
+                    if( x == 0 )
+                    {
+                        // initial setting for this new device
+                        o_laneMask[0] = LANE_MASK_X8_GRP0;
+                    }
+                    else
+                    {
+                        // x8 bifurcation uses lanes 0 & 2
+                        o_laneMask[2] = LANE_MASK_X8_GRP1;
+                    }
+                }
+                else
+                {
+                    // two adjacent lane masks assigned to
+                    // the same device id makes a x16 device
+                    o_laneMask[0] = LANE_MASK_X16;
+                }
+
+                // sniff test the device id to see if its valid for this PEC
+                uint8_t mask = static_cast<uint8_t>(PHB0_MASK) >> l_deviceID;
+
+                if( (mask & validPhbMask) == 0 )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "HX keyword defined deviceId %d which "
+                            "is not valid for PEC%d - using default lane mask",
+                            l_keyword.laneEntry[x].deviceId, i_pec_num);
+
+                    l_rc = INVALID_DEVICE_NUMBER;
+                    break;
+                }
+            }
+        }
+    }while(0);
+    return l_rc;
+}
+
+errlHndl_t createElogFromHxKeywordRc( hxKeywordRc i_rc,
+        TARGETING::ConstTargetHandle_t const  i_pecTarget,
+        ATTR_PEC_PCIE_HX_KEYWORD_DATA_type i_hxKeywordData )
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Failed to parse the HX keyword RC=%d for %.8X PEC target",
+            static_cast<uint32_t>(i_rc), TARGETING::get_huid(i_pecTarget) );
+
+    // fit as much of the hx keyword data into the userdata2 field
+    uint64_t hxKwdData = 0;
+
+    // make sure we don't access beyond the boundary of i_hxKeywordData
+    // when copying to hxKwdData variable
+    static_assert((sizeof(i_hxKeywordData) >= sizeof(hxKwdData)),
+        "createElogFromHxKeywordRc: sizeof(i_hxKeywordData) is less than hxKwdData size");
+    memcpy(&hxKwdData, i_hxKeywordData, sizeof(hxKwdData));
+
+    /*@
+     * @errortype
+     * @moduleid         MOD_GET_LANEMASK_FROM_HX_KEYWORD
+     * @reasoncode       RC_INVALID_HX_KEYWORD_DATA
+     * @userdata1[0:31]  Return code value from parseHxKeyword
+     * @userdata1[32:63] PEC target HUID
+     * @userdata2        HX keyword data
+     * @devdesc          The HX keyword data found in the
+     *                   vpd is invalid. See Userdata for specific
+     *                   reason.
+     *
+     * @custdesc         A problem isolated to firmware or firmware
+     *                   customization occurred during the IPL of
+     *                   the system.
+     */
+    errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              MOD_GET_LANEMASK_FROM_HX_KEYWORD,
+                              RC_INVALID_HX_KEYWORD_DATA,
+                              TWO_UINT32_TO_UINT64( i_rc,
+                                TARGETING::get_huid(i_pecTarget) ),
+                              hxKwdData);
+
+    l_pError->addPartCallout(i_pecTarget,
+                             HWAS::VPD_PART_TYPE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+
+    l_pError->addHwCallout(i_pecTarget,
+                           HWAS::SRCI_PRIORITY_LOW,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL);
+
+    ERRORLOG::ErrlUserDetailsTarget(i_pecTarget).addToLog(l_pError);
+
+    ERRORLOG::ErrlUserDetailsAttribute(i_pecTarget,
+        ATTR_PEC_PCIE_HX_KEYWORD_DATA).addToLog(l_pError);
+
+    l_pError->collectTrace(ISTEP_COMP_NAME);
+
+    return l_pError;
+}
+/*******************************************************************
+ * calculateEffectiveLaneMask
+ *
+ * Use the data from the HX keyword to calculate the effective lane mask
+ * if the HX keyword is empty, or invalid use the default lane mask from
+ * mrw.
+ *****************************************************************/
+errlHndl_t calculateEffectiveLaneMask(
+        TARGETING::ConstTargetHandle_t const  i_pecTarget,
+        TARGETING::ATTR_PROC_PCIE_LANE_MASK_type& o_effectiveLaneMask)
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            ENTER_MRK "calculateEffectiveLaneMask: PEC target "
+            "HUID = 0x%08X.", i_pecTarget ?
+            i_pecTarget->getAttr<TARGETING::ATTR_HUID>() : 0);
+
+    errlHndl_t pError = nullptr;
+
+    do {
+        // the most likely case is to use the default, we will overwrite it
+        // it later if we get good data from the hx keyword
+        assert(i_pecTarget->tryGetAttr<
+                TARGETING::ATTR_PROC_PCIE_LANE_MASK>(o_effectiveLaneMask),
+                "Failed to get ATTR_PROC_PCIE_LANE_MASK attribute");
+
+        if( !(i_pecTarget->getAttr<TARGETING::ATTR_PEC_IS_BIFURCATABLE>()) )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "PHB is not bifurcatable skip reading HX keyword");
+            break;
+        }
+
+        ATTR_PEC_PCIE_HX_KEYWORD_DATA_type l_hxKeywordData  = {0};
+
+        // grab the HX keyword from the PEC target
+        assert(i_pecTarget->tryGetAttr
+                    <ATTR_PEC_PCIE_HX_KEYWORD_DATA>(l_hxKeywordData),
+                    "HX keyword not found for PEC target");
+
+        TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                "HX keyword data:",l_hxKeywordData,sizeof(l_hxKeywordData));
+
+        ATTR_PROC_PCIE_LANE_MASK_type l_laneMask = {0};
+
+        // need the PEC number to validate the keyword contents
+        uint8_t pec_num = i_pecTarget->getAttr<ATTR_CHIP_UNIT>();
+
+        // parse and validate the keyword data for this pec
+        hxKeywordRc l_rc = getLaneMaskFromHxKeyword(
+                                                l_hxKeywordData,
+                                                l_laneMask,
+                                                pec_num);
+
+        if( l_rc == KEYWORD_VALID )
+        {
+            // overwrite the default mask we setup earlier
+            memcpy(o_effectiveLaneMask,l_laneMask,sizeof(l_laneMask));
+        }
+        else if (l_rc == KEYWORD_NOT_SET )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "HX keyword is not set, using default lane mask");
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "ERR>>calculateEffectiveLaneMask()> "
+            "an error occurred while parsing the HX keyword, return "
+            "the error and use default lane mask");
+            // create an elog from the rc here
+            pError = createElogFromHxKeywordRc(l_rc,
+                                               i_pecTarget,
+                                               l_hxKeywordData);
+        }
+
+    } while(0);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "INF>>calculateEffectiveLaneMask()> "
+            "PEC: 0x%08X",
+            TARGETING::get_huid(i_pecTarget));
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "     Lane set 0: Lane mask = 0x%04X ",
+            o_effectiveLaneMask[0]);
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "     Lane set 1: Lane mask = 0x%04X ",
+            o_effectiveLaneMask[1]);
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "     Lane set 2: Lane mask = 0x%04X ",
+            o_effectiveLaneMask[2]);
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "     Lane set 3: Lane mask = 0x%04X ",
+            o_effectiveLaneMask[3]);;
+
+    return pError;
+}
+
+
 /******************************************************************
-* setup_pcie_iovalid_enable
-*
-* Setup ATTR_PROC_PCIE_IOVALID_ENABLE on i_procTarget's PEC children
-*
-*******************************************************************/
+ * setup_pcie_iovalid_enable
+ *
+ * Setup ATTR_PROC_PCIE_IOVALID_ENABLE on i_procTarget's PEC children
+ *
+ *******************************************************************/
 void setup_pcie_iovalid_enable(const TARGETING::Target * i_procTarget)
 {
     // Get list of PEC chiplets downstream from the given proc chip
@@ -441,9 +742,9 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
         (  sizeof(pec2_laneConfigTable)
          / sizeof(pec2_laneConfigTable[0]));
 
-    errlHndl_t pError = NULL;
-    const laneConfigRow* pLaneConfigTableBegin = NULL;
-    const laneConfigRow* pLaneConfigTableEnd = NULL;
+    errlHndl_t pError = nullptr;
+    const laneConfigRow* pLaneConfigTableBegin = nullptr;
+    const laneConfigRow* pLaneConfigTableEnd = nullptr;
     TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type procPhbActiveMask = 0;
 
     do
@@ -541,17 +842,18 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             TARGETING::ATTR_PROC_PCIE_LANE_MASK_type
               effectiveLaneMask = {0};
 
-            TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_type
-              effectiveLaneReversal = {0};
-
-            TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
-              effectiveLaneSwap = 0;
-
-            // Only attempt to determine the lane config on FSPless systems
-            // On FSP based systems it has already been determined
+            //Only attempt to determine the lane config on FSP-less systems
+            //On FSP based systems it has already been determined
             if (!INITSERVICE::spBaseServicesEnabled())
             {
 #if CONFIG_DYNAMIC_BIFURCATION
+                TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL_type
+                    effectiveLaneReversal = {0};
+
+                TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
+                    effectiveLaneSwap = 0;
+
+
                 // Figure out which IOPs need bifurcation, and as a
                 // result, which PHBs to disable
                 bool iopBifurcate = false;
@@ -559,7 +861,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                                                                l_pec,
                                                                iopBifurcate,
                                                                disabledPhbs);
-                if(pError!=NULL)
+                if(pError!=nullptr)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                               ERR_MRK "computeProcPcieConfigAttrs> "
@@ -632,20 +934,18 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             }
             else // FSP based
             {
-                assert(l_pec->tryGetAttr<
-                       TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask),
-                       "Failed to get ATTR_PROC_PCIE_LANE_MASK attribute");
+                // PROC_IOP_SWAP defined/set in mrw and is the same
+                // for bifurcated and non-bifurcated lane masks
+                // so we just need to figure out what the lane mask
+                // would be and let the existing function fill in the rest
+                // of the interesting attributes.
+                pError = calculateEffectiveLaneMask(l_pec,effectiveLaneMask);
 
-                // While we aren't using the attribute in this function, we
-                // should still make sure swap and reversal are set
-                assert(l_pec->tryGetAttr<
-                       TARGETING::ATTR_PROC_PCIE_IOP_SWAP>(effectiveLaneSwap),
-                       "Failed to get ATTR_PROC_PCIE_IOP_SWAP attribute");
-
-                assert(l_pec->tryGetAttr<
-                       TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>
-                       (effectiveLaneReversal),
-                       "Failed to get ATTR_PEC_PCIE_IOP_REVERSAL attribute");
+                //If there was an error, commit it as unrecoverable and move on
+                if (pError != nullptr)
+                {
+                  errlCommit(pError,ISTEP_COMP_ID);
+                }
             }
 
             TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type pecPhbActiveMask = 0;
@@ -689,9 +989,16 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                 // trace something out just so someone knows.
                 if(pecPhbActiveMask == PHB_MASK_NA)
                 {
-                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Valid "
-                     "configuration found for PEC 0x%08X, but no PHBs behind "
-                     "it wil be functional", l_pecID);
+                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Valid configuration found for PEC%d, but no PHBs behind "
+                     "it will be functional", l_pecID);
+                }
+                else
+                {
+                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Valid configuration found for PEC%d, "
+                     "pecPhbActiveMask = 0x%x", l_pecID, pecPhbActiveMask);
+
                 }
 
                 // Disable applicable PHBs
@@ -702,7 +1009,7 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     ERR_MRK "computeProcPcieConfigAttrs> "
                     "Code bug! PEC PCIE IOP configuration not found. "
-                    "Continuing with no PHBs active on PEC 0x%08X. "
+                    "Continuing with no PHBs active on PEC%d. "
                     "Lane set 0: Lane mask = 0x%04X "
                     "Lane set 1: Lane mask = 0x%04X "
                     "Lane set 2: Lane mask = 0x%04X "
