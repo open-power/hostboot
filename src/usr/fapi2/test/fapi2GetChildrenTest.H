@@ -911,6 +911,8 @@ void test_fapi2getChildTargetsForCDG()
     TARGETING::Target * l_cumulusProc = nullptr;
     TARGETING::Target * l_proc = nullptr;
     size_t l_expectedDimms = 0;
+    size_t l_expectedDimmsUnderPort0 = 0;
+    size_t l_expectedDimmsUnderPort1 = 0;
     do
     {
         FAPI_DBG("start of test_fapi2getChildTargetsForCDG()");
@@ -929,12 +931,16 @@ void test_fapi2getChildTargetsForCDG()
         {
             l_proc = l_nimbusProc;
             l_expectedDimms = 16;
-
+            l_expectedDimmsUnderPort0 = l_expectedDimms;
+            l_expectedDimmsUnderPort1 = 0;
         }
         else if (l_cumulusProc != nullptr)
         {
             l_proc = l_cumulusProc;
             l_expectedDimms = 8;
+            l_expectedDimmsUnderPort0 = l_expectedDimms/2;
+            l_expectedDimmsUnderPort1 = l_expectedDimms/2;
+
         }
         else //both are nullptr
         {
@@ -973,10 +979,11 @@ void test_fapi2getChildTargetsForCDG()
         FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 0 is %d",
                 TARGETING::get_huid(l_proc),l_dimmList.size());
         numTests++;
-        if(l_dimmList.size() != l_expectedDimms)
+
+        if(l_dimmList.size() != l_expectedDimmsUnderPort0)
         {
             FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 0 not equal expected %d",
-                    l_dimmList.size(),l_expectedDimms);
+                    l_dimmList.size(),l_expectedDimmsUnderPort0);
             numFails++;
         }
 
@@ -989,10 +996,11 @@ void test_fapi2getChildTargetsForCDG()
         FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X port 1 is %d",
                 TARGETING::get_huid(l_proc),l_dimmList.size());
         numTests++;
-        if(l_dimmList.size() != 0)
+
+        if(l_dimmList.size() != l_expectedDimmsUnderPort1)
         {
             FAPI_ERR("test_fapi2getChildTargetsForCDG: Dimm count %d under port 1 not equal expected %d",
-                    l_dimmList.size(),0);
+                    l_dimmList.size(),l_expectedDimmsUnderPort1);
             numFails++;
         }
 
