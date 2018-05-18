@@ -2212,39 +2212,37 @@ sub processMembufVpdAssociation
 ## Finds I2C connections to DIMM and creates EEPROM attributes
 ## FYI:  I had to handle DMI busses in framework because they
 ## define affinity path
-#@TODO RTC:163874 -- centaur support
 sub processMembuf
 {
     my $targetObj = shift;
-    my $target    = shift;
-    if ($targetObj->isBadAttribute($target, "PHYS_PATH", ""))
+    my $membufTarg    = shift;
+    if ($targetObj->isBadAttribute($membufTarg, "PHYS_PATH", ""))
     {
         ##dmi is probably not connected.  will get caught in error checking
         return;
     }
 
-    processMembufVpdAssociation($targetObj,$target);
+    processMembufVpdAssociation($targetObj,$membufTarg);
 
     ## find port mapping
     my %dimm_portmap;
-    foreach my $child (@{$targetObj->getTargetChildren($target)})
+    foreach my $child (@{$targetObj->getTargetChildren($membufTarg)})
     {
          if ($targetObj->getType($child) eq "MBA")
          {
+             # find this MBA's position relative to the membuf
              my $mba_num = $targetObj->getAttribute($child,"MBA_NUM");
-             my $dimms=$targetObj->findConnections($child,"DDR4","");
+             # follow the DDR4 bus connection to find the 'ddr' targets
+             my $ddrs = $targetObj->findConnections($child,"DDR4","");
 
-             if ($dimms ne "")
+             if ($ddrs ne "")
              {
-                 foreach my $dimm (@{$dimms->{CONN}})
+                 foreach my $ddr (@{$ddrs->{CONN}})
                  {
-                       my $port_num = $targetObj->getAttribute(
-                                     $dimm->{SOURCE},"MBA_PORT");
-                       my $dimm_num = $targetObj->getAttribute(
-                                     $dimm->{SOURCE},"MBA_DIMM");
-
+                       my $port_num = $targetObj->getDimmPort($ddr->{SOURCE});
+                       my $dimm_num = $targetObj->getDimmPos($ddr->{SOURCE});
                        my $map = oct("0b".$mba_num.$port_num.$dimm_num);
-                       $dimm_portmap{$dimm->{DEST_PARENT}} = $map;
+                       $dimm_portmap{$ddr->{DEST_PARENT}} = $map;
                  }
              }
          }
@@ -2253,7 +2251,7 @@ sub processMembuf
 
     ## Process MEMBUF to DIMM I2C connections
     my @addr_map=('0','0','0','0','0','0','0','0');
-    my $dimms=$targetObj->findConnections($target,"I2C","SPD");
+    my $dimms=$targetObj->findConnections($membufTarg,"I2C","SPD");
     if ($dimms ne "") {
         foreach my $dimm (@{$dimms->{CONN}}) {
             my $dimm_target = $targetObj->getTargetParent($dimm->{DEST_PARENT});
@@ -2271,32 +2269,13 @@ sub processMembuf
             $addr_map[$map] = $field;
         }
     }
-    $targetObj->setAttribute($target,
+    $targetObj->setAttribute($membufTarg,
             "MRW_MEM_SENSOR_CACHE_ADDR_MAP","0x".join("",@addr_map));
 
     ## Update bus speeds
-    processI2cSpeeds($targetObj,$target);
+    processI2cSpeeds($targetObj,$membufTarg);
 
-    ## Do MBA port mapping
-    my %mba_port_map;
-    #@TODO RTC:175881 -- Support DDR3 DIMMs on Fleetwood systems
-    my $ddrs=$targetObj->findConnections($target,"DDR4","DIMM");
-    if ($ddrs ne "") {
-        my %portmap;
-        foreach my $ddr (@{$ddrs->{CONN}}) {
-            my $mba=$ddr->{SOURCE};
-            my $dimm=$ddr->{DEST_PARENT};
-            my ($dimmnum,$port)=split(//,sprintf("%02b\n",$portmap{$mba}));
-            $targetObj->setAttribute($dimm, "MBA_DIMM",$dimmnum);
-            $targetObj->setAttribute($dimm, "MBA_PORT",$port);
-            $portmap{$mba}++;
-
-            ## Copy connector attributes
-            my $dimmconn=$targetObj->getTargetParent($dimm);
-        }
-    }
-
-    processPowerRails($targetObj, $target);
+    processPowerRails($targetObj, $membufTarg);
 }
 
 sub getI2cMapField

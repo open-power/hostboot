@@ -523,8 +523,10 @@
     <id>FRU_ID</id>
   </attribute>
   <attribute><id>REL_POS</id></attribute>
-  <attribute><id>MBA_PORT</id></attribute>
-  <attribute><id>MBA_DIMM</id></attribute>
+  <attribute><id>MBA_PORT</id></attribute><!-- deprecated -->
+  <attribute><id>MEM_PORT</id></attribute>
+  <attribute><id>MBA_DIMM</id></attribute><!-- deprecated -->
+  <attribute><id>POS_ON_MEM_PORT</id></attribute>
 </targetType>
 
 <targetType>

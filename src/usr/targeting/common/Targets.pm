@@ -48,9 +48,10 @@ use constant
     NUM_PROCS_PER_GROUP => 4,
     DIMMS_PER_PROC => 64,  # Cumulus
     DIMMS_PER_DMI => 8,    # Cumulus
-    DIMMS_PER_MBAPORT => 4,# Cumulus
+    DIMMS_PER_MBA => 4,# Cumulus
     MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
     MBA_PER_MEMBUF => 2,
+    MAX_DIMMS_PER_MBA_PORT => 2,
 
 };
 
@@ -761,7 +762,7 @@ sub buildAffinity
         elsif ($type eq "MCA")
         {
             my $ddrs = $self->findConnections($target,"DDR4","");
-            $self->processDimms($ddrs, $sys_pos, $node_phys, $node, $proc);
+            $self->processMcaDimms($ddrs, $sys_pos, $node_phys, $node, $proc);
         }
 
         elsif ($type eq "PROC")
@@ -1335,7 +1336,7 @@ sub getPervasiveForUnit
 
     return $pervasive
 }
-sub processDimms
+sub processMcaDimms
 {
     my $self        = shift;
     my $ddrs        = shift;
@@ -1351,8 +1352,6 @@ sub processDimms
         foreach my $dimms (@{$ddrs->{CONN}})
         {
             my $ddr = $dimms->{SOURCE};
-            my $port_num = $self->getAttribute($ddr,"MBA_PORT");
-            my $dimm_num = $self->getAttribute($ddr,"MBA_DIMM");
             my $dimm=$dimms->{DEST_PARENT};
 
             #proc->mcbist->mcs->mca->ddr
@@ -1370,9 +1369,43 @@ sub processDimms
             my $mcbist  = $self->getAttribute($mcbist_target,    "CHIP_UNIT");
             my $dimm_pos= $self->getAttribute($dimm_connector_tgt,"POSITION");
 
+            #The port/dimm attributes have been swizzled too many times and
+            # now they no longer make sense.  Until everyone is on the same
+            # page we will replicate everything as needed.
+            my $dimm_num = 0;
+            my $port_num = 0; # MCA only has 1 port
+
+            # Eventually we will converge on a generic name for all
+            #  configurations that the MRW will use.
+            if( !$self->isBadAttribute($ddr, "POS_ON_MEM_PORT") )
+            {
+                $dimm_num = $self->getAttribute($ddr,"POS_ON_MEM_PORT");
+            }
+            # Legacy OP systems are using MBA_PORT to represent the dimm
+            #  position within the port, going to remap that to keep that
+            #  support in place.
+            elsif( !$self->isBadAttribute($ddr, "MBA_PORT") )
+            {
+                $dimm_num = $self->getAttribute($ddr,"MBA_PORT");
+            }
+            else
+            {
+                print "ERROR: No port specified for dimm $ddr\n";
+                $self->myExit(4);
+            }
+
+            # Write out all the attributes that someone might still be using
+            $self->setAttribute($dimm, "CEN_MBA_PORT",$port_num); #unused
+            $self->setAttribute($dimm, "MBA_PORT",$port_num); #legacy
+            $self->setAttribute($dimm, "MEM_PORT",$port_num); #converged
+            $self->setAttribute($dimm, "CEN_MBA_DIMM",$dimm_num); #unused
+            $self->setAttribute($dimm, "MBA_DIMM",$dimm_num); #legacy
+            $self->setAttribute($dimm, "POS_ON_MEM_PORT",$dimm_num); #converged
+
+
             $self->setAttribute($dimm, "AFFINITY_PATH",
                 $self->getAttribute($mcbist_target, "AFFINITY_PATH")
-             . "/mcs-$mcs/mca-$mca/dimm-$port_num"
+             . "/mcs-$mcs/mca-$mca/dimm-$dimm_num"
             );
 
             $self->setAttribute($dimm, "PHYS_PATH",
@@ -1383,8 +1416,6 @@ sub processDimms
             $self->setAttribute($dimm, "POSITION",  $dimm_pos);
             $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
             $self->setAttribute($dimm, "REL_POS", $port_num);
-            $self->setAttribute($dimm, "MBA_DIMM", $port_num); #which dimm
-            $self->setAttribute($dimm, "MBA_PORT", 0);  #0, each MCA is a port
             $self->setAttribute($dimm, "LOCATION_CODE",$loc_code);
 
             ## set all FAPI_POS
@@ -1583,7 +1614,7 @@ sub processMc
                                 $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
                                 $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
 
-                                $self->setAttribute($membuf_child, "REL_POS", $mba_offset);
+                                $self->setAttribute($membuf_child, "REL_POS", $mba);
                                 $self->setAttribute($membuf_child, "POSITION", $mba_offset);
 
                                 $self->setHuid($membuf_child, $sys, $node);
@@ -1603,43 +1634,37 @@ sub processMc
                                     foreach my $dimms (@{$ddrs->{CONN}})
                                     {
                                         my $ddr = $dimms->{SOURCE};
-                                        my $port_num = $self->getAttribute($ddr,"MBA_PORT");
-                                        my $dimm_num = $self->getAttribute($ddr,"MBA_DIMM");
                                         my $dimm=$dimms->{DEST_PARENT};
-                                        $self->setAttribute($dimm,"MBA_PORT",$port_num);
-                                        $self->setAttribute($dimm,"MBA_DIMM",$dimm_num);
                                         $self->setAttribute($dimm,"CLASS","LOGICAL_CARD");
 
-                                        #Centaur/Membufs use CEN_MBA_PORT and not MBA_PORT
-                                        #For now, support both.
-                                        if (!$self->isBadAttribute($ddr, "CEN_MBA_PORT"))
-                                        {
-                                            $port_num = $self->getAttribute($ddr,"CEN_MBA_PORT");
-                                        }
+                                        #We will converge on POS_ON_MEM_PORT/MEM_PORT eventually, but
+                                        # we are leaving in support for everything for now
+                                        my $port_num = getDimmPort( $self, $ddr );
+                                        $self->setAttribute($dimm, "CEN_MBA_PORT",$port_num); #hwp
+                                        $self->setAttribute($dimm, "MBA_PORT",$port_num); #legacy
+                                        $self->setAttribute($dimm, "MEM_PORT",$port_num); #converged
 
-                                        if (!$self->isBadAttribute($ddr, "CEN_MBA_DIMM"))
-                                        {
-                                            $dimm_num = $self->getAttribute($ddr,"CEN_MBA_DIMM");
-                                        }
+                                        my $dimm_num = getDimmPos( $self, $ddr );
+                                        $self->setAttribute($dimm, "CEN_MBA_DIMM",$dimm_num); #hwp
+                                        $self->setAttribute($dimm, "MBA_DIMM",$dimm_num); #legacy
+                                        $self->setAttribute($dimm, "POS_ON_MEM_PORT",$dimm_num); #converged
 
-                                        $self->setAttribute($dimm,"CEN_MBA_PORT",$port_num);
-                                        $self->setAttribute($dimm,"CEN_MBA_DIMM",$dimm_num);
 
                                         my $aff_pos = DIMMS_PER_PROC*$proc+
                                                       DIMMS_PER_DMI*$dmi_num+
-                                                      DIMMS_PER_MBAPORT*$mba+
-                                                      $port_num + 2*$dimm_num;
+                                                      DIMMS_PER_MBA*$mba+
+                                                      MAX_DIMMS_PER_MBA_PORT*$port_num + $dimm_num;
                                         my $fapi_pos =
                                          (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
                                           DIMMS_PER_DMI*$dmi_num+
-                                          DIMMS_PER_MBAPORT*$mba+
-                                          $port_num  + 2*$dimm_num;
+                                          DIMMS_PER_MBA*$mba+
+                                          MAX_DIMMS_PER_MBA_PORT*$port_num  + $dimm_num;
 
                                         #unique offset per system
                                         my $dimm_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
                                                       DIMMS_PER_DMI*$dmi_num+
-                                                      DIMMS_PER_MBAPORT*$mba+
-                                                      $port_num  + 2*$dimm_num;
+                                                      DIMMS_PER_MBA*$mba+
+                                                      MAX_DIMMS_PER_MBA_PORT*$port_num + $dimm_num;
 
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
                                                   $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
@@ -1658,7 +1683,9 @@ sub processMc
 
                                         $self->setAttribute($dimm, "POSITION", $aff_pos);
 
-                                        $self->setAttribute($dimm, "REL_POS", $aff_pos);
+                                        $self->setAttribute($dimm, "REL_POS", 
+                                            MAX_DIMMS_PER_MBA_PORT*$port_num +
+                                            $dimm_num);
 
                                         $self->setAttribute($dimm, "VPD_REC_NUM", $self->{dimm_tpos});
 
@@ -2456,6 +2483,84 @@ sub getSystemName
 {
     my $self = shift;
     return $self->getAttribute("/".$self->{TOP_LEVEL}, "SYSTEM_NAME");
+}
+
+#--------------------------------------------------
+## Utility function to process all of the existing
+## types of dimm port attributes that we have
+## supported.
+sub getDimmPort
+{
+    my $self = shift;
+
+    # input can be a dimm connector or a ddr target
+    #  data exist on the dimm_port in the xml but
+    #  we mirror it to the ddr while processing (somewhere...)
+    my $targ = shift;
+
+    # output values
+    my $port_num = 0;
+
+    #We will converge on MEM_PORT eventually, but
+    # we are leaving in support for everything for now
+    if (!$self->isBadAttribute($targ, "MEM_PORT"))
+    {
+        $port_num = $self->getAttribute($targ,"MEM_PORT");
+    }
+    elsif (!$self->isBadAttribute($targ, "CEN_MBA_PORT"))
+    {
+        $port_num = $self->getAttribute($targ,"CEN_MBA_PORT");
+    }
+    elsif( !$self->isBadAttribute($targ, "MBA_PORT"))
+    {
+        $port_num = $self->getAttribute($targ,"MBA_PORT");
+    }
+    else
+    {
+        print("ERROR: There is no memory port defined for target $targ\n");
+        $self->myExit(4);
+    }
+
+    return $port_num;
+}
+
+#--------------------------------------------------
+## Utility function to process all of the existing
+## types of dimm port position attributes that we have
+## supported.
+sub getDimmPos
+{
+    my $self = shift;
+
+    # input can be a dimm connector or a ddr target
+    #  data exist on the dimm_port in the xml but
+    #  we mirror it to the ddr while processing (somewhere...)
+    my $targ = shift;
+
+    # output values
+    my $dimm_num = 0;
+
+    #We will converge on POS_ON_MEM_PORT eventually, but
+    # we are leaving in support for everything for now
+    if (!$self->isBadAttribute($targ, "POS_ON_MEM_PORT"))
+    {
+        $dimm_num = $self->getAttribute($targ,"POS_ON_MEM_PORT");
+    }
+    elsif (!$self->isBadAttribute($targ, "CEN_MBA_DIMM"))
+    {
+        $dimm_num = $self->getAttribute($targ,"CEN_MBA_DIMM");
+    }
+    elsif( !$self->isBadAttribute($targ, "MBA_DIMM"))
+    {
+        $dimm_num = $self->getAttribute($targ,"MBA_DIMM");
+    }
+    else
+    {
+        print("ERROR: CEN_MBA_DIMM not defined for dimm $targ\n");
+        $self->myExit(4);
+    }
+
+    return $dimm_num;
 }
 
 sub myExit

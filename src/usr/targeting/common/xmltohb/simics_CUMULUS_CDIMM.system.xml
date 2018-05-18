@@ -5653,14 +5653,12 @@
         <id>AFFINITY_PATH</id>
          <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0/dimm-0</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MEM_PORT</id><default>0</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
@@ -5694,14 +5692,12 @@
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MEM_PORT</id><default>1</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>2</default>
@@ -5746,20 +5742,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-4</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MEM_PORT</id><default>0</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>4</default>
@@ -5783,20 +5777,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-6</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MEM_PORT</id><default>1</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>6</default>
@@ -6041,20 +6033,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-8</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>8</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MEM_PORT</id><default>0</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>8</default>
@@ -6078,20 +6068,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-10</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>10</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MEM_PORT</id><default>1</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>10</default>
@@ -6135,20 +6123,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-12</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>12</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MBA_PORT</id><default>0</default></attribute>
+    <attribute><id>MEM_PORT</id><default>0</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>12</default>
@@ -6172,20 +6158,18 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-14</default>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-2</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
         <default>14</default>
     </attribute>
-    <attribute>
-        <id>CEN_MBA_PORT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CEN_MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
+    <attribute><id>CEN_MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MBA_PORT</id><default>1</default></attribute>
+    <attribute><id>MEM_PORT</id><default>1</default></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>MBA_DIMM</id><default>0</default></attribute>
+    <attribute><id>POS_ON_MEM_PORT</id><default>0</default></attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>14</default>
