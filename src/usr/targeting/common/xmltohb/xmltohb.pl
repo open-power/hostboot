@@ -2754,6 +2754,16 @@ sub writeAttrErrlCFile {
     print $outFile "            }\n";
     print $outFile "            break;\n";
     print $outFile "        }\n";
+    print $outFile "        case (ATTR_PEC_PCIE_HX_KEYWORD_DATA): { //simpleType:uint, :int...\n";
+    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: PEC_PCIE_HX_KEYWORD_DATA entry\");\n";
+    print $outFile "            AttributeTraits<ATTR_PEC_PCIE_HX_KEYWORD_DATA>::Type tmp;\n";
+    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_PEC_PCIE_HX_KEYWORD_DATA>(tmp) ) {\n";
+    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+    print $outFile "                attrSize = sizeof(tmp);\n";
+    print $outFile "            }\n";
+    print $outFile "            break;\n";
+    print $outFile "        }\n";
 
     print $outFile "#if 0 //\@fixme-RTC:152874\n";
 
