@@ -43,6 +43,7 @@
 ///   - call p9_pm_pba_init in PM_RESET mode to get the PBA in "boot" mode
 ///   - Read the SGPE IVPR value that is in HOMER from Attribute written
 ///       by p9_hcode_image_build
+///   - Clear error injection bits
 ///   - Sreset the SGPE to start the boot copier from .
 ///   - Polls OCC Flag bit for HCode init completion
 ///     - Starting the SGPE will cause a "reboot" of functional CMEs
@@ -72,16 +73,15 @@
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9n2_misc_scom_addresses.H>
 
-//#include <p9_ppe_state.H>  @todo RTC 147996 to incorporate PPE state removing strings.
-
-
 // ----------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------
 
 // Map the auto generated names to clearer ones
-static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR = PU_OCB_OCI_OCCFLG_SCOM1;
-static const uint64_t PU_OCB_OCI_OCCFLG_SET  = PU_OCB_OCI_OCCFLG_SCOM2;
+static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR  = PU_OCB_OCI_OCCFLG_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG_SET    = PU_OCB_OCI_OCCFLG_SCOM2;
+static const uint64_t PU_OCB_OCI_OCCFLG2_CLEAR = P9N2_PU_OCB_OCI_OCCFLG2_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG2_SET   = P9N2_PU_OCB_OCI_OCCFLG2_SCOM2;
 
 static const uint32_t SGPE_TIMEOUT_MS       = 2500;     // Guess at this time
 static const uint32_t SGPE_TIMEOUT_MCYCLES  = 20;       // Guess at this time
@@ -317,6 +317,10 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
         .insertFromRight<4, 4>(0xA);    // FIT
         FAPI_TRY(fapi2::putScom(i_target, PU_GPE3_GPETSEL_SCOM, l_data64));
 
+        // Clear error injection bits
+        l_data64.flush<0>().setBit<p9hcd::OCCFLG2_SGPE_HCODE_STOP_REQ_ERR_INJ>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
+
         // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
         FAPI_IMP ("Malf Alert Policy Enabled: %d", malfAlertEnable);
 
@@ -324,11 +328,11 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
 
         if (malfAlertEnable == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
         {
-            FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM2, l_data64));
+            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_SET, l_data64));
         }
         else
         {
-            FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM1, l_data64));
+            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
         }
 
         FAPI_IMP ("Malf Alert Policy Set to OCC FLAG2 .. now init SGPE");
@@ -540,7 +544,7 @@ fapi2::ReturnCode stop_gpe_reset(
 
     FAPI_INF("   Clear SGPE_ACTIVE in OCC Flag Register...");
     l_data64.flush<0>().setBit<p9hcd::SGPE_ACTIVE>();
-    FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM1, l_data64));
+    FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_CLEAR, l_data64));
 
 fapi_try_exit:
     FAPI_IMP("<< stop_gpe_reset...");
