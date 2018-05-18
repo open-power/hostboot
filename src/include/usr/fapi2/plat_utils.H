@@ -107,10 +107,32 @@ ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
 ///
 template<fapi2::TargetType T>
 ReturnCode get_ring(fapi2::Target<T> i_target,
-        const RingId_t i_ringId, 
+        const RingId_t i_ringId,
         unsigned char *&o_ringData,
         uint64_t &o_ringLength,
         uint64_t &o_ringAddress);
+
+///
+/// @brief Returns child targets to Callout/Deconfigure/GARD
+///
+/// @param[i] i_parentTarget FAPI2 Parent Target
+/// @param[i] i_childType    FAPI2 Child Type
+/// @param[i] i_childPort    Child Port Number
+///                            For DIMMs: MBA Port Number
+///                            Else unused
+/// @param[i] i_childNum     Child Number
+///                            For DIMMs: DIMM Socket Number
+///                            For Chips: Chip Position
+///                            For Chiplets: Chiplet Position
+/// @param[o] o_childTargets List of child targets matching input
+//                             criteria.
+///
+void getChildTargetsForCDG(
+             const fapi2::Target<fapi2::TARGET_TYPE_ALL>& i_parentTarget,
+             const fapi2::TargetType i_childType,
+             const uint8_t i_childPort,
+             const uint8_t i_childNum,
+             TARGETING::TargetHandleList & o_childTargets);
 
 } // End namespace fapi2
 
