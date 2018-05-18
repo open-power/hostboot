@@ -6216,7 +6216,24 @@
 
 <attribute>
     <id>MBA_PORT</id>
-    <description>MBA port this DIMM is connected to</description>
+    <description>
+       MBA port this DIMM is connected to
+       (deprecated in favor of MEM_PORT)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MEM_PORT</id>
+    <description>
+       Memory port this DIMM is connected to
+    </description>
     <simpleType>
         <uint8_t>
             <default>0</default>
@@ -6228,7 +6245,24 @@
 
 <attribute>
     <id>MBA_DIMM</id>
-    <description>MBA port DIMM number of this DIMM</description>
+    <description>
+       MBA port DIMM number of this DIMM
+       (deprecated in favor of POS_ON_MEM_PORT)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>POS_ON_MEM_PORT</id>
+    <description>
+       Position of this DIMM on its memory port
+    </description>
     <simpleType>
         <uint8_t>
             <default>0</default>

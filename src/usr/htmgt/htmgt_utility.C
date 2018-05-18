@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,15 +164,15 @@ namespace HTMGT
     {
         //To make the OCC DIMM # 0 - 7: 0bABC
         //  A: MBA  ATTR_CHIP_UNIT: 0 or 1
-        //  B: DIMM ATTR_MBA_PORT:  0 or 1
-        //  C: DIMM ATTR_MBA_DIMM:  0 or 1
+        //  B: DIMM ATTR_MEM_PORT:  0 or 1
+        //  C: DIMM ATTR_POS_ON_MEM_PORT:  0 or 1
 
         //Note: No CDIMM systems in plan.  May need to revisit
         //this if there are any as OCC may not care about logical DIMMs.
 
         const uint8_t mbaUnit = i_mba->getAttr<ATTR_CHIP_UNIT>();
-        const uint8_t mbaPort = i_dimm->getAttr<ATTR_MBA_PORT>();
-        const uint8_t mbaDIMM = i_dimm->getAttr<ATTR_MBA_DIMM>();
+        const uint8_t mbaPort = i_dimm->getAttr<ATTR_MEM_PORT>();
+        const uint8_t mbaDIMM = i_dimm->getAttr<ATTR_POS_ON_MEM_PORT>();
 
         TMGT_DBG("DIMM 0x%X unit %d port %d pos %d = %d",
                  i_dimm->getAttr<ATTR_HUID>(),

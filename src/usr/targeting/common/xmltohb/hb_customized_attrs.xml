@@ -682,6 +682,12 @@
         <writeable/>
     </attribute>
 
+    <!-- Delete the redundant values from SW2 -->
+    <attribute><id>CEN_MBA_PORT</id><no_export/></attribute>
+    <attribute><id>MBA_PORT</id><no_export/></attribute>
+    <attribute><id>CEN_MBA_DIMM</id><no_export/></attribute>
+    <attribute><id>MBA_DIMM</id><no_export/></attribute>
+
     <attribute>
         <id>ATTR_PBAX_GROUPID</id>
         <global/>
