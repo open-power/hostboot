@@ -274,6 +274,7 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         pvpd_present = true;  //node PVDP always returns present
     }
 #endif
+    VPD::updateSerialNumberFromBMC( i_target );
 
     //Fsp sets PN/SN so if there is none, do it here
     if(!INITSERVICE::spBaseServicesEnabled())
