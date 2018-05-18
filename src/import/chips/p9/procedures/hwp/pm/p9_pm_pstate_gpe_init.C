@@ -48,7 +48,13 @@
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-// @todo RTC 148540 Refine this values for the lab
+
+// Map the auto generated names to clearer ones
+static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR  = PU_OCB_OCI_OCCFLG_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG_SET    = PU_OCB_OCI_OCCFLG_SCOM2;
+static const uint64_t PU_OCB_OCI_OCCFLG2_CLEAR = P9N2_PU_OCB_OCI_OCCFLG2_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG2_SET   = P9N2_PU_OCB_OCI_OCCFLG2_SCOM2;
+
 // Following constants hold an approximate value.
 static const uint32_t PGPE_TIMEOUT_MS       = 500;
 static const uint32_t PGPE_TIMEOUT_MCYCLES  = 20;
@@ -156,6 +162,12 @@ fapi2::ReturnCode pstate_gpe_init(
         .insertFromRight<0, 4>(0x1)    // Watchdog
         .insertFromRight<4, 4>(0xA);   // FIT
         FAPI_TRY(fapi2::putScom(i_target, PU_GPE2_GPETSEL_SCOM, l_data64));
+
+        // Clear error injection bits
+        l_data64.flush<0>()
+        .setBit<p9hcd::OCCFLG2_PGPE_HCODE_FIT_ERR_INJ>()
+        .setBit<p9hcd::OCCFLG2_PGPE_HCODE_PSTATE_REQ_ERR_INJ>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
 
         // Program XCR to ACTIVATE PGPE
         FAPI_INF("   Starting the PGPE...");
