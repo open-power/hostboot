@@ -997,6 +997,8 @@ void processEICDGs(const ErrorInfo & i_errInfo,
 ///                            For DIMMs: DIMM Socket Number
 ///                            For Chips: Chip Position
 ///                            For Chiplets: Chiplet Position
+/// @param[o] o_childTargets List of child targets matching input
+///                            criteria.
 ///
 void getChildTargetsForCDG(
              const fapi2::Target<fapi2::TARGET_TYPE_ALL>& i_parentTarget,
@@ -1081,11 +1083,11 @@ void getChildTargetsForCDG(
                 // Match i_childPort and i_childNum
                 if ( ((i_childPort == ErrorInfoChildrenCDG::ALL_CHILD_PORTS) ||
                       (i_childPort ==
-                           (*l_itr)->getAttr<TARGETING::ATTR_MBA_PORT>()))
+                           (*l_itr)->getAttr<TARGETING::ATTR_CEN_MBA_PORT>()))
                 &&
                      ((i_childNum == ErrorInfoChildrenCDG::ALL_CHILD_NUMBERS) ||
                       (i_childNum ==
-                           (*l_itr)->getAttr<TARGETING::ATTR_MBA_DIMM>())) )
+                           (*l_itr)->getAttr<TARGETING::ATTR_CEN_MBA_DIMM>())) )
                 {
                     o_childTargets.push_back(*l_itr);
                 }
