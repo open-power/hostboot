@@ -4783,12 +4783,21 @@ sub generate_pec
 
     # PCIE Hack to set PEC PCIE_LANE_MASK and PCIE_IOP_SWAP attributes
     my %pciOtherAttr;
+
+    #set PROC_PCIE_LANE_MASK to the default lane mask as defined
+    #in the workbook - this value will be used to restore the slot to the default
+    #lane configuration if it was once altered by the HX keyword
     if ($pec == 0)
     {
+        $pciOtherAttr{"PEC_IS_BIFURCATABLE"} = 0x0;
+
         $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFFFF, 0x0000, 0x0000, 0x0000";
+        $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x0;
     }
     elsif ($pec == 1)
     {
+        $pciOtherAttr{"PEC_IS_BIFURCATABLE"} = 0x1;
+
         if ($proc == 0)
         {
             $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
@@ -4802,8 +4811,11 @@ sub generate_pec
     }
     elsif ($pec == 2)
     {
+        $pciOtherAttr{"PEC_IS_BIFURCATABLE"} = 0x1;
+
         if ($proc == 0)
         {
+            # lane is bifurcated by default
             $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
             $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x6;
         }
