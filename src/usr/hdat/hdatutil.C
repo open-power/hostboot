@@ -2083,6 +2083,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                     case 0x10:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_10); break; }
                     case 0x11:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_11); break; }
                     case 0x12:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_12); break; }
+                    case 0x13:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_13); break; }
                 }
             }
             if(l_freqList == NULL)
