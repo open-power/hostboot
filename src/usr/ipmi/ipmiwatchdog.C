@@ -53,6 +53,14 @@ extern trace_desc_t * g_trac_ipmi;
 namespace IPMIWATCHDOG
 {
 
+// Needed for watchdog resets in case the BMC side becomes uninitialized and we
+// need to reinitialize it
+static bool g_set_once = false;
+static uint16_t g_countdown_secs;
+static uint8_t g_timer_use;
+static TIMER_ACTIONS g_timer_action;
+static TIMER_USE_CLR_FLAGS g_timer_clr_flag;
+
 /******************************************************************************/
 // Functions
 /******************************************************************************/
@@ -63,6 +71,14 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
                         const TIMER_ACTIONS i_timer_action,
                         const TIMER_USE_CLR_FLAGS i_timer_clr_flag)
 {
+    // Save the latest values so that reset actions can setup the timer
+    // if the BMC goes away.
+    g_set_once = true;
+    g_countdown_secs = i_countdown_secs;
+    g_timer_use = i_timer_use;
+    g_timer_action = i_timer_action;
+    g_timer_clr_flag = i_timer_clr_flag;
+
     // Convert secs into lsb and msb values
     // the ipmi spec uses the count which is 100ms/count
     static const uint16_t ms_per_count               = 100;
@@ -128,11 +144,9 @@ errlHndl_t resetWatchDogTimer()
     {
         IPMI_TRAC( "resetWatchDogTimer" );
 
-        // Don't worry about the return just send the msg over
-        // If there is an error during the reset
-        // we don't care about it since the watchdog will trip
-        //send ipmi command
-        err_ipmi = IPMI::send(IPMI::reset_watchdog(), len, data);
+        IPMI::completion_code cc;
+        err_ipmi = IPMI::sendrecv(IPMI::reset_watchdog(), cc, len, data);
+        delete[] data;
 
         if(err_ipmi)
         {
@@ -141,6 +155,43 @@ errlHndl_t resetWatchDogTimer()
             break;
         }
 
+        // Make sure we don't have an uninitialized watchdog
+        // openbmc will always start the watchdog regardless of us
+        // initializing it. If we don't initialize it, it can eventually
+        // time out on us
+        if (g_set_once && cc == IPMI::CC_CMDSPC1)
+        {
+            err_ipmi = setWatchDogTimer(g_countdown_secs,
+                    g_timer_use | DO_NOT_STOP,
+                    g_timer_action, g_timer_clr_flag);
+
+            if (err_ipmi)
+            {
+                //got an error sending IPMI msg
+                //progate error upstream.
+                break;
+            }
+
+            // Make sure to issue a reset after initialization to start
+            // the timer if it isn't already. We don't care about the return
+            // value of this message since we can't recurse forever. If we
+            // fail here, later resets should handle reconfiguring the
+            // watchdog if it isn't critically broken.
+            len = 0;
+            data = NULL;
+            err_ipmi = IPMI::send(IPMI::reset_watchdog(), len, data);
+
+            if(err_ipmi)
+            {
+                //got an error sending IPMI msg
+                //progate error upstream.
+                break;
+            }
+        }
+
+        // We don't care about any other types of errors as the watchdog
+        // will just trip in these cases.
+        break;
     }
     while(0);
 
