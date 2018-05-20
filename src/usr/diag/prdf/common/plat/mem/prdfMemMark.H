@@ -174,62 +174,29 @@ template<TARGETING::TYPE T>
 uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 /**
- * @brief  If a rank contains a symbol mark that is on the same DRAM as the chip
- *         mark, the symbol mark is removed. This is done to free up available
- *         repairs. Will also apply RAS policies where necessary.
+ * @brief  If a chip mark has been verified or explicitly set due other RAS
+ *         policies, this function does all the necessary cleanup.
+ *
+ * Function details:
+ *  - Adds the chip mark to the callout list.
+ *  - Removes the symbol mark if it is on the same DRAM as the chip mark.
+ *  - Adds the symbol mark to the callout list if it exists on another DRAM.
+ *  - If DRAM repairs are disabled:
+ *      - Makes the error log predictive.
+ *  - Otherwise:
+ *      - Sets the DRAM in the DRAM Repair VPD.
+ *      - Makes the error log predictive if RAS policies apply.
+ *      - Adds a DSD procedure to the TD queue is a DRAM spare is available.
+ *      - Bans TPS on the rank if all repairs are used.
+ *
  * @param  i_chip MBA or MCA chip.
  * @param  i_rank Target rank.
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank,
-                  STEP_CODE_DATA_STRUCT & io_sc )
-{
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get the chip mark.
-        MemMark chipMark;
-        o_rc = readChipMark<T>( i_chip, i_rank, chipMark );
-        if ( SUCCESS != o_rc ) break;
-        if ( !chipMark.isValid() ) break; // nothing to do.
-
-        // Get the symbol mark.
-        MemMark symMark;
-        o_rc = readSymbolMark<T>( i_chip, i_rank, symMark );
-        if ( SUCCESS != o_rc ) break;
-        if ( !symMark.isValid() ) break; // nothing to do.
-
-        // If both the chip and symbol mark are on the same DRAM, clear the
-        // symbol mark.
-        if ( chipMark.getSymbol().getDram() == symMark.getSymbol().getDram() )
-        {
-            o_rc = clearSymbolMark<T>( i_chip, i_rank );
-            if ( SUCCESS != o_rc ) break;
-        }
-        else
-        {
-            // Both a chip and symbol mark exist, but they are on separate
-            // DRAMs. So, make the error log predictive.
-            io_sc.service_data->setServiceCall();
-            io_sc.service_data->setSignature( i_chip->getHuid(),
-                                              PRDFSIG_AllDramRepairs );
-
-            // The chip and symbol mark may be on different DIMMs (Centaur ranks
-            // span two DIMMs). Therefore, we must add both to the callout list
-            // to ensure all DIMMs are in the callout list.
-            MemoryMru cm_mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
-            MemoryMru sm_mm { i_chip->getTrgt(), i_rank, symMark.getSymbol()  };
-            io_sc.service_data->SetCallout( cm_mm );
-            io_sc.service_data->SetCallout( sm_mm );
-        }
-
-    } while (0);
-
-    return o_rc;
-}
+uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          STEP_CODE_DATA_STRUCT & io_sc );
 
 } // end namespace MarkStore
 

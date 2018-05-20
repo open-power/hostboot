@@ -947,16 +947,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             }
         }
 
-        // We may have placed a chip mark, so if a symbol mark is being used on
-        // the same chip, undo the symbol mark after the chip mark is in place.
-        o_rc = MarkStore::balance<TYPE_MCA>( iv_chip, iv_rank, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), getKey() );
-            break;
-        }
-
         // Write any updates to VPD.
         o_rc = setBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, iv_rank, dqBitmap);
         if ( SUCCESS != o_rc )
@@ -966,7 +956,19 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     iv_rank.getKey());
             break;
         }
-    }while(0);
+
+        // We may have placed a chip mark so do any necessary cleanup. This must
+        // be called after writing the bad DQ bitmap because the this function
+        // will also write it if necessary.
+        o_rc = MarkStore::chipMarkCleanup<TYPE_MCA>( iv_chip, iv_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "
+                      "failed", iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+    } while (0);
 
     return o_rc;
 

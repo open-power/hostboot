@@ -30,6 +30,8 @@
 #include <prdfMemDbUtils.H>
 
 #ifdef __HOSTBOOT_MODULE
+#include <prdfCenMbaExtraSig.H>
+#include <prdfMemDsd.H>
 #include <prdfMemVcm.H>
 #endif
 
@@ -872,7 +874,290 @@ uint32_t writeSymbolMark<TYPE_MBA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
+//##############################################################################
+//          Utilities to cleanup markstore after a chip mark is verified
+//##############################################################################
+
+#ifdef __HOSTBOOT_MODULE // Not supported on FSP.
+
+template<TARGETING::TYPE T>
+uint32_t __applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             STEP_CODE_DATA_STRUCT & io_sc,
+                             const MemMark & i_chipMark,
+                             const MemMark & i_symMark );
+
+template<>
+uint32_t __applyRasPolicies<TYPE_MCA>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
+                                       const MemMark & i_chipMark,
+                                       const MemMark & i_symMark )
+{
+    // There is no DRAM sparing on Nimbus so simply check if both the chip and
+    // symbol mark have been used.
+    if ( i_chipMark.isValid() && i_symMark.isValid() )
+    {
+        io_sc.service_data->setServiceCall();
+        io_sc.service_data->setSignature( i_chip->getHuid(),
+                                          PRDFSIG_AllDramRepairs );
+
+        #ifdef __HOSTBOOT_RUNTIME
+        // No more repairs left so no point doing any more TPS procedures.
+        MemDbUtils::banTps<TYPE_MCA>( i_chip, i_rank );
+        #endif
+    }
+
+    return SUCCESS;
+}
+
+template<>
+uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
+                                       const MemRank & i_rank,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
+                                       const MemMark & i_chipMark,
+                                       const MemMark & i_symMark )
+{
+    #define PRDF_FUNC "[__applyRasPolicies<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+
+    bool allRepairsUsed = false;
+
+    do
+    {
+        const uint8_t ps   = i_chipMark.getSymbol().getPortSlct();
+        const uint8_t dram = i_chipMark.getSymbol().getDram();
+
+        const bool isX4 = isDramWidthX4( i_chip->getTrgt() );
+
+        // Determine if DRAM sparing is enabled.
+        bool isEnabled = isX4; // Always an ECC spare in x4 mode.
+
+        if ( !isEnabled )
+        {
+            /* TODO RTC 189221
+            // Check for any DRAM spares.
+            uint8_t cnfg = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
+            o_rc = getDimmSpareConfig<TYPE_MBA>( i_chip, i_rank, ps, cnfg );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getDimmSpareConfig(0x%08x,0x%02x,%d) "
+                          "failed", i_chip->getHuid(), i_rank.getKey(), ps );
+                break;
+            }
+            isEnabled = (ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != cnfg);
+            */
+        }
+
+        if ( isEnabled )
+        {
+            // Sparing is enabled. Get the current spares in hardware.
+            MemSymbol sp0, sp1, ecc;
+            /* TODO RTC 189221
+            o_rc = mssGetSteerMux<TYPE_MBA>( i_chip, i_rank, sp0, sp1, ecc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
+                          i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+            */
+
+            // Add the spares to the callout list if they exist.
+            if ( sp0.isValid() )
+            {
+                MemoryMru mm { i_chip->getTrgt(), i_rank, sp0 };
+                io_sc.service_data->SetCallout( mm );
+            }
+            if ( sp1.isValid() )
+            {
+                MemoryMru mm { i_chip->getTrgt(), i_rank, sp1 };
+                io_sc.service_data->SetCallout( mm );
+            }
+            if ( ecc.isValid() )
+            {
+                MemoryMru mm { i_chip->getTrgt(), i_rank, ecc };
+                io_sc.service_data->SetCallout( mm );
+            }
+
+            // If the chip mark is on a spare then the spare is bad and hardware
+            // can not steer it to another DRAM even if one is available (e.g.
+            // the ECC spare). In this this case, make error log predictive.
+            if ( ( dram == (0 == ps ? sp0.getDram() : sp1.getDram()) ) ||
+                 ( dram == ecc.getDram() ) )
+            {
+                allRepairsUsed = true;
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                                                  PRDFSIG_VcmBadSpare );
+                break; // Nothing more to do.
+            }
+
+            // Certain DIMMs may have had spares intentially made unavailable by
+            // the manufacturer. Check the VPD for available spares.
+            bool dramSparePossible = false;
+            bool eccSparePossible  = false;
+            /* TODO RTC 189221
+            o_rc = bitmap.isSpareAvailable( ps, dramSparePossible,
+                                            eccSparePossible );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "isDramSpareAvailable() failed" );
+                break;
+            }
+            */
+
+            if ( dramSparePossible &&
+                 (0 == ps ? !sp0.isValid() : !sp1.isValid()) )
+            {
+                // A spare DRAM is available.
+                TdEntry * e = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
+                                                      i_chipMark };
+                MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
+            }
+            else if ( eccSparePossible && !ecc.isValid() )
+            {
+                // The ECC spare is available.
+                TdEntry * e = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
+                                                      i_chipMark, true };
+                MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
+            }
+            else
+            {
+                // Chip mark is in place and sparing is not possible.
+                allRepairsUsed = true;
+                io_sc.service_data->setSignature( i_chip->getHuid(),
+                                                  PRDFSIG_AllDramRepairs );
+            }
+        }
+        // There is no DRAM sparing so simply check if both the chip and symbol
+        // mark have been used.
+        else if ( i_chipMark.isValid() && i_symMark.isValid() )
+        {
+            allRepairsUsed = true;
+            io_sc.service_data->setSignature( i_chip->getHuid(),
+                                              PRDFSIG_AllDramRepairs );
+        }
+
+    } while (0);
+
+    if ( allRepairsUsed )
+    {
+        io_sc.service_data->setServiceCall();
+
+        #ifdef __HOSTBOOT_RUNTIME
+        // No more repairs left so no point doing any more TPS procedures.
+        MemDbUtils::banTps<TYPE_MCA>( i_chip, i_rank );
+        #endif
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<TARGETING::TYPE T>
+uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[chipMarkCleanup] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the chip mark.
+        MemMark chipMark;
+        o_rc = readChipMark<T>( i_chip, i_rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // There is nothing else to do if there is no chip mark.
+        if ( !chipMark.isValid() ) break;
+
+        // Add the chip mark to the callout list.
+        MemoryMru cm_mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
+        io_sc.service_data->SetCallout( cm_mm );
+
+        // Get the symbol mark.
+        MemMark symMark;
+        o_rc = readSymbolMark<T>( i_chip, i_rank, symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // If both the chip and symbol mark are on the same DRAM, clear the
+        // symbol mark.
+        if ( chipMark.getSymbol().getDram() == symMark.getSymbol().getDram() )
+        {
+            o_rc = clearSymbolMark<T>( i_chip, i_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "clearSymbolMark(0x%08x,0x%02x) failed",
+                          i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            // Reset the symbol mark variable to invalid.
+            symMark = MemMark();
+        }
+
+        // Add the symbol mark to the callout list if it exists.
+        if ( symMark.isValid() )
+        {
+            MemoryMru sm_mm { i_chip->getTrgt(), i_rank, symMark.getSymbol() };
+            io_sc.service_data->SetCallout( sm_mm );
+        }
+
+        // Make the error log predictive and exit if DRAM repairs are disabled.
+        if ( areDramRepairsDisabled() )
+        {
+            io_sc.service_data->setServiceCall();
+            break; // nothing else to do
+        }
+
+        // Set the chip mark in the DRAM Repairs VPD.
+        o_rc = setDramInVpd<TYPE_MCA>( i_chip, i_rank, chipMark.getSymbol() );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+        // Apply RAS policies.
+        o_rc = __applyRasPolicies<T>( i_chip, i_rank, io_sc, chipMark,
+                                      symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "__applyRasPolicies(0x%08x,0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template
+uint32_t chipMarkCleanup<TYPE_MCA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
+template
+uint32_t chipMarkCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
+                                    const MemRank & i_rank,
+                                    STEP_CODE_DATA_STRUCT & io_sc );
+
+#endif // not supported on FSP
 
 } // end namespace MarkStore
 

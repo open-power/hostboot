@@ -1111,25 +1111,14 @@ uint32_t analyzeImpe<TYPE_MCA>( ExtensibleChip * i_chip,
                     break;
                 }
 
-                o_rc = MarkStore::balance<TYPE_MCA>( i_chip, rank, io_sc );
+                o_rc = MarkStore::chipMarkCleanup<TYPE_MCA>( i_chip, rank,
+                                                             io_sc );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "balance(0x%08x,0x%02x) failed",
+                    PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
                               i_chip->getHuid(), rank.getKey() );
                     break;
                 }
-
-                // Set the dram in DRAM Repairs VPD.
-                o_rc = setDramInVpd<TYPE_MCA>( i_chip, rank, symbol );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
-                              i_chip->getHuid(), rank.getKey() );
-                    break;
-                }
-
-                // Add a DRAM sparing procedure to the queue, if supported.
-                // TODO: RTC 157888
             }
         }
 

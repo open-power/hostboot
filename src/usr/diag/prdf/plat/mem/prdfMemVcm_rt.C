@@ -62,129 +62,6 @@ VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
 
 //##############################################################################
 //
-//                          Generic template functions
-//
-//##############################################################################
-
-template<TARGETING::TYPE T>
-uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[VcmEvent::falseAlarm] "
-
-    uint32_t o_rc = SUCCESS;
-
-    PRDF_TRAC( PRDF_FUNC "Chip mark false alarm: 0x%08x,0x%02x",
-               iv_chip->getHuid(), getKey() );
-
-    io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                      PRDFSIG_VcmFalseAlarm );
-
-    do
-    {
-        // If DRAM repairs are disabled, make the error log predictive.
-        if ( areDramRepairsDisabled() )
-        {
-            io_sc.service_data->setServiceCall();
-            break; // Nothing more to do.
-        }
-
-        // Increment the false alarm counter and check threshold.
-        uint8_t dram = iv_mark.getSymbol().getDram();
-        if ( __getFalseAlarmCounter<T>(iv_chip)->inc(iv_rank, dram, io_sc) )
-        {
-            // False alarm threshold has been reached.
-
-            io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                              PRDFSIG_VcmFalseAlarmTH );
-
-            PRDF_TRAC( PRDF_FUNC "False alarm threshold: 0x%08x,0x%02x",
-                       iv_chip->getHuid(), getKey() );
-
-            // Leave the chip mark in place and do any necessary cleanup.
-            o_rc = cleanup( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
-                break;
-            }
-        }
-        else
-        {
-            // Remove the chip mark.
-            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
-                break;
-            }
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[VcmEvent::cleanup] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // If there is a symbol mark on the same DRAM as the newly verified chip
-        // mark, remove the symbol mark.
-        o_rc = MarkStore::balance<T>( iv_chip, iv_rank, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), getKey() );
-            break;
-        }
-
-        // Set the dram in DRAM Repairs VPD.
-        o_rc = setDramInVpd<T>( iv_chip, iv_rank, iv_mark.getSymbol() );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), iv_rank.getKey() );
-            break;
-        }
-
-        // Add a DRAM sparing procedure to the queue, if supported.
-        // TODO: RTC 157888
-
-        // The cleanup() function is called by both verified() and falseAlarm().
-        // In either case, we can pass in the DRAM characterized by iv_mark to
-        // determine if there has been a least one false alarm on any DRAM on
-        // this rank other than this DRAM. If so, the error log should be
-        // predictive.
-        VcmFalseAlarm * faCntr = __getFalseAlarmCounter<T>(iv_chip);
-        uint8_t dram = iv_mark.getSymbol().getDram();
-        if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
-            io_sc.service_data->setServiceCall();
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// Avoid linker errors with the template.
-template class VcmEvent<TYPE_MCA>;
-template class VcmEvent<TYPE_MBA>;
-
-//##############################################################################
-//
 //                          Specializations for MCA
 //
 //##############################################################################
@@ -280,6 +157,42 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
                 o_done = true; break;
             }
         }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t VcmEvent<TYPE_MCA>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[VcmEvent::cleanup] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        o_rc = MarkStore::chipMarkCleanup<TYPE_MCA>( iv_chip, iv_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
+                      iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
+
+        // The cleanup() function is called by both verified() and falseAlarm().
+        // In either case, the error log should be predictive if there has been
+        // a least one false alarm on any DRAM on this rank other than this
+        // DRAM. This is required on Nimbus because of two symbol correction,
+        // which does not exist on Centaur.
+        VcmFalseAlarm * faCntr = __getFalseAlarmCounter<TYPE_MCA>(iv_chip);
+        uint8_t dram = iv_mark.getSymbol().getDram();
+        if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
+            io_sc.service_data->setServiceCall();
 
     } while (0);
 
@@ -399,6 +312,79 @@ uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
 
     #undef PRDF_FUNC
 }
+
+//##############################################################################
+//
+//                          Generic template functions
+//
+//##############################################################################
+
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[VcmEvent::falseAlarm] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_TRAC( PRDF_FUNC "Chip mark false alarm: 0x%08x,0x%02x",
+               iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                      PRDFSIG_VcmFalseAlarm );
+
+    do
+    {
+        // If DRAM repairs are disabled, make the error log predictive.
+        if ( areDramRepairsDisabled() )
+        {
+            io_sc.service_data->setServiceCall();
+            break; // Nothing more to do.
+        }
+
+        // Increment the false alarm counter and check threshold.
+        uint8_t dram = iv_mark.getSymbol().getDram();
+        if ( __getFalseAlarmCounter<T>(iv_chip)->inc(iv_rank, dram, io_sc) )
+        {
+            // False alarm threshold has been reached.
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_VcmFalseAlarmTH );
+
+            PRDF_TRAC( PRDF_FUNC "False alarm threshold: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            // Leave the chip mark in place and do any necessary cleanup.
+            o_rc = cleanup( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
+                break;
+            }
+        }
+        else
+        {
+            // Remove the chip mark.
+            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// Avoid linker errors with the template.
+template class VcmEvent<TYPE_MCA>;
+template class VcmEvent<TYPE_MBA>;
 
 //------------------------------------------------------------------------------
 
