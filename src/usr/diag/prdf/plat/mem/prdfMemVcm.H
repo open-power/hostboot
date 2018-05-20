@@ -277,19 +277,11 @@ class VcmEvent : public TdEntry
         io_sc.service_data->setSignature( iv_chip->getHuid(),
                                           PRDFSIG_VcmVerified );
 
-        if ( PlatServices::areDramRepairsDisabled() )
+        // Leave the chip mark in place and do any necessary cleanup.
+        o_rc = cleanup( io_sc );
+        if ( SUCCESS != o_rc )
         {
-            // Make the error log predictive, nothing else to do.
-            io_sc.service_data->setServiceCall();
-        }
-        else
-        {
-            // Leave the chip mark in place and do any necessary cleanup.
-            o_rc = cleanup( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
-            }
+            PRDF_ERR( PRDF_FUNC "cleanup() failed" );
         }
 
         return o_rc;
@@ -305,7 +297,23 @@ class VcmEvent : public TdEntry
      * @param  io_sc  The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t cleanup( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t cleanup( STEP_CODE_DATA_STRUCT & io_sc )
+    {
+        #define PRDF_FUNC "[VcmEvent::cleanup] "
+
+        uint32_t o_rc = SUCCESS;
+
+        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
+                    iv_chip->getHuid(), iv_rank.getKey() );
+        }
+
+        return o_rc;
+
+        #undef PRDF_FUNC
+    }
 
     /**
      * @brief  Verification failed. Do additional processing such as removing
