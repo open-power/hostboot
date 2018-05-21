@@ -85,6 +85,8 @@ case HWAS::_type: i_parser.PrintString( "Clock Type", #_type); break;
                     case_CLOCK_TYPE(MEMCLK_TYPE)
                     case_CLOCK_TYPE(OSCREFCLK_TYPE)
                     case_CLOCK_TYPE(OSCPCICLK_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK0_TYPE)
+                    case_CLOCK_TYPE(OSCPCICLK1_TYPE)
                     default:
                         i_parser.PrintNumber( "Clock Type", "UNKNOWN: 0x%X",
                                         ntohl(pData->clockType) );
