@@ -66,35 +66,35 @@ class VcmEvent : public TdEntry
 
     uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
     {
+        #define PRDF_FUNC "[VcmEvent::nextStep] "
+
         uint32_t o_rc = SUCCESS;
 
         o_done = false;
 
-        // Take action based on the current phase.
-        switch ( iv_phase )
+        do
         {
-            case TD_PHASE_0:
-                o_rc = startNextPhase( io_sc );
+            // First, do analysis.
+            o_rc = analyzePhase( io_sc, o_done );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
+                          iv_chip->getHuid(), getKey() );
                 break;
+            }
 
-            case TD_PHASE_1:
-                o_rc = analyzePhase1( io_sc, o_done );
-                if ( SUCCESS == o_rc && !o_done )
-                    o_rc = startNextPhase( io_sc );
+            if ( o_done ) break; // Nothing more to do.
+
+            // Then, start the next phase of the procedure.
+            o_rc = startNextPhase( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%2x",
+                          iv_chip->getHuid(), getKey() );
                 break;
+            }
 
-            case TD_PHASE_2:
-                o_rc = analyzePhase2( io_sc, o_done );
-                break;
-
-            default: PRDF_ASSERT( false ); // invalid phase
-        }
-
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( "[VcmEvent::nextStep] failed: 0x%08x,0x%02x",
-                      iv_chip->getHuid(), getKey() );
-        }
+        } while (0);
 
         // Add the chip mark to the callout list if no callouts in the list.
         if ( 0 == io_sc.service_data->getMruListSize() )
@@ -104,6 +104,8 @@ class VcmEvent : public TdEntry
         }
 
         return o_rc;
+
+        #undef PRDF_FUNC
     }
 
     uint32_t getKey() const
@@ -153,19 +155,23 @@ class VcmEvent : public TdEntry
     }
 
     /**
-     * @brief  Analyzes the state of the hardware after phase 1 completes.
+     * @brief  Do analysis based on the current phase.
      * @param  io_sc  The step code data struct.
-     * @param  o_done True if the procedure is complete or has aborted.
+     * @param  o_done True if the procedure is complete or has aborted, false
+     *                otherwise.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t analyzePhase1( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
+    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
     {
-        #define PRDF_FUNC "[VcmEvent::analyzePhase1] "
+        #define PRDF_FUNC "[VcmEvent::analyzePhase] "
 
         uint32_t o_rc = SUCCESS;
 
         do
         {
+            if ( TD_PHASE_0 == iv_phase ) break; // Nothing to analyze yet.
+
+            // Look for any ECC errors that occurred during the command.
             uint32_t eccAttns;
             o_rc = checkEccFirs<T>( iv_chip, eccAttns );
             if ( SUCCESS != o_rc )
@@ -175,62 +181,31 @@ class VcmEvent : public TdEntry
                 break;
             }
 
+            // Analyze the ECC errors, if needed.
             o_rc = checkEcc( eccAttns, io_sc, o_done );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "checkEcc() failed" );
-                break;
-            }
-
-        } while (0);
-
-        return o_rc;
-
-        #undef PRDF_FUNC
-    }
-
-    /**
-     * @brief  Analyzes the state of the hardware after phase 1 completes.
-     * @param  io_sc  The step code data struct.
-     * @param  o_done True if the procedure is complete or has aborted.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t analyzePhase2( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
-    {
-        #define PRDF_FUNC "[VcmEvent::analyzePhase2] "
-
-        uint32_t o_rc = SUCCESS;
-
-        do
-        {
-            uint32_t eccAttns;
-            o_rc = checkEccFirs<T>( iv_chip, eccAttns );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",
                           iv_chip->getHuid() );
                 break;
             }
 
-            o_rc = checkEcc( eccAttns, io_sc, o_done );
-            if ( SUCCESS != o_rc )
+            if ( o_done ) break; // abort the procedure.
+
+            if ( TD_PHASE_2 == iv_phase )
             {
-                PRDF_ERR( PRDF_FUNC "checkEcc() failed" );
-                break;
+                // Determine if the chip mark has been verified.
+                o_rc = (eccAttns & MAINT_MCE) ? verified(io_sc)
+                                              : falseAlarm(io_sc);
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
+                    break;
+                }
+
+                // Procedure is complete.
+                o_done = true;
             }
-
-            if ( o_done ) break; // nothing more to do
-
-            // Determine if the chip mark has been verified.
-            o_rc = (eccAttns & MAINT_MCE) ? verified(io_sc) : falseAlarm(io_sc);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
-                break;
-            }
-
-            // Procedure is complete.
-            o_done = true;
 
         } while (0);
 

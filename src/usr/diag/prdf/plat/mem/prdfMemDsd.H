@@ -87,7 +87,7 @@ class DsdEvent : public TdEntry
             o_rc = startNextPhase( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
+                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%2x",
                           iv_chip->getHuid(), getKey() );
                 break;
             }
