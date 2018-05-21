@@ -484,17 +484,6 @@ extern "C"
     {
         mcbist_mode = QUARTER_SLOW;
         uint8_t l_mcb_status = 0;
-        uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
-        uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
-        uint8_t l_byte, l_rnk = 0;
-        uint8_t l_nibble = 0;
-        uint8_t l_p = 0;
-        uint8_t rank = 0;
-        uint8_t l_faulted_rank = 255;
-        uint8_t l_faulted_port = 255;
-        uint8_t l_faulted_dimm = 255;
-        uint8_t l_memory_health = 0;
-        uint8_t l_max_byte = 10;
 
         struct subtest_info l_sub_info[30];
         FAPI_DBG("%s:  enter sanity check", mss::c_str(i_target));
@@ -503,21 +492,47 @@ extern "C"
         FAPI_TRY(start_mcb(i_target), "Sanity Check failed start_mcb");
         FAPI_DBG("%s:  polling   mcbist now", mss::c_str(i_target));
         FAPI_TRY(poll_mcb(i_target, &l_mcb_status, l_sub_info, 1), "generic_shmoo::do_mcbist_test: POLL MCBIST failed !!");
+        FAPI_DBG("%s:  parsing error map ", mss::c_str(i_target));
+        FAPI_TRY(parse_error_map(i_target), "Failed parse_error_map");
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief parse the MCBIST error map and report spd if any bad bit found
+    /// @param[in] i_target Centaur input mba
+    /// @return FAPI2_RC_SUCCESS iff succesful
+    ///
+    fapi2::ReturnCode generic_shmoo::parse_error_map( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target )
+    {
+        uint8_t l_faulted_rank = 255;
+        uint8_t l_faulted_port = 255;
+        uint8_t l_faulted_dimm = 255;
+        uint8_t l_memory_health = 0;
+        uint8_t l_count = 0;
+        uint8_t l_dram_width = 0;
+        uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE] = { 0 }; // 10 byte array of bad bits
+        uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+        uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target, l_dram_width));
+
         FAPI_DBG("%s:  checking error map ", mss::c_str(i_target));
         FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
                                count_bad_dq), "Failed mcb_error_map");
 
-        for (l_p = 0; l_p < MAX_PORT; l_p++)
+        for (uint8_t l_p = 0; l_p < MAX_PORT; l_p++)
         {
-            for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
+            for (uint8_t l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
                 // Byte loop
-                rank = valid_rank1[l_p][l_rnk];
+                uint8_t rank = valid_rank1[l_p][l_rnk];
 
-                for (l_byte = 0; l_byte < l_max_byte; l_byte++)
+                for (uint8_t l_byte = 0; l_byte < DIMM_DQ_RANK_BITMAP_SIZE; l_byte++)
                 {
                     //Nibble loop
-                    for (l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
+                    for (uint8_t l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
                     {
                         if (mcbist_error_map[l_p][rank][l_byte][l_nibble] == 1)
                         {
@@ -534,44 +549,72 @@ extern "C"
                                 l_faulted_dimm = 0;
                             }
 
-                            break;
+                            // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
+                            FAPI_TRY(dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank, l_dqBitmap),
+                                     "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target));
+
+                            if (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
+                            {
+                                l_dqBitmap[l_byte] = 0xff;
+                            }
+                            else if ((l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4) && (l_nibble == 0))
+                            {
+                                l_dqBitmap[l_byte] = l_dqBitmap[l_byte] | 0xf0;
+                            }
+                            else
+                            {
+                                l_dqBitmap[l_byte] = l_dqBitmap[l_byte] | 0x0f;
+                            }
+
+                            FAPI_INF("%s Warning dimm_bad bits found ---> Updating Bad Bits: port%d, dimm%d, rank%d, l_dqBitmap[%d] = 0x%02x",
+                                     mss::c_str(i_target), l_p, l_faulted_dimm, rank, l_byte, l_dqBitmap[l_byte]);
+                            l_count++;
+
+                            FAPI_TRY(dimmSetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank, l_dqBitmap),
+                                     "Error from dimmSetBadDqBitmap on %s.", mss::c_str(i_target));
                         }
-                    }
+                    } // nibble
+                } // byte
+
+                // Reset error count if there was only one error on this rank
+                if(l_count == 1)
+                {
+                    l_count = 0;
                 }
-            }
-        }
+            } // rank
+        } // port
 
         //////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
-
 #ifdef __HOSTBOOT_MODULE
-        FAPI_ASSERT_NOEXIT(!l_memory_health,
+        // In firmware, post an error log and callout the last faulted port & DIMM if we found any new bad bits
+        FAPI_ASSERT_NOEXIT((l_memory_health == 0),
                            fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
                            set_MBA_TARGET(i_target).
                            set_MBA_PORT_NUMBER(l_faulted_port).
                            set_MBA_DIMM_NUMBER(l_faulted_dimm),
-                           "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",
+                           "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run, port=%d rank=%d dimm=%d",
                            mss::c_str(i_target),
                            l_faulted_port,
                            l_faulted_rank,
                            l_faulted_dimm);
-
 #else
-        FAPI_ASSERT(!l_memory_health,
+        // In Cronus, assert and halt only if we found more than one bad nibble on a given rank
+        FAPI_ASSERT(((l_memory_health == 0) && (l_count == 0)),
                     fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
                     set_MBA_TARGET(i_target).
                     set_MBA_PORT_NUMBER(l_faulted_port).
                     set_MBA_DIMM_NUMBER(l_faulted_dimm),
-                    "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",
+                    "generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run, port=%d rank=%d dimm=%d",
                     mss::c_str(i_target),
                     l_faulted_port,
                     l_faulted_rank,
                     l_faulted_dimm);
-
 #endif
 
     fapi_try_exit:
         return fapi2::current_err;
     }
+
     ///
     /// @brief do mcbist reset
     /// @param[in] i_target Centaur input mba
