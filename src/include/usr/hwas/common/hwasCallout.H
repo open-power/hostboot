@@ -127,12 +127,21 @@ enum busTypeEnum
     O_BUS_TYPE      = 7
 };
 
+// Used by Hostboot code where real clock targets do not exist
 enum clockTypeEnum
 {
+    // Specify a generic clock source in the event that the calling code is
+    //  unable to determine which of the redundant sources are currently
+    //  configured as active
     TODCLK_TYPE     = 1,
     MEMCLK_TYPE     = 2,
     OSCREFCLK_TYPE  = 3,
     OSCPCICLK_TYPE  = 4,
+  
+    // Specify a specific clock source for the case where the code can determine
+    //  which of the redundant sources is actually at fault
+    OSCPCICLK0_TYPE = 10, //Specifically clock 0
+    OSCPCICLK1_TYPE = 11, //Specifically clock 1
 };
 
 
