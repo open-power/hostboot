@@ -87,6 +87,24 @@ bool compareAffinity(const TargetInfo t1, const TargetInfo t2)
         return t1.affinityPath < t2.affinityPath;
 }
 
+/*
+ * @brief  This function takes in proc target and returns group/chip id
+ *         in the following bit format: GGGG CCC
+ *         where G = Group Id and C = Chip Id
+ *
+ * @param[in] i_proc: proc target
+ * @retval: chip info including group and chip id
+ */
+uint64_t getGroupChipIdInfo (TargetHandle_t i_proc)
+{
+    auto l_grp_id  = i_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
+    auto l_chip_id = i_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+
+    //Chip ID is three bits long, therefore, shift group id
+    //by 3 and OR it with chip id
+    return ((l_grp_id << 3) | l_chip_id);
+}
+
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
  *                  present, functional
@@ -289,6 +307,223 @@ errlHndl_t disableOBUSes()
     } while (0);
     return l_err;
 }
+
+errlHndl_t update_proc_mem_to_use (const Target* i_node)
+{
+    errlHndl_t l_errl {nullptr};
+    TargetHandle_t l_masterProcTarget {nullptr};
+
+    do
+    {
+        //Get master proc
+        l_errl =
+            targetService().queryMasterProcChipTargetHandle(l_masterProcTarget,
+                    i_node);
+        if (l_errl)
+        {
+            HWAS_ERR("update_proc_mem_to_use: unable to get master proc");
+            break;
+        }
+
+
+        //Check if this processor has missing memory
+        //If yes, then get the HRMOR of the proc we want to use the mem of
+        uint8_t l_proc_mem_to_use = l_masterProcTarget->getAttr
+                                    <ATTR_PROC_MEM_TO_USE>();
+        uint8_t l_proc_mem_to_use_save = l_proc_mem_to_use;
+        bool l_found_missing_mem = false;
+        l_errl = check_for_missing_memory(i_node, l_proc_mem_to_use,
+                                          l_found_missing_mem);
+        if (l_errl)
+        {
+            HWAS_ERR("update_proc_mem_to_use: unable to check for missing mem");
+            break;
+        }
+
+        //We found missing memory behind master proc, but
+        //check_for_missing_memory didn't update proc_mem_to_use
+        //probably because there are no other procs with memory,
+        //create an error.
+        if (l_found_missing_mem && (l_proc_mem_to_use==l_proc_mem_to_use_save))
+        {
+            HWAS_ERR("update_proc_mem_to_use: ATTR_PROC_MEM_TO_USE didn't get"
+            " updated even though we were missing mem behind master proc");
+
+            /*@
+             * @errortype
+             * @severity           ERRL_SEV_UNRECOVERABLE
+             * @moduleid           MOD_UPDATE_PROC_MEM_TO_USE
+             * @reasoncode         RC_NO_UPDATE_WHEN_MEM_MISSING
+             * @devdesc            No procs found with valid memory
+             * @custdesc           A problem occurred during the IPL of
+             *                     the system: No memory found
+             * @userdata1          Saved value of ATTR_PROC_MEM_TO_USE
+             * @userdata2          Updated value of ATTR_PROC_MEM_TO_USE
+             */
+            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                               MOD_UPDATE_PROC_MEM_TO_USE,
+                               RC_NO_UPDATE_WHEN_MEM_MISSING,
+                               l_proc_mem_to_use_save,
+                               l_proc_mem_to_use);
+
+            hwasErrorAddProcedureCallout(l_errl,
+                    EPUB_PRC_FIND_DECONFIGURED_PART,
+                    SRCI_PRIORITY_HIGH);
+            break;
+
+        }
+
+        //set PROC_MEM_TO_USE to the group/chip id of the proc we want to
+        //use the mem of
+        //get all procs behind the input node
+        TargetHandleList l_procs;
+        getChildAffinityTargetsByState( l_procs,
+                                        i_node,
+                                        CLASS_CHIP,
+                                        TYPE_PROC,
+                                        UTIL_FILTER_ALL);
+        for (auto & l_proc : l_procs)
+        {
+            l_proc->setAttr<ATTR_PROC_MEM_TO_USE>(l_proc_mem_to_use);
+        }
+
+    } while (0);
+
+    return l_errl;
+}
+
+errlHndl_t check_for_missing_memory (const Target* i_node,
+                                     uint8_t & io_proc_mem_to_use,
+                                     bool   & o_found_missing_mem)
+{
+
+    errlHndl_t l_errl {nullptr};
+    o_found_missing_mem = true;
+
+    do
+    {
+        /////////////////////////////////////////////////////////////
+        //Step 1 -- Figure out the lowest group/chip id proc that has
+        //          memory
+        /////////////////////////////////////////////////////////////
+        //get all procs behind the input node
+        TargetHandleList l_procs;
+        getChildAffinityTargetsByState( l_procs,
+                                        i_node,
+                                        CLASS_CHIP,
+                                        TYPE_PROC,
+                                        UTIL_FILTER_FUNCTIONAL);
+
+        //sort based on group/chip id. So, we can deterministically
+        //pick the processor with memory. This will also help guarantee
+        //that we will attempt to use master (or altmaster) proc's memory
+        //first before using slave proc's memory.
+        std::sort(l_procs.begin(), l_procs.end(),
+                [] (TargetHandle_t a, TargetHandle_t b)
+                {
+                    return getGroupChipIdInfo(a) < getGroupChipIdInfo(b);
+                });
+
+        uint8_t l_temp_proc_mem_to_use = io_proc_mem_to_use;
+
+        //find a processor that has dimms
+        for (auto & l_proc : l_procs)
+        {
+            TargetHandleList l_funcDimms;
+            getChildAffinityTargetsByState( l_funcDimms,
+                                            l_proc,
+                                            CLASS_LOGICAL_CARD,
+                                            TYPE_DIMM,
+                                            UTIL_FILTER_FUNCTIONAL);
+
+            //Pick the first proc we find with dimms
+            if (l_funcDimms.size() > 0)
+            {
+                l_temp_proc_mem_to_use = getGroupChipIdInfo(l_proc);
+                break;
+            }
+
+        }
+
+        /////////////////////////////////////////////////////////////
+        //Step 2 -- Get the proc we are currently using the memory of
+        //          and check if it has memory
+        /////////////////////////////////////////////////////////////
+        //get the proc pointed by PROC_MEM_TO_USE and check
+        //if there is memory behind that proc. We rely on the current
+        //value of PROC_MEM_TO_USE, so, we don't change our answer
+        //unnecessarily (in cases when both master proc and altmaster
+        //have memory)
+        auto l_grp  = (io_proc_mem_to_use >> 3);
+        auto l_chip = (io_proc_mem_to_use & 0x07); // last three bits are chipId
+        PredicateAttrVal<ATTR_FABRIC_GROUP_ID> l_predGrp (l_grp);
+        PredicateAttrVal<ATTR_FABRIC_CHIP_ID> l_predChip (l_chip);
+        PredicateCTM l_predProc (CLASS_CHIP, TYPE_PROC);
+        PredicateIsFunctional l_isFunctional;
+        PredicatePostfixExpr l_procCheckExpr;
+
+        l_procCheckExpr.push(&l_predProc).push(&l_isFunctional).
+            push(&l_predGrp).push(&l_predChip).And().And().And();
+
+        TargetHandleList l_procMemUsedCurrently;
+        targetService().getAssociated(l_procMemUsedCurrently,
+                                      i_node,
+                                      TargetService::CHILD_BY_AFFINITY,
+                                      TargetService::IMMEDIATE,
+                                      &l_procCheckExpr);
+
+        HWAS_INF("check_for_missing_memory: looking for a proc with "
+                "grp=0x%x chip=0x%x, found %d procs",
+                l_grp, l_chip, l_procMemUsedCurrently.size());
+
+        if (l_procMemUsedCurrently.size() >= 1)
+        {
+            //found proc
+            //Check if proc whose memory we are currently using has dimms
+            TargetHandleList l_funcDimms;
+            getChildAffinityTargetsByState( l_funcDimms,
+                                            l_procMemUsedCurrently[0],
+                                            CLASS_LOGICAL_CARD,
+                                            TYPE_DIMM,
+                                            UTIL_FILTER_FUNCTIONAL);
+            if (l_funcDimms.size() > 0)
+            {
+                //we found dimms behind the proc we are currently using
+                o_found_missing_mem = false;
+            }
+        }
+
+
+        /////////////////////////////////////////////////////////////
+        //Step 3-- If a proc with lower group/chip id has memory or
+        //          there is no memory behind the currently used proc,
+        //          then we update the proc_mem_to_use
+        //NOTE: This ensures that if someone replaces the dimm on a lowered
+        //      number proc, then we can fall back to that lowered number
+        //      proc. Also, it makes sure that we are updating only when
+        //      current proc_mem_to_use doesn't have memory or it's not
+        //      pointing  to a valid proc.
+        /////////////////////////////////////////////////////////////
+        if ((l_temp_proc_mem_to_use < io_proc_mem_to_use)
+                || (o_found_missing_mem))
+        {
+            HWAS_INF("check_for_missing_memory: found a need to switch"
+                    " PROC_MEM_TO_USE from 0x%x to 0x%x",
+                    io_proc_mem_to_use, l_temp_proc_mem_to_use);
+            io_proc_mem_to_use = l_temp_proc_mem_to_use;
+        }
+        else
+        {
+            HWAS_INF("check_for_missing_memory: kept PROC_MEM_TO_USE same"
+                    " 0x%x", io_proc_mem_to_use);
+        }
+
+
+    } while (0);
+
+    return l_errl;
+}
+
 
 errlHndl_t discoverTargets()
 {
