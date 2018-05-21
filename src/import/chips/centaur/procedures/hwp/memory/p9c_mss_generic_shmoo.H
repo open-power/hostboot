@@ -328,6 +328,13 @@ class generic_shmoo
         fapi2::ReturnCode sanity_check(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
 
         ///
+        /// @brief parse the MCBIST error map and report spd if any bad bit found
+        /// @param[in] i_target Centaur input mba
+        /// @return FAPI2_RC_SUCCESS iff succesful
+        ///
+        fapi2::ReturnCode parse_error_map(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+        ///
         /// @brief call setup_mcbist
         /// @param[in] i_target Centaur input MBA
         /// @return FAPI2_RC_SUCCESS iff successful
