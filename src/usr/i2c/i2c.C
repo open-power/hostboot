@@ -2635,12 +2635,11 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 // does not allow diagnostic mode when Secure Boot is enabled.
                 // Note that because I2C is needed before presence detect, we
                 // cannot check the security state of the processor, so we use
-                // the master secure mode as a proxy.  The effectiveness of this
-                // approach assumes nobody enables Secure Boot in hardware but
-                // then loads code with without Secure Boot compiled in, and
-                // that the processors' secure access bits (SABs) all match.
-                else if(   (SECUREBOOT::enabled())
-                        && (i_args.switches.useFsiI2C)) // FSI engine 0
+                // the master secure mode as a proxy.  However, we are unable
+                // to assume that the processors' secure access bits (SABs)
+                // all match early in the IPL.  Therefore we are disabling
+                // diagnostic mode for all FSI-based resets.
+                else if(i_args.switches.useFsiI2C) // FSI engine 0
                 {
                     skipDiagMode = true;
                 }
