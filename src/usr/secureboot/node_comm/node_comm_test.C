@@ -198,7 +198,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
 
 
     // 3) Read message on proc with Link Mailbox found above
-    TRACFCOMP(g_trac_nc,"nodeCommXbus2ProcTest: Attention Found on"
+    TRACFCOMP(g_trac_nc,"nodeCommXbus2ProcTest: Attention Found on "
               "proc=0x%X for L%d/M%d ",
               TARGETING::get_huid(read_tgt), linkId, mboxId);
 

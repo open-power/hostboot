@@ -142,6 +142,8 @@
         <id>XSCOM_VIRTUAL_ADDR</id>
     </attribute>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+    <attribute><id>HB_NODE_COMM_XBUS_MUTEX</id></attribute>
+    <attribute><id>HB_NODE_COMM_ABUS_MUTEX</id></attribute>
 </targetTypeExtension>
 
 <!-- Centaur chip/DMI -->

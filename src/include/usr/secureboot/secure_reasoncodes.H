@@ -55,6 +55,7 @@ namespace SECUREBOOT
         MOD_NC_XBUS_TEST                = 0x22,
         MOD_NC_MAP_ATTN                 = 0x23,
         MOD_NCDD_PERFORM_OP             = 0x24,
+        MOD_NCDD_WRITE                  = 0x25,
    };
 
     enum SECUREReasonCode
@@ -87,6 +88,7 @@ namespace SECUREBOOT
         RC_NC_NO_ATTN_FOUND             = SECURE_COMP_ID | 0x23,
         RC_NC_TOO_MANY_ATTNS_FOUND      = SECURE_COMP_ID | 0x24,
         RC_NCDD_INVALID_ARGS            = SECURE_COMP_ID | 0x25,
+        RC_NCDD_DATA_NOT_SENT           = SECURE_COMP_ID | 0x26,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

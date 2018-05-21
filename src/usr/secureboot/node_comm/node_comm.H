@@ -40,7 +40,7 @@
 extern trace_desc_t* g_trac_nc;
 
 // Easy macro replace for unit testing - TRACD vs TRACF
-#define TRACUCOMP(args...) TRACFCOMP(args)
+#define TRACUCOMP(args...) TRACDCOMP(args)
 
 namespace SECUREBOOT
 {
@@ -69,6 +69,9 @@ enum node_comm_registers_t : uint64_t
                              // XBUS values are default values
                              // NCDD_ABUS_REG_OFFSET added if in ABUS mode
     NCDD_REG_FIR          =  0x5013400,
+    NCDD_REG_FIR_WOX_AND  =  0x5013401,
+    NCDD_REG_FIR_WOX_OR   =  0x5013402,
+
     NCDD_REG_CTRL         =  0x501342E,
     NCDD_REG_DATA         =  0x501342F,
 
@@ -132,6 +135,22 @@ enum node_comm_fir_reg_helpers_t : uint64_t
     NCDD_XBUS_FIR_ATTN_MASK = 0x000000000FFF0000,
     NCDD_START_OF_ATTN_BITS = 0x0000000008000000,
 };
+
+
+/**
+ *  @brief Calculate Link Mailbox FIR Register Attention Bit Mask
+ *         based on linkId and mboxId
+ *
+ *  @param[in] i_linkId - Link Id of the operation
+ *  @param[in] i_mboxId - Mailbox Id of the operation
+ *
+ *  @return uint64_t - Calculated FIR Register Attention Bit Mask
+ */
+inline uint64_t getLinkMboxFirAttnBit(uint8_t i_linkId, uint8_t i_mboxId)
+{
+    return (NCDD_START_OF_ATTN_BITS >> ((2*i_linkId) + i_mboxId));
+}
+
 
 /**
  *  @brief Map Attention Bits in XBUS/ABUS FIR Register to specific Link Mailbox

@@ -155,13 +155,13 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args);
  * @param[in] i_args - Structure containing arguments needed for a command
  *                     transaction.
  *
- * @param[in] i_statusVal - Control Register value to be checked
+ * @param[in] i_statusVal - Control/Status Register value to be checked
  *
  * @return errlHndl_t - nullptr if successful and the command is complete;
  *                      otherwise a pointer to the error log.
  */
-errlHndl_t ncddCheckForErrors (node_comm_args_t & i_args,
-                               ctrl_reg_t i_statusVal );
+errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
+                            const ctrl_reg_t & i_statusVal );
 
 /**
  * @brief Waits for the operation to complete or timeout while
@@ -170,10 +170,13 @@ errlHndl_t ncddCheckForErrors (node_comm_args_t & i_args,
  * @param[in] i_args - Structure containing arguments needed for a command
  *                     transaction.
  *
+ * @param[in] o_statusVal - Last Control/Status Register value that was checked
+ *
  * @return errlHndl_t - nullptr if successful and the command is complete;
  *                      otherwise a pointer to the error log.
  */
-errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args);
+errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
+                               ctrl_reg_t & o_statusVal);
 
 /**
  * @brief Analyzes an error handle object and performs any
