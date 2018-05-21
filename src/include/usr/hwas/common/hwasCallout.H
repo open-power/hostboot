@@ -150,6 +150,7 @@ enum partTypeEnum
     MEM_REF_CLOCK                   = 9,
     PROC_REF_CLOCK                  = 10,
     PCI_REF_CLOCK                   = 11,
+    SMP_CABLE                       = 12, //Target is SMPGROUP
 };
 
 enum sensorTypeEnum

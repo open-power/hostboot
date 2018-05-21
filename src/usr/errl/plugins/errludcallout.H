@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,6 +142,11 @@ case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
                     case_PART_TYPE(LPC_SLAVE_PART_TYPE)
                     case_PART_TYPE(GPIO_EXPANDER_PART_TYPE)
                     case_PART_TYPE(SPIVID_SLAVE_PART_TYPE)
+                    case_PART_TYPE(TOD_CLOCK)
+                    case_PART_TYPE(MEM_REF_CLOCK)
+                    case_PART_TYPE(PROC_REF_CLOCK)
+                    case_PART_TYPE(PCI_REF_CLOCK)
+                    case_PART_TYPE(SMP_CABLE)
 
                     default:
                         i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",
