@@ -89,6 +89,7 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
                          va_list i_args )
 {
     errlHndl_t err = nullptr;
+    bool unlock_mutex = false;
     node_comm_args_t node_comm_args;
 
     uint64_t mode = va_arg( i_args, uint64_t );
@@ -160,7 +161,12 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
               node_comm_args.mboxId, (*node_comm_args.data_ptr));
 
     // Mutex Lock
-    // @TODO RTC:191008 Support mutex
+    (mode==NCDD_MODE_ABUS)
+      ? mutex_lock(node_comm_args.tgt->
+          getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_ABUS_MUTEX>())
+      : mutex_lock(node_comm_args.tgt->
+          getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_XBUS_MUTEX>());
+    unlock_mutex = true;
 
     /***********************************************/
     /* Node Comm Read                              */
@@ -190,9 +196,6 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
     }
     while (0);
 
-    // Mutex Unlock
-    // @TODO RTC:191008 Support mutex
-
     // If err, add trace and FFDC to log
     if (err)
     {
@@ -213,6 +216,17 @@ errlHndl_t nodeCommPerformOp( DeviceFW::OperationType i_opType,
                             err);
         }
     }
+
+    // Mutex unlock
+    if (unlock_mutex == true)
+    {
+        (mode==NCDD_MODE_ABUS)
+          ? mutex_unlock(node_comm_args.tgt->
+              getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_ABUS_MUTEX>())
+          : mutex_unlock(node_comm_args.tgt->
+              getHbMutexAttr<TARGETING::ATTR_HB_NODE_COMM_XBUS_MUTEX>());
+    }
+
 
     TRACFCOMP (g_trac_nc, EXIT_MRK"nodeCommPerformOp: %s: %s: "
                "tgt=0x%X, LinkId=%d, MboxId=%d, data=0x%.16llX. "
@@ -254,6 +268,58 @@ errlHndl_t ncddRead(node_comm_args_t & i_args)
             TRACE_ERR_ARGS(err));
         break;
     }
+
+    // Since Read above was successful, clear the data register
+    uint64_t clear_data = 0x0;
+    err = ncddRegisterOp( DeviceFW::WRITE,
+                          &clear_data,
+                          link_mbox_reg,
+                          i_args );
+
+    if(err)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"ncddRead: SCOM deviceWrite call "
+            "failed for Target HUID 0x%08X and address 0x%016llX. "
+            TRACE_ERR_FMT,
+            i_args.tgt_huid,
+            link_mbox_reg,
+            TRACE_ERR_ARGS(err));
+        break;
+    }
+
+
+    // Since Read above was successful, clear the FIR bit
+    uint64_t fir_attn_bit = getLinkMboxFirAttnBit(i_args.linkId, i_args.mboxId);
+
+    // Invert the fir bit and WOX_AND it into the register
+    uint64_t clear_fir_bit = ~fir_attn_bit;
+
+    uint64_t reg_addr = getLinkMboxRegAddr(NCDD_REG_FIR_WOX_AND, i_args.mode);
+
+    TRACUCOMP(g_trac_nc,"ncddRead: Clearing FIR bit 0x%.16llX based on "
+              "linkId=%d, mboxId=%d, mode=%s, by writing 0x%.16llX to FIR Reg "
+              "Addr 0x%.16llX on Target 0x%X",
+              fir_attn_bit, i_args.linkId, i_args.mboxId,
+              (i_args.mode == NCDD_MODE_ABUS)
+                ? NCDD_ABUS_STRING : NCDD_XBUS_STRING,
+              clear_fir_bit, reg_addr, i_args.tgt_huid);
+
+    err = ncddRegisterOp( DeviceFW::WRITE,
+                          &clear_fir_bit,
+                          NCDD_REG_FIR_WOX_AND,
+                          i_args );
+
+    if(err)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"ncddRead: SCOM deviceWrite call "
+            "failed for Target HUID 0x%08X and address 0x%016llX. "
+            TRACE_ERR_FMT,
+            i_args.tgt_huid,
+            link_mbox_reg,
+            TRACE_ERR_ARGS(err));
+        break;
+    }
+
 
     } while( 0 );
 
@@ -299,7 +365,7 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
     ctrl_reg_cmd.link_id = i_args.linkId;
 
 
-   err = ncddRegisterOp( DeviceFW::WRITE,
+    err = ncddRegisterOp( DeviceFW::WRITE,
                           &ctrl_reg_cmd.value,
                           NCDD_REG_CTRL,
                           i_args );
@@ -316,7 +382,8 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
     }
 
     // Wait for command to be complete
-    err = ncddWaitForCmdComp(i_args);
+    ctrl_reg_cmd.value = 0;
+    err = ncddWaitForCmdComp(i_args, ctrl_reg_cmd);
     if(err)
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"ncddWrite: Wait For Cmd Complete "
@@ -327,8 +394,43 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
         break;
     }
 
-    // @TODO RTC 191008 - have ncddWaitForCmdComp return status to
-    // check for 'write' bit being set
+    // Check for 'sent' bit being set
+    if (ctrl_reg_cmd.sent != 1)
+    {
+        TRACFCOMP( g_trac_nc,
+                   ERR_MRK"ncddWrite: 'Sent' bit not set in status reg: "
+                   "0x%.16llX (Target 0x%X)",
+                   ctrl_reg_cmd.value, i_args.tgt_huid );
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_NCDD_DATA_NOT_SENT
+         * @moduleid         MOD_NCDD_WRITE
+         * @userdata1        Status Register Value
+         * @userdata2        Target HUID
+         * @devdesc          Sent bit not set in Node Comm status/ctrl register
+         * @custdesc         Secure Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_NCDD_WRITE,
+                                       RC_NCDD_DATA_NOT_SENT,
+                                       ctrl_reg_cmd.value,
+                                       i_args.tgt_huid);
+
+        // Likely an issue with Processor or its bus
+        err->addHwCallout( i_args.tgt,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DELAYED_DECONFIG,
+                           HWAS::GARD_NULL );
+
+        // Or HB code failed to do the procedure correctly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_MED);
+
+        // @TODO RTC 184518 - Look into bus callouts
+
+        break;
+    }
 
     } while( 0 );
 
@@ -342,7 +444,7 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
 
 
 errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
-                            const ctrl_reg_t i_statusVal )
+                            const ctrl_reg_t & i_statusVal )
 {
     errlHndl_t err = nullptr;
     bool errorFound = false;
@@ -436,13 +538,13 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
 } // end ncddCheckStatus
 
 
-errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args)
+errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
+                               ctrl_reg_t & o_statusVal )
 {
     errlHndl_t err = nullptr;
     uint64_t interval_ns  = NODE_COMM_POLL_DELAY_NS;
     int timeout_ns = NODE_COMM_POLL_DELAY_TOTAL_NS;
     ctrl_reg_t ctrl_reg_status;
-
 
     TRACUCOMP(g_trac_nc, "ncddWaitForCmdComp(): timeout_ns=%d, "
               "interval_ns=%d", timeout_ns, interval_ns);
@@ -537,6 +639,8 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args)
 
     } while (0);
 
+    o_statusVal = ctrl_reg_status;
+
     TRACUCOMP( g_trac_nc,EXIT_MRK"ncddWaitForCmdComp: "
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(err));
@@ -553,9 +657,37 @@ void ncddHandleError( errlHndl_t & io_err,
                TRACE_ERR_FMT,
                TRACE_ERR_ARGS(io_err));
 
+    errlHndl_t l_err = nullptr;
+
     do
     {
-// @TODO RTC:191008 Implement simple reset functionality
+    // On a fail issue a cmd to the control reg with just the 'reset' bit set
+    ctrl_reg_t ctrl_reg_cmd;
+    ctrl_reg_cmd.value = 0x0;
+    ctrl_reg_cmd.reset = 1;
+
+
+    l_err = ncddRegisterOp( DeviceFW::WRITE,
+                            &ctrl_reg_cmd.value,
+                            NCDD_REG_CTRL,
+                            i_args );
+
+    if(l_err)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"ncddHandleError: SCOM deviceWrite call "
+            "failed for Target HUID 0x%08X and address 0x%016llX: "
+            TRACE_ERR_FMT
+            " . Committing after chaining to existing error: "
+            TRACE_ERR_FMT,
+            i_args.tgt_huid,
+            NCDD_REG_CTRL,
+            TRACE_ERR_ARGS(l_err),
+            TRACE_ERR_ARGS(io_err));
+
+        l_err->plid(io_err->plid());
+        errlCommit( l_err, SECURE_COMP_ID );
+        break;
+    }
 
     } while (0);
 

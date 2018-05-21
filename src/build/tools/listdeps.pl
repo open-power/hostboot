@@ -224,6 +224,7 @@ my $resident_modules = {
     "libsecureboot_base.so"     => '1',
     "libscom.so"                => '1',
     "libxscom.so"               => '1',
+    "libnode_comm.so"           => '1',
 };
 
 # A list of the dependent libraries in each istep.
