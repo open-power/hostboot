@@ -58,8 +58,20 @@ errlHndl_t scomOpSanityCheck(const DeviceFW::OperationType i_opType,
 
     do
     {
+        // In HOSTBOOT_RUNTIME we rely on OPAL to perform indirect scoms,
+        // but PHYP wants us to do it ourselves.  Therefore we need to
+        // allow 64-bit addresses to flow through in OPAL/Sapphire mode.
+        bool l_allowIndirectScoms = false;
+#ifdef __HOSTBOOT_RUNTIME
+        if( TARGETING::is_sapphire_load() )
+        {
+            l_allowIndirectScoms = true;
+        }
+#endif // __HOSTBOOT_RUNTIME
+
         // Verify address is not over 32-bits long
-        if(0 != (i_addr & 0xFFFFFFFF00000000))
+        if( (0 != (i_addr & 0xFFFFFFFF00000000))
+            && (!l_allowIndirectScoms) )
         {
             TRACFCOMP(g_trac_scom, ERR_MRK
                       "scomOpSanityCheck: Impossible address. i_addr=0x%.16X",
