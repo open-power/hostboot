@@ -1138,8 +1138,80 @@ sub processProcessor
     $targetObj->setAttribute($target,
                      "PROC_MEM_TO_USE", ( $targetObj->getAttribute($target,
                      "FABRIC_GROUP_ID") << 3));
+    processPowerRails ($targetObj, $target);
 }
 
+sub processPowerRails
+{
+    my $targetObj = shift;
+    my $target    = shift;
+
+    #Example of how system xml is getting parsed into data structures here
+    #and eventually into the attribute
+    #
+    #System XML has this:
+    #<bus>
+    #    <bus_id>vrm3-connector-22/vrm-type3-10/35219-3-8/IR35219_special.vout-0 => fcdimm-connector-69/fcdimm-14/membuf-0/MemIO</bus_id>
+    #    <bus_type>POWER</bus_type>
+    #    <cable>no</cable>
+    #    <source_path>vrm3-connector-22/vrm-type3-10/35219-3-8/</source_path>
+    #    <source_target>IR35219_special.vout-0</source_target>
+    #    <dest_path>fcdimm-connector-69/fcdimm-14/membuf-0/</dest_path>
+    #    <dest_target>MemIO</dest_target>
+    #    <bus_attribute>
+    #            <id>CLASS</id>
+    #    <default>BUS</default>
+    #    </bus_attribute>
+    #</bus>
+    #
+    #each of the connection comes up like this (this is $rail variable)
+    # 'BUS_NUM' => 0,
+    # 'DEST_PARENT' => '/sys/node-4/calliope-1/fcdimm-connector-69/fcdimm-14/membuf-0',
+    # 'DEST' => '/sys/node-4/calliope-1/fcdimm-connector-69/fcdimm-14/membuf-0/MemIO',
+    # 'SOURCE_PARENT' => '/sys/node-4/calliope-1/vrm3-connector-22/vrm-type3-10/35219-3-8',
+    # 'SOURCE' => '/sys/node-4/calliope-1/vrm3-connector-22/vrm-type3-10/35219-3-8/IR35219_special.vout-0'
+    #
+    #So, for 'SOURCE' target, we walk up the hierarchy till we get to
+    #vrm3-connector-22 as that is the first target in the hierarchy that
+    #is unique per instance of a given volate rail. We get vrm connector's
+    #POSITION and set it as the ID for that rail.
+    #
+    #The 'DEST' target also has an attribute called "RAIL_NAME" that we can use
+    #to figure out which rail we are working with. But, for rails that are
+    #common between proc and centaur have "Cent" or "Mem" as a prefix.
+    #
+    my $rails=$targetObj->findDestConnections($target,"POWER","");
+    if ($rails ne "")
+    {
+        foreach my $rail (@{$rails->{CONN}})
+        {
+            my $rail_dest = $rail->{DEST};
+            my $rail_src  = $rail->{SOURCE};
+            my $rail_name = $targetObj->getAttribute($rail_dest, "RAIL_NAME");
+            #Need to get the connector's position and set the ID to that
+            #As it is unique for every new connection in the MRW
+            my $rail_connector =  $targetObj->getTargetParent( #VRM connector
+                                 ($targetObj->getTargetParent #VRM type
+                                 ($targetObj->getTargetParent($rail_src))));
+
+
+            my $position = $targetObj->getAttribute($rail_connector,"POSITION");
+            my $rail_attr_id =
+                ($targetObj->getAttribute($target, "TYPE") eq "PROC") ?
+                "NEST_" : "";
+
+            #The rails that are common between proc and centaur have a "Cent"
+            #prefix in the system xml. We don't care for "Cent" in our attribute
+            #as it is scoped to the right target. But, for VIO, we decided to
+            #use MemIO rather than CentIO. The attribute is named as VIO_ID.
+            $rail_name =~ s/Cent//g;
+            $rail_name =~ s/Mem/V/g;
+            $rail_attr_id .= $rail_name . "_ID";
+
+            $targetObj->setAttribute($target, $rail_attr_id, $position);
+        }
+    }
+}
 
 sub processI2cSpeeds
 {
@@ -2223,6 +2295,8 @@ sub processMembuf
             my $dimmconn=$targetObj->getTargetParent($dimm);
         }
     }
+
+    processPowerRails($targetObj, $target);
 }
 
 sub getI2cMapField
