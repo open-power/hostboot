@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,44 @@ void calculateEffectiveEC();
  * @return error log handle
  */
 errlHndl_t markDisabledMcas();
+
+
+/*
+ * @brief: This function calls check_for_missing_memory and set
+ *         ATTR_PROC_MEM_TO_USE to the processor that we should use
+ *         in case of missing memory behind master proc
+ *
+ * @note:  Only applicable for PHYP based system
+ *
+ * @param[in]: i_node: Node target to operate on
+ *
+ * @retval: error log handle
+ */
+errlHndl_t update_proc_mem_to_use (const TARGETING::Target* i_node);
+
+/*
+ * @brief: checks whether we are missing memory behind master proc
+ *
+ * If there is no memory behind the master proc, then we iterate
+ * through all the other procs and figure out a proc that has
+ * memory. We figure out the proc with memory and
+ * return that to the user as io_proc_mem_to_use. User can update
+ * ATTR_PROC_MEM_TO_USE as needed.
+ *
+ * @note:  Only applicable for PHYP based system
+ *
+ * @param[in]: i_node: Node target to operate on
+ * @param[in/out]: io_proc_mem_to_use: Value of ATTR_PROC_MEM_TO_USE
+ *                  the value is changed only if we find missing
+ *                  memory
+ * @param[out]: o_found_missing_mem: indicated whether we found missing
+ *                  memory behind master proc or not
+ * @retval error log handle
+ */
+errlHndl_t check_for_missing_memory (const TARGETING::Target* i_node,
+                                     uint8_t & io_proc_mem_to_use,
+                                     bool & o_found_missing_mem);
+
 
 };   // end namespace
 
