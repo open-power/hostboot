@@ -29,13 +29,14 @@ namespace HWAS
 {
     enum HwasModuleID
     {
-        MOD_DECONFIG_GARD         = 0x01,
-        MOD_PROCESS_CALLOUT       = 0x02,
-        MOD_CHECK_MIN_HW          = 0x03,
-        MOD_DECONFIG_TARGETS_FROM_GARD = 0x04,
-        MOD_VALIDATE_EC_LEVELS    = 0x05,
-        MOD_RUNTIME_DECONFIG      = 0x06,
-        MOD_DISABLE_OBUS          = 0x07,
+        MOD_DECONFIG_GARD                 = 0x01,
+        MOD_PROCESS_CALLOUT               = 0x02,
+        MOD_CHECK_MIN_HW                  = 0x03,
+        MOD_DECONFIG_TARGETS_FROM_GARD    = 0x04,
+        MOD_VALIDATE_EC_LEVELS            = 0x05,
+        MOD_RUNTIME_DECONFIG              = 0x06,
+        MOD_DISABLE_OBUS                  = 0x07,
+        MOD_UPDATE_PROC_MEM_TO_USE        = 0x08,
     };
 
     enum HwasReasonCode
@@ -64,6 +65,7 @@ namespace HWAS
         RC_NOT_AT_RUNTIME                       = HWAS_COMP_ID | 0x12,
         RC_NULL_TARGET                          = HWAS_COMP_ID | 0x13,
         RC_ONLY_TWO_OBUS_SHOULD_BE_CONFIGURED   = HWAS_COMP_ID | 0x14,
+        RC_NO_UPDATE_WHEN_MEM_MISSING           = HWAS_COMP_ID | 0x15,
     };
 };
 
