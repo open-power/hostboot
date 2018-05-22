@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -180,32 +180,50 @@ chip p9_ec
  ##############################################################################
 
 ################################################################################
-# Summary for EC
+# EC Chiplet FIR
 ################################################################################
-
-# We prefer to use the EC chiplet FIRs, however, COREFIR recoverable errors will
-# not report through the chiplet FIRs due to a bug in Nimbus DD1.0. Instead, we
-# will bypass the chiplet FIRS completely and use the summary construct.
-
-rule rEC
+rule rEC_CHIPLET_FIR
 {
   CHECK_STOP:
-    summary( 0, rEC_LFIR ) |
-    summary( 1, rCOREFIR );
-
+     EC_CHIPLET_CS_FIR       & ~EC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
   RECOVERABLE:
-    summary( 0, rEC_LFIR ) |
-    summary( 1, rCOREFIR );
-
-  UNIT_CS:
-    summary( 1, rCOREFIR );
-
+    (EC_CHIPLET_RE_FIR >> 2) & ~EC_CHIPLET_FIR_MASK & `3fffffffffffffff`;
 };
 
-group gEC attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
+group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
 {
-    (rEC, bit(0)) ? analyze(gEC_LFIR);
-    (rEC, bit(1)) ? analyze(gCOREFIR);
+    /** EC_CHIPLET_FIR[2]
+     *  Unit Checkstop from COREFIR (bit0 in RER)
+     */
+    (rEC_CHIPLET_FIR, bit(2)) ? analyzeCOREFIR;
+
+    /** EC_CHIPLET_FIR[3]
+     *  Attention from EC_LFIR
+     */
+    (rEC_CHIPLET_FIR, bit(3)) ? analyze(gEC_LFIR);
+
+    /** EC_CHIPLET_FIR[4]
+     *  Attention from COREFIR
+     */
+    (rEC_CHIPLET_FIR, bit(4)) ? analyzeCOREFIR;
+};
+
+################################################################################
+# EC Chiplet Unit Checkstop FIR
+################################################################################
+
+rule rEC_CHIPLET_UCS_FIR
+{
+  UNIT_CS:
+    EC_CHIPLET_UCS_FIR & ~EC_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+};
+
+group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+{
+    /** EC_CHIPLET_UCS_FIR[1]
+     *  Unit Checkstop from COREFIR
+     */
+    (rEC_CHIPLET_UCS_FIR, bit(1)) ? analyzeCOREFIR;
 };
 
 ################################################################################
@@ -308,7 +326,7 @@ rule rCOREFIR
     COREFIR & ~COREFIR_MASK &  COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
-group gCOREFIR filter singlebit, cs_root_cause
+group gCOREFIR filter priority(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,58,59,60,61,62,63,57), cs_root_cause
 {
     /** COREFIR[0]
      *  IFU SRAM Recoverable error
@@ -573,7 +591,7 @@ group gCOREFIR filter singlebit, cs_root_cause
     /** COREFIR[57]
      *  Other Core Core Checkstop
      */
-    (rCOREFIR, bit(57)) ? defaultMaskedError;
+    (rCOREFIR, bit(57)) ? self_th_1;
 
     /** COREFIR[58]
      *  Other Core System Checkstop

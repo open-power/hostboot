@@ -263,6 +263,13 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
                                     uint32_t i_childPos );
 
 /**
+ * @brief Returns the fused-core neighbor of a given core chip
+ * @param i_core  The given core chip
+ * @return        The neighbor core chip
+ */
+ExtensibleChip * getNeighborCore( ExtensibleChip * i_core );
+
+/**
  * @brief   Returns the target of a PROC that is connected via the given
  *          target's XBUS or ABUS.
  * @param   i_procTarget Target of TYPE_PROC.
