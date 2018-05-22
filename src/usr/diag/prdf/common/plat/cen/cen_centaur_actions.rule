@@ -85,8 +85,7 @@ actionclass pll_unlock_UERE
 /** Callout the DMI BUS interface */
 actionclass calloutBusInterface_dmibus
 {
-# TODO: RTC 144057
-#    funccall("calloutBusInterfacePlugin");
+    funccall("calloutBusInterfacePlugin");
 };
 
 /** Callout the DMI BUS interface, threshold 1 */
@@ -108,16 +107,14 @@ actionclass calloutBusInterface_dmibus_th1_UERE
 actionclass spareDeployed_dmibus
 {
     calloutBusInterface_dmibus;
-# TODO: RTC 144057
-#    funccall("spareDeployed");
+    funccall("spareDeployed");
 };
 
 /** Lane Repair: max spares exceeded */
 actionclass maxSparesExceeded_dmibus_UERE
 {
     calloutBusInterface_dmibus_th1;
-# TODO: RTC 144057
-#    funccall("maxSparesExceeded");
+    funccall("maxSparesExceeded");
     SueSource; # channel failure
 };
 
@@ -125,8 +122,7 @@ actionclass maxSparesExceeded_dmibus_UERE
 actionclass tooManyBusErrors_dmibus
 {
     calloutBusInterface_dmibus_th1;
-# TODO: RTC 144057
-#    funccall("tooManyBusErrors");
+    funccall("tooManyBusErrors");
 };
 
 /** Callout the DMI bus, threshold 1. Also, clear secondary MBSFIR bits. */
