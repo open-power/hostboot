@@ -1042,9 +1042,9 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
 //------------------------------------------------------------------------------
 
 template <>
-uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t TpsEvent<TYPE_MCA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeCe] "
+    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeCeStats] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -1128,10 +1128,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         if ( o_done ) break;
 
         // Analyze CEs
-        o_rc = analyzeCe( io_sc );
+        o_rc = analyzeCeStats( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "analyzeCe() failed." );
+            PRDF_ERR( PRDF_FUNC "analyzeCeStats() failed." );
             break;
         }
 
@@ -1258,6 +1258,26 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[TpsEvent::analyzeCeStats] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // TODO: analyze the CE statistics
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
                                            bool & o_done )
 {
@@ -1304,7 +1324,29 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         // starting the next phase.
         iv_canResumeScrub = !lastAddr;
 
-        // TODO
+        // Analyze the CE statistics if the command has reached the last
+        // address, there were hard CEs on phase 1 or 2, or there were
+        // soft/intermittent CEs on phase 2.
+        if ( lastAddr || (eccAttns & MAINT_HARD_NCE_ETE) ||
+             ((TD_PHASE_2 == iv_phase) && ((eccAttns & MAINT_INT_NCE_ETE) ||
+                                           (eccAttns & MAINT_SOFT_NCE_ETE)  )) )
+        {
+            o_rc = analyzeCeStats( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "analyzeCeStats() failed on 0x%08x,0x%02x",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+        }
+
+        // If the command reached the last address, the procedure is complete.
+        if ( lastAddr )
+        {
+            o_done = true;
+
+            // TODO: handle false alarm if needed.
+        }
 
     } while (0);
 

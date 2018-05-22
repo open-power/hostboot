@@ -189,11 +189,11 @@ class TpsEvent : public TdEntry
         CeCount & io_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
-     * @brief  Does isolation for CE attentions.
-     * @param  io_sc      The step code data struct.
+     * @brief  Analyzes the maintenance CE statistics.
+     * @param  io_sc The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t analyzeCe( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc );
 
     #endif // __HOSTBOOT_RUNTIME
 
