@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,6 +255,28 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
             ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/8)
             : MCA_BYTES_PER_RANK;
 }
+
+
+/**
+ * @brief Find the first symbol of the given DRAM index
+ * @param i_dram     The Dram
+ * @param i_isX4Dram TRUE if DRAM is x4
+ * @return The Symbol
+ */
+template<>
+uint8_t dram2Symbol<TARGETING::TYPE_MBA>( uint8_t i_dram, bool i_isX4Dram )
+{
+    const uint8_t dramsPerRank   = i_isX4Dram ? MBA_NIBBLES_PER_RANK
+                                              : MBA_BYTES_PER_RANK;
+
+    const uint8_t symbolsPerDram = i_isX4Dram ? MBA_SYMBOLS_PER_NIBBLE
+                                              : MBA_SYMBOLS_PER_BYTE;
+
+    return (dramsPerRank > i_dram) ? (i_dram * symbolsPerDram)
+                                   : SYMBOLS_PER_RANK;
+}
+
+
 
 } // namespace PARSERUTILS
 
