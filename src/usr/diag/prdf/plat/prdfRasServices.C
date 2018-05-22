@@ -133,15 +133,6 @@ void ErrDataService::handleChannelFail( TargetHandle_t i_memTarget )
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleCoreUnitCS( TargetHandle_t i_exTarget,
-                                       bool & o_initiateHwudump)
-{
-    // No-op in Hostboot
-    o_initiateHwudump = false; // default to not initiate hwudump
-}
-
-//------------------------------------------------------------------------------
-
 void ErrDataService::handleNxUnitCS( TargetHandle_t i_nxTarget )
 {
     // No-op in Hostboot
