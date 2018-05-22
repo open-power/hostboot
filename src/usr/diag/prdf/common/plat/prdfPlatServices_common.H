@@ -232,7 +232,7 @@ int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
  * @param  o_mark The returned mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 157888
+/*
 int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenMark & o_mark );
 */
@@ -264,50 +264,7 @@ int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
                          bool i_allowWriteBlocked = false );
 */
 
-/**
- * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_mba        Target MBA.
- * @param  i_rank       Target rank.
- * @param  o_port0Spare A symbol associated with the spare on port 0.
- * @param  o_port1Spare A symbol associated with the spare on port 1.
- * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 157888
-int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-                        CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
-                        CenSymbol & o_eccSpare );
-*/
 
-/**
- * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_mba        Target MBA.
- * @param  i_rank       Target rank.
- * @param  i_symbol     A symbol associated with the DRAM to be spared.
- * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
- * @note   The procedure will be able to derive the port from the given symbol.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 157888
-int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-                        const CenSymbol & i_symbol, bool i_x4EccSpare );
-*/
-
-/**
- * @brief   Get spare DRAM information on a DIMM.
- * @param   i_mba MBA target.
- * @param   i_rank Rank.
- * @param   i_ps MBA port select.
- * @param   o_spareConfig Spare DRAM config information.
- * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- * @note    On a DIMM its possible that spare is not present. Also on X4 DRAM
- *          spare can be on High nibble or low nibble. This function will
- *          populate spare config information in o_spareConfig.
- */
-/* TODO RTC 157888
-int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
-                            uint8_t i_ps, uint8_t & o_spareConfig );
-*/
 
 /**
  * @brief  Returns the raw card type of a buffered DIMM.
