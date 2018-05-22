@@ -23,20 +23,73 @@
 #
 # IBM_PROLOG_END_TAG
 
-# TODO: RTC 144057 upate actions for all four DMI buses on this MC target.
-actionclass calloutBusInterface_dmi0_th_1 {};
-actionclass calloutBusInterface_dmi1_th_1 {};
-actionclass calloutBusInterface_dmi2_th_1 {};
-actionclass calloutBusInterface_dmi3_th_1 {};
-actionclass spareDeployed_dmi0 {};
-actionclass spareDeployed_dmi1 {};
-actionclass spareDeployed_dmi2 {};
-actionclass spareDeployed_dmi3 {};
-actionclass maxSparesExceeded_dmi0 {};
-actionclass maxSparesExceeded_dmi1 {};
-actionclass maxSparesExceeded_dmi2 {};
-actionclass maxSparesExceeded_dmi3 {};
-actionclass tooManyBusErrors_dmi0_UERE {};
-actionclass tooManyBusErrors_dmi1_UERE {};
-actionclass tooManyBusErrors_dmi2_UERE {};
-actionclass tooManyBusErrors_dmi3_UERE {};
+/** Lane Repair: callout Bus Interface - DMI Bus  */
+/** Callout the DMI bus 0 */
+actionclass calloutDmiBus0
+{
+    funccall("calloutBusInterface_DMI0");
+};
+/** Callout the DMI bus 1 */
+actionclass calloutDmiBus1
+{
+    funccall("calloutBusInterface_DMI1");
+};
+/** Callout the DMI bus 2 */
+actionclass calloutDmiBus2
+{
+    funccall("calloutBusInterface_DMI2");
+};
+/** Callout the DMI bus 3 */
+actionclass calloutDmiBus3
+{
+    funccall("calloutBusInterface_DMI3");
+};
+
+actionclass calloutBusInterface_dmi0_th_1 { calloutDmiBus0; threshold1; };
+actionclass calloutBusInterface_dmi1_th_1 { calloutDmiBus1; threshold1; };
+actionclass calloutBusInterface_dmi2_th_1 { calloutDmiBus2; threshold1; };
+actionclass calloutBusInterface_dmi3_th_1 { calloutDmiBus3; threshold1; };
+
+
+/** Lane Repair: spare Deployed - DMI Bus  */
+actionclass spareDeployed_dmi0
+{ calloutDmiBus0; funccall("spareDeployed_DMI0"); };
+actionclass spareDeployed_dmi1
+{ calloutDmiBus1; funccall("spareDeployed_DMI1"); };
+actionclass spareDeployed_dmi2
+{ calloutDmiBus2; funccall("spareDeployed_DMI2"); };
+actionclass spareDeployed_dmi3
+{ calloutDmiBus3; funccall("spareDeployed_DMI3"); };
+
+
+/** Lane Repair: max spares exceeded - DMI Bus  */
+actionclass maxSparesExceeded_dmi0
+{ calloutBusInterface_dmi0_th_1; funccall("maxSparesExceeded_DMI0"); };
+actionclass maxSparesExceeded_dmi1
+{ calloutBusInterface_dmi1_th_1; funccall("maxSparesExceeded_DMI1"); };
+actionclass maxSparesExceeded_dmi2
+{ calloutBusInterface_dmi2_th_1; funccall("maxSparesExceeded_DMI2"); };
+actionclass maxSparesExceeded_dmi3
+{ calloutBusInterface_dmi3_th_1; funccall("maxSparesExceeded_DMI3"); };
+
+
+/** Lane Repair: too many Bus Errors - DMI Bus  */
+actionclass tooManyBusErrors_dmi0_UERE
+{
+ calloutBusInterface_dmi0_th_1; funccall("tooManyBusErrors_DMI0");
+};
+actionclass tooManyBusErrors_dmi1_UERE
+{
+ calloutBusInterface_dmi1_th_1; funccall("tooManyBusErrors_DMI1");
+};
+actionclass tooManyBusErrors_dmi2_UERE
+{
+ calloutBusInterface_dmi2_th_1; funccall("tooManyBusErrors_DMI2");
+};
+actionclass tooManyBusErrors_dmi3_UERE
+{
+ calloutBusInterface_dmi3_th_1; funccall("tooManyBusErrors_DMI3");
+};
+
+
+

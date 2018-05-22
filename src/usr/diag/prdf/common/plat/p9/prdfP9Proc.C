@@ -493,57 +493,6 @@ PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 
-/**
- * @brief  Callout a bus interface (i.e. XBUS, OBUS, DMI, etc.)
- * @param  i_chip PROC chip.
- * @param  i_type The bus endpoint type.
- * @param  i_pos  The bus endpoint position relative to the processor.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS
- */
-int32_t calloutBusInterface( ExtensibleChip * i_chip, TARGETING::TYPE i_type,
-                             uint32_t i_pos, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    ExtensibleChip * endPoint = getConnectedChild( i_chip, i_type, i_pos );
-    if ( nullptr == endPoint )
-    {
-        PRDF_ERR( "[calloutBusInterface] connection lookup failed: 0x%08x "
-                  "0x%02x %d", i_chip->getHuid(), i_type, i_pos );
-        io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
-        io_sc.service_data->SetCallout(i_chip->getTrgt());
-        io_sc.service_data->SetThresholdMaskId(0);
-    }
-    else
-    {
-        LaneRepair::calloutBusInterface( endPoint, io_sc, MRU_LOW );
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, calloutBusInterface );
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, calloutBusInterface );
-
-#define PLUGIN_CALLOUT_INTERFACE( TYPE, POS ) \
-int32_t calloutBusInterface_##TYPE##POS( ExtensibleChip * i_chip, \
-                                         STEP_CODE_DATA_STRUCT & io_sc ) \
-{ \
-    return calloutBusInterface( i_chip, TYPE_##TYPE, POS, io_sc ); \
-} \
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, calloutBusInterface_##TYPE##POS ); \
-PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, calloutBusInterface_##TYPE##POS );
-
-PLUGIN_CALLOUT_INTERFACE( XBUS, 0 )
-PLUGIN_CALLOUT_INTERFACE( XBUS, 1 )
-PLUGIN_CALLOUT_INTERFACE( XBUS, 2 )
-PLUGIN_CALLOUT_INTERFACE( OBUS, 0 )
-PLUGIN_CALLOUT_INTERFACE( OBUS, 1 )
-PLUGIN_CALLOUT_INTERFACE( OBUS, 2 )
-PLUGIN_CALLOUT_INTERFACE( OBUS, 3 )
-
-#undef PLUGIN_CALLOUT_INTERFACE
-
-//------------------------------------------------------------------------------
-
 } // end namespace Proc
 
 } // end namespace PRDF
