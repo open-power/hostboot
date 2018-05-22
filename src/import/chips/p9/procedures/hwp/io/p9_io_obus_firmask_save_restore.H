@@ -84,7 +84,8 @@ extern "C"
     *     the SAVE paramter after istep 10.6. Once we reach runtime HBRT will call this HWP again with
     *     the RESTORE OP_TYPE and the masks will be restored to their initial values. We expect the
     *     HWP to be called with the RESTORE_OP_TYPE during the HBRT initialzation after the target service
-    *     has been initialized in HBRT.
+    *     has been initialized in HBRT. There should only be one single HWP call with the RESTORE flag for
+    *     every call there is with the SAVE flag.
     *
     *     Note: If this HWP is called with the SAVE op then after we read and store the firmasks
     *           into attributes, we will set additional bits in the mask.

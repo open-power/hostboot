@@ -125,7 +125,8 @@ fapi2::ReturnCode p9_io_obus_firmask_save(const fapi2::Target<fapi2::TARGET_TYPE
 
 /**
 *        @brief This function will look up attributes that contain firmask values that we have saved off earlier
-*               and write the values to the appropriate firmask registers
+*               and write the values to the appropriate firmask registers. If one or both of the attributes
+*               then we will not restore either of the masks
 *
 *        @param[in] i_target_chip   Processor target we want to save/restore OBUS firmasks for
 *        @param[in] i_obus_targets  vector the Processor's functional child OBUS targets
@@ -268,40 +269,74 @@ fapi2::ReturnCode p9_io_obus_firmask_restore(const fapi2::Target<fapi2::TARGET_T
     FAPI_IMP("p9_io_obus_firmask_restore: Entering...");
     uint64_t l_restoreValue;
 
-    // Read the value we stored previously
+    // Read the proc's obus firmask value we stored previously
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_PB_IOOFIR_MASK,
                            i_target_chip,
                            l_restoreValue),
              "failed to get attribute ATTR_IO_PB_IOOFIR_MASK");
 
-    FAPI_ASSERT(l_restoreValue,
-                fapi2::P9_IO_FIRMASK_RESTORE_ERROR().set_TARGET( i_target_chip ),
-                "Attempted to restore PU_IOE_PB_IOO_FIR_MASK_REG but ATTR_IO_PB_IOOFIR_MASK was never set");
+    // If ATTR_IO_PB_IOOFIR_MASK is zero that indicates that firmask_save has not been
+    // called yet so we will not restore this firmask
+    // Note: it was decided to keep these attribute checks seperate to allow
+    //       attribute overrides of these attributes to take effect on HBRT reset
+    if(l_restoreValue)
+    {
+        // Write the stored value back to the scom register
+        FAPI_TRY(fapi2::putScom(i_target_chip,
+                                PU_IOE_PB_IOO_FIR_MASK_REG,
+                                l_restoreValue),
+                 "putScom of PU_IOE_PB_IOO_FIR_MASK_REG failed");
 
-    // Write the stored value back to the scom register
-    FAPI_TRY(fapi2::putScom(i_target_chip,
-                            PU_IOE_PB_IOO_FIR_MASK_REG,
-                            l_restoreValue),
-             "putScom of PU_IOE_PB_IOO_FIR_MASK_REG failed");
+        // Need to write 0 to ATTR_IO_PB_IOOFIR_MASK to ensure
+        // we do not re-write the obus firmask values on HBRT
+        // reboots or MPIPLs
+        l_restoreValue = 0;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_PB_IOOFIR_MASK,
+                               i_target_chip,
+                               l_restoreValue),
+                 "failed to set attribute ATTR_IO_PB_IOOFIR_MASK");
+    }
+    else
+    {
+        FAPI_IMP("p9_io_obus_firmask_restore: Skipping restore of PU_IOE_PB_IOO_FIR_MASK_REG because ATTR_IO_PB_IOOFIR_MASK  is 0");
+    }
 
-    // Loop through obus targets and restore the IOO LFIR value
+
+    // Loop through obus targets and restore the IOO LFIR value if necessary
     for(const auto& l_obusTarget : i_obus_targets)
     {
-        // Read the value we stored previously
+        // Read the obus's obus firmask value we stored previously
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_OLLFIR_MASK,
                                l_obusTarget,
                                l_restoreValue),
                  "failed to get attribute ATTR_IO_OLLFIR_MASK");
 
-        FAPI_ASSERT(l_restoreValue,
-                    fapi2::P9_IO_FIRMASK_RESTORE_ERROR().set_TARGET( l_obusTarget ),
-                    "Attempted to restore OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG but ATTR_IO_OLLFIR_MASK was never set");
+        // If ATTR_IO_OLLFIR_MASK is zero that indicates that firmask_save has not been
+        // called yet so we will not restore this firmask
+        // Note: it was decided to keep these attribute checks seperate to allow
+        //       attribute overrides of these attributes to take effect on HBRT reset
+        if(l_restoreValue)
+        {
 
-        // Write the stored value back to the scom register
-        FAPI_TRY(fapi2::putScom(l_obusTarget,
-                                OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG,
-                                l_restoreValue),
-                 "putScom of OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG failed");
+            // Write the stored value back to the scom register
+            FAPI_TRY(fapi2::putScom(l_obusTarget,
+                                    OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG,
+                                    l_restoreValue),
+                     "putScom of OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG failed");
+
+            // Need to write 0 to ATTR_IO_OLLFIR_MASK to ensure
+            // we do not re-write the obus firmask values on HBRT
+            // reboots or MPIPLs
+            l_restoreValue = 0;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_OLLFIR_MASK,
+                                   l_obusTarget,
+                                   l_restoreValue),
+                     "failed to set attribute ATTR_IO_OLLFIR_MASK");
+        }
+        else
+        {
+            FAPI_IMP("p9_io_obus_firmask_restore: Skipping restore of OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG because ATTR_IO_OLLFIR_MASK is 0");
+        }
     }
 
 fapi_try_exit:
