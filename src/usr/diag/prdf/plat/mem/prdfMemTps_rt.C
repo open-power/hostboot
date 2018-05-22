@@ -328,11 +328,11 @@ uint32_t __updateVpdSumAboveOne( CeCount i_sumAboveOneCount,
 //------------------------------------------------------------------------------
 
 template <>
-uint32_t TpsEvent<TYPE_MCA>::analyzeEcc( const uint32_t & i_eccAttns,
+uint32_t TpsEvent<TYPE_MCA>::analyzeEccErrors( const uint32_t & i_eccAttns,
                                          STEP_CODE_DATA_STRUCT & io_sc,
                                          bool & o_done )
 {
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeEcc] "
+    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeEccErrors] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -1119,10 +1119,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
             break;
         }
 
-        o_rc = analyzeEcc( eccAttns, io_sc, o_done );
+        o_rc = analyzeEccErrors( eccAttns, io_sc, o_done );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "analyzeEcc() failed." );
+            PRDF_ERR( PRDF_FUNC "analyzeEccErrors() failed." );
             break;
         }
         if ( o_done ) break;
@@ -1236,6 +1236,28 @@ uint32_t TpsEvent<TYPE_MCA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 //##############################################################################
 
 template<>
+uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
+                                         STEP_CODE_DATA_STRUCT & io_sc,
+                                         bool & o_done )
+{
+    #define PRDF_FUNC "[TpsEvent::analyzeEccErrors] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // TODO: handle MPE, RCE ETE, UE, etc.
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
                                            bool & o_done )
 {
@@ -1257,7 +1279,15 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
             break;
         }
 
-        // TODO
+        // Analyze the ECC errors (not CEs), if needed.
+        o_rc = analyzeEccErrors( eccAttns, io_sc, o_done );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeEccErrors() failed on 0x%08x,0x%02x",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+        if ( o_done ) break; // abort the procedure.
 
         // Determine if the command stopped on the last address.
         bool lastAddr = false;
