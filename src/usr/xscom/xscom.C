@@ -35,12 +35,14 @@
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <sys/misc.h>
+#include <sys/time.h>
 #include <string.h>
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <xscom/xscomreasoncodes.H>
 #include "xscom.H"
 #include <assert.h>
@@ -816,6 +818,117 @@ uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
     l_returnAddr = l_XSComBaseAddr + l_offset;
 
     return l_returnAddr;
+}
+
+
+/**
+ * @brief Multicast Read of core XSCOM register on remote Node
+ */
+uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
+                                      uint64_t i_scomAddr )
+{
+    // definitions of 64 bit xscom address contents that are
+    //   useful for this function
+    //                             hi 32 bits  lo 32 bits
+    //  representation :          0x0000_0000__0000_0000
+    //
+    //           (hi 32 bits, xscom mmio control)
+    //
+    //  chip field                0x0000_0400__0000_0000
+    //    (to be multiplied by chip ID to give field value)
+    //
+    //  node/group field (0-7)    0xE000_0000__0000_0000
+    //
+    //           (lo 32 bits, scom addr)
+    //
+    //  multicast                 0x0000_0000__4000_0000
+    //  multicast op type         0x0000_0000__3800_0000
+    //    - read OR                            00
+    //    - read AND                           08
+    //    - read bitwise                       10
+    //    - rsvd                               18
+    //    - write compare                      20
+    //    - write                              28
+    //    - rsvd                               30
+    //    - rsvd                               38
+    //  multicast group           0x0000_0000__0700_0000
+    //  relative scomAddr field   0x0000_0000__00FF_FFFF
+    constexpr uint64_t XSCOM_MULTICAST =                  0x0000000040000000;
+    constexpr uint64_t XSCOM_MULTICAST_OP_READ_OR =       0x0000000000000000;
+    constexpr uint64_t XSCOM_MULTICAST_GROUP_CORE =       0x0000000001000000;
+    constexpr uint64_t XSCOM_MULTICAST_REL_ADDR_MASK =    0x0000000000FFFFFF;
+
+    // Symmetry between nodes is enforced so we know the remote
+    //  node contains this chip
+    TARGETING::Target * l_MasterProcTarget = nullptr;
+    TARGETING::TargetService & l_tgtServ = TARGETING::targetService();
+    l_tgtServ.masterProcChipTargetHandle( l_MasterProcTarget );
+    uint8_t l_chipId =
+            l_MasterProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+
+    // compute xscom address & control, then map into processor space
+    uint64_t l_xscomBaseAddr =
+            computeMemoryMapOffset( MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR,
+                                    i_node,
+                                    l_chipId );
+
+    uint64_t l_xscomAddr = ( (i_scomAddr & XSCOM_MULTICAST_REL_ADDR_MASK) |
+                             XSCOM_MULTICAST |
+                             XSCOM_MULTICAST_OP_READ_OR |
+                             XSCOM_MULTICAST_GROUP_CORE );
+
+    uint64_t * l_virtAddr =
+            static_cast<uint64_t*>
+            (mmio_dev_map(reinterpret_cast<void*>(l_xscomBaseAddr),
+                          THIRTYTWO_GB));
+
+    // execute the SCOM op to do the multicast read
+    // init return value to dummy to verify read happened
+    uint64_t l_rv = IPC_INVALID_REMOTE_ADDR | i_node;
+    size_t l_rvSize = sizeof(l_rv);
+    HMER l_hmer;
+
+    do
+    {
+        errlHndl_t  l_err = xScomDoOp( DeviceFW::READ,
+                l_virtAddr,
+                l_xscomAddr,
+                &l_rv,
+                l_rvSize,
+                l_hmer );
+
+        // If not successful
+        if (l_err)
+        {
+            delete l_err;
+            l_err = nullptr;
+
+            TRACFCOMP( g_trac_xscom,
+                    ERR_MRK "readRemoteCoreScomMultiCast()  Read xScom Failed: "
+                    "XscomAddr = %.16llx, VAddr=%llx",
+                    l_xscomAddr, l_virtAddr );
+
+            // re-seed return value in case changed before error detected
+            l_rv = IPC_INVALID_REMOTE_ADDR | i_node;
+            break;
+        }
+        else
+        {
+        }
+
+        // regs not yet populated
+        if (l_rv == 0 )
+        {
+          // delay to allow remote core to populate regs
+          nanosleep(0, (NS_PER_MSEC * 100));
+        }
+
+        // wait for remote node to populate its core scom regs
+    } while( l_rv == 0 );
+
+    mmio_dev_unmap(reinterpret_cast<void*>(l_virtAddr));
+
+    return l_rv;
 }
 
 } // end namespace

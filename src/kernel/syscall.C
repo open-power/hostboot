@@ -46,11 +46,8 @@
 #include <sys/sync.h>
 #include <errno.h>
 #include <kernel/machchk.H>
+#include <kernel/ipc.H>
 
-namespace KernelIpc
-{
-    int send(uint64_t i_q, msg_t * i_msg);
-};
 
 extern "C"
 void kernel_execute_hype_doorbell()
@@ -144,6 +141,8 @@ namespace Systemcalls
     void MmLinearMap(task_t *t);
     void CritAssert(task_t *t);
     void SetMchkData(task_t *t);
+    void UpdateRemoteIpcAddr(task_t *t);
+    void QryLocalIpcInfo(task_t *t);
 
 
     syscall syscalls[] =
@@ -188,8 +187,10 @@ namespace Systemcalls
         &MmLinearMap,     // MM_LINEAR_MAP
         &CritAssert,  // MISC_CRITASSERT
         &SetMchkData,  // MISC_SETMCHKDATA
+        &UpdateRemoteIpcAddr, // UPDATE_REMOTE_IPC_ADDR
+        &QryLocalIpcInfo  // QRY_LOCAL_IPC_INFO
 
-        };
+    };
 };
 
 extern "C"
@@ -1002,6 +1003,31 @@ namespace Systemcalls
         uint64_t i_xstopData = (uint64_t)(TASK_GETARG1(t));
 
         Kernel::MachineCheck::setCheckstopData(i_xstopAddr,i_xstopData);
+    }
+
+    /**
+     *  @brief Tells the kernel the address of the Remote IPC buffer
+     *         for a given Node
+     * @param[in] t: the task calling the update function
+     */
+    void UpdateRemoteIpcAddr(task_t* t)
+    {
+        uint64_t i_Node = TASK_GETARG0(t);
+        uint64_t i_RemoteAddr = TASK_GETARG1(t);
+        int rc = KernelIpc::updateRemoteIpcAddr(i_Node, i_RemoteAddr);
+        TASK_SETRTN(t, rc);
+    }
+
+    /**
+     *  @brief Query the local node and IPC buffer info
+     * @param[in] t: the task calling the update function
+     */
+    void QryLocalIpcInfo(task_t* t)
+    {
+        uint64_t * i_pONode = (uint64_t *)TASK_GETARG0(t);
+        uint64_t * i_pOAddr = (uint64_t *)TASK_GETARG1(t);
+        int rc = KernelIpc::qryLocalIpcInfo(i_pONode, i_pOAddr);
+        TASK_SETRTN(t, rc);
     }
 
 };

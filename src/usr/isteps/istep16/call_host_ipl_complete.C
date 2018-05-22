@@ -50,6 +50,7 @@
 #ifdef CONFIG_BMC_IPMI
 #include    <ipmi/ipmisensor.H>
 #endif
+
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;

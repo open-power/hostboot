@@ -32,11 +32,6 @@
 
 using namespace KernelIpc;
 
-namespace KernelIpc
-{
-    int send(uint64_t i_q, msg_t * i_msg);
-};
-
 /**
  * IPC communication area. Interrupt service provider initializes.
  * @see intrrp.C
@@ -49,28 +44,24 @@ KernelIpc::ipc_data_area_t KernelIpc::ipc_data_area;
 //    2. The destination node never responds, potentially hanging this thread.
 int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 {
-    // @note
-    // Point to memory in the destination image.
-    // All host boot images are assured to be at the same code level.
-    // PIR node and physical node are not always the same. For instance a
-    // single node system with an alt-master could be designed such that the
-    // alt-master were on a different logical (power bus numbering) node.
-    // Since it's not in plan to use this IPC mechanism in a single node
-    // system, this case will get ignored for now.
-    uint64_t this_node = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
-    uint64_t hrmor_offset = getHRMOR()-(this_node*(ipc_data_area.hrmor_base));
-    uint64_t dest_node = (i_q >> 32) & 0x07;
-    uint64_t dest_hrmor = (ipc_data_area.hrmor_base*dest_node) + hrmor_offset;
+    // the destination node is a 3 bit field encoded in the 64 bit queue id
+    // big endian bits 29:31, ie, xxxx_xxxN__xxxx_xxxx
+    // extract it from the appropriate field
+    uint64_t dest_node = ((i_q >> 32) &
+                         (internode_info_vals_t::MAX_NODES_PER_SYS - 1));
 
-    uint64_t dest_addr = reinterpret_cast<uint64_t>(&ipc_data_area);
-    dest_addr += dest_hrmor;
-    dest_addr |= 0x8000000000000000ul;
+    ipc_data_area_t * p_dest = ipc_data_area.remote_ipc_data_addr[dest_node];
+    printkd("IPC Dest addr %px Q_id:%lx dest_node:%.lx\n",
+            p_dest,i_q, dest_node);
 
-    printkd("IPC Dest addr %lx Q_id:%lx\n",dest_addr,i_q);
-
-    // pointer to the ipc_data_area in the destination node
-    ipc_data_area_t * p_dest =
-        reinterpret_cast<ipc_data_area_t*>(dest_addr);
+    // validate destination address
+    if ( (p_dest == nullptr ) ||
+         ((reinterpret_cast<uint64_t>(p_dest) &
+                 IPC_INVALID_REMOTE_ADDR_MASK) ==
+           IPC_INVALID_REMOTE_ADDR))
+    {
+        return( EINVAL);
+    }
 
     // get lock on IPC data area in other node
     if(false == __sync_bool_compare_and_swap(&(p_dest->msg_queue_id),
@@ -98,5 +89,52 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     msg_free(i_msg);
 
     return 0;
+}
+
+
+// update the address this IPC instance will use to send messages
+//  to a remote node
+int KernelIpc::updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)
+{
+    int rc;
+    if // input node is valid
+      (i_Node < internode_info_vals_t::MAX_NODES_PER_SYS)
+    {
+        // update local array entry
+        rc = 0;
+        ipc_data_area.remote_ipc_data_addr[i_Node] =
+                reinterpret_cast<ipc_data_area_t*>(i_RemoteAddr);
+    }
+    else
+    {
+        rc = EINVAL;
+        printk("updateRemoteAddr() Invalid input node: %lx\n",i_Node);
+    }
+
+    return(rc);
+}
+
+
+// query the node and remote address other nodes will use to send
+//  messages to this IPC instance
+int KernelIpc::qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr)
+{
+    // determine node and remote address
+    uint64_t l_localNode = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+
+    uint64_t l_localAddr = reinterpret_cast<uint64_t>(&ipc_data_area);
+    uint64_t l_hrmorOffset = (getHRMOR() -
+                              (l_localNode * (ipc_data_area.hrmor_base)));
+    uint64_t l_remoteHrmor =
+            ((ipc_data_area.hrmor_base * l_localNode) + l_hrmorOffset);
+
+    uint64_t l_oAddr = (( l_localAddr +
+                          l_remoteHrmor ) |
+                          0x8000000000000000ul);
+
+    *i_pONode = l_localNode;
+    *i_pOAddr = l_oAddr;
+
+    return(0);
 }
 

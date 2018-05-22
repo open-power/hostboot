@@ -2138,6 +2138,9 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
             }
             else
             {
+                // stitch together routing if not already done
+                IPC::IpcSp::acquireRemoteNodeAddrs();
+
                 int rc = msg_send(reinterpret_cast<msg_q_t>(q_handle),
                                   i_msg);
                 TRACFCOMP(g_trac_mboxmsg,INFO_MRK

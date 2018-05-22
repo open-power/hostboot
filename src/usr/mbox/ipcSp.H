@@ -44,6 +44,18 @@ namespace IPC
              */
             static void init(errlHndl_t & o_errl);
 
+            /**
+             * Query the local node's IPC address and store it all of the
+             * local node's core scratch2 regs. This will allow remote nodes
+             * to read the address so they know where to write IPC messages.
+             */
+            static void distributeLocalNodeAddr( void );
+
+            /**
+             * Acquire all Remote Node IPC addresses
+             */
+            static void acquireRemoteNodeAddrs( void );
+
         protected:
 
             /**
@@ -77,9 +89,20 @@ namespace IPC
             void msgHandler();
 
             /**
+             * Acquire all Remote Node IPC addresses
+             */
+            void _acquireRemoteNodeAddrs( void );
+
+            /**
              * The IPC message queue
              */
             msg_q_t iv_msgQ;
+
+            /**
+             * Indicates whether or not the Remote Node IPC
+             * addresses have already been acquired
+             */
+            bool iv_IsRemoteNodeAddrsValid;
 
     };
 }; // namespace IPC

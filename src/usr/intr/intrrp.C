@@ -359,23 +359,56 @@ errlHndl_t IntrRp::_init()
             break;
         }
 
+        // extract the mpipl indicator
+        // will still be 0 if attribute does not exist
         uint8_t is_mpipl = 0;
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        if(sys &&
-            sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl) &&
-            is_mpipl)
+        sys->tryGetAttr<TARGETING::ATTR_IS_MPIPL_HB>(is_mpipl);
+
+        // Extract the last values for IPC data Addresses.
+        // will be 00's except for MPIPL, then previous values
+        uint64_t l_ipcDataAddrs[MAX_NODES_PER_SYS];
+        assert((sys->tryGetAttr<TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS>
+        (l_ipcDataAddrs)) == true );
+
+        // determine node and
+        // ipc data address as seen by a remote node
+        uint64_t l_thisNode = 0xa5a5;   // seed with invalid value(s) to
+        uint64_t l_remoteAddr = 0x5a5a; // catch missing return values
+
+        qryLocalIpcInfo( l_thisNode, l_remoteAddr );
+
+        // validate no change to local if this is an MPIPL
+        if (is_mpipl)
+        {
+            assert( l_ipcDataAddrs[l_thisNode] == l_remoteAddr );
+        }
+
+        // update attribute entry for this node
+        l_ipcDataAddrs[l_thisNode] = l_remoteAddr;
+        sys->setAttr<TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS>
+        (l_ipcDataAddrs);
+
+        // shadow the IPC addrs where the IPC msg send can reach them
+        for ( uint64_t i = 0;
+                i < MAX_NODES_PER_SYS;
+                i++ )
+        {
+            uint64_t remoteAddr = l_ipcDataAddrs[i];
+            updateRemoteIpcAddr( i, remoteAddr );
+        }
+
+        if(is_mpipl)
         {
             TRACFCOMP(g_trac_intr,"Reset interrupt service for MPIPL");
             l_err = resetIntpForMpipl();
 
             if(l_err)
             {
-                TRACFCOMP(g_trac_intr,"Failed to reset interrupt service for MPIPL");
+                TRACFCOMP(g_trac_intr,
+                        "Failed to reset interrupt service for MPIPL");
                 break;
             }
         }
-
 
 
         //Disable Incoming PSI Interrupts

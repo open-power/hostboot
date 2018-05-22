@@ -35,6 +35,12 @@
 #include <sbeio/sbeioif.H>
 #include <util/utiltce.H>
 #include <targeting/targplatutil.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/attributes.H>
+#include <p9_quad_scom_addresses.H>
+#include <sys/internode.h>
+#include <sys/mmio.h>
+#include <xscom/xscomif.H>
 
 namespace ISTEP_21
 {
@@ -54,7 +60,8 @@ using namespace TARGETING;
 
 IpcSp::IpcSp()
     :
-        iv_msgQ()
+        iv_msgQ(),
+        iv_IsRemoteNodeAddrsValid( false )
 {
 }
 
@@ -66,6 +73,48 @@ IpcSp::~IpcSp()
 void IpcSp::init(errlHndl_t & o_errl)
 {
     o_errl = Singleton<IpcSp>::instance()._init();
+}
+
+void IpcSp::distributeLocalNodeAddr( void )
+{
+    // Store IPC address for local node in core scratch registers
+    //  to identify IPC msg address to remote node(s)
+    uint64_t l_localNode;
+    uint64_t l_remoteAddr;
+    qryLocalIpcInfo( l_localNode, l_remoteAddr );
+
+    TARGETING::Target * l_pSys = NULL;
+    TARGETING::targetService().getTopLevelTarget( l_pSys );
+    TARGETING::TargetHandleList l_coreTargetList;
+    TARGETING::getChildChiplets( l_coreTargetList,
+                                 l_pSys,
+                                 TARGETING::TYPE_CORE,
+                                 true );
+
+    // Store IPC address into scom reg for each core
+    // Every core on this node needs to have the value stored
+    //  in it's scratch register in case any cores get deconfigured
+    for(const auto & l_core_target : l_coreTargetList)
+    {
+        uint64_t l_remoteAddrSize = sizeof(l_remoteAddr);
+        errlHndl_t l_err = deviceWrite( l_core_target,
+                                        &l_remoteAddr,
+                                        l_remoteAddrSize,
+                                        DEVICE_SCOM_ADDRESS(C_SCR2) );
+
+        if (l_err)
+        {
+            errlCommit(l_err, IPC_COMP_ID);
+        }
+    }
+
+    return;
+}
+
+void IpcSp::acquireRemoteNodeAddrs( void )
+{
+    Singleton<IpcSp>::instance()._acquireRemoteNodeAddrs();
+    return;
 }
 
 void* IpcSp::msg_handler(void *unused)
@@ -583,6 +632,91 @@ void IpcSp::msgHandler()
                 break;
         }
     }
+}
+
+
+void IpcSp::_acquireRemoteNodeAddrs( void )
+{
+    if // remote addresses have not been gathered
+      (iv_IsRemoteNodeAddrsValid == false)
+    {
+        TARGETING::Target * l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+
+        if (l_sys)
+        {
+            // If MPIPL then remote regs are no longer valid
+            uint8_t l_IsMpipl =
+              l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+
+            if (l_IsMpipl == false )
+            {
+                // extract current ipc addr attributes
+                uint64_t l_ipcDataAddrs[MAX_NODES_PER_SYS];
+                l_sys->tryGetAttr
+                <TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS>
+                (l_ipcDataAddrs);
+
+                // extract valid node map
+                uint8_t validNodeBitMap =
+                        l_sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+                // determine which node is local
+                uint64_t l_ThisNode;
+                uint64_t l_RemoteAddr;
+                qryLocalIpcInfo( l_ThisNode, l_RemoteAddr );
+
+                // loop thru all Nodes
+                for ( uint64_t i = 0;
+                      i < MAX_NODES_PER_SYS;
+                      i++ )
+                {
+                    if // remote node
+                      ( i != l_ThisNode )
+                    {
+                        if // valid node
+                          ( (validNodeBitMap & (0x80 >> i)) != 0  )
+                        {
+                            // read scoms for remote node
+                            l_RemoteAddr =
+                                    XSCOM::readRemoteCoreScomMultiCast(i,
+                                                                       C_SCR2);
+                        } // end valid node
+                        else
+                        {
+                            // set an invalid value for remote address
+                            l_RemoteAddr = IPC_INVALID_REMOTE_ADDR | i;
+                        }
+
+                        // push results to IPC and Attributes shadow
+                        updateRemoteIpcAddr( i, l_RemoteAddr );
+                        l_ipcDataAddrs[i] = l_RemoteAddr;
+                    } // end remote node
+                    else
+                    {
+                        // local node, do not need to get remote addrs
+                    }
+                }
+
+                // update attributes
+                l_sys->setAttr<TARGETING::ATTR_IPC_NODE_BUFFER_GLOBAL_ADDRESS>
+                (l_ipcDataAddrs);
+            } // end not mpipl
+            else
+            {
+                // (remote addrs have already been shadowed from attributes)
+            }
+
+            // read the scoms only once
+            iv_IsRemoteNodeAddrsValid = true;
+        } // end acquire scoms
+    } // end remote addrs not gathered
+    else
+    {
+        // (no action needed)
+    }
+
+    return;
 }
 
 
