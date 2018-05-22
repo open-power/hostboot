@@ -301,69 +301,6 @@ uint32_t __updateVpdSumAboveOne( CeCount i_sumAboveOneCount,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
-                                           bool & o_done )
-{
-    #define PRDF_FUNC "[TpsEvent<T>::analyzeTpsPhase1_rt] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Analyze Ecc Attentions
-        uint32_t eccAttns;
-        o_rc = checkEccFirs<T>( iv_chip, eccAttns );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
-                    iv_chip->getHuid() );
-            break;
-        }
-
-        o_rc = analyzeEcc( eccAttns, io_sc, o_done );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "analyzeEcc() failed." );
-            break;
-        }
-        if ( o_done ) break;
-
-        // Analyze CEs
-        o_rc = analyzeCe( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "analyzeCe() failed." );
-            break;
-        }
-
-        // At this point, we are done with the procedure.
-        o_done = true;
-
-    } while (0);
-
-    if ( (SUCCESS == o_rc) && o_done )
-    {
-        // Clear the ECC FFDC for this master rank.
-        MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
-
-        if ( iv_ban )
-        {
-            // Ban TPS on this rank.
-            MemDbUtils::banTps<T>( iv_chip, iv_rank );
-
-            // Permanently mask mainline NCEs and TCEs.
-            getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 template <>
 uint32_t TpsEvent<TYPE_MCA>::analyzeEcc( const uint32_t & i_eccAttns,
                                          STEP_CODE_DATA_STRUCT & io_sc,
@@ -1135,6 +1072,71 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
+                                           bool & o_done )
+{
+    #define PRDF_FUNC "[TpsEvent::analyzePhase] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TD_PHASE_0 == iv_phase ) break; // Nothing to analyze yet.
+
+        // Analyze Ecc Attentions
+        uint32_t eccAttns;
+        o_rc = checkEccFirs<TYPE_MCA>( iv_chip, eccAttns );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                    iv_chip->getHuid() );
+            break;
+        }
+
+        o_rc = analyzeEcc( eccAttns, io_sc, o_done );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeEcc() failed." );
+            break;
+        }
+        if ( o_done ) break;
+
+        // Analyze CEs
+        o_rc = analyzeCe( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeCe() failed." );
+            break;
+        }
+
+        // At this point, we are done with the procedure.
+        o_done = true;
+
+    } while (0);
+
+    if ( (SUCCESS == o_rc) && o_done )
+    {
+        // Clear the ECC FFDC for this master rank.
+        MemDbUtils::resetEccFfdc<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK );
+
+        if ( iv_ban )
+        {
+            // Ban TPS on this rank.
+            MemDbUtils::banTps<TYPE_MCA>( iv_chip, iv_rank );
+
+            // Permanently mask mainline NCEs and TCEs.
+            getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                                        bool & o_done )
 {
@@ -1161,7 +1163,7 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
                 break;
             case TD_PHASE_1:
             case TD_PHASE_2:
-                o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
+                //o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
                 break;
             default: PRDF_ASSERT( false ); // invalid phase
         }
@@ -1297,6 +1299,49 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
 //                          Specializations for MBA
 //
 //##############################################################################
+
+template<>
+uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
+                                           bool & o_done )
+{
+    #define PRDF_FUNC "[TpsEvent::analyzePhase] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TD_PHASE_0 == iv_phase ) break; // Nothing to analyze yet.
+
+        // Look for any ECC errors that occurred during the command.
+        uint32_t eccAttns;
+        o_rc = checkEccFirs<TYPE_MBA>( iv_chip, eccAttns );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // TODO
+
+    } while (0);
+
+    if ( (SUCCESS == o_rc) && o_done )
+    {
+        // Clear the ECC FFDC for this master rank.
+        MemDbUtils::resetEccFfdc<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK );
+
+        // Ban TPS on this rank, if needed.
+        if ( iv_ban ) MemDbUtils::banTps<TYPE_MBA>( iv_chip, iv_rank );
+
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template<>
 uint32_t TpsEvent<TYPE_MBA>::startCmd()
