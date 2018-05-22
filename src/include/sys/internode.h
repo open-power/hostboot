@@ -26,7 +26,7 @@
 #define __INTERNODE_H
 // Memory area preserved on MPIPL
 
-#include <vmmconst.h>
+#include <usr/vmmconst.h>
 
 enum internode_info_vals_t
 {

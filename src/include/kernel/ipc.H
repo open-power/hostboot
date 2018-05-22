@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define __IPC_H
 
 #include <sys/msg.h>
+#include <sys/internode.h>
 
 #define IPC_DATA_AREA_LOCKED 0xFFFFFFFFFFFFFFFFul
 #define IPC_DATA_AREA_READ   0xFFFFFFFFFFFFFFFEul
@@ -33,12 +34,48 @@
 
 namespace KernelIpc
 {
+
+    /** @fn send()
+     *  @brief Send an IPC message to a remote node
+     *
+     *  @param[in] i_q - message queue
+     *  @param[in] i_msg - message
+     *
+     *  @note
+     */
+    int send(uint64_t i_q, msg_t * i_msg);
+
+    /** @fn updateRemoteIpcAddr()
+     *  @brief update the Remote Address used to send IPC
+     *         messages to the specified node
+     *
+     *  @param[in] i_node - node
+     *  @param[in] i_remoteAddr - IPC address of Remote Node's ipc_data_area
+     *
+     *  @note
+     */
+    int updateRemoteIpcAddr(uint64_t i_node, uint64_t i_remoteAddr);
+
+    /** @fn qryLocalIpcInfo()
+     *  @brief query the node and remote address other nodes will use to
+     *         send messages to this IPC instance.
+     *
+     *  @param[in] i_pONode - buffer the node will be returned in
+     *  @param[in] i_pOAddr - buffer the address will be returned in
+     *
+     *  @note
+     */
+    int qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr);
+
+
 struct ipc_data_area_t
 {
     uint64_t msg_queue_id;
     msg_t    msg_payload;
     uint64_t hrmor_base;
     uint32_t pir;
+    struct ipc_data_area_t *
+      remote_ipc_data_addr[internode_info_vals_t::MAX_NODES_PER_SYS];
 };
 
 /**

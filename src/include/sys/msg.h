@@ -284,6 +284,35 @@ int msg_respond(msg_q_t q, msg_t* msg);
 msg_t* msg_wait(msg_q_t q);
 
 
+/** @fn updateRemoteIpcAddr
+  * @brief Update a Remote Node's IPC buffer address
+  *
+  * @param[in] i_node - node
+  * @param[in] i_remoteAddr - Remote Node's IPC buffer address
+  *
+  * @return Result of update.
+  * @retval 0 - Success
+  * @retval EINVAL - Invalid Node.
+  */
+           // low nibble is remote node number
+#define IPC_INVALID_REMOTE_ADDR_MASK     0xFFFFFFFFFFFFFFF0ull
+#define IPC_INVALID_REMOTE_ADDR          0x00000000deadadd0ull
+
+int updateRemoteIpcAddr(uint64_t i_node, uint64_t i_remoteAddr);
+
+
+/** @fn qryLocalIpcInfo
+  * @brief Query the local Node's node number and IPC bfr address
+  *
+  * @param[out] o_node - returned Node
+  * @param[out] o_addr - returned Local Node's IPC bfr address
+  *
+  * @return Result of query.
+  * @retval 0 - Success
+   */
+int qryLocalIpcInfo( uint64_t & o_node, uint64_t & o_addr);
+
+
 /** @fn msg_is_async
   * @brief  Indicates if message is asynchronous.
   *

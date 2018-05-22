@@ -84,7 +84,7 @@
 #include <secureboot/service.H>
 #include <p9_perst_phb.H>
 #include <plat_hwp_invoker.H>
-
+#include <ipcSp.H>
 // ---------------------------
 // Used to grab SBE boot side
 #include <sbe/sbe_update.H>
@@ -2181,6 +2181,11 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                 TRACFCOMP( g_trac_initsvc,
                    "Returned from cpu_all_winkle." );
             }
+
+            // identify IPC msg address to remote node(s)
+            // this must be after the winkle call because the data is stored
+            // in a core scom which will get lost
+            IPC::IpcSp::distributeLocalNodeAddr();
 
             err = MBOX::resume();
             if (err)

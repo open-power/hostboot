@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = mbox
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
 OBJS += mboxdd.o
 OBJS += mailboxsp.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -151,3 +151,31 @@ msg_t* msg_wait(msg_q_t q)
     return (msg_t*)_syscall1(MSG_WAIT, q);
 }
 
+int updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)
+{
+    return (int64_t)_syscall2(UPDATE_REMOTE_IPC_ADDR,
+                              (void *)i_Node,
+                              (void *)i_RemoteAddr);
+}
+
+int qryLocalIpcInfo(uint64_t & o_Node, uint64_t & o_Addr)
+{
+    // need to allocate a buffer on the heap as Kernel cannot
+    //  store back to user stack buffer
+    uint64_t * l_pTmpBfr = new uint64_t[2];
+    l_pTmpBfr[0] = o_Node;    // seed tmp bfr with contents of out bfr
+    l_pTmpBfr[1] = o_Addr;    //  to hide the existence of the
+                              //  intermediate tmp bfr
+    void * l_pNode = reinterpret_cast<void *>(&l_pTmpBfr[0]);
+    void * l_pAddr = reinterpret_cast<void *>(&l_pTmpBfr[1]);
+
+    void * l_retVal = _syscall2( QRY_LOCAL_IPC_INFO,
+                                 l_pNode,
+                                 l_pAddr );
+
+    o_Node = l_pTmpBfr[0];
+    o_Addr = l_pTmpBfr[1];
+    delete [] l_pTmpBfr;
+
+    return( reinterpret_cast<int64_t>(l_retVal) );
+}
