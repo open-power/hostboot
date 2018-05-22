@@ -70,6 +70,8 @@ class DsdEvent : public TdEntry
 
         uint32_t o_rc = SUCCESS;
 
+        o_done = false;
+
         do
         {
             // First, do analysis.
@@ -112,13 +114,104 @@ class DsdEvent : public TdEntry
   private: // functions
 
     /**
-     * @brief  Do analysis based on the current phase.
-     * @param  io_sc  The step code data struct.
-     * @param  o_done True if the procedure is complete or has aborted, false
-     *                otherwise.
+     * @brief  Does isolation for ECC attentions during each phase.
+     * @param  i_eccAttns Mask of all currently active maintenance attentions.
+     *                    See enum MaintEccAttns for values.
+     * @param  io_sc      The step code data struct.
+     * @param  o_done     True if the procedure is complete or has aborted.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+    uint32_t checkEcc( const uint32_t & i_eccAttns,
+                       STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    /**
+     * @brief  Called in the last phase of the procedure to determine if the
+     *         spare was successfully applied.
+     * @param  i_eccAttns Mask of all currently active maintenance attentions.
+     *                    See enum MaintEccAttns for values.
+     * @param  io_sc      The step code data struct.
+     * @param  o_done     True if the procedure is complete or has aborted.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t verifySpare( const uint32_t & i_eccAttns,
+                          STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    /**
+     * @brief  Do analysis based on the current phase.
+     * @param  io_sc  The step code data struct.
+     * @param  o_done True if the procedure is complete or has aborted.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
+    {
+        #define PRDF_FUNC "[DsdEvent::analyzePhase] "
+
+        uint32_t o_rc = SUCCESS;
+
+        do
+        {
+            if ( TD_PHASE_0 == iv_phase )
+            {
+                // Before starting the first command, set iv_mark in the
+                // hardware steer mux.
+                /* TODO: RTC 189221
+                o_rc = mssSetSteerMux<T>( iv_chip, iv_rank, iv_mark,
+                                          iv_eccSpare );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "mssSetSteerMux(0x%08x,0x%2x) failed",
+                              iv_chip->getHuid(), getKey() );
+                    break;
+                }
+                */
+
+                break; // Nothing to analyze yet.
+            }
+
+            // Look for any ECC errors that occurred during the command.
+            uint32_t eccAttns;
+            o_rc = checkEccFirs<T>( iv_chip, eccAttns );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            // Analyze the ECC errors, if needed.
+            o_rc = checkEcc( eccAttns, io_sc, o_done );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            if ( o_done ) break; // abort the procedure.
+
+            // Determine if the spare was applied successfully.
+            o_rc = verifySpare( eccAttns, io_sc, o_done );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "verifySpare() failed on 0x%08x",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+        } while (0);
+
+        #ifdef __HOSTBOOT_RUNTIME
+        if ( (SUCCESS == o_rc) && o_done )
+        {
+            // Clear the ECC FFDC for this master rank.
+            MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
+        }
+        #endif
+
+        return o_rc;
+
+        #undef PRDF_FUNC
+    }
 
     /**
      * @brief  Starts the appropriate maintenance command for each phase of the
@@ -134,36 +227,7 @@ class DsdEvent : public TdEntry
      * @post   iv_phase will be updated appropriately per design.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
-    {
-        uint32_t signature = 0;
-
-        switch ( iv_phase )
-        {
-            case TD_PHASE_0:
-                iv_phase  = TD_PHASE_1;
-                signature = PRDFSIG_StartDsdPhase1;
-                break;
-
-            #ifndef __HOSTBOOT_RUNTIME // IPL only
-
-            case TD_PHASE_1:
-                iv_phase  = TD_PHASE_2;
-                signature = PRDFSIG_StartDsdPhase2;
-                break;
-
-            #endif
-
-            default: PRDF_ASSERT( false ); // invalid phase
-        }
-
-        PRDF_TRAC( "[DsdEvent] Starting DSD Phase %d: 0x%08x,0x%02x",
-                   iv_phase, iv_chip->getHuid(), getKey() );
-
-        io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
-
-        return startCmd();
-    }
+    uint32_t startNextPhase( STEP_CODE_DATA_STRUCT & io_sc );
 
   private: // instance variables
 
