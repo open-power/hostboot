@@ -31,6 +31,7 @@
 // Platform includes
 #include <prdfMemTdQueue.H>
 #include <prdfMemUtils.H>
+#include <prdfTargetServices.H>
 
 namespace PRDF
 {
@@ -62,7 +63,55 @@ class TpsEvent : public TdEntry
 
   public: // overloaded functions from parent class
 
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
+    {
+        #define PRDF_FUNC "[TpsEvent::nextStep] "
+
+        #ifndef __HOSTBOOT_RUNTIME
+        // Should only do this procedure if MNFG IPL CE handling is enabled.
+        PRDF_ASSERT( PlatServices::isMfgCeCheckingEnabled() );
+        #endif
+
+        uint32_t o_rc = SUCCESS;
+
+        o_done = false;
+
+        do
+        {
+            // First, do analysis.
+            o_rc = analyzePhase( io_sc, o_done );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x, 0x%2x",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            if ( o_done ) break; // Nothing more to do.
+
+            // Then, start the next phase of the procedure.
+            o_rc = startNextPhase( io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x, 0x%2x",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+        } while (0);
+
+        // Add the rank to the callout list if no callouts in the list.
+        if ( 0 == io_sc.service_data->getMruListSize() )
+        {
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank,
+                           MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm );
+        }
+
+        return o_rc;
+
+        #undef PRDF_FUNC
+    }
 
     uint32_t getKey() const { return iv_rank.getKey(); } // Master and slave
 
