@@ -1160,26 +1160,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
-
-// TODO: RTC 157888 Actual implementation of this procedure will be done later.
-template<>
-uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
-{
-    #define PRDF_FUNC "[TpsEvent<TYPE_MBA>::nextStep] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_done = true;
-
-    PRDF_ERR( PRDF_FUNC "function not implemented yet" );
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //##############################################################################
 //
 //                          Specializations for MCA
@@ -1247,52 +1227,6 @@ uint32_t TpsEvent<TYPE_MCA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
     return startCmd();
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
-{
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_done = false;
-
-    do
-    {
-        // Runtime TPS is slightly different than IPL TPS or any other TD event.
-        // There really is only one phase, but we use two phases to help
-        // differentiate between the CE types that are collected. So only one of
-        // the two phases will be used during a TPS procedure, not both.
-        //  - Phase 1 looks for hard CEs. This is always used first on any rank.
-        //  - Phase 2 looks for all CE types. This phase is only used on a rank
-        //    after phase 1 has exceeded a threshold of false alarms.
-
-        switch ( iv_phase )
-        {
-            case TD_PHASE_0:
-                o_rc = startNextPhase( io_sc );
-                break;
-            case TD_PHASE_1:
-            case TD_PHASE_2:
-                //o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
-                break;
-            default: PRDF_ASSERT( false ); // invalid phase
-        }
-
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "TPS failed: 0x%08x,0x%02x", iv_chip->getHuid(),
-                      getKey() );
-        }
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
 }
 
 //##############################################################################
