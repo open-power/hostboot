@@ -26,8 +26,10 @@
 /** @file prdfMemTps_rt.C */
 
 // Platform includes
+#include <prdfCenMbaExtraSig.H>
 #include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
+#include <prdfMemExtraSig.H>
 #include <prdfMemMark.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
@@ -78,6 +80,30 @@ template<>
 TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
 {
     return getMbaDataBundle(i_chip)->getTpsFalseAlarmCounter();
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __getNextPhase( ExtensibleChip * i_chip, const MemRank & i_rank,
+                     STEP_CODE_DATA_STRUCT & io_sc,
+                     TdEntry::Phase & io_phase, uint32_t & o_signature )
+{
+    PRDF_ASSERT( TdEntry::Phase::TD_PHASE_0 == io_phase );
+
+    // Only use phase 2 if the false alarm counter has exceeded threshold.
+    // Otherwise, use phase 1.
+    TpsFalseAlarm * faCounter = __getTpsFalseAlarmCounter<T>( i_chip );
+    if ( faCounter->count(i_rank, io_sc) >= 1 )
+    {
+        io_phase    = TdEntry::Phase::TD_PHASE_2;
+        o_signature = PRDFSIG_StartTpsPhase2;
+    }
+    else
+    {
+        io_phase    = TdEntry::Phase::TD_PHASE_1;
+        o_signature = PRDFSIG_StartTpsPhase1;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -1136,52 +1162,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                       bool & o_done )
-{
-    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_done = false;
-
-    do
-    {
-        // Runtime TPS is slightly different than IPL TPS or any other TD event.
-        // There really is only one phase, but we use two phases to help
-        // differentiate between the CE types that are collected. So only one of
-        // the two phases will be used during a TPS procedure, not both.
-        //  - Phase 1 looks for hard CEs. This is always used first on any rank.
-        //  - Phase 2 looks for all CE types. This phase is only used on a rank
-        //    after phase 1 has exceeded a threshold of false alarms.
-
-        switch ( iv_phase )
-        {
-            case TD_PHASE_0:
-                o_rc = startNextPhase( io_sc );
-                break;
-            case TD_PHASE_1:
-            case TD_PHASE_2:
-                //o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
-                break;
-            default: PRDF_ASSERT( false ); // invalid phase
-        }
-
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "TPS failed: 0x%08x,0x%02x", iv_chip->getHuid(),
-                      getKey() );
-        }
-    }while(0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 // TODO: RTC 157888 Actual implementation of this procedure will be done later.
 template<>
 uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
@@ -1198,48 +1178,6 @@ uint32_t TpsEvent<TYPE_MBA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//##############################################################################
-//
-//                          Generic template functions
-//
-//##############################################################################
-
-template <TARGETING::TYPE T>
-uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    uint32_t signature = 0;
-
-    switch ( iv_phase )
-    {
-        case TD_PHASE_0:
-        {
-            // Only use phase 2 if the false alarm counter has exceeded
-            // threshold. Otherwise, use phase 1.
-            TpsFalseAlarm * faCounter = __getTpsFalseAlarmCounter<T>(iv_chip);
-            if ( faCounter->count(iv_rank, io_sc) >= 1 )
-            {
-                iv_phase  = TD_PHASE_2;
-                signature = PRDFSIG_StartTpsPhase2;
-            }
-            else
-            {
-                iv_phase  = TD_PHASE_1;
-                signature = PRDFSIG_StartTpsPhase1;
-            }
-            break;
-        }
-
-        default: PRDF_ASSERT( false ); // invalid phase
-    }
-
-    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
-               iv_phase, iv_chip->getHuid(), getKey() );
-
-    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
-
-    return startCmd();
 }
 
 //##############################################################################
@@ -1294,6 +1232,69 @@ uint32_t TpsEvent<TYPE_MCA>::startCmd()
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    uint32_t signature = 0;
+
+    __getNextPhase<TYPE_MCA>( iv_chip, iv_rank, io_sc, iv_phase, signature );
+
+    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
+               iv_phase, iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
+                                       bool & o_done )
+{
+    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::nextStep] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_done = false;
+
+    do
+    {
+        // Runtime TPS is slightly different than IPL TPS or any other TD event.
+        // There really is only one phase, but we use two phases to help
+        // differentiate between the CE types that are collected. So only one of
+        // the two phases will be used during a TPS procedure, not both.
+        //  - Phase 1 looks for hard CEs. This is always used first on any rank.
+        //  - Phase 2 looks for all CE types. This phase is only used on a rank
+        //    after phase 1 has exceeded a threshold of false alarms.
+
+        switch ( iv_phase )
+        {
+            case TD_PHASE_0:
+                o_rc = startNextPhase( io_sc );
+                break;
+            case TD_PHASE_1:
+            case TD_PHASE_2:
+                //o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
+                break;
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "TPS failed: 0x%08x,0x%02x", iv_chip->getHuid(),
+                      getKey() );
+        }
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //
 //                          Specializations for MBA
@@ -1321,6 +1322,23 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
                       iv_chip->getHuid() );
             break;
         }
+
+        // TODO
+
+        // Determine if the command stopped on the last address.
+        bool lastAddr = false;
+        o_rc = didCmdStopOnLastAddr<TYPE_MBA>( iv_chip, SLAVE_RANK, lastAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // It is important to initialize iv_canResumeScrub here, so that we will
+        // know to resume the current phase in startNextPhase() instead of
+        // starting the next phase.
+        iv_canResumeScrub = !lastAddr;
 
         // TODO
 
@@ -1412,13 +1430,27 @@ uint32_t TpsEvent<TYPE_MBA>::startCmd()
             break;
         }
 
-        // Start the time based scrub procedure on this slave rank.
-        o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK, stopCond );
-        if ( SUCCESS != o_rc )
+        if ( iv_canResumeScrub )
         {
-            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                      iv_chip->getHuid(), getKey() );
-            break;
+            // Resume the command from the next address to the end of this
+            // slave rank.
+            o_rc = resumeTdScrub<TYPE_MBA>( iv_chip, SLAVE_RANK, stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
+                          iv_chip->getHuid() );
+            }
+        }
+        else
+        {
+            // Start the time based scrub procedure on this slave rank.
+            o_rc = startTdScrub<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK,
+                                           stopCond );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
+                          iv_chip->getHuid(), getKey() );
+            }
         }
 
     } while(0);
@@ -1426,6 +1458,34 @@ uint32_t TpsEvent<TYPE_MBA>::startCmd()
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+
+    uint32_t signature = 0;
+
+    if ( iv_canResumeScrub )
+    {
+        signature = PRDFSIG_TpsResume;
+
+        PRDF_TRAC( "[TpsEvent] Resuming TPS Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
+    }
+    else
+    {
+        __getNextPhase<TYPE_MBA>( iv_chip, iv_rank, io_sc, iv_phase, signature);
+
+        PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
+                   iv_phase, iv_chip->getHuid(), getKey() );
+    }
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
 }
 
 //------------------------------------------------------------------------------
