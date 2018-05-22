@@ -438,4 +438,21 @@ struct hdatCpuCtrlInfo_t
     hdatCpuCtrlPair_t servRoutineData;   // Service Routines Data Area
 }  __attribute__ ((packed));
 
+/**
+ * @brief Structure to reflect the security settings on a system.
+ */
+typedef struct sysSecSets
+{
+    // bit 0: Code Container Digital Signature Checking
+    uint16_t secureboot : 1;
+    // bit 1: Primary TPM is present and functional if single-node system;
+    // All primary TPMs are present and functional if multi-node system.
+    uint16_t trustedboot : 1;
+    // bit 2: SBE Security Backdoor bit.
+    // NOTE: This bit is labeled "Platform Security Overrides Allowed"
+    // in the section 6.1.1 of HDAT spec.
+    uint16_t sbeSecBackdoor : 1;
+    uint16_t reserved : 13;
+} SysSecSets;
+
 #endif

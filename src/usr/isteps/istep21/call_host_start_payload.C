@@ -39,6 +39,7 @@
 #include <hbotcompid.H>
 #include <sys/misc.h>
 #include <targeting/common/util.H>
+#include <targeting/targplatutil.H>
 #include <pnor/pnorif.H>
 #include <kernel/console.H>
 #include <util/misc.H>
@@ -59,6 +60,8 @@
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
 #include <p9_stop_api.H>
+#include "../hdat/hdattpmdata.H"
+#include "hdatstructs.H"
 
 #ifdef CONFIG_DRTM_TRIGGERING
 #include <secureboot/drtm.H>
@@ -187,6 +190,104 @@ void* msg_handler(msg_q_t i_msgQ)
     return nullptr;
 }
 
+/**
+* Function to align the trustedboot status on all nodes
+*/
+errlHndl_t calcTrustedBootState()
+{
+    errlHndl_t l_errl = nullptr;
+
+    do {
+
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert(l_sys != nullptr, "Could not get sys target!");
+    auto l_hbInstanceMap = l_sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+    const size_t l_hbInstanceCount = __builtin_popcount(l_hbInstanceMap);
+    if((l_hbInstanceCount < 2) ||
+       (!TARGETING::UTIL::isCurrentMasterNode()))
+    {
+        break; // No-op on single node systems and non-master nodes.
+    }
+
+    uint32_t l_instance = 0;
+    uint64_t l_hdatBaseAddr = 0;
+    uint64_t l_dataSizeMax = 0; //unused
+    uint64_t l_hdatInstanceCount = 0;
+    uint64_t l_hbrtDataAddr = 0;
+
+    l_errl = RUNTIME::get_host_data_section(RUNTIME::IPLPARMS_SYSTEM,
+                                            l_instance, // instance 0
+                                            l_hbrtDataAddr,
+                                            l_dataSizeMax);
+    if(l_errl)
+    {
+        break;
+    }
+
+    hdatSysParms_t* const l_hdatSysParms =
+                             reinterpret_cast<hdatSysParms_t*>(l_hbrtDataAddr);
+
+    SysSecSets* const l_sysSecuritySettings =
+         reinterpret_cast<SysSecSets*>(&l_hdatSysParms->hdatSysSecuritySetting);
+
+    l_errl = RUNTIME::get_instance_count(RUNTIME::NODE_TPM_RELATED,
+                                         l_hdatInstanceCount);
+    if(l_errl)
+    {
+        break;
+    }
+
+    assert(l_hdatInstanceCount == l_hbInstanceCount,
+           "Inconsistent number of functional nodes reported");
+
+    for(l_instance = 0; l_instance < l_hdatInstanceCount; ++l_instance)
+    {
+        l_errl = RUNTIME::get_host_data_section(RUNTIME::NODE_TPM_RELATED,
+                                                l_instance,
+                                                l_hdatBaseAddr,
+                                                l_dataSizeMax);
+        if(l_errl)
+        {
+            break;
+        }
+
+        auto const l_hdatTpmData = reinterpret_cast<HDAT::hdatTpmData_t*>
+                                                               (l_hdatBaseAddr);
+        auto const l_hdatTpmInfo =
+                     reinterpret_cast<HDAT::hdatHDIFDataArray_t*>
+                     (reinterpret_cast<uint64_t>(l_hdatTpmData) +
+                      l_hdatTpmData->hdatSbTpmInfo.hdatOffset);
+        auto const l_hdatTpmInstInfo =
+                                   reinterpret_cast<HDAT::hdatSbTpmInstInfo_t*>(
+                                     reinterpret_cast<uint64_t>(l_hdatTpmInfo) +
+                                     sizeof(*l_hdatTpmInfo));
+        TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "calcTrustedBootState: l_hdatTpmInstInfo:",
+                 l_hdatTpmInstInfo, sizeof(*l_hdatTpmInstInfo));
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "calcTrustedBootState: Primary TPM's functional status ="
+                  " %d", l_hdatTpmInstInfo->hdatFunctionalStatus);
+
+        if(l_hdatTpmInstInfo->hdatFunctionalStatus ==
+           HDAT::TpmPresentAndFunctional)
+        {
+            l_sysSecuritySettings->trustedboot &= 1;
+        }
+        else
+        {
+            l_sysSecuritySettings->trustedboot &= 0;
+        }
+    }
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+             "calcTrustedBootState: final trusted boot enabled status = %d",
+              l_sysSecuritySettings->trustedboot);
+
+    } while(0);
+
+    return l_errl;
+}
 
 void* call_host_start_payload (void *io_pArgs)
 {
@@ -205,6 +306,12 @@ void* call_host_start_payload (void *io_pArgs)
         //  shutdown.
         l_errl = TRUSTEDBOOT::pcrExtendSeparator(false);
 
+        if(l_errl)
+        {
+            break;
+        }
+
+        l_errl = calcTrustedBootState();
         if(l_errl)
         {
             break;
