@@ -93,8 +93,12 @@ enum MMIO_Scratch_Register
         /** Identifies where hostboot currently resides and how large the
          *  space is */
     MMIO_SCRATCH_MEMORY_STATE = 0x08,
-        /** Spare scratch reg */
-    MMIO_SCRATCH_SPARE = 0x10,
+        /** The address of the Local Node's ipc_data_area buffer in
+         *  the Remote Node's radix.
+         *  The Local Node and the Remote Node use different absolute
+         *  64 bit values to access the same ipc_data_area buffer.
+         *  This register contains the value the Remote Node needs to use. */
+    MMIO_SCRATCH_IPC_DATA_ADDR = 0x10,
         /** Identifies if Hostboot is active after host_start_payload. */
     MMIO_SCRATCH_HOSTBOOT_ACTIVE = 0x18,
 };

@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
+EXTRAINCDIR += ${ROOTPATH}/src/usr/mbox/
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 

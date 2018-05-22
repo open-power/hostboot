@@ -35,7 +35,7 @@ namespace XSCOM
 uint64_t get_master_bar( void );
 
 /**
- * @brief Generate a fully-qualified MMIO address for a physical scom
+ *  @brief Generate a fully-qualified MMIO address for a physical scom
  *        address, relative to the given processor target
  *  @param[in] i_proc - Processor
  *  @param[in] i_scomAddr - Physical scom address to convert
@@ -43,6 +43,15 @@ uint64_t get_master_bar( void );
  */
 uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
                              uint64_t i_scomAddr );
+
+/**
+ *  @brief Multicast Read of core XSCOM register on remote Node
+ *  @param[in] i_node - logical Node Number
+ *  @param[in] i_scomAddr - Physical scom address to read
+ *  @return uint64_t - Register value
+ */
+uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
+                                      uint64_t i_scomAddr );
 
 };  // namespace XSCOM
 

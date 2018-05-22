@@ -126,7 +126,13 @@ namespace Systemcalls
             /** set_mchk_data() */
         MISC_SETMCHKDATA,
 
-	SYSCALL_MAX
+            /** updateRemoteIpcAddr() */
+        UPDATE_REMOTE_IPC_ADDR,
+
+            /** qryLocalIpcInfo() */
+        QRY_LOCAL_IPC_INFO,
+
+        SYSCALL_MAX
     };
 
     /** @enum SysCalls_FastPath
