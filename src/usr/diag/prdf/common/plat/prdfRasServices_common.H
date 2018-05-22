@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,14 +197,6 @@ class ErrDataService
      * @param i_memTarget memory chip(let) target.
      */
     void handleChannelFail( TARGETING::TargetHandle_t i_memTarget );
-
-    /**
-     * @brief Handles Core checkstop.
-     * @param i_exTarget EX target.
-     * @param o_initiateHwudump whether or not to initiate hwudump
-     */
-    void handleCoreUnitCS( TARGETING::TargetHandle_t i_exTarget,
-                           bool & o_initiateHwudump );
 
     /**
      * @brief Handles NX checkstops.

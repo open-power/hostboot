@@ -941,6 +941,27 @@ ExtensibleChip * getConnectedChild( ExtensibleChip * i_parent,
 
 //------------------------------------------------------------------------------
 
+ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
+{
+    PRDF_ASSERT( nullptr != i_core );
+
+    TargetHandle_t thisCore = i_core->getTrgt();
+    ExtensibleChip * neighborCore = nullptr;
+    TargetHandleList list =
+      getConnected(getConnectedParent(thisCore, TYPE_EX), TYPE_CORE);
+
+    for ( auto & trgt : list)
+    {
+        if ( trgt != thisCore )
+        {
+            neighborCore = (ExtensibleChip *)systemPtr->GetChip(trgt);
+            break;
+        }
+    }
+    return neighborCore;
+}
+//------------------------------------------------------------------------------
+
 TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
 {
     #define PRDF_FUNC "[PlatServices::getConnectedPeerTarget] "
