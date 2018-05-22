@@ -47,17 +47,6 @@ using namespace PlatServices;
 const uint8_t CE_REGS_PER_PORT = 9;
 const uint8_t SYMBOLS_PER_CE_REG = 8;
 
-/* // We will need this for MBA TPS.
-static const char *mbsCeStatReg[][ CE_REGS_PER_PORT ] = {
-                       { "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1","MBA0_MBSSYMEC2",
-                         "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
-                         "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8" },
-                       { "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1","MBA1_MBSSYMEC2",
-                         "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
-                         "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8" }
-                          };
-*/
-
 static const char *mcbCeStatReg[CE_REGS_PER_PORT] =
                        {
                            "MCB_MBSSYMEC0", "MCB_MBSSYMEC1", "MCB_MBSSYMEC2",
@@ -425,6 +414,27 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeEccErrors( const uint32_t & i_eccAttns,
 
     #undef PRDF_FUNC
 
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                      PRDFSIG_TpsFalseAlarm );
+
+    // Increase false alarm counter and check threshold.
+    if ( __getTpsFalseAlarmCounter<TYPE_MCA>(iv_chip)->inc( iv_rank, io_sc) )
+    {
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_TpsFalseAlarmTH );
+
+        // Permanently mask mainline NCEs and TCEs
+        getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
+    }
+
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -894,19 +904,11 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // If analysis resulted in a false alarm.
         if ( tpsFalseAlarm )
         {
-            io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                              PRDFSIG_TpsFalseAlarm );
-
-            // Increase false alarm counter.
-            // If false alarm counter threshold of 3 per day is reached.
-            if ( __getTpsFalseAlarmCounter<TYPE_MCA>(iv_chip)->inc( iv_rank,
-                                                                    io_sc) )
+            o_rc = handleFalseAlarm( io_sc );
+            if ( SUCCESS != o_rc )
             {
-                io_sc.service_data->setSignature( iv_chip->getHuid(),
-                    PRDFSIG_TpsFalseAlarmTH );
-
-                // Permanently mask mainline NCEs and TCEs
-                getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
+                PRDF_ERR( PRDF_FUNC "handleFalseAlarm() failed on 0x%08x, "
+                          "0x%02x", iv_chip->getHuid(), getKey() );
             }
         }
 
@@ -1246,7 +1248,79 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
 
     do
     {
-        // TODO: handle MPE, RCE ETE, UE, etc.
+        // If there was a UE.
+        if ( i_eccAttns & MAINT_UE )
+        {
+            PRDF_TRAC( PRDF_FUNC "UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintUE );
+
+            // At this point we don't actually have an address for the UE. The
+            // best we can do is get the address in which the command stopped.
+            MemAddr addr;
+            o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
+                                                  UE_TABLE::SCRUB_UE, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+
+            // Abort this procedure because additional repairs will likely
+            // not help (also avoids complication of having UE and MPE at
+            // the same time).
+            o_done = true; break;
+        }
+
+        // If there was an MPE.
+        if ( i_eccAttns & MAINT_MPE )
+        {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintMPE );
+
+            o_rc = MemEcc::handleMpe<TYPE_MBA>( iv_chip, iv_rank,
+                                                UE_TABLE::SCRUB_MPE, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",
+                          iv_chip->getHuid(), iv_rank.getKey() );
+                break;
+            }
+
+            // Abort this procedure because the chip mark may have fixed the
+            // symbol that triggered TPS.
+            o_done = true; break;
+        }
+
+        if ( i_eccAttns & MAINT_RCE_ETE )
+        {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintRETRY_CTE );
+
+            // Add the rank to the callout list.
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank,
+                           MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm );
+
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+
+            // An error was found, but don't abort. We want to see if any UEs
+            // or MPEs exist on the rest of the rank. Also, since there was an
+            // error, clear the false alarm flag.
+            iv_tpsFalseAlarm = false;
+        }
 
     } while (0);
 
@@ -1264,9 +1338,367 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
+    TargetHandle_t trgt = iv_chip->getTrgt();
+
     do
     {
-        // TODO: analyze the CE statistics
+        // Get the current threshold.
+        uint16_t thr = ( TD_PHASE_2 == iv_phase )
+                            ? (mfgMode() ? 1 : 48)
+                            : getScrubCeThreshold<TYPE_MBA>(iv_chip, iv_rank);
+
+        // Get the chip mark
+        MemMark chipMark;
+        o_rc = MarkStore::readChipMark<TYPE_MBA>( iv_chip, iv_rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MBA>(0x%08x, 0x%02x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
+        // Get the symbol mark.
+        MemMark symMark;
+        o_rc = MarkStore::readSymbolMark<TYPE_MBA>( iv_chip, iv_rank, symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark<TYPE_MBA>(0x%08x, 0x%02x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
+
+        // Get all the symbols that have a count greater than or equal to the
+        // target threshold.
+        MemUtils::MaintSymbols symData;
+        MemSymbol targetCm;
+
+        o_rc = MemUtils::collectCeStats<TYPE_MBA>( iv_chip, iv_rank, symData,
+                                                   targetCm, thr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "collectCeStats() failed." );
+            break;
+        }
+
+        // Check for false alarms.
+        if ( symData.empty() ) break; // nothing else to do
+
+        // There is valid data so clear the false alarm flag.
+        iv_tpsFalseAlarm = false;
+
+        // Callout all DIMMs with symbol count that reached threshold.
+        bool badDimms[MAX_PORT_PER_MBA] = { false, false };
+
+        for ( auto & sym : symData )
+        {
+            badDimms[sym.symbol.getPortSlct()] = true;
+        }
+        for ( uint32_t port = 0; port < MAX_PORT_PER_MBA; port++ )
+        {
+            if ( badDimms[port] )
+            {
+                TargetHandle_t dimm = getConnectedDimm( trgt, iv_rank, port );
+                io_sc.service_data->SetCallout( dimm, MRU_MED );
+            }
+        }
+
+        // Check if DRAM repairs are disabled.
+        if ( areDramRepairsDisabled() )
+        {
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+            break; // nothing else to do
+        }
+
+        // Add all symbols to the VPD.
+        MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
+
+        o_rc = getBadDqBitmap( trgt, iv_rank, bitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed." );
+            break;
+        }
+
+        for ( auto & sym : symData )
+        {
+            bitmap.setSymbol( sym.symbol );
+        }
+
+        // Write updates to VPD.
+        o_rc = setBadDqBitmap( trgt, iv_rank, bitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
+            break;
+        }
+
+        // Check if the chip mark is available.
+        bool cmPlaced = false;
+        if ( !chipMark.isValid() )
+        {
+            if ( targetCm.isValid() )
+            {
+                // Use the DRAM with the highest total count.
+                chipMark = MemMark ( trgt, iv_rank, targetCm.getSymbol() );
+                o_rc = MarkStore::writeChipMark<TYPE_MBA>( iv_chip, iv_rank,
+                                                           chipMark );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x, 0x%02x) failed.",
+                              iv_chip->getHuid(), iv_rank.getKey() );
+                    break;
+                }
+                cmPlaced = true;
+            }
+            // If the symbol mark has been used then use the chip mark.
+            else if ( !isDramWidthX4(trgt) && symMark.isValid() )
+            {
+                // symData is sorted by count with the largest entries at the
+                // end of the list. So iterate backwards through the list to
+                // find the symbol with the highest count that is not on the
+                // same symbol as the symbol mark.
+                for ( auto it = symData.end(); it-- != symData.begin(); )
+                {
+                    if ( !( it->symbol == symMark.getSymbol() ) )
+                    {
+                        chipMark = MemMark ( trgt, iv_rank, it->symbol );
+                        o_rc = MarkStore::writeChipMark<TYPE_MBA>( iv_chip,
+                                                                   iv_rank,
+                                                                   chipMark );
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x, 0x%02x) "
+                                      "failed.", iv_chip->getHuid(),
+                                      iv_rank.getKey() );
+                            break;
+
+                        }
+                        cmPlaced = true;
+                        break;
+                    }
+                }
+                if ( SUCCESS != o_rc ) break;
+            }
+        }
+
+        // If a chip mark was placed add a VCM procedure to the queue.
+        if ( cmPlaced )
+        {
+            TdEntry * e = new VcmEvent<TYPE_MBA> { iv_chip, iv_rank, chipMark };
+            MemDbUtils::pushToQueue<TYPE_MBA>( iv_chip, e );
+        }
+
+        // Check if the symbol mark is available. Note that symbol marks are not
+        // available in x4 mode. Also, we only want to place a symbol mark if we
+        // did not just place a chip mark above. The reason for this is because
+        // having a chip mark and symbol mark at the same time increases the
+        // chance of UEs. We will want to wait until the chip mark we placed
+        // above is verified and possibily steered, before placing the symbol
+        // mark.
+        if ( !cmPlaced && !isDramWidthX4(trgt) && !symMark.isValid() )
+        {
+            // Use the symbol with the highest count.
+            symMark = MemMark ( trgt, iv_rank, symData.back().symbol );
+            o_rc = MarkStore::writeSymbolMark<TYPE_MBA>( iv_chip, iv_rank,
+                                                         symMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x, 0x%02x) failed.",
+                          iv_chip->getHuid(), iv_rank.getKey() );
+                break;
+            }
+        }
+
+        // We know with a degree of confidence that any chip mark placed in this
+        // function will be verified. Therefore, we can do a early check here
+        // and make a predictive callout if the chip mark and all available
+        // spares have been used. This is useful because the targeted
+        // diagnostics procedure will take much longer to complete due to a
+        // hardware issue. By making the predictive callout now, we will send a
+        // Dynamic Memory Deallocation message to PHYP sooner so that they can
+        // attempt to get off the memory instead of waiting for the callout
+        // after the VCM procedure.
+        if ( chipMark.isValid() )
+        {
+            /* TODO RTC 189221 DRAM sparing support
+            bool available;
+            o_rc = checkForAvailableSpares( iv_mark.getCM().getPortSlct(),
+                                            available );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "checkForAvailableSpares() failed" );
+                break;
+            }
+
+            if ( !available )
+            {
+                // Spares have been used. Callout the mark. Make the error log
+                // predictive.
+                CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
+                setTdSignature( io_sc, PRDFSIG_TpsCmAndSpare );
+                io_sc.service_data->setServiceCall();
+            }
+            */
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MBA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[TpsEvent::handleFalseAlarm] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_TpsFalseAlarm );
+
+        // Callout all DIMMs that have reached threshold.
+        // Centaur DIMMS: Any non-zero count, threshold on 1.
+        // IS DIMMS:      Allow 1, threshold on 2 (because of limited spares).
+        uint8_t thr = isMembufOnDimm<TYPE_MBA>( iv_chip->getTrgt() ) ? 1 : 2 ;
+        MemUtils::MaintSymbols symData;
+        MemSymbol junk;
+        o_rc = MemUtils::collectCeStats<TYPE_MBA>( iv_chip, iv_rank, symData,
+                                                   junk, thr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "collectCeStats failed." );
+            break;
+        }
+
+        if ( symData.empty() )
+        {
+            // There is no data so callout the rank.
+            MemoryMru memmru( iv_chip->getTrgt(), iv_rank,
+                              MemoryMruData::CALLOUT_RANK );
+            io_sc.service_data->SetCallout( memmru );
+        }
+        else
+        {
+            // Callout all DIMMs with symbol count that reached threshold.
+            bool badDimms[MAX_PORT_PER_MBA] = { false, false };
+
+            for ( auto & sym : symData )
+            {
+                badDimms[sym.symbol.getPortSlct()] = true;
+            }
+            for ( uint32_t port = 0; port < MAX_PORT_PER_MBA; port++ )
+            {
+                if ( badDimms[port] )
+                {
+                    TargetHandle_t dimm =
+                        getConnectedDimm( iv_chip->getTrgt(), iv_rank, port );
+                    io_sc.service_data->SetCallout( dimm, MRU_MED );
+                }
+            }
+        }
+
+        // In manufacturing, this error log will be predictive.
+        if ( areDramRepairsDisabled() )
+        {
+            io_sc.service_data->setServiceCall();
+            break; // nothing else to do
+        }
+
+        // Increase the false alarm counter. Continue only if false alarm
+        // threshold is exceeded.
+        if ( !__getTpsFalseAlarmCounter<TYPE_MBA>(iv_chip)->inc(iv_rank,io_sc) )
+            break;
+
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_TpsFalseAlarmTH );
+
+        // If there are no symbols in the list, exit quietly.
+        if ( symData.empty() ) break;
+
+        // Use the symbol with the highest count to place a symbol or chip mark,
+        // if possible. Note that we only want to use one repair for this false
+        // alarm to avoid using up all the repairs for 'weak' errors.
+        MemSymbol highestSymbol = symData.back().symbol;
+
+        // Get the chip mark
+        MemMark chipMark;
+        o_rc = MarkStore::readChipMark<TYPE_MBA>( iv_chip, iv_rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MBA>(0x%08x, 0x%02x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
+        // Get the symbol mark.
+        MemMark symMark;
+        o_rc = MarkStore::readSymbolMark<TYPE_MBA>( iv_chip, iv_rank, symMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readSymbolMark<TYPE_MBA>(0x%08x, 0x%02x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
+
+        // Check of the symbol mark is available. Note that symbol marks are
+        // not available in x4 mode.
+        if ( !isDramWidthX4(iv_chip->getTrgt()) && !symMark.isValid() )
+        {
+            MemMark sm( iv_chip->getTrgt(), iv_rank, highestSymbol );
+            o_rc = MarkStore::writeSymbolMark<TYPE_MBA>( iv_chip, iv_rank, sm );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
+                          "failed", iv_chip->getHuid(), iv_rank.getKey() );
+                break;
+            }
+
+            // Add this symbol to the VPD.
+            MemDqBitmap<DIMMS_PER_RANK::MBA> bitmap;
+            o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
+                break;
+            }
+
+            bitmap.setSymbol( highestSymbol );
+
+            o_rc = setBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
+                break;
+            }
+        }
+        // Check if the chip mark is available
+        else if ( !chipMark.isValid() )
+        {
+            MemMark cm( iv_chip->getTrgt(), iv_rank, highestSymbol );
+            o_rc = MarkStore::writeChipMark<TYPE_MBA>( iv_chip, iv_rank, cm );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                          "failed", iv_chip->getHuid(), iv_rank.getKey() );
+                break;
+            }
+
+            // Add a VCM procedure to the queue.
+            TdEntry * entry = new VcmEvent<TYPE_MBA>( iv_chip, iv_rank, cm );
+            MemDbUtils::pushToQueue<TYPE_MBA>( iv_chip, entry );
+        }
+        else
+        {
+            // The spares have been used. Make the error log predictive.
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_AllDramRepairs );
+            io_sc.service_data->setServiceCall();
+        }
 
     } while (0);
 
@@ -1345,7 +1777,16 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         {
             o_done = true;
 
-            // TODO: handle false alarm if needed.
+            // Handle the false alarm, if needed.
+            if ( iv_tpsFalseAlarm )
+            {
+                o_rc = handleFalseAlarm( io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "handleFalseAlarm() failed on 0x%08x, "
+                              "0x%02x", iv_chip->getHuid(), getKey() );
+                }
+            }
         }
 
     } while (0);

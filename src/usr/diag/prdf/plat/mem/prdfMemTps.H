@@ -195,6 +195,14 @@ class TpsEvent : public TdEntry
      */
     uint32_t analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc );
 
+    /**
+     * @brief Additional processing if no errors are handled during the
+     *        procedure.
+     * @param  io_sc The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc );
+
     #endif // __HOSTBOOT_RUNTIME
 
 
@@ -202,6 +210,12 @@ class TpsEvent : public TdEntry
 
     /** True to ban all subsequent requests for TPS on this rank. */
     bool iv_ban = false;
+
+    #ifdef __HOSTBOOT_RUNTIME
+    /** TPS false alarm (MBA only). Initially true when the object is created.
+     *  Will be set to false if any ECC errors are found during the procedure.*/
+    bool iv_tpsFalseAlarm = true;
+    #endif
 };
 
 } // end namespace PRDF
