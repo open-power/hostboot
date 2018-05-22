@@ -1461,19 +1461,6 @@ errlHndl_t populate_hbSecurebootData ( void )
         hdatSysParms_t* const l_sysParmsPtr
             = reinterpret_cast<hdatSysParms_t*>(l_hbrtDataAddr);
 
-        typedef struct sysSecSets
-        {
-            // bit 0: Code Container Digital Signature Checking
-            uint16_t secureboot : 1;
-            // bit 1: Measurements Extended to Secure Boot TPM
-            uint16_t trustedboot : 1;
-            // bit 2: SBE Security Backdoor bit.
-            // NOTE: This bit is labeled "Platform Security Overrides Allowed"
-            // in the section 6.1.1 of HDAT spec.
-            uint16_t sbeSecBackdoor : 1;
-            uint16_t reserved : 13;
-        } SysSecSets;
-
         // populate system security settings in hdat
         SysSecSets* const l_sysSecSets =
             reinterpret_cast<SysSecSets*>(&l_sysParmsPtr->hdatSysSecuritySetting);
@@ -1702,6 +1689,15 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
     TARGETING::TargetHandleList tpmList;
     TRUSTEDBOOT::getTPMs(tpmList, TRUSTEDBOOT::TPM_FILTER::ALL_IN_BLUEPRINT);
+
+    // Put the primary TPM first in the list of TPMs to simplify alignment of
+    // trusted boot enabled bits across the nodes.
+    std::sort(tpmList.begin(), tpmList.end(),
+              [](TARGETING::TargetHandle_t lhs, TARGETING::TargetHandle_t rhs)
+              {
+                return (lhs->getAttr<TARGETING::ATTR_TPM_ROLE>() ==
+                        TARGETING::TPM_ROLE_TPM_PRIMARY);
+              });
 
     TARGETING::TargetHandleList l_procList;
 

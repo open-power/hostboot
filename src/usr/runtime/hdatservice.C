@@ -1450,6 +1450,7 @@ errlHndl_t hdatService::getInstanceCount(const SectionId i_section,
     switch(i_section)
     {
         case RUNTIME::PCRD:
+        case RUNTIME::NODE_TPM_RELATED:
         {
             hdat5Tuple_t* tuple = nullptr;
             errhdl = getAndCheckTuple(i_section, tuple);
