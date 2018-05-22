@@ -31,7 +31,7 @@
 // Includes
 /******************************************************************************/
 #include    <stdint.h>
-
+#include    <map>
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <initservice/initserviceif.H>
@@ -70,7 +70,44 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
+typedef std::map<ATTR_VDDR_ID_type, std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>> MembufTargetMap_t;
+typedef std::vector<ATTR_VDDR_ID_type> VDDR_ID_vect_t;
 
+void buildMembufLists(TargetHandleList & i_membufTargetList,
+                      MembufTargetMap_t & o_membufFapiTargetMap,
+                      VDDR_ID_vect_t & o_unique_vddr_ids)
+{
+    for (auto & l_membuf : i_membufTargetList)
+    {
+        //get VDDR_ID attribute
+        auto l_vddr_id = l_membuf->getAttr<ATTR_VDDR_ID>();
+
+        //convert membuf to fapi target
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+            l_fapi_membuf (l_membuf);
+
+        //Create a vector with the fapi target to insert in the map later.
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>> l_fapi_vect;
+        l_fapi_vect.push_back(std::move(l_fapi_membuf));
+
+        //insert {VDDR_ID, fapi2 membuf} in the map
+        //l_ret is of format std::pair<MembufTargetMap_t iterator, bool>
+        //where bool indicates whether the insertion was successful or not
+        auto l_ret = o_membufFapiTargetMap.insert({l_vddr_id, l_fapi_vect});
+        if (l_ret.second == false)
+        {
+            //This VDDR_ID already exists in the map, we need to push
+            //l_fapi_membuf to the exisiting vector
+            l_ret.first->second.push_back(std::move(l_fapi_membuf));
+        }
+        else
+        {
+            //insertion was successful meaning this is a new vddr id
+            //save it off in a vector for faster retrieval later
+            o_unique_vddr_ids.push_back(std::move(l_vddr_id));
+        }
+    }
+}
 
 void* call_mss_volt( void *io_pArgs )
 {
@@ -83,82 +120,86 @@ void* call_mss_volt( void *io_pArgs )
     bool unused = false;
     set_eff_config_attrs_helper(DEFAULT, unused);
 
-    TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     do
     {
+        TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "call_mss_volt: %d membuf targets", l_membufTargetList.size());
 
        if (l_membufTargetList.size() > 0)
        {
-           std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> >
-               l_membufFapiTargetsList;
 
-           for(auto & l_membuf_target : l_membufTargetList)
+           MembufTargetMap_t l_membufFapiTargetMap {};
+           VDDR_ID_vect_t l_unique_vddrs {};
+           buildMembufLists(l_membufTargetList, l_membufFapiTargetMap,
+                   l_unique_vddrs);
+
+           for (auto & l_vddr : l_unique_vddrs)
            {
-               fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP>
-                   l_membuf_fapi_target (l_membuf_target);
 
-               l_membufFapiTargetsList.push_back( l_membuf_fapi_target );
-           }
-
-           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Calling p9c_mss_volt on list of membuf targets");
-
-           // p9c_mss_volt.C (vector of centaurs)
-           FAPI_INVOKE_HWP(l_err, p9c_mss_volt, l_membufFapiTargetsList);
-
-           // process return code
-           if ( l_err )
-           {
                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X:  p9c_mss_volt HWP() failed",
-                       l_err->reasonCode());
+                     "Calling p9c_mss_volt on list of membuf targets"
+                     " with VDDR_ID=%d, list size=%d",
+                     l_vddr,
+                     l_membufFapiTargetMap[l_vddr].size());
 
-               // Create IStep error log and cross reference to error
-               // that occurred
-               l_StepError.addErrorDetails(l_err);
+               // p9c_mss_volt.C (vector of centaurs with same VDDR_ID)
+               FAPI_INVOKE_HWP(l_err, p9c_mss_volt,
+                       l_membufFapiTargetMap[l_vddr]);
 
-               // Commit Error
-               errlCommit( l_err, HWPF_COMP_ID );
+               // process return code
+               if ( l_err )
+               {
+                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR 0x%.8X:  p9c_mss_volt HWP() failed",
+                           l_err->reasonCode());
 
-               break;
+                   // Create IStep error log and cross reference to error
+                   // that occurred
+                   l_StepError.addErrorDetails(l_err);
 
-           }
-           else
-           {
+                   // Commit Error
+                   errlCommit( l_err, HWPF_COMP_ID );
+
+               }
+               else
+               {
+                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  p9c_mss_volt HWP");
+               }
+
                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  p9c_mss_volt HWP");
-           }
+                     "Calling p9c_mss_volt_vddr_offset on list of membuf "
+                     "targets with VDDR_ID=%d, list size=%d",
+                     l_vddr,
+                     l_membufFapiTargetMap[l_vddr].size());
 
-           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "Calling p9c_mss_volt_vddr_offset on list of membuf targets");
+               // p9c_mss_volt_vddr_offset.C (vector of centaurs)
+               FAPI_INVOKE_HWP(l_err, p9c_mss_volt_vddr_offset,
+                       l_membufFapiTargetMap[l_vddr]);
 
-           // p9c_mss_volt_vddr_offset.C (vector of centaurs)
-           FAPI_INVOKE_HWP(l_err, p9c_mss_volt_vddr_offset,
-                   l_membufFapiTargetsList);
+               // process return code
+               if ( l_err )
+               {
+                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR 0x%.8X:  p9c_mss_volt_vddr_offset HWP failed",
+                           l_err->reasonCode());
 
-           // process return code
-           if ( l_err )
-           {
-               TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "ERROR 0x%.8X:  p9c_mss_volt_vddr_offset HWP() failed",
-                       l_err->reasonCode());
+                   // Create IStep error log and cross reference to error
+                   // that occurred
+                   l_StepError.addErrorDetails(l_err);
 
-               // Create IStep error log and cross reference to error
-               // that occurred
-               l_StepError.addErrorDetails(l_err);
-
-               // Commit Error
-               errlCommit( l_err, HWPF_COMP_ID );
-           }
-           else
-           {
-               TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS :  p9c_mss_volt_vddr_offset HWP");
+                   // Commit Error
+                   errlCommit( l_err, HWPF_COMP_ID );
+               }
+               else
+               {
+                   TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "SUCCESS :  p9c_mss_volt_vddr_offset HWP");
+               }
            }
 
        }
