@@ -108,14 +108,6 @@ class TpsEvent : public TdEntry
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
-     * @brief  Analyzes phase 1 of the procedure.
-     * @param  io_sc  The step code data struct.
-     * @param  o_done True if the procedure is complete or has aborted.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t analyzeTpsPhase1_rt(STEP_CODE_DATA_STRUCT & io_sc, bool & o_done);
-
-    /**
      * @brief  Does isolation for ECC attentions.
      * @param  i_eccAttns Mask of all currently active maintenance attentions.
      *                    See enum MaintEccAttns for values.
