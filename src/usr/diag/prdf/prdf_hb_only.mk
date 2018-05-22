@@ -78,6 +78,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
+prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -163,6 +164,14 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 prd_obj_no_sim += p9_io_erepairAccessorHwpFuncs.o
 prd_obj_no_sim += p9_io_xbus_read_erepair.o
+prd_obj_no_sim += p9_io_dmi_read_erepair.o
+prd_obj_no_sim += p9_io_dmi_pdwn_lanes.o
+prd_obj_no_sim += p9_io_dmi_clear_firs.o
+
+prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/io/
+prd_obj_no_sim += p9_io_cen_read_erepair.o
+prd_obj_no_sim += p9_io_cen_pdwn_lanes.o
+
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_obj_no_sim += p9_proc_gettracearray.o
 prd_obj_no_sim += p9_sbe_tracearray.o

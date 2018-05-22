@@ -36,8 +36,7 @@ actionclass analyzeConnectedMembuf_UERE
 
 actionclass dmi_bus_th_1
 {
-# TODO: RTC 144057
-#    funccall("calloutBusInterfacePlugin");
+    funccall("calloutBusInterfacePlugin");
     threshold1;
 };
 
