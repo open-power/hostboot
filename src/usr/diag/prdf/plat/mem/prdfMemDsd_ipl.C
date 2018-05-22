@@ -26,6 +26,7 @@
 /** @file prdfMemDsd_ipl.C */
 
 // Platform includes
+#include <prdfCenMbaExtraSig.H>
 #include <prdfMemDqBitmap.H>
 #include <prdfMemDsd.H>
 
@@ -38,54 +39,155 @@ using namespace PlatServices;
 
 //##############################################################################
 //
-//                          Generic template functions
+//                          Specializations for MBA
 //
 //##############################################################################
 
-template<TARGETING::TYPE T>
-uint32_t DsdEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
-                                    bool & o_done )
+template<>
+uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
+                                       STEP_CODE_DATA_STRUCT & io_sc,
+                                       bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent::analyzePhase] "
+    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
     do
     {
-        if ( TD_PHASE_0 == iv_phase )
+        // IUEs are reported as UEs during read operations (via RCE ETE on
+        // Centaur). Therefore, we will treat IUEs like UEs for these scrub
+        // operations simply to maintain consistency during all of Memory
+        // Diagnostics.
+        if ( (i_eccAttns & MAINT_UE) || (i_eccAttns & MAINT_RCE_ETE) )
         {
-            // Before starting the next command, set iv_mark in the steer mux.
-            /* TODO: RTC 189221
-            o_rc = setSteerMux<T>( iv_chip, iv_rank, iv_mark );
+            PRDF_TRAC( "[DsdEvent] UE Detected: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              (i_eccAttns & MAINT_UE)
+                                                           ? PRDFSIG_MaintUE
+                                                           : PRDFSIG_MaintIUE );
+
+            // At this point we don't actually have an address for the UE. The
+            // best we can do is get the address in which the command stopped.
+            MemAddr addr;
+            o_rc = getMemMaintAddr<TYPE_MBA>( iv_chip, addr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "setSteerMux(0x%08x,0x%2x) failed",
+                PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            o_rc = MemEcc::handleMemUe<TYPE_MBA>( iv_chip, addr,
+                                                  UE_TABLE::SCRUB_UE, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemUe(0x%08x,0x%02x) failed",
                           iv_chip->getHuid(), getKey() );
                 break;
             }
-            */
 
-            break; // Nothing to analyze yet.
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
         }
 
-        // TODO: RTC 189221 finish supporting this function.
-
     } while (0);
-
-    // TODO: RTC 189221 remove once function is supported
-    PRDF_ERR( PRDF_FUNC "not supported yet" );
-    o_done = true; // to ensure nothing else gets executed
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
 
-//##############################################################################
-//
-//                          Specializations for MBA
-//
-//##############################################################################
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t DsdEvent<TYPE_MBA>::verifySpare( const uint32_t & i_eccAttns,
+                                          STEP_CODE_DATA_STRUCT & io_sc,
+                                          bool & o_done )
+{
+    #define PRDF_FUNC "[DsdEvent<TYPE_MBA>::verifySpare] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( TD_PHASE_2 != iv_phase ) break; // nothing to do
+
+        if ( i_eccAttns & MAINT_MCE )
+        {
+            PRDF_TRAC( "[DsdEvent] DRAM spare is bad: 0x%08x,0x%02x",
+                       iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_DsdBadSpare );
+
+            // Make the error log predictive.
+            io_sc.service_data->setServiceCall();
+
+            // Set the bad spare in the VPD. At this point, the chip mark
+            // should have already been set in the VPD because it was recently
+            // verified.
+
+            /* TODO: RTC 189221
+            CenDqBitmap bitmap;
+            o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
+                break;
+            }
+            if ( iv_eccSpare )
+            {
+                bitmap.setEccSpare();
+            }
+            else
+            {
+                o_rc = bitmap.setDramSpare( iv_mark.getCM().getPortSlct() );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "setDramSpare() failed" );
+                    break;
+                }
+            }
+
+            o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
+                break;
+            }
+            */
+        }
+        else
+        {
+            PRDF_TRAC( "[DsdEvent] DRAM spare applied successfully: "
+                       "0x%08x,0x%02x", iv_chip->getHuid(), getKey() );
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_DsdDramSpared );
+
+            // Remove the chip mark.
+            o_rc = MarkStore::clearChipMark<TYPE_MBA>( iv_chip, iv_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                break;
+            }
+        }
+
+        // At this point the procedure is complete.
+        o_done = true;
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 template<>
 uint32_t DsdEvent<TYPE_MBA>::startCmd()
@@ -126,6 +228,36 @@ uint32_t DsdEvent<TYPE_MBA>::startCmd()
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    uint32_t signature = 0;
+
+    switch ( iv_phase )
+    {
+        case TD_PHASE_0:
+            iv_phase  = TD_PHASE_1;
+            signature = PRDFSIG_StartDsdPhase1;
+            break;
+
+        case TD_PHASE_1:
+            iv_phase  = TD_PHASE_2;
+            signature = PRDFSIG_StartDsdPhase2;
+            break;
+
+        default: PRDF_ASSERT( false ); // invalid phase
+    }
+
+    PRDF_TRAC( "[DsdEvent] Starting DSD Phase %d: 0x%08x,0x%02x",
+               iv_phase, iv_chip->getHuid(), getKey() );
+
+    io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
+
+    return startCmd();
 }
 
 //------------------------------------------------------------------------------
