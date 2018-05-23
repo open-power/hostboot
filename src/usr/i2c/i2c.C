@@ -1091,9 +1091,11 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                    i_args.engine );
     }
 
-    // If there is an error, add parameter info to log
+    // If there is an error, add FFDC
     if ( err != NULL )
     {
+
+        // Add parameter info to log
         // @todo RTC 114298- update this for new parms/switches
         I2C::UdI2CParms( i_opType,
                          i_target,
@@ -1101,6 +1103,10 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                          i_accessType,
                          i_args  )
                        .addToLog(err);
+
+        // Add secureboot info to log
+        SECUREBOOT::addSecureUserDetailsToErrlog(err);
+
     }
 
     TRACDCOMP( g_trac_i2c,
