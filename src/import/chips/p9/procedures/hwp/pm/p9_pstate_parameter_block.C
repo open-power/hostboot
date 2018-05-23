@@ -830,13 +830,13 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // frequency_step_khz
         l_occppb.frequency_step_khz = l_globalppb.frequency_step_khz;
 
-        //Power bus nest freq
+        // Power bus nest freq
         uint16_t l_pbus_nest_freq = revle16(l_poundv_data.pbFreq);
-        FAPI_INF("l_pbus_nest_freq 0x%x", (l_pbus_nest_freq));
+        FAPI_INF("l_pbus_nest_freq 0x%x (%d)", l_pbus_nest_freq, l_pbus_nest_freq);
 
         // I- VDN PB current
         uint16_t l_vpd_idn_100ma = revle16(l_poundv_data.IdnPbCurr);
-        FAPI_INF("l_vpd_idn_100ma 0x%x", (l_vpd_idn_100ma));
+        FAPI_INF("l_vpd_idn_100ma 0x%x (%d)", l_vpd_idn_100ma, l_vpd_idn_100ma);
 
         if (is_wof_enabled(i_target,&l_state))
         {
@@ -854,34 +854,17 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                     revle16(l_poundw_data.poundw[TURBO].ivdd_tdp_ac_current_10ma);
             l_occppb.lac_tdp_vdd_nominal_10ma =
                     revle16(l_poundw_data.poundw[NOMINAL].ivdd_tdp_ac_current_10ma);
-            FAPI_INF("l_occppb.lac_tdp_vdd_turbo_10ma 0x%x", l_occppb.lac_tdp_vdd_turbo_10ma);
-            FAPI_INF("l_occppb.lac_tdp_vdd_nominal_10ma 0x%x",l_occppb.lac_tdp_vdd_nominal_10ma);
+            FAPI_INF("l_occppb.lac_tdp_vdd_turbo_10ma 0x%x (%d)", 
+                    l_occppb.lac_tdp_vdd_turbo_10ma, l_occppb.lac_tdp_vdd_turbo_10ma);
+            FAPI_INF("l_occppb.lac_tdp_vdd_nominal_10ma 0x%x (%d)",
+                    l_occppb.lac_tdp_vdd_nominal_10ma, l_occppb.lac_tdp_vdd_nominal_10ma);
 
-            //Power bus vdn voltage
-            uint16_t l_vpd_vdn_mv = revle16(l_poundv_data.VdnPbVltg);
-            FAPI_INF("l_vpd_vdn_mv 0x%x (%d)", l_vpd_vdn_mv, l_vpd_vdn_mv);
-
-            uint8_t l_nest_leakage_for_occ = 75;
-            uint16_t l_iac_tdp_vdn = get_iac_vdn_value ( l_vpd_vdn_mv,
-                                                         l_iddqt,
-                                                         l_nest_leakage_for_occ,
-                                                         l_vpd_idn_100ma);
-            if (!l_iac_tdp_vdn)
-            {
-                l_state.iv_wof_enabled = false;
-            }
-            else
-            {
-                l_occppb.ceff_tdp_vdn =
-                    revle16(
-                        pstate_calculate_effective_capacitance(l_iac_tdp_vdn,
-                                                               l_vpd_vdn_mv * 1000,
-                                                               l_pbus_nest_freq)
-                     );
-            }
-
-            FAPI_INF("l_iac_tdp_vdn 0x%x", l_iac_tdp_vdn);
-            FAPI_INF("l_occppb.ceff_tdp_vdn 0x%x", revle16(l_occppb.ceff_tdp_vdn));
+            // As the Vdn dimension is not supported in the WOF tables,
+            // hardcoding this value to the OCC as non-zero to keep it
+            // happy.
+            l_occppb.ceff_tdp_vdn = 1;
+            FAPI_INF(" l_occppb.ceff_tdp_vdn 0x%x (note: the Vdn dimension is not supported; this value is forced)",
+                        l_occppb.ceff_tdp_vdn);
 
             // Put the good_normal_cores value into the GPPB for PGPE
             // This is done as a union overlay so that the inter-platform headers
@@ -3256,24 +3239,24 @@ oppb_print(OCCPstateParmBlock* i_oppb)
              i_oppb->pstate_min);
 
     FAPI_INF("Nest Frequency:              %02X (%3d)",
-             i_oppb->nest_frequency_mhz,
-             i_oppb->nest_frequency_mhz);
+             revle32(i_oppb->nest_frequency_mhz),
+             revle32(i_oppb->nest_frequency_mhz));
 
     FAPI_INF("Nest Leakage Percent:        %02X (%3d)",
-             i_oppb->nest_leakage_percent,
-             i_oppb->nest_leakage_percent);
+             revle16(i_oppb->nest_leakage_percent),
+             revle16(i_oppb->nest_leakage_percent));
 
     FAPI_INF("Ceff TDP Vdn:                %02X (%3d)",
-             i_oppb->ceff_tdp_vdn,
-             i_oppb->ceff_tdp_vdn);
+             revle16(i_oppb->ceff_tdp_vdn),
+             revle16(i_oppb->ceff_tdp_vdn));
 
     FAPI_INF("Iac TDP VDD Turbo(10ma):     %02X (%3d)",
-             i_oppb->lac_tdp_vdd_turbo_10ma,
-             i_oppb->lac_tdp_vdd_turbo_10ma);
+             revle16(i_oppb->lac_tdp_vdd_turbo_10ma),
+             revle16(i_oppb->lac_tdp_vdd_turbo_10ma));
 
     FAPI_INF("Iac TDP VDD Nominal(10ma):   %02X (%3d)",
-             i_oppb->lac_tdp_vdd_nominal_10ma,
-             i_oppb->lac_tdp_vdd_nominal_10ma);
+             revle16(i_oppb->lac_tdp_vdd_nominal_10ma),
+             revle16(i_oppb->lac_tdp_vdd_nominal_10ma));
 
     FAPI_INF("WOF Elements");
     sprintf(l_buffer, "   WOF Enabled             ");
@@ -4289,162 +4272,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// Get IAC VDN vlue
-uint16_t get_iac_vdn_value (uint16_t i_vpd_vdn_mv,
-                            IddqTable i_iddq,
-                            uint8_t nest_leakage_percent,
-                            uint16_t i_vpd_idn_100ma)
-{
-    uint16_t l_ac_vdn_value = 0;
-    uint8_t l_iddq_index = 0;
-    const uint8_t MIN_IDDQ_VALUE = 6; //considering 0.6 as 6 here for easy math
-    const uint16_t IDDQ_MIN_VOLT_LEVEL = 600;
-    uint8_t l_measured_temp_C[2] = {0};
-    uint16_t l_Ivdnq_5ma[2] = {0};
-    float l_scaled_leakage_ma[2] = {0};
-    uint16_t l_Ivdnq_vpd_ma = 0;
-    uint8_t i = 0;
-    uint8_t j = 0;
-
-    //check bonunding is required or not
-    uint16_t l_bounding_value = i_vpd_vdn_mv % 100;
-    //Index to read from IDDQ table
-    //Assumption here i_vpd_vdn_mv value will be greater than 600 and lesser
-    //than 1100 mv
-    l_iddq_index = (i_vpd_vdn_mv / 100) - MIN_IDDQ_VALUE;
-    i = l_iddq_index;
-    j = l_iddq_index + 1;
-    uint16_t l_iq_mv[2] = {0};
-    l_iq_mv[0] = IDDQ_MIN_VOLT_LEVEL + (100 * i);
-    l_iq_mv[1] = IDDQ_MIN_VOLT_LEVEL + (100 * (i + 1));
-    uint8_t l_diff_value = 0;
-    do
-    {
-        if (!l_bounding_value)
-        {
-            //Read measured temp
-            l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
-
-            if ((l_measured_temp_C[0] == 0))
-            {
-                FAPI_INF("Non Bounded measured temp value is 0");
-                break;
-            }
-            else if (l_measured_temp_C[0] < nest_leakage_percent)
-            {
-                l_diff_value = nest_leakage_percent - l_measured_temp_C[0];
-            }
-            else
-            {
-                l_diff_value = l_measured_temp_C[0] - nest_leakage_percent;
-            }
-
-            //Read ivdnq_5ma
-            l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
-
-            //Scale each bounding Ivdnq_5ma value to 75C in mA
-
-            l_scaled_leakage_ma[0] = l_Ivdnq_5ma[0] * 5 * pow (1.3, (l_diff_value / 10));
-
-            l_Ivdnq_vpd_ma = l_scaled_leakage_ma[0];
-
-            l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
-        }
-        else
-        {
-            //Read measured temp
-            l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
-            l_measured_temp_C[1] = i_iddq.avgtemp_vdn[i + 1];
-
-            //Read ivdnq_5ma
-            l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
-            l_Ivdnq_5ma[1] = i_iddq.ivdn[i + 1];
-
-            //Scale each bounding Ivdnq_5ma value to 75C in mA
-
-            for (j = 0; j < 2; j++)
-            {
-                if ((l_measured_temp_C[j] == 0))
-                {
-                    FAPI_INF("Bounded measured temp value is 0");
-                    break;
-                }
-                else if (l_measured_temp_C[j] < nest_leakage_percent)
-                {
-                    l_diff_value = nest_leakage_percent - l_measured_temp_C[j];
-                }
-                else
-                {
-                    l_diff_value = l_measured_temp_C[j] - nest_leakage_percent;
-                }
-
-                l_scaled_leakage_ma[j] = l_Ivdnq_5ma[j] * 5 * pow (1.3, (l_diff_value / 10));
-            }
-
-            //Interpolate between scaled_leakage_ma[i] and scaled_leakage_ma[i+1]
-            //using the same ratio as the VPD voltage is to the bounding volages) to
-            //arrive at  Ivdnq_vpd_ma
-            l_Ivdnq_vpd_ma = l_scaled_leakage_ma[i] + roundUp((i_vpd_vdn_mv - 600 + (100 * i)) / ((l_iq_mv[1] - l_iq_mv[0]) *
-                             (l_scaled_leakage_ma[1] - l_scaled_leakage_ma[0])));
-
-            l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
-        }
-    }while(0);
-
-    return l_ac_vdn_value;
-}
-/**
- * calculate_effective_capacitance
- *
- * Description: Generic function to perform the effective capacitance
- *              calculations.
- *              C_eff = I / (V^1.3 * F)
- *
- *              I is the AC component of Idd in 0.01 Amps (or10 mA)
- *              V is the silicon voltage in 100 uV
- *              F is the frequency in MHz
- *
- *              Note: Caller must ensure they check for a 0 return value
- *                    and disable wof if that is the case
- *
- * Param[in]: i_iAC - the AC component
- * Param[in]: i_voltage - the voltage component in 100uV
- * Param[in]: i_frequency - the frequency component
- *
- * Return: The calculated effective capacitance
- */
-uint16_t pstate_calculate_effective_capacitance( uint16_t i_iAC,
-        uint16_t i_voltage,
-        uint16_t i_frequency )
-{
-
-    // Compute V^1.3 using a best-fit equation
-    // (V^1.3) = (21374 * (voltage in 100uV) - 50615296)>>10
-    uint32_t v_exp_1_dot_3 = (21374 * i_voltage - 50615296) >> 10;
-
-    // Compute I / (V^1.3)
-    uint32_t I = i_iAC << 14; // * 16384
-
-    // Prevent divide by zero
-    if( v_exp_1_dot_3 == 0 )
-    {
-        // Return 0 causing caller to disable wof.
-        return 0;
-    }
-
-    uint32_t c_eff = (I / v_exp_1_dot_3);
-    c_eff = c_eff << 14; // * 16384
-
-    // Divide by frequency and return the final value.
-    // (I / (V^1.3 * F)) == I / V^1.3 /F
-    return c_eff / i_frequency;
-
-}
-
-uint16_t roundUp(float i_value)
-{
-    return ((uint16_t)(i_value == (uint16_t)i_value ? i_value : i_value + 1));
-}
 //
 // p9_pstate_compute_vdm_threshold_pts
 //
