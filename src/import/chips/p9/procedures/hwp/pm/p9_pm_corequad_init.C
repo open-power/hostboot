@@ -569,6 +569,7 @@ fapi2::ReturnCode pm_corequad_reset(
         uint16_t l_qaccr_value = 0;
         uint16_t l_caccr_value = 0;
         l_address = EQ_QPPM_QACCR;
+        uint8_t l_caccr_bit_13_14_15_value = 0;
         FAPI_TRY(fapi2::getScom(l_quad_chplt, l_address, l_quad_data64),
                  "ERROR: Failed to read EQ_QPPM_QACCR");
 
@@ -615,6 +616,21 @@ fapi2::ReturnCode pm_corequad_reset(
                                     .set_QACCR(l_qaccr_value),
                                     "CACCR value %04x is not sync with QACCR value %04X", l_caccr_value,
                                     l_qaccr_value);
+                    }
+                    else
+                    {
+                        //extract 13:14:15 bits
+                        l_core_data64.
+                        extractToRight<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(l_caccr_bit_13_14_15_value);
+
+                        if (l_caccr_bit_13_14_15_value)
+                        {
+                            //Clear override bits
+                            l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(0);
+                            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+                                     "ERROR: Failed to write C_CPPM_CACCR");
+                        }
+
                     }
 
                 }
@@ -745,12 +761,11 @@ fapi2::ReturnCode pm_disable_resclk(
             FAPI_INF("CACCR[0:12] value %04x and CACCR[13:14] %02x",
                      l_caccr_value, l_caccr_bit_13_14_value);
 
-
             //Compare qaccr and caccr value
             if ((l_caccr_value != l_qaccr_value) && (!l_caccr_bit_13_14_value))
             {
                 FAPI_INF("CME isn't in the middle of things and yet the \
-                         CACCR and QACCR don't match");
+                        CACCR and QACCR don't match");
                 continue;
             }
             else if(l_caccr_bit_13_14_value)//if override bit is set
@@ -786,7 +801,6 @@ fapi2::ReturnCode pm_disable_resclk(
 
                 l_step = l_core_index < l_quad_index ? 1 : -1;
 
-                l_address = C_CPPM_CACCR;
 
                 while (l_core_index != l_quad_index)
                 {
@@ -802,12 +816,14 @@ fapi2::ReturnCode pm_disable_resclk(
                     FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
                              "ERROR: Failed to write C_CPPM_CACCR");
                 }
-
-                //Clear override bits before QACCR is updated
-                l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 2>(0);
-                FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
-                         "ERROR: Failed to write C_CPPM_CACCR");
             }
+
+            // By default clear override bits before QACCR is updated
+            //bit 13:14:15
+            l_core_data64.insert<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 3>(0);
+            FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+                     "ERROR: Failed to write C_CPPM_CACCR");
+
         } //end of core list
     } // end of ex list
 
