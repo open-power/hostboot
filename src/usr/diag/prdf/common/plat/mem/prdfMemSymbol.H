@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,21 @@ class MemSymbol
         return ( (iv_symbol == i_symbol.iv_symbol) &&
                  (iv_rank   == i_symbol.iv_rank  ) );
     }
+
+    /**
+     * @brief  Checks if the current symbol is on any of the spares
+     *         Sets iv_isDramSpared if found on at least one of the valid spares
+     *         Sets iv_isEccSpared if found on valid i_ecc
+     *         Usually call mssGetSteerMux to fill in associated symbols
+     *
+     * @param  i_sp0 A symbol associated with the spare on port 0.
+     * @param  i_sp1 A symbol associated with the spare on port 1.
+     * @param  i_ecc A symbol associated with the ECC spare (x4 mode only).
+     */
+    void updateSpared(const MemSymbol & i_sp0,
+                      const MemSymbol & i_sp1,
+                      const MemSymbol & i_ecc);
+
 
   private: // instance variables
 

@@ -44,6 +44,7 @@
 #endif
 
 #ifdef __HOSTBOOT_MODULE
+#include <prdfParserUtils.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <p9_io_xbus_read_erepair.H>
 #include <p9_io_xbus_pdwn_lanes.H>
@@ -383,130 +384,6 @@ int32_t setBadDqBitmap<DIMMS_PER_RANK::MBA>(
     TargetHandle_t i_trgt, const MemRank & i_rank,
     const MemDqBitmap<DIMMS_PER_RANK::MBA> & i_bitmap );
 
-//------------------------------------------------------------------------------
-/*
-int32_t mssGetMarkStore( TargetHandle_t i_mba, const MemRank & i_rank,
-                         MemMark & o_mark )
-{
-    #define PRDF_FUNC "[PlatServices::mssGetMarkStore] "
-
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        errlHndl_t errl = NULL;
-        uint8_t symbolMark, chipMark;
-        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
-        FAPI_INVOKE_HWP( errl, mss_get_mark_store, fapiMba,
-                         i_rank.getMaster(), symbolMark, chipMark );
-
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "mss_get_mark_store() failed. HUID: 0x%08x "
-                      "rank: %d", getHuid(i_mba), i_rank.getMaster() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-        }
-
-        MemSymbol sm = MemSymbol::fromSymbol( i_mba, i_rank, symbolMark );
-        MemSymbol cm = MemSymbol::fromSymbol( i_mba, i_rank, chipMark   );
-
-        // Check if the chip or symbol mark are on any of the spares.
-        MemSymbol sp0, sp1, ecc;
-        o_rc = mssGetSteerMux( i_mba, i_rank, sp0, sp1, ecc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
-                      "rank: %d", getHuid(i_mba), i_rank.getMaster() );
-            break;
-        }
-
-        if ( sp0.isValid() )
-        {
-            if ( sp0.getDram() == sm.getDram() ) sm.setDramSpared();
-            if ( sp0.getDram() == cm.getDram() ) cm.setDramSpared();
-        }
-
-        if ( sp1.isValid() )
-        {
-            if ( sp1.getDram() == sm.getDram() ) sm.setDramSpared();
-            if ( sp1.getDram() == cm.getDram() ) cm.setDramSpared();
-        }
-
-        if ( ecc.isValid() )
-        {
-            if ( ecc.getDram() == sm.getDram() ) sm.setEccSpared();
-            if ( ecc.getDram() == cm.getDram() ) cm.setEccSpared();
-        }
-
-        o_mark = CenMark( sm, cm );
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
-
-//------------------------------------------------------------------------------
-
-/* TODO RTC 157888
-int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
-                         CenMark & io_mark, bool & o_writeBlocked,
-                         bool i_allowWriteBlocked )
-{
-    #define PRDF_FUNC "[PlatServices::mssSetMarkStore] "
-
-    int32_t o_rc = SUCCESS;
-
-    errlHndl_t errl = NULL;
-    o_writeBlocked = false;
-
-    uint8_t sm = io_mark.getSM().isValid() ? io_mark.getSM().getSymbol()
-                                           : MSS_INVALID_SYMBOL;
-    uint8_t cm = io_mark.getCM().isValid() ? io_mark.getCM().getDramSymbol()
-                                           : MSS_INVALID_SYMBOL;
-
-    fapi::ReturnCode l_rc = mss_put_mark_store( getFapiTarget(i_mba),
-                                                i_rank.getMaster(), sm, cm );
-
-    if ( i_allowWriteBlocked &&
-         fapi::RC_MSS_MAINT_MARKSTORE_WRITE_BLOCKED == l_rc )
-    {
-        o_writeBlocked = true;
-
-        // Read hardware and get the new chip mark.
-        CenMark hwMark;
-        o_rc = mssGetMarkStore( i_mba, i_rank, hwMark );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed." );
-        }
-        else
-        {
-            // Update io_mark with the new chip mark.
-            io_mark.setCM( hwMark.getCM() );
-        }
-    }
-    else
-    {
-        errl = fapi::fapiRcToErrl(l_rc);
-        if ( NULL != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
-                      "rank: %d sm: %d cm: %d", getHuid(i_mba),
-                      i_rank.getMaster(), sm, cm );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-*/
 
 
 //------------------------------------------------------------------------------
@@ -556,6 +433,167 @@ void getDimmDqAttr<TYPE_DIMM>( TargetHandle_t i_target,
 
     #undef PRDF_FUNC
 } // end function getDimmDqAttr
+
+//------------------------------------------------------------------------------
+template<>
+int32_t mssGetSteerMux<TYPE_MCA>( TargetHandle_t i_mca,
+                                  const MemRank & i_rank,
+                                  MemSymbol & o_port0Spare,
+                                  MemSymbol & o_port1Spare,
+                                  MemSymbol & o_eccSpare )
+{
+    // NO-OP for MCA
+    o_port0Spare = MemSymbol(); // default invalid
+    o_port1Spare = MemSymbol(); // default invalid
+    o_eccSpare   = MemSymbol(); // default invalid
+    return SUCCESS;
+}
+
+template<>
+int32_t mssGetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
+                            MemSymbol & o_port0Spare, MemSymbol & o_port1Spare,
+                            MemSymbol & o_eccSpare )
+{
+    int32_t o_rc = SUCCESS;
+
+    // called by FSP code so can't just move to hostboot side
+#ifdef __HOSTBOOT_MODULE
+    errlHndl_t errl = NULL;
+
+    uint8_t port0Spare, port1Spare, eccSpare;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
+    FAPI_INVOKE_HWP( errl, mss_check_steering, fapiMba,
+            i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
+
+    if ( NULL != errl )
+    {
+        PRDF_ERR( "[PlatServices::mssGetSteerMux] mss_check_steering() "
+                  "failed. HUID: 0x%08x rank: %d",
+                  getHuid(i_mba), i_rank.getMaster() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    else
+    {
+        o_port0Spare = MemSymbol::fromSymbol( i_mba, i_rank, port0Spare );
+        o_port1Spare = MemSymbol::fromSymbol( i_mba, i_rank, port1Spare );
+        o_eccSpare   = MemSymbol::fromSymbol( i_mba, i_rank, eccSpare   );
+    }
+#endif
+    return o_rc;
+}
+
+
+//------------------------------------------------------------------------------
+
+template<>
+int32_t mssSetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
+                                const MemSymbol & i_symbol, bool i_x4EccSpare )
+{
+    int32_t o_rc = SUCCESS;
+#ifdef __HOSTBOOT_MODULE
+    errlHndl_t errl = NULL;
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
+
+    uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_MBA>(
+                                                     i_symbol.getDram(),
+                                                     isDramWidthX4(i_mba) );
+
+    FAPI_INVOKE_HWP( errl, mss_do_steering, fapiMba,
+                     i_rank.getMaster(), l_dramSymbol,
+                     i_x4EccSpare );
+
+    if ( NULL != errl )
+    {
+        PRDF_ERR( "[PlatServices::mssSetSteerMux] mss_do_steering "
+                  "failed. HUID: 0x%08x rank: %d symbol: %d eccSpare: %c",
+                  getHuid(i_mba), i_rank.getMaster(), l_dramSymbol,
+                  i_x4EccSpare ? 'T' : 'F' );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+#endif
+    return o_rc;
+}
+
+
+//------------------------------------------------------------------------------
+template<>
+int32_t getDimmSpareConfig<TYPE_MCA>( TargetHandle_t i_mba, MemRank i_rank,
+                                      uint8_t i_ps, uint8_t & o_spareConfig )
+{
+    // No spares for MCAs
+    o_spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
+    return SUCCESS;
+}
+
+template<>
+int32_t getDimmSpareConfig<TYPE_MBA>( TargetHandle_t i_mba, MemRank i_rank,
+                                      uint8_t i_ps, uint8_t & o_spareConfig )
+{
+    #define PRDF_FUNC "[PlatServices::getDimmSpareConfig] "
+    int32_t o_rc = SUCCESS;
+
+#ifdef __HOSTBOOT_MODULE
+    using namespace fapi2;
+
+    ATTR_CEN_VPD_DIMM_SPARE_Type attr;
+    o_spareConfig = ENUM_ATTR_CEN_VPD_DIMM_SPARE_NO_SPARE;
+    do
+    {
+        if( TYPE_MBA != getTargetType( i_mba ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid Target:0x%08X", getHuid( i_mba ) );
+            o_rc = FAIL; break;
+        }
+
+        if ( MAX_PORT_PER_MBA <= i_ps )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid parameters i_ps:%u", i_ps );
+            o_rc = FAIL; break;
+        }
+
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(i_mba);
+        ReturnCode l_rc = FAPI_ATTR_GET(ATTR_CEN_VPD_DIMM_SPARE, fapiMba, attr);
+        errlHndl_t errl = fapi2::rcToErrl(l_rc);
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_VPD_DIMM_SPARE for Target:"
+                      "0x%08X", getHuid( i_mba ) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+        o_spareConfig = attr[i_ps][i_rank.getDimmSlct()][i_rank.getRankSlct()];
+
+        // Check for valid values
+        // For X4 DRAM, we can not have full byte as spare config. Also for X8
+        // DRAM we can not have nibble as spare.
+
+        if( ENUM_ATTR_CEN_VPD_DIMM_SPARE_NO_SPARE == o_spareConfig) break;
+
+        bool isFullByte = ( ENUM_ATTR_CEN_VPD_DIMM_SPARE_FULL_BYTE ==
+                                                            o_spareConfig );
+        bool isX4Dram = isDramWidthX4(i_mba);
+
+        if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid Configuration: o_spareConfig:%u",
+                      o_spareConfig );
+            o_rc = FAIL; break;
+        }
+
+    }while(0);
+#endif
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+
+
+
+
 
 //------------------------------------------------------------------------------
 

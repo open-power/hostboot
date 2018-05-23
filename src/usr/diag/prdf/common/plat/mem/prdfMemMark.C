@@ -370,8 +370,18 @@ uint32_t __readMarks<TYPE_MBA>( ExtensibleChip * i_chip, const MemRank & i_rank,
         MemSymbol l_smSym = MemSymbol::fromSymbol( i_chip->getTrgt(), i_rank,
                                                    l_sm );
 
-        //TODO RTC 189221 DRAM sparing support
         // Check if the chip mark is on any of the spares
+        MemSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux<TARGETING::TYPE_MBA>( i_chip->getTrgt(), i_rank,
+                                                    sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+        l_cmSym.updateSpared(sp0,sp1,ecc);
+        l_smSym.updateSpared(sp0,sp1,ecc);
 
         o_chipMark = MemMark( i_chip->getTrgt(), i_rank, l_cmSym );
         o_symMark  = MemMark( i_chip->getTrgt(), i_rank, l_smSym );
@@ -947,33 +957,31 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
 
         if ( !isEnabled )
         {
-            /* TODO RTC 189221
             // Check for any DRAM spares.
-            uint8_t cnfg = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
-            o_rc = getDimmSpareConfig<TYPE_MBA>( i_chip, i_rank, ps, cnfg );
+            uint8_t cnfg = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
+            o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( i_chip->getTrgt(),
+                                                            i_rank, ps, cnfg );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getDimmSpareConfig(0x%08x,0x%02x,%d) "
                           "failed", i_chip->getHuid(), i_rank.getKey(), ps );
                 break;
             }
-            isEnabled = (ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != cnfg);
-            */
+            isEnabled = (TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE != cnfg);
         }
 
         if ( isEnabled )
         {
             // Sparing is enabled. Get the current spares in hardware.
             MemSymbol sp0, sp1, ecc;
-            /* TODO RTC 189221
-            o_rc = mssGetSteerMux<TYPE_MBA>( i_chip, i_rank, sp0, sp1, ecc );
+            o_rc = mssGetSteerMux<TARGETING::TYPE_MBA>( i_chip->getTrgt(),
+                                                        i_rank, sp0, sp1, ecc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
                           i_chip->getHuid(), i_rank.getKey() );
                 break;
             }
-            */
 
             // Add the spares to the callout list if they exist.
             __addCallout( i_chip, i_rank, sp0, io_sc );
@@ -997,15 +1005,23 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
             // the manufacturer. Check the VPD for available spares.
             bool dramSparePossible = false;
             bool eccSparePossible  = false;
-            /* TODO RTC 189221
-            o_rc = bitmap.isSpareAvailable( ps, dramSparePossible,
-                                            eccSparePossible );
+
+            MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
+            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
+                                                        i_rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "isDramSpareAvailable() failed" );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
                 break;
             }
-            */
+
+            o_rc = dqBitmap.isSpareAvailable( ps, dramSparePossible,
+                                              eccSparePossible );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
+                break;
+            }
 
             if ( dramSparePossible &&
                  (0 == ps ? !sp0.isValid() : !sp1.isValid()) )

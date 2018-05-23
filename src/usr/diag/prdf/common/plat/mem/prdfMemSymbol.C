@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,28 @@ uint8_t MemSymbol::getGalois() const
 }
 
 //------------------------------------------------------------------------------
+
+void MemSymbol::updateSpared(const MemSymbol & i_sp0,
+                             const MemSymbol & i_sp1,
+                             const MemSymbol & i_ecc)
+{
+    if (!iv_isDramSpared)
+    {
+        if ( ( i_sp0.isValid() && (i_sp0.getDram() == getDram()) ) ||
+             ( i_sp1.isValid() && (i_sp1.getDram() == getDram()) ) )
+        {
+            setDramSpared();
+        }
+    }
+
+    if ( (!iv_isEccSpared) &&
+         ( i_ecc.isValid() && (i_ecc.getDram() == getDram())) )
+    {
+        setEccSpared();
+    }
+}
+
+//------------------------------------------------------------------------------
 //                       Symbol Accessor Functions
 //------------------------------------------------------------------------------
 
@@ -193,8 +215,6 @@ uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
         o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g1, m1 );
         o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g2, m2 );
 
-        // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
-
     } while (0);
 
     return o_rc;
@@ -217,6 +237,7 @@ uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
+    // o_sym2 is just a placeholder for TYPE_MBA
     o_sym1 = o_sym2 = MemSymbol(); // both initially invalid
 
     do
@@ -242,7 +263,16 @@ uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
         // Get the NCE symbol.
         o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g1, m1 );
 
-        // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
+        MemSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux<TYPE_MBA>( i_chip->getTrgt(), i_rank,
+                                         sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
+                      "rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+            break;
+        }
+        o_sym1.updateSpared(sp0, sp1, ecc);
 
     } while (0);
 
