@@ -73,15 +73,9 @@ void* call_host_attnlisten_proc(void *io_pArgs)
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_attnlisten_proc entry" );
 
-    uint8_t    l_useAllProcs = 1;
-    TARGETING::Target  *l_sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( l_sys );
-    assert(l_sys != NULL);
-
-    // All we need to do is set a flag so that the
-    // ATTN code will check ALL processors the next
-    // time it gets called versus just the master proc.
-    l_sys->trySetAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
+    // Function is a NOOP because with security enabled, PRD is unable
+    // to write FIRs due to blacklist violations.  All of the slave
+    // processor attentions will be ignored until the SMP comes up.
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
              "call_host_attnlisten_proc exit" );

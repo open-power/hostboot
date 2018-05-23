@@ -213,6 +213,14 @@ void* call_proc_build_smp (void *io_pArgs)
             ++curproc;
         }
 
+        // Set a flag so that the ATTN code will check ALL processors
+        // the next time it gets called versus just the master proc.
+        uint8_t    l_useAllProcs = 1;
+        TARGETING::Target  *l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != NULL);
+        l_sys->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
+
     } while (0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
