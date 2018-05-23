@@ -253,15 +253,13 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
 
         // Get the current spares on this rank.
         MemSymbol sp0, sp1, ecc;
-
-        /* TODO RTC 157888/189221 - uncomment when mssGetSteerMux is working
-        o_rc = mssGetSteerMux( mbaTrgt, i_rank, sp0, sp1, ecc );
+        o_rc = mssGetSteerMux<TYPE_MBA>( mbaTrgt, i_rank, sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed." );
             break;
         }
-        */
+
 
         // Use this map to keep track of the total counts per DRAM.
         DramCountMap dramCounts;
@@ -317,21 +315,8 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
                     }
                     else
                     {
-                      /* TODO RTC 157888/189221 - sp0 and sp1 aren't defined yet
                         // Check if this symbol is on any of the spares.
-                        if ( ( sp0.isValid() &&
-                               (sp0.getDram() == symData.symbol.getDram()) ) ||
-                             ( sp1.isValid() &&
-                               (sp1.getDram() == symData.symbol.getDram()) ) )
-                        {
-                            symData.symbol.setDramSpared();
-                        }
-                      */
-                        if ( ecc.isValid() &&
-                             (ecc.getDram() == symData.symbol.getDram()) )
-                        {
-                            symData.symbol.setEccSpared();
-                        }
+                        symData.symbol.updateSpared(sp0, sp1, ecc);
 
                         // Add the symbol to the list.
                         symData.count = count;
@@ -371,18 +356,8 @@ int32_t collectCeStats<TYPE_MBA>( ExtensibleChip * i_chip,
 
             o_chipMark  = MemSymbol::fromSymbol( mbaTrgt, i_rank, sym );
 
-            /* TODO RTC 157888/18922uncomment when mssGetSteerMux is working1 - sp0 and sp1 aren't defined yet
             // Check if this symbol is on any of the spares.
-            if ( ( sp0.isValid() && (sp0.getDram() == o_chipMark.getDram()) ) ||
-                 ( sp1.isValid() && (sp1.getDram() == o_chipMark.getDram()) ) )
-            {
-                o_chipMark.setDramSpared();
-            }
-            */
-            if ( ecc.isValid() && (ecc.getDram() == o_chipMark.getDram()) )
-            {
-                o_chipMark.setEccSpared();
-            }
+            o_chipMark.updateSpared(sp0, sp1, ecc);
         }
 
     } while(0);

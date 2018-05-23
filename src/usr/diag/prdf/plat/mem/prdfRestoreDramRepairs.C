@@ -319,15 +319,13 @@ bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
 
 
         MemSymbol sp0, sp1, ecc;
-        /* TODO RTC 189221 DRAM sparing
-        if ( SUCCESS != mssGetSteerMux(i_trgt, rank, sp0, sp1, ecc) )
+        if ( SUCCESS != mssGetSteerMux<TYPE_MBA>(i_trgt, rank, sp0, sp1, ecc) )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed: MBA=0x%08x "
                       "rank=%d", getHuid(i_trgt), rank.getMaster() );
             analysisErrors = true;
             continue; // skip this rank
         }
-        */
 
         bool isCm  = chipMark.isValid();                // chip mark
         bool isSm  = symMark.isValid();                 // symbol mark
@@ -576,9 +574,9 @@ void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
                                  const std::vector<MemRank> & i_ranks )
 {
     PRDF_TRAC( "deployDramSpares: Function not implemented yet" );
-    /* TODO RTC 189221
+
     bool x4 = isDramWidthX4( i_trgt );
-    bool cenDimm = isMembufOnDimm<TYPE_MBA>( i_mba );
+    bool cenDimm = isMembufOnDimm<TYPE_MBA>( i_trgt );
 
     for ( auto & rank : i_ranks )
     {
@@ -593,12 +591,12 @@ void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
 
         if ( cenDimm )
         {
-            l_rc |= mssSetSteerMux( i_trgt, rank, symPort0, false );
-            l_rc |= mssSetSteerMux( i_trgt, rank, symPort1, false );
+            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symPort0, false );
+            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symPort1, false );
         }
 
         if ( x4 )
-            l_rc |= mssSetSteerMux( i_trgt, rank, symEccSp, true );
+            l_rc |= mssSetSteerMux<TYPE_MBA>( i_trgt, rank, symEccSp, true );
 
         if ( SUCCESS != l_rc )
         {
@@ -607,7 +605,7 @@ void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
             // warning in Hostboot.
             continue;
         }
-    }*/
+    }
 }
 
 } // end namespace RDR
