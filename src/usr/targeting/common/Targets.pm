@@ -1121,6 +1121,7 @@ sub setCommonAttrForChiplet
     }
     elsif ($tgt_type eq "SMPGROUP")
     {
+        $self->setAttribute($target, "INSTANCE_PATH", $target);
         $unit_pos = $pos%2;
     }
 
