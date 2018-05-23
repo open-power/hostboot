@@ -168,21 +168,19 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
             break;
         }
 
-
-/* TODO: 189221
-        uint8_t spareConfig = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
+        uint8_t spareConfig = CEN_VPD_DIMM_SPARE_NO_SPARE;
         // check for spare DRAM. Port does not matter.
-        // Also this configuration is same for all ranks on MBA.
-        rc = getDimmSpareConfig( i_trgt, masterRanks[0], 0, spareConfig );
+        // Also this configuration is same for all ranks on MBA. (MCA no-op)
+        rc = getDimmSpareConfig<T>( i_trgt, masterRanks[0], 0, spareConfig );
         if( SUCCESS != rc )
         {
             PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
             break;
         }
 
-        if( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE != spareConfig )
+        if( CEN_VPD_DIMM_SPARE_NO_SPARE != spareConfig )
             data.header.isSpareDram = true;
-*/
+
 
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
@@ -207,14 +205,13 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
             // Get DRAM spares
             MemSymbol sp0, sp1, ecc;
-/* TODO: 189221
-            rc = mssGetSteerMux( i_trgt, rank, sp0, sp1, ecc );
+            rc = mssGetSteerMux<T>( i_trgt, rank, sp0, sp1, ecc );
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed");
                 continue;
             }
-*/
+
             // Add data
             DramRepairRankData rankData = { rank.getMaster(),
                                               cm.getSymbol().getSymbol(),

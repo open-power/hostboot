@@ -486,7 +486,156 @@ std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MBA>::getSymbolList(
 }
 
 //------------------------------------------------------------------------------
+template <>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable( uint8_t i_portSlct,
+                                       bool & o_dramSpare, bool & o_eccSpare )
+{
+    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable] "
 
+    int32_t o_rc = SUCCESS;
+
+    o_dramSpare = false;
+    o_eccSpare  = false;
+
+    do
+    {
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
+            o_rc = FAIL; break;
+        }
+
+        uint8_t spareConfig = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( iv_trgt , iv_rank,
+                                                      i_portSlct, spareConfig );
+        if( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
+            break;
+        }
+
+        uint8_t spareDqBits = iv_data[i_portSlct][DRAM_SPARE_BYTE];
+
+        if ( iv_x4Dram )
+        {
+            // Check for DRAM spare
+            if ( TARGETING::CEN_VPD_DIMM_SPARE_LOW_NIBBLE == spareConfig )
+            {
+                o_dramSpare = ( 0 == ( spareDqBits & 0xf0 ) );
+            }
+            else if ( TARGETING::CEN_VPD_DIMM_SPARE_HIGH_NIBBLE == spareConfig )
+            {
+                o_dramSpare = ( 0 == ( spareDqBits & 0x0f ) );
+            }
+
+            // Check for ECC spare
+            uint8_t eccDqBits = iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE];
+            o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
+        }
+        else
+        {
+            if ( TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
+            {
+                // spare is not available.
+                o_dramSpare = false;
+            }
+            else
+            {
+                o_dramSpare = ( 0 == spareDqBits );
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+template <>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare( uint8_t i_portSlct,
+                                                        uint8_t i_pins )
+{
+    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( MBA_DIMMS_PER_RANK <= i_portSlct )
+        {
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct);
+            o_rc = FAIL; break;
+        }
+
+        uint8_t spareConfig = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( iv_trgt, iv_rank,
+                                                      i_portSlct, spareConfig );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
+            o_rc = FAIL; break;
+        }
+
+        if ( TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
+        {
+            PRDF_ERR( PRDF_FUNC "DRAM Spare is not avaiable" );
+            o_rc = FAIL; break;
+        }
+
+        if ( iv_x4Dram )
+        {
+            i_pins &= 0xf; // limit to 4 bits
+
+            if ( TARGETING::CEN_VPD_DIMM_SPARE_LOW_NIBBLE == spareConfig )
+            {
+                i_pins = i_pins << DQS_PER_NIBBLE;
+            }
+            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
+        }
+        else
+        {
+            i_pins &= 0xff; // limit to 8 bits
+            iv_data[i_portSlct][DRAM_SPARE_BYTE] |= i_pins;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+template <>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setEccSpare( uint8_t i_pins )
+{
+    #define PRDF_FUNC "[MemDqBitmap::setEccSpare] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        if ( !iv_x4Dram )
+        {
+            PRDF_ERR( PRDF_FUNC "MBA 0x %08x does not support x4 ECC spare",
+                      getHuid(iv_trgt) );
+            o_rc = FAIL; break;
+        }
+
+        i_pins &= 0xf; // limit to 4 bits
+        iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE] |= i_pins;
+
+    } while( 0 );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+
+//------------------------------------------------------------------------------
 // Avoid linker errors with the template.
 template class MemDqBitmap<DIMMS_PER_RANK::MCA>;
 template class MemDqBitmap<DIMMS_PER_RANK::MBA>;

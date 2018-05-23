@@ -66,9 +66,10 @@ class DsdEvent : public TdEntry
     {
         #define PRDF_FUNC "[DsdEvent::nextStep] "
 
-        // TODO: RTC 189221 should assert if DRAM Sparing is NOT supported.
-
         uint32_t o_rc = SUCCESS;
+
+        // NOTE: DRAM Sparing should already be supported if we get this far,
+        //       so just continue without checking for the support here
 
         o_done = false;
 
@@ -154,16 +155,16 @@ class DsdEvent : public TdEntry
             {
                 // Before starting the first command, set iv_mark in the
                 // hardware steer mux.
-                /* TODO: RTC 189221
-                o_rc = mssSetSteerMux<T>( iv_chip, iv_rank, iv_mark,
-                                          iv_eccSpare );
+                o_rc = PlatServices::mssSetSteerMux<T>(iv_chip->getTrgt(),
+                                                       iv_rank,
+                                                       iv_mark.getSymbol(),
+                                                       iv_eccSpare );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "mssSetSteerMux(0x%08x,0x%2x) failed",
                               iv_chip->getHuid(), getKey() );
                     break;
                 }
-                */
 
                 break; // Nothing to analyze yet.
             }

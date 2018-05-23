@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -166,6 +166,35 @@ class MemDqBitmap
      * @return Vector of all active symbols.
      */
     std::vector<MemSymbol> getSymbolList( uint8_t i_portSlct = 0 );
+
+
+    /**
+     * @brief  Queries for DRAM spare status.
+     * @param  i_portSlct  The target port.
+     * @param  o_dramSpare TRUE if the DRAM spare is available, FALSE otherwise.
+     * @param  o_eccSpare  TRUE if the ECC spare is available, FALSE otherwise.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t isSpareAvailable( uint8_t i_portSlct,
+                              bool & o_dramSpare, bool & o_eccSpare );
+
+    /**
+     * @brief  Sets the ECC spare on the specified port (x4 mode only).
+     * @param  i_pins     Optional 4-bit value of the DRAM's pins.
+     *                    The default is to set all pins.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t setEccSpare( uint8_t i_pins = 0x0f );
+
+    /**
+     * @brief  Sets the DRAM spare on the specified port.
+     * @param  i_portSlct The target port.
+     * @param  i_pins     Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of
+     *                    the DRAM's pins. The default is to set all pins.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t setDramSpare( uint8_t i_portSlct, uint8_t i_pins = 0xff );
+
 
   private: // instance variables
 

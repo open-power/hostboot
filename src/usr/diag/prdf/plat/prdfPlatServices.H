@@ -158,48 +158,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
                           VT & o_startAddr, VT & o_endAddr,
                           uint8_t i_dimmSlct = MAX_DIMM_PER_PORT );
 
-/**
- * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_mba        Target MBA.
- * @param  i_rank       Target rank.
- * @param  o_port0Spare A symbol associated with the spare on port 0.
- * @param  o_port1Spare A symbol associated with the spare on port 1.
- * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
-                        MemSymbol & o_port0Spare, MemSymbol & o_port1Spare,
-                        MemSymbol & o_eccSpare );
 
-/**
- * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_mba        Target MBA.
- * @param  i_rank       Target rank.
- * @param  i_symbol     A symbol associated with the DRAM to be spared.
- * @param  i_x4EccSpare If true, will set ECC spare instead (x4 mode only).
- * @note   The procedure will be able to derive the port from the given symbol.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T>
-int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
-                        const MemSymbol & i_symbol, bool i_x4EccSpare );
-
-
-/**
- * @brief   Get spare DRAM information on a DIMM.
- * @param   i_mba MBA target.
- * @param   i_rank Rank.
- * @param   i_ps MBA port select.
- * @param   o_spareConfig Spare DRAM config information.
- * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- * @note    On a DIMM its possible that spare is not present. Also on X4 DRAM
- *          spare can be on High nibble or low nibble. This function will
- *          populate spare config information in o_spareConfig.
- */
-template<TARGETING::TYPE T>
-int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, MemRank i_rank,
-                            uint8_t i_ps, uint8_t & o_spareConfig );
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
 //##############################################################################
