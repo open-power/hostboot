@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ extern "C"
               (new uint8_t[MAX_RANKS_PER_DIMM * DIMM_DQ_RANK_BITMAP_SIZE]));
 
         FAPI_TRY(dimmBadDqCheckParamFindDimm(i_mba, i_port, i_dimm, i_rank, l_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
 
         //Write contents of DQ bitmap for specific rank to o_data.
         memcpy(o_data, l_dqBitmap[i_rank], DIMM_DQ_RANK_BITMAP_SIZE);
@@ -171,12 +171,12 @@ extern "C"
               (new uint8_t[MAX_RANKS_PER_DIMM * DIMM_DQ_RANK_BITMAP_SIZE]));
 
         FAPI_TRY(dimmBadDqCheckParamFindDimm(i_mba, i_port, i_dimm, i_rank, l_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
 
         // Add the rank bitmap to the DIMM bitmap and write the bitmap
         memcpy(l_dqBitmap[i_rank], i_data, DIMM_DQ_RANK_BITMAP_SIZE);
 
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dqBitmap));
 
         delete [] &l_dqBitmap;
 

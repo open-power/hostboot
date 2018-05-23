@@ -585,7 +585,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         This must only be called by a firmware HWP that knows how to
         decode the data. HWP/PLAT firmware that needs to get/set the
         Bad DQ Bitmap from a Centaur DQ point of view must use the
-        ATTR_CEN_BAD_DQ_BITMAP attribute.
+        ATTR_BAD_DQ_BITMAP attribute.
     </description>
     <valueType>uint8</valueType>
     <array>80</array>
