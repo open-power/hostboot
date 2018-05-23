@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,11 @@ inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
             o_tCK_in_ps = 833;
             break;
 
+        // Default 2933 to 2666
+        // TODO:RTC192461
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2933:
+            FAPI_INF("2933 speed grade detected. Setting o_tCK_in_ps to match 2666");
+
         case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
             o_tCK_in_ps = 750;
             break;
@@ -132,6 +137,11 @@ fapi2::ReturnCode ps_to_freq(const T i_time_in_ps, OT& o_speed_grade)
 {
     switch(i_time_in_ps)
     {
+        // Default 682ps (2933MT/s) to 750ps (2666MT/s)
+        // TODO:RTC192461
+        case 682:
+            FAPI_INF("682ps detected (2933 speed bin). Setting o_speed_grade to match 2666.");
+
         case 750:
             o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
             break;
