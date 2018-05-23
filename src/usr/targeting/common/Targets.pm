@@ -831,6 +831,8 @@ sub buildAffinity
             my $nodepos = $self->getParentNodePos($target) ;
             my $proc_ordinal_id = ($nodepos * $maxInstance{$type}) + $proc;
 
+            # Ensure processor HUID is node-relative
+            $self->{huid_idx}->{$type} = $proc;
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
             $self->setAttribute($target, "PHYS_PATH",       $parent_physical);
@@ -1137,15 +1139,21 @@ sub setCommonAttrForChiplet
 
     my $fapi_name       = $self->getFapiName($tgt_type, $node, $proc, $pos);
 
-    #unique offset per system
-    my $offset = (($node * $maxInstance{"PROC"} + $proc ) * $maxInstance{$tgt_type}) + $pos;
-    $self->{huid_idx}->{$tgt_type} = $offset;
+    # Calculate a system wide offset
+    my $sys_offset = (($node * $maxInstance{"PROC"} + $proc ) *
+        $maxInstance{$tgt_type}) + $pos;
+
+    # Calculate a node specific offset
+    my $node_offset = ($proc * $maxInstance{$tgt_type}) + $pos;
+
+    # HUID is node based so use that offset
+    $self->{huid_idx}->{$tgt_type} = $node_offset;
     $self->setHuid($target, $sys, $node);
     $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
     $self->setAttribute($target, "PHYS_PATH",       $physical_path);
     $self->setAttribute($target, "AFFINITY_PATH",   $affinity_path);
-    $self->setAttribute($target, "ORDINAL_ID",      $offset);
-    $self->setAttribute($target, "FAPI_POS",        $offset);
+    $self->setAttribute($target, "ORDINAL_ID",      $sys_offset);
+    $self->setAttribute($target, "FAPI_POS",        $sys_offset);
     $self->setAttribute($target, "REL_POS",         $pos);
 
     my $pervasive_parent= getPervasiveForUnit("$tgt_type$pos");
