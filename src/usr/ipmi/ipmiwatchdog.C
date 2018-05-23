@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2018                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +40,7 @@
 #include <ipmi/ipmiwatchdog.H>
 #include <ipmi/ipmiif.H>
 #include <sys/time.h>
+#include <time.h>
 
 /******************************************************************************/
 // Globals/Constants
@@ -104,6 +106,18 @@ errlHndl_t resetWatchDogTimer()
 {
     errlHndl_t err_ipmi = NULL;
 
+    // Limit the amount of sent watchdog resets to once per second to make
+    // sure that we don't overload the BMC with resets during quickly
+    // completing ISTEPs. For simplicity we only compare the tv_sec so
+    // the grace period may be almost 2 seconds.
+    static uint64_t last_reset_sec;
+    timespec_t now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    if (last_reset_sec + 1 >= now.tv_sec)
+    {
+        return NULL;
+    }
+    last_reset_sec = now.tv_sec;
 
     // reset command does not take any request data
     size_t len = 0;
