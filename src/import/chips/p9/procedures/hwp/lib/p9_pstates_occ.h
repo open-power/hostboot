@@ -107,19 +107,19 @@ typedef struct
     /// Spare
     uint8_t     spare[8];
 
-    /// IVDD ALL Good Cores ON; 1mA units
+    /// IVDD ALL Good Cores ON; 5mA units
     iddq_entry_t ivdd_all_good_cores_on_caches_on[IDDQ_MEASUREMENTS];
 
-    /// IVDD ALL Cores OFF; 1mA units
+    /// IVDD ALL Cores OFF; 5mA units
     iddq_entry_t ivdd_all_cores_off_caches_off[IDDQ_MEASUREMENTS];
 
-    /// IVDD ALL Good Cores OFF; 1mA units
+    /// IVDD ALL Good Cores OFF; 5mA units
     iddq_entry_t ivdd_all_good_cores_off_good_caches_on[IDDQ_MEASUREMENTS];
 
-    /// IVDD Quad 0 Good Cores ON, Caches ON; 1mA units
+    /// IVDD Quad 0 Good Cores ON, Caches ON; 5mA units
     iddq_entry_t ivdd_quad_good_cores_on_good_caches_on[MAXIMUM_QUADS][IDDQ_MEASUREMENTS];
 
-    /// IVDDN; 1mA units
+    /// IVDDN; 5mA units
     iddq_entry_t ivdn[IDDQ_MEASUREMENTS];
 
     /// IVDD ALL Good Cores ON, Caches ON; 0.5C units

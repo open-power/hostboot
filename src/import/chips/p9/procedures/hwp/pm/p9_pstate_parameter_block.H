@@ -677,53 +677,6 @@ p9_pstate_update_vfrt(
     HomerVFRTLayout_t* o_vfrt_data,
     uint32_t i_reference_freq);
 
-/**
-*
-* Description: Generic function to perform the effective capacitance
-*              calculations.
-*              C_eff = I / (V^1.3 * F)
-*
-*              I is the AC component of Idd in 0.01 Amps (or10 mA)
-*              V is the silicon voltage in 100 uV
-*              F is the frequency in MHz
-*
-*              Note: Caller must ensure they check for a 0 return value
-*                    and disable wof if that is the case
-*
-/// -------------------------------------------------------------------
-/// @brief calculate_effective_capacitance
-/// @param[in]: i_iAC - the AC component
-/// @param[in]: i_voltage - the voltage component in 100uV
-/// @param[in]: i_frequency - the frequency component
-/// @return: The calculated effective capacitance
-/// -------------------------------------------------------------------
-*/
-uint16_t pstate_calculate_effective_capacitance( uint16_t i_iAC,
-        uint16_t i_voltage,
-        uint16_t i_frequency );
-
-
-/// -------------------------------------------------------------------
-/// @brief   Get IAC VDN value
-/// @param[in]: i_vdd_value VDD value from #V
-/// @param[in]: i_iddq      IQ vpd data
-/// @param[in]: nest_leakage_percent   leakage in 60C
-/// @param[in]: i_vdn_vpd_value VPD value from power bus #V data
-/// @return iaac vdn value
-/// -------------------------------------------------------------------
-uint16_t get_iac_vdn_value (uint16_t i_vdd_value,
-                            IddqTable i_iddq,
-                            uint8_t nest_leakage_percent,
-                            uint16_t i_vdn_vpd_value);
-
-/// -------------------------------------------------------------------
-/// @brief  round up the floating point value
-/// @param[in]: i_vdd_value VDD value from #V
-/// @return nearest value
-/// -------------------------------------------------------------------
-uint16_t roundUp(float i_value);
-
-
 ///Compute VID points
 /// -------------------------------------------------------------------
 /// @brief  Compute VDM threshold points based on pound W data
