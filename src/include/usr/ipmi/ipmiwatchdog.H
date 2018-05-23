@@ -43,7 +43,7 @@ namespace IPMIWATCHDOG
 // Globals/Constants
 /******************************************************************************/
 /**
- * @brief the default watchdog countdown setting it to 120 seconds.
+ * @brief the default watchdog countdown setting it to 600 seconds.
  *
  */
 // The config option CONFIG_BMC_IPMI_LONG_WATCHDOG allows a tester to use a
@@ -53,7 +53,7 @@ namespace IPMIWATCHDOG
 #ifdef CONFIG_BMC_IPMI_LONG_WATCHDOG
 const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 3600; //60 minutes
 #else
-const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 120; //2 minutes
+const uint16_t  DEFAULT_WATCHDOG_COUNTDOWN = 600; //10 minutes
 #endif
 
 /**
