@@ -1273,12 +1273,12 @@ void updateCpmrHeaderSR( Homerlayout_t* i_pChipHomer, uint8_t i_fusedState )
     pCmeHdr->g_cme_mode_flags = SWIZZLE_4_BYTE(i_fusedState ? 1 : 0);
 
     FAPI_INF("CPMR SR");
-    FAPI_INF("  Fuse Mode = 0x%08X CME Image Flag = 0x%08X", pCpmrHdr->fusedModeStatus,
-             SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
-    FAPI_DBG("  Offset    = 0x%08X, Header value 0x%08X (Real offset / 32)",
+    FAPI_INF("Fuse Mode                 :   0x%08X", pCpmrHdr->fusedModeStatus );
+    FAPI_INF("CME Image Flag            :   0x%08X", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
+    FAPI_DBG("CME Image Offset          :   0x%08X, Header value 0x%08X (Real offset / 32)",
              SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset) * 32,
              SWIZZLE_4_BYTE(pCpmrHdr->cmeImgOffset));
-    FAPI_DBG("  Size      = 0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
+    FAPI_DBG("CME Image Size            :   0x%08X", SWIZZLE_4_BYTE(pCpmrHdr->cmeImgLength));
 
     FAPI_INF("<< updateCpmrHeaderSR");
 }
@@ -1519,8 +1519,8 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
 {
 
     FAPI_INF(">> buildCoreRestoreImage");
-    uint32_t rcTemp = IMG_BUILD_SUCCESS;
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint32_t rcTemp     =   IMG_BUILD_SUCCESS;
+    fapi2::current_err  =   fapi2::FAPI2_RC_SUCCESS;
     //Let us find XIP Header for Core Self Restore Image
     P9XipSection ppeSection;
     uint8_t* pSelfRestImg = NULL;
@@ -1579,7 +1579,6 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                  .set_MAX_ALLOWED_SIZE( rcTemp  )
                  .set_ACTUAL_SIZE( ppeSection.iv_size ),
                  "Failed to update CPMR Header in HOMER" );
-
 
     if( i_imgType.coreSprBuild )
     {
@@ -1838,7 +1837,13 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
                                      i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        //FIXME RTC 178555 Add size check for PGPE Auxiliary Task binary.
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rcTemp ),
+                     fapi2::P9_PGPE_AUX_TASK_BIN_SIZE_ERROR()
+                     .set_EC_LEVEL( i_procFuncModel.getChipLevel() )
+                     .set_CHIP_TYPE( i_procFuncModel.getChipName() )
+                     .set_MAX_ALLOWED_SIZE( rcTemp )
+                     .set_ACTUAL_SIZE( ppeSection.iv_size ),
+                     "Failed to copy PGPE Aux Task Binary due to bad size" );
 
         io_ppmrHdr.g_ppmr_aux_task_offset = io_ppmrHdr.g_ppmr_hcode_offset + PGPE_IMAGE_SIZE;
         io_ppmrHdr.g_ppmr_aux_task_length = ppeSection.iv_size;
