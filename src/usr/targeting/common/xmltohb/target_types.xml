@@ -166,7 +166,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -359,7 +359,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -497,7 +497,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -998,7 +998,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000019</default>
+    <default>0x00000039</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1268,7 +1268,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1295,7 +1295,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1318,7 +1318,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1346,7 +1346,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1394,7 +1394,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1431,7 +1431,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1503,7 +1503,7 @@
   </attribute>
   <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute><id>PARENT_PERVASIVE</id></attribute>
@@ -1537,7 +1537,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1573,7 +1573,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1636,7 +1636,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1681,7 +1681,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1746,7 +1746,7 @@
     <id>CDM_DOMAIN</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1945,7 +1945,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -1997,7 +1997,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>
@@ -2131,7 +2131,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
   </attribute>
 </targetType>
 
@@ -2158,7 +2158,7 @@
   </attribute>
   <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
   <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    <default>0x00000013</default>
+    <default>0x00000033</default>
   </attribute>
   <attribute>
     <id>CDM_DOMAIN</id>
@@ -2178,7 +2178,7 @@
     <id>DECONFIG_GARDABLE</id>
   </attribute>
   <attribute>
-    <default>0x00000011</default>
+    <default>0x00000031</default>
     <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
   </attribute>
   <attribute>

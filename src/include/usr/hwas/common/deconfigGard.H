@@ -523,6 +523,18 @@ public:
      */
     uint8_t clearBlockSpecDeconfigForReplacedTargets();
 
+    /**
+     * @brief Clears attribute which blocks speculative deconfiguration
+     *     (ATTR_BLOCK_SPEC_DECONFIG) so that resource recovery is allowed to
+     *     apply speculative deconfigurations / predictive gards.  Attribute
+     *     is cleared only if a target had gard applied but no longer does.
+     *
+     * @param[in/out]  io_blockAttr  ATTR_BLOCK_SPEC_DECONFIG value.
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t clearBlockSpecDeconfigForUngardedTargets(uint8_t &io_blockAttr);
+
 protected:
 
     /**

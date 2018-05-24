@@ -5116,6 +5116,10 @@
       <name>RESRC_RECOV</name>
       <value>0x00000010</value>
     </enumerator>
+    <enumerator>
+      <name>GARD_APPLIED</name>
+      <value>0x00000020</value>
+    </enumerator>
     <id>HWAS_CHANGED_BIT</id>
   </enumerationType>
 
