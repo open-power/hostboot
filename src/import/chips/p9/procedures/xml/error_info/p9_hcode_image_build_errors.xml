@@ -688,5 +688,18 @@
   </hwpError>
 
   <!-- *********************************************************************** -->
-
+  <hwpError>
+    <rc>RC_P9_PGPE_AUX_TASK_BIN_SIZE_ERROR</rc>
+    <description>hcode image build procedure failed to build PPMR region due to a bad
+    size of auxiliary task binary </description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>
