@@ -535,6 +535,7 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
     fapi2::ATTR_LINK_TRAIN_Type l_link_train;
     fapi2::ATTR_CHIP_EC_FEATURE_HW419022_Type l_hw419022;
     fapi2::ATTR_IO_OBUS_PAT_A_DETECT_RUN_Type l_pat_a_detect_run;
+    fapi2::ATTR_IO_OBUS_TRAIN_FOR_RECOVERY_Type l_train_for_recovery;
     bool l_even = true;
     bool l_odd = true;
 
@@ -567,6 +568,11 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
                            i_tgt,
                            l_link_train),
              "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_OBUS_TRAIN_FOR_RECOVERY,
+                           i_tgt,
+                           l_train_for_recovery),
+             "Error from FAPI_ATTR_GET (ATTR_IO_OBUS_TRAIN_FOR_RECOVERY)");
 
     // determine link train capabilities (half/full)
     l_even = (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) ||
@@ -615,24 +621,27 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
                                        PATTERN_A),
                  "Error from force_dl_pattern_send, pattern A, remote end");
 
-        // power down any unneeded lanes (not physically connected or
+        // at IPL time, power down any unneeded lanes (not physically connected or
         // unused half-link)
-        for (uint8_t ii = 0; ii < MAX_LANES; ii++)
+        if (!l_train_for_recovery)
         {
-            if (((ii >= ((MAX_LANES / 2) - 1)) && (ii <= (MAX_LANES / 2))) || // unused lanes, always pdwn
-                (!l_even && (ii <  ((MAX_LANES / 2) - 1))) ||           // even link is unused
-                (!l_odd  && (ii >= ((MAX_LANES / 2) + 1))))             // odd link is unused
+            for (uint8_t ii = 0; ii < MAX_LANES; ii++)
             {
-                FAPI_TRY(pdwn_bad_lane(i_tgt,
-                                       GRP0,
-                                       ii),
-                         "Error from pdwn_bad_lane, even, local end, lane: %d",
-                         ii);
-                FAPI_TRY(pdwn_bad_lane(l_rem_tgt,
-                                       GRP0,
-                                       ii),
-                         "Error from pdwn_bad_lane, even, remote end, lane: %d",
-                         ii);
+                if (((ii >= ((MAX_LANES / 2) - 1)) && (ii <= (MAX_LANES / 2))) || // unused lanes, always pdwn
+                    (!l_even && (ii <  ((MAX_LANES / 2) - 1))) ||                 // even link is unused
+                    (!l_odd  && (ii >= ((MAX_LANES / 2) + 1))))                   // odd link is unused
+                {
+                    FAPI_TRY(pdwn_bad_lane(i_tgt,
+                                           GRP0,
+                                           ii),
+                             "Error from pdwn_bad_lane, even, local end, lane: %d",
+                             ii);
+                    FAPI_TRY(pdwn_bad_lane(l_rem_tgt,
+                                           GRP0,
+                                           ii),
+                             "Error from pdwn_bad_lane, even, remote end, lane: %d",
+                             ii);
+                }
             }
         }
 
@@ -694,6 +703,27 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
         {
             l_dl_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
             l_dl_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+        }
+
+        FAPI_TRY(fapi2::putScomUnderMask(i_tgt,
+                                         OBUS_LL0_IOOL_CONTROL,
+                                         l_dl_control_data,
+                                         l_dl_control_mask),
+                 "Error writing DLL control register (0x%08X)!",
+                 OBUS_LL0_IOOL_CONTROL);
+
+        if (l_even && l_train_for_recovery)
+        {
+            l_dl_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+            l_dl_control_mask.clearBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+            l_dl_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+        }
+
+        if (l_odd && l_train_for_recovery)
+        {
+            l_dl_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
+            l_dl_control_mask.clearBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+            l_dl_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
         }
 
         FAPI_TRY(fapi2::putScomUnderMask(i_tgt,
