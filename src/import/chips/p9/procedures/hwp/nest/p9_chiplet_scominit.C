@@ -61,21 +61,11 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9_perv_scom_addresses.H>
+#include <p9_obus_fir_utils.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const uint64_t FBC_IOO_TL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOO_TL_FIR_ACTION1 = 0x0049200000000000ULL;
-const uint64_t FBC_IOO_TL_FIR_MASK    = 0xFF2490000FFFF00FULL;
-
-const uint64_t FBC_IOO_DL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C000033FFFFCULL;
-const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCC00003ULL;
-
-// link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
-const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF00FFULL;
-
 static const uint8_t N3_PG_NPU_REGION_BIT = 7;
 
 // MCBIST FIR (Cumulus)
