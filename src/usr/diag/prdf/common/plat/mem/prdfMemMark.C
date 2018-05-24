@@ -1123,7 +1123,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         }
 
         // Set the chip mark in the DRAM Repairs VPD.
-        o_rc = setDramInVpd<TYPE_MCA>( i_chip, i_rank, chipMark.getSymbol() );
+        o_rc = setDramInVpd<T>( i_chip, i_rank, chipMark.getSymbol() );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
