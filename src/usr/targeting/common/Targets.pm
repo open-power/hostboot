@@ -1121,6 +1121,8 @@ sub setCommonAttrForChiplet
     }
     elsif ($tgt_type eq "SMPGROUP")
     {
+        # SMPGROUP inherits the same INSTANCE_PATH as its parent OBUS which
+        # messes up the HUID -NID mapping, hence adding the below line
         $self->setAttribute($target, "INSTANCE_PATH", $target);
         $unit_pos = $pos%2;
     }
