@@ -54,13 +54,7 @@
 #include <p9_obus_scom.H>
 #include <p9_io_obus_scominit.H>
 #include <p9_obus_scom_addresses.H>
-
-//------------------------------------------------------------------------------
-//  Constant definitions
-//------------------------------------------------------------------------------
-const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FIR_ACTION1 = 0x2000000000000000ULL;
-const uint64_t FIR_MASK    = 0xDFFFFFFFFFFFC000ULL;
+#include <p9_obus_fir_utils.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -98,15 +92,15 @@ fapi2::ReturnCode p9_io_obus_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OB
     {
         FAPI_TRY(fapi2::putScom(i_target,
                                 OBUS_FIR_ACTION0_REG,
-                                FIR_ACTION0),
+                                OBUS_PHY_FIR_ACTION0),
                  "Error from putScom (OBUS_FIR_ACTION0_REG)");
         FAPI_TRY(fapi2::putScom(i_target,
                                 OBUS_FIR_ACTION1_REG,
-                                FIR_ACTION1),
+                                OBUS_PHY_FIR_ACTION1),
                  "Error from putScom (OBUS_FIR_ACTION1_REG)");
         FAPI_TRY(fapi2::putScom(i_target,
                                 OBUS_FIR_MASK_REG,
-                                FIR_MASK),
+                                OBUS_PHY_FIR_MASK),
                  "Error from putScom (OBUS_FIR_MASK_REG)");
     }
 
