@@ -59,7 +59,6 @@ namespace p9_hcodeImageBuild
 #endif //__cplusplus
 #endif //__ASSEMBLER__
 
-//FIXME to make future addition simple, need a better solution
 /**
  * @brief returns maximum quad common rings that enter HOMER.
  */
@@ -255,9 +254,7 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
-//FIXME RTC 155018
-//Eventually SGPE Img header has been defined to be of size 96B. Next 36B would be for
-//debug pointer.Aligning SGPE image header to 64B boundary.
+//SGPE header size is 96B
 } __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) sgpeHeader_t;
 #endif
 
@@ -299,9 +296,7 @@ HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
 #else
-//FIXME RTC 155018
-//Eventually CME Img header might be of size 96B. Next 36B would be for
-//debug pointer.Aligning CME image header to 64B boundary.
+//CME Header size is 96B
 } __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) cmeHeader_t;
 #endif
 
@@ -364,9 +359,7 @@ HCD_HDR_UINT32(g_pgpe_doptrace_length,          0 );        // Deep Opeartional 
 #ifdef __ASSEMBLER__
 .endm
 #else
-//FIXME RTC 155018
-//Eventually PGPE Img header has been defined to be of size 96B. Next 36B would be for
-//debug pointer.Aligning PGPE image header to 64B boundary.
+//PGPE Header size is 128B
 } __attribute__((packed, aligned(IMG_HDR_ALIGN_SIZE))) PgpeHeader_t;
 #endif
 
@@ -618,6 +611,7 @@ typedef struct
     uint8_t                 cmeSramRegion[CME_REGION_SIZE];
 } CPMRLayout_t;
 
+
 /**
  * @brief   models image section associated with PGPE in HOMER.
  */
@@ -631,7 +625,8 @@ typedef struct
     uint8_t  ppmr_reserved0[PGPE_IMAGE_RESERVE_SIZE];
     uint8_t  occParmBlock[sizeof(OCCPstateParmBlock)];  // PPMR + 128KB
     uint8_t  occParmBlockReserve[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE - sizeof(OCCPstateParmBlock)];
-    uint8_t  pstateTable[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE];  // PPMR + 144KB
+    uint8_t  pstateTable[sizeof(GeneratedPstateInfo)];  // PPMR + 144KB
+    uint8_t  pstateTableReserve[PGPE_PSTATE_OUTPUT_TABLES_REGION_SIZE - sizeof(GeneratedPstateInfo)];
     uint8_t  ppmr_reserved1[WOF_TABLE_RESERVE];
     uint8_t  wofTableSize[OCC_WOF_TABLES_SIZE]; //WOF Tables located ar PPMR base + 768KB
 } PPMRLayout_t;
