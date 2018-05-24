@@ -48,6 +48,7 @@ namespace mss
 /// @tparam M the target type to be returned
 /// @tparam T the fapi2 target type of the argument
 /// @param[in] i_target the fapi2 target T
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
 /// @return a vector of M targets.
 /// @note Only works for valid parent-child relationships
 /// So calling find_targets<TARGET_TYPE_DIMM>(l_mca) will work here
@@ -56,26 +57,8 @@ namespace mss
 /// If we do, it's on fapi2
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
-inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target)
-{
-    return i_target.template getChildren<M>();
-}
-
-///
-/// @brief find a set of elements based on a fapi2 target
-/// @tparam M the target type to be returned
-/// @tparam T the fapi2 target type of the argument
-/// @param[in] i_target the fapi2 target T
-/// @param[in] i_state the fapi2 target state for the children of i_target
-/// @return a vector of M targets that match the target state specified
-/// @note Only works for valid parent-child relationships
-/// So calling find_targets<TARGET_TYPE_DIMM>(l_mca) will work here
-/// but calling find_targets<TARGET_TYPE_DIMM>(l_mcs) will not work
-/// Compiler will freak out and we'll never get a bad relationship/ error at runtime
-/// If we do, it's on fapi2
-///
-template< fapi2::TargetType M, fapi2::TargetType T >
-inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target, fapi2::TargetState i_state)
+inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target,
+        fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL )
 {
     return i_target.template getChildren<M>(i_state);
 }
@@ -212,9 +195,10 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Tar
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DMI> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+              fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_DMI>(i_state);
 }
 
 ///
@@ -224,9 +208,10 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+              fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>(i_state);
 }
 
 ///
@@ -236,9 +221,10 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+              fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MBA>(i_state);
 }
 
 ///
@@ -248,13 +234,14 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+              fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> > l_mbas;
 
-    for (const auto& membuf_chip : i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+    for (const auto& membuf_chip : i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>(i_state))
     {
-        auto l_these_mbas( membuf_chip.getChildren<fapi2::TARGET_TYPE_MBA>() );
+        auto l_these_mbas( membuf_chip.getChildren<fapi2::TARGET_TYPE_MBA>(i_state) );
         l_mbas.insert(l_mbas.end(), l_these_mbas.begin(), l_these_mbas.end());
     }
 
@@ -268,13 +255,14 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+              fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
-    for (const auto& l_mba : i_target.getChildren<fapi2::TARGET_TYPE_MBA>())
+    for (const auto& l_mba : i_target.getChildren<fapi2::TARGET_TYPE_MBA>(i_state))
     {
-        auto l_these_dimms( l_mba.getChildren<fapi2::TARGET_TYPE_DIMM>() );
+        auto l_these_dimms( l_mba.getChildren<fapi2::TARGET_TYPE_DIMM>(i_state) );
         l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
     }
 
@@ -288,14 +276,15 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+              fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
     // At this time, fapi2 (cronus?) doesn't seem to recognize a DIMM is the child of an MCS.
-    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>(i_state))
     {
-        auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>() );
+        auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>(i_state) );
         l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
     }
 
@@ -309,13 +298,14 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+              fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
 
-    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>(i_state))
     {
-        auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>() );
+        auto l_these_dimms( p.getChildren<fapi2::TARGET_TYPE_DIMM>(i_state) );
         l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
     }
 
@@ -329,9 +319,10 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+  fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCS>(i_state);
 }
 ///
 /// @brief find all the MCS connected to an MCBIST
@@ -341,12 +332,13 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+  fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > l_mcses;
 
     // At this time, fapi2 (cronus?) doesn't seem to recognize a MCS is the child of an MCBIST
-    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<fapi2::TARGET_TYPE_MCA>(i_state))
     {
         fapi2::Target<fapi2::TARGET_TYPE_MCS> l_mcs = p.getParent<fapi2::TARGET_TYPE_MCS>();
 
@@ -370,9 +362,10 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> > find_targets
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+  fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>(i_state);
 }
 
 ///
@@ -382,7 +375,8 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+  fapi2::TargetState i_state )
 {
     // TODO - RTC:174905. Find out if we really need a find API that returns a vector of MCA from an MCA
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_temp  = {i_target};
@@ -468,9 +462,10 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets_with_ma
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+  fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCA>(i_state);
 }
 
 ///
@@ -480,9 +475,10 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > find_targets
-( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+  fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_DIMM>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_DIMM>(i_state);
 }
 
 ///
@@ -503,9 +499,10 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCS> find_target( const fapi2::Target<fa
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCBIST> > find_targets(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    fapi2::TargetState i_state )
 {
-    return i_target.getChildren<fapi2::TARGET_TYPE_MCBIST>();
+    return i_target.getChildren<fapi2::TARGET_TYPE_MCBIST>(i_state);
 }
 
 ///
