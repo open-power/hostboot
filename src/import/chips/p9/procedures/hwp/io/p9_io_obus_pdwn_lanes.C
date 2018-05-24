@@ -73,6 +73,10 @@ fapi2::ReturnCode p9_io_obus_pdwn_lanes(const OBUS_TGT i_tgt, const uint32_t i_l
     FAPI_IMP("p9_io_obus_pdwn_lanes: I/O Obus Entering");
     const uint8_t GRP0  = 0;
     const uint8_t LANES = 24;
+    const uint8_t  TIMEOUT = 200;
+    const uint64_t DLY_1MS = 1000000;
+    const uint64_t DLY_1MIL_CYCLES = 1000000;
+
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
     FAPI_DBG("I/O Obus Pdwn Lanes %s, Lane Vector(0x%X)", l_tgtStr, i_lane_vector);
@@ -82,6 +86,33 @@ fapi2::ReturnCode p9_io_obus_pdwn_lanes(const OBUS_TGT i_tgt, const uint32_t i_l
     {
         if(((0x1 << lane) & i_lane_vector) != 0)
         {
+            uint64_t l_data = 0;
+
+            // set rx_recal_abort = 1
+            FAPI_TRY(io::rmw(OPT_RX_RECAL_ABORT, i_tgt, GRP0, lane, 0x1),
+                     "Error setting OPT_RX_RECAL_ABORT");
+
+            // poll for rx_lane_busy = 0
+            for (uint8_t l_count = 0; l_count < TIMEOUT; ++l_count)
+            {
+                FAPI_TRY(io::read(OPT_RX_LANE_BUSY, i_tgt, GRP0, lane, l_data),
+                         "Error reading OPT_RX_LANE_BUSY");
+
+                if (io::get(OPT_RX_LANE_BUSY, l_data) == 0)
+                {
+                    break;
+                }
+
+                FAPI_TRY(fapi2::delay(DLY_1MS, DLY_1MIL_CYCLES));
+            }
+
+            FAPI_ASSERT((io::get(OPT_RX_LANE_BUSY, l_data) == 0),
+                        fapi2::IO_OBUS_PDWN_BAD_LANE_TIMEOUT()
+                        .set_TARGET(i_tgt)
+                        .set_GROUP(GRP0)
+                        .set_LANE(lane),
+                        "Timeout waiting for RX lane busy status");
+
             FAPI_TRY(io::rmw(OPT_RX_LANE_ANA_PDWN, i_tgt, GRP0, lane, 0x01));
             FAPI_TRY(io::rmw(OPT_RX_LANE_DIG_PDWN, i_tgt, GRP0, lane, 0x01));
             FAPI_TRY(io::rmw(OPT_TX_LANE_PDWN    , i_tgt, GRP0, lane, 0x01));
