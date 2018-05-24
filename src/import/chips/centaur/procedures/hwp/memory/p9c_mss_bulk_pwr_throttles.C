@@ -209,7 +209,7 @@ extern "C" {
         // Maximum theoretical data bus utilization (percent of max) (for ceiling)
         // Comes from MRW value in c% - convert to %
         // We don't need to limit this because this function is only determining the channel pair power slope and interecpt
-        l_max_util = (static_cast<double>(convert_to_percent(l_max_dram_databus_util)));
+        l_max_util = convert_to_percent(static_cast<double>(l_max_dram_databus_util));
 
         for (l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++)
         {
@@ -342,7 +342,7 @@ extern "C" {
             FAPI_INF("%s [Max Util Limited to %4.2lf centi percent]", mss::c_str(i_target_mba), l_max_dram_databus_util);
         }
 
-        l_max_util = (static_cast<double>(convert_to_percent(l_max_dram_databus_util)));
+        l_max_util = convert_to_percent(static_cast<double>(l_max_dram_databus_util));
 
         // Limit input utilization if needed
         if (i_utilization > l_max_util)
@@ -378,9 +378,8 @@ extern "C" {
 
         if (l_num_mba_with_dimms > 1)
         {
-            l_max_util_power_calc = (l_max_util < (static_cast<double>(convert_to_percent(DRAM_UTIL_LIMIT_BOTH_MBA_WITH_DIMMS)))) ?
-                                    l_max_util : (
-                                        static_cast<double>(convert_to_percent(DRAM_UTIL_LIMIT_BOTH_MBA_WITH_DIMMS)));
+            l_max_util_power_calc = (l_max_util < (convert_to_percent(static_cast<double>(DRAM_UTIL_LIMIT_BOTH_MBA_WITH_DIMMS)))) ?
+                                    l_max_util : (convert_to_percent(static_cast<double>(DRAM_UTIL_LIMIT_BOTH_MBA_WITH_DIMMS)));
         }
 
         FAPI_INF("%s [Max Util for power calculations %4.2lf percent]", mss::c_str(i_target_mba), l_max_util_power_calc);
@@ -397,7 +396,7 @@ extern "C" {
         // throttling disabled with M=0, use MAX_UTIL
         if (l_throttle_d == 0)
         {
-            l_util_power_calc = convert_to_percent(MAX_UTIL);
+            l_util_power_calc = convert_to_percent(static_cast<double>(MAX_UTIL));
         }
         // throttling enabled, use calculated throttle settings to determine utilization
         else
@@ -426,8 +425,8 @@ extern "C" {
         // throttling disabled with M=0, use MAX_UTIL
         if (l_throttle_d == 0)
         {
-            l_utilization_calc = convert_to_percent(MAX_UTIL);
-            l_utilization_calc_without_throttle_adder = convert_to_percent(MAX_UTIL);
+            l_utilization_calc = convert_to_percent(static_cast<double>(MAX_UTIL));
+            l_utilization_calc_without_throttle_adder = convert_to_percent(static_cast<double>(MAX_UTIL));
         }
         // throttling enabled, use calculated throttle settings to determine utilization
         else

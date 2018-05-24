@@ -40,11 +40,10 @@
 //  My Includes
 //------------------------------------------------------------------------------
 #include <p9c_mss_util_to_throttle.H>
-#include <p9c_mss_bulk_pwr_throttles.C>
 #include <p9c_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <fapi2.H>
-#include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 using fapi2::FAPI2_RC_SUCCESS;
 

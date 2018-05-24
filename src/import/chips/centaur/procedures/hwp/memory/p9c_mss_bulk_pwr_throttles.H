@@ -51,7 +51,7 @@ constexpr uint8_t PERCENT_CONVERSION = 100;
 ///
 /// @brief This function will convert a value with units of centi percent to percent
 /// @tparam T the type to convert into a percentage
-/// @param[in] i_value:  uint32_t value in centi percent
+/// @param[in] i_value:  value in centi percent
 /// @return the value in percent
 ///
 template<typename T>
@@ -68,8 +68,8 @@ typedef fapi2::ReturnCode (*p9c_mss_bulk_pwr_throttles_FP_t)
 typedef fapi2::ReturnCode (*p9c_mss_bulk_pwr_channel_pair_power_curve_FP_t)
 (
     const fapi2::Target<fapi2::TARGET_TYPE_MBA>&,
-    double,
-    double
+    double&,
+    double&
 );
 
 typedef fapi2::ReturnCode (*p9c_mss_bulk_pwr_util_to_throttle_power_FP_t)

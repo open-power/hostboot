@@ -638,11 +638,12 @@ extern "C" {
                                i_target_mba, l_channel_pair_thermal_power_limit));
 
         // Initialize the runtime throttle attributes to an unthrottled value for mss_bulk_pwr_throttles
-        l_runtime_throttle_n_per_mba = (static_cast<uint32_t>(l_runtime_throttle_d * ((static_cast<double>
-                                        (convert_to_percent(l_max_dram_databus_util))) / PERCENT_CONVERSION) / ADDR_TO_DATA_UTIL_CONVERSION));
-        l_runtime_throttle_n_per_chip = (static_cast<uint32_t>(l_runtime_throttle_d * ((static_cast<double>
-                                         (convert_to_percent(l_max_dram_databus_util))) / PERCENT_CONVERSION) / ADDR_TO_DATA_UTIL_CONVERSION) *
-                                         l_throttle_multiplier);
+        l_runtime_throttle_n_per_mba = (static_cast<uint32_t>(l_runtime_throttle_d *
+                                        ((convert_to_percent(static_cast<double>(l_max_dram_databus_util))) / PERCENT_CONVERSION) /
+                                        ADDR_TO_DATA_UTIL_CONVERSION));
+        l_runtime_throttle_n_per_chip = (static_cast<uint32_t>(l_runtime_throttle_d *
+                                         ((convert_to_percent(static_cast<double>(l_max_dram_databus_util))) / PERCENT_CONVERSION) /
+                                         ADDR_TO_DATA_UTIL_CONVERSION) * l_throttle_multiplier);
 
         // for better custom dimm performance for DDR4, set the per mba throttle to the per chip throttle
         // Not planning on doing this for DDR3
