@@ -183,6 +183,21 @@ fapi2::ReturnCode p9_pm_reset(
             FAPI_TRY(special_wakeup_all(i_target,
                                         true),//Enable splwkup
                      "ERROR: Failed to remove EX chiplets from special wakeup");
+
+            // To prevent unnecessary Quad Special Wakeup request timeout,
+            // Upon upcoming reset(ppe down, thus cannot service quad special wakeup),
+            // Assert Quad Special Wakeup Done as Core Special Wakeup Done is asserted
+            // Note: This Done will be reset by SGPE code upon reboot
+            FAPI_DBG("Assert Quad Special Wakeup Done upon upcoming PPE reset");
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets =
+                        i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
+
+            for ( auto l_itr = l_eqChiplets.begin(); l_itr != l_eqChiplets.end(); ++l_itr)
+            {
+                FAPI_TRY(fapi2::putScom(*l_itr, EQ_PPM_GPMMR_SCOM2, l_data64.flush<0>().setBit<0>()),
+                         "ERROR: Failed to write EQ_PPM_GPMMR_SCOM2");
+            }
+
             FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX in special wakeup"));
         }
         else
