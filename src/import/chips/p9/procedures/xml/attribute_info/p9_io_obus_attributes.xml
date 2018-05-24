@@ -81,6 +81,18 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IO_OBUS_TRAIN_FOR_RECOVERY</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates that all future training actions will occur for
+    runtime link recovery.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IO_OBUS_LANE_PDWN</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>

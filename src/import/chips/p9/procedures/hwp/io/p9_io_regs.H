@@ -342,7 +342,9 @@
 #define OPT_TX_FIR_ERROR_INJECT_PL                         0x800434000000003f, 48, 16 // register -- description
 #define OPT_TX_BIT_MODE1_E_PL                              0x80043c000000003f, 48, 16 // register -- description
 #define OPT_TX_BIT_MODE2_E_PL                              0x800444000000003f, 48, 16 // register -- description
+*/
 #define OPT_TX_IORESET                                     0x80044c000000003f, 48,  1 // reset the given tx lane
+/*
 #define OPT_TX_CNTL2_O_PL                                  0x80044c000000003f, 48, 16 // register -- description
 #define OPT_TX_TDR_ENABLE                                  0x800454000000003f, 48,  1 // enable tdr on the given tx lane\r\n\tgap
 #define OPT_TX_CNTL3_EO_PL                                 0x800454000000003f, 48, 16 // register -- description
@@ -525,6 +527,7 @@
 #define OPT_RX_DAC_CNTL3_EO_PL                             0x800018000000003f, 48, 16 // register -- description
 #define OPT_RX_A_OFFSET_O0                                 0x800020000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch.
 #define OPT_RX_A_OFFSET_O1                                 0x800020000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch.
+*/
 #define OPT_RX_DAC_CNTL4_EO_PL                             0x800020000000003f, 48, 16 // register -- description
 #define OPT_RX_A_INTEG_COARSE_GAIN                         0x800028000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define OPT_RX_A_EVEN_INTEG_FINE_GAIN                      0x800028000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments.
@@ -532,6 +535,7 @@
 #define OPT_RX_DAC_CNTL5_EO_PL                             0x800028000000003f, 48, 16 // register -- description
 #define OPT_RX_A_CTLE_COARSE                               0x800030000000003f, 48,  5 // this is the ctle coarse peak value, only 4 bits currently used thinking future
 #define OPT_RX_A_CTLE_GAIN                                 0x800030000000003f, 53,  4 // this is the ctle gain setting
+/*
 #define OPT_RX_DAC_CNTL6_EO_PL                             0x800030000000003f, 48, 16 // register -- description
 #define OPT_RX_A_H1E_VAL                                   0x800038000000003f, 48,  7 // dfe h1 value for even samplers
 #define OPT_RX_A_H1O_VAL                                   0x800038000000003f, 56,  7 // dfe h1 value for odd samplers
@@ -547,6 +551,7 @@
 #define OPT_RX_DAC_CNTL2_O_PL                              0x800088000000003f, 48, 16 // register -- description
 #define OPT_RX_B_OFFSET_O0                                 0x800090000000003f, 48,  7 // this is the vertical offset of the odd low threshold sampling latch. the step size is vio/256.
 #define OPT_RX_B_OFFSET_O1                                 0x800090000000003f, 56,  7 // this is the vertical offset of the odd high threshold sampling latch. the step size is vio/256.
+*/
 #define OPT_RX_DAC_CNTL3_O_PL                              0x800090000000003f, 48, 16 // register -- description
 #define OPT_RX_B_INTEG_COARSE_GAIN                         0x800098000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define OPT_RX_B_EVEN_INTEG_FINE_GAIN                      0x800098000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments
@@ -554,6 +559,7 @@
 #define OPT_RX_DAC_CNTL4_O_PL                              0x800098000000003f, 48, 16 // register -- description
 #define OPT_RX_B_CTLE_COARSE                               0x8000a0000000003f, 48,  5 // this is the ctle coarse peak value
 #define OPT_RX_B_CTLE_GAIN                                 0x8000a0000000003f, 53,  4 // this is the ctle gain setting
+/*
 #define OPT_RX_DAC_CNTL5_O_PL                              0x8000a0000000003f, 48, 16 // register -- description
 #define OPT_RX_B_H1E_VAL                                   0x8000a8000000003f, 48,  7 // dfe h1 value for even samplers
 #define OPT_RX_B_H1O_VAL                                   0x8000a8000000003f, 56,  7 // dfe h1 value for odd samplers
@@ -562,6 +568,7 @@
 #define OPT_RX_DAC_CNTL7_O_PL                              0x8000b0000000003f, 48, 16 // register -- description
 #define OPT_RX_E_OFFSET_E                                  0x8000b8000000003f, 48,  7 // this is the vertical offset of the even low threshold sampling latch. the step size is vio/256.
 #define OPT_RX_E_OFFSET_O                                  0x8000b8000000003f, 56,  7 // this is the vertical offset of the odd low threshold sampling latch. the step size is vio/256.
+*/
 #define OPT_RX_DAC_CNTL8_O_PL                              0x8000b8000000003f, 48, 16 // register -- description
 #define OPT_RX_E_INTEG_COARSE_GAIN                         0x8000c0000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define OPT_RX_E_EVEN_INTEG_FINE_GAIN                      0x8000c0000000003f, 52,  5 // this is integrator gain control used in making common mode adjustments
@@ -569,6 +576,7 @@
 #define OPT_RX_DAC_CNTL9_O_PL                              0x8000c0000000003f, 48, 16 // register -- description
 #define OPT_RX_E_CTLE_COARSE                               0x8000c8000000003f, 48,  5 // this is the ctle coarse peak value
 #define OPT_RX_E_CTLE_GAIN                                 0x8000c8000000003f, 53,  4 // this is the ctle gain setting
+/*
 #define OPT_RX_DAC_CNTL10_O_PL                             0x8000c8000000003f, 48, 16 // register -- description
 #define OPT_RX_PL_SPARE_MODE_0                             0x800200000000003f, 48,  1 // per-lane spare mode latch.
 #define OPT_RX_PL_SPARE_MODE_1                             0x800200000000003f, 49,  1 // per-lane spare mode latch.
@@ -653,8 +661,10 @@
 #define OPT_RX_PR_TRACE_DDC_SM                             0x800258000000003f, 49,  5 // determines when to stop the state machine for trace debug.
 #define OPT_RX_PR_TRACE_WOBBLE_STOP                        0x800258000000003f, 54,  1 // enables the trace debug wobble state to stop the state machines.
 #define OPT_RX_PR_TRACE_WOBBLE_SM                          0x800258000000003f, 55,  3 // determines when to stop the state machine for trace debug.
+*/
 #define OPT_RX_PR_RESET                                    0x800258000000003f, 62,  1 // set this to reset cdr logic.  power and clocks must be enabled in the slice.
 #define OPT_RX_IORESET                                     0x800258000000003f, 63,  1 // reset the given rx lane (except the cdr logic)
+/*
 #define OPT_RX_BIT_CNTL4_EO_PL                             0x800258000000003f, 48, 16 // register -- description
 #define OPT_RX_PR_BUMP_SL_1STEP                            0x800260000000003f, 48,  1 // rx manual phase rotator shift right pulse\r\n\twriting this bit to a 1 adds one to the binary pr value. an increase in pr value has the effect of moving the c2 clocks to the samplat earlier in time relative to the data.\r\n\tthis is just the opposite of what you might think and is also opposite the definition of bump_right_half servo command.
 #define OPT_RX_PR_BUMP_SR_1STEP                            0x800260000000003f, 49,  1 // rx manual phase rotator shift left pulse\r\n\twriting this bit to a 1 subtracts one from the binary pr value. a decrease in pr value has the effect of moving the c2 clocks to the samplat later in time relative to the data.\r\n\tthis is just the opposite of what you might think and is also opposite the definition of bump_left_half servo command.
@@ -685,7 +695,9 @@
 #define OPT_RX_PR_RIGHT_EDGE_B                             0x800318000000003f, 54,  6 // rx phase rotator b bank right edge
 #define OPT_RX_B_PR_DFE_CLKADJ                             0x800318000000003f, 60,  4 // tweak value in phase rotator steps for the bank b clock offset when doing dfe calibration
 #define OPT_RX_BIT_STAT1_O_PL                              0x800318000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_RUN_LANE                                    0x800320000000003f, 48,  1 // run training and subsequent recalibration on given lane
+/*
 #define OPT_RX_RUN_DCCAL                                   0x800320000000003f, 49,  1 // run on-die dc training on given lane
 #define OPT_RX_RECAL_REQ                                   0x800320000000003f, 50,  1 // request recalibration on given lane
 */
@@ -934,7 +946,9 @@
 #define OPT_RX_RC_ENABLE_CTLE_1ST_LATCH_OFFSET_CAL         0x800970000000003f, 48,  1 // rx recalibration    first latch offset adjustment enable with ctle-based disable
 #define OPT_RX_RC_ENABLE_CTLE_2ND_LATCH_OFFSET_CAL         0x800970000000003f, 49,  1 // rx recalibratoin    second latch offset adjustment enable with ctle-based disable
 #define OPT_RX_RC_ENABLE_VGA_AMAX_MODE                     0x800970000000003f, 50,  1 // rx recalibration    vga ap measurement mode  \r\n\t0: apx111 - anx000 mode \r\n\t1: 2ap-amin mode
+*/
 #define OPT_RX_RC_ENABLE_AUTO_RECAL                        0x800970000000003f, 51,  1 // rx recalibration    vga ap measurement mode  \r\n\t0: apx111 - anx000 mode \r\n\t1: 2ap-amin mode
+/*
 #define OPT_RX_CTL_MODE27_EO_PG                            0x800970000000003f, 48, 16 // register -- description
 #define OPT_RX_DC_STEP_CNTL_OPT_ALIAS                      0x800978000000003f, 48,  5 // rx dc step control opt alias
 #define OPT_RX_DC_ENABLE_CM_COARSE_CAL                     0x800978000000003f, 48,  1 // rx dc cal eye optimization common mode coarse calibration enable
