@@ -351,6 +351,7 @@ static constexpr uint8_t mss_eccSpareIndex_to_symbol[MSS_X4_ECC_STEER_OPTIONS] =
 
 constexpr uint8_t NUM_DRAM_WIDTHS = 2; //0=x8 1=x4
 constexpr uint8_t NUM_BEATS = 16; //   8 on port 0,2     8 on port 1,3
+constexpr uint8_t NUM_BEATS_PER_PORT = NUM_BEATS / 2; //   8 on each port
 constexpr uint8_t NUM_WORDS = 2;
 
 static constexpr uint32_t mss_maintBufferData[NUM_DRAM_WIDTHS][MSS_MAX_PATTERNS][NUM_BEATS][NUM_WORDS] =
@@ -5786,6 +5787,7 @@ uint8_t mss_centaurDQ_to_symbol( const uint8_t i_dq,
     return o_symbol;
 }
 
+
 ///
 /// @brief  Identifies UE bits from trap data
 ///
@@ -5795,17 +5797,18 @@ uint8_t mss_centaurDQ_to_symbol( const uint8_t i_dq,
 ///
 /// @param[in]  i_target                MBA target
 /// @param[in]  i_rank                  Rank containing the UE.
-/// @param[out] o_bad_bits              Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
-fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                        const uint8_t i_rank,
-                                        uint8_t (&o_bad_bits)[2][10])
-
+fapi2::ReturnCode mss_IPL_UE_isolation_data_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        uint8_t (&io_bad_bits)[2][10])
 {
-    FAPI_INF("ENTER mss_IPL_UE_isolation()");
-
-    static const uint32_t maintBufferReadDataRegs[2][2][8] =
+    static const uint32_t maintBufferReadDataRegs[2][2][NUM_BEATS_PER_PORT] =
     {
 
         // UE trap 0:
@@ -5860,33 +5863,266 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
             }
         }
     };//7    DW15
+    uint32_t l_tmp_data_diff[2] = {0};
+    fapi2::buffer<uint64_t> l_data_32;
+    fapi2::buffer<uint64_t> l_data_64;
+    fapi2::buffer<uint64_t> l_diff;
+    fapi2::buffer<uint64_t> l_data;
 
+    //----------------------------------------------------
+    // DATA: Do XOR of expected and actual data to find stuck bits
+    //----------------------------------------------------
 
-    static const uint32_t maintBufferRead65thByteRegs[2][4] =
+    for(uint8_t l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++ )
     {
-        // UE trap 0
+        l_tmp_data_diff[0] = 0;
+        l_tmp_data_diff[1] = 0;
+
+        FAPI_INF("%s port%d", mss::c_str(i_target), l_port);
+
+        for(uint8_t l_beat = 0; l_beat < NUM_BEATS_PER_PORT; l_beat++ )
         {
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC0_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC1_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC2_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC3_RO
-        },
-        // UE trap 1
-        {
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC4_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC5_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC6_RO,
-            CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC7_RO
+            FAPI_TRY(fapi2::getScom(i_target, maintBufferReadDataRegs[i_ue_trap][l_port][l_beat], l_data));
+
+            FAPI_INF("%s rank%u Actual data, beat%d: 0x%X", mss::c_str(i_target), i_rank, l_beat, l_data);
+
+            FAPI_INF("%s rank%u Expected pattern%d = 0x%.8X 0x%.8X", mss::c_str(i_target), i_rank, i_pattern,
+                     mss_maintBufferData[i_ue_trap][i_pattern][l_port * 8 + l_beat][0],
+                     mss_maintBufferData[i_ue_trap][i_pattern][l_port * 8 + l_beat][1]);
+            l_data.extractToRight<0, 32>(l_data_32);
+            l_data.extractToRight<32, 32>(l_data_64);
+            // DO XOR of actual and expected data, and OR the result together for all 8 beats
+            l_tmp_data_diff[0] |= l_data_32 ^ mss_maintBufferData[i_ue_trap][i_pattern][l_port * 8 + l_beat][0];
+            l_tmp_data_diff[1] |= l_data_64 ^ mss_maintBufferData[i_ue_trap][i_pattern][l_port * 8 + l_beat][1];
+
+            FAPI_INF("***************************************** %s rank%u l_tmp_diff: 0x%.8X 0x%.8X", mss::c_str(i_target), i_rank,
+                     l_tmp_data_diff[0], l_tmp_data_diff[1]);
         }
-    };
+
+        // Put l_tmp_diff into a fapi2::buffer<uint64_t> to make it easier
+        // to get into o_bad_bits
+        l_diff.insert<0, 32, 0>(l_tmp_data_diff[0]);
+        l_diff.insert<32, 32, 0>(l_tmp_data_diff[1]);
+
+        for(uint8_t l_byte = 0; l_byte < 8; l_byte++ )
+        {
+            FAPI_TRY(l_diff.extract(io_bad_bits[l_port][l_byte], 8 * l_byte, 8, 0));
+        }
+    } // End loop on ports
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+static const uint32_t maintBufferRead65thByteRegs[2][4] =
+{
+    // UE trap 0
+    {
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC0_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC1_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC2_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC3_RO
+    },
+    // UE trap 1
+    {
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC4_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC5_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC6_RO,
+        CEN_MBA_MAINT0_MAINT_BUFF_65TH_BYTE_64B_ECC7_RO
+    }
+};
+
+///
+/// @brief  Identifies UE bits from trap data for the 65th byte
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[in]  i_dram_width            DRAM width
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation_65byte( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        const uint8_t i_dram_width,
+        uint8_t (&io_bad_bits)[2][10])
+{
+    fapi2::buffer<uint64_t> l_data;
+
+
+    //----------------------------------------------------
+    // 65th byte: Do XOR of expected and actual 65th byte to find stuck bits
+    //----------------------------------------------------
+
+    for(uint8_t l_loop = 0; l_loop < NUM_LOOPS_FOR_65TH_BYTE; l_loop++ )
+    {
+        uint8_t l_tag_MDI = 0;
+        uint8_t l_tmp_65th_byte_diff = 0;
+
+        FAPI_TRY(fapi2::getScom(i_target, maintBufferRead65thByteRegs[i_ue_trap][l_loop], l_data));
+
+
+        // Grab bit 0 = Checkbit0_1
+        // Grab bit 1 = Tag0_2
+        // Grab bit 2 = Tag1_3
+        // Grab bit 3 = MDI
+        l_data.extract<0, 4, 0>(l_tag_MDI);
+
+
+        FAPI_INF("%s rank%u Actual:   bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", mss::c_str(i_target),
+                 i_rank, l_tag_MDI);
+
+        FAPI_INF("%s rank%u Expected: bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", mss::c_str(i_target),
+                 i_rank,
+                 mss_65thByte[i_dram_width][i_pattern][l_loop]);
+
+        // DO XOR of actual and expected data
+        l_tmp_65th_byte_diff = l_tag_MDI ^ mss_65thByte[i_dram_width][i_pattern][l_loop];
+        FAPI_INF("***************************************** %s rank%u l_tmp_65th_byte_diff: 0x%.2X", mss::c_str(i_target),
+                 i_rank, l_tmp_65th_byte_diff);
+
+
+        // Check for mismatch in bit 0: Checkbit0_1
+        if (l_tmp_65th_byte_diff & 0x80)
+        {
+            // Checkbit0_1 maps to port0 bit 64, which is on byte8
+            io_bad_bits[0][8] |= 0x80;
+        }
+
+        // Check for mismatch in bit 1: Tag0_2
+        if (l_tmp_65th_byte_diff & 0x40)
+        {
+            // Tag0_2 maps to port0 bit 65, which is on byte8
+            io_bad_bits[0][8] |= 0x40;
+        }
+
+        // Check for mismatch in bit 2: Tag1_3
+        if (l_tmp_65th_byte_diff & 0x20)
+        {
+            // Tag1_3 maps to port0 bit 64, which is on byte8
+            io_bad_bits[0][8] |= 0x80;
+        }
+
+        // Check for mismatch in bit 3: MDI
+        if (l_tmp_65th_byte_diff & 0x10)
+        {
+            // MDI maps to port0 bit 65, which is on byte8
+            io_bad_bits[0][8] |= 0x40;
+        }
+    } // End loops through trapped 65th byte info
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief  Identifies UE bits from trap data for the ecc byte
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[in]  i_dram_width            DRAM width
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation_ecc( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        const uint8_t i_dram_width,
+        uint8_t (&io_bad_bits)[2][10])
+{
+
+    uint32_t l_ECC = 0;
+    uint32_t l_tmp_ECC_diff = 0;
+    fapi2::buffer<uint32_t> l_ECC_diff;
+    uint8_t l_ECC_c6_c5_c4_01 = 0;
+    uint8_t l_ECC_c6_c5_c4_23 = 0;
+    uint8_t l_ECC_c3_c2_c1_c0_01 = 0;
+    uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
+    fapi2::buffer<uint64_t> l_data;
+
+    //----------------------------------------------------
+    // ECC: Do XOR of expected and actual ECC bits to find stuck bits
+    //----------------------------------------------------
+
+    for(uint8_t l_loop = 0; l_loop < NUM_LOOPS_FOR_65TH_BYTE; l_loop++ )
+    {
+        l_ECC = 0;
+
+        FAPI_TRY(fapi2::getScom(i_target, maintBufferRead65thByteRegs[i_ue_trap][l_loop], l_data));
+
+
+        // Grab bits 4:15 = ECC_c6_c5_c4, and bits 16:31 = ECC_c3_c2_c1_c0
+        l_data.extract<4, 28, 4>(l_ECC);
+
+
+        FAPI_INF("%s rank%u Actual:   ECC = 0x%.8X", mss::c_str(i_target), i_rank, l_ECC);
+
+        FAPI_INF("%s rank%u Expected: ECC = 0x%.8X", mss::c_str(i_target), i_rank, mss_ECC[i_dram_width][i_pattern][l_loop]);
+
+        // DO XOR of actual and expected data
+        l_tmp_ECC_diff |= l_ECC ^ mss_ECC[i_dram_width][i_pattern][l_loop];
+        FAPI_INF("***************************************** %s rank%u l_tmp_ECC_diff: 0x%.8X", mss::c_str(i_target), i_rank,
+                 l_tmp_ECC_diff);
+    }
+
+    // Put l_tmp_ECC_diff into a fapi2::buffer<uint64_t> to make it easier
+    // to get into io_bad_bits
+    l_ECC_diff.insert<0, 32, 0>(l_tmp_ECC_diff);
+
+
+    l_ECC_diff.extract < 4, 6, 8 - 6 > (l_ECC_c6_c5_c4_01);
+    l_ECC_diff.extract < 10, 6, 8 - 6 > (l_ECC_c6_c5_c4_23);
+    l_ECC_diff.extract<16, 8, 0>(l_ECC_c3_c2_c1_c0_01);
+    l_ECC_diff.extract<24, 8, 0>(l_ECC_c3_c2_c1_c0_23);
+
+
+    // The 6 bits of ECC_c6_c5_c4 maps to byte8 on port0
+    io_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
+    // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
+    io_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief  Identifies UE bits from trap data
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[out] o_bad_bits              Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                        const uint8_t i_rank,
+                                        uint8_t (&o_bad_bits)[2][10])
+
+{
+    FAPI_INF("%s rank%u ENTER mss_IPL_UE_isolation()", mss::c_str(i_target), i_rank);
 
 
     uint8_t l_UE_trap = 0; // 0,1, since UE can be in 1st or 2nd half of buffer
     uint8_t l_port = 0;    // 0,1
-    uint8_t l_beat = 0;    // 0-7
     uint8_t l_byte = 0;    // 0-9
     uint8_t l_nibble = 0;  // 0-17
-    uint8_t l_loop = 0;
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_data_32;
     fapi2::buffer<uint64_t> l_data_64;
@@ -5901,17 +6137,7 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
     uint8_t l_cmd_type = 0;
     fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_targetCentaur;
     uint8_t l_mbaPosition = 0;
-    uint32_t l_tmp_data_diff[2] = {0};
-    uint8_t l_tag_MDI = 0;
-    uint8_t l_tmp_65th_byte_diff = 0;
     fapi2::buffer<uint64_t> l_diff;
-    uint32_t l_ECC = 0;
-    uint32_t l_tmp_ECC_diff = 0;
-    fapi2::buffer<uint32_t> l_ECC_diff;
-    uint8_t l_ECC_c6_c5_c4_01 = 0;
-    uint8_t l_ECC_c6_c5_c4_23 = 0;
-    uint8_t l_ECC_c3_c2_c1_c0_01 = 0;
-    uint8_t l_ECC_c3_c2_c1_c0_23 = 0;
     uint8_t l_dramSparePort0Symbol = MSS_INVALID_SYMBOL;
     uint8_t l_dramSparePort1Symbol = MSS_INVALID_SYMBOL;
     uint8_t l_eccSpareSymbol = MSS_INVALID_SYMBOL;
@@ -6014,13 +6240,13 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
     if ((l_UE_trap0_signature_32 != 0xFACEB00C) &&
         (l_UE_trap0_signature_32 != 0xD15C0DAD))
     {
-        FAPI_INF("UE trapped in 1st half of maint buffer");
+        FAPI_INF("%s rank%u UE trapped in 1st half of maint buffer", mss::c_str(i_target), i_rank);
         l_UE_trap = 0;
     }
     else if ((l_UE_trap1_signature_32 != 0xFACEB00C) &&
              (l_UE_trap1_signature_32 != 0xD15C0DAD))
     {
-        FAPI_INF("UE trapped in 2nd half of maint buffer");
+        FAPI_INF("%s rank%u UE trapped in 2nd half of maint buffer", mss::c_str(i_target), i_rank);
         l_UE_trap = 1;
     }
     else
@@ -6041,141 +6267,31 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
     //----------------------------------------------------
     // DATA: Do XOR of expected and actual data to find stuck bits
     //----------------------------------------------------
-
-    for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++ )
-    {
-        l_tmp_data_diff[0] = 0;
-        l_tmp_data_diff[1] = 0;
-
-        FAPI_INF("port%d", l_port);
-
-        for(l_beat = 0; l_beat < 8; l_beat++ )
-        {
-            FAPI_TRY(fapi2::getScom(i_target, maintBufferReadDataRegs[l_UE_trap][l_port][l_beat], l_data));
-
-            FAPI_INF("Actual data, beat%d: 0x%X", l_beat, l_data);
-
-            FAPI_INF("Expected pattern%d = 0x%.8X 0x%.8X", l_initPattern,
-                     mss_maintBufferData[l_dramWidth][l_initPattern][l_port * 8 + l_beat][0],
-                     mss_maintBufferData[l_dramWidth][l_initPattern][l_port * 8 + l_beat][1]);
-            l_data.extract<0, 32>(l_data_32);
-            l_data.extract<32, 32>(l_data_64);
-            // DO XOR of actual and expected data, and OR the result together for all 8 beats
-            l_tmp_data_diff[0] |= l_data_32 ^ mss_maintBufferData[l_dramWidth][l_initPattern][l_port * 8 + l_beat][0];
-            l_tmp_data_diff[1] |= l_data_64 ^ mss_maintBufferData[l_dramWidth][l_initPattern][l_port * 8 + l_beat][1];
-
-            FAPI_INF("***************************************** l_tmp_diff: 0x%.8X 0x%.8X", l_tmp_data_diff[0], l_tmp_data_diff[1]);
-        }
-
-        // Put l_tmp_diff into a fapi2::buffer<uint64_t> to make it easier
-        // to get into o_bad_bits
-        l_diff.insert<0, 32, 0>(l_tmp_data_diff[0]);
-        l_diff.insert<32, 32, 0>(l_tmp_data_diff[1]);
-
-        for(l_byte = 0; l_byte < 8; l_byte++ )
-        {
-            FAPI_TRY(l_diff.extract(o_bad_bits[l_port][l_byte], 8 * l_byte, 8, 0));
-        }
-    } // End loop on ports
+    FAPI_TRY(mss_IPL_UE_isolation_data_bad_bits( i_target,
+             i_rank,
+             l_UE_trap,
+             l_initPattern,
+             o_bad_bits));
 
     //----------------------------------------------------
     // 65th byte: Do XOR of expected and actual 65th byte to find stuck bits
     //----------------------------------------------------
-
-    for(l_loop = 0; l_loop < NUM_LOOPS_FOR_65TH_BYTE; l_loop++ )
-    {
-        l_tag_MDI = 0;
-        l_tmp_65th_byte_diff = 0;
-
-        FAPI_TRY(fapi2::getScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data));
-
-
-        // Grab bit 0 = Checkbit0_1
-        // Grab bit 1 = Tag0_2
-        // Grab bit 2 = Tag1_3
-        // Grab bit 3 = MDI
-        l_data.extract<0, 4, 0>(l_tag_MDI);
-
-
-        FAPI_INF("Actual:   bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X", l_tag_MDI);
-
-        FAPI_INF("Expected: bit0 (Checkbit0_1), bit1(Tag0_2), bit2(Tag1_3), bit3(MDI) = 0x%.2X",
-                 mss_65thByte[l_dramWidth][l_initPattern][l_loop]);
-
-        // DO XOR of actual and expected data
-        l_tmp_65th_byte_diff = l_tag_MDI ^ mss_65thByte[l_dramWidth][l_initPattern][l_loop];
-        FAPI_INF("***************************************** l_tmp_65th_byte_diff: 0x%.2X", l_tmp_65th_byte_diff);
-
-
-        // Check for mismatch in bit 0: Checkbit0_1
-        if (l_tmp_65th_byte_diff & 0x80)
-        {
-            // Checkbit0_1 maps to port0 bit 64, which is on byte8
-            o_bad_bits[0][8] |= 0x80;
-        }
-
-        // Check for mismatch in bit 1: Tag0_2
-        if (l_tmp_65th_byte_diff & 0x40)
-        {
-            // Tag0_2 maps to port0 bit 65, which is on byte8
-            o_bad_bits[0][8] |= 0x40;
-        }
-
-        // Check for mismatch in bit 2: Tag1_3
-        if (l_tmp_65th_byte_diff & 0x20)
-        {
-            // Tag1_3 maps to port0 bit 64, which is on byte8
-            o_bad_bits[0][8] |= 0x80;
-        }
-
-        // Check for mismatch in bit 3: MDI
-        if (l_tmp_65th_byte_diff & 0x10)
-        {
-            // MDI maps to port0 bit 65, which is on byte8
-            o_bad_bits[0][8] |= 0x40;
-        }
-    } // End loops through trapped 65th byte info
-
+    FAPI_TRY( mss_IPL_UE_isolation_65byte( i_target,
+                                           i_rank,
+                                           l_UE_trap,
+                                           l_initPattern,
+                                           l_dramWidth,
+                                           o_bad_bits));
 
     //----------------------------------------------------
     // ECC: Do XOR of expected and actual ECC bits to find stuck bits
     //----------------------------------------------------
-
-    for(l_loop = 0; l_loop < NUM_LOOPS_FOR_65TH_BYTE; l_loop++ )
-    {
-        l_ECC = 0;
-
-        FAPI_TRY(fapi2::getScom(i_target, maintBufferRead65thByteRegs[l_UE_trap][l_loop], l_data));
-
-
-        // Grab bits 4:15 = ECC_c6_c5_c4, and bits 16:31 = ECC_c3_c2_c1_c0
-        l_data.extract<4, 28, 4>(l_ECC);
-
-
-        FAPI_INF("Actual:   ECC = 0x%.8X", l_ECC);
-
-        FAPI_INF("Expected: ECC = 0x%.8X", mss_ECC[l_dramWidth][l_initPattern][l_loop]);
-
-        // DO XOR of actual and expected data
-        l_tmp_ECC_diff |= l_ECC ^ mss_ECC[l_dramWidth][l_initPattern][l_loop];
-        FAPI_INF("***************************************** l_tmp_ECC_diff: 0x%.8X", l_tmp_ECC_diff);
-    }
-
-    // Put l_tmp_ECC_diff into a fapi2::buffer<uint64_t> to make it easier
-    // to get into o_bad_bits
-    l_ECC_diff.insert<0, 32, 0>(l_tmp_ECC_diff);
-
-
-    l_ECC_diff.extract < 4, 6, 8 - 6 > (l_ECC_c6_c5_c4_01);
-    l_ECC_diff.extract < 10, 6, 8 - 6 > (l_ECC_c6_c5_c4_23);
-    l_ECC_diff.extract<16, 8, 0>(l_ECC_c3_c2_c1_c0_01);
-    l_ECC_diff.extract<24, 8, 0>(l_ECC_c3_c2_c1_c0_23);
-
-
-    // The 6 bits of ECC_c6_c5_c4 maps to byte8 on port0
-    o_bad_bits[0][8] |= l_ECC_c6_c5_c4_01 | l_ECC_c6_c5_c4_23;
-    // The 8 bits of ECC_c3_c2_c1_c0 maps to byte8 byte on port1
-    o_bad_bits[1][8] |= l_ECC_c3_c2_c1_c0_01 | l_ECC_c3_c2_c1_c0_23;
+    FAPI_TRY( mss_IPL_UE_isolation_ecc( i_target,
+                                        i_rank,
+                                        l_UE_trap,
+                                        l_initPattern,
+                                        l_dramWidth,
+                                        o_bad_bits));
 
 
     //----------------------------------------------------
@@ -6191,9 +6307,9 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
 
 
 
-//----------------------------
-// x8
-//----------------------------
+    //----------------------------
+    // x8
+    //----------------------------
     if (l_dramWidth == 0)
     {
         // If steering on port0
@@ -6345,19 +6461,20 @@ fapi2::ReturnCode mss_IPL_UE_isolation( const fapi2::Target<fapi2::TARGET_TYPE_M
     //----------------------------------------------------
 
     FAPI_ERR("WARNING: IPL UE isolation results for rank = %d on %s.", i_rank, mss::c_str(i_target));
-    FAPI_ERR("WARNING: Expected pattern = 0x%.8X", mss_maintBufferData[l_dramWidth][l_initPattern][0][0]);
+    FAPI_ERR("WARNING: %s rank%u Expected pattern = 0x%.8X", mss::c_str(i_target), i_rank,
+             mss_maintBufferData[l_dramWidth][l_initPattern][0][0]);
 
     for(l_port = 0; l_port < 2; l_port++ )
     {
         for(l_byte = 0; l_byte < 10; l_byte++ )
         {
-            FAPI_ERR("WARNING: o_bad_bits[port%d][byte%d] = %02x",
-                     l_port, l_byte, o_bad_bits[l_port][l_byte]);
+            FAPI_ERR("WARNING: %s rank%u o_bad_bits[port%d][byte%d] = 0x%02x",
+                     mss::c_str(i_target), i_rank, l_port, l_byte, o_bad_bits[l_port][l_byte]);
         }
     }
 
 
-    FAPI_INF("EXIT mss_IPL_UE_isolation()");
+    FAPI_INF("%s EXIT mss_IPL_UE_isolation()", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 

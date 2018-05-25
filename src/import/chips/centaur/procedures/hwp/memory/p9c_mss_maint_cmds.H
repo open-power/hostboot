@@ -1272,6 +1272,73 @@ uint8_t mss_centaurDQ_to_symbol( const uint8_t i_dq,
 
 
 ///
+/// @brief  Identifies UE bits from trap data for data bits
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation_data_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        uint8_t (&io_bad_bits)[2][10]);
+
+
+///
+/// @brief  Identifies UE bits from trap data for the 65th byte
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[in]  i_dram_width            DRAM width
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation_65byte( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        const uint8_t i_dram_width,
+        uint8_t (&io_bad_bits)[2][10]);
+
+
+///
+/// @brief  Identifies UE bits from trap data for the ecc byte
+///
+///         This function compares trapped actual UE data to an expected
+///         data pattern in order to identify the bits that contributed to
+///         a UE encountered during IPL memory diagnostics.
+///
+/// @param[in]  i_target                MBA target
+/// @param[in]  i_rank                  Rank containing the UE.
+/// @param[in]  i_ue_trap               UE trap number
+/// @param[in]  i_pattern               Pattern that triggered the UE.
+/// @param[in]  i_dram_width            DRAM width
+/// @param[out] io_bad_bits             Map of bad bits (Centaur DQ format) 2 ports x 10 bytes
+/// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+///
+fapi2::ReturnCode mss_IPL_UE_isolation_ecc( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_rank,
+        const uint8_t i_ue_trap,
+        const uint8_t i_pattern,
+        const uint8_t i_dram_width,
+        uint8_t (&io_bad_bits)[2][10]);
+
+
+///
 /// @brief  Identifies UE bits from trap data
 ///
 ///         This function compares trapped actual UE data to an expected
