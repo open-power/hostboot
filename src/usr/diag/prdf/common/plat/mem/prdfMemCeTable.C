@@ -205,20 +205,18 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
     // Centaur specific info.
     uint8_t isMba  = 0;
     uint8_t mbaPos = 0;
-    uint8_t rcType = CEN_SYMBOL::WIRING_INVALID;
+    CEN_SYMBOL::WiringType rcType = CEN_SYMBOL::WIRING_INVALID;
     if ( TYPE_MBA == iv_chip->getType() )
     {
         isMba  = 1;
         mbaPos = getTargetPosition( iv_chip->getTrgt() );
 
-        /* TODO: RTC 157888
         if ( SUCCESS != getMemBufRawCardType(iv_chip->getTrgt(), rcType) )
         {
-            PRDF_ERR( "[MemCeTable::addCapData] getMemBufRawCardType(0x%08x) "
-                      "failed", iv_chip->getHuid() );
+            PRDF_ERR( "addCapData: getMemBufRawCardType(0x%08x) failed",
+                      iv_chip->getHuid() );
             rcType = CEN_SYMBOL::WIRING_INVALID; // Just in case.
         }
-        */
     }
 
     // Fill in the header info.
