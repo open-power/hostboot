@@ -50,7 +50,8 @@ extern "C" {
     /// @param[in] i_targets_memb  Reference to vector of present Centaur Targets in a particular VDDR power domain
     /// @return ReturnCode
     ///
-    fapi2::ReturnCode p9c_mss_volt_dimm_count(std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>& i_targets_memb)
+    fapi2::ReturnCode p9c_mss_volt_dimm_count(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>>&
+            i_targets_memb)
     {
         FAPI_INF("*** Running p9c_mss_volt_dimm_count ***");
 
