@@ -23,42 +23,130 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+///
+/// @file spd_checker.H
+/// @brief SPD functions to check boundaries
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
 #ifndef _SPD_CHECKER_H_
 #define _SPD_CHECKER_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
-namespace check
+
+///
+/// @brief Selectors for timing limits
+/// @note BITS12 stands for a 12 bit range
+/// @note BITS16 stands for a 16 bit range
+///
+enum bit_len
 {
+    BITS12 = 12,
+    BITS16 = 16,
+};
+
+///
+/// @class bitRangeTraits
+/// @brief Traits class to select
+/// @tparam T bit_len selector
+///
+template <bit_len T>
+struct bitRangeTraits;
+
+///
+/// @class bitRangeTraits
+/// @brief Traits class to select - BITS12 specialization
+///
+template<>
+struct bitRangeTraits<BITS12>
+{
+    enum
+    {
+        LOWER_BOUND = 0x1,
+        UPPER_BOUND = 0xfff,
+    };
+};
+
+///
+/// @class bitRangeTraits
+/// @brief Traits class to select - BITS16 specialization
+///
+template<>
+struct bitRangeTraits<BITS16>
+{
+    enum
+    {
+        LOWER_BOUND = 0x1,
+        UPPER_BOUND = 0xffff,
+    };
+};
+
 namespace spd
+{
+namespace check
 {
 
 ///
-/// @brief      Checks conditional passes and implements traces & exits if it fails
-/// @tparam     T input data of any size
-/// @param[in]  i_target fapi2 dimm target
-/// @param[in]  i_conditional conditional that we are testing against
-/// @param[in]  i_spd_byte_index current SPD byte
-/// @param[in]  i_spd_data debug data
-/// @param[in]  i_err_str error string to print out when conditional fails
-/// @return     ReturnCode
+/// @brief SPD timing boundary check
+/// @tparam BL bit_len selector
+/// @tparam T the TargetType
+/// @tparam TT defaulted to bitRangeTraits<TB>
+/// @param[in] i_target fapi2 target
+/// @param[in] i_timing the timing value
+/// @param[in] i_ffdc ffdc function code
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template < bit_len BL, fapi2::TargetType T, typename TT = bitRangeTraits<BL> >
+fapi2::ReturnCode max_timing_range(const fapi2::Target<T>& i_target,
+                                   const int64_t i_timing,
+                                   const generic_ffdc_codes i_ffdc)
+{
+    FAPI_ASSERT( (i_timing <= TT::UPPER_BOUND) &&
+                 (i_timing >= TT::LOWER_BOUND),
+                 fapi2::MSS_SPD_TIMING_FAIL()
+                 .set_FUNCTION_CODE(i_ffdc)
+                 .set_TARGET(i_target),
+                 "Failed timing parameter check for %s",
+                 spd::c_str(i_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks conditional passes and implements traces & exits if it fails
+/// @tparam T input data of any size
+/// @param[in] i_target fapi2 dimm target
+/// @param[in] i_conditional conditional that we are testing against
+/// @param[in] i_spd_byte_index current SPD byte
+/// @param[in] i_spd_data debug data
+/// @param[in] i_err_str error string to print out when conditional fails
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
 template< typename T >
 inline fapi2::ReturnCode fail_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const bool i_conditional,
         const size_t i_spd_byte_index,
         const T i_spd_data,
-        const char* i_err_str)
+        const char* i_err_str = "")
 {
     FAPI_ASSERT(i_conditional,
                 fapi2::MSS_BAD_SPD().
                 set_VALUE(i_spd_data).
                 set_BYTE(i_spd_byte_index).
                 set_DIMM_TARGET(i_target),
-                "%s %s Byte %d, Data returned: %d.",
-                c_str(i_target),
+                "%s %s Byte %d, data 0x%02x, extracted value: 0x%02x.",
+                spd::c_str(i_target),
                 i_err_str,
                 i_spd_byte_index,
                 i_spd_data);
@@ -67,70 +155,136 @@ inline fapi2::ReturnCode fail_for_invalid_value(const fapi2::Target<fapi2::TARGE
 fapi_try_exit:
     return fapi2::current_err;
 
-} // fail_for_invalid_value()
+} // fail_for_invalid_value
 
 ///
-/// @brief      Checks conditional passes and implements traces if it fails. No FFDC collected.
-/// @tparam     T input data of any size
-/// @param[in]  i_target fapi2 dimm target
-/// @param[in]  i_conditional that we are testing against
-/// @param[in]  i_spd_byte_index
-/// @param[in]  i_spd_data debug data
-/// @param[in]  i_err_str string to print out when conditional fails
-/// @return     void
+/// @brief Helper function to test if a DRAM generation is valid
+/// @param[in] i_dram_gen the DRAM gen from SPD
+/// @return true if this DRAM gen is valid, else false
 ///
-template< typename T >
-inline void warn_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const bool i_conditional,
-                                   const size_t i_spd_byte_index,
-                                   const T i_spd_data,
-                                   const char* i_err_str)
+static inline bool is_dram_gen_valid(const uint8_t i_dram_gen)
 {
-    // Don't print warning conditional if true
-    if(!i_conditional)
+    bool l_result = false;
+
+    switch(i_dram_gen)
     {
-        FAPI_IMP("%s. %s. Byte %d, Data returned: %d.",
-                 c_str(i_target),
-                 i_err_str,
-                 i_spd_byte_index,
-                 i_spd_data );
+        case DDR4:
+            l_result = true;
+            break;
+
+        default:
+            l_result = false;
+            break;
     }
-}// warn_for_invalid_value
+
+    return l_result;
+}
 
 ///
-/// @brief      Checks if valid factory parameters are given
-/// @param[in]  i_target fapi2 dimm target
-/// @param[in]  i_dimm_type DIMM type enumeration
-/// @param[in]  i_encoding_rev SPD encoding level rev number
-/// @param[in]  i_additions_rev SPD additions level rev number
-/// @param[in]  i_err_str string to print out when conditional fails
-/// @return     fapi2::ReturnCode
+/// @brief Checks for valid DRAM generation
+/// @param[in] i_target the DIMM target
+/// @param[in] i_dram_gen the DRAM gen from SPD
+/// @param[in] i_func_code mss ffdc code
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-inline fapi2::ReturnCode invalid_factory_sel(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint8_t i_dimm_type,
-        const uint8_t i_encoding_rev,
-        const uint8_t i_additions_rev,
-        const char* i_err_str)
+inline fapi2::ReturnCode dram_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const uint8_t i_dram_gen,
+                                  const generic_ffdc_codes i_func_code)
 {
-    FAPI_ASSERT(false,
-                fapi2::MSS_INVALID_DIMM_REV_COMBO().
-                set_DIMM_TYPE(i_dimm_type).
-                set_ENCODING_REV(i_encoding_rev).
-                set_ADDITIONS_REV(i_additions_rev).
-                set_DIMM_TARGET(i_target),
-                "%s. %s. Invalid combination for dimm type: %d, rev: %d.%d",
-                c_str(i_target),
-                i_err_str,
-                i_dimm_type,
-                i_encoding_rev,
-                i_additions_rev);
+    FAPI_ASSERT(is_dram_gen_valid(i_dram_gen),
+                fapi2::MSS_INVALID_DRAM_GEN()
+                .set_DRAM_GEN(i_dram_gen)
+                .set_FUNCTION(i_func_code)
+                .set_DIMM_TARGET(i_target),
+                "Invalid DRAM gen recieved (%d) for %s",
+                i_dram_gen, spd::c_str(i_target));
+
     return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
-}// invalid_factory_sel
+}
 
-}// spd
+///
+/// @brief Helper function to test if a DIMM type is valid
+/// @param[in] i_dimm_type the DIMM type from SPD
+/// @return true if this DIMM type is valid, else false
+///
+static inline bool is_dimm_type_valid(const uint8_t i_dimm_type)
+{
+    bool l_result = false;
+
+    switch(i_dimm_type)
+    {
+        case RDIMM:
+        case LRDIMM:
+            l_result = true;
+            break;
+
+        default:
+            l_result = false;
+            break;
+    }
+
+    return l_result;
+}
+
+///
+/// @brief Checks for valid DIMM type
+/// @param[in] i_target the DIMM target
+/// @param[in] i_dram_gen the DIMM type from SPD
+/// @param[in] i_func_code mss ffdc code
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const uint8_t i_dimm_type,
+                                   const generic_ffdc_codes i_func_code)
+{
+    FAPI_ASSERT(is_dimm_type_valid(i_dimm_type),
+                fapi2::MSS_INVALID_DIMM_TYPE()
+                .set_DIMM_TYPE(i_dimm_type)
+                .set_FUNCTION(i_func_code)
+                .set_DIMM_TARGET(i_target),
+                "Invalid DIMM type recieved (%d) for %s",
+                i_dimm_type, spd::c_str(i_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to check for reserved values
+/// @tparam TT FAPI2 target type
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_reserved_bits vector of SORTED reserved bits to sort through
+/// @param[in] i_ffdc ffdc function code
+/// @param[in] i_input value to check
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template < fapi2::TargetType TT >
+inline fapi2::ReturnCode reserved_values(const fapi2::Target<TT>& i_target,
+        const std::vector<uint8_t>& i_reserved_bits,
+        const generic_ffdc_codes i_ffdc,
+        const uint8_t i_input)
+{
+    // Lets make an additional check that we aren't being set to a reserved field
+    FAPI_ASSERT( !std::binary_search(i_reserved_bits.begin(), i_reserved_bits.end(), i_input),
+                 fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                 .set_FUNCTION_CODE(i_ffdc)
+                 .set_TARGET(i_target),
+                 "Reserved bits seen on %s",
+                 spd::c_str(i_target) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }// check
+}// spd
 }// mss
 
 #endif
