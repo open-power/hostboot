@@ -43,6 +43,20 @@ namespace mss
 {
 
 ///
+/// @brief Common conversions
+///
+enum conversions
+{
+    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
+    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
+    MHZ_TO_KHZ              = 1000,
+    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
+    NIBBLES_PER_BYTE = 2,
+    BITS_PER_NIBBLE = 4,
+    BITS_PER_BYTE = 8,
+};
+
+///
 /// @brief FFDC generic codes
 ///
 enum generic_ffdc_codes
@@ -58,22 +72,58 @@ enum generic_ffdc_codes
     PRE_DATA_ENGINE_CTOR = 0x1005,
     EXTRACT_SPD_FLD = 0x1006,
     SPD_READER = 0x1007,
-    BASE_CNFG_MAKE_OBJ = 0x1008,
-    DIMM_MODULE_MAKE_OBJ = 0x1009,
-    CREATE_BASE_CNFG_FACTORY = 0x100A,
-    CREATE_MODULE_FACTORY = 0x100B,
+    BASE_CFG_PARAM_SELECT = 0x1008,
+    DIMM_MODULE_PARAM_SELECT = 0x1009,
+    BASE_CFG_FACTORY = 0x100A,
+    DIMM_MODULE_FACTORY = 0x100B,
+    GET_TAAMIN = 0x100C,
+    GET_TCKMIN = 0x100D,
+    GET_TCKMAX = 0x100E,
     GET_TIMEBASES_FTB = 0x100F,
     GET_TIMEBASES_MTB = 0x1010,
+    GET_SUPPORTED_REV = 0x1011,
+    TRASMIN = 0x1012,
+    TRCMIN = 0x1013,
+    TRFC1MIN = 0x1014,
+    TRFC2MIN = 0x1015,
+    TRFC4MIN = 0x1016,
+    TFAWMIN = 0x1017,
+    TWTR_S_MIN = 0x1018,
+    TWRMIN = 0x1019,
+    TWTR_L_MIN = 0x101A,
+    DEVICE_TYPE = 0x101B,
+    BASE_MODULE_TYPE = 0x101C,
 };
 
 ///
-/// @brief DRAM generation selector
+/// @brief Supported proc types
 ///
-enum device_type
+enum proc_type
 {
-    DDR4 = 0x0c,
+    NIMBUS,
+    AXONE,
 };
 
+///
+/// @brief JEDEC supported DDR4 speeds
+///
+enum ddr4_dimm_speeds
+{
+    DIMM_SPEED_1600 = 1600,
+    DIMM_SPEED_1866 = 1866,
+    DIMM_SPEED_2133 = 2133,
+    DIMM_SPEED_2400 = 2400,
+    DIMM_SPEED_2666 = 2666,
+    DIMM_SPEED_2933 = 2933,
+    DIMM_SPEED_3200 = 3200,
+};
+
+namespace spd
+{
+
+///
+/// @brief SPD revisions - not tied any particular module
+///
 enum rev : uint8_t
 {
     V1_0 = 0x10, ///< represents Rev 1.0
@@ -93,11 +143,43 @@ enum rev : uint8_t
 ///
 enum parameters
 {
+    UNINITIALIZED,
     BASE_CNFG,
     RDIMM_MODULE,
     LRDIMM_MODULE,
+    NVDIMM_MODULE,
 };
 
+///
+/// @brief DRAM generation selector
+/// @note values set to SPD settings
+///
+enum device_type
+{
+    DDR4 = 0x0c,
+};
+
+///
+/// @brief DIMM type selector
+/// @note values set to SPD settings
+///
+enum dimm_type
+{
+    RDIMM = 0b0001,
+    LRDIMM = 0b0100,
+};
+
+enum guard_band : uint16_t
+{
+    // Used for caclulating spd timing values - from JEDEC rounding algorithm
+    // Correction factor is 1% (for DDR3) or 2.5% (for DDR4)
+    // when doing integer math, we add-in the inverse correction factor
+    // Formula used for derivation:
+    // Guardband = 1000 * (1000* correction_factor) - 1
+    INVERSE_DDR4_CORRECTION_FACTOR = 974, ///< DDR4 correction factor
+};
+
+}// spd
 }// mss
 
 #endif
