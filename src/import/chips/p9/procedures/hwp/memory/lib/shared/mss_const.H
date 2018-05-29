@@ -37,6 +37,7 @@
 #define _MSS_CONST_H_
 
 #include <cstdint>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_math.H>
 
 namespace mss
@@ -51,9 +52,6 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
-    NIBBLES_PER_BYTE = 2,
-    BITS_PER_NIBBLE = 4,
-    BITS_PER_BYTE = 8,
     BITS_PER_DP = 16,
     NIBBLES_PER_DP = BITS_PER_DP / BITS_PER_NIBBLE,
     BYTES_PER_DP = BITS_PER_DP /  BITS_PER_BYTE,
@@ -122,9 +120,6 @@ enum sizes
 
 enum times
 {
-    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
-    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
-
     DELAY_1NS               = 1,
     DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
     DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
@@ -134,9 +129,6 @@ enum times
     DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
 
     // Not *exactly* a time but go with it.
-    MHZ_TO_KHZ              = 1000,
-
-    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
     BG_SCRUB_IN_HOURS       = 12,
 
     CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap
@@ -145,13 +137,34 @@ enum times
 };
 
 ///
-/// @brief ID codes so we can lookup which function triggered the ffdc fail
+/// @brief function ID codes for FFDC functions
+/// @note If we get a fail in HB, we can trace back to the function that failed
 ///
 enum ffdc_function_codes
 {
+    // Following are used in rank.H
+    RANK_PAIR_TO_PHY = 0,
+    RANK_PAIR_FROM_PHY = 1,
+    SET_RANKS_IN_PAIR = 2,
+    GET_RANKS_IN_PAIR = 3,
+    GET_RANK_FIELD = 4,
+    GET_PAIR_VALID = 5,
+    SET_RANK_FIELD = 6,
+    RD_CTR_WORKAROUND_READ_DATA = 7,
+    OVERRIDE_ODT_WR_CONFIG = 8,
+    RECORD_BAD_BITS_HELPER = 9,
+    SET_PAIR_VALID = 10,
+
     // Used in eff_dimm.C
+    SET_DRAM_DENSITY_INSTANCE = 19,
     NIBBLE_MAP_FUNC = 20,
     PACKAGE_RANK_MAP_FUNC = 21,
+    SET_DRAM_WIDTH_INSTANCE = 22,
+    PRIM_DIE_COUNT = 23,
+    DIMM_SIZE = 24,
+    DRAM_BANK_BITS = 25,
+    DRAM_ROW_BITS = 26,
+    SOFT_POST_PACKAGE_REPAIR = 27,
 
     // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
     FWMS_READ = 30,
@@ -185,10 +198,6 @@ enum ffdc_function_codes
     READ_RD_VREF_VALUES_FOR_DRAM = 93,
     GET_DRAM_DISABLE_REG_AND_POS = 94,
     GET_STARTING_WR_DQ_DELAY_VALUE = 95,
-
-    GET_TAAMIN = 96,
-    GET_TCKMIN = 97,
-    GET_TCKMAX = 98,
 
     SUPPORTED_FREQS = 99,
     SELECT_SUPPORTED_FREQ = 100,
@@ -228,25 +237,6 @@ enum states
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
 
-///
-/// @brief function ID codes for FFDC functions
-/// @note If we get a fail in HB, we can trace back to the function that failed
-///
-enum ffdc_functions
-{
-    // Following are used in rank.H
-    RANK_PAIR_TO_PHY = 0,
-    RANK_PAIR_FROM_PHY = 1,
-    SET_RANKS_IN_PAIR = 2,
-    GET_RANKS_IN_PAIR = 3,
-    GET_RANK_FIELD = 4,
-    GET_PAIR_VALID = 5,
-    SET_RANK_FIELD = 6,
-    RD_CTR_WORKAROUND_READ_DATA = 7,
-    OVERRIDE_ODT_WR_CONFIG = 8,
-    RECORD_BAD_BITS_HELPER = 9,
-    SET_PAIR_VALID = 10,
-};
 // Static consts describing the bits used in the cal_step_enable attribute
 // These are bit positions. 0 is the left most bit.
 enum cal_steps : uint64_t
