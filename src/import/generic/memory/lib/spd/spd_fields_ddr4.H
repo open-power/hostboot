@@ -460,7 +460,6 @@ class fields<DDR4, BASE_CNFG>
         static constexpr field_t OFFSET_TCK_MIN{125, OFFSET_TCK_MIN_START, OFFSET_TCK_MIN_LEN};
         static constexpr field_t CRC_LSB{126, CRC_LSB_START, CRC_LSB_LEN};
         static constexpr field_t CRC_MSB{127, CRC_MSB_START, CRC_MSB_LEN};
-        static constexpr field_t REF_RAW_CARD{130, REF_RAW_CARD_START, REF_RAW_CARD_LEN};
         static constexpr field_t CONTINUATION_CODES{320, CONTINUATION_CODES_START, CONTINUATION_CODES_LEN};
         static constexpr field_t LAST_NON_ZERO_BYTE{321, LAST_NON_ZERO_BYTE_START, LAST_NON_ZERO_BYTE_LEN};
         static constexpr field_t MODULE_MFG_LOCATION{322, MODULE_MFG_LOC_START, MODULE_MFG_LOC_LEN};
