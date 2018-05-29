@@ -82,6 +82,7 @@ enum PlatTargetingReasonCode
     TARG_RT_MISSING_ATTR           = TARG_COMP_ID | 0x87,
     TARG_RT_BAD_ATTR_SIZES         = TARG_COMP_ID | 0x88,
     TARG_SVC_MISSING_ATTR          = TARG_COMP_ID | 0x89,
+    TARG_RT_NODE_NOT_IN_IMAGE      = TARG_COMP_ID | 0x8A,
 };
 
 } // End TARGETING namespace

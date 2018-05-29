@@ -63,9 +63,21 @@ struct NodeInfo
     NodeInfo() :
         pTargetMap(nullptr),
         pSections(nullptr),
-        sectionCount(0)
+        sectionCount(0),
+        isValid(false)
     {
     }
+
+    // helper to determine if NodeInfo struct has
+    // been initialized or not
+    bool getIsValid() const  { return isValid; };
+
+    // set the instance var to indicate the NodeInfo
+    // struct has ben initialized
+    void setIsValid( bool i_valid )
+    {
+        isValid = i_valid;
+    };
 
     // Pointer to the targeting image
     void*           pTargetMap;
@@ -76,18 +88,11 @@ struct NodeInfo
     // Count of attribute sections.
     size_t          sectionCount;
 
+    // has this node info struct been setup
+    bool            isValid;
+
 };
 
-/**
- *  @brief enumeration of node instance status
- */
-enum NodeInstanceStatus
-{
-    SINGLE_NODE,
-    MULTI_NODE,
-    MULTI_NODE_LT_MAX_INSTANCES,
-    MULTI_NODE_INSTANCE_GAP,
-};
 #endif
 
 /**
@@ -371,18 +376,6 @@ class AttrRP
 
 #else
         /**
-         *  @brief Get node instance status of attribute resource provider
-         *  which indicates if the attribute resource provider is handling
-         *  a single node or multiple nodes
-         *
-         *  @return Node instance status
-         */
-        NodeInstanceStatus getInstanceStatus()
-        {
-            return iv_instanceStatus;
-        }
-
-        /**
          *  @brief Get count of nodes handled by attribute resource provider.
          *
          *  @return Number of node containers
@@ -406,8 +399,7 @@ class AttrRP
             : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0),
               iv_isMpipl(false)
 #else
-            : iv_isTempInstance(false), iv_instanceStatus(SINGLE_NODE),
-              iv_isMpipl(false)
+            : iv_isTempInstance(false), iv_isMpipl(false)
 #endif
         {
         };
@@ -418,13 +410,15 @@ class AttrRP
          *
          *  @par Detailed Description:
          *      Ensures member variables are initialized to sane values.
+         *
+         *  @param[in] i_header, Targeting Header for the node of interest
+         *  @param[in] i_nodeId, Node ID for the node of interest
+         *  @param[in] i_nodeCount, Number of nodes to initialize
          */
         AttrRP(TargetingHeader* i_header,
                NODE_ID i_nodeId,
-               size_t i_nodeCount,
-               NodeInstanceStatus i_instanceStatus)
-            : iv_isTempInstance(true), iv_instanceStatus(i_instanceStatus),
-              iv_isMpipl(false)
+               size_t i_nodeCount)
+            : iv_isTempInstance(true), iv_isMpipl(false)
         {
             // Work with nodes before passed in node
             for(NODE_ID l_nodeId = NODE0; l_nodeId < i_nodeCount; ++l_nodeId)
@@ -498,6 +492,22 @@ class AttrRP
                   std::vector <sectionRefData>& o_pages,
             const SECTION_TYPE                  i_sectionType,
             const NODE_ID                       i_nodeId = 0) const;
+#else
+        /**
+         *  @brief Check the HB existing image attribute from the system target
+         *         in the targeting data for the node.  Use image to determine
+         *         if node of interest (instance) is a node that is shown to be
+         *         present.  Also update the maximum node ID as needed.
+         *
+         *  @param[in] i_header, Targeting Header for the node of interest
+         *  @param[in] i_instance, Specifies the node of interest
+         *  @param[in/out] io_maxNodeId, maximum node ID in use on the system
+         *
+         *  @return Error log
+         */
+        errlHndl_t checkHbExistingImage(TargetingHeader* i_header,
+                                        uint8_t i_instance,
+                                        NODE_ID &io_maxNodeId);
 #endif
 
 
@@ -623,9 +633,6 @@ class AttrRP
 
         // Node Container
         std::vector<NodeInfo> iv_nodeContainer;
-
-        // Node instance status
-        NodeInstanceStatus iv_instanceStatus;
 #endif
 
         bool iv_isMpipl;
@@ -639,7 +646,8 @@ TARG_DECLARE_SINGLETON(TARGETING::AttrRP,theAttrRP);
 extern const char* ATTRRP_MSG_Q;
 
 // user-defined message subtype for MSG_MM_RP_RUNTIME_PREP
-/** @enum msg_mm_rp_runtime_prep_t
+/**
+  * @enum msg_mm_rp_runtime_prep_t
   * @brief Message type and subtypes for the MSG_MM_RP_RUNTIME_PREP message
   */
 enum msg_mm_rp_runtime_prep_t

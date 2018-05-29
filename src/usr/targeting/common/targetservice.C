@@ -176,10 +176,9 @@ void TargetService::init(const size_t i_maxNodes)
 
             if(NULL == l_pHdr)
             {
-                TARG_INF("Targeting header is NULL for Node Id [%d]",
+                TARG_INF("Targeting header is NULL for Node Id [%d].. skipping",
                     l_nodeCnt);
-                TARG_ASSERT(0, TARG_ERR_LOC
-                    "Targeting Header for Node [%d] cannot be NULL", l_nodeCnt);
+                  continue;
             }
             else
             {

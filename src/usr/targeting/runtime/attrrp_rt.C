@@ -39,48 +39,22 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
-    void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
+    errlHndl_t AttrRP::checkHbExistingImage(TargetingHeader* i_header,
+                                            uint8_t i_instance,
+                                            NODE_ID &io_maxNodeId)
     {
-        TRACFCOMP(g_trac_targeting, "AttrRP::startup");
+        TRACFCOMP(g_trac_targeting, "AttrRP::checkHbExistingImage");
         errlHndl_t l_errl = nullptr;
 
-        uint8_t l_index = 0;
-        uint32_t l_instance[MAX_NODES_PER_SYS];
-        l_instance[l_index] = NODE0; // First instance is always NODE 0
-        // Initialize rest of the instances to be invalid nodes
-        for(l_index = 1; l_index < MAX_NODES_PER_SYS; l_index++)
-        {
-            l_instance[l_index] = INVALID_NODE;
-        }
-
-        // Handle first instance
-        l_index = 0;
-        uint64_t attr_size = 0;
-        TargetingHeader* l_header =
-          reinterpret_cast<TargetingHeader*>(
-              hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
-                                 l_instance[l_index], attr_size));
-
-        // Create local copy of node struct
-        NodeInfo l_nodeCont;
-
-        // Initialize local copy of node struct
-        l_errl = nodeInfoInit(l_nodeCont,
-                              l_header,
-                              l_instance[l_index]);
-
-        // Push back node struct into the node container
-        TRACFCOMP(g_trac_targeting,
-                  "Push node struct for Node %d",
-                  l_instance[l_index]);
-        iv_nodeContainer.push_back(l_nodeCont);
+        // Validity of the node instance
+        bool l_validNode = false;
 
         // Get pointer to number of targets
         const AbstractPointer<uint32_t>* l_pNumTargetsPtr =
             static_cast<const AbstractPointer<uint32_t>*>(
                 reinterpret_cast<void*>(
-                reinterpret_cast<char*>(l_header) +
-                                        l_header->headerSize));
+                reinterpret_cast<char*>(i_header) +
+                                        i_header->headerSize));
         uint32_t* l_pNumTargets = TARG_TO_PLAT_PTR(*l_pNumTargetsPtr);
 
         // Only translate addresses on platforms where addresses are 4 bytes
@@ -90,14 +64,14 @@ namespace TARGETING
         if(TARG_ADDR_TRANSLATION_REQUIRED)
         {
             l_pNumTargets = static_cast<uint32_t*>(
-                this->translateAddr(l_pNumTargets, l_instance[l_index]));
+                this->translateAddr(l_pNumTargets, i_instance));
         }
 
         // Get pointer to targets
         Target (*l_pTargets)[] =
             reinterpret_cast<Target(*)[]> (l_pNumTargets + 1);
 
-        // Walk through targets
+        // Walk through targets until system target is found
         for(uint32_t l_targetNum = 1;
             l_targetNum <= *l_pNumTargets;
             ++l_targetNum)
@@ -130,102 +104,175 @@ namespace TARGETING
                 decltype(l_hb_images) l_mask =
                     0x1 << ((sizeof(l_hb_images) * 8) - 1);
 
-                uint32_t l_node = NODE0;
-                l_index = 0;
-                // While multi-node system and valid mask and valid index
-                while(l_hb_images && l_mask && (l_index < MAX_NODES_PER_SYS))
+                NODE_ID l_node = NODE0;
+
+                // Check if multi-node system
+                if(l_hb_images)
                 {
-                    // Change node instance status
-                    if(iv_instanceStatus == SINGLE_NODE)
+                    // While valid mask and valid node
+                    while(l_mask && (l_node < MAX_NODES_PER_SYS))
                     {
-                        iv_instanceStatus = MULTI_NODE;
-                    }
-
-                    // If node is present
-                    if(l_mask & l_hb_images)
-                    {
-                        l_instance[l_index] = l_node;
-
-                        // Check if a previous node was skipped
-                        if(iv_instanceStatus == MULTI_NODE_LT_MAX_INSTANCES)
+                        // If node is present
+                        if(l_mask & l_hb_images)
                         {
-                            // Flag that instances are not contiguous
-                            iv_instanceStatus = MULTI_NODE_INSTANCE_GAP;
+                            // Check if current node is the node of interest
+                            if(l_node == i_instance)
+                            {
+                                // Flag that input instance is a valid node
+                                l_validNode = true;
+                            }
+
+                            // Check if maximum node ID needs replacing
+                            if(l_node > io_maxNodeId)
+                            {
+                                // Replace maximum node ID
+                                io_maxNodeId = l_node;
+                            }
                         }
-                    }
-                    else if(iv_instanceStatus == MULTI_NODE)
-                    {
-                        // Flag that an instance is being skipped
-                        iv_instanceStatus = MULTI_NODE_LT_MAX_INSTANCES;
-                    }
 
-                    l_mask >>= 1; // shift to the right for the next node
-                    l_node++;
-                    l_index++;
+                        l_mask >>= 1; // shift to the right for the next node
+                        ++l_node;
+                    } // while
                 }
-
-                if(iv_instanceStatus == MULTI_NODE_INSTANCE_GAP)
+                else // Single-node system
                 {
-                    TRACFCOMP( g_trac_targeting,
-                               "There is a gap in the node numbers");
+                    // Check if current node is the node of interest
+                    if(l_node == i_instance)
+                    {
+                        // Flag that input instance is a valid node
+                        l_validNode = true;
+                    }
+
+                    // Replace maximum node ID
+                    io_maxNodeId = l_node;
                 }
 
+                // Input instance is not a valid node
+                if(!l_validNode)
+                {
+                    TRACFCOMP(g_trac_targeting,
+                              ERR_MRK"Node %d not present in HB images %0.2x",
+                              i_instance,
+                              l_hb_images);
+
+                    /*@
+                     *   @errortype         ERRL_SEV_UNRECOVERABLE
+                     *   @moduleid          TARG_MOD_ATTRRP_RT
+                     *   @reasoncode        TARG_RT_NODE_NOT_IN_IMAGE
+                     *   @userdata1[00:31]  Node
+                     *   @userdata1[32:64]  HB Existing Image
+                     *   @userdata2         Memory address referenced.
+                     *
+                     *   @devdesc   Expected node is not present in
+                     *              ATTR_HB_EXISTING_IMAGE
+                     *   @custdesc  A problem occurred during the IPL of the
+                     *              system.
+                     *              Expected resource was not indicated to be
+                     *              present.
+                     */
+                    l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                           TARG_MOD_ATTRRP_RT,
+                                           TARG_RT_NODE_NOT_IN_IMAGE,
+                                           TWO_UINT32_TO_UINT64(
+                                               TO_UINT32(i_instance),
+                                               TO_UINT32(l_hb_images)),
+                                           reinterpret_cast<uint64_t>(i_header)
+                                           );
+                    break;
+                }
+
+                // Stop walking targets, system target was found
                 break;
             }
-        }
+        } // for
 
-        // Handle additional instances
-        l_index = 1;
+        return l_errl;
+    }
+
+    void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
+    {
+        TRACFCOMP(g_trac_targeting, "AttrRP::startup");
+        errlHndl_t l_errl = nullptr;
+
+        uint32_t l_instance = NODE0;    // Start with NODE 0 for first instance
+        NODE_ID l_maxNodeId = NODE0;    // Start with minimal node
+        bool l_rsvd_mem_exists = false; // indicates if an instance of reserved
+                                        // memory has been found
+
         do
         {
-            // Check that a valid node is set for this instnace
-            if(l_instance[l_index] == INVALID_NODE)
-            {
-                l_index++;
-
-                // Continue with next instance
-                continue;
-            }
+            // Create local copy of node struct
+            NodeInfo l_nodeCont;
 
             uint64_t attr_size = 0;
             TargetingHeader* l_header =
               reinterpret_cast<TargetingHeader*>(
                   hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,
-                                     l_instance[l_index], attr_size));
+                                     l_instance, attr_size));
 
             // Check if reserved memory does not exist for this instance
-            if ((NULL == l_header) && (l_instance[l_index] > NODE0))
+            if ((NULL == l_header) || (0 == attr_size))
             {
                 TRACFCOMP(g_trac_targeting,
-                          "Reserved memory does not exist for Node %d",
-                          l_instance[l_index]);
+                          "Reserved memory does not exist for Node %d, "
+                          "Push empty node struct for this node",
+                          l_instance);
+                iv_nodeContainer.push_back(l_nodeCont);
 
-                l_index++;
+                // Check if we haven't found reserved memory for any node and
+                // if we haven't reached the maximum node ID for the system
+                if(!l_rsvd_mem_exists && (l_maxNodeId < MAX_NODES_PER_SYS - 1))
+                {
+                    // Increase maximum node ID to allow checking another node
+                    ++l_maxNodeId;
+                }
+            }
+            else
+            {
+                l_rsvd_mem_exists = true;
 
-                // Continue with next instance
-                continue;
+                // Initialize local copy of node struct
+                l_errl = nodeInfoInit(l_nodeCont,
+                                      l_header,
+                                      l_instance);
+
+                if (l_errl)
+                {
+                    break;
+                }
+
+
+                // Push back node struct into the node container
+                TRACFCOMP(g_trac_targeting,
+                          "Push node struct for Node %d",
+                          l_instance);
+                iv_nodeContainer.push_back(l_nodeCont);
+
+                // Check this node against the HB existing image attribute
+                l_errl = checkHbExistingImage(l_header,
+                                              l_instance,
+                                              l_maxNodeId);
+
+                if (l_errl)
+                {
+                    break;
+                }
             }
 
-            // Create local copy of node struct
-            NodeInfo l_nodeCont;
-
-            // Initialize local copy of node struct
-            l_errl = nodeInfoInit(l_nodeCont,
-                                  l_header,
-                                  l_instance[l_index]);
-
-            // Push back node struct into the node container
-            TRACFCOMP(g_trac_targeting,
-                      "Push node struct for Node %d",
-                      l_instance[l_index]);
-            iv_nodeContainer.push_back(l_nodeCont);
-
-            l_index++;
-        } while(l_index < MAX_NODES_PER_SYS);
+            ++l_instance;
+        } while(l_instance <= l_maxNodeId);
 
         if (l_errl)
         {
             l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        }
+        else if(l_maxNodeId != (iv_nodeContainer.size() - 1))
+        {
+            TRACFCOMP(g_trac_targeting,
+                      ERR_MRK"Node container size, %d, is expected to be 1 "
+                      "more than maximum Node ID, %d",
+                      iv_nodeContainer.size(),
+                      l_maxNodeId);
         }
 
         io_taskRetErrl = l_errl;
@@ -310,6 +357,9 @@ namespace TARGETING
                           io_nodeCont.pSections[i].pnorAddress,
                           io_nodeCont.pSections[i].size);
             }
+            // mark this node container as valid
+            io_nodeCont.setIsValid(true);
+
         } while(false);
 
         return l_errl;
@@ -324,7 +374,8 @@ namespace TARGETING
         void* l_pTargetMap = nullptr;
 
         // Cannot use isNodeValid method here since the vector itself is
-        // initialized in here.
+        // initialized in here. AttrRP::INVALID_NODE_ID is a dynamic
+        // value and is set to iv_nodeContainer.size()
         if((i_nodeId >= NODE0) &&
             (i_nodeId < AttrRP::INVALID_NODE_ID))
         {
@@ -399,28 +450,33 @@ namespace TARGETING
 
         void* l_pMap = nullptr;
 
-        // The init for a node id might have been done via the other way i.e.
-        // setImageName, need to valid if node Id is valid and init is already
-        // done validate node Id, It's a special case validation, since the node
-        // which is getting validated doesn't yet have a container, so it should
-        // always point to the next to be initialized.
+        // if i_nodeId is less than INVALID_NODE_ID then iv_nodeContainer
+        // contains a node info struct for it, however it may be invalid
+        // for some reason (deconfigured) so check that on the next line.
         if(i_nodeId < INVALID_NODE_ID)
         {
             // Check if the Mmap is already done
-            if(iv_nodeContainer[i_nodeId].pTargetMap != nullptr)
+            if( iv_nodeContainer[i_nodeId].getIsValid() )
             {
                 l_pMap = iv_nodeContainer[i_nodeId].pTargetMap;
             }
             else
             {
-                TARG_ASSERT(0,
-                            TARG_ERR_LOC "Node Id [%d] should have been already"
-                            " initialized, before but the Mmap Address is NULL",
-                            i_nodeId);
+                TARG_INF("getBaseAddr nodeInfo struct for %d is invalid,"
+                        " skipping", i_nodeId);
+
             }
         }
         else if(i_nodeId == INVALID_NODE_ID)
         {
+            // If i_nodeID is equal to INVALID_NODE_ID then we add an empty
+            // NodeInfo struct to iv_nodeContainer and will attempt to
+            // initalize it with a call to getTargetMapPtr()
+            //
+            // Note: INVALID_NODE_ID is a dynamic value here which gets gets
+            //       incremented each time a node info struct is pushed to
+            //       iv_nodeContainer
+
             // Push back a node struct in the node container
             NodeInfo l_nodeCont;
             iv_nodeContainer.push_back(l_nodeCont);
