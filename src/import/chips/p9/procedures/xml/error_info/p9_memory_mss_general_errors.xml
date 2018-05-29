@@ -71,30 +71,6 @@
   </hwpError>
 
    <hwpError>
-    <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
-    <description>
-      An invalid/unsupported DIMM type was received.  This is possibly due
-      to SPD decoding errors or incorrect setting of ATTR_EFF_DIMM_TYPE attribute.
-    </description>
-    <ffdc>DIMM_TYPE</ffdc>
-    <callout>
-      <procedure>MEMORY_PLUGGING_ERROR</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-        <target>DIMM_TARGET</target>
-    </deconfigure>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    </hwpError>
-
-   <hwpError>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
       An invalid/unsupported RTT_WR encoding was received
