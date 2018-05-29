@@ -151,6 +151,7 @@ enum HbrtRcPiberr_t
 #define HBRT_RSVD_MEM__SBE_FFDC           "ibm,sbe-ffdc"
 #define HBRT_RSVD_MEM__SECUREBOOT         "ibm,secure-crypt-algo-code"
 #define HBRT_RSVD_MEM__DATA               "ibm,hbrt-data"
+#define HBRT_RSVD_MEM__ARCH_REG           "ibm,arch-reg-data"
 
 // Aligned reserved memory size for Opal
 #define HBRT_RSVD_MEM_OPAL_ALIGN  64*KILOBYTE

@@ -177,14 +177,26 @@ enum BlockPriority
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
  (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
+/** Memory for Architected state (max 4 procs - 256KB Each) **/
+#define VMM_ARCH_REG_DATA_START_OFFSET VMM_OCC_COMMON_END_OFFSET
+#define VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB 256
+#define VMM_ARCH_REG_DATA_PER_PROC_SIZE \
+ ( VMM_ARCH_REG_DATA_PER_PROC_SIZE_IN_KB*KILOBYTE )
+#define VMM_ARCH_REG_DATA_SIZE_ALL_PROC_IN_MB 1
+#define VMM_ARCH_REG_DATA_SIZE_ALL_PROC \
+ ( VMM_ARCH_REG_DATA_SIZE_ALL_PROC_IN_MB*MEGABYTE )
+#define VMM_ARCH_REG_DATA_END_OFFSET \
+ ( VMM_ARCH_REG_DATA_START_OFFSET + VMM_ARCH_REG_DATA_SIZE_ALL_PROC )
+/** End offset for the Architected region is 217MB **/
+
 /** Memory for attribute data */
-#define VMM_ATTR_DATA_START_OFFSET  VMM_OCC_COMMON_END_OFFSET
+#define VMM_ATTR_DATA_START_OFFSET  VMM_ARCH_REG_DATA_END_OFFSET
 #define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
-/** End of Attr Area = 217MB */
+/** End of Attr Area = 218MB */
 
 /** Memory for hostboot data Table of Contents */
 #define VMM_HB_DATA_TOC_START_OFFSET \
-    (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE) /* currently 217MB */
+    (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE) /* currently 218MB */
 
 /** Variable Attribute overrides and Attributes memory here **/
 

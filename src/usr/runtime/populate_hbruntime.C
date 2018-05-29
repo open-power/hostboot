@@ -1121,6 +1121,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             // -----HOMER_N----------
             // -----...--------------
             // -----HOMER_0----------
+            // -----Arch_dump_area---
             // -----HB Data ---------
             //   -- VPD
             //   -- ATTR Data
@@ -1161,6 +1162,46 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             {
                 break;
             }
+
+            ////////////////////////////////////////////////////////////////////
+            // Set the Architected Reserve area in OPAL and pass it down to SBE
+            uint64_t l_memBase = l_topMemAddr -
+                VMM_ARCH_REG_DATA_SIZE_ALL_PROC - VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
+                                          i_nodeId,
+                                          l_memBase,
+                                          VMM_ARCH_REG_DATA_SIZE_ALL_PROC,
+                                          HBRT_RSVD_MEM__ARCH_REG);
+            if(l_elog)
+            {
+                break;
+            }
+            // Loop through all functional Procs
+            for (const auto & l_procChip: l_procChips)
+            {
+                uint32_t l_procNum =
+                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                l_homerAddr = l_memBase +
+                         (l_procNum * VMM_ARCH_REG_DATA_PER_PROC_SIZE);
+
+                //Pass start address down to SBE via chipop
+                l_elog = SBEIO::sendPsuStashKeyAddrRequest(
+                                        SBEIO::ARCH_REG_DATA_ADDR,
+                                        l_homerAddr,
+                                        l_procChip);
+                if (l_elog)
+                {
+                    TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest "
+                       "failed for target: %x",TARGETING::get_huid(l_procChip));
+                    break;
+                }
+            }
+
+            if(l_elog)
+            {
+                break;
+            }
+            ////////////////////////////////////////////////////////////////////
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
             ///////////////////////////////////////////////////
@@ -1208,7 +1249,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         else if(TARGETING::is_sapphire_load())
         {
             l_endAddr = l_topMemAddr -
-                VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+                VMM_ALL_HOMER_OCC_MEMORY_SIZE - VMM_ARCH_REG_DATA_SIZE_ALL_PROC;
             startAddressValid = false;
         }
 
