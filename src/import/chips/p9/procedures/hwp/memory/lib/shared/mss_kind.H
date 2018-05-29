@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,18 +62,18 @@ enum kind_t
     FORCE_DISPATCH = 4 + 1,
 };
 
-inline mss::kind_t dimm_kind( const uint64_t l_type, const uint64_t l_gen )
+inline mss::kind_t dimm_kind( const uint64_t i_type, const uint64_t i_gen )
 {
     // This is the conditional needed to differentiate dimm type/generation
-    switch (l_type)
+    switch (i_type)
     {
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM:
-            if (l_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)
+            if (i_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)
             {
                 return KIND_RDIMM_EMPTY;
             }
 
-            if (l_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+            if (i_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
             {
                 return KIND_RDIMM_DDR4;
             }
@@ -82,12 +82,12 @@ inline mss::kind_t dimm_kind( const uint64_t l_type, const uint64_t l_gen )
             break;
 
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
-            if (l_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)
+            if (i_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY)
             {
                 return KIND_LRDIMM_EMPTY;
             }
 
-            if (l_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+            if (i_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
             {
                 return KIND_LRDIMM_DDR4;
             }

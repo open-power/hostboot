@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,8 +42,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <lib/spd/spd_factory.H>
-#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/spd_facade.H>
 #include <lib/eff_config/attr_setters.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/pos.H>
@@ -72,19 +71,19 @@ extern "C"
             FAPI_INF("Populating decoder cache for %s", mss::c_str(l_mcs));
 
             //Factory cache is per MCS
-            std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
-            FAPI_TRY( mss::spd::populate_decoder_caches(l_mcs, l_factory_caches),
-                      "Failed to populate decoder cache for %s", l_mcs);
+            std::vector< mss::spd::facade > l_spd_facades;
+            FAPI_TRY( get_spd_decoder_list(l_mcs, l_spd_facades) );
 
             // Get dimms for each MCS
-            for ( const auto& l_cache : l_factory_caches )
+            for ( const auto& l_cache : l_spd_facades )
             {
+                const auto l_dimm = l_cache.get_dimm_target();
                 uint8_t l_dimm_nominal = 0;
                 uint8_t l_dimm_endurant = 0;
 
                 // Read nominal and endurant bits from SPD, 0 = 1.2V is not operable and endurant, 1 = 1.2 is valid
-                FAPI_TRY( l_cache->operable_nominal_voltage(l_dimm_nominal) );
-                FAPI_TRY( l_cache->endurant_nominal_voltage(l_dimm_endurant) );
+                FAPI_TRY( l_cache.operable_nominal_voltage(l_dimm_nominal) );
+                FAPI_TRY( l_cache.endurant_nominal_voltage(l_dimm_endurant) );
 
                 //Check to make sure 1.2 V is both operable and endurant, fail if it is not
                 FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
@@ -93,10 +92,10 @@ extern "C"
                               set_ACTUAL_ENDURANT(l_dimm_endurant).
                               set_EXPECTED_OPERABLE(mss::spd::OPERABLE).
                               set_EXPECTED_ENDURANT(mss::spd::ENDURANT).
-                              set_DIMM_TARGET(l_cache->iv_target),
+                              set_DIMM_TARGET(l_dimm),
                               "%s: DIMM is not operable (%d) expected (%d)"
                               " and/or endurant (%d) expected (%d) at 1.2V",
-                              mss::c_str(l_cache->iv_target),
+                              mss::c_str(l_dimm),
                               l_dimm_nominal,
                               mss::spd::OPERABLE,
                               l_dimm_endurant,

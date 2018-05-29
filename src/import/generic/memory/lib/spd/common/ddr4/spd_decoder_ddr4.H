@@ -45,16 +45,54 @@
 #include <fapi2.H>
 
 // mss lib
+#include <generic/memory/lib/spd/spd_decoder_def.H>
 #include <generic/memory/lib/spd/common/dimm_module_decoder.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
-#include <generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H>
-#include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4.H>
-#include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/spd/common/spd_decoder_base.H>
 #include <generic/memory/lib/spd/spd_checker.H>
 
 namespace mss
 {
+
+namespace spd
+{
+
+///
+/// @brief sdram package types. Follows encodings in SPD
+///
+enum sdram_package_type : uint8_t
+{
+    // Package Type
+    MONOLITHIC = 0,           ///< Monolithic DRAM device
+    NON_MONOLITHIC = 1,       ///< NonMonolithic DRAM device (3DS, Dual/Quad Die, etc)
+
+    // Signal loading
+    UNSPECIFIED = MONOLITHIC, ///< Not specified
+    MULTI_LOAD_STACK = 1,     ///< Multi laod stack
+    SINGLE_LOAD_STACK = 2,    ///< Single load stack (3DS)
+};
+
+///
+/// @brief module type DDR4 encoding
+///
+enum module_type
+{
+    NOT_HYBRID = 0,
+    HYBRID = 1,
+    NVDIMM_HYBRID = 1
+};
+
+///
+/// @brief enum for voltage information. Encoding comes from SPD
+///
+enum nominal_voltage : uint8_t
+{
+    NOT_OPERABLE = 0, ///< Not operable at 1.2V
+    OPERABLE = 1,     ///< Operable at 1.2V
+
+    NOT_ENDURANT = 0, ///< Not endurant at 1.2V
+    ENDURANT = 1      ///< Endurant at 1.2 V
+};
 
 ///
 /// @brief Connector to SDRAM Bit Mapping field positions
@@ -117,11 +155,11 @@ static fapi2::ReturnCode nibble_map_helper( const fapi2::Target<fapi2::TARGET_TY
     const bool VALID_LOWER_NIBBLE = (i_bit_order >= LOW_BIT_ORDER_MIN) && (i_bit_order <= LOW_BIT_ORDER_MAX);
     const bool VALID_UPPER_NIBBLE = (i_bit_order >= UP_BIT_ORDER_MIN) && (i_bit_order <= UP_BIT_ORDER_MAX);
 
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
-             (VALID_LOWER_NIBBLE || VALID_UPPER_NIBBLE),
-             i_byte,
-             i_bit_order,
-             "Failed check on the NIBBLE_MAP field") );
+    FAPI_TRY(check::fail_for_invalid_value(i_target,
+                                           (VALID_LOWER_NIBBLE || VALID_UPPER_NIBBLE),
+                                           i_byte,
+                                           i_bit_order,
+                                           "Failed check on the NIBBLE_MAP field") );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -139,11 +177,11 @@ static fapi2::ReturnCode package_rank_map_helper( const fapi2::Target<fapi2::TAR
 {
     // Taken from the SPD JEDEC spec, only valid encoding, the rest are reserved
     constexpr uint64_t VALID_VALUE = 0;
-    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
-             (i_pkg_rank_map == VALID_VALUE),
-             i_byte,
-             i_pkg_rank_map,
-             "Failed check on Package Rank Map") );
+    FAPI_TRY(check::fail_for_invalid_value(i_target,
+                                           (i_pkg_rank_map == VALID_VALUE),
+                                           i_byte,
+                                           i_pkg_rank_map,
+                                           "Failed check on Package Rank Map") );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -374,1162 +412,37 @@ class connectorTraits<CB0_7, PKG_RANK_MAP>
         }
 };
 
-namespace spd
-{
-
-///
-/// @brief sdram package types. Follows encodings in SPD
-///
-enum sdram_package_type : uint8_t
-{
-    // Package Type
-    MONOLITHIC = 0,           ///< Monolithic DRAM device
-    NON_MONOLITHIC = 1,       ///< Non-Monolithic DRAM device (3DS, Dual/Quad Die, etc)
-
-    // Signal loading
-    UNSPECIFIED = MONOLITHIC, ///< Not specified
-    MULTI_LOAD_STACK = 1,     ///< Multi laod stack
-    SINGLE_LOAD_STACK = 2,    ///< Single load stack (3DS)
-};
-
-///
-/// @brief enum for voltage information. Encoding comes from SPD
-///
-enum nominal_voltage : uint8_t
-{
-    NOT_OPERABLE = 0, ///< Not operable at 1.2V
-    OPERABLE = 1,     ///< Operable at 1.2V
-
-    NOT_ENDURANT = 0, ///< Not endurant at 1.2V
-    ENDURANT = 1      ///< Endurant at 1.2 V
-};
-
-namespace ddr4
-{
-
 ///
 /// @class decoder
+/// @tparam R SPD revision - partial specialization
 /// @brief Base SPD DRAM decoder
 ///
-class decoder_v1_0 : public decoder
+template < rev R >
+class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 {
-    protected:
-        enum
-        {
-            // Byte 0
-            BYTES_USED_START = 4,
-            BYTES_USED_LEN = 4,
-
-            BYTES_TOTAL_START = 1,
-            BYTES_TOTAL_LEN = 3,
-
-            // Byte 1 - see factory byte enum
-            // Byte 2 - Entire byte used
-            // Byte 3 - used in the SPD factory
-
-            // Byte 4
-            SDRAM_CAPACITY_START = 4,
-            SDRAM_CAPACITY_LEN = 4,
-
-            SDRAM_BANKS_START = 2,
-            SDRAM_BANKS_LEN = 2,
-
-            BANK_GROUP_START = 0,
-            BANK_GROUP_LEN = 2,
-
-            // Byte 5
-            COL_ADDRESS_START = 5,
-            COL_ADDRESS_LEN = 3,
-
-            ROW_ADDRESS_START = 2,
-            ROW_ADDRESS_LEN = 3,
-
-            // Byte 6
-            PRIM_SIGNAL_LOAD_START = 6,
-            PRIM_SIGNAL_LOAD_LEN = 2,
-
-            PRIM_DIE_COUNT_START = 1,
-            PRIM_DIE_COUNT_LEN = 3,
-
-            PRIM_PACKAGE_TYPE_START = 0,
-            PRIM_PACKAGE_TYPE_LEN = 1,
-
-            // Byte 7
-            MAC_START = 4,
-            MAC_LEN = 4,
-
-            TMAW_START = 2,
-            TMAW_LEN = 2,
-
-            // Byte 8 reserved
-
-            // Byte 9
-            SOFT_PPR_START = 2,
-            SOFT_PPR_LEN = 1,
-
-            PPR_START = 0,
-            PPR_LEN = 2,
-
-            // Byte 10
-            SEC_SIGNAL_LOAD_START = 5,
-            SEC_SIGNAL_LOAD_LEN = 2,
-
-            DENSITY_RATIO_START = 4,
-            DENSITY_RATIO_LEN = 2,
-
-            SEC_DIE_COUNT_START = 1,
-            SEC_DIE_COUNT_LEN = 3,
-
-            SEC_PACKAGE_TYPE_START = 0,
-            SEC_PACKAGE_TYPE_LEN = 1,
-
-            // Byte 11
-            OPERABLE_START = 7,
-            OPERABLE_LEN = 1,
-
-            ENDURANT_START = 6,
-            ENDURANT_LEN = 1,
-
-            NOM_VOLT_START = 0,
-            NOM_VOLT_LEN = 6,
-
-            // Byte 12
-            SDRAM_WIDTH_START = 5,
-            SDRAM_WIDTH_LEN = 3,
-
-            PACKAGE_RANKS_START = 2,
-            PACKAGE_RANKS_LEN = 3,
-
-            RANK_MIX_START = 1,
-            RANK_MIX_LEN = 1,
-
-            // Byte 13
-            BUS_WIDTH_START = 5,
-            BUS_WIDTH_LEN = 3,
-
-            BUS_EXT_WIDTH_START = 3,
-            BUS_EXT_WIDTH_LEN = 2,
-
-            // Byte 14
-            THERM_SENSOR_RESERV_START = 1,
-            THERM_SENSOR_RESERV_LEN = 7,
-
-            THERM_SENSOR_START = 0,
-            THERM_SENSOR_LEN = 1,
-
-            // Byte 15
-            EXT_MOD_TYPE_START = 5,
-            EXT_MOD_TYPE_LEN = 3,
-
-            // Byte 16 - reserved
-
-            // Byte 17
-            FINE_TIMEBASE_START = 6,
-            FINE_TIMEBASE_LEN = 2,
-
-            MED_TIMEBASE_START = 4,
-            MED_TIMEBASE_LEN = 2,
-
-            // Byte 18 -  Entire byte used
-            // Byte 19 -  Entire byte used
-
-            // Byte 20-23
-            CAS_BYTE_1_START = 56,
-            CAS_BYTE_1_LEN = 8,
-            CAS_BYTE_2_START = 48,
-            CAS_BYTE_2_LEN = 8,
-            CAS_BYTE_3_START = 40,
-            CAS_BYTE_3_LEN = 8,
-            CAS_BYTE_4_START = 32,
-            CAS_BYTE_4_LEN = 8,
-
-            // Byte 24 -  Entire byte used
-            // Byte 25 -  Entire byte used
-            // Byte 26 -  Entire byte used
-
-            // Byte 27
-            TRASMIN_MSN_START = 4, // MSN = most significant nibble
-            TRASMIN_MSN_LEN = 4,
-
-            TRCMIN_MSN_START = 0, // MSN = most significant nibble
-            TRCMIN_MSN_LEN = 4,
-
-            // Byte 28
-            TRASMIN_LSB_START = 0, // LSB = least significant byte
-            TRASMIN_LSB_LEN = 8,
-
-            // Byte 29
-            TRCMIN_LSB_START = 0, // LSB = least significant byte
-            TRCMIN_LSB_LEN = 8,
-
-            // Byte 30
-            TRFC1MIN_LSB_START = 0,
-            TRFC1MIN_LSB_LEN = 8,
-
-            // Byte 31
-            TRFC1MIN_MSB_START = 0,
-            TRFC1MIN_MSB_LEN = 8,
-
-            // Byte 32
-            TRFC2MIN_LSB_START = 0,
-            TRFC2MIN_LSB_LEN = 8,
-
-            // Byte 33
-            TRFC2MIN_MSB_START = 0,
-            TRFC2MIN_MSB_LEN = 8,
-
-            // Byte 34 & Byte 35
-            TRFC4MIN_LSB_START = 0,
-            TRFC4MIN_LSB_LEN = 8,
-
-            TRFC4MIN_MSB_START = 0,
-            TRFC4MIN_MSB_LEN = 8,
-
-            // Byte 36
-            TFAWMIN_MSN_START = 4,
-            TFAWMIN_MSN_LEN = 4,
-
-            // Byte 37
-            TFAWMIN_LSB_START = 0,
-            TFAWMIN_LSB_LEN = 8,
-
-            // Byte 38 - Entire byte used
-            // Byte 39 - Entire byte used
-            // Byte 40 - Entire byte used
-
-            // Byte 41
-            TWRMIN_MSN_START = 4, // MSN = most significant nibble
-            TWRMIN_MSN_LEN = 4,
-
-            // Byte 42
-            TWRMIN_LSB_START = 0, // LSB = least significant nibble
-            TWRMIN_LSB_LEN = 8,
-
-            // Byte 43
-            TWTRMIN_L_MSN_START = 0, // MSN = most significant nibble
-            TWTRMIN_L_MSN_LEN = 4,
-
-            TWTRMIN_S_MSN_START = 4, // MSN = most significant nibble
-            TWTRMIN_S_MSN_LEN = 4,
-
-            // Byte 44
-            TWTRMIN_S_LSB_START = 0, // LSB = least significant byte
-            TWTRMIN_S_LSB_LEN = 8,
-
-            // Byte 45
-            TWTRMIN_L_LSB_START = 0,
-            TWTRMIN_L_LSB_LEN = 8,
-
-            // Bytes 46 - 59 - reserved
-
-            // Bytes 78 - 116 - reserved
-
-            // Bytes 117 - 125 : Entire byte used
-
-            // Byte 126
-            CRC_LSB_START = 0,
-            CRC_LSB_LEN = 8,
-
-            // Byte 127
-            CRC_MSB_START = 0,
-            CRC_MSB_LEN = 8,
-
-            // Byte 320
-            // Skip SPD most signigicant bit, so our 0
-            MOD_MFG_LSB_START = 0,
-            MOD_MFG_LSB_LEN = 8,
-
-            // Byte 321
-            MOD_MFG_MSB_START = 0,
-            MOD_MFG_MSB_LEN = 8,
-
-        };
-
-        ///
-        /// @brief Helper function that turns Logical ranks in Primary SDRAM type
-        /// @param[out] o_logical_ranks number of logical ranks
-        /// @return fapi2::FAPI2_RC_SUCCESS iff okay
-        ///
-        virtual fapi2::ReturnCode prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const;
-
-    public:
-
-        // First field is byte index
-        // Second field is the decoding start bit
-        // Third field is the decoding bit length
-        static constexpr field_t BYTES_USED{0, BYTES_USED_START, BYTES_USED_LEN};
-        static constexpr field_t TOTAL_BYTES_USED{0, BYTES_TOTAL_START, BYTES_TOTAL_LEN};
-        static constexpr field_t SDRAM_CAPACITY{4, SDRAM_CAPACITY_START, SDRAM_CAPACITY_LEN};
-        static constexpr field_t SDRAM_BANKS{4, SDRAM_BANKS_START, SDRAM_BANKS_LEN};
-        static constexpr field_t BANK_GROUP{4, BANK_GROUP_START, BANK_GROUP_LEN};
-        static constexpr field_t COL_ADDRESS{5, COL_ADDRESS_START, COL_ADDRESS_LEN};
-        static constexpr field_t ROW_ADDRESS{5, ROW_ADDRESS_START, ROW_ADDRESS_LEN};
-        static constexpr field_t PRIM_SIGNAL_LOADING{6, PRIM_SIGNAL_LOAD_START, PRIM_SIGNAL_LOAD_LEN};
-        static constexpr field_t PRIM_DIE_COUNT{6, PRIM_DIE_COUNT_START, PRIM_DIE_COUNT_LEN};
-        static constexpr field_t PRIM_PACKAGE_TYPE{6, PRIM_PACKAGE_TYPE_START, PRIM_PACKAGE_TYPE_LEN};
-        static constexpr field_t MAC{7, MAC_START, MAC_LEN};
-        static constexpr field_t TMAW{7, TMAW_START, TMAW_LEN};
-        static constexpr field_t PPR{9, PPR_START, PPR_LEN};
-        static constexpr field_t SOFT_PPR{9, SOFT_PPR_START, SOFT_PPR_LEN};
-        static constexpr field_t SEC_SIGNAL_LOADING{10, SEC_SIGNAL_LOAD_START, SEC_SIGNAL_LOAD_LEN};
-        static constexpr field_t SEC_DENSITY_RATIO{10, DENSITY_RATIO_START, DENSITY_RATIO_LEN};
-        static constexpr field_t SEC_DIE_COUNT{10, SEC_DIE_COUNT_START, SEC_DIE_COUNT_LEN};
-        static constexpr field_t SEC_PACKAGE_TYPE{10, SEC_PACKAGE_TYPE_START, SEC_PACKAGE_TYPE_LEN};
-        static constexpr field_t OPERABLE_FLD{11, OPERABLE_START, OPERABLE_LEN};
-        static constexpr field_t ENDURANT_FLD{11, ENDURANT_START, ENDURANT_LEN};
-        static constexpr field_t SDRAM_WIDTH{12, SDRAM_WIDTH_START, SDRAM_WIDTH_LEN};
-        static constexpr field_t RANK_MIX{12, RANK_MIX_START, RANK_MIX_LEN};
-        static constexpr field_t PACKAGE_RANKS{12, PACKAGE_RANKS_START, PACKAGE_RANKS_LEN};
-        static constexpr field_t BUS_WIDTH{13, BUS_WIDTH_START, BUS_WIDTH_LEN};
-        static constexpr field_t BUS_EXT_WIDTH{13, BUS_EXT_WIDTH_START, BUS_EXT_WIDTH_LEN};
-        static constexpr field_t THERM_SENSOR{14, THERM_SENSOR_START, THERM_SENSOR_LEN};
-        static constexpr field_t EXTENDED_MODULE_TYPE{15, EXT_MOD_TYPE_START, EXT_MOD_TYPE_LEN};
-        static constexpr field_t FINE_TIMEBASE{17, FINE_TIMEBASE_START, FINE_TIMEBASE_LEN};
-        static constexpr field_t MEDIUM_TIMEBASE{17, MED_TIMEBASE_START, MED_TIMEBASE_LEN};
-        static constexpr field_t TRASMIN_MSN{27, TRASMIN_MSN_START, TRASMIN_MSN_LEN};
-        static constexpr field_t TRASMIN_LSB{28, TRASMIN_LSB_START, TRASMIN_LSB_LEN};
-        static constexpr field_t TRCMIN_MSN{27, TRCMIN_MSN_START, TRCMIN_MSN_LEN};
-        static constexpr field_t TRCMIN_LSB{29, TRCMIN_LSB_START, TRCMIN_LSB_LEN};
-        static constexpr field_t TRFC1MIN_MSB{31, TRFC1MIN_MSB_START, TRFC1MIN_MSB_LEN};
-        static constexpr field_t TRFC1MIN_LSB{30, TRFC1MIN_LSB_START, TRFC1MIN_LSB_LEN};
-        static constexpr field_t TRFC2MIN_MSB{33, TRFC2MIN_MSB_START, TRFC2MIN_MSB_LEN};
-        static constexpr field_t TRFC2MIN_LSB{32, TRFC2MIN_LSB_START, TRFC2MIN_LSB_LEN};
-        static constexpr field_t TRFC4MIN_MSB{35, TRFC4MIN_MSB_START, TRFC4MIN_MSB_LEN};
-        static constexpr field_t TRFC4MIN_LSB{34, TRFC4MIN_LSB_START, TRFC4MIN_LSB_LEN};
-        static constexpr field_t TFAWMIN_MSN{36, TFAWMIN_MSN_START, TFAWMIN_MSN_LEN};
-        static constexpr field_t TFAWMIN_LSB{37, TFAWMIN_LSB_START, TFAWMIN_LSB_LEN};
-        static constexpr field_t TWRMIN_MSN{41, TWRMIN_MSN_START, TWRMIN_MSN_LEN};
-        static constexpr field_t TWRMIN_LSB{42, TWRMIN_LSB_START, TWRMIN_LSB_LEN};
-        static constexpr field_t TWTRMIN_S_MSN{43, TWTRMIN_S_MSN_START, TWTRMIN_S_MSN_LEN};
-        static constexpr field_t TWTRMIN_S_LSB{44, TWTRMIN_S_LSB_START, TWTRMIN_S_LSB_LEN};
-        static constexpr field_t TWTRMIN_L_MSN{43, TWTRMIN_L_MSN_START, TWTRMIN_L_MSN_LEN};
-        static constexpr field_t TWTRMIN_L_LSB{45, TWTRMIN_L_LSB_START, TWTRMIN_L_LSB_LEN};
-        static constexpr field_t CRC_MSB{127, CRC_MSB_START, CRC_MSB_LEN};
-        static constexpr field_t CRC_LSB{126, CRC_LSB_START, CRC_LSB_LEN};
-
-        // Default constructor deleted
-        decoder_v1_0() = delete;
-
-        ///
-        /// @brief ctor
-        /// @param[in] i_target dimm target
-        /// @param[in] i_spd_data SPD data vector
-        /// @param[in] i_module_decoder shared_ptr to dimm module decoder
-        /// @param[in] i_raw_card raw pointer to rcd data
-        ///
-        decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                     const std::vector<uint8_t>& i_spd_data,
-                     const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                     const rcw_settings& i_raw_card);
-
-        ///
-        /// @brief Default dtor
-        ///
-        virtual ~decoder_v1_0() = default;
-
-        /////////////////////////
-        // Member Methods
-        /////////////////////////
-
-        ///
-        /// @brief Decodes number of used SPD bytes
-        /// @param[out] o_value number of SPD bytes used
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note Decodes SPD Byte 0 (3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 14
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode number_of_used_bytes( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes total number of SPD bytes
-        /// @param[out] o_value number of total SPD bytes
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note Decodes SPD Byte 0 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 14
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM density from SPD
-        /// @param[out] o_value SDRAM density in GBs
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 4 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes number of SDRAM banks bits from SPD
-        /// @param[out] o_value Number of SDRAM bank bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 4 (bits 5~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes number of SDRAM bank groups bits from SPD
-        /// @param[out] o_value Number of SDRAM bank groups bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 4 (bits 7~6)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes number of SDRAM column address bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 5 (bits 2~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes number of SDRAM row address bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 5 (bits 5~3)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Primary SDRAM signal loading
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 6 (bits 1~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 19
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Primary SDRAM die count
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 6 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 19
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Primary SDRAM package type
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 6 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 19
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode SDRAM Maximum activate count
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 7 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 20
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode maximum_activate_count( uint32_t& o_value ) const override;
-
-        ///
-        /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 7 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 20
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint32_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Post package repair (PPR)
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 9 (bits 7~6)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 21
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Soft post package repair (soft PPR)
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 9 (bit 5)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 21
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Secondary SDRAM signal loading
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 1~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Secondary DRAM Density Ratio
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 3~2)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Secondary SDRAM die count
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Secondary SDRAM package type
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Module Nominal Voltage, VDD
-        /// @param[out] o_value enum representing if 1.2V is operable
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 11 (bit 0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Module Nominal Voltage, VDD
-        /// @param[out] o_value enum representing if 1.2V is endurant
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 11 (bit 1)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value ) const override;
-        ///
-        /// @brief Decodes SDRAM device width
-        /// @param[out] o_value device width in bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 12 (bits 2~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode device_width( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes number of package ranks per DIMM
-        /// @param[out] o_value number of package ranks per DIMM
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 12 (bits 5~3)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Rank Mix
-        /// @param[out] o_value rank mix value from SPD
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 12 (bit 6)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes primary bus width
-        /// @param[out] o_value primary bus width in bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 13 (bits 2~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 27
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes bus width extension
-        /// @param[out] o_value bus width extension in bits
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 13 (bits 4~3)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 27
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Module Thermal Sensor
-        /// @param[out] o_value thermal sensor value from SPD
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 14 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 28
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Extended Base Module Type
-        /// @param[out] o_value extended base module type value from SPD
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 15 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 28
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Fine Timebase
-        /// @param[out] o_value fine_timebase from SPD in picoseconds
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 17 (bits 1~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 29
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decode Medium Timebase
-        /// @param[out] o_value fine_timebase from SPD in picoseconds
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 17 (bits 3~2)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 29
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value ) const override;
-
-        ///
-        ///
-        /// @brief Decodes SDRAM Minimum Cycle Time in MTB
-        /// @param[out] o_value tCKmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 18
-        /// @note Item JC-45-2220.01x
-        /// @note Page 31-32
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tCKmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tCKmin (SPD byte 125)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_tck( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Maximum Cycle Time in MTB
-        /// @param[out] o_value tCKmax in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 19
-        /// @note Item JC-45-2220.01x
-        /// @note Page 32
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tCKmax cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tCKmax (SPD byte 124)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode max_tck( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decode CAS Latencies Supported
-        /// @param[out] o_value bitmap of supported CAS latencies
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Bytes 20-23
-        /// @note Item JC-45-2220.01x
-        /// @note Page 33-34
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum CAS Latency Time in MTB
-        /// @param[out] o_value tAAmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 24
-        /// @note Item JC-45-2220.01x
-        /// @note Page 34
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tAAmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tAAmin (SPD byte 123)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_taa( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
-        /// @param[out] o_value tRCDmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 25
-        /// @note Item JC-45-2220.01x
-        /// @note Page 35
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tRCDmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tRCDmin (SPD byte 122)
-        /// used for correction to get the actual value
-        ///
-        virtual fapi2::ReturnCode min_trcd( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Row Precharge Delay Time in MTB
-        /// @param[out] o_value tRPmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 26
-        /// @note Item JC-45-2220.01x
-        /// @note Page 36-37
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tRPmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tRPmin (SPD byte 121)
-        /// used for correction to get the actual value
-        ///
-        virtual fapi2::ReturnCode min_trp( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
-        /// @param[out] o_value tRASmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 28 (bits 7~4) & SPD Byte 27 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 38
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_tras( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
-        /// @param[out] o_value tRCmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 27 (bits 7~4) & SPD Byte 29 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 38
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tRCmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tRCmin (SPD byte 120)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_trc( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
-        /// @param[out] o_value tRFC1min in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 30 & Byte 31
-        /// @note Item JC-45-2220.01x
-        /// @note Page 39-40
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
-        /// @param[out] o_value tRFC2min in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 32 & Byte 33
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
-        /// @param[out] o_value tRFC4min in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 34 & Byte 35
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes SDRAM Minimum Four Activate Window Delay Time
-        /// @param[out] o_value tFAWmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 36 (bits 3~0) & Byte 37 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 42
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum Activate to Activate Delay Time - Different Bank Group
-        /// @param[out] o_value tRRD_Smin MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 38
-        /// @note Item JC-45-2220.01x
-        /// @note Page 43
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tRRD_Smin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tRRD_Smin (SPD byte 119)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum Activate to Activate Delay Time - Same Bank Group
-        /// @param[out] o_value tRRD_Lmin MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 39
-        /// @note Item JC-45-2220.01x
-        /// @note Page 43-44
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tRRD_Lmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tRRD_Lmin (SPD byte 118)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum CAS to CAS Delay Time - Same Bank Group
-        /// @param[out] o_value tCCD_Lmin MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 40
-        /// @note Item JC-45-2220.01x
-        /// @note Page 44-45
-        /// @note DDR4 SPD Document Release 3
-        /// @warning If tCCD_Lmin cannot be divided evenly by the MTB,
-        /// this byte must be rounded up to the next larger
-        /// integer and the Fine Offset for tCCD_Lmin (SPD byte 117)
-        /// used for correction to get the actual value.
-        ///
-        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum Write Recovery Time
-        /// @param[out] o_value tWRmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum Write to Read Time - Different Bank Group
-        /// @param[out] o_value tWRT_Smin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Minimum Write to Read Time - Same Bank Group
-        /// @param[out] o_value tWRT_Lmin in MTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 46
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Package Rank Map
-        /// @param[out] o_value vector of package rank maps for SPD bytes 60 - 77
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 60 - 77
-        /// @note JEDEC Standard No. 21-C
-        /// @note Page 45
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode package_rank_map( std::vector<uint8_t>& o_value ) const override;
-
-        ///
-        /// @brief Decodes Nibble Map
-        /// @param[out] o_value vector of nibble map encoding for SPD bytes 60 - 77
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 60 - 77
-        /// @note JEDEC Standard No. 21-C
-        /// @note Page 45
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode nibble_map( std::vector<uint8_t>& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
-        /// @param[out] o_value tCCD_Lmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 117
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
-        /// @param[out] o_value tRRD_Lmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 118
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
-        /// @param[out] o_value tRRD_Smin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 119
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
-        /// @param[out] o_value tRCmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 120
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for Minimum Row Precharge Delay Time
-        /// @param[out] o_value tRPmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 121
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
-        /// @param[out] o_value tRCDmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 122
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for SDRAM Minimum CAS Latency Time
-        /// @param[out] o_value tAAmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 123
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for SDRAM Maximum Cycle Time
-        /// @param[out] o_value tCKmax offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 124
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Fine Offset for SDRAM Minimum Cycle Time
-        /// @param[out] o_value tCKmin offset in FTB units
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 125
-        /// @note Item JC-45-2220.01x
-        /// @note Page 52
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
-        /// @param[out] o_value crc value from SPD
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 127 & Byte 126
-        /// @note Item JC-45-2220.01x
-        /// @note Page 53
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes module manufacturer ID code
-        /// @param[out] o_output module manufacturing id code
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 320 (bit 7~0), 321 (6~0)
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 3
-        /// @note Page 4.1.2.12 - 54
-        ///
-        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Module Manufacturing Location
-        /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 322
-        /// @note Item JC-45-2220.01x
-        /// @note Page 55
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value ) const override;
-        ///
-        /// @brief Decodesmodule manufacturing date
-        /// @param[out] o_output the 2 byte date of manufacturing in BCD format
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 323 & 324
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 54
-        /// @note in Binary Coded Decimal (BCD)
-        /// @note MSB = year, LSB = week
-        ///
-        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_output ) const override;
-
-        ///
-        /// @brief Decodes module's unique serial number
-        /// @param[out] o_output
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 325-328
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 54
-        ///
-        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_output ) const override;
-
-        ///
-        /// @brief Decodes Module Revision Code
-        /// @param[out] o_value uint8_t identifier for revision code
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 349
-        /// @note Item JC-45-2220.01x
-        /// @note Page 55
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes DRAM Manufacturer ID code
-        /// @param[out] o_output dram manufacturing id code
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 350 - 351
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 54
-        ///
-        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_output ) const override;
-
-        ///
-        /// @brief Decodes RCD Manufacturer ID code
-        /// @param[out] o_value rcd manufacturing id code
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 133 134
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 54
-        ///
-        virtual fapi2::ReturnCode reg_manufacturer_id_code( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes Register Revision Number
-        /// @param[out] o_value register revision number
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 135
-        /// @note Item JEDEC Standard No. 21-C
-        /// @note DDR4 SPD Document Release 2
-        /// @note Page 4.1.2.12 - 54
-        ///
-        virtual fapi2::ReturnCode register_rev_num( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes DRAM Stepping
-        /// @param[out] o_value uint8_t DRAM Stepping val
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 352
-        /// @note Item JC-45-2220.01x
-        /// @note Page 56
-        /// @note DDR4 SPD Document Release 3
-        /// @note also called die revision level
-        ///
-        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Returns Logical ranks per DIMM
-        /// @param[out] o_logical_ranks number of logical ranks
-        /// @return fapi2::FAPI2_RC_SUCCESS iff okay
-        ///
-        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const override;
-
     private:
+
+        using fields_t = fields<DDR4, BASE_CNFG>;
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
+        std::vector<uint8_t> iv_data;
 
         ///
         /// @brief SPD byte field threshold check
         /// @param[out] o_value list of connector_field values from SPD
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        template< mss::connector_bits T, mss::connector_field OT, typename TT = mss::connectorTraits<T, OT> >
+        template< connector_bits T, connector_field OT, typename TT = connectorTraits<T, OT> >
         fapi2::ReturnCode sdram_connector_helper( std::vector<uint8_t>& o_value ) const
         {
             for( size_t byte = TT::START; byte <= TT::END; ++byte )
             {
                 uint8_t l_field = 0;
 
-                fapi2::buffer<uint8_t> l_buffer(iv_spd_data[byte]);
+                fapi2::buffer<uint8_t> l_buffer(iv_data[byte]);
                 l_buffer.extractToRight<TT::EXTRACT_START, TT::EXTRACT_LEN>(l_field);
 
                 FAPI_DBG("%s SPD byte %d, data: %d, field value: %d, starting bit: %d, bit length: %d",
-                         iv_target_str_storage, byte, iv_spd_data[byte], l_field, TT::EXTRACT_START, TT::EXTRACT_LEN);
+                         spd::c_str(iv_target), byte, iv_data[byte], l_field, TT::EXTRACT_START, TT::EXTRACT_LEN);
 
                 FAPI_TRY( TT::fail_check(iv_target, byte, l_field) );
 
@@ -1540,187 +453,1412 @@ class decoder_v1_0 : public decoder
             return fapi2::current_err;
         }
 
-};// decoder
+        ///
+        /// @class proxy
+        /// @brief Nested class to help specialize certain decoder methods
+        /// @tparam U SPD revision
+        /// @tparam B dummy var to faciliate partial specialization - defaulted to true
+        /// @note explicit specialization of a class isn't allowed on the HB compiler.
+        /// This is a helper class to workaround specialization for just a few methods
+        /// instead of having the explicitly specialize the entire class itself.
+        /// Since nested classes also can't be explicitly specialized...we use a bool
+        /// template param to facilitate partial specialzation of the nested helper class.
+        ///
+        template< rev U, bool B = true >
+        struct proxy
+        {
+            ///
+            /// @brief Decodes Minimum Write Recovery Time
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRmin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twr( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                              const std::vector<uint8_t>& i_data,
+                                              int64_t& o_value )
+            {
+                uint8_t l_twrmin_msn = 0;
+                uint8_t l_twrmin_lsb = 0;
 
-///
-/// @class decoder_v1_1
-/// @brief Base SPD DRAM decoder, 1st addition to general section
-///
-class decoder_v1_1 : public decoder_v1_0
-{
-    protected:
+                FAPI_TRY( (mss::spd::reader<fields_t::TWRMIN_MSN, U>(i_target, i_data, l_twrmin_msn)) );
+                FAPI_TRY( (mss::spd::reader<fields_t::TWRMIN_LSB, U>(i_target, i_data, l_twrmin_lsb)) );
+
+                {
+                    fapi2::buffer<int64_t> l_buffer;
+                    rightAlignedInsert(l_buffer, l_twrmin_msn, l_twrmin_lsb);
+
+                    // Update output only after check passes
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWRMIN));
+                    o_value = l_buffer;
+
+                    FAPI_INF("%s. Minimum Write Recovery Time (tWRmin) in MTB units: %d",
+                             spd::c_str(i_target),
+                             o_value);
+                }
+            fapi_try_exit:
+                return fapi2::current_err;
+            }
+
+            ///
+            /// @brief Decodes Minimum Write to Read Time - Same Bank Group
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRT_Lmin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twtr_l( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                 const std::vector<uint8_t>& i_data,
+                                                 int64_t& o_value )
+            {
+                uint8_t l_twtr_lmin_msn = 0;
+                uint8_t l_twtr_lmin_lsb = 0;
+
+                FAPI_TRY( (mss::spd::reader<fields_t::TWTRMIN_L_MSN, U>(i_target, i_data, l_twtr_lmin_msn)) );
+                FAPI_TRY( (mss::spd::reader<fields_t::TWTRMIN_L_LSB, U>(i_target, i_data, l_twtr_lmin_lsb)) );
+
+                {
+                    fapi2::buffer<int64_t> l_buffer;
+                    rightAlignedInsert(l_buffer, l_twtr_lmin_msn, l_twtr_lmin_lsb);
+
+                    // Update output only after check passes
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_L_MIN));
+                    o_value = l_buffer;
+
+                    FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Lmin) in MTB units: %d",
+                             spd::c_str(i_target),
+                             o_value);
+                }
+
+            fapi_try_exit:
+                return fapi2::current_err;
+            }
+
+            ///
+            /// @brief Decodes Minimum Write to Read Time - Different Bank Group
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRT_Smin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twtr_s( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                 const std::vector<uint8_t>& i_data,
+                                                 int64_t& o_value )
+            {
+                uint8_t l_twtr_smin_msn = 0;
+                uint8_t l_twtr_smin_lsb = 0;
+
+                FAPI_TRY( (mss::spd::reader<fields_t::TWTRMIN_S_MSN, U>(i_target, i_data, l_twtr_smin_msn)) );
+                FAPI_TRY( (mss::spd::reader<fields_t::TWTRMIN_S_LSB, U>(i_target, i_data, l_twtr_smin_lsb)) );
+
+                {
+                    fapi2::buffer<int64_t> l_buffer;
+                    rightAlignedInsert(l_buffer, l_twtr_smin_msn, l_twtr_smin_lsb);
+
+                    // Update output only after check passes
+                    FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_S_MIN));
+                    o_value = l_buffer;
+
+                    FAPI_INF("%s. Minimum Write to Read Time - Different Bank Group (tWTR_Smin) in MTB units: %d",
+                             spd::c_str(i_target),
+                             o_value);
+                }
+
+            fapi_try_exit:
+                return fapi2::current_err;
+            }
+        };
 
         ///
-        /// @brief Helper functions that returns Logical ranks in Secondary SDRAM type
-        /// @param[out] o_logical_ranks number of logical ranks
-        /// @return fapi2::FAPI2_RC_SUCCESS iff okay
+        /// @class proxy - rev::V1_0 specialization
+        /// @brief Nested class to help specialize certain decoder methods
+        /// @tparam B dummy var to faciliatate partial specialization
+        /// @note If the decoder methods are rev::v1_0 hardcode them to these values
         ///
-        virtual fapi2::ReturnCode sec_sdram_logical_ranks( uint8_t& o_logical_ranks ) const;
+        template< bool B >
+        struct proxy<rev::V1_0, B>
+        {
+
+            ///
+            /// @brief Decodes Minimum Write Recovery Time
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRmin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twr( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                              const std::vector<uint8_t>& i_data,
+                                              int64_t& o_value )
+            {
+                // For General Section rev 1.0 of the SPD,
+                // SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0) were reserved
+                // and coded as zeros.
+                // Default as 0x78 for all DDR4 bins for rev 1.0
+                o_value = 0x78;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            ///
+            /// @brief Decodes Minimum Write to Read Time - Same Bank Group
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRT_Lmin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twtr_l( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                 const std::vector<uint8_t>& i_data,
+                                                 int64_t& o_value )
+            {
+                // For General Section rev 1.0 of the SPD,
+                // SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0) were reserved
+                // and coded as zeros.
+                // Default as 0x3C for all DDR4 bins for rev 1.0
+                o_value = 0x3C;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            ///
+            /// @brief Decodes Minimum Write to Read Time - Different Bank Group
+            /// @param[in] i_target dimm target
+            /// @param[in] i_data SPD data vector
+            /// @param[out] o_value tWRT_Smin in MTB units
+            /// @return FAPI2_RC_SUCCESS iff okay
+            ///
+            static fapi2::ReturnCode min_twtr_s( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                                 const std::vector<uint8_t>& i_data,
+                                                 int64_t& o_value )
+            {
+                // For General Section rev 1.0 of the SPD,
+                // SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0) were reserved
+                // and coded as zeros.
+                // Default as 0x14 for all DDR4 bins for rev 1.0
+                o_value = 0x14;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+
+        };
 
     public:
+
         ///
-        /// @brief Default constructor
+        /// @brief default ctor
         ///
-        decoder_v1_1() = default;
+        decoder() = default;
 
         ///
         /// @brief ctor
         /// @param[in] i_target dimm target
         /// @param[in] i_spd_data SPD data vector
-        /// @param[in] i_module_decoder shared_ptr to dimm module decoder
-        /// @param[in] i_raw_card raw pointer to rcd data
         ///
-        decoder_v1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                     const std::vector<uint8_t>& i_spd_data,
-                     const std::shared_ptr<dimm_module_decoder>& i_module_decoder,
-                     const rcw_settings& i_raw_card);
+        decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                const std::vector<uint8_t>& i_spd_data):
+            base_cnfg_decoder(i_target, i_spd_data),
+            iv_target(i_target),
+            iv_data(i_spd_data)
+        {
+            static_assert( R <= rev::GEN_SEC_MAX, " R > rev::GEN_SEC_MAX");
+        }
 
         ///
         /// @brief Default dtor
         ///
-        virtual ~decoder_v1_1() = default;
+        virtual ~decoder() = default;
 
         /////////////////////////
         // Member Methods
         /////////////////////////
 
         ///
+        /// @brief Gets decoder target
+        /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+        ///
+        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        {
+            return iv_target;
+        }
+
+        ///
+        /// @brief Gets decoder SPD data
+        /// @return std::vector<uint8_t>
+        ///
+        virtual std::vector<uint8_t> get_data() const
+        {
+            return iv_data;
+        }
+
+        ///
+        /// @brief Sets decoder SPD data
+        /// @param[in] i_spd_data SPD data in a vector reference
+        ///
+        virtual void set_data(const std::vector<uint8_t>& i_spd_data)
+        {
+            iv_data = i_spd_data;
+        }
+
+        ///
+        /// @brief Decodes number of used SPD bytes
+        /// @param[out] o_value number of SPD bytes used
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode number_of_used_bytes( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::BYTES_USED, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes total number of SPD bytes
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode number_of_total_bytes( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TOTAL_BYTES, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDP revision
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode revision( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::REVISION, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes DRAM device type
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode device_type( uint8_t& o_value ) const override
+        {
+            // Sparsed reserved bits within valid SPD field range
+            static const std::vector<uint8_t> l_reserved_bits{0x00, 0x0D};
+            FAPI_TRY( (mss::spd::reader<fields_t::DEVICE_TYPE, R>(iv_target, iv_data, o_value)) );
+            FAPI_TRY( check::reserved_values(iv_target, l_reserved_bits, DEVICE_TYPE, o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes base module type
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode base_module( uint8_t& o_value ) const override
+        {
+            // Sparsed reserved bits within valid SPD field range
+            static const std::vector<uint8_t> l_reserved_bits{0b0111, 0b1010, 0b1011, 0b1110, 0b1111};
+            FAPI_TRY( (mss::spd::reader<fields_t::BASE_MODULE, R>(iv_target, iv_data, o_value)) );
+            FAPI_TRY( check::reserved_values(iv_target, l_reserved_bits, BASE_MODULE_TYPE, o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes hybrid media
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::HYBRID_MEDIA, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes hybrid
+        /// @param[out] o_value number of total SPD bytes
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::HYBRID, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Decodes SDRAM density from SPD
         /// @param[out] o_value SDRAM density in GBs
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 4 (bits 3~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 18
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode sdram_density( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SDRAM_CAPACITY, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes number of SDRAM banks bits from SPD
+        /// @param[out] o_value Number of SDRAM bank bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode bank_bits( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::BANKS_ADDR_BITS, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes number of SDRAM bank groups bits from SPD
+        /// @param[out] o_value Number of SDRAM bank groups bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode bank_group_bits( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::BANK_GROUP_BITS, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes number of SDRAM column address bits
+        /// @param[out] o_value Number of SDRAM bank bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode column_address_bits( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::COL_ADDR_BITS, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes number of SDRAM row address bits
+        /// @param[out] o_value Number of SDRAM bank bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode row_address_bits( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::ROW_ADDR_BITS, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Primary SDRAM signal loading
+        /// @param[out] o_value Number of SDRAM bank bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode prim_sdram_signal_loading( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PRIM_SIGNAL_LOADING, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Primary SDRAM die count
+        /// @param[out] o_value Number of SDRAM bank bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual  fapi2::ReturnCode prim_sdram_die_count( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PRIM_DIE_COUNT, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Primary SDRAM package type
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode prim_sdram_package_type( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PRIM_PACKAGE_TYPE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode SDRAM Maximum activate count
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode maximum_activate_count( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::MAC, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode maximum_activate_window_multiplier( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TMAW, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Post package repair (PPR)
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode post_package_repair( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PPR, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decode Soft post package repair (soft PPR)
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 9 (bit 5)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 21
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode soft_post_package_repair( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SOFT_PPR, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Secondary SDRAM signal loading
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 1~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode sec_sdram_signal_loading( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SEC_SIGNAL_LOADING, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Secondary DRAM Density Ratio
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 3~2)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode sec_dram_density_ratio( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SEC_DENSITY_RATIO, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Secondary SDRAM die count
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode sec_sdram_die_count( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SEC_DIE_COUNT, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Secondary SDRAM package type
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 10 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 22
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode sec_sdram_package_type( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SEC_PACKAGE_TYPE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Module Nominal Voltage, VDD
+        /// @param[out] o_value enum representing if 1.2V is operable
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode operable_nominal_voltage( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OPERABLE_FLD, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Module Nominal Voltage, VDD
+        /// @param[out] o_value enum representing if 1.2V is endurant
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode endurant_nominal_voltage( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::ENDURANT_FLD, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM device width
+        /// @param[out] o_value device width in bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode device_width( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::SDRAM_WIDTH, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes number of package ranks per DIMM
         /// @param[out] o_value number of package ranks per DIMM
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 12 (bits 5~3)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode num_package_ranks_per_dimm( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::PACKAGE_RANKS, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Rank Mix
         /// @param[out] o_value rank mix value from SPD
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 12 (bit 6)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 23
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const override;
+        virtual fapi2::ReturnCode rank_mix( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::RANK_MIX, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes primary bus width
+        /// @param[out] o_value primary bus width in bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode prim_bus_width( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::BUS_WIDTH, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes bus width extension
+        /// @param[out] o_value bus width extension in bits
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode bus_width_extension( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::BUS_EXT_WIDTH, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Module Thermal Sensor
+        /// @param[out] o_value thermal sensor value from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode thermal_sensor( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::THERM_SENSOR, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Extended Base Module Type
+        /// @param[out] o_value extended base module type value from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode extended_base_module_type( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::EXTENDED_MODULE_TYPE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Fine Timebase
+        /// @param[out] o_value fine_timebase from SPD in picoseconds
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_timebase( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::FINE_TIMEBASE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decode Medium Timebase
+        /// @param[out] o_value fine_timebase from SPD in picoseconds
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode medium_timebase( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::MEDIUM_TIMEBASE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        ///
+        /// @brief Decodes SDRAM Minimum Cycle Time in MTB
+        /// @param[out] o_value tCKmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_tck( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TCK_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Maximum Cycle Time in MTB
+        /// @param[out] o_value tCKmax in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode max_tck( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TCK_MAX, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decode CAS Latencies Supported
         /// @param[out] o_value bitmap of supported CAS latencies
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Bytes 20-23
-        /// @note Item JC-45-2220.01x
-        /// @note Page 33-34
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value) const override;
+        virtual fapi2::ReturnCode supported_cas_latencies( uint64_t& o_value ) const override
+        {
+            uint8_t l_first_raw_byte = 0;
+            uint8_t l_sec_raw_byte = 0;
+            uint8_t l_third_raw_byte = 0;
+            uint8_t l_fourth_raw_byte = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::CL_FIRST_BYTE, R>(iv_target, iv_data, l_first_raw_byte)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::CL_SECOND_BYTE, R>(iv_target, iv_data, l_sec_raw_byte)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::CL_THIRD_BYTE, R>(iv_target, iv_data, l_third_raw_byte)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::CL_FOURTH_BYTE, R>(iv_target, iv_data, l_fourth_raw_byte)) );
+
+            {
+                // Buffers used for bit manipulation
+                // Combine Bytes to create bitmap - right aligned
+                fapi2::buffer<uint64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_fourth_raw_byte, l_third_raw_byte, l_sec_raw_byte, l_first_raw_byte);
+
+                // According to the JEDEC spec:
+                // Byte 22 (Bits 7~0) and Byte 23 are reserved and thus not supported
+                // Check for a valid value
+                constexpr size_t MAX_VALID_VAL = 0x3FFFF;
+                FAPI_TRY( check::fail_for_invalid_value(iv_target,
+                                                        l_buffer <= MAX_VALID_VAL,
+                                                        23,
+                                                        l_buffer,
+                                                        "Failed check on CAS latencies supported") );
+
+                // Update output value only if range check passes
+                o_value = int64_t(l_buffer);
+
+                FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum CAS Latency Time in MTB
+        /// @param[out] o_value tAAmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_taa( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TAA_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
+        /// @param[out] o_value tRCDmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trcd( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TRCD_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Row Precharge Delay Time in MTB
+        /// @param[out] o_value tRPmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trp( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TRP_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
+        /// @param[out] o_value tRASmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_tras( int64_t& o_value ) const override
+        {
+            uint8_t l_tRASmin_msn = 0;
+            uint8_t l_tRASmin_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::TRASMIN_MSN, R>(iv_target, iv_data, l_tRASmin_msn)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TRASMIN_LSB, R>(iv_target, iv_data, l_tRASmin_lsb)) );
+
+            {
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_tRASmin_msn, l_tRASmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRASMIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Active to Precharge Delay Time (tRASmin) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
+        /// @param[out] o_value tRCmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trc( int64_t& o_value ) const override
+        {
+            uint8_t l_trcmin_msn = 0;
+            uint8_t l_trcmin_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::TRCMIN_MSN, R>(iv_target, iv_data, l_trcmin_msn)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TRCMIN_LSB, R>(iv_target, iv_data, l_trcmin_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_trcmin_msn, l_trcmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRCMIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Active to Active/Refresh Delay Time (tRCmin) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
+        /// @param[out] o_value tRFC1min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc1( int64_t& o_value ) const override
+        {
+            uint8_t l_trfc1min_msb = 0;
+            uint8_t l_trfc1min_lsb = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC1MIN_MSB, R>(iv_target, iv_data, l_trfc1min_msb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC1MIN_LSB, R>(iv_target, iv_data, l_trfc1min_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_trfc1min_msb, l_trfc1min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC1MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 1 (tRFC1min) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
+        /// @param[out] o_value tRFC2min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc2( int64_t& o_value ) const override
+        {
+            uint8_t l_trfc2min_msb = 0;
+            uint8_t l_trfc2min_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC2MIN_MSB, R>(iv_target, iv_data, l_trfc2min_msb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC2MIN_LSB, R>(iv_target, iv_data, l_trfc2min_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_trfc2min_msb, l_trfc2min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC2MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 2 (tRFC2min) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
+        /// @param[out] o_value tRFC4min in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trfc4( int64_t& o_value ) const override
+        {
+            uint8_t l_trfc4min_msb = 0;
+            uint8_t l_trfc4min_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC4MIN_MSB, R>(iv_target, iv_data, l_trfc4min_msb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TRFC4MIN_LSB, R>(iv_target, iv_data, l_trfc4min_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_trfc4min_msb, l_trfc4min_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC4MIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Refresh Recovery Delay Time 4 (tRFC4min) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes SDRAM Minimum Four Activate Window Delay Time
+        /// @param[out] o_value tFAWmin in MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_tfaw( int64_t& o_value ) const override
+        {
+            uint8_t l_tfawmin_msn = 0;
+            uint8_t l_tfawmin_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::TFAWMIN_MSN, R>(iv_target, iv_data, l_tfawmin_msn)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::TFAWMIN_LSB, R>(iv_target, iv_data, l_tfawmin_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<int64_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_tfawmin_msn, l_tfawmin_lsb);
+
+                // Update output only after check passes
+                FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TFAWMIN));
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Minimum Four Activate Window Delay Time (tFAWmin) in MTB units: %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Minimum Activate to Activate Delay Time - Different Bank Group
+        /// @param[out] o_value tRRD_Smin MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trrd_s( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TRRD_S_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Minimum Activate to Activate Delay Time - Same Bank Group
+        /// @param[out] o_value tRRD_Lmin MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_trrd_l( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TRRD_L_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Minimum CAS to CAS Delay Time - Same Bank Group
+        /// @param[out] o_value tCCD_Lmin MTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode min_tccd_l( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::TCCD_L_MIN, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Minimum Write Recovery Time
         /// @param[out] o_value tWRmin in MTB units
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const override;
+        virtual fapi2::ReturnCode min_twr( int64_t& o_value ) const override
+        {
+            FAPI_TRY( proxy<R>::min_twr(iv_target, iv_data, o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Different Bank Group
         /// @param[out] o_value tWRT_Smin in MTB units
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 40
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const override;
+        virtual fapi2::ReturnCode min_twtr_s( int64_t& o_value ) const override
+        {
+            FAPI_TRY( proxy<R>::min_twtr_s(iv_target, iv_data, o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         ///
         /// @brief Decodes Minimum Write to Read Time - Same Bank Group
         /// @param[out] o_value tWRT_Lmin in MTB units
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 46
-        /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override;
+        virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override
+        {
+            FAPI_TRY( proxy<R>::min_twtr_l(iv_target, iv_data, o_value) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
-        /// @brief Returns Logical ranks per DIMM
-        /// @param[out] o_logical_ranks number of logical ranks
-        /// @return fapi2::FAPI2_RC_SUCCESS iff okay
+        /// @brief Decodes Package Rank Map
+        /// @param[out] o_value vector of package rank maps for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const override;
+        virtual fapi2::ReturnCode package_rank_map( std::vector<uint8_t>& o_value ) const override
+        {
+            o_value.clear();
 
-};// spd_decoder_v1_1
+            FAPI_TRY( (sdram_connector_helper<DQ0_31, PKG_RANK_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for DQ0_31, PKG_RANK_MAP", spd::c_str(iv_target) );
 
-}// ddr4
+            FAPI_TRY( (sdram_connector_helper<DQ32_63, PKG_RANK_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for DQ32_63, PKG_RANK_MAP", spd::c_str(iv_target) );
+
+            FAPI_TRY( (sdram_connector_helper<CB0_7, PKG_RANK_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for CB0_7, PKG_RANK_MAP", spd::c_str(iv_target) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Nibble Map
+        /// @param[out] o_value vector of nibble map encoding for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode nibble_map( std::vector<uint8_t>& o_value ) const override
+        {
+            o_value.clear();
+
+            FAPI_TRY( (sdram_connector_helper<DQ0_31, NIBBLE_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for DQ0_31, NIBBLE_MAP", spd::c_str(iv_target) );
+
+            FAPI_TRY( (sdram_connector_helper<DQ32_63, NIBBLE_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for DQ32_63, NIBBLE_MAP", spd::c_str(iv_target) );
+
+            FAPI_TRY( (sdram_connector_helper<CB0_7, NIBBLE_MAP>(o_value)),
+                      "%s Failed to sdram_connector_helper for CB0_7, NIBBLE_MAP", spd::c_str(iv_target) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
+        /// @param[out] o_value tCCD_Lmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_tccd_l( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TCCD_L_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
+        /// @param[out] o_value tRRD_Lmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_trrd_l( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TRRD_L_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
+        /// @param[out] o_value tRRD_Smin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_trrd_s( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TRRD_S_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
+        /// @param[out] o_value tRCmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_trc( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TRC_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for Minimum Row Precharge Delay Time
+        /// @param[out] o_value tRPmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_trp( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TRP_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
+        /// @param[out] o_value tRCDmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_trcd( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TRCD_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Minimum CAS Latency Time
+        /// @param[out] o_value tAAmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_taa( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TAA_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Maximum Cycle Time
+        /// @param[out] o_value tCKmax offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_max_tck( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TCK_MAX, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Fine Offset for SDRAM Minimum Cycle Time
+        /// @param[out] o_value tCKmin offset in FTB units
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode fine_offset_min_tck( int64_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::OFFSET_TCK_MIN, R>(iv_target, iv_data, o_value)) );
+            o_value = static_cast<int8_t>(o_value);
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
+        /// @param[out] o_value crc value from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode cyclical_redundancy_code( uint16_t& o_value ) const override
+        {
+            uint8_t l_crc_msb = 0;
+            uint8_t l_crc_lsb = 0;
+            FAPI_TRY( (mss::spd::reader<fields_t::CRC_MSB, R>(iv_target, iv_data, l_crc_msb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::CRC_LSB, R>(iv_target, iv_data, l_crc_lsb)) );
+
+            {
+                // Combining bits to create timing value (in a buffer)
+                fapi2::buffer<uint16_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_crc_msb, l_crc_lsb);
+
+                // This value isn't bounded in the SPD document
+                o_value = l_buffer;
+
+                FAPI_INF("%s. Cyclical Redundancy Code (CRC): %d",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes module manufacturer ID code
+        /// @param[out] o_output module manufacturing id code
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode module_manufacturer_id_code( uint16_t& o_value ) const override
+        {
+            uint8_t l_cont_codes = 0;
+            uint8_t l_last_nonzero_byte = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::CONTINUATION_CODES, R>(iv_target, iv_data, l_cont_codes)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::LAST_NON_ZERO_BYTE, R>(iv_target, iv_data, l_last_nonzero_byte)) );
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_last_nonzero_byte, l_cont_codes);
+
+                o_value = l_buffer;
+
+                FAPI_INF("%s.Module Manufacturer ID Code: %x",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Module Manufacturing Location
+        /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode module_manufacturing_location( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_MFG_LOCATION, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodesmodule manufacturing date
+        /// @param[out] o_value the 2 byte date of manufacturing in BCD format
+        /// @return FAPI2_RC_SUCCESS iff okay
+        virtual fapi2::ReturnCode module_manufacturing_date( uint16_t& o_value ) const override
+        {
+            uint8_t l_date_msb = 0;
+            uint8_t l_date_lsb = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_MFG_DATE_MSB, R>(iv_target, iv_data, l_date_msb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_MFG_DATE_LSB, R>(iv_target, iv_data, l_date_lsb)) );
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_date_msb, l_date_lsb);
+
+                o_value = l_buffer;
+
+                FAPI_INF("%s.Module Manufacturer ID date: %x",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes module's unique serial number
+        /// @param[out] o_value module's serial number
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode module_serial_number( uint32_t& o_value ) const override
+        {
+            uint8_t l_sn_byte_0 = 0;
+            uint8_t l_sn_byte_1 = 0;
+            uint8_t l_sn_byte_2 = 0;
+            uint8_t l_sn_byte_3 = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_SERIAL_NUM_BYTE1, R>(iv_target, iv_data, l_sn_byte_0)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_SERIAL_NUM_BYTE2, R>(iv_target, iv_data, l_sn_byte_1)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_SERIAL_NUM_BYTE3, R>(iv_target, iv_data, l_sn_byte_2)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_SERIAL_NUM_BYTE4, R>(iv_target, iv_data, l_sn_byte_3)) );
+
+            {
+                fapi2::buffer<uint32_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_sn_byte_3, l_sn_byte_2, l_sn_byte_1, l_sn_byte_0);
+
+                o_value = l_buffer;
+
+                FAPI_INF("%s.Module Serial Number : 0x%08x",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes Module Revision Code
+        /// @param[out] o_value uint8_t identifier for revision code
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode module_revision_code( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::MODULE_REV_CODE, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes DRAM Manufacturer ID code
+        /// @param[out] o_value dram manufacturing id code
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_value ) const override
+        {
+            uint8_t l_mfgid_msb = 0;
+            uint8_t l_mfgid_lsb = 0;
+
+            FAPI_TRY( (mss::spd::reader<fields_t::DRAM_MFR_ID_CODE_LSB, R>(iv_target, iv_data, l_mfgid_lsb)) );
+            FAPI_TRY( (mss::spd::reader<fields_t::DRAM_MFR_ID_CODE_MSB, R>(iv_target, iv_data, l_mfgid_msb)) );
+
+            {
+                fapi2::buffer<uint16_t> l_buffer;
+                rightAlignedInsert(l_buffer, l_mfgid_msb, l_mfgid_lsb);
+
+                o_value = l_buffer;
+
+                FAPI_INF("%s.DRAM Manufacturer ID Code: %x",
+                         spd::c_str(iv_target),
+                         o_value);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Decodes DRAM Stepping
+        /// @param[out] o_value uint8_t DRAM Stepping val
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode dram_stepping( uint8_t& o_value ) const override
+        {
+            FAPI_TRY( (mss::spd::reader<fields_t::DRAM_STEPPING, R>(iv_target, iv_data, o_value)) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+};// decoder
+
 }// spd
 }// mss
 

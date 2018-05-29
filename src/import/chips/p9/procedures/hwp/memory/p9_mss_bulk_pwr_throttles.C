@@ -34,7 +34,6 @@
 // *HWP Consumed by: FSP:HB
 #include <vector>
 
-#include <mss.H>
 #include <fapi2.H>
 #include <p9_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/find.H>

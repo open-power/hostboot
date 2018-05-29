@@ -45,7 +45,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
+#include <generic/memory/lib/spd/spd_facade.H>
 #include <lib/utils/conversions.H>
 #include <lib/freq/sync.H>
 
@@ -132,7 +132,7 @@ class cas_latency
         /// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
         ///
         cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target_mcs,
-                    const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
+                    const std::vector< spd::facade >& i_caches,
                     const std::vector<uint32_t>& i_supported_freqs,
                     fapi2::ReturnCode& o_rc);
 
@@ -277,11 +277,11 @@ class cas_latency
 
         ///
         /// @brief Retrieves SDRAM Minimum CAS Latency Time (tAAmin) from SPD
-        /// @param[in] i_pDecoder the SPD decoder
+        /// @param[in] i_spd_decoder the SPD decoder
         /// @param[out] o_value tCKmin value in ps
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
-        fapi2::ReturnCode get_taamin(const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+        fapi2::ReturnCode get_taamin(const mss::spd::facade& i_spd_decoder,
                                      uint64_t& o_value);
 
         ///

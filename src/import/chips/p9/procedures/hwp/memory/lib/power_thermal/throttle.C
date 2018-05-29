@@ -39,7 +39,7 @@
 // mss lib
 #include <lib/power_thermal/throttle.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <mss.H>
+
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_DIMM;

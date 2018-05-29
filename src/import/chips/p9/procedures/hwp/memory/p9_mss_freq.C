@@ -45,8 +45,7 @@
 #include <fapi2.H>
 
 // mss lib
-#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
-#include <lib/spd/spd_factory.H>
+#include <generic/memory/lib/spd/spd_facade.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/freq/sync.H>
 #include <lib/workarounds/freq_workarounds.H>
@@ -55,6 +54,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/index.H>
 #include <lib/shared/mss_const.H>
+#include <lib/eff_config/attr_setters.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -79,7 +79,7 @@ extern "C"
         // So for now, iterate over all the MCBIST. This isn't great as we do this work
         // twice for every MC. However, attribute access is cheap so this will suffice for
         // the time being.
-        const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+        const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
         std::vector< std::vector<uint64_t> > l_min_dimm_freq(mss::MCS_PER_MC, std::vector<uint64_t> (mss::PORTS_PER_MCS,  0) );
         std::vector<uint32_t> l_supported_freqs;
 
@@ -91,6 +91,21 @@ extern "C"
         {
             FAPI_INF("Seeing no DIMM on %s, no freq to set", mss::c_str(l_mcbist));
             return FAPI2_RC_SUCCESS;
+        }
+
+        // We will first set pre-eff_config attributes
+        for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mcbist))
+        {
+            std::vector<uint8_t> l_raw_spd;
+            FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+
+            {
+                fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+                mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
+
+                FAPI_TRY(l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d));
+                FAPI_TRY(mss::set_pre_init_attrs(d, l_spd_decoder));
+            }
         }
 
         // Get supported freqs for this MCBIST
@@ -105,15 +120,14 @@ extern "C"
             for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
             {
                 const auto l_mca_index = mss::index(l_mca);
-                std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
                 fapi2::ReturnCode l_rc;
 
                 // Get cached decoder
-                FAPI_TRY( mss::spd::populate_decoder_caches(l_mca, l_factory_caches),
-                          "%s. Failed to populate decoder cache", mss::c_str(l_mca) );
+                std::vector< mss::spd::facade > l_spd_facades;
+                FAPI_TRY( get_spd_decoder_list(l_mca, l_spd_facades) );
 
                 // Instantiation of class that calculates CL algorithm
-                mss::cas_latency l_cas_latency( l_mca, l_factory_caches, l_supported_freqs, l_rc );
+                mss::cas_latency l_cas_latency( l_mca, l_spd_facades, l_supported_freqs, l_rc );
 
                 FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_mca) );
 

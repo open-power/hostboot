@@ -37,7 +37,9 @@
 #define _MSS_POWER_THROTTLE_
 
 #include <fapi2.H>
-#include <mss.H>
+#include <lib/shared/mss_const.H>
+#include <lib/mss_attribute_accessors.H>
+
 namespace mss
 {
 namespace power_thermal

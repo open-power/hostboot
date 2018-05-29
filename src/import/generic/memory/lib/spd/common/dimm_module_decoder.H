@@ -52,11 +52,12 @@ namespace spd
 ///
 class dimm_module_decoder
 {
-    public:
-        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
+    private:
 
-        //
-        std::vector<uint8_t> iv_spd_data;
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
+        std::vector<uint8_t> iv_data;
+
+    public:
 
         ///
         /// @brief default ctor
@@ -67,15 +68,43 @@ class dimm_module_decoder
         /// @brief ctor
         ///
         dimm_module_decoder(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                            const std::vector<uint8_t>& i_spd_data): iv_target(i_target), iv_spd_data(i_spd_data)
+                            const std::vector<uint8_t>& i_spd_data):
+            iv_target(i_target),
+            iv_data(i_spd_data)
         {
-            fapi2::toString(iv_target, iv_target_str_storage, fapi2::MAX_ECMD_STRING_LEN);
         }
 
         ///
         /// @brief default dtor
         ///
         virtual ~dimm_module_decoder() = default;
+
+        ///
+        /// @brief Gets decoder target
+        /// @return fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+        ///
+        virtual fapi2::Target<fapi2::TARGET_TYPE_DIMM> get_dimm_target() const
+        {
+            return iv_target;
+        }
+
+        ///
+        /// @brief Gets decoder SPD data
+        /// @return std::vector<uint8_t>
+        ///
+        virtual std::vector<uint8_t> get_data() const
+        {
+            return iv_data;
+        }
+
+        ///
+        /// @brief Sets decoder SPD data
+        /// @param[in] i_spd_data SPD data in a vector reference
+        ///
+        virtual void set_data(const std::vector<uint8_t>& i_spd_data)
+        {
+            iv_data = i_spd_data;
+        }
 
         ///
         /// @brief Decodes module nominal height max
@@ -122,8 +151,23 @@ class dimm_module_decoder
         }
 
         ///
+        /// @brief Decodes reference raw card used
+        /// @param[out] o_output encoding from SPD
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 130 (Bits 7~0)
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 48
+        ///
+        virtual fapi2::ReturnCode reference_raw_card(uint8_t& o_output) const
+        {
+            o_output = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes number of registers used on RDIMM
-        /// @param[out] o_output  encoding from SPD
+        /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode num_registers_used(uint8_t& o_output) const
@@ -145,7 +189,7 @@ class dimm_module_decoder
 
         ///
         /// @brief Decodes register and buffer type for LRDIMMs
-        /// @param[out] o_output  encoding from SPD
+        /// @param[out] o_output encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode register_and_buffer_type(uint8_t& o_output) const
@@ -178,22 +222,11 @@ class dimm_module_decoder
         }
 
         ///
-        /// @brief Decodes number of continuation codes
-        /// @param[out] o_output drive strength encoding from SPD
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode num_continuation_codes(uint8_t& o_output) const
-        {
-            o_output = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
         /// @brief Decodes register manufacturer ID code
         /// @param[out] o_output drive strength encoding from SPD
         /// @return FAPI2_RC_SUCCESS if okay
         ///
-        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint8_t& o_output) const
+        virtual fapi2::ReturnCode reg_manufacturer_id_code(uint16_t& o_output) const
         {
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
@@ -312,7 +345,7 @@ class dimm_module_decoder
 
         ///
         /// @brief Decodes RCD output slew rate control
-        /// @param[out] o_output encoded drive strength
+        /// @param[out] o_output encoded slew rate
         /// @return FAPI2_RC_SUCCESS if okay
         ///
         virtual fapi2::ReturnCode slew_rate_control(uint8_t& o_output) const
@@ -521,44 +554,7 @@ class dimm_module_decoder
             o_output = 0;
             return fapi2::FAPI2_RC_SUCCESS;
         }
-
-    protected:
-
-        char iv_target_str_storage[fapi2::MAX_ECMD_STRING_LEN];
-
 };
-
-///
-/// @brief data structure for byte fields
-/// @note holds byte index, start bit and length of decoded field
-///
-struct field_t
-{
-    const uint64_t iv_byte;
-    const uint64_t iv_start;
-    const uint64_t iv_length;
-
-    // default ctor deleted
-    constexpr field_t() = delete;
-
-    ///
-    /// @brief ctor
-    /// @param[in] i_byte_index
-    /// @param[in] i_start_bit
-    /// @param[in] i_bit_length
-    ///
-    constexpr field_t(const uint64_t i_byte_index,
-                      const uint64_t i_start_bit,
-                      const uint64_t i_bit_length)
-        : iv_byte(i_byte_index), iv_start(i_start_bit), iv_length(i_bit_length)
-    {}
-
-    ///
-    /// @brief default dtor
-    ///
-    ~field_t() = default;
-
-};// field_t
 
 }// spd
 }// mss

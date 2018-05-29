@@ -42,8 +42,9 @@
 
 // mss lib
 #include <lib/freq/cas_latency.H>
-#include <lib/spd/spd_factory.H>
+#include <generic/memory/lib/data_engine/pre_data_init.H>
 #include <lib/eff_config/timing.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/checker.H>
 
@@ -66,7 +67,7 @@ namespace mss
 /// @param[out] o_rc returns FAPI2_RC_SUCCESS if constructor initialzed successfully
 ///
 cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                         const std::vector< std::shared_ptr<spd::decoder> >& i_caches,
+                         const std::vector< spd::facade >& i_caches,
                          const std::vector<uint32_t>& i_supported_freqs,
                          fapi2::ReturnCode& o_rc):
     iv_dimm_list_empty(false),
@@ -88,16 +89,16 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
     for ( const auto& l_cache : i_caches )
     {
         // Retrieve timing values from the SPD
-        const auto l_target = l_cache->iv_target;
+        const auto l_target = l_cache.get_dimm_target();
         uint64_t l_taa_min_in_ps = 0;
         uint64_t l_tckmax_in_ps = 0;
         uint64_t l_tck_min_in_ps = 0;
 
         FAPI_TRY( get_taamin(l_cache, l_taa_min_in_ps),
                   "%s. Failed to get tAAmin", mss::c_str(l_target) );
-        FAPI_TRY( get_tckmax(l_cache, l_tckmax_in_ps),
+        FAPI_TRY( spd::get_tckmax(l_cache, l_tckmax_in_ps),
                   "%s. Failed to get tCKmax", mss::c_str(l_target) );
-        FAPI_TRY( get_tckmin(l_cache, l_tck_min_in_ps),
+        FAPI_TRY( spd::get_tckmin(l_cache, l_tck_min_in_ps),
                   "%s. Failed to get tCKmin", mss::c_str(l_target) );
 
         // Determine largest tAAmin value
@@ -114,7 +115,7 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         if( iv_is_3ds != loading::IS_3DS)
         {
             uint8_t l_stack_type = 0;
-            FAPI_TRY( l_cache->prim_sdram_signal_loading(l_stack_type) );
+            FAPI_TRY( l_cache.prim_sdram_signal_loading(l_stack_type) );
 
             // Is there a more algorithmic efficient approach? - AAM
             iv_is_3ds = (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS) ?
@@ -124,7 +125,7 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         {
             // Retrieve dimm supported cas latencies from SPD
             uint64_t l_dimm_supported_cl = 0;
-            FAPI_TRY( l_cache->supported_cas_latencies(l_dimm_supported_cl),
+            FAPI_TRY( l_cache.supported_cas_latencies(l_dimm_supported_cl),
                       "%s. Failed to get supported CAS latency", mss::c_str(l_target) );
 
             // Bitwise ANDING the bitmap from all modules creates a bitmap w/a common CL
@@ -312,11 +313,11 @@ fapi_try_exit:
 
 ///
 /// @brief Retrieves SDRAM Minimum CAS Latency Time (tAAmin) from SPD
-/// @param[in] i_pDecoder the SPD decoder
+/// @param[in] i_spd_decoder the SPD decoder
 /// @param[out] o_value tCKmin value in ps
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode cas_latency::get_taamin( const std::shared_ptr<mss::spd::decoder>& i_pDecoder,
+fapi2::ReturnCode cas_latency::get_taamin( const mss::spd::facade& i_spd_decoder,
         uint64_t& o_value )
 {
     int64_t l_timing_ftb = 0;
@@ -326,15 +327,14 @@ fapi2::ReturnCode cas_latency::get_taamin( const std::shared_ptr<mss::spd::decod
     int64_t l_temp = 0;
 
     // Retrieve timing parameters
-    const auto l_target = i_pDecoder->iv_target;
+    const auto l_target = i_spd_decoder.get_dimm_target();
 
-    FAPI_TRY( i_pDecoder->medium_timebase(l_medium_timebase),
-              "%s. Failed medium_timebase()", mss::c_str(l_target) );
-    FAPI_TRY( i_pDecoder->fine_timebase(l_fine_timebase),
-              "%s. Failed fine_timebase()", mss::c_str(l_target) );
-    FAPI_TRY( i_pDecoder->min_taa(l_timing_mtb),
+    FAPI_TRY( get_timebases(i_spd_decoder, l_medium_timebase, l_fine_timebase),
+              "%s. Failed Failed get_timebases",  mss::c_str(l_target) );
+
+    FAPI_TRY( i_spd_decoder.min_taa(l_timing_mtb),
               "%s. Failed min_taa()", mss::c_str(l_target) );
-    FAPI_TRY( i_pDecoder->fine_offset_min_taa(l_timing_ftb),
+    FAPI_TRY( i_spd_decoder.fine_offset_min_taa(l_timing_ftb),
               "%s. Failed fine_offset_min_taa()", mss::c_str(l_target) );
 
     // Calculate timing value
@@ -409,7 +409,7 @@ inline fapi2::ReturnCode cas_latency::calc_cas_latency(const uint64_t i_taa,
         const uint64_t i_tck,
         uint64_t& o_cas_latency) const
 {
-    FAPI_TRY( spd::calc_nck(i_taa, i_tck, INVERSE_DDR4_CORRECTION_FACTOR, o_cas_latency) );
+    FAPI_TRY( spd::calc_nck(i_taa, i_tck, spd::INVERSE_DDR4_CORRECTION_FACTOR, o_cas_latency) );
 
     FAPI_INF("%s. tAA (ps): %d, tCK (ps): %d, CL (nck): %d",
              mss::c_str(iv_target),

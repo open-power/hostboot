@@ -42,8 +42,9 @@
 #include <lib/freq/sync.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
-#include <lib/spd/spd_factory.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/spd/spd_facade.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
@@ -445,25 +446,23 @@ fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
     o_supported_freqs = std::vector<uint32_t>(PORTS_PER_MCBIST, ~(0));
 
     // Get cached decoder
-    std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
-
-    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches),
-              "%s. Failed to populate decoder cache", mss::c_str(i_target) );
+    std::vector< mss::spd::facade > l_spd_facades;
+    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades) );
 
     // Looking for the biggest application period on an MC.
     // This will further reduce supported frequencies the system can run on.
-    for ( const auto& l_cache : l_factory_caches )
+    for ( const auto& l_cache : l_spd_facades )
     {
-        const auto l_dimm = l_cache->iv_target;
+        const auto l_dimm = l_cache.get_dimm_target();
         const auto l_mca = mss::find_target<TARGET_TYPE_MCA>(l_dimm);
         const auto l_port_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(l_mca);
         uint64_t l_tckmax_in_ps = 0;
         uint64_t l_tck_min_in_ps = 0;
         uint32_t l_dimm_freq = 0;
 
-        FAPI_TRY( get_tckmax(l_cache, l_tckmax_in_ps),
+        FAPI_TRY( spd::get_tckmax(l_cache, l_tckmax_in_ps),
                   "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
-        FAPI_TRY( get_tckmin(l_cache, l_tck_min_in_ps),
+        FAPI_TRY( spd::get_tckmin(l_cache, l_tck_min_in_ps),
                   "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
 
         // Determine a proposed tCK value that is greater than or equal tCKmin

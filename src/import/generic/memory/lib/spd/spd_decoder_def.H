@@ -22,3 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file spd_decoder_def.H
+/// @brief SPD decoder definition
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_SPD_DECODER_DEF_H_
+#define _MSS_SPD_DECODER_DEF_H_
+
+#include <generic/memory/lib/spd/spd_field.H>
+
+namespace mss
+{
+namespace spd
+{
+
+///
+/// @class decoder
+/// @tparam D device type (DDR4, etc.)
+/// @tparam S JEDEC SPD parameters (LRDIMM_MODULE, GEN_SEC, etc.)
+/// @tparam R SPD revision (e.g. rev 1.1, 1.2, etc.)
+/// @brief Base SPD DRAM decoder
+///
+template < device_type D, parameters S, rev R >
+class decoder;
+
+}// spd
+}// mss
+
+#endif //_MSS_SPD_DECODER_DEF_H_

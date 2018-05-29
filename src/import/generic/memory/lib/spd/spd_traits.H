@@ -67,9 +67,8 @@ bool conditional(const T i_spd_field,
 /// @brief trait structure to hold static SPD information
 /// @tparam F holds SPD field info
 /// @tparam R the revision of the SPD field
-/// @tparam B boolean required to activate trait class - defaulted to true_type
 ///
-template< const field_t& F, rev R, typename B = std::true_type >
+template< const field_t& F, rev R >
 class readerTraits;
 
 ///

@@ -51,6 +51,94 @@ namespace spd
 {
 
 ///
+/// @brief Helper function to find bit length of an integral type
+/// @tparam T integral type
+/// @return bit length for given integral type
+///
+template < typename T >
+constexpr size_t get_bit_length()
+{
+    return sizeof(T) * BITS_PER_BYTE;
+}
+
+///
+/// @brief Helper function to find bit length of an input param
+/// @tparam T input type
+/// @param[in] i_input argument we want to get bit length of
+/// @return bit length for given input
+///
+template < typename T >
+constexpr size_t get_bit_length(const T& i_input)
+{
+    return sizeof(T) * BITS_PER_BYTE;
+}
+
+///
+/// @brief Variadic helper function to find bit length of integral types
+/// @tparam T input type
+/// @tparam Types input type for a list in input params
+/// @param[in] i_first first argument we want to get bit length of
+/// @param[in] i_args list of arguments we want to get the total bit length of
+/// @return total bit length for given input
+//
+template < typename T, typename... Types >
+constexpr size_t get_bit_length (const T& i_first, const Types& ... i_args)
+{
+    // Recursive-ish pattern to add up bit length of passed in params
+    return get_bit_length(i_first) + get_bit_length(i_args...);
+}
+
+///
+/// @tparam T input type
+/// @tparam T
+/// @param[in] i_data data to insert
+/// @param[in,out] io_out buffer we wish to insert values to
+///
+template <size_t INPUT_BIT_LEN, typename T, typename OT>
+static void set_buffer_helper(const T i_data, fapi2::buffer<OT>& io_out)
+{
+    constexpr size_t l_output_bit_length = get_bit_length<OT>();
+
+    constexpr size_t l_start_bit = l_output_bit_length - INPUT_BIT_LEN;
+    constexpr size_t l_len = get_bit_length<T>();
+
+    FAPI_DBG("Total input bit length %d, output bit length %d, insert start bit %d, insert length %d, data %d",
+             INPUT_BIT_LEN, l_output_bit_length, l_start_bit, l_len, i_data);
+
+    io_out.template insertFromRight<l_start_bit, l_len >(i_data);
+}
+
+///
+/// @brief Helper function to insert entire values of any integral value into a buffer
+/// @tparam T input type
+/// @tparam OT output type of fapi2::buffer
+/// @param[in,out] io_out buffer we wish to insert values to
+/// @param[in] i_input argument we want to get bit length of
+///
+template <typename T, typename OT>
+void rightAlignedInsert(fapi2::buffer<OT>& io_out, const T& i_input)
+{
+    constexpr size_t l_input_total_args_bit_length = get_bit_length(i_input);
+    set_buffer_helper<l_input_total_args_bit_length>(i_input, io_out);
+}
+
+///
+/// @tparam T input type
+/// @tparam Types input type for a list in input params
+/// @param[in,out] io_out buffer we wish to insert values to
+/// @param[in] i_first first argument we want to get bit length of
+/// @param[in] i_args list of arguments we want to get the total bit length of
+///
+template <typename T, typename OT, typename... Types>
+void rightAlignedInsert(fapi2::buffer<OT>& io_out, const T& first, const Types& ... args)
+{
+    constexpr size_t l_input_total_args_bit_length = get_bit_length(first, args...);
+    set_buffer_helper<l_input_total_args_bit_length>(first, io_out);
+
+    rightAlignedInsert(io_out, args...);
+}
+
+///
 /// @brief Helper function to extract byte information
 /// @tparam F the SPD field to extract
 /// @param[in] i_target the dimm target
@@ -85,6 +173,8 @@ fapi2::ReturnCode extract_field(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
                  o_value);
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -107,18 +197,20 @@ fapi2::ReturnCode reader( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                           OT& o_value)
 {
     T l_temp = 0;
-    FAPI_TRY(extract_field<F>(i_target, i_spd_data, l_temp));
+    FAPI_TRY( extract_field<F>(i_target, i_spd_data, l_temp),
+              "Failed extract_field() for %s", spd::c_str(i_target) );
 
     FAPI_DBG("extracted %s value: 0x%02x for %s",
              TT::FIELD_STR, l_temp, spd::c_str(i_target));
 
     // Test if retrieved data seems valid
-    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
-              conditional( l_temp,
-                           TT::COMPARISON_VAL,
-                           typename TT::template COMPARISON_OP<T>() ),
-              F.get_byte(),
-              l_temp) );
+    FAPI_TRY( check::fail_for_invalid_value(i_target,
+                                            conditional( l_temp,
+                                                    TT::COMPARISON_VAL,
+                                                    typename TT::template COMPARISON_OP<T>() ),
+                                            F.get_byte(),
+                                            l_temp),
+              "Failed fail_for_invalid_value() for %s", spd::c_str(i_target) );
 
     // Output should only change if data check passes
     o_value = static_cast<OT>(l_temp);

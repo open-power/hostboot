@@ -43,7 +43,6 @@
 
 // mss lib
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
-#include <lib/spd/spd_factory.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/checker.H>
 #include <generic/memory/lib/utils/find.H>
@@ -67,12 +66,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    fapi2::ReturnCode l_rc;
-    std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
-
-    // Caches
-    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches),
-              "Failed populate_decoder_caches for %s", mss::c_str(i_target));
+    std::vector< mss::spd::facade > l_spd_facades;
+    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades) );
 
     // Need to check dead load before we get the VPD.
     // MR and MT VPD depends on DIMM ranks and freaks out if it receives 0 ranks from DIMM 0 and 1 or more ranks for DIMM 1
@@ -93,13 +88,13 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Unable to decode VPD for %s", mss::c_str(i_target) );
     }
 
-    for( const auto& l_cache : l_factory_caches )
+    for( const auto& l_spd : l_spd_facades )
     {
-        const auto l_dimm = l_cache->iv_target;
+        const auto l_dimm = l_spd.get_dimm_target();
 
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
-        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm),
-                  "Failed eff_dimm_factory for %s",  mss::c_str(l_dimm));
+        FAPI_TRY( mss::eff_dimm::factory( l_spd, l_eff_dimm),
+                  "Failed factory for %s",  mss::c_str(l_dimm));
 
         FAPI_INF("Running eff_config on %s", mss::c_str(l_dimm) );
 
@@ -225,6 +220,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Failed odt_input_buffer for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->post_package_repair(),
                   "Failed post_package_repair for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->soft_post_package_repair(),
+                  "Failed soft_post_package_repair for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->read_preamble_train(),
                   "Failed read_preamble_train for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->read_preamble(),
