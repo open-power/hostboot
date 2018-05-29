@@ -77,6 +77,7 @@ include ${ROOTPATH}/procedure.rules.mk
 include $(HWP_PATH_1)/p9_mss_volt.mk
 include $(HWP_PATH_2)/p9c_mss_volt.mk
 include $(HWP_PATH_2)/p9c_mss_volt_vddr_offset.mk
+include $(HWP_PATH_2)/p9c_mss_volt_dimm_count.mk
 include $(HWP_PATH_2)/mss_dynamic_vid_utils.mk
 
 #mss_freq : Calc dimm frequency
