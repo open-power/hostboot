@@ -58,6 +58,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/attributes.H>
+#include    <targeting/targplatutil.H>
 
 //  fapi support
 
@@ -70,7 +71,7 @@
 
 #include    <mbox/ipc_msg_types.H>
 #include    <intr/interrupt.H>
-
+#include <secureboot/nodecommif.H>
 
 //  Uncomment these files as they become available:
 // #include    "host_coalesce_host/host_coalesce_host.H"
@@ -244,7 +245,7 @@ errlHndl_t call_host_coalesce_host( )
                         master_node_mask = mask >> drawerCount;
 
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                                "master_node_mask=%X",master_node_mask);
+                                "master_node_mask=0x%X",master_node_mask);
                     }
 
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -540,6 +541,26 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
         sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
 
 #ifdef CONFIG_TPMDD
+        // Run Secure Node-to-Node Communication Procedure
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "host_sys_fab_iovalid_processing: hb_existing_image = 0x%X, "
+            "isMaster=%d.  Calling nodeCommAbusExchange()",
+            hb_existing_image, TARGETING::UTIL::isCurrentMasterNode());
+
+        errlHndl_t err = SECUREBOOT::NODECOMM::nodeCommAbusExchange();
+        if (err)
+        {
+            // @TODO RTC 184518 Determine how to handle error log, but
+            // delete error log for now
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                "host_sys_fab_iovalid_processing: nodeCommAbusExchange() "
+                "returned err: plid=0x%X. Deleting err and continuing",
+                err->plid());
+            delete err;
+            err = nullptr;
+        }
+
+        // Lock the secure ABUS Link Mailboxes now
         SECUREBOOT::lockAbusSecMailboxes();
 #endif
 

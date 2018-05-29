@@ -123,7 +123,9 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     if (bit_count == 0)
     {
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found");
+        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found: "
+                  "FIR data = 0x%.16llX, mask=0x%.16llX, data+mask=0x%.16llX",
+                  fir_data, fir_mask, fir_data_with_mask);
         break;
     }
     else if (bit_count > 1)

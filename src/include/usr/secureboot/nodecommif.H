@@ -68,6 +68,17 @@ enum node_comm_link_mbox_info_t
  */
 errlHndl_t nodeCommXbus2ProcTest(void);
 
+/**
+ *  @brief Runs the procedure for the drawers/nodes to exchange messages
+ *         over the ABUS Link Mailbox facility
+ *
+ *  @return errHndl_t Error log handle indicating success or failure
+ *  @retval nullptr  Procedure completed successfully
+ *  @retval !nullptr Error log providing failure details
+ */
+errlHndl_t nodeCommAbusExchange(void);
+
+
 } // End NODECOMM namespace
 
 } // End SECUREBOOT namespace
