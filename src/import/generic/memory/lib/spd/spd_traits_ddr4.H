@@ -46,19 +46,15 @@ namespace mss
 namespace spd
 {
 
-// Note: The 3rd template parameter is a compile-time conditional
-// to activate trait class based on a valid SPD revision.
-
 ///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BYTES_USED field partial specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template<rev R>
-class readerTraits < fields<DDR4, BASE_CNFG>::BYTES_USED, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BYTES_USED, R>
 {
     public:
 
@@ -74,11 +70,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::BYTES_USED, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TOTAL_BYTES field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template<rev R>
-class readerTraits < fields<DDR4, BASE_CNFG>::TOTAL_BYTES, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TOTAL_BYTES, R >
 {
     public:
 
@@ -94,11 +89,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TOTAL_BYTES, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REVISION field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::REVISION, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::REVISION, R >
 {
     public:
 
@@ -136,8 +130,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::DEVICE_TYPE, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::DEVICE_TYPE, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::DEVICE_TYPE, R >
 {
     public:
 
@@ -153,11 +146,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::DEVICE_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BASE_MODULE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::BASE_MODULE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BASE_MODULE, R >
 {
     public:
 
@@ -193,8 +185,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID, R >
 {
     public:
 
@@ -227,11 +218,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, rev::V1_0 >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note HYBRID_MEDIA field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, R >
 {
     public:
 
@@ -247,11 +237,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::HYBRID_MEDIA, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BANK_GROUP_BITS field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::BANK_GROUP_BITS, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BANK_GROUP_BITS, R >
 {
     public:
 
@@ -270,8 +259,7 @@ class readerTraits < fields<DDR4, BASE_CNFG>::BANK_GROUP_BITS, R,
 /// @note rev 1.0 specialization
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::BANKS_ADDR_BITS, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BANKS_ADDR_BITS, R >
 {
     public:
 
@@ -304,11 +292,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SDRAM_CAPACITY, rev::V1_0 >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note SDRAM_CAPACITY, field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SDRAM_CAPACITY, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SDRAM_CAPACITY, R >
 {
     public:
 
@@ -324,11 +311,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SDRAM_CAPACITY, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note COL_ADDR_BITS field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::COL_ADDR_BITS, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::COL_ADDR_BITS, R >
 {
     public:
 
@@ -344,11 +330,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::COL_ADDR_BITS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ROW_ADDR_BITS field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::ROW_ADDR_BITS, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::ROW_ADDR_BITS, R >
 {
     public:
 
@@ -364,11 +349,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::ROW_ADDR_BITS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note PRIM_SIGNAL_LOADING field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_SIGNAL_LOADING, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_SIGNAL_LOADING, R >
 {
     public:
 
@@ -384,11 +368,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_SIGNAL_LOADING, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note PRIM_DIE_COUNT field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_DIE_COUNT, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_DIE_COUNT, R >
 {
     public:
 
@@ -404,11 +387,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::PRIM_DIE_COUNT, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note PRIM_PACKAGE_TYPE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::PRIM_PACKAGE_TYPE, R,
-          std::integral_constant<bool, (R >= rev::V1_0)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::PRIM_PACKAGE_TYPE, R >
 {
     public:
 
@@ -424,11 +406,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::PRIM_PACKAGE_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MAC field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MAC, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MAC, R >
 {
     public:
 
@@ -447,8 +428,7 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MAC, R,
 /// @note rev 1.0 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::TMAW, R,
-          std::integral_constant<bool, (R >= rev::V1_0)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::TMAW, R >
 {
     public:
 
@@ -464,11 +444,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::TMAW, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note PPR field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::PPR, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::PPR, R >
 {
     public:
 
@@ -483,32 +462,15 @@ class readerTraits < fields<DDR4, BASE_CNFG>::PPR, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note SOFT_PPR field specialization
-/// @note rev 1.0 specialization
-///
-template<>
-class readerTraits< fields<DDR4, BASE_CNFG>::SOFT_PPR, rev::V1_0 >
-{
-    public:
-
-        static constexpr size_t COMPARISON_VAL = 0;
-        static constexpr const char* FIELD_STR = "Soft post package repair (SPPR)";
-
-        template <typename T>
-        using COMPARISON_OP = std::equal_to<T>;
-};
-
-///
-/// @class readerTraits
-/// @brief trait structure to hold static SPD information
-/// @note SOFT_PPR field specialization
-/// @note valid for rev >= 1.1
+/// @note valid for revs
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SOFT_PPR, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SOFT_PPR, R >
 {
     public:
 
+        // Some existing HW has a soft PPR value of 0b01 despite being rev 1.0
+        // So we'll allow even thought it doesn't match the SPD spec....
         static constexpr size_t COMPARISON_VAL = 0b01;
         static constexpr const char* FIELD_STR = "Soft post package repair (SPPR)";
 
@@ -541,8 +503,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SEC_SIGNAL_LOADING, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SEC_SIGNAL_LOADING, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SEC_SIGNAL_LOADING, R >
 {
     public:
 
@@ -578,8 +539,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DENSITY_RATIO, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DENSITY_RATIO, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DENSITY_RATIO, R >
 {
     public:
 
@@ -615,8 +575,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DIE_COUNT, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DIE_COUNT, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SEC_DIE_COUNT, R >
 {
     public:
 
@@ -652,8 +611,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SEC_PACKAGE_TYPE, V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::SEC_PACKAGE_TYPE, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::SEC_PACKAGE_TYPE, R >
 {
     public:
 
@@ -669,11 +627,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::SEC_PACKAGE_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OPERABLE_FLD field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OPERABLE_FLD, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OPERABLE_FLD, R >
 {
     public:
 
@@ -689,11 +646,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OPERABLE_FLD, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ENDURANT_FLD field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::ENDURANT_FLD, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::ENDURANT_FLD, R >
 {
     public:
 
@@ -709,11 +665,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::ENDURANT_FLD, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note SDRAM_WIDTH field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::SDRAM_WIDTH, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::SDRAM_WIDTH, R >
 {
     public:
 
@@ -749,8 +704,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::PACKAGE_RANKS, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::PACKAGE_RANKS, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::PACKAGE_RANKS, R >
 {
     public:
 
@@ -786,8 +740,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::RANK_MIX, rev::V1_0 >
 /// @note rev 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::RANK_MIX, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::RANK_MIX, R >
 {
     public:
 
@@ -803,11 +756,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::RANK_MIX, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BUS_WIDTH field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::BUS_WIDTH, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BUS_WIDTH, R >
 {
     public:
 
@@ -823,11 +775,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::BUS_WIDTH, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BUS_EXT_WIDTH field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::BUS_EXT_WIDTH, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::BUS_EXT_WIDTH, R >
 {
     public:
 
@@ -843,11 +794,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::BUS_EXT_WIDTH, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note THERM_SENSOR field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::THERM_SENSOR, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::THERM_SENSOR, R >
 {
     public:
 
@@ -863,11 +813,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::THERM_SENSOR, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note EXTENDED_MODULE_TYPE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::EXTENDED_MODULE_TYPE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::EXTENDED_MODULE_TYPE, R >
 {
     public:
 
@@ -883,11 +832,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::EXTENDED_MODULE_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MED_TIMEBASE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MEDIUM_TIMEBASE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MEDIUM_TIMEBASE, R >
 {
     public:
 
@@ -903,11 +851,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MEDIUM_TIMEBASE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note FINE_TIMEBASE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::FINE_TIMEBASE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::FINE_TIMEBASE, R >
 {
     public:
 
@@ -923,11 +870,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::FINE_TIMEBASE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TCK_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MIN, R >
 {
     public:
 
@@ -943,11 +889,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TCK_MAX field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MAX, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MAX, R >
 {
     public:
 
@@ -963,11 +908,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TCK_MAX, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CL_FIRST_BYTE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::CL_FIRST_BYTE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::CL_FIRST_BYTE, R >
 {
     public:
 
@@ -984,11 +928,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::CL_FIRST_BYTE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CL_SECOND_BYTE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::CL_SECOND_BYTE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::CL_SECOND_BYTE, R >
 {
     public:
 
@@ -1024,8 +967,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::CL_THIRD_BYTE, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::CL_THIRD_BYTE, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::CL_THIRD_BYTE, R >
 {
     public:
 
@@ -1061,8 +1003,7 @@ class readerTraits< fields<DDR4, BASE_CNFG>::CL_FOURTH_BYTE, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, BASE_CNFG>::CL_FOURTH_BYTE, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, BASE_CNFG>::CL_FOURTH_BYTE, R >
 {
     public:
 
@@ -1078,11 +1019,10 @@ class readerTraits< fields<DDR4, BASE_CNFG>::CL_FOURTH_BYTE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TAA_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TAA_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TAA_MIN, R >
 {
     public:
 
@@ -1098,11 +1038,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TAA_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRCD_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRCD_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRCD_MIN, R >
 {
     public:
 
@@ -1118,11 +1057,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRCD_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRP_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRP_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRP_MIN, R >
 {
     public:
 
@@ -1138,11 +1076,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRP_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRASMIN_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_MSN, R >
 {
     public:
 
@@ -1158,11 +1095,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_MSN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRASMIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_LSB, R >
 {
     public:
 
@@ -1178,11 +1114,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRASMIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRCMIN_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_MSN, R >
 {
     public:
 
@@ -1197,11 +1132,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_MSN, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_LSB, R >
 {
     public:
 
@@ -1217,11 +1151,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRCMIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC1MIN_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_MSB, R >
 {
     public:
 
@@ -1237,11 +1170,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC1MIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_LSB, R >
 {
     public:
 
@@ -1257,11 +1189,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC1MIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC2MIN_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_MSB, R >
 {
     public:
 
@@ -1277,11 +1208,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC2MIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_LSB, R >
 {
     public:
 
@@ -1297,11 +1227,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC2MIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC4MIN_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_MSB, R >
 {
     public:
 
@@ -1318,11 +1247,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRFC4MIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_LSB, R >
 {
     public:
 
@@ -1338,11 +1266,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRFC4MIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TFAWMIN_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_MSN, R >
 {
     public:
 
@@ -1358,11 +1285,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_MSN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TFAWMIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_LSB, R >
 {
     public:
 
@@ -1378,11 +1304,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TFAWMIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRRD_S_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_S_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_S_MIN, R >
 {
     public:
 
@@ -1398,11 +1323,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_S_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TRRD_L_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_L_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_L_MIN, R >
 {
     public:
 
@@ -1418,11 +1342,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TRRD_L_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TCCD_L_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TCCD_L_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TCCD_L_MIN, R >
 {
     public:
 
@@ -1439,11 +1362,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TCCD_L_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWRMIN_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_MSN, R >
 {
     public:
 
@@ -1459,11 +1381,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_MSN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWRMIN_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_LSB, R >
 {
     public:
 
@@ -1480,11 +1401,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWRMIN_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWTRMIN_S_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_MSN, R >
 {
     public:
 
@@ -1500,11 +1420,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_MSN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWTRMIN_S_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_LSB, R >
 {
     public:
 
@@ -1520,11 +1439,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_S_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWTRMIN_L_MSN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_MSN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_MSN, R >
 {
     public:
 
@@ -1541,11 +1459,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_MSN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note TWTRMIN_L_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_LSB, R >
 {
     public:
 
@@ -1562,11 +1479,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::TWTRMIN_L_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TCCD_L_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCCD_L_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCCD_L_MIN, R >
 {
     public:
 
@@ -1584,11 +1500,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCCD_L_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TRRD_L_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_L_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_L_MIN, R >
 {
     public:
 
@@ -1605,11 +1520,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_L_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TRRD_S_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_S_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_S_MIN, R >
 {
     public:
 
@@ -1626,11 +1540,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRRD_S_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TRC_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRC_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRC_MIN, R >
 {
     public:
 
@@ -1646,11 +1559,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRC_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TRP_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRP_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRP_MIN, R >
 {
     public:
 
@@ -1667,11 +1579,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRP_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TAA_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TAA_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TAA_MIN, R >
 {
     public:
 
@@ -1687,11 +1598,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TAA_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TRCD_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRCD_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRCD_MIN, R >
 {
     public:
 
@@ -1707,11 +1617,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TRCD_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TCK_MIN field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MIN, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MIN, R >
 {
     public:
 
@@ -1727,11 +1636,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MIN, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note OFFSET_TCK_MAX field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MAX, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MAX, R >
 {
     public:
 
@@ -1747,11 +1655,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::OFFSET_TCK_MAX, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CRC_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::CRC_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::CRC_MSB, R >
 {
     public:
 
@@ -1767,11 +1674,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::CRC_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CRC_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::CRC_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::CRC_LSB, R >
 {
     public:
 
@@ -1787,11 +1693,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::CRC_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CONTINUATION_CODES field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::CONTINUATION_CODES, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::CONTINUATION_CODES, R >
 {
     public:
 
@@ -1807,11 +1712,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::CONTINUATION_CODES, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note LAST_NON_ZERO_BYTE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::LAST_NON_ZERO_BYTE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::LAST_NON_ZERO_BYTE, R >
 {
     public:
 
@@ -1827,11 +1731,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::LAST_NON_ZERO_BYTE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_MFG_LOCATION field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_LOCATION, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_LOCATION, R >
 {
     public:
 
@@ -1847,11 +1750,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_LOCATION, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_MFG_DATE_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_LSB, R >
 {
     public:
 
@@ -1867,11 +1769,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_MFG_DATE_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_MSB, R >
 {
     public:
 
@@ -1887,11 +1788,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_MFG_DATE_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_SERIAL_NUM_BYTE1 field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE1, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE1, R >
 {
     public:
 
@@ -1907,11 +1807,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE1, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_SERIAL_NUM_BYTE2 field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE2, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE2, R >
 {
     public:
 
@@ -1927,11 +1826,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE2, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_SERIAL_NUM_BYTE3 field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE3, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE3, R >
 {
     public:
 
@@ -1947,11 +1845,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE3, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_SERIAL_NUM_BYTE4 field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE4, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE4, R >
 {
     public:
 
@@ -1967,11 +1864,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_SERIAL_NUM_BYTE4, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_REV_CODE field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_REV_CODE, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_REV_CODE, R >
 {
     public:
 
@@ -1987,11 +1883,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::MODULE_REV_CODE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_MFR_ID_CODE_LSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_LSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_LSB, R >
 {
     public:
 
@@ -2007,11 +1902,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_LSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_MFR_ID_CODE_MSB field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_MSB, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_MSB, R >
 {
     public:
 
@@ -2027,11 +1921,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_MFR_ID_CODE_MSB, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_STEPPING field specialization
-/// @note valid for revisions up to rev::GEN_SEC_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_STEPPING, R,
-          std::integral_constant<bool, (R <= rev::GEN_SEC_MAX)> >
+class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_STEPPING, R >
 {
     public:
 
@@ -2047,11 +1940,10 @@ class readerTraits < fields<DDR4, BASE_CNFG>::DRAM_STEPPING, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_NOMINAL_HEIGHT field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R >
 {
     public:
 
@@ -2068,11 +1960,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note FRONT_MODULE_THICKNESS field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::FRONT_MODULE_THICKNESS, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::FRONT_MODULE_THICKNESS, R >
 {
     public:
 
@@ -2089,11 +1980,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::FRONT_MODULE_THICKNESS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BACK_MODULE_THICKNESS field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::BACK_MODULE_THICKNESS, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::BACK_MODULE_THICKNESS, R >
 {
     public:
 
@@ -2109,11 +1999,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::BACK_MODULE_THICKNESS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REF_RAW_CARD field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::REF_RAW_CARD, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::REF_RAW_CARD, R >
 {
     public:
 
@@ -2129,11 +2018,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::REF_RAW_CARD, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note NUM_REGS_USED field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::NUM_REGS_USED, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::NUM_REGS_USED, R >
 {
     public:
 
@@ -2149,11 +2037,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::NUM_REGS_USED, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ROWS_OF_DRAMS field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::ROWS_OF_DRAMS, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::ROWS_OF_DRAMS, R >
 {
     public:
 
@@ -2169,11 +2056,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::ROWS_OF_DRAMS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REGISTER_TYPE field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_TYPE, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_TYPE, R >
 {
     public:
 
@@ -2189,11 +2075,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note HEAT_SPREADER_CHAR field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_CHAR, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_CHAR, R >
 {
     public:
 
@@ -2209,11 +2094,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_CHAR, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note HEAT_SPREADER_SOL field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_SOL, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_SOL, R >
 {
     public:
 
@@ -2229,11 +2113,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::HEAT_SPREADER_SOL, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CONTINUATION_CODES field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::CONTINUATION_CODES, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::CONTINUATION_CODES, R >
 {
     public:
 
@@ -2249,11 +2132,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::CONTINUATION_CODES, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note LAST_NON_ZERO_BYTE field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::LAST_NON_ZERO_BYTE, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::LAST_NON_ZERO_BYTE, R >
 {
     public:
 
@@ -2269,11 +2151,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::LAST_NON_ZERO_BYTE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REGISTER_REV field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_REV, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_REV, R >
 {
     public:
 
@@ -2289,12 +2170,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::REGISTER_REV, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ADDR_MAP_REG_TO_DRAM field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::ADDR_MAP_REG_TO_DRAM, R,
-
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::ADDR_MAP_REG_TO_DRAM, R >
 {
     public:
 
@@ -2309,7 +2188,7 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::ADDR_MAP_REG_TO_DRAM, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note CKE_DRIVER field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template<>
 class readerTraits< fields<DDR4, RDIMM_MODULE>::CKE_DRIVER, rev::V1_0 >
@@ -2327,11 +2206,10 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::CKE_DRIVER, rev::V1_0 >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note CKE_DRIVER field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::CKE_DRIVER, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::CKE_DRIVER, R >
 {
     public:
 
@@ -2346,7 +2224,7 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::CKE_DRIVER, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note ODT_DRIVER field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template<>
 class readerTraits< fields<DDR4, RDIMM_MODULE>::ODT_DRIVER, rev::V1_0 >
@@ -2364,11 +2242,10 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::ODT_DRIVER, rev::V1_0 >
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note ODT_DRIVER field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::ODT_DRIVER, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::ODT_DRIVER, R >
 {
     public:
 
@@ -2384,11 +2261,10 @@ class readerTraits < fields<DDR4, RDIMM_MODULE>::ODT_DRIVER, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CA_DRIVER field specialization
-/// @note valid for revisions up to rev::RDIMM_MAX (largest decoded rev)
+/// @note valid for all revisionsRDIMM_MAX (largest decoded rev)
 ///
 template< rev R >
-class readerTraits < fields<DDR4, RDIMM_MODULE>::CA_DRIVER, R,
-          std::integral_constant<bool, (R <= rev::RDIMM_MAX)> >
+class readerTraits < fields<DDR4, RDIMM_MODULE>::CA_DRIVER, R >
 {
     public:
 
@@ -2424,8 +2300,7 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::CS_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, RDIMM_MODULE>::CS_DRIVER, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, RDIMM_MODULE>::CS_DRIVER, R >
 {
     public:
 
@@ -2461,8 +2336,7 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::YO_Y2_DRIVER, rev::V1_0 >
 /// @note rev 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, RDIMM_MODULE>::YO_Y2_DRIVER, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, RDIMM_MODULE>::YO_Y2_DRIVER, R >
 {
     public:
 
@@ -2498,8 +2372,7 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::Y1_Y3_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, RDIMM_MODULE>::Y1_Y3_DRIVER, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, RDIMM_MODULE>::Y1_Y3_DRIVER, R >
 {
     public:
 
@@ -2515,11 +2388,10 @@ class readerTraits< fields<DDR4, RDIMM_MODULE>::Y1_Y3_DRIVER, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note MODULE_NOMINAL_HEIGHT field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R >
 {
     public:
 
@@ -2535,11 +2407,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::MODULE_NOMINAL_HEIGHT, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note RAW_CARD_EXT field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::RAW_CARD_EXT, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::RAW_CARD_EXT, R >
 {
     public:
 
@@ -2555,11 +2426,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::RAW_CARD_EXT, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note FRONT_MODULE_THICKNESS field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::FRONT_MODULE_THICKNESS, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::FRONT_MODULE_THICKNESS, R >
 {
     public:
 
@@ -2575,11 +2445,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::FRONT_MODULE_THICKNESS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note BACK_MODULE_THICKNESS field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::BACK_MODULE_THICKNESS, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::BACK_MODULE_THICKNESS, R >
 {
     public:
 
@@ -2595,11 +2464,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::BACK_MODULE_THICKNESS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REF_RAW_CARD field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::REF_RAW_CARD, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::REF_RAW_CARD, R >
 {
     public:
 
@@ -2615,11 +2483,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::REF_RAW_CARD, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note NUM_REGS_USED field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::NUM_REGS_USED, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::NUM_REGS_USED, R >
 {
     public:
 
@@ -2635,11 +2502,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::NUM_REGS_USED, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ROWS_OF_DRAMS field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::ROWS_OF_DRAMS, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::ROWS_OF_DRAMS, R >
 {
     public:
 
@@ -2655,11 +2521,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::ROWS_OF_DRAMS, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REGISTER_TYPE field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_TYPE, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_TYPE, R >
 {
     public:
 
@@ -2675,11 +2540,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_TYPE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note HEAT_SPREADER_SOL field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::HEAT_SPREADER_SOL, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::HEAT_SPREADER_SOL, R >
 {
     public:
 
@@ -2695,11 +2559,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::HEAT_SPREADER_SOL, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CONTINUATION_CODES field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::CONTINUATION_CODES, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::CONTINUATION_CODES, R >
 {
     public:
 
@@ -2715,11 +2578,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::CONTINUATION_CODES, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note LAST_NON_ZERO_BYTE field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::LAST_NON_ZERO_BYTE, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::LAST_NON_ZERO_BYTE, R >
 {
     public:
 
@@ -2735,11 +2597,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::LAST_NON_ZERO_BYTE, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note REGISTER_REV field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_REV, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_REV, R >
 {
     public:
 
@@ -2755,11 +2616,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::REGISTER_REV, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note ADDR_MAP_REG_TO_DRAM field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::ADDR_MAP_REG_TO_DRAM, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::ADDR_MAP_REG_TO_DRAM, R >
 {
     public:
 
@@ -2796,8 +2656,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::CKE_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::CKE_DRIVER, R,
-          std::integral_constant<bool, R >= rev::V1_1 > >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::CKE_DRIVER, R >
 {
     public:
 
@@ -2833,8 +2692,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::ODT_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::ODT_DRIVER, R,
-          std::integral_constant<bool, R >= rev::V1_1 > >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::ODT_DRIVER, R >
 {
     public:
 
@@ -2850,11 +2708,10 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::ODT_DRIVER, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note CA_DRIVER field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::CA_DRIVER, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::CA_DRIVER, R >
 {
     public:
 
@@ -2890,8 +2747,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::CS_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::CS_DRIVER, R,
-          std::integral_constant<bool, R >= rev::V1_1 > >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::CS_DRIVER, R >
 {
     public:
 
@@ -2928,8 +2784,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::YO_Y2_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::YO_Y2_DRIVER, R,
-          std::integral_constant<bool, R >= rev::V1_1> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::YO_Y2_DRIVER, R >
 {
     public:
 
@@ -2965,8 +2820,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::Y1_Y3_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::Y1_Y3_DRIVER, R,
-          std::integral_constant<bool, R >= rev::V1_1> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::Y1_Y3_DRIVER, R >
 {
     public:
 
@@ -3002,8 +2856,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCOM_BODT_BCKE_DRIVER, rev::V1_
 /// @note valid for rev >= 1.1 specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCOM_BODT_BCKE_DRIVER, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCOM_BODT_BCKE_DRIVER, R >
 {
     public:
 
@@ -3039,8 +2892,7 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCK_DRIVER, rev::V1_0 >
 /// @note valid for rev >= 1.1
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCK_DRIVER, R,
-          std::integral_constant<bool, (R >= rev::V1_1)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCK_DRIVER, R >
 {
     public:
 
@@ -3055,11 +2907,28 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::BCK_DRIVER, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note RCD_SLEW_CNTRL field specialization
-/// @note rev 1.0 & 1.1 specialization
+/// @note rev 1.0 specialization
 ///
-template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, R,
-          std::integral_constant<bool, (R <= rev::V1_1)> >
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, rev::V1_0 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "RCD output slew rate control";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note RCD_SLEW_CNTRL field specialization
+/// @note rev 1.1 specialization
+///
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, rev::V1_1 >
 {
     public:
 
@@ -3077,8 +2946,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, R,
 /// @note valid for rev >= 1.2
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, R,
-          std::integral_constant<bool, (R >= rev::V1_2)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, R >
 {
     public:
 
@@ -3094,11 +2962,10 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::RCD_SLEW_CNTRL, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DATA_BUFFER_REV field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_REV, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_REV, R >
 {
     public:
 
@@ -3106,18 +2973,17 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_REV, R,
         static constexpr const char* FIELD_STR = "Data buffer revision";
 
         template <typename T>
-        using COMPARISON_OP = std::less_equal<T>;
+        using COMPARISON_OP = std::less<T>;
 };
 ///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note VREF_DQ_RANK0 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK0, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK0, R >
 {
     public:
 
@@ -3133,11 +2999,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK0, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note VREF_DQ_RANK1 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK1, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK1, R >
 {
     public:
 
@@ -3153,11 +3018,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK1, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note VREF_DQ_RANK2 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK2, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK2, R >
 {
     public:
 
@@ -3173,11 +3037,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK2, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note VREF_DQ_RANK3 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK3, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK3, R >
 {
     public:
 
@@ -3194,12 +3057,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::VREF_DQ_RANK3, R,
 /// @tparam R the revision of the SPD field
 /// @note DATA_BUFFER_VREF_DQ field specialization
 /// @note rev 1.0 specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ, R,
-
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ, R >
 {
     public:
 
@@ -3215,11 +3076,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_1866, R >
 {
     public:
 
@@ -3235,11 +3095,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_1866, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_2400, R >
 {
     public:
 
@@ -3255,11 +3114,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_2400, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_3200, R >
 {
     public:
 
@@ -3275,11 +3133,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_LTE_3200, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_RTT_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_1866, R >
 {
     public:
 
@@ -3295,11 +3152,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_1866, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_RTT_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_2400, R >
 {
     public:
 
@@ -3315,11 +3171,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_2400, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DB_MDQ_RTT_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_3200, R >
 {
     public:
 
@@ -3335,11 +3190,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DB_MDQ_RTT_LTE_3200, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_DRIVE_STRENGTH_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_1866, R >
 {
     public:
 
@@ -3355,11 +3209,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_1866, 
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_DRIVE_STRENGTH_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_2400, R >
 {
     public:
 
@@ -3375,11 +3228,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_2400, 
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_DRIVE_STRENGTH_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_3200, R >
 {
     public:
 
@@ -3395,11 +3247,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_DRIVE_STRENGTH_LTE_3200, 
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_NOM_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_1866, R >
 {
     public:
 
@@ -3415,11 +3266,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_1866, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_NOM_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_2400, R >
 {
     public:
 
@@ -3435,11 +3285,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_2400, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_NOM_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_3200, R >
 {
     public:
 
@@ -3455,11 +3304,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_NOM_LTE_3200, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_WR_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_1866, R >
 {
     public:
 
@@ -3475,11 +3323,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_1866, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_WR_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_2400, R >
 {
     public:
 
@@ -3495,11 +3342,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_2400, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_WR_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_3200, R >
 {
     public:
 
@@ -3515,11 +3361,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_WR_LTE_3200, R,
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R01_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_1866, R >
 {
     public:
 
@@ -3535,11 +3380,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_1866
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R01_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_2400, R >
 {
     public:
 
@@ -3555,11 +3399,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_2400
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R01_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_3200, R >
 {
     public:
 
@@ -3575,11 +3418,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R01_LTE_3200
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R23_LTE_1866 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_1866, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_1866, R >
 {
     public:
 
@@ -3595,11 +3437,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_1866
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R23_LTE_2400 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_2400, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_2400, R >
 {
     public:
 
@@ -3615,11 +3456,10 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_2400
 /// @brief trait structure to hold static SPD information
 /// @tparam R the revision of the SPD field
 /// @note DRAM_ODT_RTT_PARK_R23_LTE_3200 field specialization
-/// @note valid for revisions up to rev::LRDIMM_MAX (largest decoded rev)
+/// @note valid for all revisions
 ///
 template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_3200, R,
-          std::integral_constant<bool, (R <= rev::LRDIMM_MAX)> >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_3200, R >
 {
     public:
 
@@ -3634,11 +3474,28 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_ODT_RTT_PARK_R23_LTE_3200
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note DRAM_VREF_DQ_RANGE field specialization
-/// @note rev 1.0 & 1.1 specialization
+/// @note rev 1.0 specialization
 ///
-template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, R,
-          std::integral_constant<bool, (R <= rev::V1_1)> >
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, rev::V1_0 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0b1111;
+        static constexpr const char* FIELD_STR = "VrefDQ range for DRAM interface range";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note DRAM_VREF_DQ_RANGE field specialization
+/// @note rev 1.1 specialization
+///
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, rev::V1_1 >
 {
     public:
 
@@ -3656,8 +3513,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, R,
 /// @note rev 1.2+ specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, R,
-          std::integral_constant<bool, (R >= rev::V1_2)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, R >
 {
     public:
 
@@ -3672,11 +3528,28 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::DRAM_VREF_DQ_RANGE, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note DATA_BUFFER_VREF_DQ field specialization
-/// @note rev 1.0 & 1.1 specialization
+/// @note rev 1.0 specialization
 ///
-template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, R,
-          std::integral_constant<bool, (R <= rev::V1_1)> >
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, rev::V1_0 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "Data Buffer VrefDQ range for DRAM interface range";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note DATA_BUFFER_VREF_DQ field specialization
+/// @note rev 1.1 specialization
+///
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, rev::V1_1 >
 {
     public:
 
@@ -3694,8 +3567,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, R,
 /// @note rev 1.2+ specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, R,
-          std::integral_constant<bool, (R >= rev::V1_2)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, R >
 {
     public:
 
@@ -3712,9 +3584,26 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_VREF_DQ_RANGE, R,
 /// @note DATA_BUFFER_DFE field specialization
 /// @note rev 1.0 & 1.1 specialization
 ///
-template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, R,
-          std::integral_constant<bool, (R <= rev::V1_1)> >
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, rev::V1_0 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 0;
+        static constexpr const char* FIELD_STR = "Data Buffer DFE";
+
+        template <typename T>
+        using COMPARISON_OP = std::equal_to<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note DATA_BUFFER_DFE field specialization
+/// @note rev 1.1 specialization
+///
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, rev::V1_1 >
 {
     public:
 
@@ -3732,8 +3621,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, R,
 /// @note rev 1.2+ specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, R,
-          std::integral_constant<bool, (R >= rev::V1_2)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, R >
 {
     public:
 
@@ -3748,11 +3636,28 @@ class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_DFE, R,
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @note DATA_BUFFER_GAIN_ADJUST field specialization
-/// @note rev 1.0 & 1.1 specialization
+/// @note rev 1.0 specialization
 ///
-template< rev R >
-class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R,
-          std::integral_constant<bool, (R <= rev::V1_1)> >
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, rev::V1_0 >
+{
+    public:
+
+        static constexpr size_t COMPARISON_VAL = 1;
+        static constexpr const char* FIELD_STR = "Data Buffer Gain Adjust";
+
+        template <typename T>
+        using COMPARISON_OP = std::less_equal<T>;
+};
+
+///
+/// @class readerTraits
+/// @brief trait structure to hold static SPD information
+/// @note DATA_BUFFER_GAIN_ADJUST field specialization
+/// @note rev 1.1 specialization
+///
+template< >
+class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, rev::V1_1 >
 {
     public:
 
@@ -3770,8 +3675,7 @@ class readerTraits < fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R,
 /// @note rev 1.2+ specialization
 ///
 template< rev R >
-class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R,
-          std::integral_constant<bool, (R >= rev::V1_2)> >
+class readerTraits< fields<DDR4, LRDIMM_MODULE>::DATA_BUFFER_GAIN_ADJUST, R >
 {
     public:
 
