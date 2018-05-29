@@ -1324,6 +1324,7 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
     FAPI_INF("  Quad SCOM Length        : 0x%08X", SWIZZLE_4_BYTE(pQpmrHdr->quadScomLength) );
     FAPI_DBG("  SGPE SRAM Img Size      : 0x%08x", SWIZZLE_4_BYTE(pQpmrHdr->sgpeSramImageSize ) );
     FAPI_DBG("  Max SCOM Rest Entry     : 0x%08x", SWIZZLE_4_BYTE(pQpmrHdr->maxQuadScomRestoreEntry ) );
+    FAPI_DBG("  Enable 24x7 Nest IMA    : %s",     SWIZZLE_4_BYTE(pQpmrHdr->enable24x7Ima )? "Yes" : "No" );
     FAPI_DBG("==============================QPMR Ends==============================");
 
     FAPI_DBG("===========================SGPE Image Hdr=============================");
@@ -4186,11 +4187,10 @@ fapi_try_exit:
 
 /**
  * @brief       Reads an attribute to determine aux function invocation interval.
- * @param[in]   i_pHomer                points to HOMER.
  * @param[out]  o_auxFuncIntControl     Invocation interval for the auxiliary function.
  * @return       fapi2 return code.
  */
-fapi2::ReturnCode initReadIntervalForAuxFunc( Homerlayout_t*     i_pHomer, uint32_t& o_auxFuncIntControl )
+fapi2::ReturnCode initReadIntervalForAuxFunc( uint32_t& o_auxFuncIntControl )
 {
     FAPI_INF(">> initReadIntervalForAuxFunc");
     uint8_t readInterAttr = 0;
@@ -4215,6 +4215,32 @@ fapi_try_exit:
 }
 
 //---------------------------------------------------------------------------
+/**
+ * @brief       Reads an attribute to determine 24x7 enable status
+ * @param[out]  o_24x7Enable            true if 24x7 IMA is enabled else disabled.
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode read24x7EnableStatus( uint32_t& o_24x7ImaEnable )
+{
+    FAPI_INF(">> read24x7EnableStatus");
+    uint8_t l_24x7Enable    =   0;
+    o_24x7ImaEnable         =   0;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NEST_24x7_PERF_ACCUM_ENABLE,
+                           FAPI_SYSTEM,
+                           l_24x7Enable),
+             "Error From FAPI_ATTR_GET For Attribute ATTR_NEST_24x7_PERF_ACCUM_ENABLE");
+
+    o_24x7ImaEnable = l_24x7Enable;
+    FAPI_DBG("ATTR_NEST_24x7_PERF_ACCUM_ENABLE 0x%08x", o_24x7ImaEnable  );
+
+fapi_try_exit:
+    FAPI_INF("<< read24x7EnableStatus");
+    return fapi2::current_err;
+}
+//---------------------------------------------------------------------------
 
 /**
  * @brief   builds HOMER section supporting Auxiliary functions.
@@ -4230,19 +4256,22 @@ fapi2::ReturnCode buildSgpeAux( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
     uint32_t l_sgpeAuxFunc = 0;
+    uint32_t l_24x7Enable  = 0;
 
     //SGPE Image Header
     //Offset represented as OCI PBA memory address
-    pSgpeHdr->g_sgpe_aux_offset  = SWIZZLE_4_BYTE(HOMER_AUX_BASE_ADDR);
-    pSgpeHdr->g_sgpe_aux_length  = SWIZZLE_4_BYTE(QPMR_AUX_LENGTH);
+    FAPI_TRY( initReadIntervalForAuxFunc( l_sgpeAuxFunc ),
+              "Failed in initReadIntervalForAuxFunc" );
+    pSgpeHdr->g_sgpe_aux_control    =   SWIZZLE_4_BYTE(l_sgpeAuxFunc);
+    pSgpeHdr->g_sgpe_aux_offset     =   SWIZZLE_4_BYTE(HOMER_AUX_BASE_ADDR);
+    pSgpeHdr->g_sgpe_aux_length     =   SWIZZLE_4_BYTE(QPMR_AUX_LENGTH);
 
     //QPMR Header
-    o_qpmrHdr.quadAuxOffset  =  SWIZZLE_4_BYTE(QPMR_AUX_OFFSET);
-    o_qpmrHdr.quadAuxLength  =  SWIZZLE_4_BYTE(QPMR_AUX_LENGTH);
-
-    FAPI_TRY(initReadIntervalForAuxFunc( i_pHomer, l_sgpeAuxFunc ),
-             "Failed in initReadIntervalForAuxFunc" );
-    pSgpeHdr->g_sgpe_aux_control = SWIZZLE_4_BYTE(l_sgpeAuxFunc);
+    FAPI_TRY( read24x7EnableStatus( l_24x7Enable ),
+              " Failed to read ATTR_NEST_24x7_PERF_ACCUM_ENABLE " );
+    o_qpmrHdr.enable24x7Ima         =   SWIZZLE_4_BYTE(l_24x7Enable);
+    o_qpmrHdr.quadAuxOffset         =   SWIZZLE_4_BYTE(QPMR_AUX_OFFSET);
+    o_qpmrHdr.quadAuxLength         =   SWIZZLE_4_BYTE(QPMR_AUX_LENGTH);
 
 fapi_try_exit:
     FAPI_INF("<< buildSgpeAux");

@@ -104,6 +104,7 @@ HCD_HDR_UINT32( stopFfdcLength, 0);
 HCD_HDR_UINT32( sgpeBootProgCode, 0 );
 HCD_HDR_UINT32( sgpeSramImageSize, 0 );
 HCD_HDR_UINT32( maxQuadScomRestoreEntry, 0 );
+HCD_HDR_UINT32( enable24x7Ima, 0 );
 HCD_HDR_PAD(512);
 #ifdef __ASSEMBLER__
 .endm
