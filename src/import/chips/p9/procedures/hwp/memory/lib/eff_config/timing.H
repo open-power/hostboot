@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/utils/conversions.H>
 
 namespace mss
@@ -62,17 +63,6 @@ enum functions
     TDLLK = 11,
 };
 
-enum guard_band : uint16_t
-{
-    // Used for caclulating spd timing values - from JEDEC rounding algorithm
-    // Correction factor is 1% (for DDR3) or 2.5% (for DDR4)
-    // when doing integer math, we add-in the inverse correction factor
-    // Formula used for derivation:
-    // Guardband = 1000 * (1000* correction_factor) - 1
-    INVERSE_DDR3_CORRECTION_FACTOR = 989, ///< DDR3 correction factor
-    INVERSE_DDR4_CORRECTION_FACTOR = 974, ///< DDR4 correction factor
-};
-
 enum refresh_rate : uint8_t
 {
     REF1X = 1, ///< Refresh rate 1X
@@ -82,96 +72,6 @@ enum refresh_rate : uint8_t
 
 namespace spd
 {
-
-///
-/// @brief Calculates timing value
-/// @param[in] i_timing_mtb timing value in MTB units
-/// @param[in] i_mtb_multiplier SPD medium timebase
-/// @param[in] i_timing_ftb fine offset of timing value
-/// @param[in] i_ftb_multiplier SPD fine timebase
-/// @return the timing value in picoseconds
-///
-inline int64_t calc_timing_from_timebase(const int64_t i_timing_mtb,
-        const int64_t i_mtb_multiplier,
-        const int64_t i_timing_ftb,
-        const int64_t i_ftb_multiplier)
-{
-    // JEDEC algorithm
-    const int64_t l_timing_val = i_timing_mtb * i_mtb_multiplier;
-    const int64_t l_fine_offset = i_timing_ftb * i_ftb_multiplier;
-
-    return l_timing_val + l_fine_offset;
-}
-
-///
-/// @brief Helper to compute JEDEC's SPD rounding algorithm
-/// to convert ps to nCK
-/// @tparam T input type
-/// @tparam OT output type
-/// @param[in] i_timing_in_ps timing parameter in ps
-/// @param[in] i_tck_in_ps  clock period in ps
-/// @param[in] i_inverse_corr_factor inverse correction factor (defined by JEDEC)
-/// @param[out] o_value_nck the end calculation in nck
-/// @return true if overflow didn't occur, false otherwise
-/// @note DDR4 SPD Contents Rounding Algorithm
-/// @note Item 2220.46
-///
-template<typename T, typename OT>
-static inline bool jedec_spd_rounding_alg(const T& i_timing_in_ps,
-        const T& i_tck_in_ps,
-        const guard_band i_inverse_corr_factor,
-        OT& o_val_nck)
-{
-    // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
-    T l_temp_nck = (i_timing_in_ps * CONVERT_PS_IN_A_NS) / (i_tck_in_ps == 0 ? 1 : i_tck_in_ps);
-    l_temp_nck += i_inverse_corr_factor;
-    l_temp_nck = l_temp_nck / CONVERT_PS_IN_A_NS;
-
-    // Check for overflow
-    // static_cast needed for HB compiler that complains about
-    // comparision of two different integral types
-    o_val_nck = l_temp_nck;
-
-    FAPI_DBG("Input timing (ps) %d, tCK (ps) %d, temp output %d, output (nCK) %d",
-             i_timing_in_ps, i_tck_in_ps, l_temp_nck, o_val_nck);
-
-    return (static_cast<T>(o_val_nck) == l_temp_nck);
-}
-
-///
-/// @brief Returns clock cycles based on input application period
-/// @tparam T input type
-/// @tparam OT output type
-/// @param[in] i_timing_in_ps timing parameter in ps
-/// @param[in] i_tck_in_ps  clock period in ps
-/// @param[in] i_inverse_corr_factor inverse correction factor  (defined by JEDEC)
-/// @param[out] o_value_nck the end calculation in nck
-/// @return FAPI2_RC_SUCCESS iff okay
-/// @note DDR4 SPD Contents Rounding Algorithm
-/// @note Item 2220.46
-///
-template<typename T, typename OT>
-inline fapi2::ReturnCode calc_nck(const T& i_timing_in_ps,
-                                  const T& i_tck_in_ps,
-                                  const guard_band i_inverse_corr_factor,
-                                  OT& o_val_nck)
-{
-    FAPI_ASSERT( jedec_spd_rounding_alg(i_timing_in_ps,
-                                        i_tck_in_ps,
-                                        i_inverse_corr_factor,
-                                        o_val_nck),
-                 fapi2::MSS_INVALID_CAST_CALC_NCK().
-                 set_TIMING_PS(i_timing_in_ps).
-                 set_NCK_NS(i_tck_in_ps).
-                 set_CORRECTION_FACTOR(i_inverse_corr_factor),
-                 "Overflow occured. Returned data is %d", o_val_nck);
-
-    // If we don't assert, we don't know what's in current_err ...
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Returns clock cycles form picoseconds based on speed bin
@@ -201,7 +101,7 @@ inline OT ps_to_nck( const fapi2::Target<T>& i_target, const OT& i_timing_in_ps)
 
     FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
               "Failed freq() accessor" );
-    FAPI_TRY( calc_nck(i_timing_in_ps, l_tck_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
+    FAPI_TRY( calc_nck(i_timing_in_ps, l_tck_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_temp_nck),
               "Failed calc_nck()" );
 
     return l_temp_nck;
