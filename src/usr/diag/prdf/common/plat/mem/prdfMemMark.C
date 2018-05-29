@@ -983,8 +983,9 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
             // If the chip mark is on a spare then the spare is bad and hardware
             // can not steer it to another DRAM even if one is available (e.g.
             // the ECC spare). In this this case, make error log predictive.
-            if ( ( dram == (0 == ps ? sp0.getDram() : sp1.getDram()) ) ||
-                 ( dram == ecc.getDram() ) )
+            if ( ( (0 == ps) && sp0.isValid() && (dram == sp0.getDram()) ) ||
+                 ( (1 == ps) && sp1.isValid() && (dram == sp1.getDram()) ) ||
+                 ( isX4      && ecc.isValid() && (dram == ecc.getDram()) ) )
             {
                 allRepairsUsed = true;
                 io_sc.service_data->setSignature( i_chip->getHuid(),
