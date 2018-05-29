@@ -30,6 +30,7 @@ include ../common/common.mk
 OBJS += node_comm_dd.o
 OBJS += node_comm_test.o
 OBJS += node_comm.o
+OBJS += node_comm_exchange.o
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr
