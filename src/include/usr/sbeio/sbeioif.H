@@ -45,6 +45,7 @@ namespace SBEIO
                                     // reusing this could break backwards
                                     // compatibility
         RELOC_PAYLOAD_ADDR = 0x03,
+        ARCH_REG_DATA_ADDR = 0x04,
         //On SBE side struct is defaulted so that
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
         //So a key w/ FF means its empty or at its default val
