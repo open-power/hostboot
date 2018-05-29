@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,8 @@
 
 
 fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-        bool i_force_security)
+        bool i_force_security,
+        bool i_lock_sec_mailboxes)
 {
     FAPI_INF("p9_update_security_ctrl : Entering ...");
 
@@ -80,6 +81,12 @@ fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE
         {
             //Set bit 12 to set TDP
             l_data64.setBit<PU_SECURITY_SWITCH_REGISTER_I2CM_TPM_DECONFIG_PROTECT>();
+        }
+
+        //Set bit 8 to set Abus mailbox lock
+        if(i_lock_sec_mailboxes)
+        {
+            l_data64.setBit<PU_SECURITY_SWITCH_REGISTER_ABUS_LOCK>();
         }
 
         FAPI_TRY(fapi2::putScom(i_target_chip, PU_SECURITY_SWITCH_REGISTER_SCOM, l_data64));

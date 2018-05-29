@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,11 +51,14 @@ typedef fapi2::ReturnCode (*p9_update_security_ctrl_FP_t)(const fapi2::Target<fa
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
 /// @param[in]     i_force_security  Forces setting of SUL and TDP (if attribute is set)
+/// @param[in]     i_lock_sec_mailboxes Forces locking of Abus security mailboxes
+///                (only if security is asserted on the machine).
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
     fapi2::ReturnCode p9_update_security_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-            bool i_force_security = false);
+            bool i_force_security = false,
+            bool i_lock_sec_mailboxes = false);
 }
 
 #endif
