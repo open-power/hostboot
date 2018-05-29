@@ -417,8 +417,7 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
         l_attrRPLid =
             new AttrRP(reinterpret_cast<TargetingHeader*>(io_lidStructPtr),
                        l_nodeId,
-                       l_attrRPRsvd->getNodeCount(),
-                       l_attrRPRsvd->getInstanceStatus());
+                       l_attrRPRsvd->getNodeCount());
 
         // Get pointer to array of targets in the targeting image
         uint32_t l_maxTargetsLid = 0;

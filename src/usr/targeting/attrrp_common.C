@@ -32,7 +32,8 @@ namespace TARGETING
     #define TARG_CLASS "AttrRP"
 
 #ifdef __HOSTBOOT_RUNTIME
-    // It is defined here to limit the scope within this file
+    // It is defined here to limit the scope within this file,
+    // this file is also included in attrrp_rt.C
     #define INVALID_NODE_ID iv_nodeContainer.size()
 #endif
 
