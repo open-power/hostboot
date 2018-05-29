@@ -100,7 +100,7 @@ enum node_comm_registers_t : uint64_t
 };
 
 /**
- *  @brief Calculate Link Mailbox Register Address based on mode (XBUS or ABUS)
+ *  @brief Convert Link Mailbox Register Address based on mode (XBUS or ABUS)
  *
  *  @param[in] i_reg  - Register Base Address - see node_comm_registers_t
  *  @param[in] i_mode - Indicates if the address is for a ABUS or XBUS operation
@@ -128,6 +128,32 @@ inline uint64_t getLinkMboxReg(uint8_t i_linkId, uint8_t i_mboxId)
 {
     return NCDD_REG_LINK_MBOX_00 + (2*i_linkId) + i_mboxId;
 }
+
+/**
+ *  @brief Calculate Secure LinkId and MailboxId based on OBUS Instance
+ *
+ *  @param[out] i_obusInstance - OBUS Instance of the operation
+ *  @param[out] o_linkId       - Link Id of the OBUS instance
+ *  @param[out] o_mboxId       - Mailbox Id of the OBUS instance
+ *
+ *  @return void
+ */
+inline void getSecureLinkMboxFromObus(uint8_t i_obusInstance,
+                                      uint8_t & o_linkId,
+                                      uint8_t & o_mboxId)
+{
+    // For each OBUS instance there are 2 links and 2 mailboxes
+    // and the Secure Link and Mailbox is always the relative 'L0M0'
+    // of these 4 possibilities
+    o_linkId = (2*i_obusInstance);
+
+    // @TODO RTC 184518 Until Secure Mailbox is not fenced off by FSP, use
+    // non-secure mailbox for communications
+    o_mboxId = 1;
+
+    return;
+}
+
 
 enum node_comm_fir_reg_helpers_t : uint64_t
 {

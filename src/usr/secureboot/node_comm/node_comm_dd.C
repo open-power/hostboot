@@ -63,8 +63,8 @@ TRAC_INIT( & g_trac_nc, NODECOMM_TRACE_NAME, KILOBYTE );
 // ----------------------------------------------
 // If the link(s) are up the operation should complete right away
 // so there will only be a short polling window
-#define NODE_COMM_POLL_DELAY_NS 1   // Sleep for 1ns per poll
-#define NODE_COMM_POLL_DELAY_TOTAL_NS 10 // Total time to poll
+#define NODE_COMM_DD_POLL_DELAY_NS 1   // Sleep for 1ns per poll
+#define NODE_COMM_DD_POLL_DELAY_TOTAL_NS 10 // Total time to poll
 
 
 using namespace TARGETING;
@@ -542,8 +542,8 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
                                ctrl_reg_t & o_statusVal )
 {
     errlHndl_t err = nullptr;
-    uint64_t interval_ns  = NODE_COMM_POLL_DELAY_NS;
-    int timeout_ns = NODE_COMM_POLL_DELAY_TOTAL_NS;
+    uint64_t interval_ns  = NODE_COMM_DD_POLL_DELAY_NS;
+    int timeout_ns = NODE_COMM_DD_POLL_DELAY_TOTAL_NS;
     ctrl_reg_t ctrl_reg_status;
 
     TRACUCOMP(g_trac_nc, "ncddWaitForCmdComp(): timeout_ns=%d, "
