@@ -212,11 +212,11 @@
                         Pstate Parameter Block (PSPB) for PGPE
 
      *MOST* systems use Bus 0 for VDD.  If this is not the case, the value
-     must be appropriately set by the platform (eg MRWB or equivalent
+     must be appropriately set by the platform (eg MRWB or equivalent)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>0</default>    
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -236,6 +236,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <default>1</default>    
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -254,6 +255,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <default>0xFF</default>    
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -275,7 +277,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>0</default>    
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -297,7 +299,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <initToZero/>
+    <default>0</default>    
   </attribute>
   <!-- ********************************************************************* -->
  <attribute>
@@ -316,7 +318,7 @@
    </description>
    <valueType>uint8</valueType>
    <platInit/>
-    <initToZero/>  <!-- This here strictly to allocate the attribute in Cronus -->
+   <default>0xFF</default>    
  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -331,21 +333,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_VCS_I2C_RAIL</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Defines the I2C rail selector number (0 - 15) for the VCS VRM on the
-      bus defined by ATTR_VCS_I2C_BUSNUM.
-
-      Producer:  Machine Readable Workbook
-      Consumers: p9_set_evid;
-                 p9_set_voltage (tool)
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
+    <default>0xFF</default>    
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
