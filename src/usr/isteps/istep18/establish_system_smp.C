@@ -82,6 +82,8 @@
 
 #include    "establish_system_smp.H"
 
+#include <secureboot/service_ext.H>
+
 
 namespace   ESTABLISH_SYSTEM_SMP
 {
@@ -536,6 +538,10 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
         }
 
         sys->setAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>(hb_existing_image);
+
+#ifdef CONFIG_TPMDD
+        SECUREBOOT::lockAbusSecMailboxes();
+#endif
 
         // after agreement, open a-busses as required
         // @TODO RTC:187337 -- HB doesn't have the knowledge of attributes that
