@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -37,8 +37,6 @@
 // mss lib
 #include <lib/utils/fake_vpd.H>
 #include <lib/mss_vpd_decoder.H>
-#include <lib/spd/spd_factory.H>
-#include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
@@ -48,9 +46,9 @@
 #include <lib/dimm/eff_dimm.H>
 #include <lib/dimm/mrs_load.H>
 #include <lib/shared/mss_kind.H>
-#include <generic/memory/lib/spd/common/dimm_module_decoder.H>
 #include <lib/phy/dp16.H>
 #include <lib/mss_attribute_accessors_manual.H>
+#include <endian.h>
 
 namespace mss
 {
@@ -59,6 +57,147 @@ using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
+
+//
+// Note SPD mappings included are settings only supported by Nimbus.
+// We purposely omit certain settings that exist in the JEDEC SPD spec
+// if they are not supported in HW. This simplifies error catching and
+// explicitly depicts supported mappings.
+//
+
+// =========================================================
+// Byte 4 maps
+// Item JC-45-2220.01x
+// Page 18
+// DDR4 SPD Document Release 3
+// Byte 4 (0x004): SDRAM Density and Banks
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::SDRAM_DENSITY_MAP =
+{
+    // {key byte, capacity in GBs}
+    {4, fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_4G},
+    {5, fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_8G},
+    {6, fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G},
+};
+
+// =========================================================
+// Byte 4 maps
+// Item JC-45-2220.01x
+// Page 18
+// DDR4 SPD Document Release 3
+// Byte 4 (0x004): SDRAM Density and Banks
+// =========================================================
+const std::vector< std::pair<uint8_t, uint8_t> > eff_dimm::BANK_ADDR_BITS_MAP =
+{
+    // {key byte, number of bank address bits}
+    {0, 2},
+    {1, 3}
+};
+
+// =========================================================
+// Byte 5 maps
+// Item JC-45-2220.01x
+// Page 18
+// DDR4 SPD Document Release 3
+// Byte 5 (0x005): SDRAM Addressing
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::ROW_ADDRESS_BITS_MAP =
+{
+    //{key byte,row address bits}
+    {2, fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM14},
+    {3, fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM15},
+    {4, fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM16},
+    {5, fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM17},
+    {6, fapi2::ENUM_ATTR_EFF_DRAM_ROW_BITS_NUM18}
+};
+
+// =========================================================
+// Byte 6 maps
+// Item JC-45-2220.01x
+// Page 19
+// DDR4 SPD Document Release 3
+// Byte 6 (0x006): Primary SDRAM Package Type
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::PRIM_DIE_COUNT_MAP =
+{
+    // {key byte, number of die}
+    {0, 1},
+    {1, 2},
+    {2, 3},
+    {3, 4},
+    {4, 5},
+    {5, 6},
+    {6, 7},
+    {7, 8}
+};
+
+// =========================================================
+// Byte 9 maps
+// Item JC-45-2220.01x
+// Page 21
+// DDR4 SPD Document Release 3
+// Byte 9 (0x009): Other SDRAM Optional Features
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::SOFT_PPR_MAP =
+{
+    // {key byte, value }
+    {0, fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_NOT_SUPPORTED},
+    {1, fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_SUPPORTED}
+};
+
+// =========================================================
+// Byte 10 maps
+// Item JC-45-2220.01x
+// Page 21-22
+// DDR4 SPD Document Release 3
+// Byte 10 (0x00A): Secondary SDRAM Package Type
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::SEC_DIE_COUNT_MAP =
+{
+    // {key byte, number of die}
+    {0, 1},
+    {1, 2},
+    {2, 3},
+    {3, 4},
+    {4, 5},
+    {5, 6},
+    {6, 7},
+    {7, 8}
+};
+
+// =========================================================
+// Byte 12 maps
+// Item JC-45-2220.01x
+// Page 23
+// DDR4 SPD Document Release 3
+// Byte 12 (0x00C): Module Organization
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::DEVICE_WIDTH_MAP =
+{
+    // {key byte, device width (bits)}
+    {0, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4},
+    {1, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8},
+    {2, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16},
+    {3, fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X32},
+    // All others reserved
+};
+
+// =========================================================
+// Byte 13 maps
+// Item JC-45-2220.01x
+// Page 27
+// DDR4 SPD Document Release 3
+// Byte 13 (0x00D): Module Memory Bus Width
+// =========================================================
+const std::vector<std::pair<uint8_t, uint8_t> > eff_dimm::BUS_WIDTH_MAP =
+{
+    // {key byte, bus width (in bits)
+    {0, 8},
+    {1, 16},
+    {2, 32},
+    {3, 64}
+    // All others reserved
+};
 
 ///
 /// @brief bit encodings for RC02
@@ -141,7 +280,7 @@ enum rc0d_encode : uint8_t
 /// @brief bit encodings for RC0E
 /// From DDR4 Register v1.0
 ///
-enum rc0e_encode
+enum rc0e_encode : uint8_t
 {
     RC0E_PARITY_ENABLE_BIT = 7,
     RC0E_PARITY_ENABLE = 1,
@@ -204,7 +343,7 @@ enum lrdimm_databuffers
 ///
 /// @brief encoding for MSS_INVALID_FREQ so we can look up functions based on encoding
 ///
-enum invalid_freq_function_encoding
+enum invalid_freq_function_encoding : uint8_t
 {
     RC0A = 0x0a,
     RC3X = 0x30,
@@ -214,15 +353,122 @@ enum invalid_freq_function_encoding
 ///
 /// @brief encoding for MSS_INVALID_TIMING so we can look up functions based on encoding
 ///
-enum invalid_timing_function_encoding
+enum invalid_timing_function_encoding : uint8_t
 {
     TRRD_S = 0,
     TRRD_L = 1,
     TFAW = 2,
 };
+
 /////////////////////////
 // Non-member function implementations
 /////////////////////////
+
+///
+/// @brief Helper function to calculate logical ranks
+/// @param[in] i_signal_loading signal loading from SPD
+/// @param[in] i_dram_die_count DRAM die count from SPD
+/// @param[in] i_master_ranks number of master ranks from SPD
+///
+static uint8_t calc_logical_ranks(const uint8_t i_signal_loading,
+                                  const uint8_t i_dram_die_count,
+                                  const uint8_t i_master_ranks)
+{
+    // For single-load-stack(3DS) the logical ranks per package ends up being the same as the die count.
+    // For MONOLITHIC & MULTI_LOAD_STACK
+    // The die count isn't guaranteed to be 1 (e.g. SDP - 1 die package, DDP - 2 die package).
+    // Value of 1 has no meaning and is used for calculation purposes as defined by the SPD spec.
+    const uint8_t l_multiplier = (i_signal_loading == spd::SINGLE_LOAD_STACK) ? i_dram_die_count : 1;
+
+    return (i_master_ranks * l_multiplier);
+}
+
+///
+/// @brief Returns logical ranks in Primary SDRAM type
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode eff_dimm::prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
+{
+    uint8_t l_signal_loading = 0;
+    uint8_t l_master_ranks = 0;
+
+    // Number of master ranks taken from attribute since we need mapped value
+    // and not the encoded raw value from SPD.
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+    FAPI_TRY( iv_spd_decoder.prim_sdram_signal_loading(l_signal_loading) );
+
+    o_logical_ranks = calc_logical_ranks(l_signal_loading, iv_dram_die_count, l_master_ranks);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function that returns logical ranks in SDRAM type
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::sec_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
+{
+    uint8_t l_signal_loading = 0;
+    uint8_t l_master_ranks = 0;
+    uint8_t l_spd_die_count = 0;
+    uint8_t l_die_count = 0;
+
+    // Grabbing signal loading
+    FAPI_TRY( iv_spd_decoder.sec_sdram_signal_loading(l_signal_loading) );
+
+    // Number of master ranks taken from attribute since we need mapped value
+    // and not the encoded raw value from SPD.
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+
+    // Getting die count
+    FAPI_TRY( iv_spd_decoder.sec_sdram_die_count(l_spd_die_count) );
+
+    FAPI_ASSERT( mss::find_value_from_key(SEC_DIE_COUNT_MAP, l_spd_die_count, l_die_count),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_spd_die_count)
+                 .set_DATA(l_die_count)
+                 .set_TARGET(iv_dimm),
+                 "Could not a mapped value that matched the key (%d) for %s",
+                 l_spd_die_count, mss::c_str(iv_dimm) );
+
+    o_logical_ranks = calc_logical_ranks(l_signal_loading, l_die_count, l_master_ranks);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Returns logical ranks per DIMM
+/// @param[out] o_logical_ranks number of logical ranks
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode eff_dimm::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const
+{
+    uint8_t l_prim_logical_rank_per_dimm = 0;
+    uint8_t l_rank_mix = 0;
+
+    FAPI_TRY( iv_spd_decoder.rank_mix(l_rank_mix) );
+    FAPI_TRY( prim_sdram_logical_ranks(l_prim_logical_rank_per_dimm) );
+
+    if(l_rank_mix == fapi2::ENUM_ATTR_EFF_DRAM_RANK_MIX_SYMMETRICAL)
+    {
+        o_logical_rank_per_dimm = l_prim_logical_rank_per_dimm;
+    }
+    else
+    {
+        // Rank mix is ASYMMETRICAL
+        uint8_t l_sec_logical_rank_per_dimm = 0;
+        FAPI_TRY( sec_sdram_logical_ranks(l_sec_logical_rank_per_dimm) );
+
+        o_logical_rank_per_dimm = l_prim_logical_rank_per_dimm + l_sec_logical_rank_per_dimm;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Gets the JEDEC train and range values from the encoded VPD value
@@ -293,28 +539,105 @@ static uint64_t ibt_helper(const uint8_t i_ibt)
 }
 
 ///
+/// @brief Helper function to set dram width instance variable
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode eff_dimm::set_dram_width_instance()
+{
+    uint8_t l_spd_device_width = 0;
+    FAPI_TRY( iv_spd_decoder.device_width(l_spd_device_width),
+              "Failed accessing device width from SPD %s", mss::c_str(iv_dimm) );
+
+    FAPI_ASSERT( mss::find_value_from_key(DEVICE_WIDTH_MAP, l_spd_device_width, iv_dram_width),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_spd_device_width)
+                 .set_DATA(iv_dram_width)
+                 .set_FUNCTION(SET_DRAM_WIDTH_INSTANCE)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_spd_device_width, mss::c_str(iv_dimm) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to set dram density instance variable
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode eff_dimm::set_dram_density_instance()
+{
+    uint8_t l_spd_dram_density = 0;
+    FAPI_TRY( iv_spd_decoder.sdram_density(l_spd_dram_density), "Failed to get dram_density from SPD %s",
+              mss::c_str(iv_dimm) );
+
+    FAPI_ASSERT( mss::find_value_from_key(SDRAM_DENSITY_MAP, l_spd_dram_density, iv_dram_density),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_spd_dram_density)
+                 .set_DATA(iv_dram_density)
+                 .set_FUNCTION(SET_DRAM_DENSITY_INSTANCE)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_spd_dram_density, mss::c_str(iv_dimm) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to set dram density instance variable
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode eff_dimm::set_prim_dram_die_count_instance()
+{
+    uint8_t l_decoder_val = 0;
+    FAPI_TRY( iv_spd_decoder.prim_sdram_die_count(l_decoder_val),
+              "Failed to get the die count for the dimm %s", mss::c_str(iv_dimm) );
+
+    FAPI_ASSERT( mss::find_value_from_key(PRIM_DIE_COUNT_MAP, l_decoder_val, iv_dram_die_count),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_decoder_val)
+                 .set_DATA(iv_dram_die_count)
+                 .set_FUNCTION(PRIM_DIE_COUNT)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_decoder_val, mss::c_str(iv_dimm) );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
 /// @brief factory to make an eff_config DIMM object based on dimm kind (type, gen, and revision number)
-/// @param[in] i_pDecoder the spd::decoder for the dimm target
+/// @param[in] i_spd_decoder the spd::decoder for the dimm target
 /// @param[out] o_fact_obj a shared pointer of the eff_dimm type
 ///
-fapi2::ReturnCode eff_dimm::eff_dimm_factory ( const std::shared_ptr<spd::decoder>& i_pDecoder,
-        std::shared_ptr<eff_dimm>& o_fact_obj )
+fapi2::ReturnCode eff_dimm::factory ( const spd::facade& i_spd_decoder,
+                                      std::shared_ptr<eff_dimm>& o_fact_obj )
 {
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
     uint8_t l_buffer_type = 0;
     kind_t l_dimm_kind = DEFAULT_KIND;
+    rcw_settings l_raw_card;
 
     fapi2::ReturnCode l_rc;
-    const auto& l_dimm = i_pDecoder->iv_target;
+    const auto l_dimm = i_spd_decoder.get_dimm_target();
 
     // Now time to get the three attributes to tell which dimm we're working with.
-    // Dram_gen and dimm_type are set in the SPD factory and we'll call the SPD decoder to get the reg and buff type
-    FAPI_TRY( eff_dram_gen(l_dimm, l_gen), "Failed eff_dram_gen() accessor for %s", l_dimm );
-    FAPI_TRY( eff_dimm_type(l_dimm, l_type), "Failed eff_dimm_type() accessor for %s",
-              l_dimm );
-    FAPI_TRY( i_pDecoder->iv_module_decoder->register_and_buffer_type(l_buffer_type),
-              "Failed decoding register and buffer type from SPD for %s", l_dimm );
+    // Dram_gen and dimm_type are set in mss_freq and we'll call the SPD decoder to get the reg and buff type
+    FAPI_TRY( eff_dram_gen(l_dimm, l_gen), "Failed eff_dram_gen() accessor for %s", mss::c_str(l_dimm) );
+    FAPI_TRY( eff_dimm_type(l_dimm, l_type), "Failed eff_dimm_type() accessor for %s", mss::c_str(l_dimm) );
+
+    FAPI_TRY( i_spd_decoder.register_and_buffer_type(l_buffer_type),
+              "Failed decoding register and buffer type from SPD for %s", mss::c_str(l_dimm) );
+
+    FAPI_TRY(raw_card_factory(l_dimm, i_spd_decoder, l_raw_card));
 
     l_dimm_kind = mss::dimm_kind(l_type, l_gen);
 
@@ -324,7 +647,7 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory ( const std::shared_ptr<spd::decode
             switch (l_buffer_type)
             {
                 case LRDIMM_DB01:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db01>( i_pDecoder, l_rc );
+                    o_fact_obj = std::make_shared<eff_lrdimm_db01>( i_spd_decoder, l_raw_card, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -339,7 +662,7 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory ( const std::shared_ptr<spd::decode
                     break;
 
                 case LRDIMM_DB02:
-                    o_fact_obj = std::make_shared<eff_lrdimm_db02>( i_pDecoder, l_rc );
+                    o_fact_obj = std::make_shared<eff_lrdimm_db02>( i_spd_decoder, l_raw_card, l_rc );
 
                     // Assert that l_rc is good and o_fact_object isn't null
                     FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
@@ -367,7 +690,7 @@ fapi2::ReturnCode eff_dimm::eff_dimm_factory ( const std::shared_ptr<spd::decode
             break;
 
         case KIND_RDIMM_DDR4:
-            o_fact_obj = std::make_shared<eff_rdimm>( i_pDecoder, l_rc );
+            o_fact_obj = std::make_shared<eff_rdimm>( i_spd_decoder, l_raw_card, l_rc );
             // Assert that l_rc is good and o_fact_object isn't null
             FAPI_ASSERT( ((l_rc == fapi2::FAPI2_RC_SUCCESS) && (o_fact_obj != nullptr)),
                          fapi2::MSS_ERROR_CREATING_EFF_CONFIG_DIMM_OBJECT().
@@ -410,7 +733,8 @@ fapi2::ReturnCode eff_dimm::rcd_mfg_id()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_rcd_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_RCD_MFG_ID" );
-    FAPI_TRY( iv_pDecoder->reg_manufacturer_id_code(l_decoder_val), "Failed getting rcd id code from SPD %s",
+    FAPI_TRY( iv_spd_decoder.reg_manufacturer_id_code(l_decoder_val),
+              "Failed getting rcd id code from SPD %s",
               mss::c_str(iv_dimm) );
 
     switch (l_decoder_val)
@@ -451,7 +775,7 @@ fapi2::ReturnCode eff_dimm::register_type()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_register_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_REGISTER_TYPE" );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_and_buffer_type(l_decoder_val),
+    FAPI_TRY( iv_spd_decoder.register_and_buffer_type(l_decoder_val),
               "Failed getting register_type code from SPD %s",
               mss::c_str(iv_dimm) );
 
@@ -475,7 +799,8 @@ fapi2::ReturnCode eff_dimm::register_rev()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_register_rev(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_REGISTER_REV" );
-    FAPI_TRY( iv_pDecoder->register_rev_num(l_decoder_val), "Failed getting register_rev code from SPD %s",
+    FAPI_TRY( iv_spd_decoder.register_rev_num(l_decoder_val),
+              "Failed getting register_rev code from SPD %s",
               mss::c_str(iv_dimm) );
 
     FAPI_INF("%s Register rev is 0x%02x", mss::c_str(iv_dimm), l_decoder_val);
@@ -498,8 +823,10 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_DRAM_MFG_ID" );
-    FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD %s",
+    FAPI_TRY( iv_spd_decoder.dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD %s",
               mss::c_str(iv_dimm) );
+
+    endian_swap(l_decoder_val);
 
     switch (l_decoder_val)
     {
@@ -534,24 +861,12 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_width()
 {
-    uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
-    FAPI_TRY( iv_pDecoder->device_width(l_decoder_val), "Failed accessing device width from SPD %s", mss::c_str(iv_dimm) );
     FAPI_TRY( eff_dram_width(iv_mcs, &l_mcs_attrs[0][0]), "Failed getting EFF_DRAM_WIDTH" );
 
-    // Enforcing NIMBUS restrictions
-    FAPI_ASSERT( (l_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
-                 (l_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
-                 fapi2::MSS_INVALID_DRAM_WIDTH()
-                 .set_DRAM_WIDTH(l_decoder_val)
-                 .set_DIMM_TARGET(iv_dimm),
-                 "Unsupported DRAM width with %d for target %s",
-                 l_decoder_val,
-                 mss::c_str(iv_dimm));
-
-    l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
+    l_mcs_attrs[iv_port_index][iv_dimm_index] = iv_dram_width;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_WIDTH, iv_mcs, l_mcs_attrs), "Failed setting ATTR_EFF_DRAM_WIDTH" );
 
 fapi_try_exit:
@@ -564,17 +879,12 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_density()
 {
-    uint8_t l_decoder_val = 0;
-    FAPI_TRY( iv_pDecoder->sdram_density(l_decoder_val), "Failed to get dram_density from SPD %s", mss::c_str(iv_dimm) );
-
     // Get & update MCS attribute
-    {
-        uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-        FAPI_TRY( eff_dram_density(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_EFF_DRAM_DENSITY" );
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( eff_dram_density(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_EFF_DRAM_DENSITY" );
 
-        l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_DENSITY, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_DRAM_DENSITY" );
-    }
+    l_mcs_attrs[iv_port_index][iv_dimm_index] = iv_dram_density;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_DENSITY, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_DRAM_DENSITY" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -591,8 +901,8 @@ fapi2::ReturnCode eff_dimm::ranks_per_dimm()
 
     // Get & update MCS attribute
     FAPI_TRY( eff_num_ranks_per_dimm(iv_mcs, &l_attrs_ranks_per_dimm[0][0]), "Failed to get EFF_NUM_RANKS_PER_DIMM" );
-    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_ranks_per_dimm),
-              "Failed to get logical_ranks_per_dimm from SPD %s", mss::c_str(iv_dimm) );
+    FAPI_TRY( logical_ranks_per_dimm(l_ranks_per_dimm),
+              "Failed to get logical_ranks_per_dimm %s", mss::c_str(iv_dimm) );
 
     l_attrs_ranks_per_dimm[iv_port_index][iv_dimm_index] = l_ranks_per_dimm;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_RANKS_PER_DIMM, iv_mcs, l_attrs_ranks_per_dimm),
@@ -608,15 +918,12 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::prim_die_count()
 {
-    uint8_t l_die_count = 0;
     uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     // Get & update MCS attribute
     FAPI_TRY( eff_prim_die_count(iv_mcs, &l_attr[0][0]), "Failed to get EFF_PRIM_DIE_COUNT" );
-    FAPI_TRY( iv_pDecoder->prim_sdram_die_count(l_die_count),
-              "Failed to get the die count for the dimm %s", mss::c_str(iv_dimm) );
 
-    l_attr[iv_port_index][iv_dimm_index] = l_die_count;
+    l_attr[iv_port_index][iv_dimm_index] = iv_dram_die_count;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_PRIM_DIE_COUNT, iv_mcs, l_attr),
               "Failed to set ATTR_EFF_PRIM_DIE_COUNT" );
 
@@ -633,9 +940,9 @@ fapi2::ReturnCode eff_dimm::primary_stack_type()
     uint8_t l_stack_type = 0;
     uint8_t l_package_type = 0;
 
-    FAPI_TRY( iv_pDecoder->prim_sdram_signal_loading(l_stack_type),
+    FAPI_TRY( iv_spd_decoder.prim_sdram_signal_loading(l_stack_type),
               "Failed to get dram_signal_loading from SPD %s", mss::c_str(iv_dimm) );
-    FAPI_TRY( iv_pDecoder->prim_sdram_package_type(l_package_type),
+    FAPI_TRY( iv_spd_decoder.prim_sdram_package_type(l_package_type),
               "Failed to get prim_sdram_package_type from SPD %s", mss::c_str(iv_dimm) );
 
     // Check to see if monolithic DRAM/ SDP
@@ -700,14 +1007,24 @@ fapi2::ReturnCode eff_dimm::dimm_size()
 
     // Retrieve values needed to calculate dimm size
     uint8_t l_bus_width = 0;
-    uint8_t l_sdram_width = 0;
-    uint8_t l_sdram_density = 0;
     uint8_t l_logical_rank_per_dimm = 0;
 
-    FAPI_TRY( iv_pDecoder->device_width(l_sdram_width), "Failed to get device width from SPD %s", mss::c_str(iv_dimm) );
-    FAPI_TRY( iv_pDecoder->prim_bus_width(l_bus_width), "Failed to get prim bus width from SPD %s", mss::c_str(iv_dimm) );
-    FAPI_TRY( iv_pDecoder->sdram_density(l_sdram_density), "Failed to get dram density from SPD %s", mss::c_str(iv_dimm) );
-    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_logical_rank_per_dimm),
+    {
+        uint8_t l_spd_bus_width = 0;
+        FAPI_TRY( iv_spd_decoder.prim_bus_width(l_spd_bus_width), "Failed to get prim bus width from SPD %s",
+                  mss::c_str(iv_dimm) );
+
+        FAPI_ASSERT( mss::find_value_from_key(BUS_WIDTH_MAP, l_spd_bus_width, l_bus_width),
+                     fapi2::MSS_LOOKUP_FAILED()
+                     .set_KEY(l_spd_bus_width)
+                     .set_DATA(l_bus_width)
+                     .set_FUNCTION(DIMM_SIZE)
+                     .set_TARGET(iv_dimm),
+                     "Could not find a mapped value that matched the key (%d) for %s",
+                     l_spd_bus_width, mss::c_str(iv_dimm) );
+    }
+
+    FAPI_TRY( logical_ranks_per_dimm(l_logical_rank_per_dimm),
               "Failed to get logical ranks from SPD %s", mss::c_str(iv_dimm) );
 
     // Let's sort the dimm size vector just to be super duper safe
@@ -716,9 +1033,9 @@ fapi2::ReturnCode eff_dimm::dimm_size()
 
         // Double checking to avoid divide by zero errors
         // If this fails, there was a problem with the check in SPD function
-        FAPI_ASSERT( l_sdram_density != 0,
+        FAPI_ASSERT( iv_dram_density != 0,
                      fapi2::MSS_BAD_SDRAM_DENSITY_DECODER()
-                     .set_DRAM_DENSITY(l_sdram_density)
+                     .set_DRAM_DENSITY(iv_dram_density)
                      .set_DIMM_TARGET(iv_dimm),
                      "SPD decoder messed up and returned a 0. Should have been caught already %s",
                      mss::c_str(iv_dimm));
@@ -726,23 +1043,23 @@ fapi2::ReturnCode eff_dimm::dimm_size()
         // Calculate dimm size
         // Formula from SPD Spec (seriously, they don't have parenthesis in the spec)
         // Total = SDRAM Capacity / 8 * Primary Bus Width / SDRAM Width * Logical Ranks per DIMM
-        const uint32_t l_dimm_size = (l_sdram_density * l_bus_width * l_logical_rank_per_dimm) / (8 * l_sdram_width);
+        const uint32_t l_dimm_size = (iv_dram_density * l_bus_width * l_logical_rank_per_dimm) / (8 * iv_dram_width);
 
         FAPI_ASSERT( (std::binary_search(l_dimm_sizes.begin(), l_dimm_sizes.end(), l_dimm_size) == true),
                      fapi2::MSS_INVALID_CALCULATED_DIMM_SIZE()
                      .set_CALCULATED_SIZE(l_dimm_size)
-                     .set_SDRAM_WIDTH(l_sdram_width)
+                     .set_SDRAM_WIDTH(iv_dram_width)
                      .set_BUS_WIDTH(l_bus_width)
-                     .set_DRAM_DENSITY(l_sdram_density)
+                     .set_DRAM_DENSITY(iv_dram_density)
                      .set_LOGICAL_RANKS(l_logical_rank_per_dimm)
                      .set_DIMM_TARGET(iv_dimm),
                      "Recieved an invalid dimm size (%d) for calculated DIMM_SIZE for target %s"
-                     "(l_sdram_density %d * l_bus_width %d * l_logical_rank_per_dimm %d) / (8 * l_sdram_width %d",
+                     "(iv_dram_density %d * l_bus_width %d * l_logical_rank_per_dimm %d) / (8 * iv_dram_width %d",
                      l_dimm_size,
                      mss::c_str(iv_dimm),
-                     l_sdram_width,
+                     iv_dram_width,
                      l_bus_width,
-                     l_sdram_density,
+                     iv_dram_density,
                      l_logical_rank_per_dimm);
 
         // Get & update MCS attribute
@@ -820,7 +1137,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
         // Calculate nck
         FAPI_TRY(  spd::calc_nck( l_trefi_in_ps,
                                   static_cast<uint64_t>(iv_tCK_in_ps),
-                                  INVERSE_DDR4_CORRECTION_FACTOR,
+                                  spd::INVERSE_DDR4_CORRECTION_FACTOR,
                                   l_trefi_in_nck),
                    "Error in calculating tREFI for target %s, with value of l_trefi_in_ps: %d", mss::c_str(iv_dimm), l_trefi_in_ps);
 
@@ -866,19 +1183,19 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
     switch(iv_refresh_mode)
     {
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL:
-            FAPI_TRY( iv_pDecoder->min_trfc1(l_trfc_mtb),
+            FAPI_TRY( iv_spd_decoder.min_trfc1(l_trfc_mtb),
                       "Failed to decode SPD for tRFC1" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_2X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_2X:
-            FAPI_TRY( iv_pDecoder->min_trfc2(l_trfc_mtb),
+            FAPI_TRY( iv_spd_decoder.min_trfc2(l_trfc_mtb),
                       "Failed to decode SPD for tRFC2" );
             break;
 
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FIXED_4X:
         case fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_FLY_4X:
-            FAPI_TRY( iv_pDecoder->min_trfc4(l_trfc_mtb),
+            FAPI_TRY( iv_spd_decoder.min_trfc4(l_trfc_mtb),
                       "Failed to decode SPD for tRFC4" );
             break;
 
@@ -916,7 +1233,7 @@ fapi2::ReturnCode eff_dimm::dram_trfc()
                   "Failed to retrieve tRFC attribute" );
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_trfc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trfc_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_in_nck),
                   "Error in calculating l_tRFC for target %s, with value of l_trfc_in_ps: %d", mss::c_str(iv_dimm), l_trfc_in_ps);
 
         FAPI_INF("tCK (ps): %d, tRFC (ps): %d, tRFC (nck): %d",
@@ -943,27 +1260,23 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::dram_trfc_dlr()
 {
 
-    uint8_t l_density = 0;
     uint64_t l_tCK_in_ps = 0;
     uint64_t l_trfc_dlr_in_ps = 0;
     uint8_t l_trfc_dlr_in_nck = 0;
     std::vector<uint8_t> l_mcs_attrs_trfc_dlr(PORTS_PER_MCS, 0);
 
     // Retrieve map params
-    FAPI_TRY( iv_pDecoder->sdram_density(l_density), "Failed to get sdram density");
-    FAPI_TRY(  mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed to get MRW attribute for fine refresh mode" );
-
     FAPI_INF("Retrieved SDRAM density: %d, fine refresh mode: %d",
-             l_density, iv_refresh_mode);
+             iv_dram_density, iv_refresh_mode);
 
     // Calculate refresh cycle time in ps
-    FAPI_TRY( calc_trfc_dlr(iv_dimm, iv_refresh_mode, l_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
+    FAPI_TRY( calc_trfc_dlr(iv_dimm, iv_refresh_mode, iv_dram_density, l_trfc_dlr_in_ps), "Failed calc_trfc_dlr()" );
 
     // Calculate clock period (tCK) from selected freq from mss_freq
     FAPI_TRY( clock_period(iv_dimm, l_tCK_in_ps), "Failed to calculate clock period (tCK)");
 
     // Calculate refresh cycle time in nck
-    FAPI_TRY( spd::calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_dlr_in_nck));
+    FAPI_TRY( spd::calc_nck(l_trfc_dlr_in_ps, l_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trfc_dlr_in_nck));
 
     FAPI_INF("tCK (ps): %d, tRFC_DLR (ps): %d, tRFC_DLR (nck): %d",
              l_tCK_in_ps, l_trfc_dlr_in_ps, l_trfc_dlr_in_nck);
@@ -996,7 +1309,7 @@ fapi2::ReturnCode eff_dimm::rcd_mirror_mode()
     FAPI_TRY( eff_dimm_rcd_mirror_mode(iv_mcs, &l_attrs_mirror_mode[0][0]) );
 
     // Update MCS attribute
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
+    FAPI_TRY( iv_spd_decoder.register_to_dram_addr_mapping(l_mirror_mode) );
     l_attrs_mirror_mode[iv_port_index][iv_dimm_index] = l_mirror_mode;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RCD_MIRROR_MODE, iv_mcs, l_attrs_mirror_mode) );
@@ -1012,10 +1325,20 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::dram_bank_bits()
 {
     uint8_t l_bank_bits = 0;
+    uint8_t l_decoder_val = 0;
     uint8_t l_attrs_bank_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_bank_bits(iv_mcs, &l_attrs_bank_bits[0][0]) );
-    FAPI_TRY( iv_pDecoder->bank_bits(l_bank_bits) );
+    FAPI_TRY( iv_spd_decoder.bank_bits(l_decoder_val) );
+
+    FAPI_ASSERT( mss::find_value_from_key(BANK_ADDR_BITS_MAP, l_decoder_val, l_bank_bits),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_decoder_val)
+                 .set_DATA(l_bank_bits)
+                 .set_FUNCTION(DRAM_BANK_BITS)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_decoder_val, mss::c_str(iv_dimm) );
 
     l_attrs_bank_bits[iv_port_index][iv_dimm_index] = l_bank_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_BANK_BITS, iv_mcs, l_attrs_bank_bits) );
@@ -1030,11 +1353,21 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_row_bits()
 {
+    uint8_t l_decoder_val = 0;
     uint8_t l_row_bits = 0;
     uint8_t l_attrs_row_bits[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_row_bits(iv_mcs, &l_attrs_row_bits[0][0]) );
-    FAPI_TRY( iv_pDecoder->row_address_bits(l_row_bits) );
+    FAPI_TRY( iv_spd_decoder.row_address_bits(l_decoder_val) );
+
+    FAPI_ASSERT( mss::find_value_from_key(ROW_ADDRESS_BITS_MAP, l_decoder_val, l_row_bits),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_decoder_val)
+                 .set_DATA(l_row_bits)
+                 .set_FUNCTION(DRAM_ROW_BITS)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_decoder_val, mss::c_str(iv_dimm) );
 
     l_attrs_row_bits[iv_port_index][iv_dimm_index] = l_row_bits;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_ROW_BITS, iv_mcs, l_attrs_row_bits) );
@@ -1051,27 +1384,13 @@ fapi_try_exit:
 fapi2::ReturnCode eff_dimm::dram_dqs_time()
 {
     uint8_t l_attrs_dqs_time[PORTS_PER_MCS] = {};
-    uint8_t l_dram_width = 0;
-
-    // Get the DRAM width
-    FAPI_TRY( iv_pDecoder->device_width(l_dram_width) );
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tdqs(iv_mcs, &l_attrs_dqs_time[0]) );
-    FAPI_INF("SDRAM width: %d for target %s", l_dram_width, mss::c_str(iv_dimm));
-
-    // Enforcing current NIMBUS standards.
-    FAPI_ASSERT( (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
-                 (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
-                 fapi2::MSS_INVALID_DRAM_WIDTH()
-                 .set_DRAM_WIDTH(l_dram_width)
-                 .set_DIMM_TARGET(iv_dimm),
-                 "Invalid DRAM width with %d for target %s",
-                 l_dram_width,
-                 mss::c_str(iv_dimm));
+    FAPI_INF("SDRAM width: %d for target %s", iv_dram_width, mss::c_str(iv_dimm));
 
     // Only possible dram width are x4, x8. If x8, tdqs is available, else not available
-    l_attrs_dqs_time[iv_port_index] = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
+    l_attrs_dqs_time[iv_port_index] = (iv_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
                                       fapi2::ENUM_ATTR_EFF_DRAM_TDQS_ENABLE : fapi2::ENUM_ATTR_EFF_DRAM_TDQS_DISABLE;
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TDQS, iv_mcs, l_attrs_dqs_time) );
@@ -1098,9 +1417,9 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
         int64_t l_tccd_mtb = 0;
         int64_t l_tccd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_tccd_l(l_tccd_mtb),
+        FAPI_TRY( iv_spd_decoder.min_tccd_l(l_tccd_mtb),
                   "Failed min_tccd_l() for %s", mss::c_str(iv_dimm) );
-        FAPI_TRY( iv_pDecoder->fine_offset_min_tccd_l(l_tccd_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_tccd_l(l_tccd_ftb),
                   "Failed fine_offset_min_tccd_l() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tCCD_L (MTB): %ld, tCCD_L(FTB): %ld",
@@ -1119,7 +1438,7 @@ fapi2::ReturnCode eff_dimm::dram_tccd_l()
                   "Failed to retrieve tCCD attribute" );
 
         // Calculate nck
-        FAPI_TRY(  spd::calc_nck(l_tccd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
+        FAPI_TRY(  spd::calc_nck(l_tccd_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_tccd_in_nck),
                    "Error in calculating tccd  for target %s, with value of l_tccd_in_ps: %d", mss::c_str(iv_dimm), l_tccd_in_ps);
 
         FAPI_INF("tCK (ps): %d, tCCD_L (ps): %d, tCCD_L (nck): %d",
@@ -1151,7 +1470,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc00()
     FAPI_TRY( eff_dimm_ddr4_rc00(iv_mcs, &l_attrs_dimm_rc00[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc00;
+    l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] = iv_raw_card.iv_rc00;
 
     FAPI_INF("%s: RC00 settting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC00, iv_mcs, l_attrs_dimm_rc00) );
@@ -1172,7 +1491,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc01()
     FAPI_TRY( eff_dimm_ddr4_rc01(iv_mcs, &l_attrs_dimm_rc01[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc01[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc01;
+    l_attrs_dimm_rc01[iv_port_index][iv_dimm_index] = iv_raw_card.iv_rc01;
 
     FAPI_INF("%s: RC01 settting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc01[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC01, iv_mcs, l_attrs_dimm_rc01) );
@@ -1218,8 +1537,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc03()
     uint8_t l_cs_output_drive = 0;
     uint8_t l_ca_output_drive = 0;
 
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->cs_signal_output_driver(l_cs_output_drive) );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->ca_signal_output_driver(l_ca_output_drive) );
+    FAPI_TRY( iv_spd_decoder.cs_signal_output_driver(l_cs_output_drive) );
+    FAPI_TRY( iv_spd_decoder.ca_signal_output_driver(l_ca_output_drive) );
 
     FAPI_INF( "%s: Retrieved register output drive, for CA: %d, CS: %d",
               mss::c_str(iv_dimm), l_ca_output_drive, l_cs_output_drive );
@@ -1259,8 +1578,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc04()
 
     fapi2::buffer<uint8_t> l_buffer;
 
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->odt_signal_output_driver(l_odt_output_drive) );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->cke_signal_output_driver(l_cke_output_drive) );
+    FAPI_TRY( iv_spd_decoder.odt_signal_output_driver(l_odt_output_drive) );
+    FAPI_TRY( iv_spd_decoder.cke_signal_output_driver(l_cke_output_drive) );
 
     FAPI_INF( "%s: Retrieved signal driver output, for CKE: %d, ODT: %d",
               mss::c_str(iv_dimm), l_cke_output_drive, l_odt_output_drive );
@@ -1301,8 +1620,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc05()
 
     fapi2::buffer<uint8_t> l_buffer;
 
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->a_side_clk_output_driver(l_a_side_output_drive) );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->b_side_clk_output_driver(l_b_side_output_drive) );
+    FAPI_TRY( iv_spd_decoder.a_side_clk_output_driver(l_a_side_output_drive) );
+    FAPI_TRY( iv_spd_decoder.b_side_clk_output_driver(l_b_side_output_drive) );
 
     FAPI_INF( "%s: Retrieved register output drive for clock, b-side (Y0,Y2): %d, a-side (Y1,Y3): %d",
               mss::c_str(iv_dimm), l_b_side_output_drive, l_a_side_output_drive );
@@ -1718,15 +2037,15 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
     constexpr uint8_t l_cs_mode = rc0d_encode::DIRECT_CS_MODE;
     uint8_t l_mirror_mode = 0;
     uint8_t l_dimm_type = 0;
-    uint8_t l_module_type = 0;
+    uint8_t l_rc0d_dimm_type = 0;
 
-    FAPI_TRY( spd::base_module_type(iv_dimm, iv_pDecoder->iv_spd_data, l_module_type) );
+    FAPI_TRY(mss::eff_dimm_type(iv_dimm, l_dimm_type));
 
-    l_dimm_type = (l_module_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
-                  rc0d_encode::RDIMM :
-                  rc0d_encode::LRDIMM;
+    l_rc0d_dimm_type = (l_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
+                       rc0d_encode::RDIMM :
+                       rc0d_encode::LRDIMM;
 
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_to_dram_addr_mapping(l_mirror_mode) );
+    FAPI_TRY( iv_spd_decoder.register_to_dram_addr_mapping(l_mirror_mode) );
 
     // Lets construct encoding byte for RCD setting
     {
@@ -1743,7 +2062,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
         constexpr size_t MIRROR_LEN = 1;
 
         l_buffer.insertFromRight<CS_START, CS_LEN>(l_cs_mode)
-        .insertFromRight<DIMM_TYPE_START, DIMM_TYPE_LEN>(l_dimm_type)
+        .insertFromRight<DIMM_TYPE_START, DIMM_TYPE_LEN>(l_rc0d_dimm_type)
         .insertFromRight<MIRROR_START, MIRROR_LEN>(l_mirror_mode);
     }
 
@@ -1751,7 +2070,6 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
     FAPI_TRY( eff_dimm_ddr4_rc0d(iv_mcs, &l_attrs_dimm_rc0d[0][0]) );
 
     // Update MCS attribute
-    FAPI_TRY( spd::base_module_type(iv_dimm, iv_pDecoder->iv_spd_data, l_dimm_type) );
     l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] = l_buffer;
 
     FAPI_INF( "%s: RC0D setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] );
@@ -2183,7 +2501,7 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         constexpr int64_t l_twr_ftb = 0;
         int64_t l_twr_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_twr(l_twr_mtb),
+        FAPI_TRY( iv_spd_decoder.min_twr(l_twr_mtb),
                   "Failed min_twr() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWR (MTB): %ld, tWR(FTB): %ld",
@@ -2198,7 +2516,7 @@ fapi2::ReturnCode eff_dimm::dram_twr()
         uint8_t l_twr_in_nck = 0;
 
         // Calculate tNCK
-        FAPI_TRY( spd::calc_nck(l_twr_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
+        FAPI_TRY( spd::calc_nck(l_twr_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR,  l_twr_in_nck),
                   "Error in calculating l_twr_in_nck for target %s, with value of l_twr_in_ps: %d", mss::c_str(iv_dimm), l_twr_in_ps);
 
         FAPI_INF( "tCK (ps): %d, tWR (ps): %d, tWR (nck): %d for target: %s",
@@ -2269,20 +2587,18 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     // Taken from DDR4 JEDEC spec 1716.78C
     // Proposed DDR4 Full spec update(79-4A)
     // Page 26, Table 7
-    static std::pair<uint64_t, uint8_t> CWL_TABLE_1 [6] =
+    static constexpr std::pair<uint64_t, uint8_t> CWL_TABLE_1 [] =
     {
-        {1600, 9},
-        {1866, 10},
-        {2133, 11},
-        {2400, 12},
-        {2666, 14},
-        {3200, 16},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT1866, 10},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT2133, 11},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT2400, 12},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT2666, 14},
     };
-    static std::pair<uint64_t, uint8_t> CWL_TABLE_2 [3] =
+
+    static constexpr std::pair<uint64_t, uint8_t> CWL_TABLE_2 [] =
     {
-        {2400, 14},
-        {2666, 16},
-        {3200, 18},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT2400, 14},
+        {fapi2::ENUM_ATTR_MSS_FREQ_MT2666, 16},
     };
 
     std::vector<uint8_t> l_attrs_cwl(PORTS_PER_MCS, 0);
@@ -2744,11 +3060,58 @@ fapi2::ReturnCode eff_dimm::post_package_repair()
     uint8_t l_attrs_dram_ppr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
     FAPI_TRY( eff_dram_ppr(iv_mcs, &l_attrs_dram_ppr[0][0]) );
-    FAPI_TRY( iv_pDecoder->post_package_repair(l_decoder_val) );
+    FAPI_TRY( iv_spd_decoder.post_package_repair(l_decoder_val) );
 
     l_attrs_dram_ppr[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_PPR, iv_mcs, l_attrs_dram_ppr),
               "Failed setting attribute for DRAM_PPR");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for soft post package repair
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::soft_post_package_repair()
+{
+    uint8_t l_sppr_decoder_val = 0;
+    uint8_t l_rev_decoder_val = 0;
+
+    uint8_t l_sppr = 0;
+    uint8_t l_attrs_dram_soft_ppr[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY( eff_dram_soft_ppr(iv_mcs, &l_attrs_dram_soft_ppr[0][0]) );
+
+    FAPI_TRY( iv_spd_decoder.soft_post_package_repair(l_sppr_decoder_val) );
+    FAPI_TRY( iv_spd_decoder.revision(l_rev_decoder_val) );
+
+    if(l_rev_decoder_val == spd::rev::V1_0 &&
+       l_sppr_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_SUPPORTED)
+    {
+        // Lab observes DIMMs that are SPD rev 1.0 but have sPPR enabled that is considered
+        // invalid per the SPD spec.  For backward compatability of those DIMMs (known past vendor issue)
+        // we set it to a valid value.
+        FAPI_INF("Invalid sPPR (0x%02x) for SPD rev 0x%02x on %s.  Setting sPPR to 0x%02x",
+                 l_sppr_decoder_val, l_rev_decoder_val, mss::c_str(iv_dimm),
+                 fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_NOT_SUPPORTED);
+
+        l_sppr_decoder_val = fapi2::ENUM_ATTR_EFF_DRAM_SOFT_PPR_NOT_SUPPORTED;
+    }
+
+    FAPI_ASSERT( mss::find_value_from_key(SOFT_PPR_MAP, l_sppr_decoder_val, l_sppr),
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(l_sppr_decoder_val)
+                 .set_DATA(l_sppr)
+                 .set_FUNCTION(SOFT_POST_PACKAGE_REPAIR)
+                 .set_TARGET(iv_dimm),
+                 "Could not find a mapped value that matched the key (%d) for %s",
+                 l_sppr_decoder_val, mss::c_str(iv_dimm) );
+
+    l_attrs_dram_soft_ppr[iv_port_index][iv_dimm_index] = l_sppr;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_SOFT_PPR, iv_mcs, l_attrs_dram_soft_ppr),
+              "Failed setting attribute for DRAM_SOFT_PPR");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -3197,10 +3560,10 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         int64_t l_trp_mtb = 0;
         int64_t l_trp_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_trp(l_trp_mtb),
+        FAPI_TRY( iv_spd_decoder.min_trp(l_trp_mtb),
                   "Failed min_trp() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trp(l_trp_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_trp(l_trp_ftb),
                   "Failed fine_offset_min_trp() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tRP (MTB): %ld, tRP(FTB): %ld",
@@ -3221,7 +3584,7 @@ fapi2::ReturnCode eff_dimm::dram_trp()
         uint8_t l_trp_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_trp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trp_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trp_in_nck),
                   "Error in calculating dram_tRP nck for target %s, with value of l_trp_in_ps: %d", mss::c_str(iv_dimm), l_trp_in_ps);
 
         FAPI_INF( "tCK (ps): %d, tRP (ps): %d, tRP (nck): %d for target: %s",
@@ -3259,10 +3622,10 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         int64_t l_trcd_mtb = 0;
         int64_t l_trcd_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_trcd(l_trcd_mtb),
+        FAPI_TRY( iv_spd_decoder.min_trcd(l_trcd_mtb),
                   "Failed min_trcd() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trcd(l_trcd_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_trcd(l_trcd_ftb),
                   "Failed fine_offset_min_trcd() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCD (MTB): %ld, tRCD (FTB): %ld",
@@ -3276,7 +3639,7 @@ fapi2::ReturnCode eff_dimm::dram_trcd()
         uint8_t l_trcd_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_trcd_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trcd_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trcd_in_nck),
                   "Error in calculating trcd for target %s, with value of l_trcd_in_ps: %d", mss::c_str(iv_dimm), l_trcd_in_ps);
 
         FAPI_INF("tCK (ps): %d, tRCD (ps): %d, tRCD (nck): %d for target: %s",
@@ -3309,10 +3672,10 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         int64_t l_trc_mtb = 0;
         int64_t l_trc_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_trc(l_trc_mtb),
+        FAPI_TRY( iv_spd_decoder.min_trc(l_trc_mtb),
                   "Failed min_trc() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trc(l_trc_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_trc(l_trc_ftb),
                   "Failed fine_offset_min_trc() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase MTB (ps): %ld, fine timebase FTB (ps): %ld, tRCmin (MTB): %ld, tRCmin(FTB): %ld",
@@ -3326,7 +3689,7 @@ fapi2::ReturnCode eff_dimm::dram_trc()
         uint8_t l_trc_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_trc_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trc_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trc_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trc_in_nck),
                   "Error in calculating trc for target %s, with value of l_trc_in_ps: %d",
                   mss::c_str(iv_dimm), l_trc_in_ps );
 
@@ -3360,7 +3723,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
         constexpr int64_t l_twtr_l_ftb = 0;
         int64_t l_twtr_l_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_twtr_l(l_twtr_l_mtb) );
+        FAPI_TRY( iv_spd_decoder.min_twtr_l(l_twtr_l_mtb) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
                  mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twtr_l_mtb, l_twtr_l_ftb );
@@ -3374,7 +3737,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_l()
         int8_t l_twtr_l_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
+        FAPI_TRY( spd::calc_nck(l_twtr_l_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_l_in_nck),
                   "Error in calculating tWTR_L for target %s, with value of l_twtr_in_ps: %d", mss::c_str(iv_dimm), l_twtr_l_in_ps );
 
         FAPI_INF( "tCK (ps): %d,  tWTR_L (ps): %d, tWTR_L (nck): %d for target: %s",
@@ -3407,7 +3770,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
         constexpr int64_t l_twtr_s_ftb = 0;
         int64_t l_twtr_s_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_twtr_s(l_twtr_s_mtb) );
+        FAPI_TRY( iv_spd_decoder.min_twtr_s(l_twtr_s_mtb) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tWTR_S (MTB): %ld, tWTR_S (FTB): %ld",
                  mss::c_str(iv_dimm), iv_mtb, iv_ftb, l_twtr_s_mtb, l_twtr_s_ftb );
@@ -3420,7 +3783,7 @@ fapi2::ReturnCode eff_dimm::dram_twtr_s()
         uint8_t l_twtr_s_in_nck = 0;
 
         // Calculate nck
-        FAPI_TRY( spd::calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
+        FAPI_TRY( spd::calc_nck(l_twtr_s_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_twtr_s_in_nck),
                   "Error in calculating tWTR_S for target %s, with value of l_twtr_in_ps: %d", mss::c_str(iv_dimm), l_twtr_s_in_ps);
 
         FAPI_INF("tCK (ps): %d, tWTR_S (ps): %d, tWTR_S (nck): %d for target: %s",
@@ -3449,7 +3812,7 @@ fapi2::ReturnCode eff_dimm::nibble_map()
     uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_DQ_NIBBLES] = {};
 
     std::vector<uint8_t> l_nibble_bitmap;
-    FAPI_TRY( iv_pDecoder->nibble_map(l_nibble_bitmap) );
+    FAPI_TRY( iv_spd_decoder.nibble_map(l_nibble_bitmap) );
 
     // Sanity check we retrieved a vector w/the right size
     FAPI_ASSERT( l_nibble_bitmap.size() == MAX_DQ_NIBBLES,
@@ -3482,7 +3845,7 @@ fapi2::ReturnCode eff_dimm::package_rank_map()
     uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_DQ_NIBBLES] = {};
 
     std::vector<uint8_t> l_package_rank_map;
-    FAPI_TRY( iv_pDecoder->package_rank_map(l_package_rank_map) );
+    FAPI_TRY( iv_spd_decoder.package_rank_map(l_package_rank_map) );
 
     // Sanity check we retrieved a vector w/the right size
     FAPI_ASSERT( l_package_rank_map.size() == MAX_DQ_NIBBLES,
@@ -3540,17 +3903,16 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
     uint64_t l_trrd_s_in_nck = 0;
     int64_t l_trrd_s_in_ps = 0;
     uint64_t l_jedec_trrd = 0;
-    uint8_t l_dram_width = 0;
 
     // Calculate tRRD_S
     {
         int64_t l_trrd_s_mtb = 0;
         int64_t l_trrd_s_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_trrd_s(l_trrd_s_mtb),
+        FAPI_TRY( iv_spd_decoder.min_trrd_s(l_trrd_s_mtb),
                   "Failed min_trrd_s() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_s(l_trrd_s_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_trrd_s(l_trrd_s_ftb),
                   "Failed fine_offset_min_trrd_s() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_s (MTB): %ld",
@@ -3569,16 +3931,13 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
 
         FAPI_DBG("TRRD_S in ps is %d", l_trrd_s_in_ps);
 
-        FAPI_TRY( spd::calc_nck(l_trrd_s_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trrd_s_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_s_in_nck),
                   "Error in calculating l_tFAW for target %s, with value of l_trrd_s_in_ps: %d",
                   mss::c_str(iv_dimm),
                   l_trrd_s_in_nck);
     }
 
-    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
-              "Failed device_width()");
-
-    FAPI_TRY( trrd_s( iv_dimm, l_dram_width, l_jedec_trrd) );
+    FAPI_TRY( trrd_s( iv_dimm, iv_dram_width, l_jedec_trrd) );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_trrd != l_trrd_s_in_nck)
@@ -3587,14 +3946,14 @@ fapi2::ReturnCode eff_dimm::dram_trrd_s()
                  mss::c_str(iv_dimm),
                  l_jedec_trrd,
                  l_trrd_s_in_nck,
-                 l_dram_width,
+                 iv_dram_width,
                  iv_freq);
 
         l_trrd_s_in_nck = std::max( l_jedec_trrd, l_trrd_s_in_nck);
     }
 
     FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
-             l_dram_width, l_trrd_s_in_nck, mss::c_str(iv_dimm));
+             iv_dram_width, l_trrd_s_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_s(iv_mcs, l_attrs_dram_trrd_s.data()) );
@@ -3619,17 +3978,16 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
     std::vector<uint8_t> l_attrs_dram_trrd_l(PORTS_PER_MCS, 0);
     uint64_t l_trrd_l_in_nck = 0;
     int64_t l_trrd_l_in_ps = 0;
-    uint8_t l_dram_width = 0;
     uint64_t l_jedec_trrd = 0;
     // Calculate tRRD_L
     {
         int64_t l_trrd_l_mtb = 0;
         int64_t l_trrd_l_ftb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_trrd_l(l_trrd_l_mtb),
+        FAPI_TRY( iv_spd_decoder.min_trrd_l(l_trrd_l_mtb),
                   "Failed min_trrd_l() for %s", mss::c_str(iv_dimm) );
 
-        FAPI_TRY( iv_pDecoder->fine_offset_min_trrd_l(l_trrd_l_ftb),
+        FAPI_TRY( iv_spd_decoder.fine_offset_min_trrd_l(l_trrd_l_ftb),
                   "Failed fine_offset_min_trrd_l() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, trrd_l (MTB): %ld",
@@ -3649,16 +4007,13 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
 
         FAPI_DBG("TRRD_L in ps is %d", l_trrd_l_in_ps);
 
-        FAPI_TRY( spd::calc_nck(l_trrd_l_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
+        FAPI_TRY( spd::calc_nck(l_trrd_l_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_trrd_l_in_nck),
                   "Error in calculating l_tFAW for target %s, with value of l_trrd_l_in_ps: %d",
                   mss::c_str(iv_dimm),
                   l_trrd_l_in_nck);
     }
 
-    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
-              "Failed device_width()");
-
-    FAPI_TRY( trrd_l( iv_dimm, l_dram_width, l_jedec_trrd) );
+    FAPI_TRY( trrd_l( iv_dimm, iv_dram_width, l_jedec_trrd) );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_trrd != l_trrd_l_in_nck)
@@ -3667,14 +4022,14 @@ fapi2::ReturnCode eff_dimm::dram_trrd_l()
                  mss::c_str(iv_dimm),
                  l_jedec_trrd,
                  l_trrd_l_in_nck,
-                 l_dram_width,
+                 iv_dram_width,
                  iv_freq);
 
         l_trrd_l_in_nck = std::max( l_jedec_trrd, l_trrd_l_in_nck);
     }
 
     FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
-             l_dram_width, l_trrd_l_in_nck, mss::c_str(iv_dimm));
+             iv_dram_width, l_trrd_l_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_trrd_l(iv_mcs, l_attrs_dram_trrd_l.data()) );
@@ -3726,14 +4081,13 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
     uint64_t l_tfaw_in_nck = 0;
     uint64_t l_jedec_tfaw_in_nck = 0;
     int64_t l_tfaw_in_ps = 0;
-    uint8_t l_dram_width = 0;
     int64_t l_tfaw_ftb = 0;
 
     // Calculate tFAW
     {
         int64_t l_tfaw_mtb = 0;
 
-        FAPI_TRY( iv_pDecoder->min_tfaw(l_tfaw_mtb),
+        FAPI_TRY( iv_spd_decoder.min_tfaw(l_tfaw_mtb),
                   "Failed min_tfaw() for %s", mss::c_str(iv_dimm) );
 
         FAPI_INF("%s medium timebase (ps): %ld, fine timebase (ps): %ld, tfaw (MTB): %ld",
@@ -3752,16 +4106,13 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
 
         FAPI_DBG("%s TFAW in ps is %d", mss::c_str(iv_dimm), l_tfaw_in_ps);
 
-        FAPI_TRY( spd::calc_nck(l_tfaw_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
+        FAPI_TRY( spd::calc_nck(l_tfaw_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_tfaw_in_nck),
                   "Error in calculating l_tFAW for target %s, with value of l_tfaw_in_ps: %d",
                   mss::c_str(iv_dimm),
                   l_tfaw_in_nck);
     }
 
-    FAPI_TRY( iv_pDecoder->device_width(l_dram_width),
-              "Failed device_width()");
-
-    FAPI_TRY( mss::tfaw(iv_dimm, l_dram_width, l_jedec_tfaw_in_nck), "Failed tfaw()" );
+    FAPI_TRY( mss::tfaw(iv_dimm, iv_dram_width, l_jedec_tfaw_in_nck), "Failed tfaw()" );
 
     // Taking the worst case between the required minimum JEDEC value and the proposed value from SPD
     if (l_jedec_tfaw_in_nck != l_tfaw_in_nck)
@@ -3770,14 +4121,14 @@ fapi2::ReturnCode eff_dimm::dram_tfaw()
                  mss::c_str(iv_dimm),
                  l_jedec_tfaw_in_nck,
                  l_tfaw_in_nck,
-                 l_dram_width,
+                 iv_dram_width,
                  iv_freq);
 
         l_tfaw_in_nck = std::max(l_jedec_tfaw_in_nck, l_tfaw_in_nck);
     }
 
     FAPI_INF("SDRAM width: %d, tFAW (nck): %d for target: %s",
-             l_dram_width, l_tfaw_in_nck, mss::c_str(iv_dimm));
+             iv_dram_width, l_tfaw_in_nck, mss::c_str(iv_dimm));
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dram_tfaw(iv_mcs, l_attrs_dram_tfaw.data()) );
@@ -3842,7 +4193,7 @@ fapi2::ReturnCode eff_dimm::dram_tras()
     // addition with negative integers.
     FAPI_TRY( spd::calc_nck(l_tras_in_ps,
                             static_cast<uint64_t>(iv_tCK_in_ps),
-                            INVERSE_DDR4_CORRECTION_FACTOR,
+                            spd::INVERSE_DDR4_CORRECTION_FACTOR,
                             l_tras_in_nck),
               "Error in calculating tras_l for target %s, with value of l_twtr_in_ps: %d",
               mss::c_str(iv_dimm), l_tras_in_ps);
@@ -3878,7 +4229,7 @@ fapi2::ReturnCode eff_dimm::dram_trtp()
     uint8_t l_calc_trtp_in_nck = 0;
 
     // Calculate nck
-    FAPI_TRY( spd::calc_nck(l_max_trtp_in_ps, iv_tCK_in_ps, INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
+    FAPI_TRY( spd::calc_nck(l_max_trtp_in_ps, iv_tCK_in_ps, spd::INVERSE_DDR4_CORRECTION_FACTOR, l_calc_trtp_in_nck),
               "Error in calculating trtp  for target %s, with value of l_twtr_in_ps: %d",
               mss::c_str(iv_dimm), l_max_trtp_in_ps);
 
@@ -3974,7 +4325,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_nom()
     FAPI_TRY( eff_dram_rtt_nom(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_nom(iv_freq, l_decoder_val));
+    FAPI_TRY( iv_spd_decoder.dram_rtt_nom(iv_freq, l_decoder_val));
 
     // Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
     // Same value for every rank for LRDIMMs
@@ -4057,7 +4408,7 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_wr()
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_wr(iv_freq, l_decoder_val));
+    FAPI_TRY( iv_spd_decoder.dram_rtt_wr(iv_freq, l_decoder_val));
 
     // Plug into every rank position for the attribute so it'll fit the same style as the RDIMM value
     // Same value for every rank for LRDIMMs
@@ -4090,10 +4441,10 @@ fapi2::ReturnCode eff_rdimm::dram_rtt_park()
     // for mss::index 1. So this doesn't correspond directly with the table in the JEDEC spec,
     // as that's not in "denominator order."
     constexpr uint64_t RTT_PARK_COUNT = 8;
-    //                                                 0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
-    constexpr uint8_t rtt_park_map[RTT_PARK_COUNT] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
+    //                                                       0  RQZ/1  RQZ/2  RQZ/3  RQZ/4  RQZ/5  RQZ/6  RQZ/7
+    constexpr uint8_t const rtt_park_map[RTT_PARK_COUNT] = { 0, 0b100, 0b010, 0b110, 0b001, 0b101, 0b011, 0b111 };
 
-    uint8_t l_rtt_park[MAX_RANK_PER_DIMM];
+    uint8_t l_rtt_park[MAX_RANK_PER_DIMM] = {};
 
     FAPI_TRY( mss::vpd_mt_dram_rtt_park(iv_dimm, &(l_rtt_park[0])) );
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
@@ -4133,8 +4484,8 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
     FAPI_TRY( eff_dram_rtt_park(iv_mcs, &l_mcs_attrs[0][0][0]) );
 
     // Get the value from the LRDIMM SPD
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01) );
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23) );
+    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks0_1(iv_freq, l_decoder_val_01) );
+    FAPI_TRY( iv_spd_decoder.dram_rtt_park_ranks2_3(iv_freq, l_decoder_val_23) );
 
     // Setting the four rank values for this dimm
     // Rank 0 and 1 have the same value, l_decoder_val_01
@@ -4457,7 +4808,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc04()
     // So the encoding from the SPD is the same as the encoding for the buffer control encoding
     // Simple grab and insert
     // Value is checked in decoder function for validity
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_rtt(iv_freq, l_decoder_val) );
+    FAPI_TRY( iv_spd_decoder.data_buffer_mdq_rtt(iv_freq, l_decoder_val) );
 
     // Update MCS attribute
 
@@ -4485,7 +4836,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc05()
     FAPI_TRY( eff_dimm_ddr4_bc05(iv_mcs, &l_attrs_dimm_bc05[0][0]) );
 
     // Same as BC04, grab from SPD and put into BC
-    FAPI_TRY( iv_pDecoder->iv_module_decoder->data_buffer_mdq_drive_strength(iv_freq, l_decoder_val) );
+    FAPI_TRY( iv_spd_decoder.data_buffer_mdq_drive_strength(iv_freq, l_decoder_val) );
     l_attrs_dimm_bc05[iv_port_index][iv_dimm_index] = l_decoder_val;
 
     FAPI_INF("%s: BC05 settting (MDQ Drive Strenght): %d", mss::c_str(iv_dimm),
@@ -4509,15 +4860,14 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc07()
     // Map for the bc07 attribute, Each bit and its position represents one rank
     // 0b0 == enabled, 0b1 == disabled
     //                                                1 rank  2 rank  3 rank  4 rank
-    constexpr uint8_t dram_map [MAX_RANK_PER_DIMM] = {0b1110, 0b1100, 0b1000, 0b0000};
-
+    constexpr uint8_t const dram_map [MAX_RANK_PER_DIMM] = {0b1110, 0b1100, 0b1000, 0b0000};
     uint8_t l_ranks_per_dimm = 0;
 
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_bc07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-    FAPI_TRY( iv_pDecoder->num_package_ranks_per_dimm(l_ranks_per_dimm) );
-
+    // It is safe to use the attribute accessor directly since it is set in mss_freq
+    FAPI_TRY( eff_num_master_ranks_per_dimm(iv_dimm, l_ranks_per_dimm) );
     FAPI_TRY( eff_dimm_ddr4_bc07(iv_mcs, &l_attrs_dimm_bc07[0][0]) );
 
     // Subtract so 1 rank == 0, 2 rank == 1, etc. For array mss::indexing
