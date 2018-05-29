@@ -2236,5 +2236,23 @@
     <platInit/>
     <default>FALSE</default>
   </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_NEST_24x7_PERF_ACCUM_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Switch to enable or disable 24x7 IMA. Based on the attribute value, a field of 
+    QPMR header of HOMER is populated while building HOMER. Based on the value in 
+    that field 24x7 code, which runs on GPE1, either starts or stops Nest IMA.
+
+    Producer: Initialized by Hostboot firmware based on platform support
+    Consumers: Read by p9_hcode_image_build.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0x00, TRUE = 0x01</enum>
+    <platInit/>
+    <default>TRUE</default>
+  </attribute>
   <!-- ********************************************************************* -->
 </attributes>
