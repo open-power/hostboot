@@ -76,6 +76,12 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     TargetHandle_t txBusTgt = nullptr;
     TYPE busType = getTargetType(rxBusTgt);
 
+    // Make predictive on first occurrence in MFG
+    if (isFabeRepairDisabled())
+    {
+        i_sc.service_data->setServiceCall();
+    }
+
     // RTC 174485
     // Need HWPs for this. Just callout bus interface for now.
     if (busType == TYPE_OBUS)
