@@ -726,6 +726,8 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>
                  l_right_margin);
     }
 
+    FAPI_INF("Restoring mcbist setup attribute...");
+    FAPI_TRY(reset_attribute(i_target_mba));
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1324,6 +1326,8 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBSPAMSKQ, l_data_buffer_64));
     l_data_buffer_64.clearBit<10>();
 
+    FAPI_INF("Restoring mcbist setup attribute...");
+    FAPI_TRY(reset_attribute(i_target_mba));
 //Read the write vref attributes
 fapi_try_exit:
     return fapi2::current_err;
