@@ -1047,7 +1047,7 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
 
         #ifdef __HOSTBOOT_RUNTIME
         // No more repairs left so no point doing any more TPS procedures.
-        MemDbUtils::banTps<TYPE_MCA>( i_chip, i_rank );
+        MemDbUtils::banTps<TYPE_MBA>( i_chip, i_rank );
         #endif
     }
 
