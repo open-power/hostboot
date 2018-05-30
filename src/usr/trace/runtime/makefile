@@ -26,7 +26,7 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = trace_rt
 
-SUBDIRS += test.d
+EXTRAINCDIR +=${ROOTPATH}/src/usr
 
 OBJS += interface.o
 OBJS += assert.o
@@ -42,5 +42,7 @@ OBJS += rt_rsvdtracebufservice.o
 
 VPATH += ..
 VPATH += ../daemon
+
+SUBDIRS += test.d
 
 include $(ROOTPATH)/config.mk
