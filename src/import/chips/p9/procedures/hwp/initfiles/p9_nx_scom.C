@@ -558,7 +558,7 @@ fapi2::ReturnCode p9_nx_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0b0 );
             }
 
             if (literal_1)
