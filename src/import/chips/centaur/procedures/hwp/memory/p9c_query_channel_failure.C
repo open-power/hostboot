@@ -131,7 +131,7 @@ constexpr uint8_t L_CHIFIR_CFG0_ASSOCIATION[][3] =
  *
  * @return FAPI2_RC_SUCCESS on success, error otherwise
  */
-fapi2::ReturnCode p9_query_channel_failure(
+fapi2::ReturnCode p9c_query_channel_failure(
     const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_tgt,
     bool& o_failed )
 {
