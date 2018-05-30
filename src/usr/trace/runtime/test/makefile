@@ -25,6 +25,8 @@
 HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
+EXTRAINCDIR +=${ROOTPATH}/src/usr
+
 MODULE = testrsvdtracebuf_rt
 TESTS =  testrsvdtracebuf.H
 
