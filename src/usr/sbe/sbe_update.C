@@ -1104,13 +1104,19 @@ namespace SBE
             uint32_t desired_min_cores = ((is_fused_mode()) ? 2 : 1) *
                 sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
 
-            // Find out what chip it is
-            // If NIMBUS DD1, be less restrictive
-            uint32_t min_cores =
-                ( (i_target->getAttr<ATTR_MODEL>() == MODEL_NIMBUS) &&
-                (i_target->getAttr<TARGETING::ATTR_EC>() >= 0x20) ) ?
-                    desired_min_cores :
-                    std::min(desired_min_cores, coreCount);
+            // Use desired minimum number of cores, but be less restrictive if
+            // fewer cores are found to be present
+            uint32_t min_cores = std::min(desired_min_cores, coreCount);
+            if(min_cores < desired_min_cores)
+            {
+                // Identify that the desired minimum core count was not met
+                TRACFCOMP( g_trac_sbe, INFO_MRK"procCustomizeSbeImg() - "
+                           "Using fewer cores than desired minimum number of "
+                           "cores. HUID=0x%X, coreCount=%d, coreMask=0x%.8X, "
+                           "desired_min_cores=0x%X",
+                           TARGETING::get_huid(i_target),
+                           coreCount, coreMask, desired_min_cores);
+            }
 
             while( coreCount >= min_cores )
             {
