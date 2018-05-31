@@ -473,11 +473,27 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
-                //In certain IPL Scenarios this attribute may not get
-                // cleared properly, so clearing it for all proc chip
-                // targets that are not the master proc chip
-                if (l_chip != l_pMasterProcChip)
+                if (l_chip == l_pMasterProcChip)
                 {
+                    // Need to set PROC_MASTER_TYPE to reflect the
+                    //  current acting master
+                    l_chip->setAttr<ATTR_PROC_MASTER_TYPE>(PROC_MASTER_TYPE_ACTING_MASTER);
+                }
+                else
+                {
+                    // If an different proc chip was previously the master
+                    //  (we assume this because the PROC_MASTER_TYPE
+                    //  attribute says so) we should change the attribute
+                    //  to indicate it could be the master again in the future
+                    if (l_chip->getAttr<ATTR_PROC_MASTER_TYPE>()
+                                      == PROC_MASTER_TYPE_ACTING_MASTER)
+                    {
+                        l_chip->setAttr<ATTR_PROC_MASTER_TYPE>(PROC_MASTER_TYPE_MASTER_CANDIDATE);
+                    }
+
+                    //In certain IPL Scenarios this attribute may not get
+                    // cleared properly, so clearing it for all proc chip
+                    // targets that are not the master proc chip
                     l_chip->setAttr<ATTR_PROC_SBE_MASTER_CHIP>(0);
                 }
             }
