@@ -29,6 +29,7 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/taskargs.H>
+#include <initservice/initserviceif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -126,6 +127,45 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED,
             ISTEP::RC_MIN_HW_CHECK_FAILED);
+    }
+
+    if (!l_errl)
+    {
+        bool l_valid {true};
+        l_errl = HWAS::check_current_proc_mem_to_use_is_still_valid (l_valid);
+        if (l_errl || !l_valid)
+        {
+            //We deconfigured a bunch of dimms and the answer
+            //changed for which proc's memory to use. Give up TI
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR: check_current_proc_mem_to_use_is_still_valid"
+                    " going to TI");
+
+            if (!l_errl)
+            {
+                /*@
+                *  @errortype      ERRL_SEV_UNRECOVERABLE
+                *  @moduleid       ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED
+                *  @reasoncode     ISTEP::RC_NO_VALID_MEM_CONFIG
+                *  @devdesc        call_proc_exit_cache_contained: did not
+                *                  find valid memory configuration
+                *  @custdesc       Host firmware did not find valid
+                *                  hardware to continue the boot
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED,
+                        ISTEP::RC_NO_VALID_MEM_CONFIG);
+
+                l_errl->addProcedureCallout(
+                        HWAS::EPUB_PRC_SP_CODE,
+                        HWAS::SRCI_PRIORITY_HIGH );
+
+                l_errl->addProcedureCallout(
+                        HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                        HWAS::SRCI_PRIORITY_HIGH );
+            }
+        }
     }
 
     uint8_t l_mpipl = 0;
