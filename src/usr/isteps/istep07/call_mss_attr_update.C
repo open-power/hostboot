@@ -44,6 +44,7 @@
 #include    <errl/errludtarget.H>
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initserviceif.H>
+#include    <initservice/initsvcreasoncodes.H>
 
 // SBE
 #include    <sbeif.H>
@@ -64,6 +65,9 @@
 
 // HWP
 #include <p9_mss_attr_update.H>
+
+//HRMOR
+#include <sys/misc.h>
 
 namespace   ISTEP_07
 {
@@ -345,6 +349,82 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     return l_err;
 } // end check_proc0_memory_config()
 
+void check_hrmor_within_range (ATTR_PROC_MEM_TO_USE_type i_proc_mem_to_use,
+                               IStepError & io_StepError)
+{
+    errlHndl_t l_err {nullptr};
+
+    //extract group and chip id from PROC_MEM_TO_USE attribute
+    uint8_t l_grp  {0};
+    uint8_t l_chip {0};
+    HWAS::parseProcMemToUseIntoGrpChipId(i_proc_mem_to_use, l_grp, l_chip);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "check_hrmor_within_range: PROC_MEM_TO_USE=0x%x,Grp=0x%x,Chip=0x%x",
+            i_proc_mem_to_use, l_grp, l_chip);
+
+    //Find a proc that matches current proc_mem_to_use's group/chip id
+    TargetHandleList l_procs;
+    getAllChips(l_procs, TYPE_PROC);
+
+    TargetHandle_t l_procTgtMemUsed {nullptr};
+    for (auto & l_proc : l_procs)
+    {
+        auto l_proc_grp  = l_proc->getAttr<ATTR_FABRIC_GROUP_ID>();
+        auto l_proc_chip = l_proc->getAttr<ATTR_FABRIC_CHIP_ID>();
+
+        if ((l_proc_grp == l_grp) && (l_proc_chip == l_chip))
+        {
+            l_procTgtMemUsed = l_proc;
+            break;
+        }
+    }
+
+
+    //if we find it, then we check that the hrmor in within
+    //range of configured mem.
+    //
+    //Otherwise, we want to go down the sbe upate and TI path
+    bool l_sbeUpdateTIRequired = true;
+    if (l_procTgtMemUsed)
+    {
+        auto l_lowest_mem_addr  = get_bottom_mem_addr(l_procTgtMemUsed);
+        auto l_highest_mem_addr = get_top_mem_addr(l_procTgtMemUsed);
+        auto l_hrmor = cpu_spr_value(CPU_SPR_HRMOR);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "check_hrmor_within_range: proc picked: 0x%x, lowest addr=0x%x, "
+            "highest addr=0x%x HRMOR=0x%x", get_huid(l_procTgtMemUsed),
+            l_lowest_mem_addr, l_highest_mem_addr, l_hrmor);
+
+        if ((l_lowest_mem_addr <= l_hrmor) && (l_hrmor < l_highest_mem_addr))
+        {
+            //we are good -- no need for TI
+            l_sbeUpdateTIRequired = false;
+        }
+    }
+
+    if (l_sbeUpdateTIRequired)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "check_hrmor_within_range: sbe is downleveled - update required");
+
+        // Rebuild SBE image and trigger reconfig loop
+        l_err = SBE::updateProcessorSbeSeeproms();
+        if( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR: updateProcessorSbeSeeproms");
+            io_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "check_hrmor_within_range: sbe update is NOT required");
+    }
+}
 
 //
 //  Wrapper function to call mss_attr_update
@@ -386,9 +466,59 @@ void*    call_mss_attr_update( void *io_pArgs )
                            "SUCCESS:  check_proc0_memory_config");
             }
         }
+        // For phyp based systems on FSP, HWSV will call
+        // HWAS::update_proc_mem_to_use function to determine the new
+        // proc to use for memory and update SBE scratch registers as
+        // necessary. HB just needs to tell HWSV to do that. There are
+        // only two cases where HB will want HWSV to attempt the above
+        // logic.
+        // 1) HRMOR that we booted doesn't match the current value
+        //    of PROC_MEM_TO_USE attribute. This can only happen if the
+        //    SBE is really old. So, force an sbe update and TI.
+        // 2) HB deconfigured a bunch of dimms in istep7. In this case,
+        //    HB computes new value of PROC_MEM_TO_USE and checks it
+        //    against current value of PROC_MEM_TO_USE. If they don't
+        //    match, HB will force a reconfig loop TI
         else
         {
-            //TODO -- next commit adds the logic for this case
+
+            //////////////////////////////////////////////////////////////////
+            //Case1 from above, where HRMOR doesn't fall in configured mem range
+            //of proc pointed by ATTR_PROC_MEM_TO_USE
+            //////////////////////////////////////////////////////////////////
+
+            //Get the master proc to get the current value of PROC_MEM_TO_USE
+            TargetHandle_t l_mProc;
+            l_err = targetService().queryMasterProcChipTargetHandle(l_mProc);
+            if (l_err)
+            {
+                TRACFCOMP (ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR: getting master proc");
+                l_StepError.addErrorDetails(l_err);
+                errlCommit( l_err, HWPF_COMP_ID );
+                break;
+            }
+
+            auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
+            check_hrmor_within_range(l_proc_mem_to_use, l_StepError);
+
+            //////////////////////////////////////////////////////////////////
+            //Case2 from above, where HB deconfigured dimms, so, we need to
+            //recompute PROC_MEM_TO_USE and if it is not the same TI
+            //////////////////////////////////////////////////////////////////
+            bool l_valid {true};
+            l_err=HWAS::check_current_proc_mem_to_use_is_still_valid (l_valid);
+            if (l_err || !l_valid)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR: check_current_proc_mem_to_use_is_still_valid"
+                        " going down for a reconfig loop");
+                //We deconfigured a bunch of dimms and the answer
+                //changed for which proc's memory to use. Trigger
+                //reconfig loop TI
+                INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+
+            }
         }
 
         // Get all functional MCS chiplets

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/trace.H>
 
 namespace TARGETING
 {
@@ -216,24 +217,36 @@ uint64_t get_top_mem_addr(void)
         for ( size_t proc = 0; proc < l_cpuTargetList.size(); proc++ )
         {
             TARGETING::Target * l_pProc = l_cpuTargetList[proc];
-
-            //Not checking success here as fail results in no change to
-            // top_addr
-            uint64_t l_mem_bases[8] = {0,};
-            uint64_t l_mem_sizes[8] = {0,};
-            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases);
-            l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes);
-
-            for (size_t i=0; i< 8; i++)
-            {
-                if(l_mem_sizes[i]) //non zero means that there is memory present
-                {
-                    top_addr = std::max(top_addr,
-                                        l_mem_bases[i] + l_mem_sizes[i]);
-                }
-            }
+            top_addr = std::max(top_addr,get_top_mem_addr(l_pProc));
         }
-    }while(0);
+
+    } while(0);
+
+    return top_addr;
+}
+
+/**
+ * @brief Utility function to obtain the highest known address in a given proc
+ */
+uint64_t get_top_mem_addr(TargetHandle_t i_proc)
+{
+    uint64_t top_addr = 0;
+
+    //Not checking success here as fail results in no change to
+    // top_addr
+    uint64_t l_mem_bases[8] = {0,};
+    uint64_t l_mem_sizes[8] = {0,};
+    i_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases);
+    i_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes);
+
+    for (size_t i=0; i< 8; i++)
+    {
+        if(l_mem_sizes[i]) //non zero means that there is memory present
+        {
+            top_addr = std::max(top_addr,
+                                l_mem_bases[i] + l_mem_sizes[i]);
+        }
+    }
 
     return top_addr;
 }
@@ -254,24 +267,7 @@ uint64_t get_bottom_mem_addr(void)
         for ( size_t proc = 0; proc < l_cpuTargetList.size(); proc++ )
         {
             TARGETING::Target * l_pProc = l_cpuTargetList[proc];
-
-            uint64_t l_mem_bases[8] = {};
-            uint64_t l_mem_sizes[8] = {};
-            TARG_ASSERT(
-               l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases),
-               "Unable to get ATTR_PROC_MEM_BASES attribute");
-
-            TARG_ASSERT(
-               l_pProc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes),
-               "Unable to get ATTR_PROC_MEM_SIZES attribute");
-
-            for (size_t i=0; i< 8; i++)
-            {
-                if(l_mem_sizes[i]) //non zero means that there is memory present
-                {
-                    bottom_addr = std::min(bottom_addr, l_mem_bases[i]);
-                }
-            }
+            bottom_addr = std::min(bottom_addr, get_bottom_mem_addr(l_pProc));
         }
     }while(0);
 
@@ -284,6 +280,34 @@ uint64_t get_bottom_mem_addr(void)
     return bottom_addr;
 }
 
+
+/**
+ * @brief Utility function to obtain the lowest known address in a given proc
+ */
+uint64_t get_bottom_mem_addr(TargetHandle_t i_proc)
+{
+    uint64_t bottom_addr = UINT64_MAX;
+
+    uint64_t l_mem_bases[8] = {};
+    uint64_t l_mem_sizes[8] = {};
+    TARG_ASSERT(
+       i_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_BASES>(l_mem_bases),
+       "Unable to get ATTR_PROC_MEM_BASES attribute");
+
+    TARG_ASSERT(
+       i_proc->tryGetAttr<TARGETING::ATTR_PROC_MEM_SIZES>(l_mem_sizes),
+       "Unable to get ATTR_PROC_MEM_SIZES attribute");
+
+    for (size_t i=0; i< 8; i++)
+    {
+        if(l_mem_sizes[i]) //non zero means that there is memory present
+        {
+            bottom_addr = std::min(bottom_addr, l_mem_bases[i]);
+        }
+    }
+
+    return bottom_addr;
+}
 
 bool orderByNodeAndPosition(  Target* i_firstProc,
                               Target* i_secondProc)

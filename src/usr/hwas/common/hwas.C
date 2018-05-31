@@ -105,6 +105,24 @@ uint64_t getGroupChipIdInfo (TargetHandle_t i_proc)
     return ((l_grp_id << 3) | l_chip_id);
 }
 
+/*
+ * @brief  This function takes in the value of ATTR_PROC_MEM_TO_USE
+ *         and extract out group and chip id
+ *         in the following bit format: GGGG CCC
+ *         where G = Group Id and C = Chip Id
+ *
+ * @param[in] i_proc_mem_to_use: Value of ATTR_PROC_MEM_TO_USE
+ * @param[out] o_grp_id: groupd id
+ * @param[out] o_chip_id: chip id
+ */
+void parseProcMemToUseIntoGrpChipId (uint8_t   i_proc_mem_to_use,
+                                     uint8_t & o_grp_id,
+                                     uint8_t & o_chip_id)
+{
+    o_grp_id  = (i_proc_mem_to_use >> 3) & 0x0F;
+    o_chip_id = i_proc_mem_to_use & 0x07;
+}
+
 /**
  * @brief       simple helper fn to get and set hwas state to poweredOn,
  *                  present, functional
@@ -454,8 +472,9 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
         //value of PROC_MEM_TO_USE, so, we don't change our answer
         //unnecessarily (in cases when both master proc and altmaster
         //have memory)
-        auto l_grp  = (io_proc_mem_to_use >> 3);
-        auto l_chip = (io_proc_mem_to_use & 0x07); // last three bits are chipId
+        uint8_t l_grp  = 0;
+        uint8_t l_chip = 0;
+        parseProcMemToUseIntoGrpChipId(io_proc_mem_to_use, l_grp, l_chip);
         PredicateAttrVal<ATTR_FABRIC_GROUP_ID> l_predGrp (l_grp);
         PredicateAttrVal<ATTR_FABRIC_CHIP_ID> l_predChip (l_chip);
         PredicateCTM l_predProc (CLASS_CHIP, TYPE_PROC);
@@ -495,7 +514,8 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
 
 
         /////////////////////////////////////////////////////////////
-        //Step 3-- If a proc with lower group/chip id has memory or
+        //Step 3-- If proc picked in Step1 has lower group/chip id
+        //          than current proc_mem_to_use value or
         //          there is no memory behind the currently used proc,
         //          then we update the proc_mem_to_use
         //NOTE: This ensures that if someone replaces the dimm on a lowered
@@ -524,6 +544,52 @@ errlHndl_t check_for_missing_memory (const Target* i_node,
     return l_errl;
 }
 
+errlHndl_t check_current_proc_mem_to_use_is_still_valid (bool o_match)
+{
+    errlHndl_t l_err {nullptr};
+    o_match = true;
+    do
+    {
+        //Get the master proc to get the current value of PROC_MEM_TO_USE
+        TargetHandle_t l_mProc;
+        l_err = targetService().queryMasterProcChipTargetHandle(l_mProc);
+        if (l_err)
+        {
+            HWAS_ERR("ERROR: getting master proc");
+            break;
+        }
+
+        auto l_proc_mem_to_use = l_mProc->getAttr<ATTR_PROC_MEM_TO_USE>();
+
+        //Get the node target to pass to check_for_missing_memory
+        TargetHandleList l_nodes;
+        getEncResources(l_nodes, TYPE_NODE, UTIL_FILTER_FUNCTIONAL);
+        HWAS_ASSERT((l_nodes.size() == 1), "Only expecting 1 functional node");
+
+        auto l_curr_proc_mem_to_use = l_proc_mem_to_use;
+        bool l_found_missing_mem {false};
+        l_err = HWAS::check_for_missing_memory(l_nodes[0],
+                                               l_proc_mem_to_use,
+                                               l_found_missing_mem);
+        if (l_err)
+        {
+            HWAS_ERR("ERROR: check_for_missing_memory");
+            break;
+        }
+
+        HWAS_INF("PROC_MEM_TO_USE currentVal=0x%x reComputedVal=0x%x",
+                l_curr_proc_mem_to_use, l_proc_mem_to_use);
+
+        if (l_curr_proc_mem_to_use != l_proc_mem_to_use)
+        {
+            HWAS_INF("check_current_proc_mem_to_use_is_still_valid: "
+                "currentVal and reComputerVal don't match");
+            o_match = false;
+        }
+    } while (0);
+
+    return l_err;
+}
 
 errlHndl_t discoverTargets()
 {
