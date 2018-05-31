@@ -3286,6 +3286,10 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
         }
     }
 
+    // Always free the message since send/recv implies ownership
+    msg_free(l_msg);
+    l_msg=nullptr;
+
     return l_err;
 } // end persistent_rwAttrRuntimeCheck
 
