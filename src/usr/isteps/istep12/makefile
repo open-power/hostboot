@@ -104,6 +104,6 @@ include $(P9_IO_HWP_PATH)/p9_io_dmi_pdwn_lanes.mk
 include $(CENT_IO_HWP_PATH)/p9_io_cen_pdwn_lanes.mk
 include $(P9_IO_HWP_PATH)/p9_io_dmi_clear_firs.mk
 include $(CENT_INITFILE_PATH)/centaur_dmi_scom.mk
-
+include $(P9_IO_HWP_PATH)/p9_io_erepairAccessorHwpFuncs.mk
 
 include ${ROOTPATH}/config.mk
