@@ -151,8 +151,11 @@ template<>
 fapi2::ReturnCode perform_rcd_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
 {
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
+
     FAPI_DBG("perform rcd_load for %s [expecting rdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( rcd_load_ddr4(i_target, i_inst),
+    FAPI_TRY( rcd_load_ddr4(i_target, l_sim, i_inst),
               "Failed rcd_load_ddr4() for %s", mss::c_str(i_target) );
 
 fapi_try_exit:
@@ -169,8 +172,11 @@ template<>
 fapi2::ReturnCode perform_rcd_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
 {
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::is_simulation(l_sim) );
+
     FAPI_DBG("perform rcd_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( rcd_load_ddr4(i_target, i_inst) );
+    FAPI_TRY( rcd_load_ddr4(i_target, l_sim, i_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;

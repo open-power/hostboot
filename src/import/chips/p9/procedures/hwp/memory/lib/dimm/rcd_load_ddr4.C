@@ -39,6 +39,7 @@
 #include <lib/dimm/rcd_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
 #include <lib/workarounds/draminit_workarounds.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -53,10 +54,12 @@ namespace mss
 ///
 /// @brief Perform the rcd_load_ddr4 operations - TARGET_TYPE_DIMM specialization
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_sim, true IFF in simulation mode
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                 const bool i_sim,
                                  std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     FAPI_INF("rcd_load_ddr4 %s", mss::c_str(i_target));
@@ -115,23 +118,27 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
     // Then with CKE high (We raise it w/the RCW): 4-bit RC09
 
     // Load 4-bit data
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, io_inst, CKE_LOW),
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, i_sim, io_inst, CKE_LOW),
               "Failed to load 4-bit control words for %s",
               mss::c_str(i_target));
 
     // Load 8-bit data
-    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, io_inst, CKE_LOW),
+    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, i_sim, io_inst, CKE_LOW),
               "Failed to load 8-bit control words for %s",
               mss::c_str(i_target));
 
     // Load RC09
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, io_inst, CKE_HIGH),
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, i_sim, io_inst, CKE_HIGH),
               "Failed to load 4-bit RC09 control word for %s",
               mss::c_str(i_target));
 
     // Toggle RC06 again to ensure the DRAM is reset properly
-    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, io_inst), "%s failed to add reset workaround functionality",
+    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, i_sim, io_inst), "%s failed to add reset workaround functionality",
               mss::c_str(i_target));
+
+    // Now, hold the CKE's high, so we don't power down the RCD and re power it back up
+    mss::ccs::workarounds::hold_cke_high(io_inst);
+
 
 fapi_try_exit:
     return fapi2::current_err;

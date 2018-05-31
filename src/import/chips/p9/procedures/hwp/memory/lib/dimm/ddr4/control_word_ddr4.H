@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -274,49 +274,67 @@ struct cw_data
 template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
+                                      const bool i_sim,
                                       std::vector< ccs::instruction_t<OT> >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
-    ccs::instruction_t<OT> l_inst =  ccs::rcd_command<OT>(i_target, i_turn_on_cke);
+    // You're probably asking "Why always turn off CKE's? What is this madness?"
+    // Well, due to a vendor sensitivity, we need to have the CKE's off until we run RC09 at the very end
+    // Unfortunately, we need to have the CKE's off on the DIMM we are running second
+    // We also don't want to turn off the CKE's on the DIMM we are running first
+    // Therefore, we want to setup all RCW commands to have CKE's off across both DIMM's
+    // We then manually turn on the CKE's associated with a specific DIMM
+    constexpr bool CKE_OFF = false;
+    ccs::instruction_t<OT> l_inst =  ccs::rcd_command<OT>(i_target, i_sim, CKE_OFF);
 
-    // A12 is the RCW/ BCW selector
-    constexpr uint64_t DDR_ADDRESS_12 = 12;
-    l_inst.arr0.template writeBit<DDR_ADDRESS_12>(TT::CW_ACCESS);
+    // Turn on the CKE's for the ranks we're not touching, if it's needed
+    // Note: we only have the whole CKE field, not the per DIMM one by default
+    constexpr uint8_t CKE_PER_DIMM = 2;
+    const uint64_t CKE_START = MCBIST_CCS_INST_ARR0_00_DDR_CKE + (mss::index(i_target) * CKE_PER_DIMM);
+    FAPI_TRY(l_inst.arr0.writeBit(i_sim || i_turn_on_cke, CKE_START, CKE_PER_DIMM));
 
-    // For user defined data, iv_data is user defined and iv_attr_get is a NO-OP
-    // For attribute defined data, iv_attr_get will define data and l_value initialization is overwritten
-    // I need l_value integral because the attribute accessor template deduction doesn't let me use buffers
-    // and since I'm passing in bcw data as const I can't pass in iv_data to the attribute accessor
-    // which would break const correctness
-    uint8_t l_value = i_data.iv_data;
-    FAPI_TRY( i_data.iv_attr_get(i_target, l_value) );
+    // Run everything else
+    {
 
-    // Data to be written into the configuration registers
-    // 4-bit control are containned in bits DA0 thorugh DA3
-    // 8-bit control are contained in bits DA0 thorugh DA7
-    mss::swizzle< MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13,
-        TT::DATA_LEN, TT::SWIZZLE_START >(fapi2::buffer<uint8_t>(l_value), l_inst.arr0);
+        // A12 is the RCW/ BCW selector
+        constexpr uint64_t DDR_ADDRESS_12 = 12;
+        l_inst.arr0.template writeBit<DDR_ADDRESS_12>(TT::CW_ACCESS);
 
-    // Selection of each word of control bits
-    mss::swizzle < MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13 + TT::DATA_LEN,
-        TT::WORD_LEN, TT::SWIZZLE_START > (i_data.iv_number, l_inst.arr0);
+        // For user defined data, iv_data is user defined and iv_attr_get is a NO-OP
+        // For attribute defined data, iv_attr_get will define data and l_value initialization is overwritten
+        // I need l_value integral because the attribute accessor template deduction doesn't let me use buffers
+        // and since I'm passing in bcw data as const I can't pass in iv_data to the attribute accessor
+        // which would break const correctness
+        uint8_t l_value = i_data.iv_data;
+        FAPI_TRY( i_data.iv_attr_get(i_target, l_value) );
 
-    // For changes to the control word setting [...] the controller needs to wait some time
-    // the last control word access, before further access to the DRAM can take place.
-    l_inst.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                         MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(i_data.iv_delay);
+        // Data to be written into the configuration registers
+        // 4-bit control are containned in bits DA0 thorugh DA3
+        // 8-bit control are contained in bits DA0 thorugh DA7
+        mss::swizzle< MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13,
+            TT::DATA_LEN, TT::SWIZZLE_START >(fapi2::buffer<uint8_t>(l_value), l_inst.arr0);
 
-    FAPI_INF("F%d%s%02x%s value 0x%x (%d cycles) 0x%016llx:0x%016llx %s",
-             uint8_t(i_data.iv_func_space),
-             (TT::CW_ACCESS == 1 ? "BC" : "RC"),
-             uint8_t(i_data.iv_number),
-             (T == BCW_4BIT || T == RCW_4BIT ? "" : "X"),
-             l_value,
-             i_data.iv_delay,
-             uint64_t(l_inst.arr0), uint64_t(l_inst.arr1),
-             mss::c_str(i_target));
+        // Selection of each word of control bits
+        mss::swizzle < MCBIST_CCS_INST_ARR0_00_DDR_ADDRESS_0_13 + TT::DATA_LEN,
+            TT::WORD_LEN, TT::SWIZZLE_START > (i_data.iv_number, l_inst.arr0);
 
-    io_inst.push_back(l_inst);
+        // For changes to the control word setting [...] the controller needs to wait some time
+        // the last control word access, before further access to the DRAM can take place.
+        l_inst.arr1.template insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                             MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(i_data.iv_delay);
+
+        FAPI_INF("F%d%s%02x%s value 0x%x (%d cycles) 0x%016llx:0x%016llx %s",
+                 uint8_t(i_data.iv_func_space),
+                 (TT::CW_ACCESS == 1 ? "BC" : "RC"),
+                 uint8_t(i_data.iv_number),
+                 (T == BCW_4BIT || T == RCW_4BIT ? "" : "X"),
+                 l_value,
+                 i_data.iv_delay,
+                 uint64_t(l_inst.arr0), uint64_t(l_inst.arr1),
+                 mss::c_str(i_target));
+
+        io_inst.push_back(l_inst);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -336,6 +354,7 @@ fapi_try_exit:
 template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const std::vector<cw_data>& i_data_list,
+                                      const bool i_sim,
                                       std::vector< ccs::instruction_t<OT> >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
@@ -347,7 +366,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
     for (const auto& data : i_data_list)
     {
-        FAPI_TRY( control_word_engine<T>(i_target, data, io_inst, i_turn_on_cke) );
+        FAPI_TRY( control_word_engine<T>(i_target, data, i_sim, io_inst, i_turn_on_cke) );
     }
 
 fapi_try_exit:

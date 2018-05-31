@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,8 +66,11 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 {
     FAPI_INF("bcw_load_ddr4 %s", mss::c_str(i_target) );
 
-    // Per DDR4BC01
+    uint8_t l_sim = 0;
     uint64_t l_tDLLK = 0;
+    FAPI_TRY(mss::is_simulation(l_sim));
+
+    // Per DDR4BC01
     FAPI_TRY( tdllk(i_target, l_tDLLK), "Failed to get tDLLK for %s in bcw_load_ddr4", mss::c_str(i_target) );
 
     {
@@ -102,7 +105,7 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         // We set the 4-bit buffer control words first (they live in function space 0
         // hw is supposed to default to function space 0 but Just.In.Case.
         FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst), "Failed function space select 0", mss::c_str(i_target));
-        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) , "Failed control_word_engine",
+        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, l_sim, io_inst) , "Failed control_word_engine",
                   mss::c_str(i_target));
 
         // We set our 8-bit buffer control words but have to switch function space
@@ -112,14 +115,14 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         {
             cw_data l_data(FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW, eff_dimm_ddr4_f6bc4x, mss::tmrc());
             FAPI_TRY( ddr4::function_space_select<6>(i_target, io_inst), "Failed function space select 6", mss::c_str(i_target) );
-            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst), "Failed control_word_engine",
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst), "Failed control_word_engine",
                       mss::c_str(i_target) );
         }
 
         {
             cw_data l_data(FUNC_SPACE_5, DRAM_VREF_CW, eff_dimm_ddr4_f5bc6x, mss::tmrc());
             FAPI_TRY( ddr4::function_space_select<5>(i_target, io_inst), "Failed function space select 5", mss::c_str(i_target) );
-            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst), "Failed control_word_engine",
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst), "Failed control_word_engine",
                       mss::c_str(i_target) );
         }
 

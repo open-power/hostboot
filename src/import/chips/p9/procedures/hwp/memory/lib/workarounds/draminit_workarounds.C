@@ -49,10 +49,12 @@ namespace workarounds
 ///
 /// @brief Runs the DRAM reset workaround to fix training bugs
 /// @param[in] i_target - the target on which to operate
+/// @param[in] i_sim - true IFF simulation mode is on
 /// @param[in,out] a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rcw_reset_dram( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const bool i_sim,
                                   std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
 {
     // Note: we're always going to run this guy
@@ -75,7 +77,10 @@ fapi2::ReturnCode rcw_reset_dram( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     };
 
     // Load the data into the CCS array
-    return control_word_engine<RCW_4BIT>(i_target, l_rcd_reset_data, io_inst);
+    FAPI_TRY(control_word_engine<RCW_4BIT>(i_target, l_rcd_reset_data, i_sim, io_inst));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // namespace workarounds
