@@ -4841,7 +4841,7 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     if ((l_safe_mode_values.safe_mode_freq_mhz*1000) > i_reference_freq)
     {
         FAPI_ERR("Safe mode frequency %08x is greater than UltraTurbo frequency %08x",
-                  (l_safe_mode_values.safe_op_freq_mhz*1000), i_reference_freq);
+                  (l_safe_mode_values.safe_mode_freq_mhz*1000), i_reference_freq);
         FAPI_ASSERT(false,
                     fapi2::PSTATE_PB_SAFE_FREQ_GT_UT_FREQ()
                     .set_CHIP_TARGET(i_target)
