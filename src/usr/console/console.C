@@ -8,7 +8,6 @@
 /* Contributors Listed Below - COPYRIGHT 2014                             */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
-/* [+] Google Inc.                                                        */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -107,6 +106,10 @@ namespace CONSOLE
         msg_t* msg = msg_allocate();
         msg->type = SYNC;
         msg_sendrecv(g_msgq, msg);
+
+        // Always free since send/recv implies ownership
+        msg_free(msg);
+        msg=nullptr;
     }
 
 }
