@@ -126,6 +126,7 @@ namespace ISTEP
         RC_TURBO_FREQ_MISMATCH                   = ISTEP_COMP_ID | 0x44,
         RC_ULTRA_TURBO_FREQ_MISMATCH             = ISTEP_COMP_ID | 0x45,
         RC_NEST_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x46,
+        RC_NO_VALID_MEM_CONFIG                   = ISTEP_COMP_ID | 0x47,
     };
 
 };
