@@ -544,10 +544,11 @@ fapi2::ReturnCode getVerifiedRepairLanes(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    getLanes_t<K> l_getLanes = NULL;
-    setLanes_t<K> l_setLanes = NULL;
+    getLanes_t<K> l_getLanes_target_K = NULL;
+    getLanes_t<J> l_getLanes_target_J = NULL;
+    setLanes_t<K> l_setLanes_target_K = NULL;
+    setLanes_t<J> l_setLanes_target_J = NULL;
 
-    fapi2::Target < K > l_target[2] = {i_endp1_target, i_endp2_target};
     bool         l_invalidFails_inTx_OfTgt[2] = {false, false};
     bool         l_invalidFails_inRx_OfTgt[2] = {false, false};
     uint8_t      l_tgtIndx = 0;
@@ -563,25 +564,42 @@ fapi2::ReturnCode getVerifiedRepairLanes(
 
     if(i_vpdType == EREPAIR::EREPAIR_VPD_FIELD)
     {
-        l_getLanes = &erepairGetFieldFailedLanes;
-        l_setLanes = &erepairSetFieldFailedLanes;
+        l_getLanes_target_K = &erepairGetFieldFailedLanes;
+        l_getLanes_target_J = &erepairGetFieldFailedLanes;
+        l_setLanes_target_K = &erepairSetFieldFailedLanes;
+        l_setLanes_target_J = &erepairSetFieldFailedLanes;
     }
     else if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
     {
-        l_getLanes = &erepairGetMnfgFailedLanes;
-        l_setLanes = &erepairSetMnfgFailedLanes;
+        l_getLanes_target_K = &erepairGetMnfgFailedLanes;
+        l_getLanes_target_J = &erepairGetMnfgFailedLanes;
+        l_setLanes_target_K = &erepairSetMnfgFailedLanes;
+        l_setLanes_target_J = &erepairSetMnfgFailedLanes;
     }
 
     for(l_tgtIndx = 0; l_tgtIndx < 2; l_tgtIndx++)
     {
         // Get failed lanes for endp1 and endp2
-        FAPI_TRY( l_getLanes(
-                      l_target[l_tgtIndx],
-                      i_clkGroup,
-                      l_txFaillanes,
-                      l_rxFaillanes),
-                  "getVerifiedRepairLanes() from Accessor HWP failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+        if (l_tgtIndx == 0)
+        {
+            FAPI_TRY( l_getLanes_target_K(
+                          i_endp1_target,
+                          i_clkGroup,
+                          l_txFaillanes,
+                          l_rxFaillanes),
+                      "getVerifiedRepairLanes() from Accessor HWP failed w/rc=0x%x",
+                      (uint64_t)fapi2::current_err );
+        }
+        else
+        {
+            FAPI_TRY( l_getLanes_target_J(
+                          i_endp2_target,
+                          i_clkGroup,
+                          l_txFaillanes,
+                          l_rxFaillanes),
+                      "getVerifiedRepairLanes() from Accessor HWP failed w/rc=0x%x",
+                      (uint64_t)fapi2::current_err );
+        }
 
         if(l_tgtIndx == 0)
         {
@@ -636,33 +654,72 @@ fapi2::ReturnCode getVerifiedRepairLanes(
         if(l_invalidFails_inTx_OfTgt[l_tgtIndx] &&
            l_invalidFails_inRx_OfTgt[l_tgtIndx])
         {
-            FAPI_TRY( l_setLanes(
-                          l_target[l_tgtIndx],
-                          i_clkGroup,
-                          l_txFaillanes,
-                          l_rxFaillanes),
-                      "getVerifiedRepairLanes() tx/rx from Accessor HWP failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+            if(l_tgtIndx == 0)
+            {
+                FAPI_TRY( l_setLanes_target_K(
+                              i_endp1_target,
+                              i_clkGroup,
+                              l_txFaillanes,
+                              l_rxFaillanes),
+                          "getVerifiedRepairLanes() tx/rx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
+            else
+            {
+                FAPI_TRY( l_setLanes_target_J(
+                              i_endp2_target,
+                              i_clkGroup,
+                              l_txFaillanes,
+                              l_rxFaillanes),
+                          "getVerifiedRepairLanes() tx/rx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
         }
         else if(l_invalidFails_inTx_OfTgt[l_tgtIndx])
         {
-            FAPI_TRY( l_setLanes(
-                          l_target[l_tgtIndx],
-                          i_clkGroup,
-                          l_txFaillanes,
-                          l_emptyVector),
-                      "getVerifiedRepairLanes() tx from Accessor HWP failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+            if(l_tgtIndx == 0)
+            {
+                FAPI_TRY( l_setLanes_target_K(
+                              i_endp1_target,
+                              i_clkGroup,
+                              l_txFaillanes,
+                              l_emptyVector),
+                          "getVerifiedRepairLanes() tx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
+            else
+            {
+                FAPI_TRY( l_setLanes_target_J(
+                              i_endp2_target,
+                              i_clkGroup,
+                              l_txFaillanes,
+                              l_emptyVector),
+                          "getVerifiedRepairLanes() tx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
         }
         else if(l_invalidFails_inRx_OfTgt[l_tgtIndx])
         {
-            FAPI_TRY( l_setLanes(
-                          l_target[l_tgtIndx],
-                          i_clkGroup,
-                          l_emptyVector,
-                          l_rxFaillanes),
-                      "getVerifiedRepairLanes() rx from Accessor HWP failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+            if(l_tgtIndx == 0)
+            {
+                FAPI_TRY( l_setLanes_target_K(
+                              i_endp1_target,
+                              i_clkGroup,
+                              l_emptyVector,
+                              l_rxFaillanes),
+                          "getVerifiedRepairLanes() rx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
+            else
+            {
+                FAPI_TRY( l_setLanes_target_J(
+                              i_endp2_target,
+                              i_clkGroup,
+                              l_emptyVector,
+                              l_rxFaillanes),
+                          "getVerifiedRepairLanes() rx from Accessor HWP failed w/rc=0x%x",
+                          (uint64_t)fapi2::current_err );
+            }
         }
     } // end of for loop
 
@@ -766,8 +823,10 @@ fapi2::ReturnCode erepairSetFailedLanes(
     uint64_t         l_allMnfgFlags    = 0;
     bool             l_mnfgModeIPL     = false;
     uint8_t          l_threshold       = 0;
-    setLanes_t<K>       l_setLanes        = NULL;
-    getLanes_t<K>       l_getLanes        = NULL;
+    setLanes_t<K>    l_setLanes_target_K  = NULL;
+    setLanes_t<J>    l_setLanes_target_J  = NULL;
+    getLanes_t<K>    l_getLanes_target_K  = NULL;
+    getLanes_t<J>    l_getLanes_target_J  = NULL;
     std::vector<uint8_t> l_txFaillanes;
     std::vector<uint8_t> l_rxFaillanes;
     std::vector<uint8_t> l_emptyVector;
@@ -791,13 +850,17 @@ fapi2::ReturnCode erepairSetFailedLanes(
 
     if(l_mnfgModeIPL)
     {
-        l_setLanes = &erepairSetMnfgFailedLanes;
-        l_getLanes = &erepairGetMnfgFailedLanes;
+        l_setLanes_target_K = &erepairSetMnfgFailedLanes;
+        l_setLanes_target_J = &erepairSetMnfgFailedLanes;
+        l_getLanes_target_K = &erepairGetMnfgFailedLanes;
+        l_getLanes_target_J = &erepairGetMnfgFailedLanes;
     }
     else
     {
-        l_setLanes = &erepairSetFieldFailedLanes;
-        l_getLanes = &erepairGetFieldFailedLanes;
+        l_setLanes_target_K = &erepairSetFieldFailedLanes;
+        l_setLanes_target_J = &erepairSetFieldFailedLanes;
+        l_getLanes_target_K = &erepairGetFieldFailedLanes;
+        l_getLanes_target_J = &erepairGetFieldFailedLanes;
     }
 
     /*** Check if we have crossed the repair threshold ***/
@@ -818,7 +881,7 @@ fapi2::ReturnCode erepairSetFailedLanes(
     }
 
     // Get existing fail lanes that are in the VPD of rx endpoint
-    FAPI_TRY( l_getLanes(
+    FAPI_TRY( l_getLanes_target_J(
                   i_rxEndp_target,
                   i_clkGroup,
                   l_throwAway,
@@ -827,7 +890,7 @@ fapi2::ReturnCode erepairSetFailedLanes(
               (uint64_t)fapi2::current_err );
 
     // Get existing fail lanes that are in the VPD of tx endpoint
-    FAPI_TRY( l_getLanes(
+    FAPI_TRY( l_getLanes_target_K(
                   i_txEndp_target,
                   i_clkGroup,
                   l_txFaillanes,
@@ -870,7 +933,7 @@ fapi2::ReturnCode erepairSetFailedLanes(
     /*** Update the VPD ***/
 
     // Lets write the VPD of endpoint1 with faillanes on Rx side
-    FAPI_TRY( l_setLanes(
+    FAPI_TRY( l_setLanes_target_J(
                   i_rxEndp_target,
                   i_clkGroup,
                   l_emptyVector,
@@ -879,7 +942,7 @@ fapi2::ReturnCode erepairSetFailedLanes(
               (uint64_t)fapi2::current_err );
 
     // Lets write the VPD of endpoint2 with faillanes on Tx side
-    FAPI_TRY( l_setLanes(
+    FAPI_TRY( l_setLanes_target_K(
                   i_txEndp_target,
                   i_clkGroup,
                   l_txFaillanes,
