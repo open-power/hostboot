@@ -33,67 +33,55 @@
 
 namespace KernelMemState
 {
-    // hb_Mem_Location struct values are defined below.
-    /* see mmio.h for scratch reg definitions
-
-     Register Bit Definition:
-     - 0:7 - Indicator of memory mode
-     NOTE:  having no bits on in this range indicated the memory is not ready.
-     - - 0b00000000 = Hostboot contained in L3
-     - - 0b00000001 = Hostboot expanded to mainstore
-     - 8:31 - Reserved/Unused
-     - 32:63 - Size of active Hostboot memory in MB
-     - - 0 = Hostboot is not ready yet.
-     - - 4 = Hostboot is using half a cache
-     - - 8 = Hostboot is using reduced cache
-     - - 10 = Hostboot is using the full cache
-     - - XX = Hostboot is using XX MB of mainstore*/
-
+    /* see mmio.h for scratch reg definitions */
 
     enum MemLocation
     {
           MEM_CONTAINED_NR  = 0x0,
-          MEM_CONTAINED_L3  = 0x80,
-          MEM_CONTAINED_MS  = 0x40,
+          MEM_CONTAINED_L3  = 0x8,
+          MEM_CONTAINED_MS  = 0x4,
     };
 
     // This constants must be kept in sync with the Dump.pm debug tool.
     enum MemSize
     {
-          NO_MEM          =  0x0,
-          HALF_CACHE      =  0x00000004,
-          REDUCED_CACHE   =  0x00000008,
-          FULL_CACHE      =  0x0000000A,
+          NO_MEM          =  0x000,
+          HALF_CACHE      =  0x004,
+          REDUCED_CACHE   =  0x008,
+          FULL_CACHE      =  0x00A,
           FULL_MEM        =  (VMM_MEMORY_SIZE/MEGABYTE),
+          MAX_MEMORY      =  0xFFF  //max space allocated for size
     };
 
-    struct mem_location
+    struct MemState_t
     {
 
         union{
             struct {
-                uint64_t memMode:8;     /**< indicator of memory mode HostBoot
-                                             contained in l3 or mainstore  */
-
-                uint64_t reserved:24;   /**< reserved */
-                uint64_t memSize:32;    /**< Size of the memory */
+                // 00:03 - Indicator of memory mode
+                uint64_t location:4;    /**< Indicator of memory mode HostBoot
+                                             contained in L3 or mainstore  */
+                // 04:51 - Current HRMOR
+                uint64_t hrmor:48;      /**< Current HRMOR in MB */
+                // 52:63 - Size of active Hostboot memory
+                uint64_t size:12;       /**< Size of the memory in MB */
             };
-            uint64_t Scratch6Data;      /**< Full double word */
+            uint64_t fullData;          /**< Full double word */
         };
-   };
+   } PACKED;
 
-    /** @fn set
+    /** @fn setMemScratchReg
      *
-     *  @brief Sets the Hostboot memory location and size in the scratch
-     *     register 6
+     *  @brief Sets the Hostboot memory location and size
      *
-     *  This is used to update the core scratch reg 6 with the current
+     *  This is used to update the core scratch reg with the current
      *  location of hostboot memory and the size it is.
      *
      *  @param[in] uint16_t - location of the memory (L3 or Mainstore)
      *  @param[in] uint32_t - size of the memory
      */
-    void setMemScratchReg(MemLocation i_location,MemSize i_size);
+    void setMemScratchReg( MemLocation i_location,
+                           MemSize i_size );
 
 };
 

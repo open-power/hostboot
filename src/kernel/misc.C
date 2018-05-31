@@ -591,22 +591,22 @@ namespace KernelMisc
 namespace KernelMemState
 {
     void setMemScratchReg(MemLocation i_location,
-                         MemSize i_size)
+                          MemSize i_size)
     {
-        mem_location l_MemData;
+        MemState_t l_MemData;
 
-        l_MemData.memMode = i_location;
-        l_MemData.reserved = 0;
-        l_MemData.memSize = i_size;
+        l_MemData.location = i_location;
+        l_MemData.hrmor = getHRMOR();
+        l_MemData.size = i_size;
+        kassert( i_size < KernelMemState::MAX_MEMORY );
 
         isync();
-        kernel_hbDescriptor.kernelMemoryState = l_MemData.Scratch6Data;
+        kernel_hbDescriptor.kernelMemoryState = l_MemData.fullData;
         KernelMisc::updateScratchReg(MMIO_SCRATCH_MEMORY_STATE,
-                                   l_MemData.Scratch6Data);
+                                     l_MemData.fullData);
         lwsync();
 
     }
-
 };
 
 const char* ProcessorCoreTypeStrings[]

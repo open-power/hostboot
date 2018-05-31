@@ -93,6 +93,18 @@ limit_memory()
     esac
 }
 
+# @fn find_hrmor
+# Discover the stashed away HRMOR.
+find_hrmor()
+{
+    # HRMOR is stored in bits 4:51 of core scratch 1
+    # See memstate.H for details
+    fullreg=`getscom pu 41010A87 4 48`
+    #multiply result by 1024 since it is in MB
+    #take NODE into account
+    #fixme
+}
+
 # Read filename and state.
 FILE=$1
 STATE=$2
