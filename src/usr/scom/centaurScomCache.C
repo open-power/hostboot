@@ -56,34 +56,14 @@ const bool ADD_HI_PRI_HB_SW_CALLOUT=true;
 const bool NO_HB_SW_CALLOUT=false;
 
 ScomCache::ScomCache()
-    : iv_pScomRegDefs(_initScomRegDefs()),
+    : iv_pScomRegDefs(nullptr),
       iv_cacheEnabled(false)
 {
-    // Sort SCOM register defintion records by register address so that we
-    // can look up a given register using std::lower_bound in O(log n)
-    // algorithmic complexity and then jump to same index within local
-    // Centaur SCOM cache to find the current value, yielding overall
-    // algorithmic complexity of O(log n) for lookup of any given Centaur's
-    // cached SCOM register
-    std::sort(
-        iv_pScomRegDefs->begin(),
-        iv_pScomRegDefs->end(),
-        [](const ScomRegDef& i_lhs,const ScomRegDef &i_rhs)
-        {
-            return (i_lhs.addr<i_rhs.addr);
-        });
-
-    _enforceScomRegDefUniqueness();
-
-    _validateScomRegDefs();
-
-    _optimizeScomRegDefs();
 }
 
 ScomCache::~ScomCache()
 {
-    delete iv_pScomRegDefs;
-    iv_pScomRegDefs=nullptr;
+    destroy();
 }
 
 void ScomCache::_enforceScomRegDefUniqueness() const
@@ -196,9 +176,31 @@ void ScomCache::_optimizeScomRegDefs()
     }
 }
 
-void ScomCache::init() const
+void ScomCache::init()
 {
     destroy();
+
+    iv_pScomRegDefs = _initScomRegDefs();
+
+    // Sort SCOM register defintion records by register address so that we
+    // can look up a given register using std::lower_bound in O(log n)
+    // algorithmic complexity and then jump to same index within local
+    // Centaur SCOM cache to find the current value, yielding overall
+    // algorithmic complexity of O(log n) for lookup of any given Centaur's
+    // cached SCOM register
+    std::sort(
+        iv_pScomRegDefs->begin(),
+        iv_pScomRegDefs->end(),
+        [](const ScomRegDef& i_lhs,const ScomRegDef &i_rhs)
+        {
+            return (i_lhs.addr<i_rhs.addr);
+        });
+
+    _enforceScomRegDefUniqueness();
+
+    _validateScomRegDefs();
+
+    _optimizeScomRegDefs();
 
     std::vector<uint64_t> registerCache(iv_pScomRegDefs->size(),0);
     auto registerCacheItr = registerCache.begin();
@@ -235,7 +237,7 @@ void ScomCache::init() const
     }
 }
 
-void ScomCache::destroy() const
+void ScomCache::destroy()
 {
     // Grab all blueprint Centaurs in case a Centaur got deconfigured after
     // Hostboot configured its cache
@@ -258,6 +260,9 @@ void ScomCache::destroy() const
             _setCachePtr(pCentaur,pCache);
         }
     }
+
+    delete iv_pScomRegDefs;
+    iv_pScomRegDefs=nullptr;
 }
 
 errlHndl_t ScomCache::write(

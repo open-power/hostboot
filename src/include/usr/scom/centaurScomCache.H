@@ -184,9 +184,10 @@ class ScomCache
      *  @par Detailed Description:
      *      Builds a SCOM register cache seeded with expected hardware
      *      initialization values for each security sensitive register, and
-     *      clones it to every Centaur
+     *      clones it to every Centaur.  Also instantiates the register
+     *      definitions.
      */
-    void init() const;
+    void init();
 
     /**
      *  @brief Globally enables caching of read/write SCOM requests for every
@@ -210,9 +211,10 @@ class ScomCache
     bool cacheEnabled() const;
 
     /**
-     *  @brief Delete all Centaurs' SCOM register cache
+     *  @brief Delete all Centaurs' SCOM register cache and the
+     *      global register definitions
      */
-    void destroy() const;
+    void destroy();
 
     /**
      *  @brief If caching enabled and register is sensitive, writes the
