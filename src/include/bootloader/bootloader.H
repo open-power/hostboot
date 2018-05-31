@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,6 +138,11 @@ namespace Bootloader{
         return hrmor;
     }
 
+
+     /**Core Scratch Register 1 which tells HRMOR and memsize.
+        This is passed into writeScratchReg to select which scratch
+        reg you are writing */
+#define MMIO_SCRATCH_MEMORY_STATE             0x08
 
      /**Core Scratch Register 3 which tells the state of hostboot.
         This is passed into writeScratchReg to select which scratch
