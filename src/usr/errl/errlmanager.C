@@ -821,12 +821,16 @@ void ErrlManager::flushErrorLogs()
     TRACDCOMP( g_trac_errl, ENTER_MRK "ErrlManager::flushErrorLogs" );
 
     // Create message to send to msg handler
-    msg_t *msg = NULL;
+    msg_t *msg = nullptr;
     msg = msg_allocate();
     msg->type = ERRLOG_FLUSH_TYPE;
     do{
         // Send message to msg handler, get msg back on l_RecvMsgQ
         int rc = msg_sendrecv(iv_msgQ,msg);
+
+        // Always free the message since send/recv implies ownership
+        msg_free(msg);
+        msg=nullptr;
 
         if(rc)
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@ namespace TRACE
             msg->type = TRACE_DAEMON_SHUTDOWN;
             msg_sendrecv(iv_queue, msg);
             msg_free(msg);
+            msg=nullptr;
         }
 
         msg_q_destroy(iv_queue);
@@ -58,6 +59,10 @@ namespace TRACE
             if (i_blocking)
             {
                 msg_sendrecv(iv_queue, msg); // sync message due to 'blocking'.
+
+                // Always free the message since send/receive implies ownership
+                msg_free(msg);
+                msg=nullptr;
             }
             else
             {
@@ -76,6 +81,7 @@ namespace TRACE
         msg->data[0] = i_enable ? 0x2 : 0x0;
         msg_sendrecv(iv_queue, msg);
         msg_free(msg);
+        msg=nullptr;
     }
 
 }
