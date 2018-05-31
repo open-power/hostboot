@@ -2194,8 +2194,6 @@ extern "C" {
                 FAPI_TRY(address_16.flipBit(14)); // Invert A17
                 FAPI_TRY(bank_3.flipBit(0, 3));   // Invert BA0,BA1,BG0
 
-                FAPI_ERR("mss_ddr4_setup_pda: Error setting up buffers");
-
                 if (( address_mirror_map[l_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
                 {
                     FAPI_TRY(mss_address_mirror_swizzle(i_target, address_16, bank_3));
