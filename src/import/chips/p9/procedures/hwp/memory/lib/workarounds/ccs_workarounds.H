@@ -121,6 +121,20 @@ inline void hold_cke_high_helper( fapi2::buffer<uint8_t>& io_cke,
 
 ///
 /// @brief Holds the lower order rank cke high in higher order rank instruction
+/// @param[in,out] io_inst - CCS program with instructions on multi-rank DIMM
+///
+inline void hold_cke_high( std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst )
+{
+    fapi2::buffer<uint8_t> l_cke(CKE_LOW);
+
+    for ( auto& l_inst : io_inst )
+    {
+        hold_cke_high_helper( l_cke, l_inst );
+    }
+}
+
+///
+/// @brief Holds the lower order rank cke high in higher order rank instruction
 /// @param[in,out] io_program - CCS program with instructions on multi-rank DIMM
 ///
 inline void hold_cke_high( ccs::program<fapi2::TARGET_TYPE_MCBIST>& io_program )
