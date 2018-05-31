@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,9 @@ inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGE
     // From DB02 spec - F[3:0]BC7x control word
     constexpr size_t MAX_FUNC_SPACE = 7;
 
+    uint8_t l_sim = 0;
+    mss::is_simulation(l_sim);
+
     // Function spaces are typically user selected.
     // Sometimes function spaces are selected based on rank number
     // or MDQ lane number which currently are also user inputs.
@@ -142,7 +145,7 @@ inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGE
     // don't cares (XXX).  We choose 0 for simplicity.
     cw_data l_data( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, T, mss::tmrd() );
 
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst),
+    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst),
               "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
               mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
 
@@ -183,11 +186,14 @@ inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGE
         fapi2::Assert(false);
     }
 
+    uint8_t l_sim = 0;
+    mss::is_simulation(l_sim);
+
     // function space bits for the function space selector are
     // don't cares (XXX).  We choose 0 for simplicity.
     cw_data l_data( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, mss::tmrd() );
 
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst),
+    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst),
               "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
               mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
 
@@ -214,11 +220,14 @@ static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET
         const cw_data& i_data,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
 {
+    uint8_t l_sim = 0;
+    mss::is_simulation(l_sim);
+
     FAPI_TRY( function_space_select(i_target, i_data.iv_func_space, io_inst),
               "%s. Failed to select function space %d",
               mss::c_str(i_target), uint8_t(i_data.iv_func_space) );
 
-    FAPI_TRY( control_word_engine<T>(i_target, i_data, io_inst),
+    FAPI_TRY( control_word_engine<T>(i_target, i_data, l_sim, io_inst),
               "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
               mss::c_str(i_target), uint8_t(i_data.iv_func_space), uint8_t(i_data.iv_number) );
 

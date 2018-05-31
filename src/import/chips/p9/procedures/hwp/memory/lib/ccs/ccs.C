@@ -207,11 +207,14 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         uint64_t l_total_delay = 0;
         uint64_t l_delay = 0;
         uint64_t l_repeat = 0;
+        uint8_t l_current_cke = 0;
 
         // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
         for (; l_inst_iter != i_program.iv_instructions.end()
              && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++l_inst_iter)
         {
+            l_inst_iter->arr0.extractToRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
+
             // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
             // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
             l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
@@ -248,6 +251,9 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
         FAPI_INF("executing ccs instructions (%d:%d, %d) for %s",
                  i_program.iv_instructions.size(), l_inst_count, i_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
+
+        // Deselect
+        l_des.arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_current_cke);
 
         // Insert a DES as our last instruction. DES is idle state anyway and having this
         // here as an instruction forces the CCS engine to wait the delay specified in

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,10 +47,12 @@ namespace mss
 ///
 /// @brief Perform the rcd_load_ddr4 operations - TARGET_TYPE_DIMM specialization
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_sim, true IFF in simulation mode
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                 std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
+                                 const bool i_sim,
+                                 std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 }
 #endif
