@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,8 +46,7 @@
 //HWP
 #include    <p9_io_dmi_restore_erepair.H>
 #include    <p9_io_cen_restore_erepair.H>
-
-//#include <erepairAccessorHwpFuncs.H> TODO RTC 179584
+#include    <p9_io_erepairAccessorHwpFuncs.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -68,7 +67,7 @@ void* call_dmi_erepair (void *io_pArgs)
     std::vector<uint8_t> l_endp1_rxFaillanes;
     std::vector<uint8_t> l_endp2_txFaillanes;
     std::vector<uint8_t> l_endp2_rxFaillanes;
-    uint32_t             l_count   = 0;
+    uint32_t l_count = 0;
 
     TargetHandleList           l_dmiTargetList;
     TargetHandleList           l_memTargetList;
@@ -116,12 +115,11 @@ void* call_dmi_erepair (void *io_pArgs)
         l_endp2_txFaillanes.clear();
         l_endp2_rxFaillanes.clear();
 
-    //TODO-RTC:179584 - Enable this section
-    #if 0
         l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
+                                      l_fapi_endp2_target,
+                                      3, //DMI Is associated with clock group 3
                                       l_endp1_txFaillanes,
                                       l_endp1_rxFaillanes,
-                                      l_fapi_endp2_target,
                                       l_endp2_txFaillanes,
                                       l_endp2_rxFaillanes);
 
@@ -133,21 +131,19 @@ void* call_dmi_erepair (void *io_pArgs)
                 "target HUID %.8X", TARGETING::get_huid(l_mem_target));
 
             // Convert fapi returnCode to Error handle
-            l_errPtr = fapiRcToErrl(l_rc);
+            l_errPtr = rcToErrl(l_rc);
 
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_dmi_target).addToLog(l_errPtr);
             ErrlUserDetailsTarget(l_mem_target).addToLog(l_errPtr);
 
-           // Create IStep error log and cross reference error that occurred
+            // Create IStep error log and cross reference error that occurred
             l_StepError.addErrorDetails( l_errPtr);
 
             // Commit Error
             errlCommit(l_errPtr, HWPF_COMP_ID);
             break;
         }
-
-    #endif
 
         if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
         {
