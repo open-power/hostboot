@@ -35,6 +35,7 @@ use Hostboot::_DebugFramework;
 
 use constant DEFAULT_HRMOR => 128*1024*1024; # 128 MB.
 use constant PER_NODE_OFFSET => 32*1024*1024*1024*1024; # 32 TB.
+use constant UNSET_HRMOR => 0xFFFFFFFFFFFFFFFF;
 
 my $filename = basename (__FILE__);
 my $self = ($0 =~ m/$filename/);
@@ -49,6 +50,7 @@ my $forceHRMOR = 0;
 my $node = 0;  # -nX parm to ecmd
 my $proc = 0;  # -pX parm to ecmd
 my $memMode = "check";
+my $hrmor = UNSET_HRMOR;
 
 my $imgPath = "";
 my $hbDir = $ENV{'HB_IMGDIR'};
@@ -152,9 +154,27 @@ sub getHRMOR
     {
         return $forceHRMOR;
     }
+    elsif( $hrmor != UNSET_HRMOR )
+    {
+        # we already calculated everything
+        return $hrmor;
+    }
     else
     {
-        return DEFAULT_HRMOR + ($node * PER_NODE_OFFSET);
+        # read Core Scratch 1 (multicast to all cores)
+        my $scratch1 = readScom( 0x41010A87, 8 );
+        # Bits 4:51 are the current HRMOR in MB (see memstate.H)
+        my $hrmor = ($scratch1 & 0x0FFFFFFFFFFFF000)>>12;
+        if( $hrmor == 0 )
+        {
+            $hrmor = DEFAULT_HRMOR + ($node * PER_NODE_OFFSET);
+        }
+        else
+        {
+            $hrmor = $hrmor*1024; #value is in MB
+        }
+
+        return $hrmor;
     }
 }
 

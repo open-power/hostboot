@@ -49,6 +49,7 @@
 #include <p9_sbe_hb_structures.H>
 
 #include <pnor/pnorif.H>
+#include <kernel/memstate.H>
 
 extern char bootloader_end_address;
 
@@ -405,7 +406,19 @@ namespace Bootloader{
         uint64_t hostboot_string = 0x626F6F746C6F6164;
         writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE, hostboot_string);
 
-        // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
+        //Set core scratch 1 to the eventual HRMOR of Hostboot
+        // and 4MB of space.  The HRMOR spoofing is required in
+        // order for FSP code to be able to find the TI area without
+        // having to know exactly where we are in the boot flow.
+        // See _updates_and_setup in bl_start.S for where we put
+        // our TI area below our actual HRMOR.  The 4MB size will
+        // allow a dump to grab all of our working data along with
+        // our actual image.
+        KernelMemState::MemState_t l_memstate;
+        l_memstate.location = KernelMemState::MEM_CONTAINED_L3;
+        l_memstate.hrmor = getHRMOR() - HBB_RUNNING_ADDR;
+        l_memstate.size = KernelMemState::HALF_CACHE;
+        writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
         // Copy SBE BL shared data into BL HB shared data
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
