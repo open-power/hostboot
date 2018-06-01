@@ -57,7 +57,7 @@ extern "C"
      * @retval     ReturnCode
      */
     fapi2::ReturnCode
-    p9_io_dmi_read_erepair(const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+    p9_io_dmi_read_erepair(const fapi2::Target< fapi2::TARGET_TYPE_DMI >& i_target,
                            std::vector< uint8_t >& o_bad_lanes);
 
 } // extern "C"
