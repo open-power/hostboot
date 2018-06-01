@@ -1199,15 +1199,22 @@ sub getFapiName
     {
         return "k0";
     }
-    elsif ($target eq "PROC" || $target eq "DIMM")
+    elsif ($target eq "PROC" || $target eq "DIMM" || $target eq "MEMBUF")
     {
         if ($node eq "" || $chipPos eq "")
         {
             die "getFapiName: ERROR: Must specify node and chipPos for $target
                  current node: $node, chipPos: $chipPos\n";
         }
-
-        my $chip_name = ($target eq "PROC") ? "pu" : "dimm";
+        my $chip_name;
+        if ($target eq "PROC")
+        {
+            $chip_name = "pu";
+        }
+        else
+        {
+            $chip_name = lc $target;
+        }
 
         my $fapi_name = sprintf("%s:k0:n%d:s0:p%02d",$chip_name,$node,$chipPos);
         return $fapi_name;
@@ -1225,12 +1232,7 @@ sub getFapiName
 
         my $fapi_name;
 
-        if ($target eq "membuf")
-        {
-            $fapi_name = sprintf("$target:k0:n%d:s0:p%02d:c%d",
-                            $node, $chipPos, $chipletPos);
-        }
-        elsif ($target eq "mba" || $target eq "l4")
+        if ($target eq "mba" || $target eq "l4")
         {
           $fapi_name = sprintf("membuf.$target:k0:n%d:s0:p%02d:c%d",
                             $node, $chipPos, $chipletPos);
@@ -1513,7 +1515,7 @@ sub processMc
                         my $parent_physical = $self->getAttribute($membuf, "PHYS_PATH");
 
                         $self->setAttribute($membuf,"FAPI_NAME",
-                                     $self->getFapiName($membuf_type, $node, $proc, $membufnum));
+                                     $self->getFapiName($membuf_type, $node, $membufnum));
 
                         my $fapi_pos = (($node * $maxInstance{"PROC"}) + $proc ) * $self->{MAX_DMI} + $dmi_num;
 
@@ -1553,6 +1555,9 @@ sub processMc
                             $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
                         my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
                         $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
+
+                        # HUID needs to be node relative
+                        $self->{huid_idx}->{$membuf_type} = $membufnum;
                         $self->setHuid($membuf, $sys, $node);
                         $self->{targeting}
                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
@@ -1581,15 +1586,19 @@ sub processMc
                                                     $membuf_aff . "/l4-0");
                                 $self->setAttribute($membuf_child, "PHYS_PATH",
                                     $membuf_physical . "/l4-0");
-
-                                $self->setAttribute($membuf_child, "FAPI_POS",  0);
-                                $self->setAttribute($membuf_child, "ORDINAL_ID", 0);
+                                # FAPI_POS and ORDINAL_ID are same as membuf
+                                $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
+                                $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
                                 $self->setAttribute($membuf_child, "REL_POS", 0);
-
+                                
+                                # HUID needs to be node relative
+                                # L4 is 1 to 1 mapping with membuf
+                                $self->{huid_idx}->{"L4"} = $membufnum;
                                 $self->setHuid($membuf_child, $sys, $node);
 
                                 $self->setAttribute($membuf_child,"FAPI_NAME",
-                                     $self->getFapiName($childType, $node, $proc, 0));
+                                    $self->getFapiName($childType, $node,
+                                    $membufnum, 0));
                             }
 
 
@@ -1603,13 +1612,13 @@ sub processMc
                                 $self->setAttribute($membuf_child, "PHYS_PATH",
                                     $membuf_physical . "/mba-$mba");
 
-                                my $mba_offset = $proc * $maxInstance{"MBA"} +
-                                                 MBA_PER_MEMBUF * $membufnum +
+                                # Node offset
+                                my $mba_offset = (MBA_PER_MEMBUF * $membufnum) +
                                                  $mba ;
-
+                                # System offset
                                 my $fapi_pos =
-                                 (($node * $maxInstance{"PROC"}) + $proc ) * $maxInstance{"MBA"} +
-                                    MBA_PER_MEMBUF * $membufnum + $mba ;
+                                 ($node * $maxInstance{"PROC"}) * $maxInstance{"MBA"} +
+                                     $mba_offset;
 
                                 $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
                                 $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
@@ -1617,10 +1626,13 @@ sub processMc
                                 $self->setAttribute($membuf_child, "REL_POS", $mba);
                                 $self->setAttribute($membuf_child, "POSITION", $mba_offset);
 
+                                # HUID needs to be node relative
+                                $self->{huid_idx}->{"MBA"} = $mba_offset;
                                 $self->setHuid($membuf_child, $sys, $node);
 
                                  $self->setAttribute($membuf_child,"FAPI_NAME",
-                                     $self->getFapiName($childType, $node, $proc, $mba_offset));
+                                     $self->getFapiName($childType, $node,
+                                     $membufnum, $mba));
 
                                 $self->{targeting}
                                   ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
@@ -1660,12 +1672,6 @@ sub processMc
                                           DIMMS_PER_MBA*$mba+
                                           MAX_DIMMS_PER_MBA_PORT*$port_num  + $dimm_num;
 
-                                        #unique offset per system
-                                        my $dimm_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
-                                                      DIMMS_PER_DMI*$dmi_num+
-                                                      DIMMS_PER_MBA*$mba+
-                                                      MAX_DIMMS_PER_MBA_PORT*$port_num + $dimm_num;
-
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
                                                   $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
 
@@ -1674,21 +1680,24 @@ sub processMc
 
                                         my $dimmType = $self->getType($dimm);
 
+                                        # cXX portion for dimms is relative to node
                                         $self->setAttribute($dimm,"FAPI_NAME",
                                             $self->getFapiName($dimmType, $node, $aff_pos));
 
                                         $self->setAttribute($dimm,"FAPI_POS", $fapi_pos);
 
-                                        $self->setAttribute($dimm, "ORDINAL_ID", $dimm_ordinal_id);
+                                        $self->setAttribute($dimm, "ORDINAL_ID", $fapi_pos);
 
                                         $self->setAttribute($dimm, "POSITION", $aff_pos);
 
-                                        $self->setAttribute($dimm, "REL_POS", 
+                                        $self->setAttribute($dimm, "REL_POS",
                                             MAX_DIMMS_PER_MBA_PORT*$port_num +
                                             $dimm_num);
 
                                         $self->setAttribute($dimm, "VPD_REC_NUM", $self->{dimm_tpos});
 
+                                        # HUID needs to be node relative
+                                        $self->{huid_idx}->{$dimmType} = $aff_pos;
                                         $self->setHuid($dimm, $sys, $node);
                                         $self->{targeting}
                                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
