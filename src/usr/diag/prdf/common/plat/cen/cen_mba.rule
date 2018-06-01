@@ -297,7 +297,7 @@ group gMBACALFIR filter priority( 4, 7 ),
     /** MBACALFIR[8]
      *  MBX_TO_MBA_PAR_ERROR
      */
-    (rMBACALFIR, bit(8)) ? self_th_1;
+    (rMBACALFIR, bit(8)) ? self_th_1_UERE;
 
     /** MBACALFIR[9]
      *  MBA_WRD_UE
