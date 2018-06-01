@@ -599,32 +599,10 @@
             <field><id>reserved</id><value/></field>
         </default>
     </attribute>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <attribute>
-        <id>TPM_REQUIRED</id>
-        <default>0</default>
-    </attribute>
     <attribute>
         <id>TYPE</id>
         <default>SYS</default>
     </attribute>
-
-
-
-
-
     <attribute>
         <id>X_EREPAIR_THRESHOLD_FIELD</id>
         <default>1</default>
