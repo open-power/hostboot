@@ -39,3 +39,14 @@
         access      write_only;
     };
 
+    ############################################################################
+    # Config registers for channel failure attentions
+    ############################################################################
+
+    register SCOM_MODE_PB
+    {
+        name        "IOMP.BUSCTL.SCOM.SCOM_MODE_PB";
+        scomaddr    0x07011020;
+        capture     group default;
+    };
+
