@@ -530,17 +530,17 @@ rule rIOMCFIR
     IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 &  IOMCFIR_ACT1;
 };
 
-group gIOMCFIR filter singlebit, cs_root_cause
+group gIOMCFIR filter singlebit, cs_root_cause( 12, 20, 28, 36 )
 {
     /** IOMCFIR[0]
      *  RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (rIOMCFIR, bit(0)) ? defaultMaskedError;
+    (rIOMCFIR, bit(0)) ? self_th_1;
 
     /** IOMCFIR[1]
      *  TX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (rIOMCFIR, bit(1)) ? defaultMaskedError;
+    (rIOMCFIR, bit(1)) ? self_th_1;
 
     /** IOMCFIR[2]
      *  GCR_HANG_ERROR
@@ -570,12 +570,12 @@ group gIOMCFIR filter singlebit, cs_root_cause
     /** IOMCFIR[11]
      *  RX BUS 0 Recal or dynamic repair error
      */
-    (rIOMCFIR, bit(11)) ? defaultMaskedError;
+    (rIOMCFIR, bit(11)) ? calloutBusInterface_dmi0_th_1;
 
     /** IOMCFIR[12]
      *  RX BUS 0 Too Many Bus Errors
      */
-    (rIOMCFIR, bit(12)) ? tooManyBusErrors_dmi0;
+    (rIOMCFIR, bit(12)) ? tooManyBusErrors_dmi0_UERE;
 
     /** IOMCFIR[13:15]
      *  spare
@@ -600,12 +600,12 @@ group gIOMCFIR filter singlebit, cs_root_cause
     /** IOMCFIR[19]
      *  RX BUS 1 Recal or dynamic repair error
      */
-    (rIOMCFIR, bit(19)) ? defaultMaskedError;
+    (rIOMCFIR, bit(19)) ? calloutBusInterface_dmi1_th_1;
 
     /** IOMCFIR[20]
      *  RX BUS 1 Too Many Bus Errors
      */
-    (rIOMCFIR, bit(20)) ? tooManyBusErrors_dmi1;
+    (rIOMCFIR, bit(20)) ? tooManyBusErrors_dmi1_UERE;
 
     /** IOMCFIR[21:23]
      *  spare
@@ -630,12 +630,12 @@ group gIOMCFIR filter singlebit, cs_root_cause
     /** IOMCFIR[27]
      *  RX BUS 2 Recal or dynamic repair error
      */
-    (rIOMCFIR, bit(27)) ? defaultMaskedError;
+    (rIOMCFIR, bit(27)) ? calloutBusInterface_dmi2_th_1;
 
     /** IOMCFIR[28]
      *  RX BUS 2 Too Many Bus Errors
      */
-    (rIOMCFIR, bit(28)) ? tooManyBusErrors_dmi2;
+    (rIOMCFIR, bit(28)) ? tooManyBusErrors_dmi2_UERE;
 
     /** IOMCFIR[29:31]
      *  spare
@@ -660,12 +660,12 @@ group gIOMCFIR filter singlebit, cs_root_cause
     /** IOMCFIR[35]
      *  RX BUS 3 Recal or dynamic repair error
      */
-    (rIOMCFIR, bit(35)) ? defaultMaskedError;
+    (rIOMCFIR, bit(35)) ? calloutBusInterface_dmi3_th_1;
 
     /** IOMCFIR[36]
      *  RX BUS 3 Too Many Bus Errors
      */
-    (rIOMCFIR, bit(36)) ? tooManyBusErrors_dmi3;
+    (rIOMCFIR, bit(36)) ? tooManyBusErrors_dmi3_UERE;
 
     /** IOMCFIR[37:39]
      *  spare

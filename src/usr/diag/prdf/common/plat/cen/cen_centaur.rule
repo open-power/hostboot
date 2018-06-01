@@ -1213,7 +1213,7 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[2]
      *  INVALID_ADDRESS_ERROR
      */
-    (rMBSFIR, bit(2)) ? calloutBusInterface_dmibus_th1;
+    (rMBSFIR, bit(2)) ? calloutBusInterface_dmibus_th1_UERE;
 
     /** MBSFIR[3]
      *  EXTERNAL_TIMEOUT
