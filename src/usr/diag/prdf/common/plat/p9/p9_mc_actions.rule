@@ -24,6 +24,10 @@
 # IBM_PROLOG_END_TAG
 
 # TODO: RTC 144057 upate actions for all four DMI buses on this MC target.
+actionclass calloutBusInterface_dmi0_th_1 {};
+actionclass calloutBusInterface_dmi1_th_1 {};
+actionclass calloutBusInterface_dmi2_th_1 {};
+actionclass calloutBusInterface_dmi3_th_1 {};
 actionclass spareDeployed_dmi0 {};
 actionclass spareDeployed_dmi1 {};
 actionclass spareDeployed_dmi2 {};
@@ -32,8 +36,7 @@ actionclass maxSparesExceeded_dmi0 {};
 actionclass maxSparesExceeded_dmi1 {};
 actionclass maxSparesExceeded_dmi2 {};
 actionclass maxSparesExceeded_dmi3 {};
-actionclass tooManyBusErrors_dmi0 {};
-actionclass tooManyBusErrors_dmi1 {};
-actionclass tooManyBusErrors_dmi2 {};
-actionclass tooManyBusErrors_dmi3 {};
-
+actionclass tooManyBusErrors_dmi0_UERE {};
+actionclass tooManyBusErrors_dmi1_UERE {};
+actionclass tooManyBusErrors_dmi2_UERE {};
+actionclass tooManyBusErrors_dmi3_UERE {};
