@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ namespace TRUSTEDBOOT
     uint32_t TCG_EfiSpecIdEventStruct_size(TCG_EfiSpecIdEventStruct* val);
 
     enum {
-        TPMLOG_BUFFER_SIZE   = 3584, ///< Size of event log buffer for HB
+        TPMLOG_BUFFER_SIZE   = 7168,    ///< Size of event log buffer for HB
         TPMLOG_DEVTREE_SIZE  = 64*1024, ///< Size to allocate for OPAL
     };
 
