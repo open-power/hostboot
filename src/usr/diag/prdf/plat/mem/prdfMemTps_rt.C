@@ -1520,25 +1520,23 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
         // after the VCM procedure.
         if ( chipMark.isValid() )
         {
-            /* TODO RTC 189221 DRAM sparing support
-            bool available;
-            o_rc = checkForAvailableSpares( iv_mark.getCM().getPortSlct(),
-                                            available );
-            if ( SUCCESS != o_rc )
+            TdEntry * dsdEvent = nullptr;
+            o_rc = MarkStore::applyRasPolicies<TYPE_MBA>( iv_chip, iv_rank,
+                                                          io_sc, dsdEvent );
+            if ( nullptr != dsdEvent )
             {
-                PRDF_ERR( PRDF_FUNC "checkForAvailableSpares() failed" );
-                break;
+                // We don't want to do the DRAM spare procedure at this time,
+                // because we haven't even run the VCM procedure yet. So just
+                // delete the procedure instead of adding it to the queue.
+                delete dsdEvent; dsdEvent = nullptr;
             }
 
-            if ( !available )
+            if ( SUCCESS != o_rc )
             {
-                // Spares have been used. Callout the mark. Make the error log
-                // predictive.
-                CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
-                setTdSignature( io_sc, PRDFSIG_TpsCmAndSpare );
-                io_sc.service_data->setServiceCall();
+                PRDF_ERR( PRDF_FUNC "applyRasPolicies(0x%08x, 0x%02x) failed.",
+                          iv_chip->getHuid(), iv_rank.getKey() );
+                break;
             }
-            */
         }
 
     } while (0);
