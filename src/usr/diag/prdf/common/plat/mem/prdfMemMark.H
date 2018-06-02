@@ -36,6 +36,10 @@
 #include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
+#ifdef __HOSTBOOT_MODULE
+  #include <prdfMemTdQueue.H>
+#endif
+
 //##############################################################################
 //                           class MemMark
 //##############################################################################
@@ -173,21 +177,44 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 template<TARGETING::TYPE T>
 uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 
+#ifdef __HOSTBOOT_MODULE // Not supported on FSP.
+
+/**
+ * @brief  Applies RAS policies on a rank of memory based on based on the number
+ *         of repairs available on that rank.
+ *
+ * Function details:
+ *  - Removes the symbol mark if it is on the same DRAM as the chip mark.
+ *  - Adds the following to the callout list if they exist: chip mark, symbol
+ *    mark, DRAM spares, and ECC spare.
+ *  - Makes the error log predictive and exits if DRAM repairs are disabled.
+ *  - Makes the error log predictive and bans TPS on this rank if all available
+ *    repairs have been used.
+ *  - Returns a new DsdEvent if DRAM sparing is available.
+ *
+ * @param  i_chip     MBA or MCA chip.
+ * @param  i_rank     Target rank.
+ * @param  io_sc      The step code data struct.
+ * @param  o_dsdEvent A new DsdEvent if DRAM sparing is available. Otherwise,
+ *                    nullptr. Note that this is not used in all cases so the
+ *                    event will need to be manually deleted if not added to the
+ *                    TD queue.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
+                           STEP_CODE_DATA_STRUCT & io_sc,
+                           TdEntry * & o_dsdEvent );
+
 /**
  * @brief  If a chip mark has been verified or explicitly set due other RAS
  *         policies, this function does all the necessary cleanup.
  *
  * Function details:
- *  - Adds the chip mark to the callout list.
- *  - Removes the symbol mark if it is on the same DRAM as the chip mark.
- *  - Adds the symbol mark to the callout list if it exists on another DRAM.
- *  - If DRAM repairs are disabled:
- *      - Makes the error log predictive.
- *  - Otherwise:
- *      - Sets the DRAM in the DRAM Repair VPD.
- *      - Makes the error log predictive if RAS policies apply.
- *      - Adds a DSD procedure to the TD queue is a DRAM spare is available.
- *      - Bans TPS on the rank if all repairs are used.
+ *  - Calls applyRasPolicies() to make any necessary callouts.
+ *  - If DRAM repairs are not disabled:
+ *      - Sets the DRAM in the DRAM Repair VPD if DRAM repairs.
+ *      - Adds a DSD procedure to the TD queue if a DRAM spare is available
  *
  * @param  i_chip MBA or MCA chip.
  * @param  i_rank Target rank.
@@ -197,6 +224,8 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank );
 template<TARGETING::TYPE T>
 uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
                           STEP_CODE_DATA_STRUCT & io_sc );
+
+#endif // Not supported on FSP.
 
 } // end namespace MarkStore
 
