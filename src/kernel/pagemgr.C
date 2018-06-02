@@ -398,9 +398,24 @@ void PageManagerCore::coalesce( void )
         {
             // p needs to be the even buddy to prevent merging of wrong block.
             // To determine this, get the index of the block as if the whole
-            // page memory space were blocks of this size.
-            uint64_t p_idx = (reinterpret_cast<uint64_t>(p) - firstPageAddr())/
-                             ((1 << bucket)*PAGESIZE);
+            // page memory space were blocks of this size.  Note: have to
+            // take into account the page manager "hole" in the middle of the
+            // space
+            uint64_t p_idx = 0;
+            if(reinterpret_cast<uint64_t>(p) < VmmManager::pageTableOffset())
+            {
+                p_idx = (  reinterpret_cast<uint64_t>(p)
+                         - VmmManager::endPreservedOffset())/
+                            ((1 << bucket)*PAGESIZE);
+            }
+            else
+            {
+                p_idx = (  reinterpret_cast<uint64_t>(p)
+                         - (  VmmManager::pageTableOffset()
+                            + VmmManager::PTSIZE) )/
+                               ((1 << bucket)*PAGESIZE);
+            }
+
             if(0 != (p_idx % 2))  // odd index
             {
                 iv_heap[bucket].push(p);  // can't merge
