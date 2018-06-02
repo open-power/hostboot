@@ -81,7 +81,11 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError  l_StepError;
-    bool l_run_xbus_test = true;
+
+    // @TODO RTC:191008
+    // Currently the x-bus mailbox exchange causes a
+    // security violation in step 9, so disabling
+    bool l_run_xbus_test = false;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer entry" );
