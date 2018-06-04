@@ -49,20 +49,6 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    This attribute is deprecated and is not consumed.  See
-    ATTR_EXTERNAL_VRM_TRANSITION_START_NS,
-    ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US,
-    ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US, and
-    ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS
-    </description>
-    <valueType>uint32</valueType>
-    <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_EXTERNAL_VRM_TRANSITION_START_NS</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
