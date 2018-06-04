@@ -6167,6 +6167,7 @@ sub generate_is_dimm
         # Add TEMP_SENSOR_I2C_CONFIG
         if (exists $dimmI2C[$node][$pos])
         {
+
         print "
     <attribute>
         <id>TEMP_SENSOR_I2C_CONFIG</id>
@@ -6175,6 +6176,26 @@ sub generate_is_dimm
             <field><id>engine</id><value>". $dimmI2C[$node][$pos]->{engine} ."</value></field>
             <field><id>port</id><value>". $dimmI2C[$node][$pos]->{port} ."</value></field>
             <field><id>devAddr</id><value>0x". $dimmI2C[$node][$pos]->{devAddr} ."</value></field>
+        </default>
+    </attribute>
+    ";
+
+        # Add EEPROM_NV_INFO i2c config
+        # Base address for the NV controller is 0x80
+        # piggybacking the last nibble of devAddr from $dimmI2C to build the device address
+        print "
+    <attribute>
+        <id>EEPROM_NV_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-$sys/node-$node/proc-$proc</value></field>
+            <field><id>port</id><value>". $dimmI2C[$node][$pos]->{port} ."</value></field>
+            <field><id>devAddr</id><value>0x8". substr($dimmI2C[$node][$pos]->{devAddr},-1) ."</value></field>
+            <field><id>engine</id><value>". $dimmI2C[$node][$pos]->{engine} ."</value></field>
+            <field><id>byteAddrOffset</id><value>0x03</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x01</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writePageSize</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>0x05</value></field>
         </default>
     </attribute>
     ";
@@ -7050,10 +7071,12 @@ sub addI2cBusSpeedArray
     my $tmp_ct eq "";
 
     # bus_speed_array[engine][port] is 4x13 array
+    # Hardcoding speed_array[3][1] for nvdimm as NVDIMM is current 
+    # not in mrw for ZZ (last gen of serverwiz1)
     my @speed_array =  (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                        0, 400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     # Loop through all i2c devices
     for my $i ( 0 .. $#I2Cdevices )
     {

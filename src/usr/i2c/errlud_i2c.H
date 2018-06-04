@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <devicefw/driverif.H>
 #include "i2c_common.H"
 #include "eepromdd.H"
+#include "nvdimmdd.H"
 
 namespace I2C
 {
@@ -111,5 +112,40 @@ class UdEepromParms : public ERRORLOG::ErrlUserDetails
 
 } // end EEPROM namespace
 
+namespace NVDIMM
+{
+/**
+ * @class UdNvdimmParms
+ *
+ * Adds NVDIMM information to an error log as user detail data
+ */
+class UdNvdimmParms : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_opType       Operation Type
+     *  @param i_target       Chip being detected/acted upon
+     *  @param i_buflen       Length of In/Out Buffer
+     *  @param i_i2cInfo      Miscellaneous Parameters
+     */
+    UdNvdimmParms( uint8_t i_opType,
+                   TARGETING::Target * i_target,
+                   uint64_t i_buflen,
+                   nvdimm_addr_t &i_i2cInfo );
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdNvdimmParms();
+
+  private:
+    // Disabled
+    UdNvdimmParms(UdNvdimmParms &);
+    UdNvdimmParms & operator=(UdNvdimmParms &);
+};
+
+} // end NVDIMM namespace
 
 #endif

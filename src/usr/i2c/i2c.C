@@ -55,6 +55,7 @@
 #include <secureboot/service.H>
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
+#include <i2c/nvdimmif.H>
 
 // TODO RTC 94872 Remove the following include in a future commit
 #include <initservice/initserviceif.H>
@@ -4112,6 +4113,17 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
         TRUSTEDBOOT::getTPMs(tpmList);
     #endif
 
+        //Find all NVDIMMs
+    #ifdef CONFIG_NVDIMM
+        TARGETING::ATTR_MODEL_type l_chipModel =
+            pProc->getAttr<TARGETING::ATTR_MODEL>();
+        std::list<EEPROM::EepromInfo_t> l_nvdimmInfo;
+        if (l_chipModel != TARGETING::MODEL_CUMULUS)
+        {
+            NVDIMM::getNVDIMMs( l_nvdimmInfo );
+        }
+    #endif
+
         for(auto const& i2cm : l_i2cInfo)
         {
             TRACDCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(pChipTarget));
@@ -4222,6 +4234,43 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 o_deviceInfo.push_back(l_currentDI);
 
             } //end of tpm iter
+    #endif
+
+    #ifdef CONFIG_NVDIMM
+            for (auto& l_nv : l_nvdimmInfo)
+            {
+                TRACDCOMP(g_trac_i2c,"nvdimm loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_nv.i2cMaster), l_nv.engine );
+                DeviceInfo_t l_currentDI;
+
+                //ignore the devices that aren't on the current target
+                if( l_nv.i2cMaster != pChipTarget )
+                {
+                    TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                    continue;
+                }
+
+                //skip the devices that are on a different engine
+                else if( l_nv.engine != i2cm.engine)
+                {
+                    TRACDCOMP(g_trac_i2c,"skipping umatched engine");
+                    continue;
+                }
+
+                l_currentDI.assocNode = assocNode;
+                l_currentDI.assocProc = assocProc;
+                l_currentDI.masterChip = l_nv.i2cMaster;
+                l_currentDI.engine = l_nv.engine;
+                l_currentDI.masterPort = l_nv.port;
+                l_currentDI.addr = l_nv.devAddr;
+                l_currentDI.slavePort = 0xFF;
+                l_currentDI.busFreqKhz = (l_nv.busFreq)
+                    / FREQ_CONVERSION::HZ_PER_KHZ;
+                strcpy(l_currentDI.deviceLabel,
+                    "?unknown,unknown,nvdimm,nvdimm");
+
+                TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_nv.devAddr);
+                o_deviceInfo.push_back(l_currentDI);
+            } //end of nvdimm iter
     #endif
 
         } //end of i2cm

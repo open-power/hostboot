@@ -959,6 +959,15 @@
     <attribute>
       <id>VPD_REC_NUM</id>
     </attribute>
+    <attribute>
+      <id>EEPROM_NV_INFO</id>
+    </attribute>
+    <attribute>
+      <id>NV_OPS_TIMEOUT_MSEC</id>
+    </attribute>
+    <attribute>
+      <id>NV_STATUS_FLAG</id>
+    </attribute>
   </targetType>
 
   <targetType>

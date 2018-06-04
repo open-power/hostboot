@@ -69,6 +69,7 @@ namespace DeviceFW
         DVPD,      // Direct access memory VPD
         DEPRECATED_MEMD_VPD,
         NODECOMM,
+        NVDIMM,
 
         LAST_ACCESS_TYPE,
     };
@@ -365,7 +366,12 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_mode )),\
             static_cast<uint64_t>(( i_link_id )),\
             static_cast<uint64_t>(( i_mailbox_id ))
-
+    /**
+     * Construct the device addressing parameters for the NVDIMM device ops.
+     * @param[i] i_address - NVDIMM address to internal register
+     */
+    #define DEVICE_NVDIMM_ADDRESS(i_address)\
+        DeviceFW::NVDIMM, static_cast<uint64_t>((i_address))
 
     /**
      *  @brief Perform a hardware read operation.
