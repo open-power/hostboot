@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -419,6 +419,14 @@ const char FAPI2_COMP_NAME[] = "fapi2";
 //@{
 const compId_t HBBL_COMP_ID = 0x3400;
 const char HBBL_COMP_NAME[] = "hbbl";
+//@}
+
+/** @name NVDIMM
+ *  NVDIMM NV Controller Interface
+ */
+//@{
+const compId_t NVDIMM_COMP_ID = 0x3500;
+const char NVDIMM_COMP_NAME[] = "nvdimm";
 //@}
 
 /** @name HDAT

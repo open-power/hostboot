@@ -1187,6 +1187,144 @@
   </attribute>
 
   <attribute>
+    <id>EEPROM_NV_INFO</id>
+    <description>Information needed to address the NV controller on the NVDIMM</description>
+    <complexType>
+        <description>Structure to define the addressing for NV controller.</description>
+        <field>
+            <name>i2cMasterPath</name>
+            <description>Entity path to the chip that contains the I2C
+                master.
+            </description>
+            <type>EntityPath</type>
+            <default>physical:sys-0</default>
+        </field>
+        <field>
+            <name>port</name>
+            <description>Port from the I2C Master device. This is a 6-bit
+                value, but then shifted 2 bits left.
+            </description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>devAddr</name>
+            <description>Device address on the I2C bus. This is a 7-bit value,
+                but then shifted 1 bit left.
+            </description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>engine</name>
+            <description>I2C master engine. This is a 2-bit value,
+                but then shifted 6 bits left.
+            </description>
+            <type>uint8_t</type>
+            <default>0x80</default>
+        </field>
+        <field>
+            <name>byteAddrOffset</name>
+            <description>
+                The number of bytes a device requires to set its
+                internal address/offset. For NV controller it's only
+                one byte addressing with no page select (3)
+                0 = Zero Byte Addressing
+                1 = One Byte Addressing with page select
+                2 = Two Byte Addressing
+                3 = OneByte Addressing with no page select
+            </description>
+            <type>uint8_t</type>
+            <default>0x03</default>
+        </field>
+        <field>
+            <name>maxMemorySizeKB</name>
+            <description>The number of kilobytes a device can hold.  'Zero'
+                value possible for some devices.
+            </description>
+            <type>uint64_t</type>
+            <default>0x01</default>
+        </field>
+        <field>
+            <name>chipCount</name>
+            <description>The number of chips making up an eeprom device.
+            </description>
+            <type>uint8_t</type>
+            <default>0x01</default>
+        </field>
+         <field>
+            <name>writePageSize</name>
+            <description>The maximum number of bytes that can be written to
+                a device at one time. 'Zero' value means no maximum value is
+                expected or checked.
+            </description>
+            <type>uint64_t</type>
+            <default>0x01</default>
+        </field>
+        <field>
+            <name>writeCycleTime</name>
+            <description>The amount of time in milliseconds a device requires
+                on the completion of a write command to update its internal memory.
+            </description>
+            <type>uint64_t</type>
+            <default>0x05</default>
+        </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable></readable>
+  </attribute>
+
+  <attribute>
+    <id>NV_OPS_TIMEOUT_MSEC</id>
+    <description>
+        NVDIMM timeout value for 6 main operations
+        0 - CSAVE
+        1 - Page Switch
+        2 - Restore
+        3 - ERASE
+        4 - ARM
+        5 - CHARGE
+
+        This attribute is set to volatile because the timeout values vary
+        depending on the vendor and capacity. The timeout values will be
+        determined during init by reading the i2c registers on the NV
+        controller.
+        The indices are defined in src/usr/isteps/nvdimm.H and the attribute
+        is consumed in nvdimm.C
+    </description>
+    <simpleType>
+        <array>6</array>
+        <uint32_t>
+            <default>0,0,0,0,0,0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>NV_STATUS_FLAG</id>
+    <description>
+        NVDIMM status flag. This is used to record the status and
+        later report to OPAL. Possible values:
+
+        0x0080 - memory valid, contents not preserved (genesis)
+        0x0040 - memory contents preserved
+        0x0020 - memory failed to preserve contents
+        0x0010 - memory unable to preserve future contents
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0000</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>
         Holds the effective EC of the system.  Effective EC is the lowest EC
         among all the functional procs in the system.  Some cards may "downbin"

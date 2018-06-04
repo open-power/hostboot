@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <i2c/i2cif.H>
 #include "eepromdd.H"
 #include "errlud_i2c.H"
+#include <i2c/nvdimmif.H>
 
 // ----------------------------------------------
 // Globals
@@ -2059,6 +2060,11 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
                                            &l_dimmFilter );
     for( ; dimm_itr; ++dimm_itr )
     {
+    #ifdef CONFIG_NVDIMM
+        // Skip if this is an NVDIMM as this will get added later
+        if (NVDIMM::isNVDIMM( *dimm_itr ))
+            continue;
+    #endif
         add_to_list( o_info, *dimm_itr );
     }
 
