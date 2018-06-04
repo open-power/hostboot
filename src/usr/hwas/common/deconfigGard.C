@@ -738,7 +738,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                  ++l_sdIter)
             {
                 HwasState l_state = (*l_sdIter)->getAttr<ATTR_HWAS_STATE>();
-                l_state.deconfiguredByEid = 0;
+                l_state.deconfiguredByEid = CONFIGURED_BY_RESOURCE_RECOVERY;
                 l_state.specdeconfig = 0;
                 (*l_sdIter)->setAttr<ATTR_HWAS_STATE>(l_state);
 
