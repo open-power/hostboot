@@ -7892,4 +7892,44 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
   <writeable/>
 </attribute>
 
+<attribute>
+  <id>ATTN_AREA_1_ADDR</id>
+  <description>
+    Specifies the "intended" starting memory address for PHYP's ATTN area 1.
+    This is written to by Hostboot and read by FSP as a means for Hostboot to
+    communicate its intentions of where the ATTN 1 area will be. Hostboot can
+    then later open up an SBE window for PHYP to dump its debugging info. An
+    address of 0xFFFFFFFFFFFFFFFF is considered N/A.
+  </description>
+  <simpleType>
+    <uint64_t>
+      <default>0xFFFFFFFFFFFFFFFF</default>
+    </uint64_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <no_export/>
+</attribute>
+
+<attribute>
+  <id>ATTN_AREA_2_ADDR</id>
+  <description>
+    Specifies the "intended" starting memory address for PHYP's ATTN area 2.
+    This is written to by Hostboot and read by FSP as a means for Hostboot to
+    communicate its intentions of where the ATTN 2 area will be. Hostboot can
+    then later open up an SBE window for PHYP to dump its debugging info. An
+    address of 0xFFFFFFFFFFFFFFFF is considered N/A.
+  </description>
+  <simpleType>
+    <uint64_t>
+      <default>0xFFFFFFFFFFFFFFFF</default>
+    </uint64_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+  <no_export/>
+</attribute>
+
 </attributes>
