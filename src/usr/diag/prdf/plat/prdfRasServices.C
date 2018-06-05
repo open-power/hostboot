@@ -116,16 +116,6 @@ bool ErrDataService::checkForceTerm( const ServiceDataCollector & i_sdc,
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleUnitCS( const ServiceDataCollector & i_sdc,
-                                   TargetHandle_t i_unitCsTarget,
-                                   bool & o_initiateHwudump)
-{
-    // No-op in Hostboot
-    o_initiateHwudump = false; // default to not initiate hwudump
-}
-
-//------------------------------------------------------------------------------
-
 void ErrDataService::commitErrLog( errlHndl_t & io_errl,
                                    const PfaData & i_pfaData )
 
