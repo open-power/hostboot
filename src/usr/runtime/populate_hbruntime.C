@@ -90,6 +90,7 @@ const uint16_t TPM_REQUIRED_BIT = 0x8000; //leftmost bit of uint16_t set to 1
 
 const uint8_t BITS_PER_BYTE = 8;
 
+const uint8_t HDAT_INVALID_NODE = 0xFF;
 // The upper limit of the hostboot reserved memory. Only applies to PHYP.
 // The lower limit is Hostboot HRMOR + 64MB; 4KB is the PHYP component's
 // secure header.
@@ -102,49 +103,82 @@ const uint64_t HB_RES_MEM_LOWER_LIMIT = VMM_MEMORY_SIZE + VMM_HRMOR_OFFSET;
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
+//
+uint16_t calculateNodeInstance(const uint8_t i_node,
+                               const uint8_t i_hb_images)
+{
+
+    // initalizing instance to -1 here will make the loop below simpler
+    // because the first functional node represented in hb_images should be
+    // counted as instance 0
+    uint16_t instance = -1;
+
+    // if hb_images is empty, then we only have a single node
+    if( i_hb_images )
+    {
+        // leftmost position indicates node 0
+        uint8_t l_mask =
+            0x1 << (sizeof(i_hb_images)*BITS_PER_BYTE-1);
+
+        uint16_t i = 0;
+
+        while( i <= i_node )
+        {
+            // see if this node is valid
+            if( i_hb_images & l_mask )
+            {
+                instance++;
+            }
+            l_mask = l_mask >> 1;
+            i++;
+        }
+        // make sure our node is really active
+        if(!( (0x80 >> i_node) & i_hb_images))
+        {
+            instance = HDAT_INVALID_NODE;
+        }
+    }
+    else
+    {
+        // if we only have a single node, its instance
+        // should be zero
+        instance = 0;
+    }
+
+    return instance;
+}
+
+
 // Helper function to get the instance number from the
 // node number. The instance is derived from the hb_images
 // attribute, instance 0 will be the first active drawer
 // in the sytem, if hb_images is zero this function will
 // also return zero.
+/**
+ *  @brief Get the nodes instance from its node number
+ *
+ *  @param[out] instance - the nodes instance
+ *  @return Error handle if error
+ */
+
 uint16_t getHdatNodeInstance(void)
 {
-
-    uint16_t instance = 0;
     TARGETING::Target* sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
     assert(sys != nullptr,
             "getHdatNodeInstance() - Could not obtain top level target");
 
-    // This attribute is only set on a multi-node system.
-    // We will use it below to detect a multi-node scenario
-    auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+    // This attribute will be non-zero only if there is more than one
+    // functional node in the system
+    const auto hb_images = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
 
     // get the node id
     const auto l_node = TARGETING::UTIL::getCurrentNodePhysId();
 
-    // if hb_images is empty instance is 0 for a single node
-    if( hb_images )
-    {
-        // leftmost position indicates node 0
-        decltype(hb_images) l_mask = 0x1 << (sizeof(hb_images)*BITS_PER_BYTE-1);
+    uint16_t instance = calculateNodeInstance(l_node, hb_images);
 
-        uint16_t i = 0;
-
-        while( i != l_node )
-        {
-            l_mask = l_mask >> 1;
-            // see if this node is functional
-            if( hb_images & l_mask )
-            {
-                instance++;
-            }
-            i++;
-        }
-    }
-
-    TRACFCOMP( g_trac_runtime,"node %d is hdat instance %d",
-            l_node,instance);
+    TRACFCOMP( g_trac_runtime,"node %d is hdat instance %d hb_images 0x%x",
+            l_node, instance, hb_images);
 
     return instance;
 }
@@ -178,6 +212,12 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
         // for this node. HB_RSV_MEM_NUM_PTRS is defined as the number
         // of usable pointers - see runtime.H for some background
         uint16_t l_nodeInstance = getHdatNodeInstance();
+
+        // if l_nodeInstance is not a valid node id, then there is a good
+        // chance hb_images is not correct for some reason -
+        assert((l_nodeInstance != HDAT_INVALID_NODE),
+                "Invalid node instance returned from getHdatNodeInstance()")
+
         uint32_t instance = l_nextSection +
             (HB_RSV_MEM_NUM_PTRS * l_nodeInstance);
 
