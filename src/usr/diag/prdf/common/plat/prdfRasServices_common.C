@@ -664,13 +664,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     if ( MACHINE_CHECK != pfaData.priAttnType && !ForceTerminate &&
          !pfaData.TERMINATE )
     {
-        // Handle any unit checkstop conditions, if needed (i.e. runtime
-        // deconfiguration, dump/FFDC collection, etc.
-        if ( io_sdc.IsUnitCS() && !io_sdc.IsUsingSavedSdc() )
-        {
-            handleUnitCS( io_sdc, o_dumpTrgt, o_initiateHwudump );
-        }
-
         if ( true == o_initiateHwudump )
         {
             // the dump log will be deleted later in PRDF::main

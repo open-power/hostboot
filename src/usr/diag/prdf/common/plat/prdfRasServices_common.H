@@ -183,16 +183,6 @@ class ErrDataService
                          PfaData &io_pfaData );
 
     /**
-     * @brief Handles unit checkstops.
-     * @param i_sdc             The service data collector.
-     * @param i_unitCsTarget    Chip(let) target.
-     * @param o_initiateHwudump Whether or not to initiate hwudump
-     */
-    void handleUnitCS( const ServiceDataCollector & i_sdc,
-                       TARGETING::TargetHandle_t i_unitCsTarget,
-                       bool & o_initiateHwudump );
-
-    /**
      * @brief commits error log based on platform.
      * @param io_errl       reference to error log handle.
      * @param i_pfaData     Pfa struct
