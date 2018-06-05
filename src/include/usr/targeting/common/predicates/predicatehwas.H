@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,6 +136,17 @@ class PredicateHwas : public PredicateBase
           *  @return Reference to the predicate, for chaining
           */
          PredicateHwas& specdeconfig(const bool i_specdeconfig);
+
+         /**
+          *  @brief Configure predicate to look for the given deconfig by
+          *  error log id or enum value
+          *
+          *  @param[in] i_eid Desired value of deconfig by EID
+          *
+          *  @return Reference to the predicate, for chaining
+          */
+         PredicateHwas& deconfiguredByEid(const uint32_t i_eid);
+
         /**
          *  @brief Returns whether target matches the desired HWAS state
          *
@@ -250,6 +261,18 @@ inline PredicateHwas& PredicateHwas::specdeconfig(
     iv_valid.attribute.specdeconfig = true;
     return *this;
 }
+
+//******************************************************************************
+// PredicateHwas::deconfiguredByEid
+//******************************************************************************
+inline PredicateHwas& PredicateHwas::deconfiguredByEid(
+    const uint32_t i_eid)
+{
+    iv_desired.attribute.deconfiguredByEid = i_eid;
+    iv_valid.attribute.deconfiguredByEid = 0xFFFFFFFF;
+    return *this;
+}
+
 #undef TARG_CLASS
 #undef TARG_NAMESPACE
 

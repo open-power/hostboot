@@ -1523,12 +1523,21 @@ void DeconfigGard::_deconfigureByAssoc(
         isFunctional.specdeconfig(false);
     }
 
+    // If there are child targets deconfig by FCO, override the reason
+    // with that of the parent's deconfg EID
+    PredicateHwas isFCO;
+    isFCO.present(true).functional(false)
+         .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+
+    PredicatePostfixExpr funcOrFco;
+    funcOrFco.push(&isFunctional).push(&isFCO).Or();
+
     // note - ATTR_DECONFIG_GARDABLE is NOT checked for all 'by association'
     // deconfigures, as that attribute is only for direct deconfigure requests.
 
     // find all CHILD targets and deconfigure them
     targetService().getAssociated(pChildList, &i_target,
-        TargetService::CHILD, TargetService::ALL, &isFunctional);
+        TargetService::CHILD, TargetService::ALL, &funcOrFco);
     for (TargetHandleList::iterator pChild_it = pChildList.begin();
             pChild_it != pChildList.end();
             ++pChild_it)
@@ -1555,7 +1564,7 @@ void DeconfigGard::_deconfigureByAssoc(
         // find all CHILD_BY_AFFINITY targets and deconfigure them
         targetService().getAssociated(pChildList, &i_target,
             TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-            &isFunctional);
+            &funcOrFco);
         for (TargetHandleList::iterator pChild_it = pChildList.begin();
                 pChild_it != pChildList.end();
                 ++pChild_it)
@@ -1613,11 +1622,23 @@ void DeconfigGard::_deconfigureByAssoc(
                     // if both cores of EX non-functional, de-config EX
                     else if (!anyChildFunctional(*l_parentEX))
                     {
+                       uint32_t l_errlEidOverride = i_errlEid;
+
+                       // If any sibling is not functional due to FCO, override
+                       // the deconfig by Eid reason of its parent to FCO
+                       if (anyChildFCO(*l_parentEX))
+                       {
+                           HWAS_INF("Override EX %.8X deconfigByEid %.8X->FCO",
+                                    get_huid(l_parentEX), i_errlEid);
+                           l_errlEidOverride =
+                                    DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
+                       }
+
                        // If parent is functional, deconfigure it
                        _deconfigureTarget(*l_parentEX,
-                          i_errlEid, NULL, i_deconfigRule);
+                          l_errlEidOverride, NULL, i_deconfigRule);
                        _deconfigureByAssoc(*l_parentEX,
-                          i_errlEid,i_deconfigRule);
+                          l_errlEidOverride, i_deconfigRule);
                     } // is_fused
                 } // isFunctional
                 break;
@@ -1641,7 +1662,19 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 if (!anyChildFunctional(*l_targetEq))
                 {
-                    _deconfigureTarget(*l_targetEq, i_errlEid, NULL,
+                    uint32_t l_errlEidOverride = i_errlEid;
+
+                    // If any sibling is not functional due to FCO, override
+                    // the deconfig by Eid reason of its parent to FCO
+                    if (anyChildFCO(*l_targetEq))
+                    {
+                        HWAS_INF("Override EQ %.8X deconfigByEid %.8X->FCO",
+                                 get_huid(l_targetEq), i_errlEid);
+                        l_errlEidOverride =
+                                 DECONFIGURED_BY_FIELD_CORE_OVERRIDE;
+                    }
+
+                    _deconfigureTarget(*l_targetEq, l_errlEidOverride, NULL,
                                     i_deconfigRule);
                 }
 
@@ -2086,6 +2119,16 @@ void DeconfigGard::_deconfigureTarget(
         {
             // if FULLY_AT_RUNTIME or DUMP_AT_RUNTIME, then the dumpfunctional
             // state changed, so do the setAttr
+            i_target.setAttr<ATTR_HWAS_STATE>(l_state);
+        }
+
+        if (l_state.deconfiguredByEid == DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
+        {
+            // A child target was deconfig by FCO, and parent is being deconfig
+            // with a non-FCO reason .. override with parent's EID
+            HWAS_INF("HUID %.8X, Overriding deconfigByEid from FCO->%.8X",
+                     get_huid(&i_target), i_errlEid);
+            l_state.deconfiguredByEid = i_errlEid;
             i_target.setAttr<ATTR_HWAS_STATE>(l_state);
         }
     }
@@ -2875,32 +2918,49 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
 bool DeconfigGard::anyChildFunctional(Target & i_parent)
 {
     bool retVal = false;
-    do
+    TargetHandleList pChildList;
+    PredicateHwas isFunctional;
+    isFunctional.functional(true);
+
+    if (isFunctional(&i_parent))
     {
-        TargetHandleList pChildList;
-        PredicateHwas isFunctional;
-        isFunctional.functional(true);
-        if (isFunctional(&i_parent))
+        // find all CHILD targets, that match the predicate
+        // if any of them are functional return true
+        // if all of them are non-functional return false
+        targetService().getAssociated(pChildList, &i_parent,
+            TargetService::CHILD, TargetService::ALL, &isFunctional);
+
+        if (pChildList.size() >= 1)
         {
-            // find all CHILD targets
-            // if any of them are functional return true
-            // if all of them are non-functional return false
-            targetService().getAssociated(pChildList, &i_parent,
-                TargetService::CHILD, TargetService::ALL, &isFunctional);
-            for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                 pChild_it != pChildList.end();
-                 ++pChild_it)
-            {
-                if (isFunctional(*pChild_it))
-                {
-                   retVal = true;
-                   break;
-                }
-            }
+            retVal = true;
         }
-    }while(0);
+    }
     return retVal;
 } //anyChildFunctional
+
+bool DeconfigGard::anyChildFCO (Target & i_parent)
+{
+    bool retVal = false;
+
+    TargetHandleList pChildList;
+    PredicateHwas predFCO;
+    predFCO.present(true)
+           .functional(false)
+           .deconfiguredByEid(DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
+
+    // find all CHILD targets, that match the predicate
+    // if any of them are FCO return true
+    // if none of them are FCO return false
+    targetService().getAssociated(pChildList, &i_parent,
+        TargetService::CHILD, TargetService::ALL, &predFCO);
+
+    if (pChildList.size() >= 1)
+    {
+        retVal = true;
+    }
+
+    return retVal;
+} //anyChildFCO
 
 #ifdef __HOSTBOOT_MODULE
 /******************************************************************************/
