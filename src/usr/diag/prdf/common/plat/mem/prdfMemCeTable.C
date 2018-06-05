@@ -210,13 +210,7 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
     {
         isMba  = 1;
         mbaPos = getTargetPosition( iv_chip->getTrgt() );
-
-        if ( SUCCESS != getMemBufRawCardType(iv_chip->getTrgt(), rcType) )
-        {
-            PRDF_ERR( "addCapData: getMemBufRawCardType(0x%08x) failed",
-                      iv_chip->getHuid() );
-            rcType = CEN_SYMBOL::WIRING_INVALID; // Just in case.
-        }
+        rcType = getMemBufRawCardType<TYPE_MBA>( iv_chip->getTrgt() );
     }
 
     // Fill in the header info.

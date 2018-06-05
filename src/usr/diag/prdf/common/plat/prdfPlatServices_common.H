@@ -259,13 +259,12 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, MemRank i_rank,
 
 /**
  * @brief  Returns the raw card type of a buffered DIMM.
- * @param  i_mbaTarget  An MBA target. This MBA must be on a buffered DIMM.
- * @param  o_wiringType The DIMM's raw card type. Will return WIRING_INVALID if
- *                      the raw card type currently is not supported.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @param  i_trgt An MBA target.
+ * @return WIRING_INVALID if an internal function fails. Otherwise, the DIMM's
+ *         raw card type.
  */
-int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
-                              CEN_SYMBOL::WiringType & o_wiringType );
+template<TARGETING::TYPE>
+CEN_SYMBOL::WiringType getMemBufRawCardType( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief   get DIMM DQ map from FAPI routines

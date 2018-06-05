@@ -59,7 +59,7 @@ using namespace TARGETING;
 
 namespace PRDF
 {
-using namespace CEN_SYMBOL;
+
 namespace PlatServices
 {
 
@@ -659,7 +659,7 @@ int32_t  getSpdModspecComRefRawCard(
 #define PRDF_FUNC "[PlatServices::getSpdModspecComRefRawCard] "
 
     int32_t rc = SUCCESS;
-    o_rawCard = WIRING_INVALID;
+    o_rawCard = 0xff; // something invalid
     size_t l_size = 0;
     uint8_t * l_blobData = nullptr;
 
@@ -736,49 +736,38 @@ int32_t  getSpdModspecComRefRawCard(
 #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
 
-int32_t getMemBufRawCardType( TargetHandle_t i_mba,
-                              WiringType & o_cardType )
+template<>
+CEN_SYMBOL::WiringType getMemBufRawCardType<TYPE_MBA>( TargetHandle_t i_trgt )
 {
     #define PRDF_FUNC "[PlatServices::getMemBufRawCardType] "
 
-    int32_t o_rc = SUCCESS;
+    PRDF_ASSERT( nullptr != i_trgt );
+    PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) );
 
-    o_cardType = WIRING_INVALID;
+    // Ensure invalid card type if something fails.
+    CEN_SYMBOL::WiringType o_cardType = CEN_SYMBOL::WIRING_INVALID;
 
     do
     {
-        if ( TYPE_MBA != getTargetType(i_mba) )
-        {
-            PRDF_ERR( PRDF_FUNC "Target 0x%08x is not an MBA", getHuid(i_mba) );
-            o_rc = FAIL; break;
-        }
+        // Must be a custom DIMM with Centaur chip.
+        if ( !isMembufOnDimm<TYPE_MBA>(i_trgt) ) break;
 
-        if ( !isMembufOnDimm<TYPE_MBA>(i_mba) )
-        {
-            PRDF_ERR( PRDF_FUNC "MBA 0x%08x is not on a buffered DIMM",
-                      getHuid(i_mba) );
-            o_rc = FAIL; break;
-        }
-
-        TargetHandleList l_dimmList = getConnected( i_mba, TYPE_DIMM );
-        if ( 0 == l_dimmList.size() )
-        {
-            PRDF_ERR( PRDF_FUNC "No DIMMs connected to MBA 0x%08x",
-                      getHuid(i_mba) );
-            o_rc = FAIL; break;
-        }
+        TargetHandleList l_dimmList = getConnected( i_trgt, TYPE_DIMM );
+        PRDF_ASSERT( 0 != l_dimmList.size() ); // MBA configured with no DIMMs
 
         // All logical DIMMs connected to this MBA are on the same card as the
         // MBA so we can use any connected DIMM to query for the raw card type.
-        uint8_t l_cardType = WIRING_INVALID;
-        o_rc = getSpdModspecComRefRawCard(l_dimmList[0], l_cardType);
-        if ( o_rc != SUCCESS )
+        uint8_t l_cardType;
+        if ( SUCCESS != getSpdModspecComRefRawCard(l_dimmList[0], l_cardType) )
         {
+            PRDF_ERR( PRDF_FUNC "getSpdModspecComRefRawCard(0x%08x) failed",
+                      getHuid(l_dimmList[0]) );
             break;
         }
 
-        uint8_t l_version = getDramGen<TYPE_MBA>( i_mba );
+        uint8_t l_version = getDramGen<TYPE_MBA>( i_trgt );
 
         // Centaur raw card types are only used for DRAM site locations. If an
         // invalid wiring type is passed to the error log parser, the parser
@@ -793,73 +782,56 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
             case SPD_MODSPEC_COM_REF_RAW_CARD_A:
                 if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
-                    o_cardType = CEN_TYPE_A;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_A;
                 }
                 else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
-                    o_cardType = CEN_TYPE_A4;
-                }
-                else
-                {
-                    o_cardType = WIRING_INVALID;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_A4;
                 }
                 break;
 
             case SPD_MODSPEC_COM_REF_RAW_CARD_B:
                 if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
-                    o_cardType = CEN_TYPE_B;
-                } // end if DDR3
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_B;
+                }
                 else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
-                    o_cardType = CEN_TYPE_B4;
-                } // end else if DDR4
-                else
-                {   // don't know what this is
-                    o_cardType = WIRING_INVALID;
-                } // end else unknown DRAM version
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_B4;
+                }
                 break;
 
             case SPD_MODSPEC_COM_REF_RAW_CARD_C:
                 if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
-                    o_cardType = CEN_TYPE_C;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_C;
                 }
                 else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
-                    o_cardType = CEN_TYPE_C4;
-                }
-                else
-                {
-                    o_cardType = WIRING_INVALID;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_C4;
                 }
                 break;
 
             case SPD_MODSPEC_COM_REF_RAW_CARD_D:
                 if (CEN_EFF_DRAM_GEN_DDR3 == l_version)
                 {
-                    o_cardType = CEN_TYPE_D;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_D;
                 }
                 else if (CEN_EFF_DRAM_GEN_DDR4 == l_version)
                 {
-                    o_cardType = CEN_TYPE_D4;
-                }
-                else
-                {
-                    o_cardType = WIRING_INVALID;
+                    o_cardType = CEN_SYMBOL::CEN_TYPE_D4;
                 }
                 break;
 
             default:
-                o_cardType = WIRING_INVALID; // Anything unsupported
+                PRDF_INF( PRDF_FUNC "Unsupported card type 0x%02x or DRAM "
+                          "version 0x%02x on DIMM 0x%08x", l_cardType,
+                          l_version, getHuid(l_dimmList[0]) );
         }
-
-        PRDF_INF( PRDF_FUNC "DIMM 0x%08x - RawType 0x%02x, version = 0x%02x => 0x%02x card type",
-          getHuid(l_dimmList[0]), l_cardType, l_version, o_cardType );
 
     } while(0);
 
-    return o_rc;
+    return o_cardType;
 
     #undef PRDF_FUNC
 }

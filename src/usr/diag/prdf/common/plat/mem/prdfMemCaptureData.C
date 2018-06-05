@@ -68,27 +68,13 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
         extMemMru.isX4Dram = isDramWidthX4( trgt ) ? 1 : 0;
 
         // Get the DIMM type.
-        bool isBufDimm = false;
         if ( TYPE_MBA == getTargetType(trgt) )
         {
-            isBufDimm = isMembufOnDimm<TYPE_MBA>( trgt );
+            extMemMru.isBufDimm = isMembufOnDimm<TYPE_MBA>( trgt ) ? 1 : 0;
+            extMemMru.cardType  = getMemBufRawCardType<TYPE_MBA>( trgt );
         }
-        extMemMru.isBufDimm = isBufDimm ? 1 : 0;
 
-        if ( isBufDimm )
-        {
-            // Get the raw card type (Centaur DIMMs only).
-            CEN_SYMBOL::WiringType cardType = CEN_SYMBOL::WIRING_INVALID;
-            int32_t l_rc = getMemBufRawCardType( trgt, cardType );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getMemBufRawCardType() failed. MBA:0x%08x",
-                          getHuid(trgt) );
-                break;
-            }
-            extMemMru.cardType = cardType;
-        }
-        else
+        if ( 0 == extMemMru.isBufDimm )
         {
             // Get the 80-byte DQ map (ISDIMMs only). This is only needed if the
             // MemoryMru contains a single DIMM callout with a valid symbol.
