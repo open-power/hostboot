@@ -43,6 +43,7 @@
 #include <sys/mm.h>
 #include <config.h>
 #include <initservice/istepdispatcherif.H>
+#include <initservice/initserviceif.H>
 
 #include <pnor/pnorif.H>
 
@@ -593,6 +594,13 @@ void DeconfigGard::platPostDeconfigureTarget(
 
    do
    {
+      // This path is only relevant for FSP systems
+      if( !INITSERVICE::spBaseServicesEnabled() )
+      {
+          break;
+      }
+
+      // Make sure we have all of our function pointers setup right
       if ((nullptr == g_hostInterfaces) ||
           (nullptr == g_hostInterfaces->firmware_request))
       {
@@ -612,7 +620,7 @@ void DeconfigGard::platPostDeconfigureTarget(
                               HWAS::RC_RT_NULL_FIRMWARE_REQUEST_PTR,
                               get_huid(i_pTarget),
                               0,
-                              true);
+                              ErrlEntry::ADD_SW_CALLOUT);
          break;
       }
 
@@ -648,7 +656,7 @@ void DeconfigGard::platPostDeconfigureTarget(
                               HWAS::RC_RT_NULL_FIRMWARE_MSG_PTR,
                               get_huid(i_pTarget),
                               0,
-                              true);
+                              ErrlEntry::ADD_SW_CALLOUT);
          break;
       }
 
