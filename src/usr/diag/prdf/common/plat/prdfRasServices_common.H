@@ -199,12 +199,6 @@ class ErrDataService
     void handleChannelFail( TARGETING::TargetHandle_t i_memTarget );
 
     /**
-     * @brief Handles NX checkstops.
-     * @param i_nxTarget NX target.
-     */
-    void handleNxUnitCS( TARGETING::TargetHandle_t i_nxTarget );
-
-    /**
      * @brief commits error log based on platform.
      * @param io_errl       reference to error log handle.
      * @param i_pfaData     Pfa struct
