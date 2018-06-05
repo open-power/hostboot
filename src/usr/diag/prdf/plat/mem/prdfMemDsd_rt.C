@@ -237,7 +237,7 @@ uint32_t DsdEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
         {
             case TD_PHASE_0:
                 iv_phase  = TD_PHASE_1;
-                signature = PRDFSIG_StartVcmPhase1;
+                signature = PRDFSIG_StartDsdPhase1;
                 break;
 
             default: PRDF_ASSERT( false ); // invalid phase
