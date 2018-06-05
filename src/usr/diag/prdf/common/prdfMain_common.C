@@ -213,10 +213,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
     // These have to be outside of system scope lock
     errlHndl_t retErrl = NULL;
-    bool initiateHwudump = false;
-    TARGETING::TargetHandle_t dumpTrgt = NULL;
-    errlHndl_t dumpErrl = NULL;
-    uint32_t dumpErrlActions = 0;
 
     { // system scope lock starts ------------------------------------------
 
@@ -372,11 +368,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     }
 
     g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,
-                                                      serviceData,
-                                                      initiateHwudump,
-                                                      dumpTrgt,
-                                                      dumpErrl,
-                                                      dumpErrlActions);
+                                                      serviceData );
 
     // Sleep for 20msec to let attention lines settle if we are at threshold.
     if ( (g_prd_errlHndl == NULL) && serviceData.IsAtThreshold() )
@@ -387,14 +379,6 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     retErrl = g_prd_errlHndl.release();
 
     } // system scope lock ends ------------------------------------------
-
-
-    if ( true == initiateHwudump )
-    {
-/* TODO RTC 144705
-        PlatServices::initiateUnitDump( dumpTrgt, dumpErrl, dumpErrlActions );
-*/
-    }
 
     PRDF_EXIT( "PRDF::main()" );
 

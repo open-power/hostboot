@@ -101,18 +101,9 @@ void ErrDataService::Initialize()
 //------------------------------------------------------------------------------
 
 errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                           ServiceDataCollector & io_sdc,
-                                           bool & o_initiateHwudump,
-                                           TargetHandle_t & o_dumpTrgt,
-                                           errlHndl_t & o_dumpErrl,
-                                           uint32_t & o_dumpErrlActions)
+                                           ServiceDataCollector & io_sdc )
 {
     #define PRDF_FUNC "[ErrDataService::GenerateSrcPfa] "
-
-    o_initiateHwudump = false;
-    o_dumpTrgt        = NULL;
-    o_dumpErrl        = NULL;
-    o_dumpErrlActions = 0;
 
     // First, check if an error log should be committed. Note that there should
     // always be an error log if there was a system or unit checkstop.
@@ -438,9 +429,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //--------------------------------------------------------------------------
 
     PfaData pfaData;
-
+    TargetHandle_t dumpTrgt;
     initPfaData( io_sdc, i_attnType, deferDeconfig, errlAct, errlSev,
-                 gardPolicy, pfaData, o_dumpTrgt );
+                 gardPolicy, pfaData, dumpTrgt );
 
     //--------------------------------------------------------------------------
     // Add each mru/callout to the error log.
@@ -546,7 +537,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
-    ForceTerminate = checkForceTerm( io_sdc, o_dumpTrgt, pfaData );
+    ForceTerminate = checkForceTerm( io_sdc, dumpTrgt, pfaData );
 
     //*************************************************************
     // Check for Manufacturing Mode terminate here and then do
@@ -664,22 +655,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     if ( MACHINE_CHECK != pfaData.priAttnType && !ForceTerminate &&
          !pfaData.TERMINATE )
     {
-        if ( true == o_initiateHwudump )
-        {
-            // the dump log will be deleted later in PRDF::main
-            // after the hwudump is initiated there.
-            o_dumpErrl = iv_errl;
-            iv_errl = NULL;
-            o_dumpErrlActions = errlAct;
-            PRDF_TRAC( PRDF_FUNC "for target: 0x%08x, i_errl: 0x%08x, "
-                       "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
-                       ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
-        }
-        else
-        {
-            // Commit the error log.
-            commitErrLog( iv_errl, pfaData );
-        }
+        // Commit the error log.
+        commitErrLog( iv_errl, pfaData );
     }
 
 #ifndef __HOSTBOOT_MODULE
@@ -979,15 +956,10 @@ void RasServices::setErrDataService( ErrDataService & i_eds )
 //------------------------------------------------------------------------------
 
 errlHndl_t RasServices::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                        ServiceDataCollector & io_sdc,
-                                        bool & o_initiateHwudump,
-                                        TargetHandle_t & o_dumpTrgt,
-                                        errlHndl_t & o_dumpErrl,
-                                        uint32_t & o_dumpErrlActions )
+                                        ServiceDataCollector & io_sdc )
 
 {
-    return iv_eds->GenerateSrcPfa( i_attnType, io_sdc, o_initiateHwudump,
-                                   o_dumpTrgt, o_dumpErrl, o_dumpErrlActions );
+    return iv_eds->GenerateSrcPfa( i_attnType, io_sdc );
 }
 
 //------------------------------------------------------------------------------
