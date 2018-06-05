@@ -731,6 +731,21 @@ private:
     bool anyChildFunctional(
                 TARGETING::Target &  i_parent);
 
+    /**
+     *  @brief Return FCO state of children
+     *
+     *  Called by _deconfigureByAssoc().
+     *  This function gets list of all children. If state of any
+     *  child is deconfig by FCO, then returns true.
+     *
+     *  @param[in] Pointer parent target id
+     *
+     *  @return true if any child state is deconfig by FCO.
+     *
+     */
+    bool anyChildFCO(
+                TARGETING::Target &  i_parent);
+
 public:
 
     /**
