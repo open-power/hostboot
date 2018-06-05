@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,12 +71,6 @@
     __TYPE__::instance()
 
 // end Singleton macros
-
-/**
- * @brief Interface to deconfig target at Runtime (Not valid in Hostboot)
- */
-#define PRDF_RUNTIME_DECONFIG( i_pTarget, i_errl, i_dmp ) \
-  SUCCESS
 
 /**
  * @brief   defined dump content to get through hostboot compilation.
