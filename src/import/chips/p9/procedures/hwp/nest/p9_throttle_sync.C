@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,8 @@
 ///----------------------------------------------------------------------------
 /// Constant definitions
 ///----------------------------------------------------------------------------
-const uint8_t SUPER_SYNC_BIT   = 14;
+const uint8_t MBA_REFRESH_SYNC_BIT = 8;
+const uint8_t SUPER_SYNC_BIT = 14;
 const uint8_t MAX_MC_SIDES_PER_PROC = 2; // MC01, MC23
 const uint8_t MAX_MC_PER_PROC = 4; // MC0, MC1, MC2, MC3
 const uint8_t MAX_MC_PER_SIDE = 2; // MC0, MC1 or MC2, MC3
@@ -272,7 +273,7 @@ fapi2::ReturnCode progMaster(const fapi2::Target<T>& i_mcTarget)
     // SUPER_SYNC_BIT == bit 14, supersync for Nimbus, reserved for cumulus.
     // Clear it in both cases.
     l_scomData.setBit<MCS_MCSYNC_SYNC_TYPE,
-                      MCS_MCSYNC_SYNC_TYPE_LEN>().clearBit(SUPER_SYNC_BIT);
+                      MCS_MCSYNC_SYNC_TYPE_LEN>().clearBit<SUPER_SYNC_BIT>();
     l_scomMask.setBit<MCS_MCSYNC_SYNC_TYPE,
                       MCS_MCSYNC_SYNC_TYPE_LEN>();
 
@@ -293,6 +294,19 @@ fapi2::ReturnCode progMaster(const fapi2::Target<T>& i_mcTarget)
              MCS_MCSYNC);
 
     // Note: No need to read Sync replay count and retry in P9.
+
+    // --------------------------------------------------------------
+    // 4. Clear refresh sync bit
+    // --------------------------------------------------------------
+    l_scomData.flush<0>();
+    l_scomMask.flush<0>().setBit<MBA_REFRESH_SYNC_BIT>();
+
+    FAPI_INF("Writing MCS_MCSYNC reg 0x%.16llX: Mask 0x%.16llX , Data 0x%.16llX",
+             MCS_MCSYNC, l_scomMask, l_scomData);
+    FAPI_TRY(fapi2::putScomUnderMask(i_mcTarget, MCS_MCSYNC,
+                                     l_scomData, l_scomMask),
+             "putScomUnderMask() returns an error (Sync), MCS_MCSYNC reg 0x%.16llX",
+             MCS_MCSYNC);
 
 fapi_try_exit:
     FAPI_DBG("Exiting progMaster");
