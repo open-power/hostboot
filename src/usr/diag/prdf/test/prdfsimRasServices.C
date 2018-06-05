@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,7 @@ namespace PRDF
 {
 
 errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                              ServiceDataCollector & io_sdc,
-                                              bool & o_initiateHwudump,
-                                              TargetHandle_t & o_dumpTrgt,
-                                              errlHndl_t & o_dumpErrl,
-                                              uint32_t & o_dumpErrlActions )
+                                              ServiceDataCollector & io_sdc )
 {
     using namespace TARGETING;
     using namespace PlatServices;
@@ -47,9 +43,7 @@ errlHndl_t SimErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     errlHndl_t errLog = NULL;
 
     // call the actual ras services function
-    errLog = ErrDataService::GenerateSrcPfa( i_attnType, io_sdc,
-                                             o_initiateHwudump, o_dumpTrgt,
-                                             o_dumpErrl, o_dumpErrlActions );
+    errLog = ErrDataService::GenerateSrcPfa( i_attnType, io_sdc );
 
     ErrorSignature * esig = io_sdc.GetErrorSignature();
 

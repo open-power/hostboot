@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,20 +48,12 @@ class SimErrDataService : public ErrDataService
      * @brief  Creates an SRC, PFA data, and error log from the SDC provided.
      * @param  i_attnType Analysis attention type.
      * @param  io_sdc      Target SDC.
-     * @param  o_initiateHwudump whether or not to initiate hwudump
-     * @param  o_dumpTrgt The DUMP target
-     * @param  o_dumpErrl The DUMP error handle
-     * @param  o_dumpErrlActions DUMP error action flags
      * @return A non-NULL error log indicates a system termination is required.
      *         Otherwise, PRD will commit the error log generated.
      * @pre    The Time of Error must be set in the given SDC.
      */
     virtual errlHndl_t GenerateSrcPfa( ATTENTION_TYPE i_attnType,
-                                       ServiceDataCollector & io_sdc,
-                                       bool & o_initiateHwudump,
-                                       TARGETING::TargetHandle_t & o_dumpTrgt,
-                                       errlHndl_t & o_dumpErrl,
-                                       uint32_t & o_dumpErrlActions );
+                                       ServiceDataCollector & io_sdc );
 
 };
 
