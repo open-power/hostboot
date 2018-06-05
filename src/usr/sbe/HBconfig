@@ -40,3 +40,8 @@ config NO_SBE_UPDATES
     default n
     help
         Don't update the SBE SEEPROMs at all.
+
+config SBE_UPDATE_LOCK
+    default y
+    help
+        Lock the SEEPROMs after updating
