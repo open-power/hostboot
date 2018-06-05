@@ -126,13 +126,6 @@ void ErrDataService::handleUnitCS( const ServiceDataCollector & i_sdc,
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleChannelFail( TargetHandle_t i_memTarget )
-{
-    // No-op in Hostboot
-}
-
-//------------------------------------------------------------------------------
-
 void ErrDataService::commitErrLog( errlHndl_t & io_errl,
                                    const PfaData & i_pfaData )
 

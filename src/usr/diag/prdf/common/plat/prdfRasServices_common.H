@@ -193,12 +193,6 @@ class ErrDataService
                        bool & o_initiateHwudump );
 
     /**
-     * @brief Handles Centaur checkstop.
-     * @param i_memTarget memory chip(let) target.
-     */
-    void handleChannelFail( TARGETING::TargetHandle_t i_memTarget );
-
-    /**
      * @brief commits error log based on platform.
      * @param io_errl       reference to error log handle.
      * @param i_pfaData     Pfa struct
