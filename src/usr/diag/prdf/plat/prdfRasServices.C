@@ -133,13 +133,6 @@ void ErrDataService::handleChannelFail( TargetHandle_t i_memTarget )
 
 //------------------------------------------------------------------------------
 
-void ErrDataService::handleNxUnitCS( TargetHandle_t i_nxTarget )
-{
-    // No-op in Hostboot
-}
-
-//------------------------------------------------------------------------------
-
 void ErrDataService::commitErrLog( errlHndl_t & io_errl,
                                    const PfaData & i_pfaData )
 
