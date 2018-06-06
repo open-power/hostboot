@@ -48,6 +48,7 @@
 #include    <hwas/common/hwas_reasoncodes.H>
 #include    <console/consoleif.H>
 #include    <sbe/sbereasoncodes.H>
+#include    <util/misc.H>
 
 #include    <errl/errludstring.H>
 #include    <errl/errludprintk.H>
@@ -771,7 +772,7 @@ void InitService::doShutdown(uint64_t i_status,
     {
         CONSOLE::displayf(NULL, "System shutting down with error status 0x%X",
                          i_status);
-        if(VFS::module_is_loaded("libconsole.so"))
+        if(Util::isConsoleStarted())
         {
             // Only flush the trace when the console module is loaded
             CONSOLE::flush();

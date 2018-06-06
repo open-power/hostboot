@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <initservice/initserviceif.H>
 #include "uart.H"
 #include "daemon.H"
+#include <util/misc.H>
 
 extern char hbi_ImageId[];
 
@@ -71,6 +72,8 @@ namespace CONSOLE
             Uart::g_device = new Uart();
             Uart::g_device->initialize();
         }
+
+        Util::setIsConsoleStarted();
 
         // Display a banner denoting the hostboot version
         char banner[256];
