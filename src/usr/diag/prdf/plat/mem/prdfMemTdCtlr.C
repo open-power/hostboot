@@ -397,6 +397,9 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
     uint8_t queueCount = queue.size();
     if ( 15 < queueCount ) queueCount = 15;
 
+    // Don't add anything if there is no data.
+    if ( nullptr == iv_curProcedure && 0 == queueCount ) return;
+
     // Get the buffer
     uint32_t bitLen = 32 + queueCount*14; // Header + TD queue
     BitStringBuffer bsb( bitLen );
