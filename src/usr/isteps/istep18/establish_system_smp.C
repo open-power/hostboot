@@ -239,11 +239,15 @@ errlHndl_t call_host_coalesce_host( )
                     // master node, set mask for later comparison
                     if (master_node_mask == 0)
                     {
-                        master_node_mask = mask;
+                        master_node_mask = mask >> drawerCount;
+
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                                "master_node_mask=%X",master_node_mask);
                     }
+
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "send coalesce host message to drawer %d",
-                               drawerCount );
+                            "send coalesce host message to drawer %d",
+                            drawerCount );
                     ++msg_count;
                     msg_t * msg = msg_allocate();
                     msg->type = IPC::IPC_TEST_CONNECTION;
