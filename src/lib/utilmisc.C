@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,17 @@ void setIsTargetingLoaded()
     g_isTargetingLoaded = true;
 }
 
+static bool g_isConsoleStarted = false;
+
+bool isConsoleStarted()
+{
+    return g_isConsoleStarted;
+}
+
+void setIsConsoleStarted()
+{
+    g_isConsoleStarted = true;
+}
 
 };
 
