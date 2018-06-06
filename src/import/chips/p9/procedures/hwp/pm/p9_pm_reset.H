@@ -119,5 +119,16 @@ extern "C"
         void* i_pHomerImage,
         const uint8_t i_plat );
 }
+//------------------------------------------------------------------------------
+///
+/// @brief Clear the Hcode error injection bits so special wake-up can succeed
+///
+/// @param[in] i_target Proc Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+///
+
+fapi2::ReturnCode p9_pm_reset_clear_errinj (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 #endif // _P9_PM_RESET_H
