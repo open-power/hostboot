@@ -615,7 +615,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
                             low_priority = priority
                             #break
                     break
-                elif priority < low_priority:
+                # If we find an object later in the list that covers the
+                # correct area, and has same or higher priority (indicated
+                # by lower number) then use it.
+                elif priority <= low_priority:
                     mem_object = simics.SIM_object_name(entry[1])
                     #print "Found entry %s for hrmor %d" % (mem_object, hb_hrmor)
                     low_priority = priority
