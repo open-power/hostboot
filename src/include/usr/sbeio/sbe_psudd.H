@@ -38,6 +38,7 @@
 #include <util/singleton.H>
 #include "sbe_sp_intf.H"
 #include <map>
+#include <arch/pirformat.H>
 
 namespace SBEIO
 {
@@ -45,6 +46,11 @@ namespace SBEIO
 //  Interfaces to the SBE PSU device driver to be used by clients
 //  within this component.
 //-----------------------------------------------------------------------------
+
+enum msgq_msg_t
+{
+    MSG_INTR,
+};
 
 /** @class SbePsu
  *  @brief Class for SBE/PSU communication
@@ -650,6 +656,14 @@ class SbePsu
 
         ~SbePsu();
 
+        /**
+         * Start message handler
+         *
+         * @note This function is used to spawn a new task.
+         *       The args and return value are not used.
+         */
+        static void* msg_handler(void * unused);
+
     private:
     //---------------------------------------------------------------------
     // Local definitions for the device driver
@@ -665,6 +679,31 @@ class SbePsu
          * @brief FFDC package needs to be 2 pages
          */
         const uint8_t ffdcPackageSize = 2;
+
+        /**
+         * @brief Response buffer from SBE
+         */
+        psuResponse * iv_psuResponse;
+
+        /**
+         * @brief Indicator that PSU response is fully populated
+         */
+        bool iv_responseReady;
+
+        /**
+         * @brief SBE PSU Message Queue
+         */
+        msg_q_t iv_msgQ;
+
+        /**
+         * @brief Indicator if HB is shutting down
+         */
+        bool iv_shutdownInProgress;
+
+        /**
+         * The sbe psu message handler.
+         */
+        void msgHandler();
 
         /**
          * @brief allocate an ffdc buffer for the proc target
@@ -691,7 +730,7 @@ class SbePsu
                                 psuCommand         * i_pPsuRequest,
                                 uint8_t              i_reqMsgs);
         /**
-         * @brief Read response from PSU
+         * @brief Check response from PSU
          *
          * @param[in]  i_target       Master proc to use for scoms
          * @param[in]  i_pPsuRequest  Pointer to PSU request commands
@@ -701,7 +740,7 @@ class SbePsu
          *
          * @return errlHndl_t Error log handle on failure.
          */
-        errlHndl_t readResponse(TARGETING::Target  * i_target,
+        errlHndl_t checkResponse(TARGETING::Target  * i_target,
                                 psuCommand         * i_pPsuRequest,
                                 psuResponse        * o_pPsuResponse,
                                 const uint64_t       i_timeout,
@@ -747,6 +786,16 @@ class SbePsu
         errlHndl_t writeScom(TARGETING::Target * i_target,
                               uint64_t   i_addr,
                               uint64_t * i_pData);
+
+        /**
+         * @brief Handle PSU Interrupt
+         *
+         * @param[in] i_pir  The PIR value of the proc that
+         *                    has the interrupt condition
+         *
+         *  @return errlHndl_t Error log handle on failure
+         */
+        errlHndl_t handleInterrupt(PIR_t i_pir);
 
         /**
          * @brief SBE PSU register addresses

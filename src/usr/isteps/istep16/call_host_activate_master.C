@@ -203,9 +203,9 @@ void* call_host_activate_master (void *io_pArgs)
                    "Target HUID %.8X",
                     TARGETING::get_huid(l_proc_target));
 
-            //In the future possibly move default "waitTime" value to SBEIO code
-            uint64_t waitTime = 1000000; // bump the wait time to 1 sec
-            l_errl = SBEIO::startDeadmanLoop(waitTime);
+        //In the future possibly move default "waitTime" value to SBEIO code
+        uint64_t waitTime = 1000000; // bump the wait time to 1 sec
+        l_errl = SBEIO::startDeadmanLoop(waitTime);
 
         if ( l_errl )
         {
@@ -227,7 +227,6 @@ void* call_host_activate_master (void *io_pArgs)
         //Need to indicate to PHYP to save HRMOR and other SPR Data to be
         // applied during wakeup
         MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
         INTR::drainQueue();

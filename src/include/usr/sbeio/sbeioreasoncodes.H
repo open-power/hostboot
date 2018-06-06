@@ -74,6 +74,7 @@ enum sbeioReasonCode
     SBEIO_PSU_RESPONSE_ERROR           = SBEIO_COMP_ID | 0x02,
     SBEIO_PSU_NOT_READY                = SBEIO_COMP_ID | 0x03,
     SBEIO_PSU_FFDC_MISSING             = SBEIO_COMP_ID | 0x04,
+    SBEIO_PSU_SEND                     = SBEIO_COMP_ID | 0x05,
 
     // SBE FIFO error codes
     SBEIO_FIFO_UPSTREAM_TIMEOUT        = SBEIO_COMP_ID | 0x10,
@@ -131,6 +132,9 @@ enum sbeioReasonCode
 
     // SBE Vital Attention error codes
     SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,
+
+    // Init error codes
+    SBEIO_RC_KERNEL_REG_FAILED         = SBEIO_COMP_ID | 0x61,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

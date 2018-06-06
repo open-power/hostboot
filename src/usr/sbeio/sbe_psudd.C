@@ -49,9 +49,16 @@
 #include <errl/errludlogregister.H>
 #include <sbeio/sbe_retry_handler.H>
 #include <initservice/initserviceif.H>
+#include <intr/interrupt.H>
+#include <errno.h>
+#include <sys/time.h>
+#include <errl/errludprintk.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
+
+// used to uniquley identify the SBE PSU message queue
+const char* SBE_PSU_MSG_Q = "sbepsuq";
 
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"psudd: " printf_string,##args)
@@ -71,11 +78,79 @@ SbePsu & SbePsu::getTheInstance()
     return Singleton<SbePsu>::instance();
 }
 
+void * SbePsu::msg_handler(void *unused)
+{
+    Singleton<SbePsu>::instance().msgHandler();
+    return nullptr;
+}
+
 /**
  * @brief  Constructor
  **/
 SbePsu::SbePsu()
+    :
+        iv_psuResponse(nullptr),
+        iv_responseReady(false),
+        iv_shutdownInProgress(false)
 {
+    errlHndl_t l_err = nullptr;
+    size_t rc = 0;
+
+    //Create message queue
+    iv_msgQ = msg_q_create();
+
+    //Register message queue with unique identifier
+    rc = msg_q_register(iv_msgQ, SBE_PSU_MSG_Q);
+
+    if(rc)   // could not register msgQ with kernel
+    {
+        SBE_TRACF(ERR_MRK "SbePsu() Could not register"
+                   "message queue with kernel");
+
+        /*@ errorlog tag
+         * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        SBEIO_PSU
+         * @reasoncode      SBEIO_RC_KERNEL_REG_FAILED
+         * @userdata1       rc from msq_q_register
+         * @devdesc         Could not register mailbox message queue
+         */
+        l_err = new ErrlEntry
+             (
+              ERRL_SEV_CRITICAL_SYS_TERM,
+              SBEIO_PSU,
+              SBEIO_RC_KERNEL_REG_FAILED,    //  reason Code
+              rc,                        // rc from msg_send
+              0,
+              true //Add HB Software Callout
+             );
+    }
+
+    if (!l_err)
+    {
+
+        // create task before registering the msgQ so any waiting interrupts get
+        // handled as soon as the msgQ is registered with the interrupt service
+        // provider
+        task_create(SbePsu::msg_handler, NULL);
+
+        //Register message queue with INTRP for Interrupts
+        //   of type LSI_PSU. The INTRP will route messages
+        //   to this queue when interrupts of that type are
+        //   detected
+        l_err = INTR::registerMsgQ(iv_msgQ,
+                                   MSG_INTR,
+                                   INTR::LSI_PSU);
+    }
+
+    if (l_err)
+    {
+        SBE_TRACF(ERR_MRK"Error in SbePsu Constructor");
+        l_err->collectTrace(INTR_COMP_NAME, 256);
+        // save off reason code before committing
+        auto l_reason = l_err->reasonCode();
+        errlCommit(l_err, SBEIO_COMP_ID);
+        INITSERVICE::doShutdown(l_reason);
+    }
 }
 
 /**
@@ -92,6 +167,60 @@ SbePsu::~SbePsu()
             PageManager::freePage(l_iter->second);
         }
     }
+}
+
+void SbePsu::msgHandler()
+{
+    // Mark as an independent daemon so if it crashes we terminate.
+    task_detach();
+
+    errlHndl_t l_err = nullptr;
+
+    while(1)
+    {
+        msg_t* msg = msg_wait(iv_msgQ);
+
+        //Message should never be nullptr
+        assert(msg != nullptr,"SbePsu::msgHandle: msg is nullptr");
+
+        switch(msg->type)
+        {
+            case MSG_INTR:
+                {
+                    if (msg->data[0] == INTR::SHUT_DOWN)
+                    {
+                        iv_shutdownInProgress = true;
+                        SBE_TRACF("SbePsu::msgHandler Handle Shutdown");
+                        //respond so INTRP can continue
+                        // with shutdown procedure
+                        msg_respond(iv_msgQ,msg);
+                    }
+                    else
+                    {
+                        //Handle the interrupt message -- pass the PIR of the
+                        // proc causing the interrupt
+                        SBE_TRACD("SbePsu::msgHandler got MSG_INTR message");
+                        l_err = handleInterrupt(msg->data[1]);
+
+                        if (l_err)
+                        {
+                            SBE_TRACF("SbePsu::msgHandler handleInterrupt returned an error");
+                            l_err->collectTrace(SBEIO_COMP_NAME);
+                            l_err->collectTrace(INTR_COMP_NAME, 256);
+                            errlCommit(l_err, SBEIO_COMP_ID);
+                        }
+
+                        // Respond to the interrupt handler regardless of error
+                        INTR::sendEOI(iv_msgQ,msg);
+                    }
+                }
+                break;
+            default:
+                msg->data[1] = -EINVAL;
+                msg_respond(iv_msgQ, msg);
+        }
+    }
+
 }
 
 /**
@@ -117,53 +246,73 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
 
-    // If not a SBE_PSU_SET_FFDC_ADDRESS command, we allocate an FFDC buffer
-    // and set FFDC adress
-    if(i_pPsuRequest->command != SBE_PSU_SET_FFDC_ADDRESS)
+    //Only perform new chip-ops if we aren't shutting down
+    if (!iv_shutdownInProgress)
     {
-        errl = allocateFFDCBuffer(i_target);
-    }
-    if (errl)
-    {
-        SBE_TRACF(ERR_MRK"performPsuChipOp::"
-            " setFFDC address returned an error");
-        return errl;
-    }
-
-    //Serialize access to PSU
-    mutex_lock(&l_psuOpMux);
-
-    // Check that target is not NULL
-    assert(i_target != nullptr,"performPsuChipOp: proc target is NULL");
-
-    do
-    {
-        // write PSU Request
-        errl = writeRequest(i_target,
-                            i_pPsuRequest,
-                            i_reqMsgs);
-        if (errl)//error has been generated
+        // If not an SBE_PSU_SET_FFDC_ADDRESS command,
+        // we allocate an FFDC buffer and set FFDC adress
+        if(i_pPsuRequest->command != SBE_PSU_SET_FFDC_ADDRESS)
+        {
+            errl = allocateFFDCBuffer(i_target);
+        }
+        if (errl)
         {
             SBE_TRACF(ERR_MRK"performPsuChipOp::"
-                    " writeRequest returned an error");
-            break;
+                " setFFDC address returned an error");
+            return errl;
         }
 
-        // read PSU response and check results
-        errl = readResponse(i_target,
-                             i_pPsuRequest,
-                             o_pPsuResponse,
-                             i_timeout,
-                             i_rspMsgs);
-        if (errl){
-            SBE_TRACF(ERR_MRK"performPsuChipOp::"
-                    " readResponse returned an error");
-            break;  // return with error
+        //Serialize access to PSU
+        mutex_lock(&l_psuOpMux);
+
+        if (iv_psuResponse != nullptr)
+        {
+            //There should already be a timeout errorlog for this condition,
+            // simply log a message and continue as the previous timeout was
+            // not deemed fatal.
+            SBE_TRACF(ERR_MRK "performPsuChipOp Previous PSU response never completed.");
         }
+        iv_psuResponse = o_pPsuResponse;
+        iv_responseReady = false;
+
+        // Check that target is not NULL
+        assert(i_target != nullptr,"performPsuChipOp: proc target is NULL");
+
+        do
+        {
+            // write PSU Request
+            errl = writeRequest(i_target,
+                                i_pPsuRequest,
+                                i_reqMsgs);
+            if (errl)//error has been generated
+            {
+                SBE_TRACF(ERR_MRK"performPsuChipOp::"
+                        " writeRequest returned an error");
+                break;
+            }
+
+            // read PSU response and check results
+            errl = checkResponse(i_target,
+                                 i_pPsuRequest,
+                                 iv_psuResponse,
+                                 i_timeout,
+                                 i_rspMsgs);
+            if (errl){
+                SBE_TRACF(ERR_MRK"performPsuChipOp::"
+                        " checkResponse returned an error");
+                break;  // return with error
+            }
+        }
+        while (0);
+
+        iv_psuResponse = nullptr;
+        mutex_unlock(&l_psuOpMux);
     }
-    while (0);
-
-    mutex_unlock(&l_psuOpMux);
+    else
+    {
+        SBE_TRACF(ERR_MRK"performPsuChipOp::"
+                  "Skipping operation because of Shutdown operation");
+    }
 
     SBE_TRACD(EXIT_MRK "performPsuChipOp");
 
@@ -286,48 +435,120 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
     return errl;
 }
 
+
+errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
+{
+    errlHndl_t errl = nullptr;
+    SBE_TRACD(ENTER_MRK "SbePsu::handleInterrupt");
+    bool l_responseAvailable = false;
+
+    do
+    {
+        uint64_t l_intrGroupID = PIR_t::groupFromPir(i_pir.word);
+        uint64_t l_intrChipID  = PIR_t::chipFromPir(i_pir.word);
+        // Find the chip that presented the interrupt
+        TARGETING::Target* l_intrChip = nullptr;
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TARGETING::TYPE_PROC, false);
+        for (auto & l_chip: l_procTargetList)
+        {
+            auto l_chipId =
+                (l_chip)->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+            auto l_groupId =
+                (l_chip)->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            if( l_chipId == l_intrChipID && l_groupId == l_intrGroupID )
+            {
+                l_intrChip = (l_chip);
+                break;
+            }
+        }
+        assert(l_intrChip != nullptr,
+                   "SbePsu::handleInterrupt: l_intrChip is nullptr");
+
+        //Occasionally, there is a PSU interrupt that is not associated
+        // with a PSU response. The HOST_DOORBELL reg will indicate if
+        // there is a response available. If there is, it will be read.
+        // If not the interrupt condition simply needs to be cleared.
+        uint64_t l_doorbellVal = 0x0;
+        errl = readScom(l_intrChip,PSU_HOST_DOORBELL_REG_RW,&l_doorbellVal);
+        if (errl)
+        { break; }
+
+        if (l_doorbellVal & HOST_RESPONSE_WAITING)
+        {
+            //In this case the doorbell reg indicated a response is
+            //available
+            l_responseAvailable = true;
+            //read the response registers
+            uint64_t * l_pMessage =
+                        reinterpret_cast<uint64_t *>(iv_psuResponse);
+            uint64_t   l_addr     = PSU_HOST_SBE_MBOX4_REG;
+
+            for (uint8_t i=0; i<(sizeof(psuResponse)/sizeof(uint64_t)); i++)
+            {
+                errl = readScom(l_intrChip,l_addr,l_pMessage);
+                if (errl)
+                { break; }
+                l_addr++;
+                l_pMessage++;
+            }
+            if (errl)
+            { break; }
+
+            //Notify PSU response has been read
+            uint64_t l_data = HOST_CLEAR_RESPONSE_WAITING;
+            errl = writeScom(l_intrChip,PSU_HOST_DOORBELL_REG_AND,&l_data);
+            if (errl)
+            { break; }
+        }
+
+        //Clear the rest of the PSU Scom Reg Interrupt Status register
+        //  This clears the PSU interrupt condition so the PSU interrupt
+        //  won't be re-presented
+        uint64_t l_data = HOST_RESPONSE_WAITING;
+        errl = writeScom(l_intrChip,PSU_HOST_DOORBELL_REG_AND,&l_data);
+        if (errl) break;
+
+    } while (0);
+
+    // Only indicate a response is ready if we found legitimate
+    //   PSU message data.
+    if (l_responseAvailable)
+    {
+        iv_responseReady = true;
+    }
+
+    SBE_TRACD(EXIT_MRK "SbePsu::handleInterrupt");
+
+    return errl;
+}
+
 /**
  * @brief Read PSU response messages
  */
-errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
-                                psuCommand         * i_pPsuRequest,
-                                psuResponse        * o_pPsuResponse,
-                                const uint64_t       i_timeout,
-                                uint8_t              i_rspMsgs)
+errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
+                                 psuCommand         * i_pPsuRequest,
+                                 psuResponse        * o_pPsuResponse,
+                                 const uint64_t       i_timeout,
+                                 uint8_t              i_rspMsgs)
 {
     errlHndl_t errl = NULL;
 
-    SBE_TRACD(ENTER_MRK "readResponse");
+    SBE_TRACD(ENTER_MRK "checkResponse");
 
     do
     {
         //wait for request to be completed
         errl = pollForPsuComplete(i_target,i_timeout,i_pPsuRequest);
-        if (errl) break;  // return with error
+        if (errl)
+        { break; }  // return with error
 
-        //read the response registers
-        uint64_t * l_pMessage = (uint64_t *)o_pPsuResponse;
-        uint64_t   l_addr     = PSU_HOST_SBE_MBOX4_REG;
-        for (uint8_t i=0;i<4;i++)
-        {
-            errl = readScom(i_target,l_addr,l_pMessage);
-            if (errl) break;
-            l_addr++;
-            l_pMessage++;
-        }
-        if (errl) break;
-
-        //notify PSU response has been read
-        uint64_t l_data = HOST_CLEAR_RESPONSE_WAITING;
-        errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_AND,&l_data);
-        if (errl) break;
-
-
+        //At this point we will have valid data in iv_psuResponse
         //If the command is not supported, then print a statement and break out
         if(o_pPsuResponse->primaryStatus == SBE_PRI_INVALID_COMMAND &&
            o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
         {
-            SBE_TRACF("sbe_psudd.C :: readResponse: COMMAND NOT SUPPORTED "
+            SBE_TRACF("sbe_psudd.C :: checkResponse: COMMAND NOT SUPPORTED "
                       " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"
                       " expected seqID=%d actual seqID=%d",
                       i_pPsuRequest->commandClass,
@@ -349,7 +570,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
            (i_pPsuRequest->seqID != o_pPsuResponse->seqID))
         {
 
-            SBE_TRACF(ERR_MRK "sbe_psudd.C :: readResponse: "
+            SBE_TRACF(ERR_MRK "sbe_psudd.C :: checkResponse: "
                       "failing response status "
                       " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"
                       " expected seqID=%d actual seqID=%d",
@@ -360,7 +581,6 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                       i_pPsuRequest->seqID,
                       o_pPsuResponse->seqID);
             SBE_TRACFBIN("Full response:", o_pPsuResponse, sizeof(psuResponse));
-
 
             /*@
              * @errortype
@@ -394,7 +614,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                 //Deallocate FFDC buffer
                 if(i_pPsuRequest->command == SBE_PSU_SET_FFDC_ADDRESS)
                 {
-                    SBE_TRACF(ERR_MRK, "sbe_psudd.C: readResponse: "
+                    SBE_TRACF(ERR_MRK, "sbe_psudd.C: checkResponse: "
                         "Set FFDC Address failed.");
                     PageManager::freePage(l_ffdcPkg);
                     iv_ffdcPackageBuffer.erase(i_target);
@@ -450,7 +670,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
     }
     while (0);
 
-    SBE_TRACD(EXIT_MRK "readResponse");
+    SBE_TRACD(EXIT_MRK "checkResponse");
 
     return errl;
 }
@@ -463,21 +683,14 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                       psuCommand* i_pPsuRequest)
 {
     errlHndl_t l_errl = NULL;
-
     SBE_TRACD(ENTER_MRK "pollForPsuComplete");
-
     uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_data = 0;
-    bool     l_trace = true; //initialize so first call is traced
 
     do
     {
-        // read response doorbell to see if ready
-        l_errl = readScom(i_target,PSU_HOST_DOORBELL_REG_RW,&l_data,l_trace);
-        if (l_errl) break; // return with error
-
-        // check if response is now ready to be read
-        if (l_data & HOST_RESPONSE_WAITING)
+        //The handling of the interrupt will set the
+        // iv_psuResponse variable with the incoming message data
+        if (iv_responseReady)
         {
             break; // return with success
         }
@@ -635,17 +848,8 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
         // try later
         nanosleep( 0, 10000 ); //sleep for 10us
         l_elapsed_time_ns += 10000;
-
-        // There will be many polls to check for the complete. If there
-        // is a problem, then there will be hundreds before timing out
-        // and giving up. Having one trace entry showing the poll request
-        // parameters is useful. Hundreds of identical entries is not. Hundreds
-        // with a non-continuous trace overruns the initial interaction.
-        l_trace = false; //only trace once to avoid flooding the trace
     }
     while (1);
-
-    task_yield(); //let INTR in
 
     SBE_TRACD(EXIT_MRK "pollForPsuComplete");
 
