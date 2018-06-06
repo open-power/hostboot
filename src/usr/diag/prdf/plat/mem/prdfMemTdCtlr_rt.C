@@ -245,7 +245,6 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
     // Gather capture data even if something failed above.
     collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
-    MemCaptureData::addEccData<T>( iv_chip, io_sc );
 
     if ( SUCCESS != o_rc )
     {
