@@ -72,7 +72,11 @@
 // -----------------------------------------------------------------------------
 // Constant definitions
 // -----------------------------------------------------------------------------
-
+// Map the auto generated names to clearer ones
+static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR  = PU_OCB_OCI_OCCFLG_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG_SET    = PU_OCB_OCI_OCCFLG_SCOM2;
+static const uint64_t PU_OCB_OCI_OCCFLG2_CLEAR = P9N2_PU_OCB_OCI_OCCFLG2_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG2_SET   = P9N2_PU_OCB_OCI_OCCFLG2_SCOM2;
 // -----------------------------------------------------------------------------
 // Global variables
 // -----------------------------------------------------------------------------
@@ -174,6 +178,9 @@ fapi2::ReturnCode p9_pm_reset(
     {
         if (l_malfAlert == false)
         {
+            // Clear the hcode error injection bits so special wake-up can succeed
+            FAPI_TRY(p9_pm_reset_clear_errinj(i_target));
+
             //  ************************************************************************
             //  Put all EX chiplets in special wakeup
             //  ************************************************************************
@@ -725,5 +732,56 @@ fapi2::ReturnCode p9_pm_collect_ffdc (
 fapi_try_exit:
     FAPI_DBG ( "<< p9_pm_collect_ffdc: Plat: 0x%02X Phase: 0x%02X Enabled: %d",
                i_plat, l_phase, l_ffdcEnable );
+    return fapi2::current_err;
+}
+
+// Clear all error injection bits of so that the reset state can succeed.
+
+fapi2::ReturnCode p9_pm_reset_clear_errinj (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::ATTR_CHIP_UNIT_POS_Type l_chpltNumber = 0;
+
+    FAPI_INF(">> p9_pm_reset_clear_errinj");
+
+    auto l_coreChiplets =
+        i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    FAPI_INF("Clearing SGPE and PGPE Hcode Error Injection bits");
+    // *INDENT-OFF*
+    l_data64.flush<0>()
+        .setBit<p9hcd::OCCFLG2_SGPE_HCODE_STOP_REQ_ERR_INJ>()
+        .setBit<p9hcd::OCCFLG2_PGPE_HCODE_FIT_ERR_INJ>()
+        .setBit<p9hcd::OCCFLG2_PGPE_HCODE_PSTATE_REQ_ERR_INJ>();
+    // *INDENT-ON*
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
+
+    // For each core target, clear CME injection bits
+    for (auto l_core_chplt : l_coreChiplets)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_core_chplt,
+                               l_chpltNumber),
+                 "ERROR: Failed to get the position of the Core %d",
+                 l_chpltNumber);
+
+        FAPI_INF("Clearing CME Hcode Error Injection and other CSAR settings for core %d",
+                 l_chpltNumber);
+        // *INDENT-OFF*
+        l_data64.flush<0>()
+                .setBit<p9hcd::CPPM_CSAR_FIT_HCODE_ERROR_INJECT>()
+                .setBit<p9hcd::CPPM_CSAR_ENABLE_PSTATE_REGISTRATION_INTERLOCK>()
+                .setBit<p9hcd::CPPM_CSAR_PSTATE_HCODE_ERROR_INJECT>()
+                .setBit<p9hcd::CPPM_CSAR_STOP_HCODE_ERROR_INJECT>();
+        // Note:  CPPM_CSAR_DISABLE_CME_NACK_ON_PROLONGED_DROOP is NOT
+        //        cleared as this is a persistent, characterization setting
+        // *INDENT-ON*
+        FAPI_TRY(fapi2::putScom(l_core_chplt, C_CPPM_CSAR_CLEAR, l_data64));
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< p9_pm_reset_clear_errinj");
     return fapi2::current_err;
 }
