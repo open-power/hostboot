@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,20 @@ namespace Util
      * @return N/A
      */
     void setIsTargetingLoaded( void );
+
+    /**
+     * @brief Determines if the Console daemon has been started
+     *
+     * @return bool true if Console daemon has been started; false otherwise
+     */
+    bool isConsoleStarted();
+
+    /**
+     * @brief Sets the global variable to indicate that the Console daemon has
+     *        been started. This should only be called once when the console
+     *        daemon starts.
+     */
+    void setIsConsoleStarted();
 };
 
 #endif
