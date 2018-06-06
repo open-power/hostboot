@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +35,7 @@
 
 #include <netinet/in.h>
 
+#ifndef LOGPARSER
 /**
  * @brief Endian swap a uint64_t. This is not provided by in.h
  */
@@ -56,6 +59,7 @@ inline uint64_t ntohll( uint64_t i )
 }
 #else
 #error Unexpected endian context.
+#endif
 #endif
 
 // FSP includes

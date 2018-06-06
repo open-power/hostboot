@@ -40,7 +40,7 @@ ROOTPATH = ../../..
 #
 
 # Content targets.
-VALID_TARGETS = fsp tools openpower vpo
+VALID_TARGETS = fsp tools openpower vpo errltool
 
 #
 # Files which are to be directly copied into content targets.
@@ -149,8 +149,49 @@ COPY_RENAME_FILES = \
     securerom.list.bz2:img/securerom.list.bz2:tools,vpo,openpower \
     securerom.bin.modinfo:img/securerom.bin.modinfo:tools,vpo,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
-    Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
-
+    Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    hbplugins/Makefile:obj/genfiles/plugins/Makefile:errltool \
+    hbplugins/prdf/Makefile:obj/genfiles/plugins/prdf/Makefile_errl:errltool \
+    $(foreach file, $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*.h), \
+    hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*.C), \
+    hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,obj/genfiles/plugins/prdf/*.H), \
+    hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/sbeio/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/initservice/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/mbox/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/secureboot/common/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/errl/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/fsi/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/vpd/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/i2c/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/runtime/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/isteps/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/usr/scom/plugins/*.*), \
+    hbplugins/$(notdir $(file)):$(file):errltool) \
+    $(foreach file, $(call ROOTPATH_WILDCARD,src/import/chips/p9/common/include/*.H), \
+    hbplugins/prdf/$(notdir $(file)):$(file):errltool) \
+    hwas/common/hwasCallout.H:src/include/usr/hwas/common/hwasCallout.H:errltool \
+    devicefw/driverif.H:src/include/usr/devicefw/driverif.H:errltool \
+    devicefw/userif.H:src/include/usr/devicefw/userif.H:errltool \
+    hbplugins/prdf/p9_pm_recovery_ffdc_defines.H:src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_defines.H:errltool \
+    hbplugins/prdf/p9_hcd_memmap_base.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_memmap_base.H:errltool \
+    hbplugins/prdf/p9_hcd_header_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_hcd_header_defs.H:errltool \
+    hbplugins/prdf/p9_ppe_defs.H:src/import/chips/p9/procedures/hwp/lib/p9_ppe_defs.H:errltool
+    
 #
 # Symbolic links created in the target.
 #

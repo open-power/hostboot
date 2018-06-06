@@ -33,8 +33,9 @@
  */
 
 #include "errluserdetails.H"
+#ifndef LOGPARSER
 #include <targeting/common/target.H>
-
+#endif
 namespace ERRORLOG
 {
 
