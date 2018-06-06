@@ -83,23 +83,42 @@ errlHndl_t PlatConfigurator::build()
 
     // Create domains.
     ProcDomain   * procDomain   = new ProcDomain(   PROC_DOMAIN   );
-    EqDomain     * eqDomain     = new EqDomain(     EQ_DOMAIN     );
-    ExDomain     * exDomain     = new ExDomain(     EX_DOMAIN     );
-    EcDomain     * ecDomain     = new EcDomain(     EC_DOMAIN     );
-    CappDomain   * cappDomain   = new CappDomain(   CAPP_DOMAIN   );
-    PecDomain    * pecDomain    = new PecDomain(    PEC_DOMAIN    );
-    PhbDomain    * phbDomain    = new PhbDomain(    PHB_DOMAIN    );
-    XbusDomain   * xbusDomain   = new XbusDomain(   XBUS_DOMAIN   );
-    ObusDomain   * obusDomain   = new ObusDomain(   OBUS_DOMAIN   );
-    McbistDomain * mcbistDomain = new McbistDomain( MCBIST_DOMAIN );
-    McsDomain    * mcsDomain    = new McsDomain(    MCS_DOMAIN    );
-    McaDomain    * mcaDomain    = new McaDomain(    MCA_DOMAIN    );
-    McDomain     * mcDomain     = new McDomain(     MC_DOMAIN     );
-    MiDomain     * miDomain     = new MiDomain(     MI_DOMAIN     );
-    DmiDomain    * dmiDomain    = new DmiDomain(    DMI_DOMAIN    );
+    MembufDomain * membufDomain = nullptr;
 
-    MembufDomain * membufDomain = new MembufDomain( MEMBUF_DOMAIN );
-    MbaDomain    * mbaDomain    = new MbaDomain(    MBA_DOMAIN    );
+    std::map<TARGETING::TYPE, RuleChipDomain *> unitMap;
+    unitMap[TYPE_EQ  ] = new EqDomain(   EQ_DOMAIN   );
+    unitMap[TYPE_EX  ] = new ExDomain(   EX_DOMAIN   );
+    unitMap[TYPE_CORE] = new EcDomain(   EC_DOMAIN   );
+    unitMap[TYPE_CAPP] = new CappDomain( CAPP_DOMAIN );
+    unitMap[TYPE_PEC ] = new PecDomain(  PEC_DOMAIN  );
+    unitMap[TYPE_PHB ] = new PhbDomain(  PHB_DOMAIN  );
+    unitMap[TYPE_XBUS] = new XbusDomain( XBUS_DOMAIN );
+    unitMap[TYPE_OBUS] = new ObusDomain( OBUS_DOMAIN );
+
+    switch ( getChipModel(getMasterProc()) )
+    {
+        case MODEL_NIMBUS:
+            unitMap[TYPE_MCBIST] = new McbistDomain( MCBIST_DOMAIN );
+            unitMap[TYPE_MCS   ] = new McsDomain(    MCS_DOMAIN    );
+            unitMap[TYPE_MCA   ] = new McaDomain(    MCA_DOMAIN    );
+
+            break;
+
+        case MODEL_CUMULUS:
+            unitMap[TYPE_MC ] = new McDomain(     MC_DOMAIN     );
+            unitMap[TYPE_MI ] = new MiDomain(     MI_DOMAIN     );
+            unitMap[TYPE_DMI] = new DmiDomain(    DMI_DOMAIN    );
+
+            membufDomain      = new MembufDomain( MEMBUF_DOMAIN );
+            unitMap[TYPE_MBA] = new MbaDomain(    MBA_DOMAIN    );
+
+            break;
+
+        default:
+            PRDF_ERR( "[PlatConfigurator::build] Unsupported master proc "
+                      "type %d", getChipModel(getMasterProc()) );
+            PRDF_ASSERT(false);
+    };
 
     PllDomainMapList pllDmnMapLst;
 
@@ -111,56 +130,21 @@ errlHndl_t PlatConfigurator::build()
         // NOTE: We should ensure that if build fails midway, deleting System
         //       should be enough to clean up the partial model.
 
-        errl = addDomainChips( TYPE_PROC,   procDomain,   pllDmnMapLst );
-        if ( NULL != errl ) break;
+        errl = addDomainChips( TYPE_PROC, procDomain, pllDmnMapLst );
+        if ( nullptr != errl ) break;
 
-        errl = addDomainChips( TYPE_EQ,     eqDomain,     pllDmnMapLst );
-        if ( NULL != errl ) break;
+        if ( nullptr != membufDomain )
+        {
+            errl = addDomainChips( TYPE_MEMBUF, membufDomain, pllDmnMapLst );
+            if ( nullptr != errl ) break;
+        }
 
-        errl = addDomainChips( TYPE_EX,     exDomain,     pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_CORE,   ecDomain,     pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_CAPP,   cappDomain,   pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_PEC,    pecDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_PHB,    phbDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_XBUS,   xbusDomain,   pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_OBUS,   obusDomain,   pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MCBIST, mcbistDomain, pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MCS,    mcsDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MCA,    mcaDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MC,     mcDomain,     pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MI,     miDomain,     pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_DMI,    dmiDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MEMBUF, membufDomain, pllDmnMapLst );
-        if ( NULL != errl ) break;
-
-        errl = addDomainChips( TYPE_MBA,    mbaDomain,    pllDmnMapLst );
-        if ( NULL != errl ) break;
+        // Order does not matter because they are not added to the PLL domains.
+        for ( auto & d : unitMap )
+        {
+            errl = addDomainChips( d.first, d.second, pllDmnMapLst );
+            if ( nullptr != errl ) break;
+        }
 
     } while (0);
 
@@ -177,7 +161,7 @@ errlHndl_t PlatConfigurator::build()
     addPllDomainsToSystem( pllDmnMapLst );
 
     // Memory chip domains are always second.
-    sysDmnLst.push_back( membufDomain );
+    if ( nullptr != membufDomain ) sysDmnLst.push_back( membufDomain );
 
     // Processor chip domains are always third.
     sysDmnLst.push_back( procDomain );
@@ -186,21 +170,10 @@ errlHndl_t PlatConfigurator::build()
     // during System::Analyze() add all chiplet domains after the chip domains.
     // Note that order of the chiplet domains does not matter because analysis
     // originates from the chip domains above.
-    sysDmnLst.push_back( eqDomain     );
-    sysDmnLst.push_back( exDomain     );
-    sysDmnLst.push_back( ecDomain     );
-    sysDmnLst.push_back( cappDomain   );
-    sysDmnLst.push_back( pecDomain    );
-    sysDmnLst.push_back( phbDomain    );
-    sysDmnLst.push_back( xbusDomain   );
-    sysDmnLst.push_back( obusDomain   );
-    sysDmnLst.push_back( mcbistDomain );
-    sysDmnLst.push_back( mcsDomain    );
-    sysDmnLst.push_back( mcaDomain    );
-    sysDmnLst.push_back( mcDomain     );
-    sysDmnLst.push_back( miDomain     );
-    sysDmnLst.push_back( dmiDomain    );
-    sysDmnLst.push_back( mbaDomain    );
+    for ( auto & d : unitMap )
+    {
+        sysDmnLst.push_back( d.second );
+    }
 
     // Add chips to the system.
     Configurator::chipList & chips = getChipList();
