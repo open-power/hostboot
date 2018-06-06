@@ -44,7 +44,7 @@
 
 extern trace_desc_t* g_trac_pnor;
 
-// used to uniquley identify the secure PNOR RP message queue
+// used to uniquely identify the secure PNOR RP message queue
 const char* SPNORRP_MSG_Q = "spnorrpq";
 
 // Easy macro replace for unit testing
