@@ -1587,9 +1587,11 @@ void DeconfigGard::_deconfigureByAssoc(
                 // EX should be deconfigured
                 //
                 // First get parent i.e EX
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentExList;
                 getParentAffinityTargetsByState(pParentExList, &i_target,
-                        CLASS_UNIT, TYPE_EX, UTIL_FILTER_PRESENT);
+                        CLASS_UNIT, TYPE_EX, UTIL_FILTER_ALL);
                 HWAS_ASSERT((pParentExList.size() == 1),
                     "HWAS _deconfigureByAssoc: pParentExList != 1");
                 Target *l_parentEX = pParentExList[0];
@@ -1626,10 +1628,12 @@ void DeconfigGard::_deconfigureByAssoc(
                 //
                 // EQ with no good EX should be de-configured
                 //
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pEqList;
                 getParentAffinityTargetsByState(pEqList,
                         &i_target, CLASS_UNIT, TYPE_EQ,
-                        UTIL_FILTER_PRESENT);
+                        UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pEqList.size() == 1),
                     "HWAS _deconfigureByAssoc: pEqList != 1");
@@ -1648,8 +1652,10 @@ void DeconfigGard::_deconfigureByAssoc(
             {
                 //  get parent DMI
                 TargetHandleList pParentDmiList;
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 getParentAffinityTargetsByState(pParentDmiList, &i_target,
-                        CLASS_UNIT, TYPE_DMI, UTIL_FILTER_PRESENT);
+                        CLASS_UNIT, TYPE_DMI, UTIL_FILTER_ALL);
                 HWAS_ASSERT((pParentDmiList.size() == 1),
                     "HWAS _deconfigureByAssoc: pParentDmiList > 1");
                 const Target *l_parentDmi = pParentDmiList[0];
@@ -1671,9 +1677,12 @@ void DeconfigGard::_deconfigureByAssoc(
             case TYPE_MCA:
             {
                 // get parent MCS
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentMcsList;
                 getParentAffinityTargetsByState(pParentMcsList, &i_target,
-                                                CLASS_UNIT, TYPE_MCS, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_MCS,
+                                                UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pParentMcsList.size() == 1),
                 "HWAS _deconfigureByAssoc: pParentMcsList != 1");
@@ -1699,9 +1708,12 @@ void DeconfigGard::_deconfigureByAssoc(
             case TYPE_MCS:
             {
                 // get parent MCBIST
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentMcbistList;
                 getParentAffinityTargetsByState(pParentMcbistList, &i_target,
-                                                CLASS_UNIT, TYPE_MCBIST, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_MCBIST,
+                                                UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pParentMcbistList.size() <= 1),
                             "HWAS _deconfigureByAssoc: MCS has multiple MCBIST parents, this is impossible");
@@ -1733,9 +1745,12 @@ void DeconfigGard::_deconfigureByAssoc(
             case TYPE_MI:
             {
                 // get parent MC
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentMctList;
                 getParentAffinityTargetsByState(pParentMctList, &i_target,
-                                                CLASS_UNIT, TYPE_MC, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_MC,
+                                                UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pParentMctList.size() <= 1),
                             "HWAS _deconfigureByAssoc: MI has multiple MC parents, this is impossible");
@@ -1767,9 +1782,12 @@ void DeconfigGard::_deconfigureByAssoc(
             case TYPE_DMI:
             {
                 // get parent MI
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentMitList;
                 getParentAffinityTargetsByState(pParentMitList, &i_target,
-                                                CLASS_UNIT, TYPE_MI, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_MI,
+                                                UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pParentMitList.size() <= 1),
                             "HWAS _deconfigureByAssoc: DMI has multiple MI parents, this is impossible");
@@ -1835,11 +1853,11 @@ void DeconfigGard::_deconfigureByAssoc(
                 //  get immediate parent (MCA/MBA/etc)
                 TargetHandleList pParentList;
                 PredicatePostfixExpr funcParent;
-                funcParent.push(&isFunctional).And();
+                funcParent.push(&isFunctional);
                 targetService().getAssociated(pParentList,
                         &i_target,
                         TargetService::PARENT_BY_AFFINITY,
-                        TargetService::ALL,
+                        TargetService::IMMEDIATE,
                         &funcParent);
 
                 HWAS_ASSERT((pParentList.size() <= 1),
@@ -1920,9 +1938,12 @@ void DeconfigGard::_deconfigureByAssoc(
             } // TYPE_PORE
             case TYPE_PHB:
             {
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentPECList;
                 getParentAffinityTargetsByState(pParentPECList, &i_target,
-                                                CLASS_UNIT, TYPE_PEC, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_PEC,
+                                                UTIL_FILTER_ALL);
                 HWAS_ASSERT((pParentPECList.size() == 1),
                             "HWAS _deconfigureByAssoc: pParentPECList != 1");
                 Target *l_parentPEC = pParentPECList[0];
@@ -1942,9 +1963,12 @@ void DeconfigGard::_deconfigureByAssoc(
             } // TYPE_PHB
             case TYPE_OBUS_BRICK:
             {
+                // Other errors may have affected parent state so use
+                // UTIL_FILTER_ALL
                 TargetHandleList pParentObusList;
                 getParentAffinityTargetsByState(pParentObusList, &i_target,
-                                                CLASS_UNIT, TYPE_OBUS, UTIL_FILTER_PRESENT);
+                                                CLASS_UNIT, TYPE_OBUS,
+                                                UTIL_FILTER_ALL);
                 HWAS_ASSERT((pParentObusList.size() == 1),
                             "HWAS _deconfigureByAssoc: pParentObusList != 1");
 
