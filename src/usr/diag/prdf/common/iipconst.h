@@ -35,7 +35,10 @@
 /*  Includes                                                          */
 /*--------------------------------------------------------------------*/
 #include <prdf_types.h>
+
+#ifndef LOGPARSER
 #include <targeting/common/attributes.H>
+#endif
 
 /*--------------------------------------------------------------------*/
 /*  User Types                                                        */
@@ -49,7 +52,11 @@
 
 namespace PRDF
 {
+#ifndef LOGPARSER
     typedef TARGETING::ATTR_HUID_type HUID;
+#else
+    typedef uint32_t HUID;
+#endif
 
     // FIXME: RTC: 62867 will resolve this
     enum { INVALID_HUID = 0 };

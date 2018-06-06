@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -206,7 +208,7 @@ $(foreach targ,$(COPY_FILES), \
 define __COPY_RENAME_TARGET_RULE
 $(TARGET_DIR)$(3)/$(1): $(ROOTPATH)/$(2) $(TESTVAR_CHANGED_FILE)
 	@mkdir -p $$(dir $$@)
-	@echo "    CP-RENAME $$(notdir $$<) $$(notdir $$@)" && cp -r $$< $$@
+	@echo "    CP-RENAME $$(notdir $$<) $$(notdir $$@)" && cp -Lr $$< $$@
 endef
 define COPY_RENAME_TARGET_RULE
 $(call __COPY_RENAME_TARGET_RULE,$(1),$(2))
@@ -443,4 +445,3 @@ $(1)_TARGET_ECHO_START:
 
 endef
 $(foreach targ,$(VALID_TARGETS),$(eval $(call INSTANTIATE_TARGET,$(targ))))
-

@@ -39,6 +39,7 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_ppe_defs.H>
 #include <map>
+#include <vector>
 #include <string>
 
 namespace PRDF

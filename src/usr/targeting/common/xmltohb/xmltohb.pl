@@ -2964,7 +2964,7 @@ sub writeAttrErrlHFile {
     print $outFile "#ifndef ERRL_UDATTRIBUTE_H\n";
     print $outFile "#define ERRL_UDATTRIBUTE_H\n";
     print $outFile "\n";
-    print $outFile "#ifndef PARSER\n";
+    print $outFile "#if !defined(PARSER) && !defined(LOGPARSER)\n";
     print $outFile "\n";
     print $outFile "#include <errl/errluserdetails.H>\n";
     print $outFile "\n";
@@ -2994,7 +2994,7 @@ sub writeAttrErrlHFile {
     print $outFile "    uint32_t iv_dataSize;\n";
     print $outFile "};\n";
     print $outFile "}\n";
-    print $outFile "#else // if PARSER defined\n";
+    print $outFile "#else // if LOGPARSER defined\n";
     print $outFile "\n";
     print $outFile "#include \"errluserdetails.H\"\n";
     print $outFile "\n";
@@ -3864,7 +3864,7 @@ sub writeTargetErrlHFile {
     print $outFile "    };\n";
     print $outFile "} TargetLabel_t;\n";
     print $outFile "}\n";
-    print $outFile "#ifndef PARSER\n";
+    print $outFile "#if !defined(PARSER) && !defined(LOGPARSER)\n";
     print $outFile "\n";
     print $outFile "#include <errl/errluserdetails.H>\n";
     print $outFile "\n";
@@ -3887,7 +3887,7 @@ sub writeTargetErrlHFile {
     print $outFile "    ErrlUserDetailsTarget & operator=(const ErrlUserDetailsTarget &);\n";
     print $outFile "};\n";
     print $outFile "}\n";
-    print $outFile "#else // if PARSER defined\n";
+    print $outFile "#else // if LOGPARSER defined\n";
     print $outFile "\n";
     print $outFile "#include \"errluserdetails.H\"\n";
     print $outFile "#include <string.h>\n";

@@ -34,9 +34,9 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#ifndef PARSER
+#if !defined(PARSER) && !defined(LOGPARSER)
 #include <targeting/common/target.H>
-#endif // not PARSER
+#endif // not LOGPARSER
 
 namespace HWAS
 {
@@ -306,7 +306,7 @@ typedef struct callout_ud
 } __attribute__ ((packed)) callout_ud_t;
 
 
-#ifndef PARSER
+#if !defined(PARSER) && !defined(LOGPARSER)
 
 /* BUS callout Structure: This structure contains all the parameters needed for callout
 // in platHandleAddBusCallout, Fields are:
@@ -480,7 +480,7 @@ errlHndl_t platHandleI2cDeviceCallout(
         callOutPriority i_priority,
         errlHndl_t &io_errl);
 
-#endif // not PARSER
+#endif // not LOGPARSER
 
 };   // end namespace
 #endif
