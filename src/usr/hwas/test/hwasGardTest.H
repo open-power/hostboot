@@ -39,6 +39,7 @@
 #include <cxxtest/TestSuite.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <hwas/common/hwas.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas_reasoncodes.H>
@@ -1192,6 +1193,108 @@ public:
         if (l_pErr)
         {
             errlCommit(l_pErr, HWAS_COMP_ID);
+        }
+#endif
+    }
+
+    /**
+     *  @brief Test Deconfiguring by Association
+     *
+     *  Ensure that if a parent of an MBA being deconfigured is not present
+     *  (due to some other bug) that the deconfig by association code properly
+     *  handles it.
+     *
+     */
+    void testDeconfigureAssoc6()
+    {
+        TS_TRACE(INFO_MRK "testDeconfigureAssoc6: Started");
+#if DISABLE_MEM_UNIT_TESTS
+        // these tests deconfigure and gard targets. and even though they
+        //  restore their state after the tests, since the cxxtests are
+        //  all run in parallel, during the time that a target is non-
+        //  functional due to this test, another test may be running that
+        //  might be adversly affected.
+        // tests are left in the code so that a developer can enable them
+        //  to test these specific functions - just keep in mind that there
+        //  could be side effects in other cxxtests.
+        TS_TRACE( " - SKIPPING -- other tests could be adversly affected");
+        HWAS_INF("testDeconfigureAssoc6: Skipped");
+#else
+        HWAS_INF("testDeconfigureAssoc6: Started");
+
+        errlHndl_t l_pErr = NULL;
+
+        do
+        {
+            // find an MEMBUF
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+
+            PredicateCTM predMembuf(CLASS_CHIP, TYPE_MEMBUF);
+            PredicateHwas predFunctional;
+            predFunctional.poweredOn(true).present(true).functional(true);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predMembuf).push(&predFunctional).And();
+            TargetHandleList pMembuf;
+            targetService().getAssociated( pMembuf, pSys,
+                TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            if (pMembuf.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc6: empty pMembuf");
+                break;
+            }
+            TargetHandle_t l_pTarget = *pMembuf.begin();
+
+            // Get the original HWAS_STATE of the target
+            HwasState l_origState = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            // Get it's parent DMI target
+            TargetHandleList pParentDmiList;
+            getParentAffinityTargetsByState(pParentDmiList, l_pTarget,
+                    CLASS_UNIT, TYPE_DMI, UTIL_FILTER_PRESENT);
+            if (pParentDmiList.empty())
+            {
+                TS_FAIL("testDeconfigureAssoc6: empty pParentDmiList");
+                break;
+            }
+            TargetHandle_t l_parentTgt = *pParentDmiList.begin();
+
+            // Save off parent state and set to not present
+            HwasState l_parOrigState = l_parentTgt->getAttr<ATTR_HWAS_STATE>();
+            HwasState l_parTestState = l_parOrigState;
+            l_parTestState.present = 0;
+            l_parentTgt->setAttr<ATTR_HWAS_STATE>(l_parTestState);
+
+            // Deconfigure the target.
+            l_pErr = theDeconfigGard().
+                    deconfigureTarget(*l_pTarget, 0xA2);
+            if (l_pErr)
+            {
+                TS_FAIL("testDeconfigureAssoc6: Error from deconfigureTarget");
+                break;
+            }
+
+            // Get the new HWAS_STATE of the target
+            HwasState l_state = l_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+            if (l_state.functional)
+            {
+                TS_FAIL("testDeconfigureAssoc6: target functional after deconfigure");
+                break;
+            }
+
+            // Reset the HWAS_STATE of the target and it's parent
+            l_pTarget->setAttr<ATTR_HWAS_STATE>(l_origState);
+            l_parentTgt->setAttr<ATTR_HWAS_STATE>(l_parOrigState);
+
+            TS_TRACE(INFO_MRK "testDeconfigureAssoc6: Success");
+        }
+        while (0);
+
+        if (l_pErr)
+        {
+            errlCommit(l_pErr,HWAS_COMP_ID);
         }
 #endif
     }
