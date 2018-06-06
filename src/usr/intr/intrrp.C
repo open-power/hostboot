@@ -483,10 +483,6 @@ errlHndl_t IntrRp::_init()
                                            MSG_INTR_SHUTDOWN,
                                            INITSERVICE::INTR_PRIORITY);
 
-        //The INTRP itself will monitor/handle PSU Interrupts
-        //  so unmask those interrupts
-        l_err = unmaskInterruptSource(LSI_PSU, l_procIntrHdlr);
-
         //Set value for enabled threads
         uint64_t l_en_threads = get_enabled_threads();
         TRACFCOMP(g_trac_intr, "IntrRp::_init() Threads enabled:"
@@ -1520,10 +1516,6 @@ void IntrRp::routeInterrupt(intr_hdlr_t* i_proc,
                 (uint32_t) i_type, rc);
         }
     }
-    else if (i_type == LSI_PSU)
-    {
-        handlePsuInterrupt(i_type, i_proc, i_pir);
-    }
     else  // no queue registered for this interrupt type
     {
         // Throw it away for now.
@@ -1841,66 +1833,6 @@ errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc,
         }
 
     } while (0);
-
-    return l_err;
-}
-
-errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type,
-                                      intr_hdlr_t* i_proc,
-                                      PIR_t& i_pir)
-{
-    //TODO FIXME RTC 149698
-    // Long term will leverage mask register to avoid
-    // polling loop below
-    errlHndl_t l_err = NULL;
-    TARGETING::Target* procTarget = i_proc->proc;
-
-    do {
-        size_t scom_len = 8;
-        uint64_t l_reg = 0x0;
-        l_err = deviceRead(procTarget,
-                           &l_reg,
-                           scom_len,
-                           DEVICE_SCOM_ADDRESS(PSI_BRIDGE_PSU_DOORBELL_REG));
-        if (l_err)
-        {
-            break;
-        }
-        TRACDCOMP( g_trac_intr, "%.8X = %.16llX",
-                   PSI_BRIDGE_PSU_DOORBELL_REG, l_reg );
-
-        //If the interrupt is driven by the doorbell, yield
-        //  to give the driver a chance to take care of it
-        if( l_reg & PSI_BRIDGE_PSU_HOST_DOORBELL )
-        {
-            nanosleep(0,10000);
-            task_yield();
-        }
-
-        //Clear the PSU Scom Reg Interrupt Status register
-        //  but ignore the bit that the PSU driver uses
-        //  to avoid a race condition
-        uint64_t l_andVal = PSI_BRIDGE_PSU_HOST_DOORBELL;
-        uint64_t size = sizeof(l_andVal);
-        l_err = deviceWrite(procTarget,
-                        &l_andVal,
-                        size,
-                        DEVICE_SCOM_ADDRESS(PSI_BRIDGE_PSU_DOORBELL_ANDREG));
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "Error clearing scom - %x",
-                      PSI_BRIDGE_PSU_DOORBELL_ANDREG);
-            break;
-        }
-
-        //Interrupt Processing is complete - re-enable
-        // this interrupt source
-        uint64_t intSource = i_type;
-        TRACFCOMP(g_trac_intr, "handlePsuInterrupt - Calling completeInterruptProcessing");
-        completeInterruptProcessing(intSource, i_pir);
-
-    } while(0);
 
     return l_err;
 }

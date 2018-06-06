@@ -1731,7 +1731,7 @@ bool MailboxSp::quiesced()
 
     if( result == true )
     {
-        TRACFCOMP(g_trac_mbox,INFO_MRK"quiesed == true, iv_shutdown_msg[%p]",
+        TRACFCOMP(g_trac_mbox,INFO_MRK"quiesced == true, iv_shutdown_msg[%p]",
                   iv_shutdown_msg);
         if(iv_shutdown_msg == NULL ||
            (iv_shutdown_msg->data[1] == SHUTDOWN_STATUS_GOOD))
@@ -1794,7 +1794,7 @@ void MailboxSp::handleIPC(queue_id_t i_msg_q_id, msg_t * i_msg)
         msg_q_t msgq = r->second;
 
         // Only async message supported right now
-        // Interface already inforces this.
+        // Interface already enforces this.
         int rc = msg_send(msgq,i_msg);
 
         if(rc)
