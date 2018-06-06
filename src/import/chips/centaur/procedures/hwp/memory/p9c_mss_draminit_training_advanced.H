@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 //  Includes
 //----------------------------------------------------------------------
 #include <fapi2.H>
+#include <dimmConsts.H>
 #include <p9c_mss_shmoo_common.H>
 typedef fapi2::ReturnCode (*p9c_mss_draminit_training_advanced_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MBA>&);
 
@@ -55,6 +56,40 @@ enum shmoo_param
     WR_VREF = 0x08,
     RD_VREF = 0x10,
     RCV_IMP = 0x20
+};
+
+/// @brief Struct to contain WR_VREF shmoo test data map keys
+struct dram_key
+{
+    uint8_t port;
+    uint8_t dimm;
+    uint8_t rank;
+    uint8_t nibble;
+
+    ///
+    /// @brief dram_key less than operator (for use in std::map)
+    /// @param[in] k the dram_key to compare against
+    /// @return true if this dram_key is less than the given one, false otherwise
+    ///
+    bool operator<(const dram_key& k) const
+    {
+        if (port != k.port)
+        {
+            return (port < k.port);
+        }
+
+        if (dimm != k.dimm)
+        {
+            return (dimm < k.dimm);
+        }
+
+        if (rank != k.rank)
+        {
+            return (rank < k.rank);
+        }
+
+        return (nibble < k.nibble);
+    }
 };
 
 extern "C"
@@ -151,13 +186,16 @@ extern "C"
     /// @param[out] o_left_margin  returns left margin delay (setup) in ps
     /// @param[out] o_right_margin returns right margin delay (hold) in ps
     /// @param[in] i_shmoo_param Shmoo
-    /// @param[in] i_pda_nibble_table
+    /// @param[in] i_pda_nibble_table table of Vref values and measured margins (hence the last [2] array parameter)
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
-    fapi2::ReturnCode delay_shmoo_ddr4_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba, const uint8_t i_port,
+    fapi2::ReturnCode delay_shmoo_ddr4_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                           const uint8_t i_port,
                                            const shmoo_type_t i_shmoo_type_valid,
-                                           uint32_t* o_left_margin, uint32_t* o_right_margin,
-                                           const uint32_t i_shmoo_param, uint32_t i_pda_nibble_table[2][2][4][16][2]);
+                                           uint32_t* o_left_margin,
+                                           uint32_t* o_right_margin,
+                                           const uint32_t i_shmoo_param,
+                                           uint32_t (&i_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2]);
     ///
     /// @brief Finds better timing margin and returns the index
     /// @param[in] i_shmoo_param_valid PARAM_NONE, DRV_IMP, SLEW_RATE, WR_VREF, RD_VREF, RCV_IMP

@@ -45,6 +45,8 @@
 //  Includes - FAPI
 //----------------------------------------------------------------------
 
+#include <map>
+#include <array>
 #include <fapi2.H>
 #include <p9c_mss_termination_control.H>
 #include <p9c_mss_mcbist.H>
@@ -774,6 +776,454 @@ fapi_try_exit:
 }
 
 ///
+/// @brief set and latch new wr vref values
+/// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_vref_values the value to set for each rank
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode latch_wr_vref(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                const uint8_t (&i_vref_values)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM])
+{
+    constexpr uint8_t ENABLE_TRAINING = 0x01;
+    constexpr uint8_t DISABLE_TRAINING = 0x00;
+
+    fapi2::buffer<uint64_t> l_data_buffer_64;
+    uint8_t l_vrefdq_train_value[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
+    uint8_t l_vrefdq_train_enable[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
+
+    // Turn off refresh
+    FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+    l_data_buffer_64.clearBit<REFRESH_BIT>();
+    FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+
+    // Setup training attributes
+    std::fill(&l_vrefdq_train_enable[0][0][0],
+              &l_vrefdq_train_enable[0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM),
+              ENABLE_TRAINING);
+    memcpy(&l_vrefdq_train_value[0][0][0], &i_vref_values[0][0][0],
+           (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM));
+
+    FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, l_vrefdq_train_enable));
+    FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, i_target_mba, l_vrefdq_train_value));
+
+    // Setup and latch MRS6 to run training
+    FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "%s mrs_load failed", mss::c_str(i_target_mba));
+    FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "%s mrs_load failed", mss::c_str(i_target_mba));
+
+    // Clear training enables
+    std::fill(&l_vrefdq_train_enable[0][0][0],
+              &l_vrefdq_train_enable[0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM),
+              DISABLE_TRAINING);
+
+    FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, l_vrefdq_train_enable));
+
+    // ...and send them out
+    FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "%s mrs_load failed", mss::c_str(i_target_mba));
+
+    // Turn refresh back on
+    FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+    l_data_buffer_64.setBit<REFRESH_BIT>();
+    FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief set average wr vref value on all ranks
+/// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_pda_nibble_table table of vref values from training
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_wr_vref_by_rank(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const uint32_t (
+                                              &i_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
+{
+    uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    uint32_t l_avg_best_vref = 0;
+    uint8_t l_dimm_type = 0;
+    uint32_t l_max_nibbles = 0;
+    uint8_t l_vref_values[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target_mba, num_ranks_per_dimm));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_dimm_type));
+
+    l_max_nibbles = (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ? MAX_DRAMS_PER_RANK_X4 :
+                    MAX_DRAMS_PER_RANK_X4_ISDIMM;
+
+    // Calculate and set the Average V-Ref Value for each rank
+    for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+    {
+        for(uint8_t l_dimm = 0; l_dimm < MAX_DIMM_PER_PORT; l_dimm++)
+        {
+            for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm]; l_rank_index++)
+            {
+                for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                {
+                    l_avg_best_vref += i_pda_nibble_table[l_port_index][l_dimm][l_rank_index][l_nibble_index][0];
+                }
+
+                l_avg_best_vref = l_avg_best_vref / l_max_nibbles;
+                l_vref_values[l_port_index][l_dimm][l_rank_index] = l_avg_best_vref;
+                FAPI_INF("%s Port %d Dimm %d Rank:%d Best Avg V-Ref = %d", mss::c_str(i_target_mba),
+                         l_port_index, l_dimm, l_rank_index, l_avg_best_vref);
+            }
+        }
+    }
+
+    FAPI_TRY(latch_wr_vref(i_target_mba, l_vref_values));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set new wr vref values on a DRAM basis (PDA)
+/// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_pda_nibble_table table of vref values from training
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_wr_vref_by_dram(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const uint32_t (
+                                              &i_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
+{
+    uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    uint8_t dram_width = 0;
+    std::vector<PDA_MRS_Storage> pda_enable;
+    std::vector<PDA_MRS_Storage> pda_disable;
+    uint32_t max_vref;
+    uint8_t dram_num;
+    fapi2::buffer<uint64_t> l_data_buffer_64;
+    uint8_t l_dimm_type = 0;
+    uint32_t l_max_nibbles = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target_mba, num_ranks_per_dimm));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target_mba, dram_width));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_dimm_type));
+
+    l_max_nibbles = (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ? MAX_DRAMS_PER_RANK_X4 :
+                    MAX_DRAMS_PER_RANK_X4_ISDIMM;
+
+    // Issue PDA commands with train enable 1 (enabled) for all DRAMs with good VREF values
+    for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+    {
+        for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+        {
+            for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+            {
+                for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                {
+                    dram_num = l_nibble_index;
+                    max_vref = i_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
+
+                    // If we're x8 width, average the Vref for both nibbles together and update the DRAM index
+                    if(dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8)
+                    {
+                        l_nibble_index++;
+                        dram_num = dram_num / MAX_NIBBLES_PER_BYTE;
+                        max_vref += i_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
+                        max_vref = max_vref / MAX_NIBBLES_PER_BYTE;
+                    }
+
+                    FAPI_INF("%s Port %d Dimm %d Rank:%d Pda_Nibble: %d DRAM_num %d  V-ref:%d  Margin:%d", mss::c_str(i_target_mba),
+                             l_port_index, l_dimm_index, l_rank_index, l_nibble_index, dram_num,
+                             i_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0],
+                             i_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
+
+                    // Push the PDA enable MRS commands onto the enable list
+                    pda_enable.push_back(PDA_MRS_Storage(0x01, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index,
+                                                         l_rank_index, l_port_index));
+                    FAPI_INF("%s PDA STRING (training enable): %d %s", mss::c_str(i_target_mba), pda_enable.size() - 1,
+                             pda_enable[pda_enable.size() - 1].c_str());
+                    pda_enable.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index,
+                                                         l_rank_index, l_port_index));
+                    FAPI_INF("%s PDA STRING (vref value): %d %s", mss::c_str(i_target_mba), pda_enable.size() - 1,
+                             pda_enable[pda_enable.size() - 1].c_str());
+
+                    // And the disable commands onto the disable list
+                    pda_disable.push_back(PDA_MRS_Storage(0x00, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index,
+                                                          l_rank_index, l_port_index));
+                    FAPI_INF("%s PDA STRING (training disable): %d %s", mss::c_str(i_target_mba), pda_disable.size() - 1,
+                             pda_disable[pda_disable.size() - 1].c_str());
+                    pda_disable.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index,
+                                                          l_rank_index, l_port_index));
+                    FAPI_INF("%s PDA STRING (vref value): %d %s", mss::c_str(i_target_mba), pda_disable.size() - 1,
+                             pda_disable[pda_disable.size() - 1].c_str());
+                }
+            } //End of Rank Loop
+        } //end of dimm loop
+    } //End of Port Loop
+
+    // Turn off refresh
+    FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+    l_data_buffer_64.clearBit<REFRESH_BIT>();
+    FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+
+    FAPI_INF("%s RUNNING PDA FOR 1ST TIME", mss::c_str(i_target_mba));
+    FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda_enable));
+    FAPI_INF("%s FINISHED RUNNING PDA FOR 1ST TIME", mss::c_str(i_target_mba));
+
+    // Issue call to run PDA again (latching good value in train mode)
+    FAPI_INF("%s RUNNING PDA FOR 2ND TIME", mss::c_str(i_target_mba));
+    FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda_enable));
+    FAPI_INF("%s FINISHED RUNNING PDA FOR 2ND TIME", mss::c_str(i_target_mba));
+
+    // Next issue PDA commands with train enable 0 (disabled) for all DRAMs
+    FAPI_INF("%s RUNNING PDA FOR 3RD TIME", mss::c_str(i_target_mba));
+    FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda_disable));
+    FAPI_INF("%s FINISHED RUNNING PDA FOR 3RD TIME", mss::c_str(i_target_mba));
+
+    // Turn refresh back on
+    FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+    l_data_buffer_64.setBit<REFRESH_BIT>();
+    FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set new wr vref values and return margins
+/// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_vref_values Vref values to test
+/// @param[in,out] io_pda_nibble_table table of vref values from training
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode wr_vref_test_helper(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const uint8_t (&i_vref_values)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4],
+                                      uint32_t (&io_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
+{
+    uint8_t l_dimm_type = 0;
+    uint32_t l_max_nibbles = 0;
+    uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    shmoo_type_t l_shmoo_type_valid = WR_EYE;
+    uint32_t l_left_total_margin = 0;
+    uint32_t l_right_total_margin = 0;
+
+    // Set up the test point Vrefs and run a shmoo to get the margins
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target_mba, num_ranks_per_dimm));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_dimm_type));
+
+    l_max_nibbles = (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ? MAX_DRAMS_PER_RANK_X4 :
+                    MAX_DRAMS_PER_RANK_X4_ISDIMM;
+
+    for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+    {
+        for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+        {
+            for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+            {
+                for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                {
+                    io_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0] =
+                        i_vref_values[l_port_index][l_dimm_index][l_rank_index][l_nibble_index];
+                }
+            }
+        }
+    }
+
+    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, io_pda_nibble_table));
+
+    FAPI_TRY(delay_shmoo_ddr4_pda(i_target_mba, 0, l_shmoo_type_valid,
+                                  &l_left_total_margin, &l_right_total_margin, 0, io_pda_nibble_table));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief search for best wr vref values by DRAM using ternary search algorithm
+/// @param[in] i_target_mba Centaur input MBA
+/// @param[in] io_pda_nibble_table table of best vref values
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode wr_vref_ternary_search(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        uint32_t (&io_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
+{
+    constexpr uint8_t MAX_VREF = 50;
+
+    // Set the MCBIST end addresses to limit the duration of each delay_shmoo, and yield a low run-to-run variation
+    uint64_t l_mcbist_address_config = 0x0000001ffc000000ull;
+
+    uint8_t l_vpd_wr_vref_value[2] = {0};
+    uint8_t l_nominal_vref = 0;
+    uint8_t l_max_delta = 0;
+    uint8_t l_min_vref = 0;
+    uint8_t l_max_vref = 0;
+    uint8_t l_starting_ticks_from_nominal = 0;
+    uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    uint8_t l_dimm_type = 0;
+    uint32_t l_max_nibbles = 0;
+    uint8_t l_attr_shmoo_test_type_u8 = fapi2::ENUM_ATTR_CEN_EFF_SCHMOO_TEST_VALID_WR_EYE;
+    bool l_search_complete = true;
+
+    // Search boundaries
+    uint8_t l_low_bound[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4] = {0};
+    uint8_t l_high_bound[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4] = {0};
+
+    // Test point
+    uint8_t l_test_vref[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4] = {0};
+
+    // Test results (margins)
+    uint32_t l_pda_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2] = {0};
+
+    // Test result storage (key is dram_key (port, dimm, rank, nibble), data is a map of vrefs to the margins found so far)
+    std::map<dram_key, std::map<uint8_t, uint32_t>> l_results;
+
+    for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+    {
+        for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+        {
+            for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+            {
+                for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                {
+                    // Insert an empty map into l_results for each DRAM
+                    const dram_key l_dram = {l_port_index, l_dimm_index, l_rank_index, l_nibble_index};
+                    l_results.insert(std::make_pair(l_dram, std::map<uint8_t, uint32_t>()));
+                }
+            }
+        }
+    }
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target_mba, num_ranks_per_dimm));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_WRDDR4_VREF, i_target_mba, l_vpd_wr_vref_value));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_VREF_CAL_DELTA_FROM_NOMINAL, i_target_mba, l_starting_ticks_from_nominal));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_dimm_type));
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_EFF_SCHMOO_TEST_VALID, i_target_mba, l_attr_shmoo_test_type_u8));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_END_ADDR, i_target_mba, l_mcbist_address_config));
+
+    // Make sure we do the MCBIST setup the fist time through so we get our custom MCBIST end address
+    FAPI_TRY(reset_attribute(i_target_mba));
+
+    l_max_nibbles = (l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ? MAX_DRAMS_PER_RANK_X4 :
+                    MAX_DRAMS_PER_RANK_X4_ISDIMM;
+
+    // Make sure our initial settings are ok
+    l_nominal_vref = l_vpd_wr_vref_value[0];
+    l_max_delta = std::min<uint8_t>((MAX_VREF - l_nominal_vref), l_nominal_vref);
+    FAPI_ASSERT((l_starting_ticks_from_nominal > 0) &&
+                (l_nominal_vref - l_starting_ticks_from_nominal >= 0) &&
+                (l_nominal_vref + l_starting_ticks_from_nominal <= MAX_VREF),
+                fapi2::CEN_MSS_WR_VREF_CAL_DELTA_INVALID_VALUE().
+                set_MBA_TARGET(i_target_mba).
+                set_DELTA_VALUE(l_starting_ticks_from_nominal).
+                set_NOMINAL_VREF(l_nominal_vref).
+                set_DELTA_MAX(l_max_delta),
+                "%s Invalid value supplied for ATTR_CEN_MSS_VREF_CAL_DELTA_FROM_NOMINAL (%d). Nominal Vref is %d, so max delta is %d",
+                mss::c_str(i_target_mba),
+                l_starting_ticks_from_nominal,
+                l_nominal_vref,
+                l_max_delta);
+
+    // Initial settings: start at the given delta from nominal
+    l_min_vref = l_nominal_vref - l_starting_ticks_from_nominal;
+    l_max_vref = l_nominal_vref + l_starting_ticks_from_nominal;
+
+    std::fill(&l_low_bound[0][0][0][0],
+              &l_low_bound[0][0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM * l_max_nibbles),
+              l_min_vref);
+    std::fill(&l_high_bound[0][0][0][0],
+              &l_high_bound[0][0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM * l_max_nibbles),
+              l_max_vref);
+
+    // Continue until we've converged the search range to the minumum boundary size
+    do
+    {
+        // Start with search complete true so &= operator switches us to false if any DRAM is not complete
+        l_search_complete = true;
+
+        for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+        {
+            for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+            {
+                for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+                {
+                    for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                    {
+                        // The helper function will do the following:
+                        // 1) Step min or max boundary inward (if both high and low results are available)
+                        // 2) Give us the next Vref to test
+                        // 3) Tell us if a given DRAM's search is complete
+                        // Note: searches on all DRAMs may not complete at the same time due to skipping tests we've already done
+                        bool l_dram_complete = false;
+
+                        const dram_key l_dram = {l_port_index, l_dimm_index, l_rank_index, l_nibble_index};
+                        FAPI_TRY(ternary_search_helper(l_results[l_dram],
+                                                       l_low_bound[l_port_index][l_dimm_index][l_rank_index][l_nibble_index],
+                                                       l_high_bound[l_port_index][l_dimm_index][l_rank_index][l_nibble_index],
+                                                       l_test_vref[l_port_index][l_dimm_index][l_rank_index][l_nibble_index],
+                                                       l_dram_complete));
+                        l_search_complete &= l_dram_complete;
+                    }
+                }
+            }
+        }
+
+        // Check margins at next test point
+        FAPI_TRY(wr_vref_test_helper(i_target_mba, l_test_vref, l_pda_table));
+
+        // Print them and store them in our results map
+        for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+        {
+            for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+            {
+                for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+                {
+                    for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                    {
+                        FAPI_INF("%s Port %d Dimm %d Rank:%d Nibble:%d Vref:%d margin=%d",
+                                 mss::c_str(i_target_mba), l_port_index, l_dimm_index, l_rank_index, l_nibble_index,
+                                 l_test_vref[l_port_index][l_dimm_index][l_rank_index][l_nibble_index],
+                                 l_pda_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
+
+                        const dram_key l_dram = {l_port_index, l_dimm_index, l_rank_index, l_nibble_index};
+                        auto l_result = std::make_pair(l_test_vref[l_port_index][l_dimm_index][l_rank_index][l_nibble_index],
+                                                       l_pda_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
+                        l_results[l_dram].insert(l_result);
+                    }
+                }
+            }
+        }
+
+        // Turn the attribute back on so we don't do the MCBIST setup after the fist time through
+        FAPI_TRY(set_attribute(i_target_mba));
+    }
+    while (!l_search_complete);
+
+    // Now that we've converged to the minimal search range, set the best vref for each nibble
+    for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+    {
+        for(uint8_t l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+        {
+            for(uint8_t l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+            {
+                for(uint8_t l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                {
+                    // The best vref is set in the next test point, so copy that into the table
+                    io_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0] =
+                        l_test_vref[l_port_index][l_dimm_index][l_rank_index][l_nibble_index];
+
+                    // Rather than running another shmoo, copy the margins in from the last shmoo
+                    // which was tested at either the best vref or one tick away from it
+                    io_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1] =
+                        l_pda_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1];
+                }
+            }
+        }
+    }
+
+    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, io_pda_nibble_table));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief perform binary wr vref shmoo on DDR4 dimms
 /// @param[in] i_target_mba Centaur input MBA
 /// @return FAPI2_RC_SUCCESS iff successful
@@ -791,16 +1241,14 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     uint32_t total_val = 0;
     uint32_t last_total = 0;
     uint32_t base_percent = 60000;
-    uint32_t pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][DATA_BYTES_PER_PORT *
-            MAX_NIBBLES_PER_BYTE][2];  // Port,Dimm,Rank,Nibble,Data[0] = vref data[1] = total margin
-    uint32_t best_pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][DATA_BYTES_PER_PORT *
-            MAX_NIBBLES_PER_BYTE][2]; // Port,Dimm,Rank,Nibble,Data[0] = vref data[1] = total margin
+    // Port,Dimm,Rank,Nibble,Data[0] = vref data[1] = total margin
+    uint32_t pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2] = {0};
+    uint32_t best_pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2] = {0};
     uint8_t cal_control = 0;
     ///// ddr4 vref //////
     uint8_t vrefdq_train_value[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
     uint8_t vrefdq_train_enable[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
     uint32_t vref_val = 0;
-    uint32_t avg_best_vref = 0;
     uint8_t l_port = 0;
     uint8_t l_port_index = 0;
     uint8_t l_dimm_index = 0;
@@ -812,13 +1260,12 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t last_known_vref = 0;
     uint8_t l_loop_count = 0;
     uint8_t dram_width = 0;
-    vector<PDA_MRS_Storage> pda;
-    pda.clear();
     uint32_t index_mul_print = 650;
     uint8_t l_attr_shmoo_test_type_u8 = 1;
     uint32_t vref_val_print = 0;
     uint8_t vpd_wr_vref_value[2] = {0};
     const auto l_target_centaur1 = i_target_mba.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+    uint32_t l_max_nibbles = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target_mba, dram_width));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_attr_eff_dimm_type_u8));
@@ -833,6 +1280,10 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     {
         base_percent = 45;
     }
+
+    l_max_nibbles = (l_attr_eff_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
+                    ? MAX_DRAMS_PER_RANK_X4
+                    : MAX_DRAMS_PER_RANK_X4_ISDIMM;
 
     FAPI_INF("%s Setting MCBIST DONE bit MASK as FW reports FIR bits!...", mss::c_str(i_target_mba));
     //Workaround MCBIST MASK Bit as FW reports FIR bits --- > SET
@@ -922,10 +1373,38 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
 
     }
 
-    else if (cal_control != fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_DISABLE)
+    else if (cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_TERNARY)
+    {
+        // Perform the shmoo search algorithm
+        FAPI_TRY(wr_vref_ternary_search(i_target_mba, pda_nibble_table));
+
+        // Report final Vrefs
+        for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
+        {
+            for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
+            {
+                for(l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
+                {
+                    for(l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
+                    {
+                        vref_val_print = base_percent +
+                                         (pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0] * index_mul_print);
+                        FAPI_INF("%s: *** Final results from ternary shmoo: port%d, dimm%d, rank%d, nibble%d: Best V-Ref - %d - %d; Total Window = %d",
+                                 mss::c_str(i_target_mba), l_port_index, l_dimm_index, l_rank_index, l_nibble_index,
+                                 pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0], vref_val_print,
+                                 pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
+                    }
+                }
+            }
+        }
+    } // end of VREF_CAL_CNTL_BINARY (P9)
+
+    // P8 algorithms
+    else if ((cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_P8_DRAM) ||
+             (cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_P8_RANK))
     {
         l_shmoo_type_valid = WR_EYE;
-        l_attr_shmoo_test_type_u8 = 2;
+        l_attr_shmoo_test_type_u8 = fapi2::ENUM_ATTR_CEN_EFF_SCHMOO_TEST_VALID_WR_EYE;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_EFF_SCHMOO_TEST_VALID, i_target_mba, l_attr_shmoo_test_type_u8));
 
         //Initialise All to Zero [MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM]
@@ -935,7 +1414,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++) //Rank
                 {
-                    for(l_nibble_index = 0; l_nibble_index < (DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE); l_nibble_index++) //Nibble
+                    for(l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++) //Nibble
                     {
                         pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0] = 0;  //  Index 0 Are V-refs
                         pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1] = 0;   // Index 1 are Total Margin Values
@@ -949,6 +1428,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
 
         while(imax >= imin)
         {
+            uint8_t l_vref_values[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
 
             if(l_loop_count == 0)
             {
@@ -963,62 +1443,12 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
             vref_val_print = base_percent + (l_vref_mid * index_mul_print);
             FAPI_INF("%sThe Vref value is = %d; The percent voltage bump = %d ", mss::c_str(i_target_mba), vref_val,
                      vref_val_print);
-            FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
-            l_data_buffer_64.clearBit<REFRESH_BIT>();
-            FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
 
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++)
-                    {
+            std::fill(&l_vref_values[0][0][0],
+                      &l_vref_values[0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM),
+                      vref_val);
 
-                        vrefdq_train_enable[l_port_index][l_dimm_index][l_rank_index] = 0x01;
-
-                    }
-                }
-            }
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_RANGE, i_target_mba, vrefdq_train_range));
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, vrefdq_train_enable));
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++) //Port
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++) //Max dimms
-                {
-                    for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++) //Ranks
-                    {
-
-                        vrefdq_train_value[l_port_index][l_dimm_index][l_rank_index] = vref_val;
-
-                    }
-                }
-            }
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, i_target_mba, vrefdq_train_value));
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-            // Call it Twice to Latch (Steve)
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++)
-                    {
-                        vrefdq_train_enable[l_port_index][l_dimm_index][l_rank_index] = 0x00;
-                    }
-                }
-            }
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, vrefdq_train_enable));
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-
-            FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
-            l_data_buffer_64.setBit<REFRESH_BIT>();
-            FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
-
+            FAPI_TRY(latch_wr_vref(i_target_mba, l_vref_values));
 
             FAPI_TRY(delay_shmoo_ddr4_pda(i_target_mba, l_port, l_shmoo_type_valid, &l_left_margin, &l_right_margin, vref_val,
                                           pda_nibble_table));
@@ -1050,7 +1480,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
                 {
                     for(l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
                     {
-                        for(l_nibble_index = 0; l_nibble_index < (DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE); l_nibble_index++)
+                        for(l_nibble_index = 0; l_nibble_index < l_max_nibbles; l_nibble_index++)
                         {
                             if (best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1] <
                                 pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1])
@@ -1075,186 +1505,22 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
         refresh_reg.clearBit<REFRESH_BIT>();
         FAPI_TRY(fapi2::putScom( i_target_mba,  CEN_MBA_MBAREF0Q,  refresh_reg));
 
-        if(cal_control == 2)
+        if(cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_P8_RANK)
         {
             FAPI_INF("%s CAL_CONTROL in RANK_Wise Mode!! ", mss::c_str(i_target_mba));
-            FAPI_TRY(fapi2::getScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
-            l_data_buffer_64.clearBit<REFRESH_BIT>();
-            FAPI_TRY(fapi2::putScom(i_target_mba, CEN_MBA_MBAREF0Q, l_data_buffer_64));
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++)
-                    {
-
-                        vrefdq_train_enable[l_port_index][l_dimm_index][l_rank_index] = 0x01;
-
-                    }
-                }
-            }
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, vrefdq_train_enable));
-            //Calculate the Average V-Ref Value
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(uint8_t i_dimm = 0; i_dimm < MAX_DIMM_PER_PORT; i_dimm++)
-                {
-                    for(l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][i_dimm]; l_rank_index++)
-                    {
-                        for(l_nibble_index = 0; l_nibble_index < DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE; l_nibble_index++)
-                        {
-
-                            avg_best_vref = best_pda_nibble_table[l_port_index][i_dimm][l_rank_index][l_nibble_index][0] + avg_best_vref;
-                        }
-
-                        avg_best_vref = avg_best_vref / (DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE);
-                        FAPI_INF("++ RANK_Wise  ++++ Best Avg V-Ref = %d !! ", avg_best_vref);
-                        vrefdq_train_value[l_port_index][i_dimm][l_rank_index] = avg_best_vref;
-
-                    } //End of Rank Loop
-                } //end of dimm loop
-            } //End of Port Loop
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, i_target_mba, vrefdq_train_value));
-
-            //issue call to run_pda (entering into train mode)
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-
-            // Call it Twice to Latch (Steve)
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < MAX_RANKS_PER_DIMM; l_rank_index++)
-                    {
-
-                        vrefdq_train_enable[l_port_index][l_dimm_index][l_rank_index] = 0x00;
-
-                    }
-                }
-            }
-
-            FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, i_target_mba, vrefdq_train_enable));
-            FAPI_TRY(p9c_mss_mrs6_DDR4(i_target_mba), "mrs_load failed");
-
-        } //end of RANK wise if
+            FAPI_TRY(set_wr_vref_by_rank(i_target_mba, best_pda_nibble_table));
+        }
         else
         {
-            //1 - Issue PDA commands with enable train enable 1 for all DRAMs with good VREF values
-            uint32_t max_vref = 0;
-            uint8_t dram_num = 0;
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
-                    {
-                        for(l_nibble_index = 0; l_nibble_index < (DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE); l_nibble_index++)
-                        {
-                            FAPI_INF("%s Port %d Dimm %d Rank:%d Pda_Nibble: %d  V-ref:%d  Margin:%d", mss::c_str(i_target_mba), l_port_index,
-                                     l_dimm_index, l_rank_index,
-                                     l_nibble_index,
-                                     best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0],
-                                     best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
-
-                            //if x8, averages the two nibbles together and, regardless, converts the DRAM over to the nibble
-                            dram_num = l_nibble_index;
-                            max_vref = best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
-
-                            if(dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8)
-                            {
-                                l_nibble_index++;
-                                dram_num = dram_num / MAX_NIBBLES_PER_BYTE;
-                                max_vref += best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
-                                max_vref = max_vref / MAX_NIBBLES_PER_BYTE;
-                            }
-
-                            FAPI_INF("%s Port %d Dimm %d Rank:%d Pda_Nibble: %d DRAM_num %d  V-ref:%d  Margin:%d", mss::c_str(i_target_mba),
-                                     l_port_index, l_dimm_index,
-                                     l_rank_index, l_nibble_index,
-                                     dram_num, best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0],
-                                     best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
-
-                            pda.push_back(PDA_MRS_Storage(0x01, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index, l_rank_index,
-                                                          l_port_index));
-                            FAPI_INF("%s PDA STRING: %d %s", mss::c_str(i_target_mba), pda.size() - 1, pda[pda.size() - 1].c_str());
-                            pda.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index, l_rank_index,
-                                                          l_port_index));
-                            FAPI_INF("%s PDA STRING: %d %s", mss::c_str(i_target_mba), pda.size() - 1, pda[pda.size() - 1].c_str());
-                        }
-
-
-                    } //End of Rank Loop
-                } //end of dimm loop
-            } //End of Port Loop
-
-            FAPI_INF("%s RUNNING PDA FOR 1ST TIME", mss::c_str(i_target_mba));
-            FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda));
-            FAPI_INF("%s FINISHED RUNNING PDA FOR 1ST TIME", mss::c_str(i_target_mba));
-
-            //issue call to run PDA again (latching good value in train mode)
-            FAPI_INF("%s RUNNING PDA FOR 2ND TIME", mss::c_str(i_target_mba));
-            FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda));
-            FAPI_INF("%s FINISHED RUNNING PDA FOR 2ND TIME", mss::c_str(i_target_mba));
-            //clear the PDA vector
-            pda.clear();
-
-            //build PDA vector with good VREF values and train enable DISABLED
-
-            for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
-            {
-                for(l_dimm_index = 0; l_dimm_index < MAX_DIMM_PER_PORT; l_dimm_index++)
-                {
-                    for(l_rank_index = 0; l_rank_index < num_ranks_per_dimm[l_port_index][l_dimm_index]; l_rank_index++)
-                    {
-                        for(l_nibble_index = 0; l_nibble_index < (DATA_BYTES_PER_PORT * MAX_NIBBLES_PER_BYTE); l_nibble_index++)
-                        {
-                            //if x8, averages the two nibbles together and, regardless, converts the DRAM over to the nibble
-                            dram_num = l_nibble_index;
-                            max_vref = best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
-
-                            if(dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8)
-                            {
-                                l_nibble_index++;
-                                dram_num = dram_num / MAX_NIBBLES_PER_BYTE;
-                                max_vref += best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0];
-                                max_vref = max_vref / MAX_NIBBLES_PER_BYTE;
-                            }
-
-                            FAPI_INF("\n Port %d Dimm %d Rank:%d Pda_Nibble: %d DRAM_num %d  V-ref:%d  Margin:%d", l_port_index, l_dimm_index,
-                                     l_rank_index, l_nibble_index,
-                                     dram_num, best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][0],
-                                     best_pda_nibble_table[l_port_index][l_dimm_index][l_rank_index][l_nibble_index][1]);
-
-                            pda.push_back(PDA_MRS_Storage(0x00, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index, l_rank_index,
-                                                          l_port_index));
-                            FAPI_INF("%s PDA STRING: %d %s", mss::c_str(i_target_mba), pda.size() - 1, pda[pda.size() - 1].c_str());
-                            pda.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index, l_rank_index,
-                                                          l_port_index));
-                            FAPI_INF("%s PDA STRING: %d %s", mss::c_str(i_target_mba), pda.size() - 1, pda[pda.size() - 1].c_str());
-                        }
-                    } //End of Rank Loop
-                } //end of dimm loop
-            } //End of Port Loop
-
-            FAPI_INF("%s RUNNING PDA FOR 3RD TIME", mss::c_str(i_target_mba));
-            //issue call to PDA command
-            FAPI_TRY(mss_ddr4_run_pda((fapi2::Target<fapi2::TARGET_TYPE_MBA>&)i_target_mba, pda));
-            FAPI_INF("%s FINISHED RUNNING PDA FOR 3RD TIME", mss::c_str(i_target_mba));
-        } //End of Else
+            FAPI_TRY(set_wr_vref_by_dram(i_target_mba, best_pda_nibble_table));
+        }
 
         //turn on refresh then exit
         FAPI_TRY(fapi2::getScom( i_target_mba, CEN_MBA_MBAREF0Q, refresh_reg));
         refresh_reg.setBit<REFRESH_BIT>();
         FAPI_TRY(fapi2::putScom( i_target_mba, CEN_MBA_MBAREF0Q, refresh_reg));
 
-    } // end of if
+    } // end of P8 algorithms
 
     else     //Skipping Shmoos ... Writing VPD data directly
 
@@ -1510,14 +1776,15 @@ fapi_try_exit:
 /// @param[out] o_left_margin  returns left margin delay (setup) in ps
 /// @param[out] o_right_margin returns right margin delay (hold) in ps
 /// @param[in] i_shmoo_param Shmoo
-/// @param[in] i_pda_nibble_table
+/// @param[in] i_pda_nibble_table table of Vref values and measured margins (hence the last [2] array parameter)
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode delay_shmoo_ddr4_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba, uint8_t i_port,
                                        shmoo_type_t i_shmoo_type_valid,
                                        uint32_t* o_left_margin,
                                        uint32_t* o_right_margin,
-                                       uint32_t i_shmoo_param, uint32_t i_pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][16][2])
+                                       uint32_t i_shmoo_param,
+                                       uint32_t (&i_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
 {
 
     //need to use fapi allocator to avoid memory fragmentation issues in Hostboot

@@ -1783,7 +1783,7 @@ extern "C"
         uint8_t l_attr_eff_dimm_type_u8 = 0;
         uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE] = {0};
         uint8_t l_dq[DATA_BYTES_PER_PORT] = { 0 };
-        uint8_t l_sp[SP_BYTES_PER_PORT] = { 0 };
+        uint8_t l_sp[SP_ECC_BYTES_PER_PORT] = { 0 };
         uint16_t l_index0 = 0;
         uint8_t l_index_sp = 0;
         uint16_t l_sp_isdimm = 0xff;

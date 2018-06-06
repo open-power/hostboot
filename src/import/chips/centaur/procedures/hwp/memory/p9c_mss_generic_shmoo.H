@@ -44,6 +44,7 @@
 #define SHMOO_DEBUG2 0
 #include <p9c_mss_shmoo_common.H>
 #include <p9c_mss_mcbist.H>
+#include <map>
 
 ///
 /// @brief MSS Generic Shmoo Class.. Inherits from PHY access class and the knob abstraction
@@ -414,7 +415,7 @@ class generic_shmoo
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
         fapi2::ReturnCode get_nibble_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                         uint32_t pda_nibble_table[2][2][4][16][2]);
+                                         uint32_t (&pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2]);
 
         ///
         /// @brief used to find right and left bound
@@ -439,4 +440,22 @@ class generic_shmoo
         fapi2::ReturnCode print_report2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
 
 };
+
+// Below are various training_advanced helper functions, placed here so they can be unit tested in p9c_mss_generic_shmoo_ut.C
+
+///
+/// @brief helper function for testing ternary search
+/// @param[in] i_results map of test results that have been found so far
+/// @param[in,out] io_low_bound lower search boundary's vref value
+/// @param[in,out] io_high_bound higher search boundary's vref value
+/// @param[out] o_test_vref next Vref value to test
+/// @param[out] o_complete true if the search is complete, false otherwise
+/// @return FAPI2_RC_SUCCESS if no errors encountered
+///
+fapi2::ReturnCode ternary_search_helper(const std::map<uint8_t, uint32_t>& i_results,
+                                        uint8_t& io_low_bound,
+                                        uint8_t& io_high_bound,
+                                        uint8_t& o_test_vref,
+                                        bool& o_complete);
+
 #endif

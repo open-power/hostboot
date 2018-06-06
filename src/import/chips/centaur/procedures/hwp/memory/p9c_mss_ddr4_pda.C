@@ -1148,18 +1148,7 @@ extern "C" {
         }
 
         uint8_t num_ranks_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //[port][dimm]
-        uint8_t dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, dram_stack));
-
-        if(dram_stack[0][0]  == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-        {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target, num_ranks_array));
-        }
-        else
-        {
-            FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, num_ranks_array);
-        }
+        FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, num_ranks_array);
 
         //loops through all DIMMs all Ranks
         for(uint8_t l_dimm = 0; l_dimm < MAX_DIMM_PER_PORT; l_dimm++)

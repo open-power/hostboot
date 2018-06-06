@@ -121,12 +121,26 @@ Set by: PLL settings written by Dave Cadigan</description>
 <attribute>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training; 0x03=Box shmoo;
+    <description>Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=P8_DRAM - Enable V-Ref Train DRAM Level (P8 algorithm); 0x02=P8_RANK Level Training (P8 algorithm); 0x03=Box shmoo; 0x04=Ternary shmoo
          Default Value = 0x03 for box shmoo on all platforms
 </description>
     <valueType>uint8</valueType>
-    <enum>DISABLE = 0, DRAM = 1, RANK = 2, BOX = 3</enum>
+    <enum>DISABLE = 0, P8_DRAM = 1, P8_RANK = 2, BOX = 3, TERNARY = 4</enum>
     <default>3</default>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+<id>ATTR_CEN_MSS_VREF_CAL_DELTA_FROM_NOMINAL</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Controls search boundaries for WR_VREF Ternary shmoo. Value is a delta of register ticks from nominal
+         Default Value = 0x08 (taken from characterization values), Max value = 0x19
+</description>
+    <valueType>uint8</valueType>
+    <default>0x08</default>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>

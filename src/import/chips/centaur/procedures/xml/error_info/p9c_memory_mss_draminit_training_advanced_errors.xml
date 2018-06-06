@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -95,6 +95,22 @@
     find_best_margin function
   </description>
   <ffdc>COUNT_DATA</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_WR_VREF_CAL_DELTA_INVALID_VALUE</rc>
+  <description>
+    The attribute ATTR_CEN_MSS_VREF_CAL_DELTA_FROM_NOMINAL was overridden
+    with an invalid value
+  </description>
+  <ffdc>MBA_TARGET</ffdc>
+  <ffdc>DELTA_VALUE</ffdc>
+  <ffdc>NOMINAL_VREF</ffdc>
+  <ffdc>DELTA_MAX</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

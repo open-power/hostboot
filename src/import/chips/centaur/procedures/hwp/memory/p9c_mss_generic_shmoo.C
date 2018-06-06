@@ -4436,7 +4436,7 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
     fapi2::ReturnCode generic_shmoo::get_nibble_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-            uint32_t pda_nibble_table[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][16][2])
+            uint32_t (&pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
     {
         uint8_t l_dimm = 0;
         uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
@@ -4450,7 +4450,7 @@ extern "C"
                 {
                     for(uint8_t l_dq = 0; l_dq < 4; l_dq++)
                     {
-                        for(uint8_t l_n = 0; l_n < 16; l_n++)
+                        for(uint8_t l_n = 0; l_n < (iv_MAX_BYTES * MAX_NIBBLES_PER_BYTE); l_n++)
                         {
                             pda_nibble_table[l_p][l_dimm][l_rnk][l_n][0] = iv_vref_mul;
 
@@ -4841,3 +4841,68 @@ extern "C"
     }
 
 }//Extern C
+
+///
+/// @brief helper function for testing ternary search
+/// @param[in] i_results map of test results that have been found so far
+/// @param[in,out] io_low_bound lower search boundary's vref value
+/// @param[in,out] io_high_bound higher search boundary's vref value
+/// @param[out] o_test_vref next Vref value to test
+/// @param[out] o_complete true if the search is complete, false otherwise
+/// @return FAPI2_RC_SUCCESS if no errors encountered
+///
+fapi2::ReturnCode ternary_search_helper(const std::map<uint8_t, uint32_t>& i_results,
+                                        uint8_t& io_low_bound,
+                                        uint8_t& io_high_bound,
+                                        uint8_t& o_test_vref,
+                                        bool& o_complete)
+{
+    // This value is for termination of the search algorithm.
+    // When the search range gets below this, the answer is the average of the high/low bounds
+    constexpr uint8_t MIN_BOUNDS = 3;
+
+    while(true)
+    {
+        // First calculate the next step value (how much to move bound on end with lowest margin)
+        const uint32_t l_step = (io_high_bound - io_low_bound) / 3;
+
+        // See if we've already got results for each test point
+        auto l_low_margin_it = i_results.find(io_low_bound + l_step);
+        auto l_high_margin_it = i_results.find(io_high_bound - l_step);
+
+        // If we don't have results for the next test points, return the next value to test
+        if (l_low_margin_it == i_results.end())
+        {
+            o_test_vref = io_low_bound + l_step;
+            o_complete = false;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        if (l_high_margin_it == i_results.end())
+        {
+            o_test_vref = io_high_bound - l_step;
+            o_complete = false;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // Next, move in low or high bound, depending on which test point had the lowest margin
+        if (l_low_margin_it->second < l_high_margin_it->second)
+        {
+            io_low_bound += l_step;
+        }
+        else
+        {
+            io_high_bound -= l_step;
+        }
+
+        // If we're at our minimum search range, return the average of the bounds
+        if ((io_high_bound - io_low_bound) < MIN_BOUNDS)
+        {
+            o_test_vref = (io_high_bound + io_low_bound) / 2;
+            o_complete = true;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // If not, loop around and continue the search
+    }
+}
