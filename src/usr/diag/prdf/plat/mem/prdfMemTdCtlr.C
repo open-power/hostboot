@@ -390,96 +390,110 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 {
     #define PRDF_FUNC "[MemTdCtlr<T>::collectStateCaptureData] "
 
-    ExtensibleChip *l_memChip = nullptr;
-
-    // Get the number of entries in the TD queue (limit 15)
+    // Get the number of entries in the TD queue (limit 16)
     TdQueue::Queue queue = iv_queue.getQueue();
     uint8_t queueCount = queue.size();
-    if ( 15 < queueCount ) queueCount = 15;
+    if ( 16 < queueCount ) queueCount = 16;
 
     // Don't add anything if there is no data.
     if ( nullptr == iv_curProcedure && 0 == queueCount ) return;
 
-    // Get the buffer
-    uint32_t bitLen = 32 + queueCount*14; // Header + TD queue
-    BitStringBuffer bsb( bitLen );
-    uint32_t curPos = 0;
-    uint8_t  filler = 0x00;
+    // Get the version to use.
+    uint8_t version = TD_CTLR_DATA::VERSION_1;
+    if ( MODEL_NIMBUS == getChipModel(getMasterProc()) )
+    {
+        version = TD_CTLR_DATA::VERSION_2;
+    }
 
-    //######################################################################
-    // Header data (28 bits) - 6 bits currently unused (filler)
-    //######################################################################
-
-    // Specifies when running. Also ensures our data is non-zero. 4-bit
-    #ifndef __HOSTBOOT_RUNTIME
-    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::IPL_PORTS );
-    curPos+=4;
+    // Get the IPL state.
+    #ifdef __HOSTBOOT_RUNTIME
+    uint8_t state = TD_CTLR_DATA::RT;
     #else
-    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::RT_PORTS  );
-    curPos+=4;
+    uint8_t state = TD_CTLR_DATA::IPL;
     #endif
 
-    uint8_t mrnk  = 0;
-    uint8_t srnk  = 0;
-    uint8_t phase = TdEntry::Phase::TD_PHASE_0;
-    uint8_t type  = TdEntry::TdType::INVALID_EVENT;
-    uint8_t port  = 0;
+    // Get the buffer length (header + TD queue)
+    uint32_t hdrLen = TD_CTLR_DATA::v1_HEADER;
+    uint32_t entLen = TD_CTLR_DATA::v1_ENTRY;
+    if ( TD_CTLR_DATA::VERSION_2 == version )
+    {
+        hdrLen = TD_CTLR_DATA::v2_HEADER;
+        entLen = TD_CTLR_DATA::v2_ENTRY;
+    }
+
+    uint32_t bitLen = hdrLen + queueCount * entLen;
+
+    // Init the buffer.
+    BitStringBuffer bsb( bitLen );
+
+    //##########################################################################
+    // Header data
+    //##########################################################################
+
+    uint8_t curMrnk  = 0;
+    uint8_t curSrnk  = 0;
+    uint8_t curPhase = TdEntry::Phase::TD_PHASE_0;
+    uint8_t curType  = TdEntry::TdType::INVALID_EVENT;
+    uint8_t curPort  = 0;
 
     if ( nullptr != iv_curProcedure )
     {
-        mrnk  = iv_curProcedure->getRank().getMaster(); // 3-bit
-        srnk  = iv_curProcedure->getRank().getSlave();  // 3-bit
-        phase = iv_curProcedure->getPhase();            // 4-bit
-        type  = iv_curProcedure->getType();             // 4-bit
+        curMrnk  = iv_curProcedure->getRank().getMaster();
+        curSrnk  = iv_curProcedure->getRank().getSlave();
+        curPhase = iv_curProcedure->getPhase();
+        curType  = iv_curProcedure->getType();
 
-        // Want MCA port number (if any)
-        l_memChip = iv_curProcedure->getChip();
-        if ( TYPE_MCA == l_memChip->getType() )
+        if ( TD_CTLR_DATA::VERSION_2 == version )
         {
-            port = l_memChip->getPos() % MAX_MCA_PER_MCBIST; // 2-bit
-        } // if MCBIST
+            curPort = iv_curProcedure->getChip()->getPos() % MAX_MCA_PER_MCBIST;
+        }
+    }
 
-    } // if Non-Null iv_curProcedure
+    uint32_t pos = 0;
 
-    bsb.setFieldJustify( curPos, 3, mrnk  ); curPos+=3;
-    bsb.setFieldJustify( curPos, 3, srnk  ); curPos+=3;
-    bsb.setFieldJustify( curPos, 4, phase ); curPos+=4;
-    bsb.setFieldJustify( curPos, 4, type  ); curPos+=4;
-    bsb.setFieldJustify( curPos, 4, port  ); curPos+=4;
-    bsb.setFieldJustify( curPos, 6, filler); curPos+=6;
+    bsb.setFieldJustify( pos, 1, state      ); pos+=1;
+    bsb.setFieldJustify( pos, 3, version    ); pos+=3;
+    bsb.setFieldJustify( pos, 3, curMrnk    ); pos+=3;
+    bsb.setFieldJustify( pos, 3, curSrnk    ); pos+=3;
+    bsb.setFieldJustify( pos, 4, curPhase   ); pos+=4;
+    bsb.setFieldJustify( pos, 4, curType    ); pos+=4;
+    bsb.setFieldJustify( pos, 4, queueCount ); pos+=4;
 
+    if ( TD_CTLR_DATA::VERSION_2 == version )
+    {
+        bsb.setFieldJustify( pos, 2, curPort ); pos+=2;
+    }
 
-    //######################################################################
-    // TD Request Queue (min 4 bits, max 228 bits)
-    //######################################################################
-
-    bsb.setFieldJustify( curPos, 4, queueCount ); curPos+=4; // 4-bit
+    //##########################################################################
+    // TD Queue
+    //##########################################################################
 
     for ( uint32_t n = 0; n < queueCount; n++ )
     {
-        uint8_t itMrnk = queue[n]->getRank().getMaster(); // 3-bit
-        uint8_t itSrnk = queue[n]->getRank().getSlave();  // 3-bit
-        uint8_t itType = queue[n]->getType();             // 4-bit
+        uint8_t itMrnk = queue[n]->getRank().getMaster();
+        uint8_t itSrnk = queue[n]->getRank().getSlave();
+        uint8_t itType = queue[n]->getType();
+        uint8_t itPort = 0;
 
-        l_memChip = queue[n]->getChip();
-        if ( TYPE_MCA == l_memChip->getType() )
+        if ( TD_CTLR_DATA::VERSION_2 == version )
         {
-            port = l_memChip->getPos() % MAX_MCA_PER_MCBIST; // 2-bit
-        }
-        else
-        {
-            port = 0xFF;
+            itPort = queue[n]->getChip()->getPos() % MAX_MCA_PER_MCBIST;
         }
 
-        bsb.setFieldJustify( curPos, 3, itMrnk ); curPos+=3;
-        bsb.setFieldJustify( curPos, 3, itSrnk ); curPos+=3;
-        bsb.setFieldJustify( curPos, 4, itType ); curPos+=4;
-        bsb.setFieldJustify( curPos, 4, port   ); curPos+=4;
+        bsb.setFieldJustify( pos, 3, itMrnk ); pos+=3;
+        bsb.setFieldJustify( pos, 3, itSrnk ); pos+=3;
+        bsb.setFieldJustify( pos, 4, itType ); pos+=4;
+
+        if ( TD_CTLR_DATA::VERSION_2 == version )
+        {
+            bsb.setFieldJustify( pos, 2, itPort ); pos+=2;
+        }
     }
 
-    //######################################################################
+    //##########################################################################
     // Add the capture data
-    //######################################################################
+    //##########################################################################
+
     CaptureData & cd = io_sc.service_data->GetCaptureData();
     cd.Add( iv_chip->getTrgt(), Util::hashString(i_startEnd), bsb );
 

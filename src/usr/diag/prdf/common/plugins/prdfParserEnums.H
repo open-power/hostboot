@@ -337,16 +337,58 @@ namespace TD_CTLR_DATA
     static const char * const START = "TDCTLR_STATE_DATA_START";
     static const char * const END   = "TDCTLR_STATE_DATA_END";
 
+    enum State
+    {
+        IPL = 0,
+        RT  = 1,
+    };
+
     // We don't use 0 as one of the enum values here so we can ensure our data
     // is non-zero when we add the tdCtlr state to the capture data
     enum Version
     {
-        IPL       = 1,
-        RT        = 2,
-        // These 2 versions include the MCA port number
-        IPL_PORTS = 3,
-        RT_PORTS  = 4
+        // Version 1:
+        //  Header:
+        //      1-bit state (IPL or RT)
+        //      3-bit version (VERSION_1)
+        //      3-bit current procedure master rank (0-7)
+        //      3-bit current procedure slave rank (0-7)
+        //      4-bit current procedure phase (see TdEntry::Phase)
+        //      4-bit current procedure type (see TdEntry::TdType)
+        //      4-bit number of entries in the queue (0-15)
+        //  For each entry in the queue
+        //      3-bit entry master rank (0-7)
+        //      3-bit entry slave rank (0-7)
+        //      4-bit entry type (see TdEntry::TdType)
+        VERSION_1 = 1,
+
+        // Version 2 (includes MCA port number):
+        //  Header:
+        //      1-bit state (IPL or RT)
+        //      3-bit version (VERSION_2)
+        //      3-bit current procedure master rank (0-7)
+        //      3-bit current procedure slave rank (0-7)
+        //      4-bit current procedure phase (see TdEntry::Phase)
+        //      4-bit current procedure type (see TdEntry::TdType)
+        //      4-bit number of entries in the queue (0-15)
+        //      2-bit current procedure MCA port relative to MCBIST (0-3)
+        //  For each entry in the queue
+        //      3-bit entry master rank (0-7)
+        //      3-bit entry slave rank (0-7)
+        //      4-bit entry type (see TdEntry::TdType)
+        //      2-bit entry MCA port relative to MCBIST (0-3)
+        VERSION_2  = 2,
     };
+
+    enum BitLen
+    {
+        v1_HEADER = 22,
+        v1_ENTRY  = 10,
+
+        v2_HEADER = 24,
+        v2_ENTRY  = 12,
+    };
+
 } // namespace TD_CTLR_DATA
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
