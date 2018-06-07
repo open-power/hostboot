@@ -3392,181 +3392,139 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
 {
     bool o_rc = true;
 
-    if ( Util::hashString(TD_CTLR_DATA::START) == i_sigId )
-        i_parser.PrintString( " TDCTLR_STATE_DATA_START", "" );
-    else if ( Util::hashString(TD_CTLR_DATA::END) == i_sigId )
-        i_parser.PrintString( " TDCTLR_STATE_DATA_END", "" );
+    // Make sure we have a valid buffer.
+    if ( (NULL == i_buffer) || (0 == i_buflen) ) return false;
 
-    // These are copies of the enums in prdfMemTdQueue.H and prdfParserEnums.H.
+    // This is a copy of the enum in prdfMemTdQueue.H.
     enum TdType
     {
         VCM_EVENT = 0,
+        DSD_EVENT,
         TPS_EVENT,
-    };
-
-    enum Phase
-    {
-        TD_PHASE_0,
-        TD_PHASE_1,
-        TD_PHASE_2,
-    };
-
-    enum Version
-    {
-        IPL       = 1,
-        RT        = 2,
-        IPL_PORTS = 3,
-        RT_PORTS  = 4
+        INVALID_EVENT = 0xf,
     };
 
     do
     {
-        if ( NULL == i_buffer )
-        {
-            o_rc = false;
-            break;
-        }
-
-        BitString bs( (i_buflen*8), (CPU_WORD*)i_buffer );
-
-        if ( bs.getBitLen() < 22 )
-        {
-            o_rc = false;
-            break;
-        }
-
-        uint32_t curPos = 0;
-        uint8_t  port   = 0x0F;  // not valid
+        const uint32_t bitLen = i_buflen * 8;
+        BitString bs ( bitLen, (CPU_WORD*)i_buffer );
+        uint32_t pos = 0;
 
         //######################################################################
-        // Header data (18 bits)
+        // Header data
         //######################################################################
 
-        uint8_t version = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-        uint8_t mrnk    = bs.getFieldJustify( curPos, 3 ); curPos+=3;
-        uint8_t srnk    = bs.getFieldJustify( curPos, 3 ); curPos+=3;
-        uint8_t phase   = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-        uint8_t type    = bs.getFieldJustify( curPos, 4 ); curPos+=4;
+        // Get the data state and version.
+        if ( bitLen < 4 ) { o_rc = false; break; }
 
-        // Verify if we have new format with port information
-        bool     versWithPorts = ( (IPL_PORTS == version) ||
-                                   (RT_PORTS  == version) )  ? true : false;
-        if ( versWithPorts )
-        {
-            // 0:3 is valid MCA,  xF is for MBA case
-            port = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-        } // end if new format with ports
+        uint8_t state   = bs.getFieldJustify( pos, 1 ); pos+=1;
+        uint8_t version = bs.getFieldJustify( pos, 3 ); pos+=3;
 
-        const char * version_str = "   ";
-        switch ( version )
+        if ( (TD_CTLR_DATA::VERSION_1 != version) &&
+             (TD_CTLR_DATA::VERSION_2 != version) )
         {
-            case IPL:
-            case IPL_PORTS:
-                version_str = "IPL"; break;
-            case RT :
-            case RT_PORTS:
-                version_str = "RT "; break;
+            o_rc = false; break;
         }
 
-        const char * type_str = "         ";
-        switch ( type )
+        uint32_t hdrLen = TD_CTLR_DATA::v1_HEADER;
+        uint32_t entLen = TD_CTLR_DATA::v1_ENTRY;
+        if ( TD_CTLR_DATA::VERSION_2 == version )
         {
-            case VCM_EVENT: type_str = "VCM_EVENT";     break;
-            case TPS_EVENT: type_str = "TPS_EVENT";     break;
-            default       : type_str = "INVALID_EVENT"; break;
+            hdrLen = TD_CTLR_DATA::v2_HEADER;
+            entLen = TD_CTLR_DATA::v2_ENTRY;
         }
 
-        const char * phase_str = "          ";
-        switch ( phase )
+        // Print the title and state.
+        const char * state_str = ( TD_CTLR_DATA::RT == state ) ? "RT" : "IPL";
+
+        if ( Util::hashString(TD_CTLR_DATA::START) == i_sigId )
+            i_parser.PrintString( " TDCTLR_STATE_DATA_START", state_str );
+        else if ( Util::hashString(TD_CTLR_DATA::END) == i_sigId )
+            i_parser.PrintString( " TDCTLR_STATE_DATA_END", state_str );
+
+        // Get the rest of the header data.
+        if ( bitLen < hdrLen ) { o_rc = false; break; }
+
+        uint8_t curMrnk    = bs.getFieldJustify( pos, 3 ); pos+=3;
+        uint8_t curSrnk    = bs.getFieldJustify( pos, 3 ); pos+=3;
+        uint8_t curPhase   = bs.getFieldJustify( pos, 4 ); pos+=4;
+        uint8_t curType    = bs.getFieldJustify( pos, 4 ); pos+=4;
+        uint8_t queueCount = bs.getFieldJustify( pos, 4 ); pos+=4;
+
+        uint8_t curPort = 0;
+        if ( TD_CTLR_DATA::VERSION_2 == version )
         {
-            case TD_PHASE_0: phase_str = "TD_PHASE_0";       break;
-            case TD_PHASE_1: phase_str = "TD_PHASE_1";       break;
-            case TD_PHASE_2: phase_str = "TD_PHASE_2";       break;
+            curPort = bs.getFieldJustify( pos, 2 ); pos+=2;
         }
 
-        char rank_str[DATA_SIZE] = "    ";
-        switch ( type )
+        // Print the current procedure, if needed.
+        if ( INVALID_EVENT != curType )
         {
-            case VCM_EVENT:
-                snprintf( rank_str, DATA_SIZE, "m%d  ", mrnk );       break;
-            case TPS_EVENT:
-                snprintf( rank_str, DATA_SIZE, "m%ds%d", mrnk, srnk ); break;
-            default:
-                snprintf( rank_str, DATA_SIZE, "n/a "); break;
-        }
-
-        i_parser.PrintString( "   Version",     version_str );
-        i_parser.PrintString( "   TD Type",     type_str    );
-        i_parser.PrintString( "   TD Phase",    phase_str   );
-        i_parser.PrintString( "   Target Rank", rank_str    );
-
-        // Do we actually have MCA port number ?
-        if ( versWithPorts )
-        {
-            i_parser.PrintNumber( "   Port Num   ", "%d", port );
-        } // end if MCA  (not MBA)
-
-
-        //######################################################################
-        // TD Request Queue (min 4 bits, max 164 bits)
-        //######################################################################
-
-        uint8_t queueCount = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-
-        if ( bs.getBitLen() < (curPos+(queueCount*10)) )
-        {
-            o_rc = false;
-            break;
-        }
-
-        for ( uint8_t i = 0; i < queueCount; i++ )
-        {
-            uint8_t queueMrnk = bs.getFieldJustify( curPos, 3 ); curPos+=3;
-            uint8_t queueSrnk = bs.getFieldJustify( curPos, 3 ); curPos+=3;
-            uint8_t queueType = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-
-            // Verify if we have new format with port information
-            if ( versWithPorts )
+            const char * curType_str = "";
+            switch ( curType )
             {
-                port = bs.getFieldJustify( curPos, 4 ); curPos+=4;
-            } // end if new format with ports
-
-            const char * type_str = "         ";
-            switch ( queueType )
-            {
-                case VCM_EVENT: type_str = "VCM_EVENT"; break;
-                case TPS_EVENT: type_str = "TPS_EVENT"; break;
+                case VCM_EVENT: curType_str = "VCM"; break;
+                case DSD_EVENT: curType_str = "DSD"; break;
+                case TPS_EVENT: curType_str = "TPS"; break;
+                default       : curType_str = "???"; break;
             }
 
-            char rank_str[DATA_SIZE] = "    ";
-            switch ( type )
+            char curPort_str[DATA_SIZE] = "";
+            if ( TD_CTLR_DATA::VERSION_2 == version )
             {
-                case VCM_EVENT:
-                    snprintf( rank_str, DATA_SIZE, "m%d  ", queueMrnk );
-                    break;
-                case TPS_EVENT:
-                    snprintf( rank_str, DATA_SIZE, "m%ds%d", queueMrnk,
-                              queueSrnk );
-                    break;
+                snprintf( curPort_str, DATA_SIZE, "port %d", curPort );
             }
 
-            char data[DATA_SIZE] = "";
+            char curData_str[DATA_SIZE] = "";
+            snprintf( curData_str, DATA_SIZE, "%s phase %d on m%ds%d %s",
+                      curType_str, curPhase, curMrnk, curSrnk, curPort_str );
 
-            // Verify if we have valid port information
-            if ( versWithPorts )
-            {
-                snprintf( data, DATA_SIZE, "%s on %s Port:%d",
-                          type_str, rank_str, port );
-            } // end if MCA  (not MBA)
-            else
-            {
-                snprintf( data, DATA_SIZE, "%s on %s", type_str, rank_str );
-            } // end if MCA  (not MBA)
-
-            i_parser.PrintString( "   TD Request", data );
+            i_parser.PrintString( "   Current procedure", curData_str );
         }
 
-    }while(0);
+        //######################################################################
+        // TD Queue entries
+        //######################################################################
+
+        for ( uint8_t n = 0; n < queueCount; n++ )
+        {
+            // Get the entry data.
+            if ( bitLen < hdrLen + (n+1) * entLen ) { o_rc = false; break; }
+
+            uint8_t itMrnk = bs.getFieldJustify( pos, 3 ); pos+=3;
+            uint8_t itSrnk = bs.getFieldJustify( pos, 3 ); pos+=3;
+            uint8_t itType = bs.getFieldJustify( pos, 4 ); pos+=4;
+
+            uint8_t itPort = 0;
+            if ( TD_CTLR_DATA::VERSION_2 == version )
+            {
+                itPort = bs.getFieldJustify( pos, 2 ); pos+=2;
+            }
+
+            // Print the entry.
+            const char * itType_str = "";
+            switch ( itType )
+            {
+                case VCM_EVENT: itType_str = "VCM"; break;
+                case DSD_EVENT: itType_str = "DSD"; break;
+                case TPS_EVENT: itType_str = "TPS"; break;
+                default       : itType_str = "???"; break;
+            }
+
+            char itPort_str[DATA_SIZE] = "";
+            if ( TD_CTLR_DATA::VERSION_2 == version )
+            {
+                snprintf( itPort_str, DATA_SIZE, "port %d", itPort );
+            }
+
+            char itData_str[DATA_SIZE] = "";
+            snprintf( itData_str, DATA_SIZE, "%s on m%ds%d %s",
+                      itType_str, itMrnk, itSrnk, itPort_str );
+
+            i_parser.PrintString( "   TD queue entry", itData_str );
+        }
+
+    } while (0);
 
     if ( !o_rc )
     {
