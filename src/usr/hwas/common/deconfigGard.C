@@ -2014,6 +2014,28 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 break;
             } // TYPE_NPU
+            case TYPE_SMPGROUP:
+            {
+                //OBUS with no good SMPGROUP should be de-configured
+                TargetHandleList pObusList;
+                getParentAffinityTargetsByState(pObusList,
+                        &i_target, CLASS_UNIT, TYPE_OBUS,
+                        UTIL_FILTER_PRESENT);
+
+                HWAS_ASSERT((pObusList.size() == 1),
+                    "HWAS _deconfigureByAssoc: pObusList != 1");
+                Target *l_targetObus = pObusList[0];
+
+                if ((l_targetObus->getAttr<ATTR_OPTICS_CONFIG_MODE>() ==
+                            OPTICS_CONFIG_MODE_SMP) &&
+                   (!anyChildFunctional(*l_targetObus)))
+                {
+                    _deconfigureTarget(*l_targetObus, i_errlEid, NULL,
+                                    i_deconfigRule);
+                }
+
+                break;
+            } // TYPE_SMPGROUP
             default:
                 // no action
             break;
