@@ -27,6 +27,9 @@
 //  Includes
 //----------------------------------------------------------------------
 #define prdfClockResolution_C
+#include <iipSystem.h>
+#include <prdfExtensibleChip.H>
+#include <prdfGlobal.H>
 #include <iipServiceDataCollector.h>
 #include <prdfClockResolution.H>
 #include <prdfPlatServices.H>
@@ -34,6 +37,8 @@
 
 namespace PRDF
 {
+
+using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 // Member Function Specifications
@@ -50,7 +55,7 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
          (iv_targetType == TYPE_MEMBUF) )
     {
         TargetHandle_t l_ptargetClock =
-            PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCREFCLK);
+            getActiveRefClk(iv_ptargetClock, TYPE_OSCREFCLK);
 
         // Callout this chip if nothing else.
         // Or in the case of hostboot, use this chip for addClockCallout
@@ -73,26 +78,72 @@ int32_t ClockResolution::Resolve(STEP_CODE_DATA_STRUCT & serviceData)
     }
     else if (iv_targetType == TYPE_PEC)
     {
-        TargetHandle_t l_ptargetClock =
-            PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCPCICLK);
+        // Check if both PCI clocks have failed
+        bool bothClocksFailed = false;
+        ExtensibleChip *procChip =
+            (ExtensibleChip *)systemPtr->GetChip(iv_ptargetClock);
 
-        // Callout this chip if nothing else.
-        if(NULL == l_ptargetClock)
+        SCAN_COMM_REGISTER_CLASS *oscSw = procChip->getRegister("OSC_SW_SENSE");
+        l_rc = oscSw->Read();
+        if ( SUCCESS == l_rc )
         {
-            l_ptargetClock = iv_ptargetClock;
+            const uint32_t OSC_0_OK = 28;
+            const uint32_t OSC_1_OK = 29;
+            if ( !(oscSw->IsBitSet(OSC_0_OK) || oscSw->IsBitSet(OSC_1_OK) ) )
+            {
+                bothClocksFailed = true;
+
+                // Callout both PCI Clocks
+                #ifndef __HOSTBOOT_MODULE
+                TargetHandle_t pciOsc =
+                    getClockId( iv_ptargetClock, TYPE_OSCPCICLK, 0 );
+                if (pciOsc)
+                    serviceData.service_data->SetCallout( pciOsc );
+
+                pciOsc = getClockId( iv_ptargetClock, TYPE_OSCPCICLK, 1 );
+                if (pciOsc)
+                    serviceData.service_data->SetCallout( pciOsc );
+
+                #else
+                serviceData.service_data->SetCallout(
+                            PRDcallout(iv_ptargetClock,
+                            PRDcalloutData::TYPE_PCICLK0));
+                serviceData.service_data->SetCallout(
+                            PRDcallout(iv_ptargetClock,
+                            PRDcalloutData::TYPE_PCICLK1));
+                #endif
+            }
+        }
+        else
+        {
+            PRDF_ERR( "ClockResolution::Resolve "
+                      "Read() failed on OSC_SW_SENSE huid 0x%08X",
+                      iv_ptargetClock );
         }
 
-        // callout the clock source
-        // HB does not have the osc target modeled
-        // so we need to use the proc target with
-        // osc clock type to call out
-        #ifndef __HOSTBOOT_MODULE
-        serviceData.service_data->SetCallout(l_ptargetClock);
-        #else
-        serviceData.service_data->SetCallout(
-                            PRDcallout(l_ptargetClock,
-                            PRDcalloutData::TYPE_PCICLK));
-        #endif
+        if ( !bothClocksFailed )
+        {
+            TargetHandle_t l_ptargetClock =
+                PlatServices::getActiveRefClk(iv_ptargetClock, TYPE_OSCPCICLK);
+
+            // Callout this chip if nothing else.
+            if(NULL == l_ptargetClock)
+            {
+                l_ptargetClock = iv_ptargetClock;
+            }
+
+            // callout the clock source
+            // HB does not have the osc target modeled
+            // so we need to use the proc target with
+            // osc clock type to call out
+            #ifndef __HOSTBOOT_MODULE
+            serviceData.service_data->SetCallout(l_ptargetClock);
+            #else
+            serviceData.service_data->SetCallout(
+                                PRDcallout(l_ptargetClock,
+                                PRDcalloutData::TYPE_PCICLK));
+            #endif
+        }
     }
     // Get all connected chips for non-CLOCK_CARD types.
     else

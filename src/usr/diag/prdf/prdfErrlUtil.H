@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,8 +181,7 @@
 #define PRDF_ADD_CLOCK_CALLOUT(io_errl, i_target, i_clockType, i_priority, \
                                i_deconfigState, i_gardErrType)             \
     io_errl->addClockCallout(i_target,                          \
-                (PRDcalloutData::TYPE_PROCCLK == i_clockType) ? \
-                 HWAS::OSCREFCLK_TYPE : HWAS::OSCPCICLK_TYPE,   \
+                             i_clockType,                       \
                 (const HWAS::callOutPriority)i_priority,        \
                 (i_deconfigState == HWAS::DECONFIG ?            \
                    HWAS::DELAYED_DECONFIG : i_deconfigState),   \
