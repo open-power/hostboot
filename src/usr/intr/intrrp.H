@@ -182,9 +182,6 @@ namespace INTR
                 //PSI Host Bridge ESB Constants
                 PSI_BRIDGE_ESB_BAR_VALID =     0x0000000000000001ULL,
                 PSI_BRIDGE_ESB_NOTIFY_VALID =  0x0000000000000001ULL,
-                PSI_BRIDGE_ESB_QUERY_OFFSET = 0x800,
-                PSI_BRIDGE_ESB_OFF_OFFSET =    0xD00,
-                PSI_BRIDGE_ESB_RESET_OFFSET =  0XC00,
                 PSI_BRIDGE_PSU_DOORBELL_REG =  0x000D0063,
                 PSI_BRIDGE_PSU_DOORBELL_ANDREG =  0x000D0064,
                 PSI_BRIDGE_PSU_HOST_DOORBELL = 0x8000000000000000,
@@ -229,6 +226,11 @@ namespace INTR
                 POWERBUS_STATE_QUIESCE = 0xC000000000000000,
                 MAX_PSU_LONG_TIMEOUT_NS  = 5000*NS_PER_MSEC, //5 seconds
 
+                // ESB Page offsets -- This page format is used both in the
+                //   PSIHB + LSI SBE EOI pages
+                ESB_QUERY_OFFSET = 0x800,
+                ESB_OFF_OFFSET   = 0xD00,
+                ESB_RESET_OFFSET = 0XC00,
                 ESB_STATE_RESET   = 0,
                 ESB_STATE_OFF     = 1,
                 ESB_STATE_PENDING = 2,
@@ -404,6 +406,12 @@ namespace INTR
              * interrupt to Hostboot
              */
             void enableLsiInterrupts();
+
+            /**
+             * Do a read from LSI ESB EOI page to disable presentation of LSI
+             * interrupt to Hostboot
+             */
+            void disableLsiInterrupts();
 
             /**
              * Clear INT_PC registers that didn't get cleared by the HW reset

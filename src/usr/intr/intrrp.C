@@ -133,20 +133,10 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             TRACFCOMP(g_trac_intr,
                "IntrRp::resetIntpForMpipl() Synchronize multi-node interrupt enablement");
 
-            // MPIPL Step 1 -- Set the Interrupt LSI state machine to disabled
-            for (uint64_t i = 0; i < LSI_LAST_SOURCE; i++)
-            {
-                err = sendPsiHbEOI(iv_masterHdlr, i);
-                if (err)
-                {
-                    TRACFCOMP(g_trac_intr,
-                      "IntrRp::resetIntpForMpipl() Error sending PsiHbEOI for int source: %d", i);
-                    break;
-                }
-            }
-
-            if (err)
-            { break; }
+            // MPIPL Step 1 -- Set the ESB State to Off (0x1) for the LSI SB
+            //    EOI Page This is the 4th page in the IC_BAR. View the P9
+            //    Interrupt Workbook section 5.1 to find info on this page
+            disableLsiInterrupts();
 
             // Step 2 -- Set bit 0 of Interrupt Control Register
             //     to 1 to enable LSI mode
@@ -410,7 +400,6 @@ errlHndl_t IntrRp::_init()
             }
         }
 
-
         //Disable Incoming PSI Interrupts
         TRACDCOMP(g_trac_intr, "IntrRp::_init() Disabling PSI Interrupts");
         uint64_t l_disablePsiIntr = PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI;
@@ -517,13 +506,31 @@ void IntrRp::enableLsiInterrupts()
     task_affinity_migrate_to_master();
     uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
     l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
-    l_lsiEoi += (0xC00 / sizeof(uint64_t));
+    l_lsiEoi += (ESB_RESET_OFFSET / sizeof(uint64_t));
 
     volatile uint64_t l_eoiRead = *l_lsiEoi;
     TRACFCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() read 0x%lx from pointer %p", l_eoiRead, l_lsiEoi);
     //MMIO Complete, rest of code can run on any thread
     task_affinity_unpin();
     TRACDCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() exit");
+}
+
+void IntrRp::disableLsiInterrupts()
+{
+    TRACDCOMP(g_trac_intr, "IntrRp:: disableLsiInterrupts() enter");
+    //The XIVE HW is expecting these MMIO accesses to come from the
+    // core/thread they were setup (master core, thread 0)
+    // These functions will ensure this code executes there
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+    uint64_t * l_lsiEoi = iv_masterHdlr->xiveIcBarAddr;
+    l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
+    l_lsiEoi += (ESB_OFF_OFFSET / sizeof(uint64_t));
+    volatile uint64_t l_eoiRead = *l_lsiEoi;
+    TRACFCOMP(g_trac_intr, "IntrRp:: disableLsiInterrupts() read 0x%lx from pointer %p", l_eoiRead, l_lsiEoi);
+    //MMIO Complete, rest of code can run on any thread
+    task_affinity_unpin();
+    TRACDCOMP(g_trac_intr, "IntrRp:: disableLsiInterrupts() exit");
 }
 
 /**
@@ -1629,7 +1636,7 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
     errlHndl_t l_err = NULL;
     uint64_t * l_psiHbEsbptr = i_chip->psiHbEsbBaseAddr;
     l_psiHbEsbptr +=
-           (((i_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_OFF_OFFSET)
+           (((i_intr_source*PAGE_SIZE)+ESB_OFF_OFFSET)
                   /sizeof(uint64_t));
 
     //MMIO Read to this address transitions the ESB to the off state
@@ -1638,7 +1645,7 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
 
     //Perform 2nd read to verify in OFF state using query offset
     l_psiHbEsbptr = i_chip->psiHbEsbBaseAddr +
-                  (((i_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_QUERY_OFFSET)
+                  (((i_intr_source*PAGE_SIZE)+ESB_QUERY_OFFSET)
                   /sizeof(uint64_t));
     l_maskRead = *l_psiHbEsbptr;
 
@@ -1724,7 +1731,7 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
         {
             uint64_t * l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr;
             l_psiHbEsbptr +=
-                 (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_RESET_OFFSET)
+                 (((l_intr_source*PAGE_SIZE)+ESB_RESET_OFFSET)
                                 /sizeof(uint64_t));
 
             //MMIO Read to this address transitions the ESB to the RESET state
@@ -1733,7 +1740,7 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
 
             //Perform 2nd read to verify in RESET state using query offset
             l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr +
-                      (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_QUERY_OFFSET)
+                      (((l_intr_source*PAGE_SIZE)+ESB_QUERY_OFFSET)
                       /sizeof(uint64_t));
 
             l_unmaskRead = *l_psiHbEsbptr;
