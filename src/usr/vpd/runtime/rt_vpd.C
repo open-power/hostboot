@@ -132,6 +132,8 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
     // Get the reserved_mem_addr only once
     else if( g_reserved_mem_addr[i_instance] == 0 )
     {
+        TRACDCOMP( g_trac_vpd, "Grabbing rsvd mem for instance %d", i_instance );
+
         uint64_t l_vpdSize;
         g_reserved_mem_addr[i_instance] =
             hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_VPD,
@@ -232,7 +234,7 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
                       mutex_t * i_mutex )
 {
     errlHndl_t err = NULL;
-    TARGETING::NODE_ID l_nodeId = TARGETING::NODE0;
+    TARGETING::NODE_ID l_nodeId = 0xFF;
     int64_t vpdLocation = 0;
     uint64_t addr = 0x0;
     const char * readAddr = NULL;
@@ -240,10 +242,8 @@ errlHndl_t readPNOR ( uint64_t i_byteAddr,
     TRACSSCOMP( g_trac_vpd,
                 ENTER_MRK"RT fake readPNOR()" );
 
-    // Get AttrRP pointer
-    TARGETING::AttrRP *l_attrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
     // Get the node ID associated with the input target
-    l_attrRP->getNodeId(i_target, l_nodeId);
+    l_nodeId = TARGETING::AttrRP::getNodeId(i_target);
 
     do
     {
