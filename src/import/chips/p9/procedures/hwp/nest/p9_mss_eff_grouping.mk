@@ -25,6 +25,7 @@
 
 # Include the macros and things for MSS procedures
 PROCEDURE=p9_mss_eff_grouping
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
 lib$(PROCEDURE)_DEPLIBS+=cen
 OBJS+=p9_fbc_utils.o
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
