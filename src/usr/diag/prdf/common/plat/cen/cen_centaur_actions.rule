@@ -111,18 +111,18 @@ actionclass spareDeployed_dmibus
 };
 
 /** Lane Repair: max spares exceeded */
-actionclass maxSparesExceeded_dmibus_UERE
+actionclass maxSparesExceeded_dmibus
 {
     calloutBusInterface_dmibus_th1;
     funccall("maxSparesExceeded");
-    SueSource; # channel failure
 };
 
 /** Lane Repair: too many bus errors */
-actionclass tooManyBusErrors_dmibus
+actionclass tooManyBusErrors_dmibus_UERE
 {
     calloutBusInterface_dmibus_th1;
     funccall("tooManyBusErrors");
+    SueSource; # channel failure
 };
 
 /** Callout the DMI bus, threshold 1. Also, clear secondary MBSFIR bits. */

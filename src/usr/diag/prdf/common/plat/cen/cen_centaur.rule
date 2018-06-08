@@ -960,7 +960,7 @@ rule rDMIFIR
 };
 
 group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
-                     cs_root_cause( 10 )
+                     cs_root_cause( 12 )
 {
     /** DMIFIR[0]
      *  RX invalid state or parity error
@@ -995,7 +995,7 @@ group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
     /** DMIFIR[10]
      *  Max spares exceeded
      */
-    (rDMIFIR, bit(10)) ? maxSparesExceeded_dmibus_UERE;
+    (rDMIFIR, bit(10)) ? maxSparesExceeded_dmibus;
 
     /** DMIFIR[11]
      *  Recal or dynamic repair error
@@ -1005,7 +1005,7 @@ group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
     /** DMIFIR[12]
      *  Too many bus errors
      */
-    (rDMIFIR, bit(12)) ? tooManyBusErrors_dmibus;
+    (rDMIFIR, bit(12)) ? tooManyBusErrors_dmibus_UERE;
 
     /** DMIFIR[13:15]
      *  Reserved
