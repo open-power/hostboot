@@ -361,7 +361,7 @@ fapi2::ReturnCode unmask_inband_errors_helper(const fapi2::Target<fapi2::TARGET_
     l_mbs_fir_action1.clearBit<2>();
     l_mbs_fir_mask_or.setBit<2>();
 
-    // 3    external_timeout        recoverable         mask (until unmask_fetch_errors)
+    // 3    external_timeout        masked off as request for Obus cable recovery support
     l_mbs_fir_action0.clearBit<3>();
     l_mbs_fir_action1.setBit<3>();
     l_mbs_fir_mask_or.setBit<3>();
@@ -2247,8 +2247,7 @@ fapi2::ReturnCode mss_unmask_fetch_errors(const fapi2::Target<fapi2::TARGET_TYPE
     // 2    invalid_address_error   channel checkstop   unmask
     l_mbs_fir_mask_and.clearBit<2>();
 
-    // 3    external_timeout        recoverable         unmask
-    l_mbs_fir_mask_and.clearBit<3>();
+    // 3    external_timeout        MASKED         - Don't touch! per needing this masked off for Obus recovery
 
     // 4    internal_timeout        recoverable         unmask
     l_mbs_fir_mask_and.clearBit<4>();
