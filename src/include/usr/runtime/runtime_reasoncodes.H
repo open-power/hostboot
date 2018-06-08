@@ -65,6 +65,7 @@ namespace RUNTIME
         MOD_RT_ATTR_SYNC_REQUEST         = 0x25,  /**< rt_fwnotify.C */
         MOD_CHECK_HB_RES_MEM_LIMIT       = 0x26,  /**< populate_hbruntime.C */
         MOD_INIT_RT_RES_MEM_TRACE_BUF    = 0x27,  /**< rt_rsvdtracebuffer.C */
+        MOD_OPEN_UNTRUSTED_SP_AREAS      = 0x28,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode
@@ -135,6 +136,8 @@ namespace RUNTIME
         RC_HOST_TIMER_THREAD_FAIL      = RUNTIME_COMP_ID | 0x3F,
         RC_RT_RES_TRACE_BUF_DUMPED     = RUNTIME_COMP_ID | 0x40,
         RC_RT_RES_TRACE_BUF_INVALID    = RUNTIME_COMP_ID | 0x41,
+        RC_SP_ATTN_AREA_OVERFLOW       = RUNTIME_COMP_ID | 0x42,
+        RC_SP_ATTN_AREA1_SIZE_OVERFLOW = RUNTIME_COMP_ID | 0x43,
     };
 
     enum UserDetailsTypes
