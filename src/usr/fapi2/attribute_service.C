@@ -60,6 +60,7 @@
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
+#include <../memory/lib/shared/dimmConsts.H>
 #include <../memory/lib/shared/mss_const.H>
 #include <../memory/lib/rosetta_map/rosetta_map.H>
 #include <util/utilcommonattr.H>
@@ -565,7 +566,7 @@ size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
 union wiringData
 {
     uint8_t nimbus[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
-    uint8_t cumulus[DIMM_BAD_DQ_NUM_BYTES];
+    uint8_t cumulus[MAX_PORTS_PER_CEN][DIMM_BAD_DQ_NUM_BYTES];
 };
 
 //******************************************************************************
@@ -599,6 +600,16 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
         // If the proc is Cumulus, we need to get the MBA.
         if ( TARGETING::MODEL_CUMULUS == procType )
         {
+            TARGETING::TargetHandle_t l_dimmTarget;
+            l_errl = getTargetingTarget(i_fapiDimm, l_dimmTarget);
+            if ( l_errl )
+            {
+                FAPI_ERR( "__getMcsAndPortSlct: Error from "
+                          "getTargetingTarget getting DIMM" );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
             Target<TARGET_TYPE_MBA> l_fapiMba =
                 i_fapiDimm.getParent<TARGET_TYPE_MBA>();
             l_errl = getTargetingTarget( l_fapiMba, l_port );
@@ -610,6 +621,13 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                 break;
             }
 
+            uint8_t mbaPos =
+                l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
+                MAX_MBA_PER_CEN; // 0-1
+            uint8_t mbaPort =
+                l_dimmTarget->getAttr<TARGETING::ATTR_CEN_MBA_PORT>() %
+                MAX_PORTS_PER_MBA; // 0-1
+            o_ps = (mbaPos*MAX_PORTS_PER_MBA)+mbaPort; // 0-3
         }
         // If the proc is Nimbus, we need to get the MCA.
         else
@@ -638,10 +656,11 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                 break;
             }
 
+            o_ps = l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
+                mss::PORTS_PER_MCS;
         }
 
-        o_ps = l_port->getAttr<TARGETING::ATTR_CHIP_UNIT>() %
-               mss::PORTS_PER_MCS;
+
 
     }while(0);
 
@@ -685,8 +704,22 @@ ReturnCode __badDqBitmapGetHelperAttrs(
             // versions and ensure zero initialized array.
             memset( o_wiringData.cumulus, 0, sizeof(o_wiringData.cumulus) );
 
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_DQ_TO_DIMM_CONN_DQ,
-                                  i_dimmTarget, o_wiringData.cumulus );
+            Target<TARGET_TYPE_MBA> l_fapiMba =
+                l_fapiDimm.getParent<TARGET_TYPE_MBA>();
+            Target<TARGET_TYPE_MEMBUF_CHIP> l_fapiMembuf =
+                l_fapiMba.getParent<TARGET_TYPE_MEMBUF_CHIP>();
+
+            TARGETING::TargetHandle_t l_membuf = nullptr;
+            errlHndl_t l_errl = getTargetingTarget( l_fapiMembuf, l_membuf );
+            if ( l_errl )
+            {
+                FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error from "
+                          "getTargetingTarget getting Membuf." );
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
+                                  l_membuf, o_wiringData.cumulus );
         }
         else
         {
@@ -1080,7 +1113,7 @@ ReturnCode __mcLogicalToDimmDqHelper(
             {
                 // Check to see which bit in the wiring data corresponds to our
                 // DIMM DQ format pin.
-                if ( i_wiringData.cumulus[bit] == l_c4 )
+                if ( i_wiringData.cumulus[i_ps][bit] == l_c4 )
                 {
                     o_dimm_dq = bit;
                     break;
@@ -1212,7 +1245,7 @@ ReturnCode __dimmDqToMcLogicalHelper(
 
         // Translate from DIMM DQ format to C4 using wiring data
         // Note: the wiring data maps from dimm dq format to c4 format
-        l_c4 = i_wiringData.cumulus[i_dimm_dq];
+        l_c4 = i_wiringData.cumulus[i_ps][i_dimm_dq];
 
         // For Cumulus, C4 to MC Logical is 1-to-1
         o_mcPin = l_c4;
