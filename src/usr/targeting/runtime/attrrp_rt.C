@@ -31,6 +31,7 @@
 #include <targeting/targplatreasoncodes.H>
 #include <util/runtime/util_rt.H>
 #include <sys/internode.h>
+#include <map>
 
 #include "../attrrp_common.C"
 
@@ -436,6 +437,20 @@ namespace TARGETING
         #undef TARG_FN
     }
 
+    NODE_ID AttrRP::getNodeId(const Target* i_pTarget)
+    {
+        #define TARG_FN "getNodeId"
+
+        NODE_ID l_nodeId = 0;
+
+        // Call the class function with my module-local singleton
+        TARGETING::AttrRP *l_attrRP = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
+        l_attrRP->getNodeId(i_pTarget, l_nodeId);
+
+        return l_nodeId;
+        #undef TARG_FN
+    }
+
     void AttrRP::getNodeId(const Target* i_pTarget, NODE_ID& o_nodeId) const
     {
         #define TARG_FN "getNodeId"
@@ -445,6 +460,15 @@ namespace TARGETING
         // Initialize with invalid
         o_nodeId = INVALID_NODE_ID;
 
+        // Check if we have a cached version first
+        static std::map<const Target*,NODE_ID> s_targToNodeMap;
+        auto l_nodeItr = s_targToNodeMap.find(i_pTarget);
+        if( l_nodeItr != s_targToNodeMap.end() )
+        {
+            o_nodeId = l_nodeItr->second;
+            return;
+        }
+
         //find the node to which this target belongs
         for(uint8_t i=0; i<INVALID_NODE_ID; ++i)
         {
@@ -453,6 +477,11 @@ namespace TARGETING
                if(  iv_nodeContainer[i].pSections[j].type ==
                                   SECTION_TYPE_PNOR_RO)
                {
+                   TARG_DBG("%d/%d> pTargetMap=%p, end=%p", i, j, iv_nodeContainer[i].pTargetMap, (
+                        reinterpret_cast<uint8_t*>(
+                            iv_nodeContainer[i].pTargetMap) +
+                            iv_nodeContainer[i].pSections[j].size) );
+
                  // This expects the pTarget to be always in range and !NULL.
                  // If any invalid target is passed (which is still within the
                  // RO Section scope) then behaviour is undefined.
@@ -464,6 +493,8 @@ namespace TARGETING
                  {
                      l_found = true;
                      o_nodeId = i;
+                     s_targToNodeMap[i_pTarget] = i;
+                     TARG_DBG("Target %p is on node %d @ %p", i_pTarget, o_nodeId, &o_nodeId );
                      break;
                  }
                }

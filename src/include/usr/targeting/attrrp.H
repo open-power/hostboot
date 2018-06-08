@@ -184,7 +184,7 @@ class AttrRP
         void* getBaseAddress(const NODE_ID i_nodeId);
 
         /**
-         *  @brief Returns Node Id of the Target handle passed
+         *  @brief Returns Node Id of the Target handle passed (internal)
          *
          *  @param[in] i_pTarget
          *      Non-NULL Target handle for which node ID is required.
@@ -196,6 +196,19 @@ class AttrRP
          */
         void getNodeId(const Target* i_pTarget,
                        NODE_ID& o_nodeId) const;
+
+#ifdef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Returns Node Id of the Target handle passed (external)
+         *
+         *  @param[in] i_pTarget
+         *      Non-NULL Target handle for which node ID is required.
+         *  @return NODE_ID
+         *      Node ID of the Target Handle requested. If Target not found
+         *      the invalid node will be return in here.
+         */
+        static NODE_ID getNodeId(const Target* i_pTarget);
+#endif
 
         /**
          *  @brief Translates given address, according to the resource
