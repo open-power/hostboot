@@ -32,6 +32,9 @@
 #include <cstdint>
 #include <securerom/sha512.H>
 #include <securerom/ROM.H>
+#include <vmmconst.h>
+#include <sys/misc.h>
+#include <kernel/vmmmgr.H>
 
 /*
  * @brief Used to capture the first 4 bytes of the hash for tracing purposes
@@ -362,6 +365,20 @@ namespace SECUREBOOT
      *      valid error log otherwise.
      */
     errlHndl_t setSbeSecurityMode(uint8_t i_sbeSecurityMode);
+
+    /*
+     *  @brief Calculates the node's proposed start address for the system's
+     *         SP ATTN areas, which becomes the effective configuration if it's
+     *         elected as the master.
+     *
+     *  @return uint64_t Absolute start address for the intended SP ATTN areas
+     */
+    inline uint64_t calcSpAttnAreaStart()
+    {
+        auto hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+        return  (hrmorVal - VMM_HRMOR_OFFSET + PHYP_ATTN_AREA_OFFSET)
+                                                  | VmmManager::FORCE_PHYS_ADDR;
+    }
 
 }
 

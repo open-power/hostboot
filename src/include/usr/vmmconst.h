@@ -144,6 +144,11 @@ enum BlockPriority
 #define VMM_HRMOR_OFFSET (128*MEGABYTE)
 #define VMM_HB_RSV_MEM_SIZE (256*MEGABYTE)
 
+/** PHYP ATTN AREA OFFSET */
+/** This offset is relative to the lowest address in a given node */
+#define PHYP_ATTN_AREA_OFFSET (59*MEGABYTE)
+#define PHYP_ATTN_AREA_1_SIZE (1*KILOBYTE)
+
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
 /**    <n0p0 HRMOR = 128MB> + <memory size = 64MB> = 192 MB */

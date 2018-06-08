@@ -3403,6 +3403,74 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
                l_spAttnStartAddr,
                l_spAttnCombinedSize);
 
+    // If in phyp mode and the master
+    if (TARGETING::is_phyp_load() && TARGETING::UTIL::isCurrentMasterNode())
+    {
+        // make sure ATTN area never grows beyond the SP/PHyp untrusted region
+        if (l_spAttnCombinedSize > SP_HOST_ATTN_SIZE_LIMIT)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"openUntrustedSpCommArea(): Combined sizes of SP ATTN area 1 and area 2 are larger than 0x%.16llX. ATTN1 sz: 0x%.16llX, ATTN2 sz: 0x%.16llX",
+                       SP_HOST_ATTN_SIZE_LIMIT,
+                       l_pCpuCtrlInfo->spAttnArea1.size,
+                       l_pCpuCtrlInfo->spAttnArea2.size);
+
+            /*@
+             * @errortype
+             * @moduleid        RUNTIME::MOD_OPEN_UNTRUSTED_SP_AREAS
+             * @reasoncode      RUNTIME::RC_SP_ATTN_AREA_OVERFLOW
+             * @userdata1       SP ATTN Area total size
+             * @userdata2       SP ATTN Area start address
+             * @devdesc         SP ATTN Areas attempting to allocate past valid
+             *                  memory range.
+             * @custdesc        Failure in the security subsystem.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            RUNTIME::MOD_OPEN_UNTRUSTED_SP_AREAS,
+                            RUNTIME::RC_SP_ATTN_AREA_OVERFLOW,
+                            l_spAttnCombinedSize,
+                            l_spAttnStartAddr,
+                            true);
+            l_err->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
+        // Make sure our intended ATTN area 1 size is not smaller than the ATTN
+        // area 1 size reported in HDAT
+        if (PHYP_ATTN_AREA_1_SIZE < l_pCpuCtrlInfo->spAttnArea1.size)
+        {
+            TRACFCOMP( g_trac_runtime,
+                       ERR_MRK"openUntrustedSpCommArea(): Hostboot's proposed SP ATTN area 1 size is smaller than what is reported in HDAT. Proposed ATTN1 sz: 0x%.16llX, HDAT ATTN1 sz: 0x%.16llX",
+                       PHYP_ATTN_AREA_1_SIZE,
+                       l_pCpuCtrlInfo->spAttnArea1.size);
+
+            /*@
+             * @errortype
+             * @moduleid        RUNTIME::MOD_OPEN_UNTRUSTED_SP_AREAS
+             * @reasoncode      RUNTIME::RC_SP_ATTN_AREA1_SIZE_OVERFLOW
+             * @userdata1       SP ATTN Area 1 size proposed by hostboot
+             * @userdata2       SP ATTN Area 1 size reported in HDAT
+             * @devdesc         SP ATTN Area 1 size exceeds the maximum.
+             * @custdesc        Failure in the security subsystem.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            RUNTIME::MOD_OPEN_UNTRUSTED_SP_AREAS,
+                            RUNTIME::RC_SP_ATTN_AREA1_SIZE_OVERFLOW,
+                            PHYP_ATTN_AREA_1_SIZE,
+                            l_pCpuCtrlInfo->spAttnArea1.size,
+                            true);
+            l_err->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
+
+        // calculate absolute address for PHYP SP ATTN areas
+        auto l_abs = SECUREBOOT::calcSpAttnAreaStart();
+
+        l_pCpuCtrlInfo->spAttnArea1.address = l_abs;
+        l_pCpuCtrlInfo->spAttnArea2.address = l_abs + PHYP_ATTN_AREA_1_SIZE;
+    }
+
     // Open unsecure SBE memory regions
     // Loop through all functional Procs
     TARGETING::TargetHandleList l_procChips;
