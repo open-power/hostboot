@@ -47,6 +47,7 @@
 #include <p9_fbc_utils.H>
 #include <map>
 #include <generic/memory/lib/utils/memory_size.H>
+#include <lib/mss_attribute_accessors.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions
@@ -415,6 +416,9 @@ struct EffGroupingMcaAttrs
     // Dimm size behind this MCA
     uint64_t iv_dimmSize = 0;
 
+    // NVDIMM type
+    bool iv_NVdimmType = false;
+
 };
 
 // See doxygen in struct definition.
@@ -422,6 +426,7 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
     FAPI_DBG("Entering EffGroupingMcaAttrs::getAttrs");
+    uint8_t l_hybridMemType[NUM_DIMMS_PER_DRAM_PORT] = {};
 
     // Get the amount of memory behind this MCA target
     // Note: DIMM must be enabled to be accounted for.
@@ -434,8 +439,15 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
              "Error getting MCA ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // MCA's total dimm size
-    FAPI_INF("MCA %u: Total DIMM size %lu GB", iv_unitPos, iv_dimmSize);
+    // Set NVDIMM type variable, DIMM types can't be mixed within a port
+    FAPI_TRY(mss::eff_hybrid_memory_type(i_target, l_hybridMemType),
+             "Error returned from eff_hybrid_memory_type, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+    iv_NVdimmType  = (l_hybridMemType[0] == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM);
+
+    // MCA's total dimm size and NVDIMM type
+    FAPI_INF("MCA %u: Total DIMM size %lu GB; NVDIMM type = %d",
+             iv_unitPos, iv_dimmSize, iv_NVdimmType);
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingMcaAttrs::getAttrs");
@@ -593,6 +605,7 @@ struct EffGroupingMemInfo
     EffGroupingMemInfo()
     {
         memset(iv_portSize, 0, sizeof(iv_portSize));
+        memset(iv_NVdimmType, false, sizeof(iv_NVdimmType));
     }
 
     ///
@@ -613,6 +626,10 @@ struct EffGroupingMemInfo
 
     // maximum group size which can be formed
     uint64_t iv_maxGroupMemSize = 0;
+
+    // NVDIMM types behind MC ports
+    bool iv_NVdimmType[NUM_MC_PORTS_PER_PROC];
+
 };
 
 // See doxygen in struct definition.
@@ -650,6 +667,8 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
                      (uint64_t)fapi2::current_err);
             // Get the mem size behind this MCA
             iv_portSize[l_mcaAttrs.iv_unitPos] = l_mcaAttrs.iv_dimmSize;
+            // Get dimm type behind this MCA
+            iv_NVdimmType[l_mcaAttrs.iv_unitPos] = l_mcaAttrs.iv_NVdimmType;
         }
     }
     else
@@ -671,6 +690,8 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
 
                 // Fill in memory info
                 iv_portSize[l_dmiAttrs.iv_unitPos] = l_dmiAttrs.iv_dimmSize;
+                // No NVDIMM in Cumulus systems (for now)
+                iv_NVdimmType[l_dmiAttrs.iv_unitPos] = false;
             }
         }
         else
@@ -1490,8 +1511,8 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                                   EffGroupingData& o_groupData)
 {
     // There are 8 MC ports (MCA/DMI) in a proc (Nimbus/Cumulus) and they can
-    // be grouped together if they all have the same memory size (assumed
-    // that no ports have already been grouped
+    // be grouped together if they all have the same memory size per ports
+    // and there is no mix of NVDIMM/RDIMM between ports.
     FAPI_DBG("Entering");
 
     FAPI_INF("grouping_group8PortsPerGroup: Attempting to group 8 MC ports");
@@ -1504,14 +1525,17 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 
         for (uint8_t l_pos = 1; l_pos < NUM_MC_PORTS_PER_PROC; l_pos++)
         {
-            if (i_memInfo.iv_portSize[0] != i_memInfo.iv_portSize[l_pos])
+            if ( (i_memInfo.iv_portSize[0] != i_memInfo.iv_portSize[l_pos]) ||
+                 (i_memInfo.iv_NVdimmType[0] != i_memInfo.iv_NVdimmType[l_pos]) )
             {
-                // This group port does not have the same size as port 0
-                // Can't group by 8
+                // This port does not have the same memory size as port 0, or
+                // its DIMM type (NVDIMM/RDIMM) is different than port 0, so
+                // we can't group by 8
                 FAPI_DBG("Can not group by 8: ");
-                FAPI_DBG("   i_memInfo.iv_portSize[0] = %d GB", i_memInfo.iv_portSize[0]);
-                FAPI_DBG("   i_memInfo.iv_portSize[%d] = %d GB",
-                         l_pos, i_memInfo.iv_portSize[l_pos]);
+                FAPI_DBG("   i_memInfo.iv_portSize[0] = %d GB, i_memInfo.iv_portSize[%d] = %d GB",
+                         i_memInfo.iv_portSize[0], l_pos, i_memInfo.iv_portSize[l_pos]);
+                FAPI_DBG("   i_memInfo.iv_NVdimmType[0] = %d, i_memInfo.iv_NVdimmType[%d] = %d",
+                         i_memInfo.iv_NVdimmType[0], l_pos, i_memInfo.iv_NVdimmType[l_pos]);
                 grouped = false;
                 break;
             }
@@ -1600,10 +1624,9 @@ void grouping_group6PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             continue;
         }
 
-        // Check the remaining MC port ids (horizontally) in this
-        // CFG_6MCPORT[ii]
-        // If they are not yet grouped and have the same amount of memory
-        // as the first entry, then they can be grouped together of 6.
+        // Check the remaining MC port ids (horizontally) in this CFG_6MCPORT[ii]
+        // If they are not yet grouped and have the same amount of memory size
+        // and dimm type as the first entry, then they can be grouped together of 6.
         bool potential_group = true;
 
         for (uint8_t jj = 1; jj < PORTS_PER_GROUP; jj++)
@@ -1613,17 +1636,27 @@ void grouping_group6PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 
             if ( (o_groupData.iv_portGrouped[CFG_6MCPORT[ii][jj]]) ||
                  (i_memInfo.iv_portSize[CFG_6MCPORT[ii][0]] !=
-                  i_memInfo.iv_portSize[CFG_6MCPORT[ii][jj]]) )
+                  i_memInfo.iv_portSize[CFG_6MCPORT[ii][jj]]) ||
+                 (i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][0]] !=
+                  i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][jj]]) )
             {
                 // This port is already grouped or does not have the same
-                // size as first entry CFG_6MCPORT[ii][0]
+                // size/dimm type as first entry CFG_6MCPORT[ii][0]
                 FAPI_DBG("   Unable to group way by 6: ");
+                // Display port grouped
                 FAPI_DBG("      o_groupData.iv_portGrouped[CFG_6MCPORT[%d][%d]] = %d",
                          ii, jj, o_groupData.iv_portGrouped[CFG_6MCPORT[ii][jj]]);
+                // Display size of first port vs port jj in row
                 FAPI_DBG("      i_memInfo.iv_portSize[CFG_6MCPORT[%d][0]] = %d GB",
                          ii, i_memInfo.iv_portSize[CFG_6MCPORT[ii][0]]);
                 FAPI_DBG("      i_memInfo.iv_portSize[CFG_6MCPORT[%d][%d]] = %d GB",
                          ii, jj, i_memInfo.iv_portSize[CFG_6MCPORT[ii][jj]]);
+                // Display DIMM type of first port vs port jj in row
+                FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_6MCPORT[%d][0]] = %d",
+                         ii, i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][0]]);
+                FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_6MCPORT[%d][%d]] = %d",
+                         ii, jj, i_memInfo.iv_NVdimmType[CFG_6MCPORT[ii][jj]]);
+
                 potential_group = false;
                 break;
             }
@@ -1722,7 +1755,7 @@ void grouping_group4PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         // Check the remaining MC port ids (horizontally) in this
         // CFG_4MCPORT[ii]
         // If they are not yet grouped and have the same amount of memory
-        // as the first entry, then they can be grouped together of 4.
+        // and dimm type as the first entry, then they can be grouped together of 4.
         bool potential_group = true;
 
         for (uint8_t jj = 1; jj < PORTS_PER_GROUP; jj++)
@@ -1732,17 +1765,26 @@ void grouping_group4PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 
             if ( (o_groupData.iv_portGrouped[CFG_4MCPORT[ii][jj]]) ||
                  (i_memInfo.iv_portSize[CFG_4MCPORT[ii][0]] !=
-                  i_memInfo.iv_portSize[CFG_4MCPORT[ii][jj]]) )
+                  i_memInfo.iv_portSize[CFG_4MCPORT[ii][jj]]) ||
+                 (i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][0]] !=
+                  i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][jj]]) )
             {
                 // This port is already grouped or does not have the same
-                // size as first entry CFG_4MCPORT[ii][0]
+                // size/type as first entry CFG_4MCPORT[ii][0]
                 FAPI_DBG("   Unable to group way by 4: ");
+                // Display port grouped
                 FAPI_DBG("      o_groupData.iv_portGrouped[CFG_4MCPORT[%d][%d]] = %d",
                          ii, jj, o_groupData.iv_portGrouped[CFG_4MCPORT[ii][jj]]);
+                // Display size of first port vs port jj in row
                 FAPI_DBG("      i_memInfo.iv_portSize[CFG_4MCPORT[%d][0]] = %d GB",
                          ii, i_memInfo.iv_portSize[CFG_4MCPORT[ii][0]]);
                 FAPI_DBG("      i_memInfo.iv_portSize[CFG_4MCPORT[%d][%d]] = %d GB",
                          ii, jj, i_memInfo.iv_portSize[CFG_4MCPORT[ii][jj]]);
+                // Display DIMM type of first port vs port jj in row
+                FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_4MCPORT[%d][0]] = %d",
+                         ii, i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][0]]);
+                FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_4MCPORT[%d][%d]] = %d",
+                         ii, jj, i_memInfo.iv_NVdimmType[CFG_4MCPORT[ii][jj]]);
 
                 potential_group = false;
                 break;
@@ -1907,7 +1949,6 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         // Skip if first MC port entry is already grouped or has no memory
         if ( (o_groupData.iv_portGrouped[CFG_3MCPORT[ii][0]]) ||
              (i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]] == 0) )
-
         {
             FAPI_DBG("CFG_3MCPORT[%d][0] is already grouped or has no memory:", ii);
             FAPI_DBG("    o_groupData.iv_portGrouped[CFG_3MCPORT[%d][0]] = %d",
@@ -1918,7 +1959,7 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Rules for group of 3:
-        // 1. All 3 ports must have same amount of memory
+        // 1. All 3 ports must have same amount of memory and same type of dimm
         // 2. Cross-MCS ports can be grouped if and only if:
         //      - it's an even port (port0) in the MCS
         //      - it's an odd port (port1) in the MCS and the even port is empty.
@@ -1940,10 +1981,12 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                      ii, jj, CFG_3MCPORT[ii][jj]);
 
             // Skip if this port is already grouped or has different
-            // amount of memory
+            // amount of memory or dimm type
             if ( (o_groupData.iv_portGrouped[CFG_3MCPORT[ii][jj]]) ||
                  (i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]] !=
-                  i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]) )
+                  i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]) ||
+                 (i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][0]] !=
+                  i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][jj]]) )
             {
                 l_canNotGroup = 1;
                 break;
@@ -1980,6 +2023,10 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                      ii, i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]]);
             FAPI_DBG("      i_memInfo.iv_portSize[CFG_3MCPORT[%d][%d]] = %d GB",
                      ii, jj, i_memInfo.iv_portSize[CFG_3MCPORT[ii][jj]]);
+            FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_3MCPORT[%d][0]] = %d",
+                     ii, i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][0]]);
+            FAPI_DBG("      i_memInfo.iv_NVdimmType[CFG_3MCPORT[%d][%d]] = %d",
+                     ii, jj, i_memInfo.iv_NVdimmType[CFG_3MCPORT[ii][jj]]);
         }
         else // Group of 3 is possible
         {
@@ -2050,10 +2097,19 @@ void grouping_2ports_same_MCS(const EffGroupingMemInfo& i_memInfo,
 
         // Check 2nd port
         if ( (o_groupData.iv_portGrouped[pos + 1]) ||
-             (i_memInfo.iv_portSize[pos + 1] != i_memInfo.iv_portSize[pos]) )
+             (i_memInfo.iv_portSize[pos + 1] != i_memInfo.iv_portSize[pos]) ||
+             (i_memInfo.iv_NVdimmType[pos + 1] != i_memInfo.iv_NVdimmType[pos]) )
         {
-            FAPI_DBG("Port %u already grouped or has different memory size, skip",
+            FAPI_DBG("Port %u already grouped or has different memory size/type, skip",
                      pos + 1);
+            FAPI_DBG("      o_groupData.iv_portGrouped[%d] = %d",
+                     pos + 1, o_groupData.iv_portGrouped[pos + 1]);
+            FAPI_DBG("      i_memInfo.iv_portSize[%d] = %d GB; i_memInfo.iv_portSize[%d] = %d GB",
+                     pos, i_memInfo.iv_portSize[pos],
+                     pos + 1, i_memInfo.iv_portSize[pos + 1]);
+            FAPI_DBG("      i_memInfo.iv_NVdimmType[%d] = %d; i_memInfo.iv_NVdimmType[%d] = %d",
+                     pos, i_memInfo.iv_NVdimmType[pos],
+                     pos + 1, i_memInfo.iv_NVdimmType[pos + 1]);
             continue;
         }
 
@@ -2171,7 +2227,9 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
             uint8_t l_twoGroupOf2[2][PORTS_PER_GROUP] = {0};
 
             if ( (i_memInfo.iv_portSize[mcs1pos0] == i_memInfo.iv_portSize[mcs2pos0]) &&
-                 (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0 + 1]) )
+                 (i_memInfo.iv_NVdimmType[mcs1pos0] == i_memInfo.iv_NVdimmType[mcs2pos0]) &&
+                 (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0 + 1]) &&
+                 (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0 + 1]) )
             {
                 l_groupSuccess = true;
                 l_twoGroupOf2[0][0] = mcs1pos0;
@@ -2180,7 +2238,9 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
                 l_twoGroupOf2[1][1] = mcs2pos0 + 1;
             }
             else if ( (i_memInfo.iv_portSize[mcs1pos0] == i_memInfo.iv_portSize[mcs2pos0 + 1]) &&
-                      (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0]) )
+                      (i_memInfo.iv_NVdimmType[mcs1pos0] == i_memInfo.iv_NVdimmType[mcs2pos0 + 1]) &&
+                      (i_memInfo.iv_portSize[mcs1pos0 + 1] == i_memInfo.iv_portSize[mcs2pos0]) &&
+                      (i_memInfo.iv_NVdimmType[mcs1pos0 + 1] == i_memInfo.iv_NVdimmType[mcs2pos0]) )
             {
                 l_groupSuccess = true;
                 l_twoGroupOf2[0][0] = mcs1pos0;
