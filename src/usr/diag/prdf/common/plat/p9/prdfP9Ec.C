@@ -62,8 +62,10 @@ void maskIfCoreCs( ExtensibleChip * i_chip )
     {
         // Mask bit 4 for recoverable and checkstop
         coreFirMask->SetBit(4);
-        // Mask bit 2 for unit cs summary reported as recoverable
-        coreFirMask->SetBit(2);
+        // Mask bit 0 for local checkstop summary
+        coreFirMask->SetBit(0);
+        // Mask bit 26 (mask for debug trigger)
+        coreFirMask->SetBit(26);
 
         // Mask bit 1 for Unit checkstop
         coreUcsMask->SetBit(1);
