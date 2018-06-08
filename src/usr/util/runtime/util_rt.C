@@ -89,7 +89,7 @@ uint64_t hb_get_rt_rsvd_mem(Util::hbrt_mem_label_t i_label,
     }
 
     TRACFCOMP(TARGETING::g_trac_targeting,
-            EXIT_MRK"hb_get_rt_rsvd_mem(0x%X, %d, %ld) -> 0x%.16llX",
+            EXIT_MRK"hb_get_rt_rsvd_mem(0x%llX, %d, %ld) -> 0x%.16llX",
             i_label, i_instance, o_size,l_label_data_addr);
 
     return l_label_data_addr;

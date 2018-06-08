@@ -471,8 +471,14 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
        size_t i(0);
        for (; i < l_dataVec.size() -1; ++i )
        {
+           if( i % 4 == 0 )
+           {
+               sprintf(&o_output[l_len],"\n");
+               l_len = strlen(o_output);
+           }
+
            l_tempValue = l_dataVec[i];
-           sprintf(&o_output[l_len],"\n%.8X ",(uint32_t)(l_tempValue>>32));
+           sprintf(&o_output[l_len],"%.8X ",(uint32_t)(l_tempValue>>32));
            l_len = strlen(o_output);
 
            sprintf(&o_output[l_len],"%.8X",(uint32_t)(l_tempValue));
