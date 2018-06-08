@@ -51,6 +51,10 @@
 #include    <ipmi/ipmisensor.H>
 #endif
 
+#include    <vmmconst.h>
+#include    <targeting/targplatutil.H>
+#include    <secureboot/service.H>
+
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
@@ -280,6 +284,22 @@ void* call_host_ipl_complete (void *io_pArgs)
         if( l_err )
         {
             break;
+        }
+
+        // populate PHYP ATTN Area Attributes with values
+        if ( INITSERVICE::spBaseServicesEnabled() && is_phyp_load())
+        {
+            // calculate absolute address for PHYP SP ATTN areas
+            auto l_abs = SECUREBOOT::calcSpAttnAreaStart();
+
+            auto spAttnArea1Addr = l_abs;
+            auto spAttnArea2Addr = l_abs + PHYP_ATTN_AREA_1_SIZE;
+
+            auto l_nodeTgt = TARGETING::UTIL::getCurrentNodeTarget();
+
+            l_nodeTgt->setAttr<ATTR_ATTN_AREA_1_ADDR>(spAttnArea1Addr);
+            l_nodeTgt->setAttr<ATTR_ATTN_AREA_2_ADDR>(spAttnArea2Addr);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK"Set attributes for PHYP ATTN areas. ATTN Area 1: 0x%.16llX ATTN Area 2: 0x%.16llX", spAttnArea1Addr, spAttnArea2Addr);
         }
 
         // Sync attributes to Fsp

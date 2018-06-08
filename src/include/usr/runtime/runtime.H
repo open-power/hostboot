@@ -31,6 +31,7 @@
 #include <errl/errlentry.H>
 #include <hdat/hdat.H>
 #include "../../../src/usr/runtime/hdatstructs.H"
+#include <vmmconst.h>
 
 namespace RUNTIME
 {
@@ -237,6 +238,9 @@ enum SbeUnsecureMemoryRegions
     SP_HOST_UNTRUSTED_COMM_AREA_SIZE = 64*MEGABYTE,
     SP_HOST_UNTRUSTED_OPAL_TRACE_ADDR = 0x31000000,
     SP_HOST_UNTRUSTED_OPAL_TRACE_SIZE = 1*MEGABYTE,
+
+    SP_HOST_ATTN_SIZE_LIMIT = (SP_HOST_UNTRUSTED_COMM_AREA_SIZE
+                                                    - PHYP_ATTN_AREA_OFFSET),
 };
 
 /**
