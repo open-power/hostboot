@@ -518,14 +518,14 @@ enum
  * @brief Notify simics that we are waiting for a FSP message
  */
 #define MAGIC_WAITING_FOR_FSP() \
-    asm volatile("mr 4, 1"); \
+    asm volatile("mr 4, %0" :: "r" (1) : "4"); \
     MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
 
 /**
  * @brief Notify simics that we are done waiting for a FSP message
  */
 #define MAGIC_DONE_WAITING_FOR_FSP() \
-    asm volatile("mr 4, 2"); \
+    asm volatile("mr 4, %0" :: "r" (2) : "4"); \
     MAGIC_INSTRUCTION(MAGIC_SIMICS_FSP_WAIT); \
 
 
