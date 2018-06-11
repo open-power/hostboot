@@ -47,16 +47,16 @@ extern "C"
 {
     ///
     /// @brief Constructor used to initialize variables and do the initial settings
-    /// @param[in] addr Port number
-    /// @param[in] shmoo_type_t shmoo_mask set what shmoos caller wants to run
+    /// @param[in] i_addr Port number
+    /// @param[in] shmoo_type_t i_shmoo_mask set what shmoos caller wants to run
     /// @param[in] shmoo_algorithm SEQ_LIN, PARALLEL etc.
     ///
-    generic_shmoo::generic_shmoo(uint8_t addr, shmoo_type_t shmoo_mask, shmoo_algorithm_t shmoo_algorithm)
+    generic_shmoo::generic_shmoo(uint8_t i_addr, shmoo_type_t i_shmoo_mask, shmoo_algorithm_t shmoo_algorithm)
     {
-        this->shmoo_mask = shmoo_mask; //! Sets what Shmoos the caller wants to run
-        this->algorithm = shmoo_algorithm ;
-        this->iv_shmoo_type = shmoo_mask;
-        this->iv_addr = addr;
+        this->iv_shmoo_mask = i_shmoo_mask; //! Sets what Shmoos the caller wants to run
+        this->iv_algorithm = shmoo_algorithm ;
+        this->iv_shmoo_type = i_shmoo_mask;
+        this->iv_addr = i_addr;
         iv_MAX_BYTES = 10;
         iv_DQS_ON = 0;
         iv_pattern = 0;
@@ -71,40 +71,39 @@ extern "C"
         {
             for(uint8_t i = 0; i < MAX_RANK; i++)
             {
-                valid_rank1[p][i] = 0;
-                valid_rank[i] = 0;
+                iv_valid_rank[p][i] = 0;
             }
         }
 
         iv_MAX_RANKS[0] = 4;
         iv_MAX_RANKS[1] = 4;
 
-        if (shmoo_mask & TEST_NONE)
+        if (iv_shmoo_mask & TEST_NONE)
         {
-            FAPI_INF("mss_generic_shmoo : NONE selected %d", shmoo_mask);
+            FAPI_INF("mss_generic_shmoo : NONE selected %d", iv_shmoo_mask);
         }
 
-        if (shmoo_mask & MCBIST)
+        if (iv_shmoo_mask & MCBIST)
         {
-            FAPI_INF("mss_generic_shmoo : MCBIST selected %d", shmoo_mask);
+            FAPI_INF("mss_generic_shmoo : MCBIST selected %d", iv_shmoo_mask);
             iv_shmoo_type = 1;
         }
 
-        if (shmoo_mask & WR_EYE)
+        if (iv_shmoo_mask & WR_EYE)
         {
-            FAPI_INF("mss_generic_shmoo : WR_EYE selected %d", shmoo_mask);
+            FAPI_INF("mss_generic_shmoo : WR_EYE selected %d", iv_shmoo_mask);
             iv_shmoo_type = 2;
         }
 
-        if (shmoo_mask & RD_EYE)
+        if (iv_shmoo_mask & RD_EYE)
         {
-            FAPI_INF("mss_generic_shmoo : RD_EYE selected %d", shmoo_mask);
+            FAPI_INF("mss_generic_shmoo : RD_EYE selected %d", iv_shmoo_mask);
             iv_shmoo_type = 8;
         }
 
-        if (shmoo_mask & WRT_DQS)
+        if (iv_shmoo_mask & WRT_DQS)
         {
-            FAPI_INF("mss_generic_shmoo : WRT_DQS selected %d", shmoo_mask);
+            FAPI_INF("mss_generic_shmoo : WRT_DQS selected %d", iv_shmoo_mask);
             iv_shmoo_type = 4;
             iv_DQS_ON = 1;
         }
@@ -117,12 +116,12 @@ extern "C"
                 {
                     for (uint8_t j = 0; j < iv_MAX_RANKS[i]; j++)
                     {
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.nom_val, 250);
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.lb_regval, 0);
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.rb_regval, 512);
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.last_pass, 0);
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.last_fail, 0);
-                        init_multi_array(SHMOO[k].MBA.P[i].S[j].K.curr_val, 0);
+                        init_multi_array(250, SHMOO[k].MBA.P[i].S[j].K.nom_val);
+                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.lb_regval);
+                        init_multi_array(512, SHMOO[k].MBA.P[i].S[j].K.rb_regval);
+                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.last_pass);
+                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.last_fail);
+                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.curr_val);
                     }
                 }
             }
@@ -130,58 +129,31 @@ extern "C"
     }
 
     ///
-    /// @brief Delegator function that runs shmoo using other  functions
+    /// @brief Sets up shmoo instance variables
     /// @param[in] i_target Centaur input mba
-    /// @param[out] o_right_min_margin Minimum hold time
-    /// @param[out] o_left_min_margin Minimum setup time
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
-    fapi2::ReturnCode generic_shmoo::run(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                         uint32_t* o_right_min_margin,
-                                         uint32_t* o_left_min_margin,
-                                         uint32_t i_vref_mul)
+    fapi2::ReturnCode generic_shmoo::setup(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
     {
         uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t eff_stack_type[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_attr_eff_dimm_type_u8 = 0;
-        uint8_t l_attr_schmoo_test_type_u8 = 0;
-        uint8_t l_attr_schmoo_multiple_setup_call_u8 = 0;
-        uint8_t l_mcbist_prnt_off = 0;
-        uint64_t i_content_array[10];
-        uint8_t l_rankpgrp0[2] = { 0 };
-        uint8_t l_rankpgrp1[2] = { 0 };
-        uint8_t l_rankpgrp2[2] = { 0 };
-        uint8_t l_rankpgrp3[2] = { 0 };
-        uint8_t l_totrg_0 = 0;
-        uint8_t l_totrg_1 = 0;
-        uint8_t l_pp = 0;
-        uint8_t l_shmoo_param = 0;
         uint8_t rank_table_port0[8] = {0};
         uint8_t rank_table_port1[8] = {0};
         uint8_t l_dram_gen = 0;
         uint8_t i_rp = 0;
-        uint8_t l_dram_width = 0;
-        uint8_t eff_stack_type[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t l_shmoo_param = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, eff_stack_type));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, num_ranks_per_dimm));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target, l_attr_eff_dimm_type_u8));
+        iv_MAX_RANKS[0] = num_ranks_per_dimm[0][0] + num_ranks_per_dimm[0][1];
+        iv_MAX_RANKS[1] = num_ranks_per_dimm[1][0] + num_ranks_per_dimm[1][1];
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SCHMOO_MODE, i_target, l_shmoo_param));
         iv_shmoo_param = l_shmoo_param;
         FAPI_INF(" +++++ The iv_shmoo_param = %d ++++ ", iv_shmoo_param);
-        iv_vref_mul = i_vref_mul;
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target, l_dram_width));
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_PRINTING_DISABLE, i_target, l_mcbist_prnt_off));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, num_ranks_per_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target, l_attr_eff_dimm_type_u8));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SCHMOO_TEST_VALID, i_target, l_attr_schmoo_test_type_u8));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SCHMOO_MULTIPLE_SETUP_CALL, i_target, l_attr_schmoo_multiple_setup_call_u8));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target, l_rankpgrp0));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP1, i_target, l_rankpgrp1));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_target, l_rankpgrp2));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_target, l_rankpgrp3));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, eff_stack_type));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
-        iv_MAX_RANKS[0] = num_ranks_per_dimm[0][0] + num_ranks_per_dimm[0][1];
-        iv_MAX_RANKS[1] = num_ranks_per_dimm[1][0] + num_ranks_per_dimm[1][1];
-        iv_pattern = 0;
-        iv_test_type = 0;
 
         if ( l_attr_eff_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES )
         {
@@ -212,11 +184,11 @@ extern "C"
                 // Byte loop
                 if(l_p == 0)
                 {
-                    valid_rank1[l_p][l_rnk] = rank_table_port0[l_rnk];
+                    iv_valid_rank[l_p][l_rnk] = rank_table_port0[l_rnk];
                 }
                 else
                 {
-                    valid_rank1[l_p][l_rnk] = rank_table_port1[l_rnk];
+                    iv_valid_rank[l_p][l_rnk] = rank_table_port1[l_rnk];
                 }
 
                 if((l_attr_eff_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
@@ -237,7 +209,50 @@ extern "C"
             }
         }
 
-        FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d", shmoo_mask);
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Delegator function that runs shmoo using other  functions
+    /// @param[in] i_target Centaur input mba
+    /// @param[out] o_right_min_margin Minimum hold time
+    /// @param[out] o_left_min_margin Minimum setup time
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode generic_shmoo::run(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                         uint32_t* o_right_min_margin,
+                                         uint32_t* o_left_min_margin,
+                                         uint32_t i_vref_mul)
+    {
+        uint8_t l_attr_schmoo_test_type_u8 = 0;
+        uint8_t l_attr_schmoo_multiple_setup_call_u8 = 0;
+        uint8_t l_mcbist_prnt_off = 0;
+        uint64_t i_content_array[10];
+        uint8_t l_rankpgrp0[2] = { 0 };
+        uint8_t l_rankpgrp1[2] = { 0 };
+        uint8_t l_rankpgrp2[2] = { 0 };
+        uint8_t l_rankpgrp3[2] = { 0 };
+        uint8_t l_totrg_0 = 0;
+        uint8_t l_totrg_1 = 0;
+        uint8_t l_pp = 0;
+        uint8_t l_dram_width = 0;
+        iv_vref_mul = i_vref_mul;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target, l_dram_width));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_PRINTING_DISABLE, i_target, l_mcbist_prnt_off));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SCHMOO_TEST_VALID, i_target, l_attr_schmoo_test_type_u8));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SCHMOO_MULTIPLE_SETUP_CALL, i_target, l_attr_schmoo_multiple_setup_call_u8));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target, l_rankpgrp0));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP1, i_target, l_rankpgrp1));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_target, l_rankpgrp2));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_target, l_rankpgrp3));
+        iv_pattern = 0;
+        iv_test_type = 0;
+
+        FAPI_TRY(setup(i_target), "%s failed generic_shmoo::setup", mss::c_str(i_target));
+
+        FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d", iv_shmoo_mask);
         FAPI_DBG("mss_generic_shmoo : run() l_attr_schmoo_test_type_u8 %d", l_attr_schmoo_test_type_u8);
         // Check if all bytes/bits are in a pass condition initially .Otherwise quit
 
@@ -482,7 +497,7 @@ extern "C"
     ///
     fapi2::ReturnCode generic_shmoo::sanity_check(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
     {
-        mcbist_mode = QUARTER_SLOW;
+        iv_mcbist_mode = QUARTER_SLOW;
         uint8_t l_mcb_status = 0;
 
         struct subtest_info l_sub_info[30];
@@ -519,28 +534,29 @@ extern "C"
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target, l_dram_width));
 
         FAPI_DBG("%s:  checking error map ", mss::c_str(i_target));
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
-                               count_bad_dq), "Failed mcb_error_map");
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
+                               iv_count_bad_dq), "Failed mcb_error_map");
 
         for (uint8_t l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (uint8_t l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
                 // Byte loop
-                uint8_t rank = valid_rank1[l_p][l_rnk];
+                const uint8_t l_rank = iv_valid_rank[l_p][l_rnk];
+                const uint8_t l_dimm_rank = l_rank % MAX_RANKS_PER_DIMM;
 
                 for (uint8_t l_byte = 0; l_byte < DIMM_DQ_RANK_BITMAP_SIZE; l_byte++)
                 {
                     //Nibble loop
                     for (uint8_t l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
                     {
-                        if (mcbist_error_map[l_p][rank][l_byte][l_nibble] == 1)
+                        if (iv_mcbist_error_map[l_p][l_rank][l_byte][l_nibble] == 1)
                         {
                             l_memory_health = 1;
-                            l_faulted_rank = rank;
+                            l_faulted_rank = l_rank;
                             l_faulted_port = l_p;
 
-                            if(rank > 3)
+                            if(l_rank > 3)
                             {
                                 l_faulted_dimm = 1;
                             }
@@ -550,7 +566,7 @@ extern "C"
                             }
 
                             // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
-                            FAPI_TRY(dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank, l_dqBitmap),
+                            FAPI_TRY(dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, l_dimm_rank, l_dqBitmap),
                                      "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target));
 
                             if (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
@@ -567,17 +583,17 @@ extern "C"
                             }
 
                             FAPI_INF("%s Warning dimm_bad bits found ---> Updating Bad Bits: port%d, dimm%d, rank%d, l_dqBitmap[%d] = 0x%02x",
-                                     mss::c_str(i_target), l_p, l_faulted_dimm, rank, l_byte, l_dqBitmap[l_byte]);
+                                     mss::c_str(i_target), l_p, l_faulted_dimm, l_rank, l_byte, l_dqBitmap[l_byte]);
                             l_count++;
 
-                            FAPI_TRY(dimmSetBadDqBitmap(i_target, l_p, l_faulted_dimm, rank, l_dqBitmap),
+                            FAPI_TRY(dimmSetBadDqBitmap(i_target, l_p, l_faulted_dimm, l_dimm_rank, l_dqBitmap),
                                      "Error from dimmSetBadDqBitmap on %s.", mss::c_str(i_target));
                         }
                     } // nibble
                 } // byte
 
                 // Reset error count if there was only one error on this rank
-                if(l_count == 1)
+                if((l_memory_health == 1) && (l_count == 1))
                 {
                     l_count = 0;
                 }
@@ -599,7 +615,7 @@ extern "C"
                            l_faulted_dimm);
 #else
         // In Cronus, assert and halt only if we found more than one bad nibble on a given rank
-        FAPI_ASSERT(((l_memory_health == 0) && (l_count == 0)),
+        FAPI_ASSERT((l_count == 0),
                     fapi2::CEN_MSS_GENERIC_SHMOO_MCBIST_FAILED().
                     set_MBA_TARGET(i_target).
                     set_MBA_PORT_NUMBER(l_faulted_port).
@@ -694,13 +710,13 @@ extern "C"
             l_max_byte = 9;
         }
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
         {
             // Byte loop
-            rank = valid_rank1[l_p][l_rnk];
+            rank = iv_valid_rank[l_p][l_rnk];
             l_n = 0;
 
             for(l_byte = 0; l_byte < l_max_byte; l_byte++)
@@ -726,29 +742,29 @@ extern "C"
                             l_nibble_is = 0;
                         }
 
-                        if( mcbist_error_map [l_p][rank][l_byte_is][l_nibble_is] == 1)
+                        if( iv_mcbist_error_map [l_p][rank][l_byte_is][l_nibble_is] == 1)
                         {
-                            schmoo_error_map[l_p][rank][l_n] = 1;
+                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             pass = 1;
                         }
                         else
                         {
 
-                            schmoo_error_map[l_p][rank][l_n] = 0;
+                            iv_shmoo_error_map[l_p][rank][l_n] = 0;
                             pass = 0;
                         }
                     }
                     else
                     {
-                        if( mcbist_error_map [l_p][rank][l_byte][l_nibble] == 1)
+                        if( iv_mcbist_error_map [l_p][rank][l_byte][l_nibble] == 1)
                         {
 
-                            schmoo_error_map[l_p][rank][l_n] = 1;
+                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             pass = 1;
                         }
                         else
                         {
-                            schmoo_error_map[l_p][rank][l_n] = 0;
+                            iv_shmoo_error_map[l_p][rank][l_n] = 0;
                             pass = 0;
                         }
                     }
@@ -795,14 +811,14 @@ extern "C"
             l_max_nibble = 18;
         }
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                rank = valid_rank1[l_p][l_rnk];
+                rank = iv_valid_rank[l_p][l_rnk];
                 l_n = 0;
 
                 // Byte loop
@@ -829,28 +845,28 @@ extern "C"
                                 l_nibble_is = 0;
                             }
 
-                            if( mcbist_error_map [l_p][rank][l_byte_is][l_nibble_is] == 1)
+                            if( iv_mcbist_error_map [l_p][rank][l_byte_is][l_nibble_is] == 1)
                             {
                                 //pass=0;
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
                             else
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 0;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 0;
                             }
 
                         }
                         else
                         {
-                            if( mcbist_error_map [l_p][rank][l_byte][l_nibble] == 1)
+                            if( iv_mcbist_error_map [l_p][rank][l_byte][l_nibble] == 1)
                             {
                                 //pass=0;
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                 //FAPI_INF("We are in error and nibble is %d and rank is %d and port is %d \n",l_n,rank,l_p);
                             }
                             else
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 0;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 0;
                             }
                         }
 
@@ -865,11 +881,11 @@ extern "C"
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
                 // Byte loop
-                rank = valid_rank1[l_p][l_rnk];
+                rank = iv_valid_rank[l_p][l_rnk];
 
                 for (l_n = 0; l_n < l_max_nibble; l_n++)
                 {
-                    if(schmoo_error_map[l_p][rank][l_n] == 0)
+                    if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                     {
                         pass = 0;
                     }
@@ -887,11 +903,11 @@ extern "C"
 
     ///
     /// @brief This function does the initialization of various schmoo parameters
-    /// @param[out] array address
-    /// @param[in] init_val initial value to initialize to
+    /// @param[in] i_init_val initial value to initialize to
+    /// @param[out] io_array address of array
     ///
-    void generic_shmoo::init_multi_array(uint16_t(&array)[MAX_DQ],
-                                         const uint16_t init_val)
+    void generic_shmoo::init_multi_array(const uint16_t i_init_val,
+                                         uint16_t(&io_array)[MAX_DQ])
     {
         uint8_t l_byte, l_nibble, l_bit = 0;
         uint8_t l_dq = 0;
@@ -906,7 +922,7 @@ extern "C"
                 for (l_bit = 0; l_bit < MAX_BITS; l_bit++)
                 {
                     l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
-                    array[l_dq] = init_val;
+                    io_array[l_dq] = i_init_val;
                 }
             }
         }
@@ -938,7 +954,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                rank = valid_rank1[l_p][l_rnk];
+                rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
                 {
@@ -1019,7 +1035,7 @@ extern "C"
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
                 // Byte loop
-                i_rnk = valid_rank1[l_p][l_rnk];
+                i_rnk = iv_valid_rank[l_p][l_rnk];
 
                 for(l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
                 {
@@ -1077,7 +1093,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                rank = valid_rank1[l_p][l_rnk];
+                rank = iv_valid_rank[l_p][l_rnk];
 
                 for (l_n = 0; l_n < l_max_nibble; l_n++)
                 {
@@ -1151,11 +1167,11 @@ extern "C"
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -1170,13 +1186,13 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
 
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
@@ -1187,38 +1203,38 @@ extern "C"
 
                             }
 
-                            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
 
                             if(l_p == 0)
                             {
 
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
 
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
 
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
 
                             if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
 
 
@@ -1245,7 +1261,7 @@ extern "C"
                 {
                     l_dq = bit;
 
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -1269,14 +1285,14 @@ extern "C"
                     {
                         l_dq = bit;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
 
 
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
@@ -1284,32 +1300,32 @@ extern "C"
                                                                      SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
                             if(l_p == 0)
                             {
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
 
                             if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
 
                             l_dq = l_dq + 4;
@@ -1336,7 +1352,7 @@ extern "C"
                 {
                     l_dq = bit;
 
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -1417,19 +1433,19 @@ extern "C"
         FAPI_TRY(do_mcbist_reset(i_target), "generic_shmoo::find_bound do_mcbist_reset failed");
 
 
-        //Reset schmoo_error_map
+        //Reset iv_shmoo_error_map
 
         for(l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
-                    binary_done_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_binary_done_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -1441,17 +1457,17 @@ extern "C"
                 do
                 {
                     l_status = 0;
-                    FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
-                            if(binary_done_map[l_p][rank][l_n] == 0)
+                            if(iv_binary_done_map[l_p][rank][l_n] == 0)
                             {
                                 l_status = 1;
                             }
@@ -1461,30 +1477,30 @@ extern "C"
 
                             if(l_p == 0)
                             {
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                         l_flag_p0 = 1;
                                     }
                                 }
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
 
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                         l_flag_p1 = 1;
 
                                     }
                                 }
                             }
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
@@ -1506,7 +1522,7 @@ extern "C"
 
                                 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
                                 {
-                                    binary_done_map[l_p][rank][l_n] = 1;
+                                    iv_binary_done_map[l_p][rank][l_n] = 1;
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
                                 }
                             }
@@ -1547,7 +1563,7 @@ extern "C"
 
                                 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
                                 {
-                                    binary_done_map[l_p][rank][l_n] = 1;
+                                    iv_binary_done_map[l_p][rank][l_n] = 1;
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
@@ -1572,7 +1588,7 @@ extern "C"
                 {
                     l_dq = bit;
                     //////
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -1600,18 +1616,18 @@ extern "C"
                 {
                     l_status = 0;
 
-                    FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = bit;
                         //////
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
 
-                            if(binary_done_map[l_p][rank][l_n] == 0)
+                            if(iv_binary_done_map[l_p][rank][l_n] == 0)
                             {
                                 l_status = 1;
                             }
@@ -1621,11 +1637,11 @@ extern "C"
 
                             if(l_p == 0)
                             {
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                         l_flag_p0 = 1;
 
                                     }
@@ -1633,19 +1649,19 @@ extern "C"
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
 
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                         l_flag_p1 = 1;
 
                                     }
                                 }
                             }
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
@@ -1667,7 +1683,7 @@ extern "C"
 
                                 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
                                 {
-                                    binary_done_map[l_p][rank][l_n] = 1;
+                                    iv_binary_done_map[l_p][rank][l_n] = 1;
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
@@ -1711,7 +1727,7 @@ extern "C"
 
                                 if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
                                 {
-                                    binary_done_map[l_p][rank][l_n] = 1;
+                                    iv_binary_done_map[l_p][rank][l_n] = 1;
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
@@ -1734,8 +1750,8 @@ extern "C"
                 {
                     l_dq = bit;
                     //////
-                    rank = valid_rank1[l_p][l_rank];
-                    //printf("Valid rank of %d %d %d %d %d %d %d %d",valid_rank1[0],valid_rank1[1],valid_rank1[2],valid_rank1[3],valid_rank1[4],valid_rank1[5],valid_rank1[6],valid_rank1[7]);
+                    rank = iv_valid_rank[l_p][l_rank];
+                    //printf("Valid rank of %d %d %d %d %d %d %d %d",iv_valid_rank[0],iv_valid_rank[1],iv_valid_rank[2],iv_valid_rank[3],iv_valid_rank[4],iv_valid_rank[5],iv_valid_rank[6],iv_valid_rank[7]);
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -1790,7 +1806,7 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: ecb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -1804,11 +1820,11 @@ extern "C"
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -1825,7 +1841,7 @@ extern "C"
                     {
                         l_dq = 0;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -1834,30 +1850,30 @@ extern "C"
                             if(l_p == 0)
                             {
 
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
 
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
 
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
                                 SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] + l_delay;
@@ -1891,7 +1907,7 @@ extern "C"
 
                             if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
                         } // for nibble
                     } // for rank
@@ -1914,7 +1930,7 @@ extern "C"
                 {
 
 
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -1934,7 +1950,7 @@ extern "C"
                     {
                         l_dq = l_bit;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -1948,7 +1964,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         } // end bound == right
@@ -1966,7 +1982,7 @@ extern "C"
                     {
                         l_dq = 0;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -1975,30 +1991,30 @@ extern "C"
                             if(l_p == 0)
                             {
 
-                                for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                 {
 
                                     if(l_CDarray0[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
                             else
                             {
-                                for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                 {
 
                                     if(l_CDarray1[l_i] == l_dq)
                                     {
 
-                                        schmoo_error_map[l_p][rank][l_n] = 1;
+                                        iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                     }
                                 }
                             }
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
                                 SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
@@ -2030,7 +2046,7 @@ extern "C"
 
                             if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] == 0)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
                         }
                     }
@@ -2049,7 +2065,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2066,7 +2082,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2079,7 +2095,7 @@ extern "C"
             }
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2123,7 +2139,7 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2135,11 +2151,11 @@ extern "C"
         {
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -2154,14 +2170,14 @@ extern "C"
                     {
                         l_dq = 0;
                         l_my_dqs = 0;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             l_dq = 4 * l_n;
                             l_my_dqs = l_dqs_arr[l_n];
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
                                 SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs] + l_delay;
@@ -2195,7 +2211,7 @@ extern "C"
 
                             if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
                         } //end of nibble loop
                     } //end of rank
@@ -2214,7 +2230,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2231,7 +2247,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2244,7 +2260,7 @@ extern "C"
             } //end of bit
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2259,14 +2275,14 @@ extern "C"
                         l_dq = 0;
                         l_my_dqs = 0;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             l_dq = 4 * l_n;
                             l_my_dqs = l_dqs_arr[l_n];
 
-                            if(schmoo_error_map[l_p][rank][l_n] == 0)
+                            if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
                                 SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_my_dqs] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_my_dqs, 0,
@@ -2298,7 +2314,7 @@ extern "C"
 
                             if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
                         }
                     }
@@ -2318,7 +2334,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2335,7 +2351,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2349,7 +2365,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         } //end of Left
 
@@ -2394,7 +2410,7 @@ extern "C"
         FAPI_INF("\nWRT_DQS --- > CDIMM  X8 - Scenario = %d", scenario);
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2407,11 +2423,11 @@ extern "C"
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
                 } //end of nib
             } //end of rank
         } //end of port loop
@@ -2427,13 +2443,13 @@ extern "C"
                         l_dq = 0;
                         l_dqs = 0;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             l_dq = 4 * l_n;
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 0) && (schmoo_error_map[l_p][rank][l_n + 1] == 0))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
                                 //Increase delay of DQS
                                 SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] + l_delay;
@@ -2494,15 +2510,15 @@ extern "C"
 
                             if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 1) || (schmoo_error_map[l_p][rank][l_n + 1] == 1))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 1) || (iv_shmoo_error_map[l_p][rank][l_n + 1] == 1))
                             {
 
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
                             l_n = l_n + 1;
@@ -2528,7 +2544,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2547,7 +2563,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2561,7 +2577,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2576,7 +2592,7 @@ extern "C"
                         l_dq = 0;
                         l_dqs = 0;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2584,7 +2600,7 @@ extern "C"
 
 
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 0) && (schmoo_error_map[l_p][rank][l_n + 1] == 0))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
                                 SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
@@ -2640,15 +2656,15 @@ extern "C"
 
                             if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 1) || (schmoo_error_map[l_p][rank][l_n + 1] == 1))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 1) || (iv_shmoo_error_map[l_p][rank][l_n + 1] == 1))
                             {
 
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
                             l_n = l_n + 1;
@@ -2674,7 +2690,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2692,7 +2708,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2706,7 +2722,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         } //end of bound Left
 
@@ -2751,7 +2767,7 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2766,11 +2782,11 @@ extern "C"
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -2786,14 +2802,14 @@ extern "C"
                     {
                         l_dq = 0;
                         l_dqs = 0;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             l_dq = 4 * l_n;
                             l_dqs = l_n / 2;
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 0) && (schmoo_error_map[l_p][rank][l_n + 1] == 0))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
 
                                 SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dqs] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_dqs] +
@@ -2854,15 +2870,15 @@ extern "C"
                             if(SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dqs] > l_max_limit)
                             {
 
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 1) || (schmoo_error_map[l_p][rank][l_n + 1] == 1))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 1) || (iv_shmoo_error_map[l_p][rank][l_n + 1] == 1))
                             {
 
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
                             l_n = l_n + 1;
@@ -2889,7 +2905,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -2906,7 +2922,7 @@ extern "C"
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
                         l_dq = l_bit;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2920,7 +2936,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2935,7 +2951,7 @@ extern "C"
                     {
                         l_dq = 0;
                         l_dqs = 0;
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -2943,7 +2959,7 @@ extern "C"
 
                             l_dqs = l_n / 2;
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 0) && (schmoo_error_map[l_p][rank][l_n + 1] == 0))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
                                 SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dqs] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_dqs] -
                                         l_delay;
@@ -3000,15 +3016,15 @@ extern "C"
 
                             if(SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dqs] == 0)
                             {
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
-                            if((schmoo_error_map[l_p][rank][l_n] == 1) || (schmoo_error_map[l_p][rank][l_n + 1] == 1))
+                            if((iv_shmoo_error_map[l_p][rank][l_n] == 1) || (iv_shmoo_error_map[l_p][rank][l_n + 1] == 1))
                             {
 
-                                schmoo_error_map[l_p][rank][l_n] = 1;
-                                schmoo_error_map[l_p][rank][l_n + 1] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n] = 1;
+                                iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
                             }
 
                             l_n = l_n + 1;
@@ -3033,7 +3049,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank[l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
@@ -3053,7 +3069,7 @@ extern "C"
                     {
                         l_dq = l_bit;
 
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
@@ -3067,7 +3083,7 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         } //end of LEFT
@@ -3214,7 +3230,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_byte = 0; l_byte < 10; l_byte++)
                 {
@@ -3283,8 +3299,8 @@ extern "C"
         uint8_t l_CDarray1[80] = { 0 };
         const auto l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
 
-        FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
-                               count_bad_dq), "generic_shmoo::print report: mcb_error_map failed!!");
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
+                               iv_count_bad_dq), "generic_shmoo::print report: mcb_error_map failed!!");
 
         if (iv_dmm_type == 1)
         {
@@ -3346,7 +3362,7 @@ extern "C"
             {
                 ////
 
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
                 //
 
                 for (l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
@@ -3366,7 +3382,7 @@ extern "C"
 
                     if (l_p == 0)
                     {
-                        for (l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                        for (l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                         {
                             if (l_CDarray0[l_i] == l_dq)
                             {
@@ -3377,7 +3393,7 @@ extern "C"
                     }
                     else
                     {
-                        for (l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                        for (l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                         {
                             if (l_CDarray1[l_i] == l_dq)
                             {
@@ -3492,7 +3508,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
                 {
@@ -3560,7 +3576,7 @@ extern "C"
             {
                 ////
 
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 //
                 for (l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
@@ -3653,7 +3669,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_byte = 0; l_byte < 10; l_byte++)
                 {
@@ -3821,7 +3837,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for (l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
                 {
@@ -3909,7 +3925,7 @@ extern "C"
 
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
                 //Nibble loop
 
                 for(l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
@@ -3970,7 +3986,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
                 {
@@ -4059,18 +4075,18 @@ extern "C"
 
         FAPI_TRY(do_mcbist_reset(i_target), "generic_shmoo::find_bound do_mcbist_reset failed");
 
-        //Reset schmoo_error_map
+        //Reset iv_shmoo_error_map
         for(l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for(uint8_t i = 0; i < iv_MAX_RANKS[l_p]; i++)
             {
 
-                rank = valid_rank1[l_p][i];
+                rank = iv_valid_rank[l_p][i];
 
                 for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                 {
-                    schmoo_error_map[l_p][rank][l_n] = 0;
-                    binary_done_map[l_p][rank][l_n] = 0;
+                    iv_shmoo_error_map[l_p][rank][l_n] = 0;
+                    iv_binary_done_map[l_p][rank][l_n] = 0;
                 }
             }
         }
@@ -4082,17 +4098,17 @@ extern "C"
                 do
                 {
                     l_status = 0;
-                    FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for(l_dq = 0; l_dq < 4; l_dq++)
                         {
                             for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                             {
-                                if(binary_done_map[l_p][rank][l_n] == 0)
+                                if(iv_binary_done_map[l_p][rank][l_n] == 0)
                                 {
                                     l_status = 1;
                                 }
@@ -4102,11 +4118,11 @@ extern "C"
 
                                 if(l_p == 0)
                                 {
-                                    for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                    for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                     {
                                         if(l_CDarray0[l_i] == l_dq + l_n * 4)
                                         {
-                                            schmoo_error_map[l_p][rank][l_n] = 1;
+                                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                             l_flag_p0 = 1;
 
                                         }
@@ -4114,19 +4130,19 @@ extern "C"
                                 }
                                 else
                                 {
-                                    for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                    for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                     {
 
                                         if(l_CDarray1[l_i] == l_dq + l_n * 4)
                                         {
-                                            schmoo_error_map[l_p][rank][l_n] = 1;
+                                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                             l_flag_p1 = 1;
 
                                         }
                                     }
                                 }
 
-                                if(schmoo_error_map[l_p][rank][l_n] == 0)
+                                if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                                 {
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
@@ -4153,7 +4169,7 @@ extern "C"
 
                                     if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
                                     {
-                                        binary_done_map[l_p][rank][l_n] = 1;
+                                        iv_binary_done_map[l_p][rank][l_n] = 1;
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
                                         // printf("\n the right bound for port=%d rank=%d dq=%d is %d \n",l_p,rank,l_dq+l_n*4,FAPI_INF.MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
@@ -4201,12 +4217,12 @@ extern "C"
 
                                     if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
                                     {
-                                        binary_done_map[l_p][rank][l_n] = 1;
+                                        iv_binary_done_map[l_p][rank][l_n] = 1;
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
                                     }
-                                } // end else (schmoo_error_map[l_p][rank][l_n] != 0)
+                                } // end else (iv_shmoo_error_map[l_p][rank][l_n] != 0)
                             } // end for nibble
                         } // end for dq
                     } // end for rank
@@ -4226,7 +4242,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for(l_dq = 0; l_dq < 4; l_dq++)
                     {
@@ -4252,17 +4268,17 @@ extern "C"
                 {
                     l_status = 0;
 
-                    FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1, count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
-                        rank = valid_rank1[l_p][l_rank];
+                        rank = iv_valid_rank[l_p][l_rank];
 
                         for(l_dq = 0; l_dq < 4; l_dq++)
                         {
                             for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                             {
-                                if(binary_done_map[l_p][rank][l_n] == 0)
+                                if(iv_binary_done_map[l_p][rank][l_n] == 0)
                                 {
                                     l_status = 1;
                                 }
@@ -4272,11 +4288,11 @@ extern "C"
 
                                 if(l_p == 0)
                                 {
-                                    for(l_i = 0; l_i < count_bad_dq[0]; l_i++)
+                                    for(l_i = 0; l_i < iv_count_bad_dq[0]; l_i++)
                                     {
                                         if(l_CDarray0[l_i] == l_dq + l_n * 4)
                                         {
-                                            schmoo_error_map[l_p][rank][l_n] = 1;
+                                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                             l_flag_p0 = 1;
 
                                         }
@@ -4284,19 +4300,19 @@ extern "C"
                                 }
                                 else
                                 {
-                                    for(l_i = 0; l_i < count_bad_dq[1]; l_i++)
+                                    for(l_i = 0; l_i < iv_count_bad_dq[1]; l_i++)
                                     {
 
                                         if(l_CDarray1[l_i] == l_dq + l_n * 4)
                                         {
-                                            schmoo_error_map[l_p][rank][l_n] = 1;
+                                            iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                             l_flag_p1 = 1;
 
                                         }
                                     }
                                 }
 
-                                if(schmoo_error_map[l_p][rank][l_n] == 0)
+                                if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                                 {
                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
@@ -4323,7 +4339,7 @@ extern "C"
 
                                     if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
                                     {
-                                        binary_done_map[l_p][rank][l_n] = 1;
+                                        iv_binary_done_map[l_p][rank][l_n] = 1;
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
@@ -4373,7 +4389,7 @@ extern "C"
 
                                     if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
                                     {
-                                        binary_done_map[l_p][rank][l_n] = 1;
+                                        iv_binary_done_map[l_p][rank][l_n] = 1;
                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
@@ -4394,7 +4410,7 @@ extern "C"
             {
                 for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                 {
-                    rank = valid_rank1[l_p][l_rank];
+                    rank = iv_valid_rank[l_p][l_rank];
 
                     for(l_dq = 0; l_dq < 4; l_dq++)
                     {
@@ -4478,7 +4494,7 @@ extern "C"
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
 
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 ////
                 for (l_byte = 0; l_byte < 10; l_byte++)
@@ -4562,7 +4578,7 @@ extern "C"
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
             {
-                i_rank = valid_rank1[l_p][l_rnk];
+                i_rank = iv_valid_rank[l_p][l_rnk];
 
                 for(l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
                 {
@@ -4723,7 +4739,7 @@ extern "C"
 
             for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
             {
-                rank = valid_rank1[l_p][l_rank];
+                rank = iv_valid_rank[l_p][l_rank];
 
                 for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
                 {
@@ -4755,8 +4771,8 @@ extern "C"
 
             uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
-                                   count_bad_dq), "Failed mcb_error_map");
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
+                                   iv_count_bad_dq), "Failed mcb_error_map");
         }
 
         for(l_p = 0; l_p < MAX_PORT; l_p++)
@@ -4764,7 +4780,7 @@ extern "C"
 
             for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
             {
-                rank = valid_rank1[l_p][l_rank];
+                rank = iv_valid_rank[l_p][l_rank];
 
                 for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
                 {
@@ -4798,15 +4814,15 @@ extern "C"
 
             uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
-            FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
-                                   count_bad_dq), "Failed mcb_error_map");
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
+                                   iv_count_bad_dq), "Failed mcb_error_map");
         }
 
         for(l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
             {
-                rank = valid_rank1[l_p][l_rank];
+                rank = iv_valid_rank[l_p][l_rank];
 
                 for(l_dq = 0; l_dq < BITS_PER_NIBBLE; l_dq++)
                 {

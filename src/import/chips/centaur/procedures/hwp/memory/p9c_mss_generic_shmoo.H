@@ -69,14 +69,13 @@ class generic_shmoo
         } SHMOO[MAX_SHMOO]; // Denote max shmoo scenarios we have; Have 2; so that one for WR/RD and other Clock.
 
         //! Result Data
-        uint8_t convergence_gap;
-        shmoo_algorithm_t algorithm;
-        shmoo_mode mcbist_mode;
-        uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];    //MAX byte is 10; Max Nibble are 2;
-        uint8_t count_bad_dq[MAX_PORT];
-        uint8_t schmoo_error_map[MAX_PORT][MAX_RANK][MAX_BYTE * MAX_NIBBLES];  // 10 * 2 = 20 Nibbles
-        uint8_t binary_done_map[MAX_PORT][MAX_RANK][MAX_BYTE * MAX_NIBBLES];   // 10 * 2 = 20 Nibbles
-        shmoo_type_t shmoo_mask;
+        shmoo_algorithm_t iv_algorithm;
+        shmoo_mode iv_mcbist_mode;
+        uint8_t iv_mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];    //MAX byte is 10; Max Nibble are 2;
+        uint8_t iv_count_bad_dq[MAX_PORT];
+        uint8_t iv_shmoo_error_map[MAX_PORT][MAX_RANK][MAX_BYTE * MAX_NIBBLES];  // 10 * 2 = 20 Nibbles
+        uint8_t iv_binary_done_map[MAX_PORT][MAX_RANK][MAX_BYTE * MAX_NIBBLES];   // 10 * 2 = 20 Nibbles
+        shmoo_type_t iv_shmoo_mask;
         uint8_t iv_addr;
         uint8_t iv_MAX_RANKS[MAX_PORT];
         uint8_t iv_MAX_BYTES;
@@ -89,8 +88,7 @@ class generic_shmoo
         uint16_t iv_shmoo_param;
         uint16_t iv_binary_diff;
         uint32_t iv_vref_mul;
-        uint8_t valid_rank[MAX_RANK];
-        uint8_t valid_rank1[MAX_PORT][MAX_RANK];
+        uint8_t iv_valid_rank[MAX_PORT][MAX_RANK];
 
     public:
 
@@ -98,16 +96,32 @@ class generic_shmoo
         ///
         /// @brief generic shmoo constructor
         ///
-        generic_shmoo(uint8_t iv_addr, shmoo_type_t shmoo_mask, shmoo_algorithm_t shmoo_algorithm); // Constructor
-        ///
-        /// @brief generic generic shmoo constructor
-        ///
-        generic_shmoo() {};
-        ~generic_shmoo() {};
+        generic_shmoo(uint8_t i_addr, shmoo_type_t i_shmoo_mask, shmoo_algorithm_t shmoo_algorithm);
 
-        //initialize multi dim arrays to known value
-        void init_multi_array(uint16_t (&array)[MAX_DQ],
-                              const uint16_t init_val);
+        ///
+        /// @brief generic shmoo constructor
+        ///
+        generic_shmoo() = default;
+
+        ///
+        /// @brief generic shmoo destructor
+        ///
+        ~generic_shmoo() = default;
+
+        ///
+        /// @brief Sets up shmoo instance variables
+        /// @param[in] i_target Centaur input mba
+        /// @return FAPI2_RC_SUCCESS iff successful
+        ///
+        fapi2::ReturnCode setup(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+        ///
+        /// @brief This function does the initialization of various schmoo parameters
+        /// @param[in] i_init_val initial value to initialize to
+        /// @param[out] io_array address of array
+        ///
+        void init_multi_array(const uint16_t i_init_val,
+                              uint16_t (&io_array)[MAX_DQ]);
 
         ///
         /// @brief This function gets the nominal values for each DQ of relevant knobs
