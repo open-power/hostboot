@@ -62,7 +62,7 @@ const uint32_t X_PG_PBIOX2_REGION_BIT = 11;
 // one register per chip (encompassing all links), in N3 chiplet
 const uint64_t FBC_EXT_FIR_ACTION0       = 0x0000000000000000ULL;
 const uint64_t FBC_EXT_FIR_ACTION1       = 0x0000000000000000ULL;
-const uint64_t FBC_EXT_FIR_MASK          = 0x1F00000000000000ULL;
+const uint64_t FBC_EXT_FIR_MASK          = 0x0100000000000000ULL;
 
 const uint64_t FBC_EXT_FIR_MASK_X0_NF    = 0x8000000000000000ULL;
 const uint64_t FBC_EXT_FIR_MASK_X1_NF    = 0x4000000000000000ULL;
