@@ -142,24 +142,25 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             nfchips.push_back( l_chip );
         }
 
+        // Continue if no clock errors reported on this chip
+        if ( 0 == l_errType )
+            continue;
+
         // Get this chip's capture data for any error
-        if (0 != l_errType)
-        {
-            l_chip->CaptureErrorData(
+        l_chip->CaptureErrorData(
                     serviceData.service_data->GetCaptureData());
-            // Capture PllFIRs group
-            l_chip->CaptureErrorData(
+        // Capture PllFIRs group
+        l_chip->CaptureErrorData(
                     serviceData.service_data->GetCaptureData(),
                     Util::hashString("PllFIRs"));
 
-            // Call this chip's capturePllFfdc plugin if it exists.
-            ExtensibleChipFunction * l_captureFfdc =
-                l_chip->getExtensibleFunction("capturePllFfdc", true);
-            if ( NULL != l_captureFfdc )
-            {
-                (*l_captureFfdc)( l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
-            }
+        // Call this chip's capturePllFfdc plugin if it exists.
+        ExtensibleChipFunction * l_captureFfdc =
+            l_chip->getExtensibleFunction("capturePllFfdc", true);
+        if ( NULL != l_captureFfdc )
+        {
+            (*l_captureFfdc)( l_chip,
+            PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
         }
 
         // In the case of a PLL_UNLOCK error, we want to do additional isolation
@@ -365,7 +366,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
     }
 
-    return rc;
+    return SUCCESS;
 
     #undef PRDF_FUNC
 }
