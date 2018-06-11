@@ -659,5 +659,40 @@
     <scomRegister>PU_OCB_OCI_OCCS2_SCOM</scomRegister>
   </registerFfdc>
 
-  <!-- ******************************************************************** -->
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_PU</id>
+    <scomRegister>PU_OCB_OCI_OCCFLG_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_CCSR_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_QCSR_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_QSSR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMDBG</scomRegister>
+  </registerFfdc>
+
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_EQ</id>
+    <scomRegister>EQ_PPM_SSHSRC</scomRegister>
+  </registerFfdc>
+
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_EX</id>
+    <scomRegister>EX_CME_SCOM_LFIR</scomRegister>
+    <scomRegister>EX_CME_SCOM_SICR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_SISR_SCOM</scomRegister>
+    <scomRegister>EX_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>EX_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>EX_PPE_XIRAMDBG</scomRegister>
+  </registerFfdc>
+ 
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CHECK_MASTER_STOP15_FFDC_REGS_EC</id>
+    <scomRegister>C_PPM_SSHSRC</scomRegister>
+  </registerFfdc>
+
+  <!-- *********************************************************************** -->
 </hwpErrors>
