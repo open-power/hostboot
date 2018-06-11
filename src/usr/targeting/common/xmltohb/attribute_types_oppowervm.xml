@@ -482,7 +482,7 @@
         <sizeInclNull>64</sizeInclNull>
      </string>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>
