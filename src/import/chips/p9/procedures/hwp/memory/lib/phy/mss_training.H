@@ -732,14 +732,14 @@ class custom_read_ctr : public phy_step
         /// @param[in] i_target - the MCA target on which to operate
         /// @param[in] i_rp - the rank pair
         /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @param[in] i_fails_on_rp - the fails taken from training advanced
+        /// @param[in,out] io_training_rc - the return code checking if training advanced failed
         /// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
         /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
         ///
         fapi2::ReturnCode backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                               const uint64_t i_rp,
                                               const uint8_t i_abort_on_error,
-                                              const std::vector<fapi2::ReturnCode>& i_fails_on_rp,
+                                              fapi2::ReturnCode& io_training_rc,
                                               const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const;
 
         ///
