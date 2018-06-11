@@ -890,7 +890,8 @@ p9_fab_iovalid_update_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                  "Error from getScom (PU_PB_CENT_SM0_PB_CENT_FIR_REG)");
 
         // clear RAS FIR mask for optical link, or electrical link if not already setup by SBE
-        if ((i_ctl.endp_type == OPTICAL) ||
+        if (((i_ctl.endp_type == OPTICAL) &&
+             (!l_fbc_cent_fir_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_14>())) ||
             ((i_ctl.endp_type == ELECTRICAL) &&
              (!l_fbc_cent_fir_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_13>())))
         {
