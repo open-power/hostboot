@@ -865,22 +865,33 @@ fapi_try_exit:
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
 /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @param[in] i_fails_on_rp - the fails taken from training advanced
+/// @param[in,out] io_training_rc - the return code checking if training advanced failed
 /// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode custom_read_ctr::backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
         const uint8_t i_abort_on_error,
-        const std::vector<fapi2::ReturnCode>& i_fails_on_rp,
+        fapi2::ReturnCode& io_training_rc,
         const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const
 {
     // If we got a fail, let's ignore the previous fails and run backup pattern
-    if (i_fails_on_rp.size() != 0)
+    if(io_training_rc != fapi2::FAPI2_RC_SUCCESS)
     {
-        std::vector<fapi2::ReturnCode> l_fails_on_rp;
-        bool l_cal_fail = false;
+        fapi2::ReturnCode l_fails_on_rp;
         fapi2::buffer<uint32_t> l_backup;
+
+        // Log the error as recovered
+        fapi2::logError(io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        io_training_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Sets up the DIMM target for the rank
+        // It's not needed until we process init cal failures, but it's a tad dangerous to have an uninitialized target
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+        FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
+                  i_rp,
+                  l_dimm),
+                  "Failed getting the DIMM for %s", mss::c_str(i_target) );
 
         // Clear the disable bits from last run.
         // This function restores bad_bits to how the attribute has them
@@ -908,15 +919,16 @@ fapi2::ReturnCode custom_read_ctr::backup_pattern_run( const fapi2::Target<fapi2
         // Rerun the training for this rp
         FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error), "%s failed re-running CUSTOM_RD_CTR", mss::c_str(i_target));
 
-        FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+        // Grab the return code for processing
+        l_fails_on_rp = mss::process_initial_cal_errors(l_dimm);
 
-        // If we got fails from the backup pattern, restore the pre-adv training settings for this rank pair
-        if (l_fails_on_rp.size() != 0)
+        // If we took a fail, restore those settings
+        if(l_fails_on_rp != fapi2::FAPI2_RC_SUCCESS)
         {
-            l_fails_on_rp.clear();
-            FAPI_INF("%s rp%d draminit_training_adv failed. Restoring original settings", mss::c_str(i_target), i_rp);
+            // Log the error as recovered
+            fapi2::logError(l_fails_on_rp, fapi2::FAPI2_ERRL_SEV_RECOVERED);
 
-            // Restore pre-training_adv settings
+            // Restores our original settings and disable bits
             FAPI_TRY( i_original_settings.restore() );
         }
     }
@@ -939,11 +951,18 @@ fapi2::ReturnCode custom_read_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_M
     constexpr bool RUN_RD_CTR = true;
     constexpr bool SKIP_RD_VREF = false;
 
-    std::vector<fapi2::ReturnCode> l_fails_on_rp;
-    bool l_cal_fail = false;
+    fapi2::ReturnCode l_fails_on_rp;
 
     // Save off registers in case adv training fails
     mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA> l_original_settings(i_target, i_rp);
+
+    // Sets up the DIMM target for the rank
+    // It's not needed until we process init cal failures, but it's a tad dangerous to have an uninitialized target
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
+              i_rp,
+              l_dimm),
+              "Failed getting the DIMM for %s", mss::c_str(i_target) );
 
     // Setup the initial settings
     FAPI_TRY( l_original_settings.save() );
@@ -957,8 +976,9 @@ fapi2::ReturnCode custom_read_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_M
 
     FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
 
-    // Runs the backup pattern if we took a fail here
-    FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+    // Grab the error for processing
+    l_fails_on_rp = mss::process_initial_cal_errors(l_dimm);
+
     FAPI_TRY( backup_pattern_run( i_target, i_rp, i_abort_on_error, l_fails_on_rp, l_original_settings ));
 
 fapi_try_exit:
@@ -1021,11 +1041,18 @@ fapi2::ReturnCode custom_write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_
 {
     typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
     std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
-    std::vector<fapi2::ReturnCode> l_fails_on_rp;
-    bool l_cal_fail = false;
 
+    fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
     // Save off registers in case adv training fails
     mss::dp16::wr_ctr_settings<fapi2::TARGET_TYPE_MCA> l_original_settings(i_target, i_rp);
+
+    // Sets up the DIMM target for the rank
+    // It's not needed until we process init cal failures, but it's a tad dangerous to have an uninitialized target
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
+              i_rp,
+              l_dimm),
+              "Failed getting the DIMM for %s", mss::c_str(i_target) );
 
     // Setup the initial settings
     FAPI_TRY( l_original_settings.save() );
@@ -1048,15 +1075,19 @@ fapi2::ReturnCode custom_write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_
     // Set staggered mode
     FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
 
+    // Run the calibrations tep
     FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
-    FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+
+    // Grab the error for processing
+    l_rc = mss::process_initial_cal_errors(l_dimm);
 
     // If we took a fail, restore those settings
-    if(!l_fails_on_rp.empty())
+    if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
-        // TK yes, this shouldn't be here, but for now we need a way to note that we took an error.  We'll add in FFDC later on to fix this
-        // We'll want it to be informational to note "Hey, I saw an error here but could recover" we'll want the same thing in custom RD
-        FAPI_ERR("%s RP%lu took a fail in CUSTOM_WRITE_CTR!", mss::c_str(i_target), i_rp);
+        // Log the error as recovered
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        // Restores our original settings and disable bits
         FAPI_TRY( l_original_settings.restore() );
     }
 
