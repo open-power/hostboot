@@ -481,7 +481,7 @@ class wr_ctr_settings
         wr_ctr_settings() = delete;
 
         ///
-        /// @brief rd_ctr_settings constructor
+        /// @brief wr_ctr_settings constructor
         /// @param[in] i_target the port target
         /// @param[in] i_rp the rank pair
         ///
