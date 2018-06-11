@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -337,7 +337,6 @@ int32_t clearParityError( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & i_sc )
 {
     #define PRDF_FUNC "[Proc::clearParityError] "
-    int32_t rc = SUCCESS;
 
     if ( CHECK_STOP != i_sc.service_data->getPrimaryAttnType() )
     {
@@ -351,7 +350,7 @@ int32_t clearParityError( ExtensibleChip * i_chip,
         ClearChipletParityError(i_chip, TYPE_CORE);
     }
 
-    return rc;
+    return SUCCESS;
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, clearParityError );
@@ -386,7 +385,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
                  i_chip->getHuid());
     }
 
-    return rc;
+    return SUCCESS;
 
     #undef PRDF_FUNC
 }
@@ -431,7 +430,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         }
     }
 
-    return rc;
+    return SUCCESS;
 
     #undef PRDF_FUNC
 }
@@ -492,7 +491,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
         }
     }
 
-    return rc;
+    return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, MaskPll );
 PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, MaskPll );
