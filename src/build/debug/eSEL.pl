@@ -64,6 +64,7 @@ my @esel_timestamps = ();
 my $timestamp = "";
 my $txt_file_name = "";
 my $timestamp_found = 0;
+my $useOpalParser = 0;
 
 my %options_table = (
     get_ami_data => 0,
@@ -86,6 +87,7 @@ sub printUsage
     print "                    [-r] # filter out ACKed logs from HBEL\n";
     print "                    [-k] # keep the temp files created by the script\n";
     print "                    [--ecc <path>] # path to the ECC executable\n";
+    print "                    [--op] # use opal-elog-parse instead of errl\n";
     print "                    [-p <option>]\n";
     print "                       where <option> can be one of:\n";
     print "                       get_ami_data (use IPMI to fetch eSEL data into binaries, no decode)\n";
@@ -122,6 +124,7 @@ GetOptions(
     "ecc:s" => \$ecc_executable,
     "v+" => \$debug,
     "h" => \$usage,
+    "op:+" => \$useOpalParser,
     ) || printUsage();
 
 if ($usage)
@@ -496,7 +499,7 @@ sub RemoveEccFromFile
 sub DecodeBinarySelData
 {
     my $bin_file_name = "";
-    if (-e "$errl_path/errl")
+    if (-e "$errl_path/errl" or $useOpalParser)
     {
         if ($options_table{"decode_ami_data"} or
             $options_table{"decode_hbel_data"})
@@ -521,7 +524,14 @@ sub DecodeBinarySelData
         open TXT_FILE, ">", $txt_file_name or die "Unable to open TXT_FILE $txt_file_name\n";
         print "Error log text file: $txt_file_name\n";
 
-        $cmd = "$cd_syms_dir $fspt_path $errl_path/errl --file=$bin_file_name $string_file -d 2>&1";
+        if(not $useOpalParser)
+        {
+            $cmd = "$cd_syms_dir $fspt_path $errl_path/errl --file=$bin_file_name $string_file -d 2>&1";
+        }
+        else
+        {
+            $cmd =  "$cd_syms_dir $fspt_path $errl_path/opal-elog-parse -f $bin_file_name -a 2>&1";
+        }
         $debug && print "$cmd\n";
         my @txt = qx/$cmd/;                # Execute the command
         print TXT_FILE " @txt";
