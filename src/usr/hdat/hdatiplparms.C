@@ -698,6 +698,8 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |= 
           l_pSysTarget->getAttr<ATTR_RISK_LEVEL>() ? HDAT_RISK_LEVEL_ELEVATED : 0 ;
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+          l_pSysTarget->getAttr<ATTR_IS_MPIPL_SUPPORTED>() ? HDAT_MPIPL_SUPPORTED : 0 ;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 
