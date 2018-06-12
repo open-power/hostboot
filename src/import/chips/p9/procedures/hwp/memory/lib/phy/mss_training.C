@@ -62,6 +62,8 @@ namespace mss
 
 namespace training
 {
+// Below definitions are used to avoid linker errors
+constexpr custom_read_ctr::attr_func custom_read_ctr::DATA_PATTERNS[NUM_PATTERNS];
 
 ///
 /// @brief Executes a cal step with workarounds
@@ -820,6 +822,21 @@ uint64_t coarse_wr_rd::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_
 }
 
 ///
+/// @brief Executes a cal step with workarounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode custom_read_ctr::execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error ) const
+{
+    reset_data_pattern();
+    return step::execute(i_target, i_rp, i_abort_on_error);
+}
+
+///
 /// @brief Executes the pre-cal step workaround
 /// @param[in] i_target - the MCA target on which to operate
 /// @param[in] i_rp - the rank pair
@@ -832,107 +849,8 @@ fapi2::ReturnCode custom_read_ctr::pre_workaround( const fapi2::Target<fapi2::TA
 {
     FAPI_DBG("%s Running Pre-Custom RD CTR workaround steps on RP%d", mss::c_str(i_target), i_rp);
 
-    // Sets up the patterns to run
-    // Note: not technically a workaround
-    {
-        // Let's set the pattern to run
-        FAPI_TRY( mss::configure_custom_pattern(i_target) );
-
-        // Set staggered mode
-        FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
-
-        // Set custom read centering mode
-        FAPI_TRY( mss::dp16::setup_custom_read_centering_mode(i_target), "Error in p9_mss_draminit_training %s",
-                  mss::c_str(i_target) );
-    }
-
-    // Runs initial pattern write
-    {
-        const auto l_ipw = std::make_shared<initial_pattern_write>();
-
-        // Executes initial pattern write
-        FAPI_TRY(l_ipw->execute(i_target, i_rp, i_abort_on_error), "%s failed to execute IPW", mss::c_str(i_target));
-    }
-
     // Turn off refresh - this is an actual workaround
     FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Runs the backup pattern if need be
-/// @param[in] i_target - the MCA target on which to operate
-/// @param[in] i_rp - the rank pair
-/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-/// @param[in,out] io_training_rc - the return code checking if training advanced failed
-/// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
-/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode custom_read_ctr::backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_rp,
-        const uint8_t i_abort_on_error,
-        fapi2::ReturnCode& io_training_rc,
-        const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const
-{
-    // If we got a fail, let's ignore the previous fails and run backup pattern
-    if(io_training_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::ReturnCode l_fails_on_rp;
-        fapi2::buffer<uint32_t> l_backup;
-
-        // Log the error as recovered
-        fapi2::logError(io_training_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        io_training_rc = fapi2::FAPI2_RC_SUCCESS;
-
-        // Sets up the DIMM target for the rank
-        // It's not needed until we process init cal failures, but it's a tad dangerous to have an uninitialized target
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
-        FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
-                  i_rp,
-                  l_dimm),
-                  "Failed getting the DIMM for %s", mss::c_str(i_target) );
-
-        // Clear the disable bits from last run.
-        // This function restores bad_bits to how the attribute has them
-        // (which was updated at the end of regular training)
-        // So we won't run on known bad bits, but will rerun on the iffy bits from last custom_pattern run
-        FAPI_TRY( mss::dp16::reset_bad_bits(i_target) );
-        FAPI_INF("%s rp%x running back up pattern for draminit_training_adv", mss::c_str(i_target), i_rp);
-
-        // Clear the cal errors so we can retry
-        FAPI_TRY( mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
-
-        FAPI_TRY( mss::custom_training_adv_backup_patterns(i_target, l_backup) );
-
-        // Put the backup into the registers
-        FAPI_TRY( mss::seq::setup_rd_wr_data(i_target, l_backup) );
-
-        // Runs initial pattern write
-        {
-            const auto l_ipw = std::make_shared<initial_pattern_write>();
-
-            // Executes initial pattern write
-            FAPI_TRY( l_ipw->execute(i_target, i_rp, i_abort_on_error), "%s failed to re-execute IPW", mss::c_str(i_target));
-        }
-
-        // Rerun the training for this rp
-        FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error), "%s failed re-running CUSTOM_RD_CTR", mss::c_str(i_target));
-
-        // Grab the return code for processing
-        l_fails_on_rp = mss::process_initial_cal_errors(l_dimm);
-
-        // If we took a fail, restore those settings
-        if(l_fails_on_rp != fapi2::FAPI2_RC_SUCCESS)
-        {
-            // Log the error as recovered
-            fapi2::logError(l_fails_on_rp, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-
-            // Restores our original settings and disable bits
-            FAPI_TRY( i_original_settings.restore() );
-        }
-    }
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -951,10 +869,15 @@ fapi2::ReturnCode custom_read_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_M
     constexpr bool RUN_RD_CTR = true;
     constexpr bool SKIP_RD_VREF = false;
 
-    fapi2::ReturnCode l_fails_on_rp;
+    // Dummy RC value used to continue the loop
+    const fapi2::ReturnCode DUMMY_FAIL = fapi2::FAPI2_RC_INVALID_PARAMETER;
+    fapi2::ReturnCode l_fails_on_rp(DUMMY_FAIL);
 
     // Save off registers in case adv training fails
     mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA> l_original_settings(i_target, i_rp);
+
+
+    const auto l_ipw = std::make_shared<initial_pattern_write>();
 
     // Sets up the DIMM target for the rank
     // It's not needed until we process init cal failures, but it's a tad dangerous to have an uninitialized target
@@ -967,19 +890,75 @@ fapi2::ReturnCode custom_read_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_M
     // Setup the initial settings
     FAPI_TRY( l_original_settings.save() );
 
-    // Clear all of the errors before we start
-    FAPI_TRY(mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
+    // Set staggered mode
+    FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
 
-    // Now lets set the actual read_vref_config. We want to write/ clear this every time we run so seperate function
-    FAPI_TRY( setup_read_vref_config1(i_target, RUN_RD_CTR, SKIP_RD_VREF),
-              "%s Failed setting the read_vref_config1", mss::c_str(i_target) );
+    // Set custom read centering mode
+    FAPI_TRY( mss::dp16::setup_custom_read_centering_mode(i_target), "Error in p9_mss_draminit_training %s",
+              mss::c_str(i_target) );
 
-    FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
+    // Loops through all patterns while we have a failing case
+    while((iv_current_pattern < NUM_PATTERNS) && (l_fails_on_rp != fapi2::FAPI2_RC_SUCCESS))
+    {
+        uint32_t l_pattern = 0;
 
-    // Grab the error for processing
-    l_fails_on_rp = mss::process_initial_cal_errors(l_dimm);
+        // Log the error as recovered, IFF it's a real error
+        if(l_fails_on_rp != DUMMY_FAIL)
+        {
+            // Logs our error as recovered, as we are about ready to recover from it
+            fapi2::logError(l_fails_on_rp, fapi2::FAPI2_ERRL_SEV_RECOVERED);
 
-    FAPI_TRY( backup_pattern_run( i_target, i_rp, i_abort_on_error, l_fails_on_rp, l_original_settings ));
+            // Resets up the dummy fail
+            l_fails_on_rp = DUMMY_FAIL;
+            FAPI_TRY(l_original_settings.restore());
+        }
+
+        // Let's set the pattern to run
+        FAPI_TRY( DATA_PATTERNS[iv_current_pattern]( i_target, l_pattern ) );
+        FAPI_INF("%s rp%lu: custom read centering about to kick off pattern number %lu with a value of 0x%08x",
+                 mss::c_str(i_target), i_rp, iv_current_pattern, l_pattern);
+        FAPI_TRY( mss::configure_custom_pattern( i_target, l_pattern ) );
+        FAPI_TRY(l_ipw->execute(i_target, i_rp, i_abort_on_error));
+
+        // Clear all of the errors before we start
+        FAPI_TRY(mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
+
+        // Now lets set the actual read_vref_config. We want to write/ clear this every time we run so seperate function
+        FAPI_TRY( setup_read_vref_config1(i_target, RUN_RD_CTR, SKIP_RD_VREF),
+                  "%s Failed setting the read_vref_config1", mss::c_str(i_target) );
+
+        FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
+
+        // Let's keep track of the error.
+        // We don't want to error out here because we want to run on the other ports/ranks
+        // We'll add this to io_fails if we fail too many DQ's
+        l_fails_on_rp = mss::process_initial_cal_errors(l_dimm);
+
+        // Goes to the next pattern
+        ++iv_current_pattern;
+    }
+
+    // Log the error as recovered
+    // It's a real error at this point, but we "recover" by restoring the original settings
+    if((l_fails_on_rp != fapi2::FAPI2_RC_SUCCESS) && (l_fails_on_rp != DUMMY_FAIL))
+    {
+        // We detected an initcal error, set that training failed
+        iv_training_failed = true;
+
+        // Logs our error as recovered, as we are about ready to recovere from it
+        fapi2::logError(l_fails_on_rp, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+
+        // Resets up the dummy fail
+        // Setting to success just for safety's sake
+        l_fails_on_rp = fapi2::FAPI2_RC_SUCCESS;
+
+        FAPI_TRY(l_original_settings.restore());
+    }
+    // Training passes
+    else
+    {
+        iv_training_failed = false;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1075,6 +1054,9 @@ fapi2::ReturnCode custom_write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_
     // Set staggered mode
     FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
 
+    // Clear all of the errors before we start
+    FAPI_TRY(mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
+
     // Run the calibrations tep
     FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
 
@@ -1084,11 +1066,19 @@ fapi2::ReturnCode custom_write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_
     // If we took a fail, restore those settings
     if(l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
+        // We detected an initcal error, set that training failed
+        iv_training_failed = true;
+
         // Log the error as recovered
         fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
 
         // Restores our original settings and disable bits
         FAPI_TRY( l_original_settings.restore() );
+    }
+    // Training passes
+    else
+    {
+        iv_training_failed = false;
     }
 
 fapi_try_exit:
@@ -1135,6 +1125,79 @@ fapi_try_exit:
 
     // Error case, the return is to make the compiler happy
     return l_cycles;
+}
+
+///
+/// @brief Sets up and runs the calibration step
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode custom_training_facade::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error ) const
+{
+    bool l_training_fail = false;
+
+    // Original WR and RD settings - used to restore starting settings we take any fails
+    mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA> l_rd_settings(i_target, i_rp);
+
+    // Saves off the original settings
+    FAPI_TRY(l_rd_settings.save());
+
+    // Resets the RD CTR pattern count
+    iv_rd_ctr->reset_data_pattern();
+
+    // Loops until we pass OR RD CTR runs out of patterns to try
+    do
+    {
+        // Run RD first
+        FAPI_TRY(iv_rd_ctr->pre_workaround(i_target, i_rp, i_abort_on_error));
+        FAPI_TRY(iv_rd_ctr->run(i_target, i_rp, i_abort_on_error));
+        FAPI_TRY(iv_rd_ctr->post_workaround(i_target, i_rp, i_abort_on_error));
+
+        // Gets our training result from custom RD CTR
+        l_training_fail = iv_rd_ctr->training_failed();
+
+        // If we didn't pass, exit out - we've exhausted all of our options
+        if(l_training_fail)
+        {
+            FAPI_ERR("%s rp%lu exhausted all of the custom RD CTR patterns. Exiting!", mss::c_str(i_target), i_rp);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+        else
+        {
+            FAPI_INF("%s rp%lu passed on custom RD CTR. On to custom WR CTR", mss::c_str(i_target), i_rp);
+        }
+
+        // Here we know we're passing
+        // Therefore we should try to run the writes
+        FAPI_TRY(iv_wr_ctr->pre_workaround(i_target, i_rp, i_abort_on_error));
+        FAPI_TRY(iv_wr_ctr->run(i_target, i_rp, i_abort_on_error));
+        FAPI_TRY(iv_wr_ctr->post_workaround(i_target, i_rp, i_abort_on_error));
+
+        // Gets our training result from custom WR CTR
+        l_training_fail = iv_wr_ctr->training_failed();
+
+        // If we fail the custom write centering, it could have been due to bad RD settings, so hit restore the original RD settings
+        if(l_training_fail)
+        {
+            FAPI_ERR("%s rp%lu custom WR CTR failed. Restoring read values (in the hopes that the read caused the fail) and continuing.",
+                     mss::c_str(i_target), i_rp);
+            FAPI_TRY(l_rd_settings.restore());
+        }
+        else
+        {
+            FAPI_INF("%s rp%lu custom WR CTR passed! continuing..", mss::c_str(i_target), i_rp);
+        }
+
+        // Run while training is failing and we still have custom RD centering patterns to try
+    }
+    while((l_training_fail) && (!iv_rd_ctr->is_out_of_patterns()));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1223,15 +1286,24 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         l_steps.push_back(std::make_shared<coarse_wr_rd>());
     }
 
+    // We can't run custom pattern RD as it requires initial pattern write, so skipping it in SIM mode
+    const bool CUSTOM_RD = (!i_sim) && i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>();
+
+    // Run custom WR CTR and custom RD CTR together
+    if(CUSTOM_RD && i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
+    {
+        FAPI_INF("Custom RD_CTR and Custom WR_CTR are enabled");
+        l_steps.push_back(std::make_shared<custom_training_facade>());
+    }
     // Training Advanced Read - aka custom pattern RD CTR
-    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>())
+    else if(CUSTOM_RD)
     {
         FAPI_INF("Custom RD_CTR is enabled");
         l_steps.push_back(std::make_shared<custom_read_ctr>());
     }
 
     // Training Advanced Write - aka custom pattern WR CTR
-    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
+    else if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
     {
         FAPI_INF("Custom WR_CTR is enabled");
         l_steps.push_back(std::make_shared<custom_write_ctr>());
