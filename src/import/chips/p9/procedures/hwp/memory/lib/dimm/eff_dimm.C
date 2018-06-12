@@ -5078,6 +5078,38 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Determines and sets the ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS2 settings
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note overwrite the attribute to default values if it's set to 0
+///
+fapi2::ReturnCode eff_dimm::training_adv_backup_pattern2()
+{
+    uint32_t l_special_patterns [PORTS_PER_MCS] = {};
+    FAPI_TRY( custom_training_adv_backup_patterns2( iv_mcs, &(l_special_patterns[0])) );
+
+    // Let's set the backup pattern as well
+    if ( l_special_patterns[mss::index(iv_mca)] == 0)
+    {
+        fapi2::buffer<uint32_t> l_temp;
+
+        l_temp.insertFromRight<PATTERN0_START, PATTERN0_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS2_DEFAULT_PATTERN0);
+
+        l_temp.insertFromRight<PATTERN1_START, PATTERN1_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS2_DEFAULT_PATTERN1);
+
+        l_special_patterns[mss::index(iv_mca)] = l_temp;
+
+        FAPI_INF("%s setting training_adv_backup_pattern2 as 0x%08x", mss::c_str(iv_mca), l_temp);
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS2, iv_mcs, l_special_patterns) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines and sets the ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN settings
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note overwrite the attribute to default values if it's set to 0
