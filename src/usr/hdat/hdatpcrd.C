@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -625,15 +625,15 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                 ((uint8_t *)l_SMPInfoFullPcrdHdrPtr + sizeof(hdatHDIFDataArray_t) +
                                 (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK));
             uint32_t l_pcrdECLvlTotalSize = sizeof(hdatHDIFDataArray_t) +
-                                          sizeof(hdatEcLvl_t); 
+                                          sizeof(hdatProcEcLvlElement_t); 
             
 
             l_ECLvlInfoPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
             l_ECLvlInfoPcrdHdrPtr->hdatArrayCnt = 1;
             l_ECLvlInfoPcrdHdrPtr->hdatAllocSize =
-                    sizeof(hdatEcLvl_t);
+                    sizeof(hdatProcEcLvlElement_t);
             l_ECLvlInfoPcrdHdrPtr->hdatActSize =
-                    sizeof(hdatEcLvl_t);
+                    sizeof(hdatProcEcLvlElement_t);
 
             uint32_t l_ecLevel = 0;
             uint32_t l_chipId = 0;
@@ -647,10 +647,16 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                     l_pProcTarget->getAttr<ATTR_HUID>());
                 break;
             }
-            hdatEcLvl_t *l_hdatEcLvl = reinterpret_cast<hdatEcLvl_t *>
+            hdatProcEcLvlElement_t *l_hdatProcEcLvlEle = reinterpret_cast<hdatProcEcLvlElement_t *>
                                     ((uint8_t *)l_ECLvlInfoPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
-            l_hdatEcLvl->hdatChipManfId = l_chipId;
-            l_hdatEcLvl->hdatChipEcLvl  = l_ecLevel;
+            l_hdatProcEcLvlEle->hdatEcLvl.hdatChipManfId = l_chipId;
+            l_hdatProcEcLvlEle->hdatEcLvl.hdatChipEcLvl  = l_ecLevel;
+            
+            TARGETING::ATTR_ECID_type l_ecid = {0};
+            assert(l_pProcTarget->tryGetAttr<TARGETING::ATTR_ECID>(l_ecid));
+
+            l_hdatProcEcLvlEle->hdatEcid[0] = l_ecid[0];
+            l_hdatProcEcLvlEle->hdatEcid[1] = l_ecid[1];
             
 
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset =
