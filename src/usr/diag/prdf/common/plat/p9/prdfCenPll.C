@@ -31,6 +31,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
 #include <prdfFsiCapUtil.H>
+#include <prdfP9Pll.H>
 
 namespace PRDF
 {
@@ -99,6 +100,30 @@ int32_t QueryPll( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( cen_centaur, QueryPll );
+
+/**
+ *  @brief Examine chiplets to determine which type of PLL error has ocurred.
+ *         There are no PCI clocks or switchovers reported on centaur, so the
+ *         only errType to report here is SYS_PLL_UNLOCK
+ *  @param i_chip Centaur chip
+ *  @param o_errType enum indicating which type of PLL error is detected
+ *  @returns Failure or Success
+ */
+int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
+{
+    #define PRDF_FUNC "[Proc::CheckErrorType] "
+    int32_t rc = SUCCESS;
+    bool errFound = false;
+
+    rc = QueryPll( i_chip, errFound );
+
+    if ( (SUCCESS == rc) && errFound )
+        o_errType |= SYS_PLL_UNLOCK;
+
+    return SUCCESS;
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( cen_centaur, CheckErrorType );
 
 /**
   * @brief Clear the PLL error for Centaur Plugin
