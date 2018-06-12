@@ -1277,10 +1277,9 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
                 break;
             }
 
-            // Abort this procedure because additional repairs will likely
-            // not help (also avoids complication of having UE and MPE at
-            // the same time).
-            o_done = true; break;
+            // Do not abort the procedure. UEs are expected. Since the command
+            // has to stop on error due to the hardware bugs, we need to resume
+            // the command and ensure it gets to the end of the rank.
         }
 
         // If there was an MPE.
