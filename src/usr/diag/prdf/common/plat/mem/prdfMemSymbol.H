@@ -132,6 +132,9 @@ class MemSymbol
      *          (x4 mode is 4-bits, x8 mode is 8-bits). */
     uint8_t getDramPins() const;
 
+    /** @return The first symbol (smallest index) on the associated DRAM. */
+    uint8_t getDramSymbol() const;
+
     /** @return The Galois field associated with this symbol. */
     uint8_t getGalois() const;
 

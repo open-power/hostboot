@@ -63,48 +63,43 @@ class MemMark
      */
     MemMark( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
              uint8_t i_galois ) :
-        iv_galois( i_galois ),
         iv_symbol( MemSymbol::fromGalois(i_trgt, i_rank, i_galois) )
     {}
 
     /**
-     * @brief Cosntructor from components.
+     * @brief Constructor from components.
      * @param i_trgt   MBA or MCA target.
      * @param i_rank   The rank this mark is on.
      * @param i_symbol The symbol representing this mark.
      */
     MemMark( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
              const MemSymbol & i_symbol ) :
-        iv_galois( i_symbol.getGalois() ),
         iv_symbol( i_symbol )
     {}
 
   public: // functions
 
     /** @return The Galois field representing this mark. */
-    uint8_t getGalois() const { return iv_galois; }
+    uint8_t getGalois() const { return iv_symbol.getGalois(); }
 
     /** @return The Galois field associated with the chip this mark is in.
      *  Will correspond to the rightmost/least index symbol in the chip. You
      *  must check for a valid symbol before calling this function. */
-    uint8_t getChipGalois() const
+    uint8_t getDramGalois() const
     {
         PRDF_ASSERT( iv_symbol.isValid() );
-        return symbol2Galois[(iv_symbol.getSymbol()/4)*4];
+        return symbol2Galois[iv_symbol.getDramSymbol()];
     }
 
     /** @return The symbol representing this mark. */
     MemSymbol getSymbol() const { return iv_symbol; }
 
-    /** @return The symbol representing this mark. */
+    /** @return True if the symbol representing this mark is valid. */
     bool isValid() const { return iv_symbol.isValid(); }
 
   private: // instance variables
 
-    /** Galois field representing any symbol on this mark. */
-    uint8_t iv_galois = 0;
-
-    /** Any symbol on this mark (must match iv_galois). */
+    /** Any symbol on this mark. */
     MemSymbol iv_symbol = MemSymbol();
 };
 
