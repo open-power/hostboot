@@ -39,9 +39,7 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
-#ifdef __HOSTBOOT_MODULE // TODO SW431530
 #include <p9c_query_channel_failure.H>
-#endif
 
 #ifdef __HOSTBOOT_MODULE
 #include <prdfParserUtils.H>
@@ -607,7 +605,6 @@ uint32_t queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
 
     uint32_t o_rc = SUCCESS;
 
-#ifdef __HOSTBOOT_MODULE // TODO SW431530
     errlHndl_t errl = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_DMI> fapiTrgt ( i_chip->getTrgt() );
@@ -620,9 +617,6 @@ uint32_t queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
-#else
-    PRDF_ERR( PRDF_FUNC "p9c_query_channel_failure() not supported yet" );
-#endif
 
     return o_rc;
 
