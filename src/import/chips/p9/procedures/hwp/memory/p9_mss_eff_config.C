@@ -347,6 +347,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Failed training_adv_pattern for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->training_adv_backup_pattern(),
                   "Failed training_adv_backup_pattern for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->training_adv_backup_pattern2(),
+                  "Failed training_adv_backup_pattern2 for %s", mss::c_str(l_dimm) );
 
         //Let's do some checking
         FAPI_TRY( mss::check::temp_refresh_mode(),

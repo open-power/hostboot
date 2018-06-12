@@ -42,6 +42,7 @@
 #include <lib/eff_config/timing.H>
 #include <lib/phy/read_cntrl.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
+#include <lib/mss_attribute_accessors.H>
 
 namespace mss
 {
@@ -120,9 +121,9 @@ class step
         /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
         /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
         ///
-        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                   const uint64_t i_rp,
-                                   const uint8_t i_abort_on_error ) const;
+        virtual fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const;
 
         ///
         /// @brief Calculates the number of cycles a given calibration step will take
@@ -681,18 +682,35 @@ class coarse_wr_rd : public phy_step
 class custom_read_ctr : public phy_step
 {
     public:
+        // Type def to beautify
+        using attr_func = fapi2::ReturnCode (*)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&,
+                                                uint32_t&);
+
         ///
         /// @brief Base constructor
         ///
         custom_read_ctr() :
             phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_RD>(),
-                      "CUSTOM_READ_CTR")
+                      "CUSTOM_READ_CTR"),
+            iv_current_pattern(0),
+            iv_training_failed(false)
         {}
 
         ///
         /// @brief Default destructor
         ///
         ~custom_read_ctr() override = default;
+
+        ///
+        /// @brief Executes a cal step with workarounds
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const uint64_t i_rp,
+                                   const uint8_t i_abort_on_error ) const override;
 
         ///
         /// @brief Sets up and runs the calibration step
@@ -728,26 +746,51 @@ class custom_read_ctr : public phy_step
                                            const uint8_t i_abort_on_error ) const override;
 
         ///
-        /// @brief Runs the backup pattern if need be
-        /// @param[in] i_target - the MCA target on which to operate
-        /// @param[in] i_rp - the rank pair
-        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
-        /// @param[in,out] io_training_rc - the return code checking if training advanced failed
-        /// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
-        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
-        ///
-        fapi2::ReturnCode backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                              const uint64_t i_rp,
-                                              const uint8_t i_abort_on_error,
-                                              fapi2::ReturnCode& io_training_rc,
-                                              const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const;
-
-        ///
         /// @brief Calculates the number of cycles a given calibration step will take
         /// @param[in] i_target - the MCA target on which to operate
         /// @return l_cycles - the number of cycles a given calibration step wil take
         ///
         uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+
+        ///
+        /// @brief Resets the current pattern
+        /// @note Marked as constant as the current pattern is mutable
+        ///
+        void reset_data_pattern() const
+        {
+            iv_current_pattern = 0;
+        }
+
+        ///
+        /// @brief Returns true if we exhausted all of our training patterns
+        /// @return true if the current pattern is greater than our maximum number of patterns
+        ///
+        bool is_out_of_patterns() const
+        {
+            return iv_current_pattern >= NUM_PATTERNS;
+        }
+
+        ///
+        /// @brief Returns true if training failed
+        /// @return result of init cal training - true if a fail was detected
+        ///
+        inline bool training_failed() const
+        {
+            return iv_training_failed;
+        }
+
+    private:
+
+        // Declares the accessors for which RD CTR patterns to run in what order
+        constexpr static const uint32_t NUM_PATTERNS = 3;
+        constexpr static attr_func DATA_PATTERNS[NUM_PATTERNS] =
+        {
+            custom_training_adv_patterns,
+            custom_training_adv_backup_patterns,
+            custom_training_adv_backup_patterns2,
+        };
+        mutable uint64_t iv_current_pattern;
+        mutable bool iv_training_failed;
 };
 
 ///
@@ -761,7 +804,8 @@ class custom_write_ctr : public phy_step
         ///
         custom_write_ctr() :
             phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_WR>(),
-                      "CUSTOM_WRITE_CTR")
+                      "CUSTOM_WRITE_CTR"),
+            iv_training_failed(false)
         {}
 
         ///
@@ -786,6 +830,70 @@ class custom_write_ctr : public phy_step
         /// @return l_cycles - the number of cycles a given calibration step wil take
         ///
         uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+
+        ///
+        /// @brief Returns true if training failed
+        /// @return result of init cal training - true if a fail was detected
+        ///
+        inline bool training_failed() const
+        {
+            return iv_training_failed;
+        }
+
+    private:
+        mutable bool iv_training_failed;
+};
+
+
+///
+/// @class custom_training_facade
+/// @brief Overall custom training algorithm
+/// @note Due to interactions between write and read calibrations, using a facade class to setup the combined custom training algorithm
+///
+class custom_training_facade : public step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        custom_training_facade() :
+            step( "CUSTOM_WRRD_CTR"),
+            iv_rd_ctr(std::make_shared<custom_read_ctr>()),
+            iv_wr_ctr(std::make_shared<custom_write_ctr>())
+        {}
+
+        ///
+        /// @brief Custom destructor
+        ///
+        ~custom_training_facade() override = default;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override
+        {
+            // This class doesn't run training itself
+            // iv_rd_ctr and iv_wr_ctr run it for us
+            // As such, a dummy value of 0 is ok here (it's needed by the API, but not useful in this case)
+            return 0;
+        }
+
+    private:
+        std::shared_ptr<custom_read_ctr> iv_rd_ctr;
+        std::shared_ptr<custom_write_ctr> iv_wr_ctr;
 };
 
 ///
