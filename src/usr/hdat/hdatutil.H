@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,11 +175,16 @@ enum hdatNVLinkSpeed
  */
 struct hdatEcLvl_t
 {
-    uint32_t hdatChipManfId;  // 0x0000 Memory interface chip manufacturing id
-    uint32_t hdatChipEcLvl;   // 0x0004 Memory interface chip EC level
+    uint32_t hdatChipManfId;  // 0x0000 Chip manufacturing id
+    uint32_t hdatChipEcLvl;   // 0x0004 Chip EC level
 }  __attribute__ ((packed));
 
-
+/** @brief Structure defination for an entry in Proc Chip ec level array */
+struct hdatProcEcLvlElement_t
+{
+    hdatEcLvl_t hdatEcLvl;  
+    uint64_t    hdatEcid[2]; // Proc ECID
+} __attribute__ ((packed));
 
 /**
  * @brief Create/Build an Error log and add HADT component trace
