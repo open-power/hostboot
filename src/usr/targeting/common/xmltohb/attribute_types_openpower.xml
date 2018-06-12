@@ -754,6 +754,21 @@
     <readable/>
 </attribute>
 
+<attribute>
+    <id>IS_MPIPL_SUPPORTED</id>
+    <description>
+        Specifies if the mpipl is supported on this platform
+        0 : No , 1 : Yes
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <enumerationType>
     <id>ENTITY_ID</id>
     <description>Enumeration indicating the IPMI entity ID, these values are

@@ -478,6 +478,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_SMM_ENABLED                           0x40000000
 #define HDAT_CRYPTO_DISABLED_BIT                   0x20000000
 #define HDAT_RISK_LEVEL_ELEVATED                   0x10000000       
+#define HDAT_MPIPL_SUPPORTED                       0x08000000
 
 #define HDAT_ECO_ENABLED                           0x80000000
 #define HDAT_ECO_CAPABLE                           0x40000000
