@@ -131,7 +131,7 @@ uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
 
     // HWMSx[0:7] set this to the Galois field.
-    hwms->SetBitFieldJustified( 0, 8, i_mark.getChipGalois() );
+    hwms->SetBitFieldJustified( 0, 8, i_mark.getDramGalois() );
 
     // HWMSx[8] confirmed with the hardware team that this will not trigger
     //          another MPE attention and that they want this set to 1.
@@ -518,7 +518,7 @@ uint32_t writeChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
 
         uint8_t l_sm = l_symMark.isValid() ? l_symMark.getSymbol().getSymbol()
                                            : MSS_INVALID_SYMBOL;
-        uint8_t l_cm = i_mark.isValid() ? i_mark.getSymbol().getSymbol()
+        uint8_t l_cm = i_mark.isValid() ? i_mark.getSymbol().getDramSymbol()
                                         : MSS_INVALID_SYMBOL;
 
         errlHndl_t l_errl = nullptr;

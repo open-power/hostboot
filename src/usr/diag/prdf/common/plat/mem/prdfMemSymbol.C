@@ -139,6 +139,20 @@ uint8_t MemSymbol::getDramPins() const
 
 //------------------------------------------------------------------------------
 
+uint8_t MemSymbol::getDramSymbol() const
+{
+    bool    isMba = TYPE_MBA == getTargetType(iv_trgt);
+    bool    isX4  = isDramWidthX4( iv_trgt );
+    uint8_t dram  = getDram();
+
+    return isMba ? isX4 ? nibble2Symbol<TYPE_MBA>( dram )
+                        : byte2Symbol  <TYPE_MBA>( dram )
+                 : isX4 ? nibble2Symbol<TYPE_MCA>( dram )
+                        : byte2Symbol  <TYPE_MCA>( dram );
+}
+
+//------------------------------------------------------------------------------
+
 uint8_t MemSymbol::getGalois() const
 {
     return symbol2Galois[iv_symbol];
