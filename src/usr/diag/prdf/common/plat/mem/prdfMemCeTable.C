@@ -108,6 +108,9 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
         uint32_t dramTh, rankTh, dimmTh;
         getMnfgMemCeTh<T>( iv_chip, thisRank, dramTh, rankTh, dimmTh );
 
+        // The returned values are the number allowed. Add 1 to get threshold.
+        dramTh++; rankTh++; dimmTh++;
+
         // Get MNFG counts from CE table.
         uint32_t dramCount = 0, rankCount = 0, dimmCount = 0;
         for ( auto & entry : iv_table )
@@ -132,9 +135,13 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
 
         // Check thresholds. Note that the thresholds are the number allowed.
         // So we have to compare if the counts have exceeded the thresholds.
-        if ( dramTh < dramCount ) o_rc |= MNFG_TH_DRAM;
-        if ( rankTh < rankCount ) o_rc |= MNFG_TH_RANK;
-        if ( dimmTh < dimmCount ) o_rc |= MNFG_TH_DIMM;
+        if ( dramTh <= dramCount ) o_rc |= MNFG_TH_DRAM;
+        if ( rankTh <= rankCount ) o_rc |= MNFG_TH_RANK;
+        if ( dimmTh <= dimmCount ) o_rc |= MNFG_TH_DIMM;
+
+        PRDF_INF( "MNFG CEs per DRAM TH=%d, count=%d", dramTh, dramCount );
+        PRDF_INF( "MNFG CEs per rank TH=%d, count=%d", rankTh, rankCount );
+        PRDF_INF( "MNFG CEs per DIMM TH=%d, count=%d", dimmTh, dimmCount );
     }
 
     // If the table is full, remove the oldest inactive entry
