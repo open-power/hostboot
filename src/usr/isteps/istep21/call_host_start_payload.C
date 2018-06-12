@@ -405,7 +405,7 @@ void* call_host_start_payload (void *io_pArgs)
         if(! is_sapphire_load() )
         {
             TARGETING::TargetHandleList l_coreTargetList;
-            getAllChips(l_coreTargetList, TYPE_CORE);
+            getAllChiplets(l_coreTargetList, TYPE_CORE);
 
             for( auto l_core_target : l_coreTargetList)
             {
