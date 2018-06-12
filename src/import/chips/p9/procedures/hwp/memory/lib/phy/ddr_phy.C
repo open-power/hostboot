@@ -76,6 +76,22 @@ namespace mss
 {
 
 ///
+/// @brief Resets the FIR bit that is set by initcal
+/// @param[in] i_target the MCA
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode reset_initcal_fir_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    // Sets up the AND mask. Anything that's a 0 will cause the FIR there to be reset
+    fapi2::buffer<uint64_t> l_data;
+    l_data.flush<1>();
+    l_data.clearBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>();
+
+    // Does the scom to clear the register
+    return mss::putScom(i_target, MCA_IOM_PHY0_DDRPHY_FIR_REG_AND, l_data);
+}
+
+///
 /// @brief Clears all training related errors - specialization for MCA
 /// @param[in] i_target the port in question
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
@@ -102,6 +118,9 @@ fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCA>
     // Now the control
     FAPI_TRY(mss::pc::reset_error_status0(i_target), "%s error resetting PC error status0", mss::c_str(i_target));
     FAPI_TRY(mss::pc::reset_init_cal_error(i_target), "%s error resetting PC init cal errors", mss::c_str(i_target));
+
+    // Reset the FIR register
+    FAPI_TRY(reset_initcal_fir_reg(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1526,23 +1545,22 @@ fapi_try_exit:
 ///
 /// @brief Set the custom pattern
 /// @param[in] i_target the port target
+/// @param[in] i_pattern the human readable pattern to be configured
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint32_t i_pattern )
 {
-    uint32_t l_pattern = 0;
     uint32_t l_swizzled = 0;
 
     // Set the custom patterns for training advance
-    // So first get the pattern from the attribute and then put it into the register
-
-    FAPI_TRY( mss::custom_training_adv_patterns( i_target, l_pattern) );
-    FAPI_TRY( mss::seq::swizzle_mpr_pattern(l_pattern, l_swizzled) );
+    // So first swizzle the pattern and then put it into the register
+    FAPI_TRY( mss::seq::swizzle_mpr_pattern(i_pattern, l_swizzled) );
 
     FAPI_INF("%s the patterns before swizzle are 0x%08x and after 0x%08x",
              mss::c_str(i_target),
-             l_pattern,
+             i_pattern,
              l_swizzled);
 
     FAPI_TRY( mss::seq::setup_rd_wr_data( i_target, l_swizzled) );

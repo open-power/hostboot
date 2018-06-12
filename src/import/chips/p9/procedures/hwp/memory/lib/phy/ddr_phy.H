@@ -43,6 +43,13 @@ namespace mss
 {
 
 ///
+/// @brief Resets the FIR bit that is set by initcal
+/// @param[in] i_target the MCA
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode reset_initcal_fir_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
 /// @brief Perform initializations for the PHY
 /// @param[in] i_target the MCBIST which has the PHYs to initialize
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -404,10 +411,11 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(const fapi2::Target<T>& i_target, co
 ///
 /// @brief Set the custom pattern
 /// @param[in] i_target the port target
+/// @param[in] i_pattern the human readable pattern to be configured
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<fapi2::TargetType T>
-fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<T>& i_target, const uint32_t i_pattern );
 ///
 /// @brief Set the custom write pattern
 /// @param[in] i_target the port target
