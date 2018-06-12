@@ -371,8 +371,23 @@ void* call_host_activate_master (void *io_pArgs)
         if( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "core_checkstop_helper_hwp ERROR: returning.");
+                       "core_checkstop_helper_hwp on master ERROR: returning.");
             break;
+        }
+
+        // We want to make sure the fused pair is also setting the
+        // core firs to handle checkstops at system level and not
+        // at the local level
+        if(l_fusedCore != NULL)
+        {
+            l_errl = HBPM::core_checkstop_helper_hwp(l_fusedCore, true);
+
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "core_checkstop_helper_hwp on fused pair ERROR: returning.");
+                break;
+            }
         }
 
         // Take new checkstop values and insert them into the homer image
