@@ -445,6 +445,78 @@ errlHndl_t DeconfigGard::clearGardRecordsByType(const GARD_ErrorType i_type)
     return l_pErr;
 } // clearGardRecordsByType
 
+//******************************************************************************
+errlHndl_t DeconfigGard::updateSpecDeconfigTargetStates(
+        const PredicateBase *i_pPredicate)
+{
+    errlHndl_t l_pErr = NULL;
+
+    do
+    {
+        // It is a caller error if this function is called and spec deconfig
+        // is not enabled.
+        Target * pSys;
+        targetService().getTopLevelTarget(pSys);
+        HWAS_ASSERT((pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() == 1),
+                "HWAS updateSpecDeconfigTargetStates: "
+                "ATTR_BLOCK_SPEC_DECONFIG != 1");
+
+        // Get all GARD Records
+        GardRecords_t l_gardRecords;
+        l_pErr = platGetGardRecords(NULL, l_gardRecords);
+        if (l_pErr)
+        {
+            HWAS_ERR("Error from platGetGardRecords");
+            break;
+        }
+
+        for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
+             (l_itr != l_gardRecords.end());
+             ++l_itr)
+        {
+            GardRecord l_gardRecord = *l_itr;
+
+            // Find the associated Target
+            Target * l_pTarget =
+                targetService().toTarget(l_gardRecord.iv_targetId);
+
+            if (l_pTarget == NULL)
+            {
+                // could be a platform specific target for the other
+                // ie, we are hostboot and this is an FSP target, or vice-versa
+                // Binary trace the iv_targetId (EntityPath)
+                HWAS_INF_BIN("Could not find Target for:",
+                             &(l_gardRecord.iv_targetId),
+                             sizeof(l_gardRecord.iv_targetId));
+                continue;
+            }
+
+            // if this does NOT match, continue to next in loop
+            if (i_pPredicate && ((*i_pPredicate)(l_pTarget) == false))
+            {
+                HWAS_INF("skipping %.8X - predicate didn't match",
+                        get_huid(l_pTarget));
+                continue;
+            }
+
+            // Since all GARD records have already been processed, if we find
+            // any target that is functional, it means it has been resource
+            // recovered. Update it's HWAS state to reflect this
+            TARGETING::HwasState l_hwasState =
+                    l_pTarget->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            if(l_hwasState.functional)
+            {
+                HWAS_INF("Found GARDED target 0x%08X is functional, set state",
+                        TARGETING::get_huid(l_pTarget));
+                l_hwasState.deconfiguredByEid =
+                        DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY;
+                l_pTarget->setAttr<TARGETING::ATTR_HWAS_STATE>(l_hwasState);
+            }
+        }
+    }while (0);
+
+    return l_pErr;
+}
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
@@ -602,8 +674,15 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
             CONSOLE::displayf("HWAS", "Blocking Speculative Deconfig");
 #endif
-            HWAS_INF("Blocking Speculative Deconfig: "
-                     "skipping Predictive GARD Records");
+            HWAS_INF("Blocking Speculative Deconfig: skipping Predictive GARD "
+                     " and updating recovered resources");
+
+            l_pErr = updateSpecDeconfigTargetStates(i_pPredicate);
+            if(l_pErr)
+            {
+                HWAS_ERR("updateSpecDeconfigTargetStates returned an error");
+                break;
+            }
         }
 
         GardRecords_t l_specDeconfigVector;
