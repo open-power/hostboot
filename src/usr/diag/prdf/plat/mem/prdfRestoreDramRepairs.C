@@ -573,8 +573,6 @@ template<>
 void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
                                  const std::vector<MemRank> & i_ranks )
 {
-    PRDF_TRAC( "deployDramSpares: Function not implemented yet" );
-
     bool x4 = isDramWidthX4( i_trgt );
     bool cenDimm = isMembufOnDimm<TYPE_MBA>( i_trgt );
 
@@ -584,7 +582,7 @@ void deployDramSpares<TYPE_MBA>( TargetHandle_t i_trgt,
         // Also, make sure the ECC spare is on a different DRAM than the spare
         // DRAM.
         MemSymbol symPort0 = MemSymbol::fromSymbol( i_trgt, rank, 71 );
-        MemSymbol symPort1 = MemSymbol::fromSymbol( i_trgt, rank, 53 );
+        MemSymbol symPort1 = MemSymbol::fromSymbol( i_trgt, rank, 39 );
         MemSymbol symEccSp = MemSymbol::fromSymbol( i_trgt, rank, 67 );
 
         int32_t l_rc = SUCCESS;
