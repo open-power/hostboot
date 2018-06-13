@@ -60,6 +60,12 @@
 #define START_XBUS_CHIPLET_NUM        0x06
 // MCBIST (0, 1 => 0x07, 0x08)
 #define START_MCBIST_CHIPLET_NUM      0x07
+// MC (0, 1 => 0x07)
+#define START_MC_CHIPLET_NUM          0x07
+// MI (0, 1 => 0x07)
+#define START_MI_CHIPLET_NUM          0x07
+// DMI (0, 3 => 0x07, 0x08)
+#define START_DMI_CHIPLET_NUM         0x07
 // OBUS (0, 3 => 0x09, 0x0C)
 #define START_OBUS_CHIPLET_NUM        0x09
 // PEC (0, 1, 2 => 0x0D, 0x0E, 0x0F)
