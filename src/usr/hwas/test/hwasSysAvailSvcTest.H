@@ -121,6 +121,47 @@ public:
     }
 
     /**
+      *  @brief Verify input resources are resource recovered and then restore
+      *         them to original state
+      *
+      *  @return True if all passes, false otherwise
+      */
+    bool verifyRecoveredAndRestore(TargetHandleList &i_targetHList,
+                                         TARGETING::HwasState *i_origStates)
+    {
+        for (uint32_t i=0; i < i_targetHList.size(); i++)
+        {
+            TARGETING::HwasState l_hwasState =
+                    i_targetHList[i]->getAttr<TARGETING::ATTR_HWAS_STATE>();
+            TS_TRACE( "testVerifyResourceRecovery: After Recovery - "
+                      "HwasState fakeState: "
+                      "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x,"
+                      "specdeconfig=0x%x",
+                      l_hwasState.deconfiguredByEid,
+                      l_hwasState.poweredOn,
+                      l_hwasState.present,
+                      l_hwasState.functional,
+                      l_hwasState.dumpfunctional,
+                      l_hwasState.specdeconfig
+                      );
+
+            // Verify resources were brought back to life by resource recovery
+            if ((l_hwasState.deconfiguredByEid !=
+                    DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY) ||
+                (l_hwasState.specdeconfig != 0) ||
+                (l_hwasState.functional != 1))
+            {
+                TS_FAIL("testVerifyResourceRecovery: Incorrect resource "
+                        "recovery hwas states");
+                return false;
+            }
+            // Restore old state
+            i_targetHList[i]->setAttr<TARGETING::ATTR_HWAS_STATE>(i_origStates[i]);
+        }
+        return true;
+    }
+
+    /**
      *  @brief mark all cores nonfunctional and then call checkMinimumHardware()
      */
     void testCheckMinimumHardwareCore()
@@ -425,6 +466,140 @@ public:
         setTargetStates( RESTORE, l_dimms, &(l_origStates[0]), 1  );
         pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(l_orig_block_spec_deconfig);
 
+#endif
+    }
+
+    /**
+     *  @brief Speculative gard all cores and verify they are recovered
+     */
+    void testVerifyResourceRecovery()
+    {
+#if DISABLE_UNIT_TESTS
+        //  NOTE:  These tests mark targets nonfunctional and then
+        //  restore them.  Since all the unit tests run in parallel, this
+        //  may cause other tests to fail.
+        //  Do not leave this test enabled for normal operations.
+        TS_TRACE(INFO_MRK "SKIPPING:  other tests could be affected.");
+        HWAS_INF("testVerifyResourceRecovery: Skipped");
+#else
+
+        do
+        {
+            errlHndl_t l_errl = NULL;
+            TS_TRACE(INFO_MRK "testVerifyResourceRecovery");
+            HWAS_INF("testVerifyResourceRecovery: Started");
+
+            TargetHandleList l_cores;
+            getAllChiplets(l_cores, TYPE_CORE, true );
+            TS_TRACE( "testVerifyResourceRecovery: %d functional cores",
+                      l_cores.size() );
+
+            // Keep track of original hwas states
+            TARGETING::HwasState l_origStates[ l_cores.size() ]  ;
+            HWAS_INF("testVerifyResourceRecovery: Create predictive gard record"
+                    " for all cores");
+
+            for (uint32_t i=0; i < l_cores.size(); i++)
+            {
+                TARGETING::HwasState l_hwasState =
+                                    l_cores[i]->getAttr<TARGETING::ATTR_HWAS_STATE>();
+                l_origStates[i] = l_hwasState;
+                TS_TRACE( "testVerifyResourceRecovery: HwasState fakeState: "
+                          "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x,"
+                          "specdeconfig=0x%x",
+                          l_hwasState.deconfiguredByEid,
+                          l_hwasState.poweredOn,
+                          l_hwasState.present,
+                          l_hwasState.functional,
+                          l_hwasState.dumpfunctional,
+                          l_hwasState.specdeconfig
+                          );
+
+                // Create a GARD record for all cores
+                l_errl = theDeconfigGard().platCreateGardRecord(l_cores[i],
+                                                                0x12,
+                                                                GARD_Predictive);
+                if (l_errl)
+                {
+                    TS_FAIL("testVerifyResourceRecovery: Error from "
+                            "platCreateGardRecord");
+                    break;
+                }
+            }
+            if (l_errl)
+            {
+                errlCommit( l_errl, HWAS_COMP_ID );
+                break;
+            }
+
+            HWAS_INF("testVerifyResourceRecovery: Enable spec deconfig");
+
+            // Ensure gard will execute speculative deconfig
+            Target * pSys;
+            targetService().getTopLevelTarget(pSys);
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+
+            // Apply gard records and run resource recovery
+            l_errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
+            if ( l_errl )
+            {
+                TS_FAIL("testVerifyResourceRecovery: Error from "
+                        "deconfigureTargetsFromGardRecordsForIpl");
+                errlCommit( l_errl, HWAS_COMP_ID );
+                break;
+            }
+
+            // Verify all cores have been "Recovered" and then restore
+            // old hwas state
+            if (!verifyRecoveredAndRestore(l_cores,l_origStates))
+            {
+                // TS_FAIL logged in function so just exit out
+                HWAS_INF("testVerifyResourceRecovery: Verify failed");
+                break;
+            }
+
+            // Verify spec deconfig is disabled (since it's already been
+            // run).
+            if (pSys->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() != 1)
+            {
+                TS_FAIL("testVerifyResourceRecovery: Spec deconfig is not "
+                        "disabled");
+                break;
+            }
+
+            // Call the deconfigure interface again and verify even without
+            // spec deconfig enabled, that hwas states are still updated properly
+            l_errl = theDeconfigGard().deconfigureTargetsFromGardRecordsForIpl();
+            if ( l_errl )
+            {
+                TS_FAIL("testVerifyResourceRecovery: Error from "
+                        "deconfigureTargetsFromGardRecordsForIpl");
+                errlCommit( l_errl, HWAS_COMP_ID );
+                break;
+            }
+
+            // Verify cores are functional and resource recovered
+            if (!verifyRecoveredAndRestore(l_cores,l_origStates))
+            {
+                // TS_FAIL logged in function so just exit out
+                HWAS_INF("testVerifyResourceRecovery: Verify phase 2 failed");
+                break;
+            }
+            else
+            {
+                HWAS_INF("testVerifyResourceRecovery: PASSED");
+                TS_TRACE("testVerifyResourceRecovery: PASSED");
+            }
+
+            // Reset to 0
+            pSys->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+
+            // Clear all gard records
+            for (uint32_t i=0; i < l_cores.size(); i++)
+            {
+                theDeconfigGard().clearGardRecords(l_cores[i]);
+            }
+        } while(0);
 #endif
     }
 
