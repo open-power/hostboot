@@ -271,6 +271,25 @@ public:
     errlHndl_t clearGardRecordsByType(GARD_ErrorType i_type);
 
     /**
+     * @brief Update HWAS fields for resource recovered targets
+     *
+     * @param  i_pPredicate     restrict processing - only look at GARD records
+     *                          for targets that match the predicate (optional)
+     *
+     * If a speculatively garded resource has been enabled due to resource
+     * recovery then we need to ensure it's HWAS states are properly updated
+     * to reflect this.
+     *
+     * This function should only be called in situations where speculative
+     * deconfig/resource recovery is being skipped due to it already being
+     * run in a previous boot (i.e. ATTR_BLOCK_SPEC_DECONFIG == 1)
+     *
+     * @return errlHndl_t. Error log handle.
+     */
+    errlHndl_t updateSpecDeconfigTargetStates(
+                const TARGETING::PredicateBase *i_pPredicate = NULL);
+
+    /**
      * @brief Deconfigures Targets that have GARD Records in preparation to IPL.
      *
      * @param  i_pPredicate     restrict processing - only look at GARD records
