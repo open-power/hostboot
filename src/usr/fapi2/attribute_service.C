@@ -1934,6 +1934,68 @@ ReturnCode platGetDQSAttrISDIMM(
 }
 
 //-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdSensorMapPrimary(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY_Type& o_SensorMapType
+                                        )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdSensorMapPrimary: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getMBvpdSensorMap(l_fapiTarget, fapi2::SENSOR_MAP_PRIMARY, o_SensorMapType);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdSensorMapSecondary(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY_Type& o_SensorMapType
+                                        )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdSensorMapSecondary: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getMBvpdSensorMap(l_fapiTarget, fapi2::SENSOR_MAP_SECONDARY, o_SensorMapType);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
 ReturnCode platGetMBvpdDramAddressMirroring(
                                    const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                    ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING_Type& o_dramAddressMirroring

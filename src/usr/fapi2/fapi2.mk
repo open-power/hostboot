@@ -174,6 +174,7 @@ include ${CENTAUR_VPD_PATH}/getDecompressedISDIMMAttrs.mk
 include ${CENTAUR_VPD_PATH}/getISDIMMTOC4DAttrs.mk
 include ${CENTAUR_VPD_PATH}/getDQAttrISDIMM.mk
 include ${CENTAUR_VPD_PATH}/getDQSAttrISDIMM.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdSensorMap.mk
 include ${CENTAUR_VPD_PATH}/getMBvpdAddrMirrorData.mk
 include ${CENTAUR_VPD_PATH}/getMBvpdAttr.mk
 include ${CENTAUR_VPD_PATH}/getMBvpdDram2NModeEnabled.mk
