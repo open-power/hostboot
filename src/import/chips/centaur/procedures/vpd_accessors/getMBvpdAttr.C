@@ -403,12 +403,14 @@ extern "C"
         if( l_version != 0)
         {
             o_version = static_cast<VpdVersion>(l_version);
-            FAPI_DBG("getVersion: vpd version=0x%x,", o_version);
+            FAPI_DBG("%s getVersion: vpd version=0x%x,", mss::c_str(i_mbaTarget),
+                     o_version);
             return fapi2::FAPI2_RC_SUCCESS;
         }
         else
         {
-            FAPI_INF("getVersion: read of MBVPD_VERSION attribute failed");
+            FAPI_INF("%s getVersion: read of MBVPD_VERSION attribute failed",
+                     mss::c_str(i_mbaTarget));
         }
 
         // Couldn't  get the Version from attribute
@@ -434,8 +436,8 @@ extern "C"
 
         if((fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) && (!l_sizeMismatch))
         {
-            FAPI_INF("getVersion:"
-                     " returned vm data : 0x%x ",
+            FAPI_INF("getVersion: %s"
+                     " returned vm data : 0x%x ", mss::c_str(i_mbaTarget),
                      l_vmVersionBuf.iv_version);
 
             // Get the first byte from VM keyword which has version value.
@@ -461,7 +463,7 @@ extern "C"
         // Get the VD in case of VM read error or
         // VM returned size is fine but with  value 0, then the Version is in
         // VD format.
-        if((fapi2::current_err == fapi2::FAPI2_RC_FALSE) ||
+        if((fapi2::current_err != fapi2::FAPI2_RC_SUCCESS) ||
            ((!l_sizeMismatch) && (l_versionBuf == VM_NOT_SUPPORTED)))
         {
             o_version = VD_VER;    // initialize to finding VD keyword
@@ -483,11 +485,12 @@ extern "C"
             {
                 o_version = static_cast<VpdVersion>(o_version |
                                                     static_cast<VpdVersion>(be16toh(l_versionBuf)));
+                l_sizeMismatch = false;
             }
         }
 
         // try record VINI keyword VZ (should work)
-        if (fapi2::current_err == fapi2::FAPI2_RC_FALSE)
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
             o_version = VZ_VER;    // VZ keyword
             l_record  = fapi2::MBVPD_RECORD_VINI;
@@ -508,10 +511,11 @@ extern "C"
             {
                 o_version = static_cast<VpdVersion>(o_version |
                                                     static_cast<VpdVersion>(be16toh(l_versionBuf)));
+                l_sizeMismatch = false;
             }
         }
 
-        if (fapi2::current_err == fapi2::FAPI2_RC_FALSE)
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
             FAPI_ERR("getVersion: Read of VM,VD and VZ keyword failed");
             return fapi2::current_err;
@@ -529,7 +533,8 @@ extern "C"
                         l_bufSize, sizeof(l_versionBuf));
         }
 
-        FAPI_INF("getVersion: vpd version=0x%x keyword=%d",
+        FAPI_INF("getVersion: %s vpd version=0x%x keyword=%d",
+                 mss::c_str(i_mbaTarget),
                  o_version, l_keyword);
 
         // cache the version value by updating attribute
