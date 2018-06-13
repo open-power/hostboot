@@ -351,6 +351,29 @@ ReturnCode platGetDQSAttrISDIMM(
                                );
 
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_SensorMapType   The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdSensorMapPrimary(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY_Type& o_SensorMapType
+                                        );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_SensorMapType   The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdSensorMapSecondary(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY_Type& o_SensorMapType
+                                        );
+
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
 //  the CEN_VPD_DRAM_ADDRESS_MIRRORING attribute. It should not be called directly.
 //
 //  @param[in] i_fapiTarget The target for the attribute operation.
@@ -673,6 +696,24 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetDQSAttrISDIMM(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY_GETMACRO access to the
+// correct HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdSensorMapPrimary(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY_GETMACRO access to the
+// correct HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdSensorMapSecondary(TARGET, VAL)
 
 //-----------------------------------------------------------------------------
 // MACRO to route ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING access to the correct
