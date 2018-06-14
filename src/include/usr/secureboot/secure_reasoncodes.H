@@ -57,6 +57,11 @@ namespace SECUREBOOT
         MOD_NC_MAP_ATTN                 = 0x23,
         MOD_NCDD_PERFORM_OP             = 0x24,
         MOD_NCDD_WRITE                  = 0x25,
+        MOD_NCEX_MAIN                   = 0x26,
+        MOD_NCEX_MASTER                 = 0x27,
+        MOD_NCEX_SLAVE                  = 0x28,
+        MOD_NCEX_GET_RANDOM             = 0x29,
+        MOD_NCEX_RECV                   = 0x2A,
    };
 
     enum SECUREReasonCode
@@ -91,6 +96,11 @@ namespace SECUREBOOT
         RC_NC_TOO_MANY_ATTNS_FOUND      = SECURE_COMP_ID | 0x24,
         RC_NCDD_INVALID_ARGS            = SECURE_COMP_ID | 0x25,
         RC_NCDD_DATA_NOT_SENT           = SECURE_COMP_ID | 0x26,
+        RC_NCEX_MISMATCH_RECV_LINKS     = SECURE_COMP_ID | 0x27,
+        RC_NCEX_NO_FUNCTIONAL_TPMS      = SECURE_COMP_ID | 0x28,
+        RC_NCEX_INVALID_PHYS_PATH       = SECURE_COMP_ID | 0x29,
+        RC_NCEX_INVALID_INSTANCE_COUNT  = SECURE_COMP_ID | 0x2A,
+        RC_NCEX_WAITING_TIMEOUT         = SECURE_COMP_ID | 0x2B,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };
