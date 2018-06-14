@@ -82,7 +82,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     const size_t expSize = sizeof(fir_data);
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK
+    TRACUCOMP(g_trac_nc,ENTER_MRK
               "nodeCommMapAttn: tgt=0x%X, mode=%s, fir_addr=0x%.16llX",
               get_huid(i_pProc),
               (i_mode == NCDD_MODE_ABUS)
@@ -123,7 +123,7 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
     if (bit_count == 0)
     {
-        TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found: "
+        TRACUCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: no attentions found: "
                   "FIR data = 0x%.16llX, mask=0x%.16llX, data+mask=0x%.16llX",
                   fir_data, fir_mask, fir_data_with_mask);
         break;
@@ -183,13 +183,19 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
             o_attn_found = true;
             o_linkId = (bit / 2);
             o_mboxId = (bit % 2);
+
+            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommMapAttn: tgt=0x%X: "
+                      "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
+                      TRACE_ERR_FMT,
+                      get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,
+                      TRACE_ERR_ARGS(err));
             break;
         }
     }
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommMapAttn: tgt=0x%X: "
+    TRACUCOMP(g_trac_nc,EXIT_MRK"nodeCommMapAttn: tgt=0x%X: "
               "o_attn_found=%d, o_linkId=%d, mboxId=%d, "
               TRACE_ERR_FMT,
               get_huid(i_pProc), o_attn_found, o_linkId, o_mboxId,

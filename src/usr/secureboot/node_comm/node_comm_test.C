@@ -92,7 +92,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
               l_cpuTargetList.size());
 
     // 1) Send Data Out of First Proc Xbus Link Mailbox
-    // @TODO RTC 184516 revisit this when PEER_PATH attribute is being used
+    // @TODO RTC 195220 Update this to use PEER_PATH attribute
     if ( l_cpuTargetList.size() != 4)
     {
         linkId = 4;
@@ -281,7 +281,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
 
-        // @TODO RTC:184518 Delete for now as it will fail in simics and
+        // @TODO RTC 195220 Delete for now as it will fail in simics and
         // cause a processor deconfig.
         delete err;
         err = nullptr;

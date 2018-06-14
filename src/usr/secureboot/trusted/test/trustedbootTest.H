@@ -1088,6 +1088,8 @@ class TrustedBootTest: public CxxTest::TestSuite
                    fails, num_ops );
     }
 
+    // @TODO RTC 195220 - Call SECUREBOOT::NODECOMM::nodeCommXbus2ProcTest()
+    // here once there is a multi-proc standalone simics config available
 };
 
 #endif
