@@ -234,7 +234,8 @@ while true; do
     sleep 5
     HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
     echo "HRMOR = $HRMOR"
-    if [ "$HRMOR" != "$BL_HRMOR" ]; then
+
+    if [[ "$HRMOR" -ne "$BL_HRMOR" ]] && [[ "$HRMOR" -ne 0 ]]; then
         echo "SBE and Hostboot bootloader completed successfully"
         break
     fi
