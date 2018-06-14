@@ -34,15 +34,18 @@
 // Includes
 // ----------------------------------------------
 #include <string.h>
+#include <algorithm>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <secureboot/nodecommif.H>
+#include <secureboot/trustedbootif.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/targplatutil.H>
@@ -50,6 +53,7 @@
 #include <sys/time.h>
 #include <sys/task.h>
 #include <util/misc.H>
+#include <config.h>
 
 #include "node_comm.H"
 
@@ -58,9 +62,12 @@
 // ----------------------------------------------
 // If the link(s) are up the operation should complete right away
 // so there will only be a short polling window
-#define NODE_COMM_POLL_DELAY_NS (1 * NS_PER_MSEC)  // Sleep for 1ms per poll
+#define NODE_COMM_POLL_DELAY_NS (10 * NS_PER_MSEC)  // Sleep for 10ms per poll
 // FSP is expecting a reply in 30 seconds, so leave some buffer
 #define NODE_COMM_POLL_DELAY_TOTAL_NS (25 * NS_PER_SEC) // Total time 25s
+
+// Use if there is an issue getting random number from a functional TPM
+#define NODE_COMM_DEFAULT_NONCE 0xFFFFFFFFFFFFFFFF
 
 using   namespace   TARGETING;
 
@@ -86,9 +93,9 @@ struct master_proc_info_t
  */
 struct obus_instances_t
 {
-    uint8_t  sendObusInstance = 0;
+    uint8_t  myObusInstance = 0;
 
-    // Expect to receive on the PEER_PATH instances
+    // Expect data to be received on the PEER_PATH instances
     uint8_t  peerNodeInstance = 0;
     uint8_t  peerProcInstance = 0;
     uint8_t  peerObusInstance = 0;
@@ -110,6 +117,154 @@ union msg_format_t
                                        // nummber requested from the TPM
     } PACKED;
 };
+
+/**
+ *  @brief This function generates a nonce by calling GetRandom on an
+ *         available TPM.
+ *
+ *  @param[out] o_nonce - The nonce that is generated
+ *  @note       Nonce is only valid if the operation is successful
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
+{
+    errlHndl_t err = nullptr;
+    o_nonce = NODE_COMM_DEFAULT_NONCE;
+    Target* tpm_tgt = nullptr;
+    TargetHandleList tpmTargetList;
+
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
+
+    do
+    {
+
+    // Get all possible functional TPMs
+    TRUSTEDBOOT::getTPMs(tpmTargetList);
+
+    if (tpmTargetList.size() == 0)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusGetRandom: no functional "
+                  "TPMs found - tpmTargetList.size() = %d - Committing "
+                  "predictive error. Continuing using default nonce=0x%.16llX",
+                  tpmTargetList.size(), o_nonce);
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_NCEX_NO_FUNCTIONAL_TPMS
+         * @moduleid         MOD_NCEX_GET_RANDOM
+         * @userdata1        <Unused>
+         * @userdata2        <Unused>
+         * @devdesc          No functional TPMs were found
+         * @custdesc         Secure Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       MOD_NCEX_GET_RANDOM,
+                                       RC_NCEX_NO_FUNCTIONAL_TPMS,
+                                       0,
+                                       0,
+                                       true /*Add HB SW Callout*/ );
+
+        // err commited outside of do-while loop below
+
+        // break here to skip calling GetRandom() below
+        break;
+    }
+
+    // Use first of functional TPM target list
+    tpm_tgt = tpmTargetList[0];
+    // This function call requires the CONFIG check for compilation purposes,
+    // but no extra error handling is needed as it should not have gotten this
+    // far if CONFIG_TPMDD wasn't set
+#ifdef CONFIG_TPMDD
+    err = TRUSTEDBOOT::GetRandom(tpm_tgt, o_nonce);
+#endif
+    if (err)
+    {
+        // Reset just to make sure above call didn't change it
+        o_nonce = NODE_COMM_DEFAULT_NONCE;
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusGetRandom: GetRandom "
+                  "returned a fail for TPM 0x%.08X. Commiting err: "
+                  TRACE_ERR_FMT
+                  ". Using default nonce=0x%.16llX",
+                  get_huid(tpm_tgt),
+                  TRACE_ERR_ARGS(err),
+                  o_nonce);
+        // err commited outside of do-while loop below
+
+        // break to be safe in case code gets added later
+        break;
+    }
+
+    } while( 0 );
+
+    if (err)
+    {
+        err->collectTrace(SECURE_COMP_NAME);
+        err->collectTrace(NODECOMM_TRACE_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
+        errlCommit(err, SECURE_COMP_ID);
+    }
+
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusGetRandom: "
+              "nonce=0x%.16llX, from TPM=0x%.08X: "
+              TRACE_ERR_FMT,
+              o_nonce, get_huid(tpm_tgt),
+              TRACE_ERR_ARGS(err));
+
+    return err;
+
+} // end of nodeCommAbusGetRandom
+
+/**
+ *  @brief This function logs a nonce to all available TPMs on the node by
+ *         extending it to a specific PCR.
+ *
+ *  @param[in]  i_nonce - The nonce to be logged/extended
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
+{
+    errlHndl_t err = nullptr;
+
+    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX",
+              i_nonce);
+
+    do
+    {
+
+    // Extend the nonce asychronously to all available TPMs
+    uint8_t l_digest[sizeof(i_nonce)]={0};
+    memcpy(l_digest, &i_nonce, sizeof(i_nonce));
+
+    err = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
+                                 TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
+                                 l_digest,
+                                 sizeof(uint64_t),
+                                 "Node Nonce");
+    if (err)
+    {
+       TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusGetRandom: pcrExtend "
+                  "returned a fail: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(err));
+    }
+
+    } while( 0 );
+
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusLogNonce: "
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(err));
+
+    return err;
+
+} // end of nodeCommAbusLogNonce
+
 
 /**
  *  @brief This function waits for the master processor of the current node to
@@ -152,7 +307,7 @@ errlHndl_t nodeCommAbusRecvMessage(const master_proc_info_t & i_mProcInfo,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusRecvMessage: Error Back "
-                      "From nodeCommMapAttn: Tgt=0x%X: "
+                      "From nodeCommMapAttn: Tgt=0x%.08X: "
                       TRACE_ERR_FMT,
                       get_huid(i_mProcInfo.tgt),
                       TRACE_ERR_ARGS(err));
@@ -160,19 +315,53 @@ errlHndl_t nodeCommAbusRecvMessage(const master_proc_info_t & i_mProcInfo,
         }
         if (attn_found == true)
         {
-            TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
-              "nodeCommMapAttn attn_found (%d) for Tgt=0x%X, link=%d, mbox=%d",
+            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusRecvMessage: "
+              "nodeCommMapAttn attn_found (%d) for Tgt=0x%.08X, link=%d, "
+              "mbox=%d",
               attn_found, get_huid(i_mProcInfo.tgt), o_linkId, o_mboxId);
             break;
         }
 
-        // @TODO RTC 184518 Create Error For Timeout
         if (time_polled_ns >= NODE_COMM_POLL_DELAY_TOTAL_NS)
         {
             TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
               "timeout: time_polled_ns-0x%.16llX, MAX=0x%.16llX, "
               "interval=0x%.16llX",
               time_polled_ns, NODE_COMM_POLL_DELAY_TOTAL_NS, interval_ns);
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCEX_WAITING_TIMEOUT
+             * @moduleid         MOD_NCEX_RECV
+             * @userdata1[0:31]  Master Proc Target HUID
+             * @userdata1[32:63] Time Polled in ns
+             * @userdata2[0:31]  Defined MAX Poll Time in ns
+             * @userdata2[32:63] Time Interval Between Polls in ns
+             * @devdesc          Timed out waiting to receive message over
+             *                   ABUS Link Mailbox
+             * @custdesc         Secure Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_NCEX_RECV,
+                                           RC_NCEX_WAITING_TIMEOUT,
+                                           TWO_UINT32_TO_UINT64(
+                                             get_huid(i_mProcInfo.tgt),
+                                             time_polled_ns),
+                                           TWO_UINT32_TO_UINT64(
+                                             NODE_COMM_POLL_DELAY_TOTAL_NS,
+                                             interval_ns));
+
+            // Likely an issue with Processor or its bus
+            err->addHwCallout( i_mProcInfo.tgt,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DELAYED_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+
+            // @TODO RTC 184518 - Add bus callout
             break;
         }
 
@@ -203,7 +392,7 @@ errlHndl_t nodeCommAbusRecvMessage(const master_proc_info_t & i_mProcInfo,
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back From "
-                      "Abus MBox Read: Tgt=0x%X, link=%d, mbox=%d: "
+                      "Abus MBox Read: Tgt=0x%.08X, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
                       get_huid(i_mProcInfo.tgt), o_linkId, o_mboxId,
                       TRACE_ERR_ARGS(err));
@@ -219,13 +408,23 @@ errlHndl_t nodeCommAbusRecvMessage(const master_proc_info_t & i_mProcInfo,
                   data, msg_data.value);
 
 
-        // @TODO RTC 184518 Push this msg_data to TPM
+        // Push this msg_data to TPM
+        err = nodeCommAbusLogNonce(msg_data.value);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back From "
+                      "nodeCommAbusLogNonce: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+
     }
 
     } while( 0 );
 
     TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusRecvMessage: "
-              "Tgt=0x%X, link=%d, mbox=%d attn_found=%d: "
+              "Tgt=0x%.08X, link=%d, mbox=%d attn_found=%d: "
               TRACE_ERR_FMT,
               get_huid(i_mProcInfo.tgt), o_linkId, o_mboxId, attn_found,
               TRACE_ERR_ARGS(err));
@@ -241,36 +440,52 @@ errlHndl_t nodeCommAbusRecvMessage(const master_proc_info_t & i_mProcInfo,
  *          of a random number from the TPM to be used as part of the message.
  *
  *  @param[in] i_mProcInfo - Information about Master Proc
- *  @param[in] i_linkId - Link Id Message is sent from
- *  @param[in] i_mboxId - Mailbox Id Message is sent from
+ *  @param[in] i_send_linkId - Link Id Message is sent from
+ *  @param[in] i_send_mboxId - Mailbox Id Message is sent from
+ *  @param[in] i_peer_linkId - Link Id Message is expected to be received on
+ *                             NOTE: this parameter is used for nonce logging/
+ *                             extending purposes only
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommAbusSendMessage(const master_proc_info_t & i_mProcInfo,
-                                   const uint8_t & i_linkId,
-                                   const uint8_t & i_mboxId)
+                                   const uint8_t & i_send_linkId,
+                                   const uint8_t & i_send_mboxId,
+                                   const uint8_t & i_peer_linkId)
 {
 
     errlHndl_t err = nullptr;
 
     TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusSendMessage: mProc=0x%.08X "
-              "to communicate through linkId=%d mboxId=%d",
-              get_huid(i_mProcInfo.tgt), i_linkId, i_mboxId);
+              "to communicate through linkId=%d mboxId=%d to peer linkId=%d",
+              get_huid(i_mProcInfo.tgt), i_send_linkId,
+              i_send_mboxId, i_peer_linkId);
 
     do
     {
-        // @TODO RTC 184518 get random number from TPM; use node huid for now
-        Target* node_tgt = nullptr;
-        TARGETING::UTIL::getMasterNodeTarget(node_tgt);
+        // Get random number from TPM
         msg_format_t msg_data;
-        msg_data.value = get_huid(node_tgt);
-        msg_data.origin_linkId = i_linkId;
+        msg_data.value = 0;
+
+        err = nodeCommAbusGetRandom(msg_data.value);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusSendMessage: Error Back "
+                      "From nodeCommAbusGetRandom: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+        // Set the send and expected receive LinkIds in the nonce
+        msg_data.origin_linkId = i_send_linkId;
+        msg_data.receiver_linkId = i_peer_linkId;
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusSendMessage: "
-                  "linkId=%d, mboxId=%d, data=0x%.016llX",
-                  i_linkId, i_mboxId, msg_data.value);
+                  "send linkId=%d, mboxId=%d; peer/recv linkId=%d: "
+                  "data=0x%.016llX",
+                  i_send_linkId, i_send_mboxId, i_peer_linkId, msg_data.value);
 
         // Send Data
         size_t size = sizeof(msg_data.value);
@@ -278,14 +493,25 @@ errlHndl_t nodeCommAbusSendMessage(const master_proc_info_t & i_mProcInfo,
                                     &msg_data.value,
                                     size,
                                     DEVICE_NODECOMM_ADDRESS(NCDD_MODE_ABUS,
-                                                            i_linkId,
-                                                            i_mboxId));
+                                                            i_send_linkId,
+                                                            i_send_mboxId));
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusSendMessage: Error Back "
-                      "From Abus MBox Send: Tgt=0x%X, link=%d, mbox=%d: "
+                      "From Abus MBox Send: Tgt=0x%.08X, link=%d, mbox=%d: "
                       TRACE_ERR_FMT,
-                      get_huid(i_mProcInfo.tgt), i_linkId, i_mboxId,
+                      get_huid(i_mProcInfo.tgt), i_send_linkId, i_send_mboxId,
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+
+        // Push this msg_data to TPM
+        err = nodeCommAbusLogNonce(msg_data.value);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back From "
+                      "nodeCommAbusLogNonce: "
+                      TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
             break;
         }
@@ -330,38 +556,98 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
 
     for ( auto const l_obus : i_obus_instances)
     {
-        uint8_t send_linkId = 0;
-        uint8_t send_mboxId = 0;
-        getSecureLinkMboxFromObus(l_obus.sendObusInstance,
-                                  send_linkId,
-                                  send_mboxId);
+        uint8_t my_linkId = 0;
+        uint8_t my_mboxId = 0;
+        getSecureLinkMboxFromObus(l_obus.myObusInstance,
+                                  my_linkId,
+                                  my_mboxId);
+
+        uint8_t expected_peer_linkId = 0;
+        uint8_t expected_peer_mboxId = 0;
+        getSecureLinkMboxFromObus(l_obus.peerObusInstance,
+                                  expected_peer_linkId,
+                                  expected_peer_mboxId);
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: "
-                  "send_linkId=%d, send_mboxId=%d, sendObusInstance=%d",
-                  send_linkId, send_mboxId, l_obus.sendObusInstance);
+                  "send: linkId=%d, mboxId=%d, ObusInstance=%d. "
+                  "expected peer recv: linkId=%d, mboxId=%d, ObusInstance=%d.",
+                  my_linkId, my_mboxId, l_obus.myObusInstance,
+                  expected_peer_linkId, expected_peer_mboxId,
+                  l_obus.peerObusInstance);
 
         // Send a message to a slave
-        err =  nodeCommAbusSendMessage(i_mProcInfo, send_linkId, send_mboxId);
+        err =  nodeCommAbusSendMessage(i_mProcInfo,
+                                       my_linkId,
+                                       my_mboxId,
+                                       expected_peer_linkId);
         if (err)
         {
            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: "
-                      "nodeCommAbusSendMessage returned an error");
+                     "nodeCommAbusSendMessage returned an error");
            break;
         }
 
-        // Look for Return Message From This Slave
-        uint64_t recv_linkId = 0;
-        uint64_t recv_mboxId = 0;
-        err = nodeCommAbusRecvMessage(i_mProcInfo,recv_linkId,recv_mboxId);
+        // Look for Return Message From The Slave
+        uint64_t actual_recv_linkId = 0;
+        uint64_t actual_recv_mboxId = 0;
+        err = nodeCommAbusRecvMessage(i_mProcInfo,
+                                      actual_recv_linkId,
+                                      actual_recv_mboxId);
         if (err)
         {
            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: "
-                      "nodeCommAbusRecvMessage returned an error");
+                     "nodeCommAbusRecvMessage returned an error");
            break;
         }
 
-        // @TODO RTC 184518 Verify that receive link/mboxIds were the
-        // same as the send ones
+        // Verify that actual receive link/mboxIds were the same as the
+        // ones this node sent from
+        if ((my_linkId != actual_recv_linkId) ||
+            (my_mboxId != actual_recv_mboxId))
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: "
+                      "Expected Link (%d) Mbox (%d) IDs DO NOT Match the "
+                      "Actual Link (%d) Mbox (%d) IDs the return message used",
+                       my_linkId, my_mboxId,
+                       actual_recv_linkId, actual_recv_mboxId);
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCEX_MISMATCH_RECV_LINKS
+             * @moduleid         MOD_NCEX_MASTER
+             * @userdata1        Master Proc Target HUID
+             * @userdata2[0:15]  Expected Link Id to receive message on
+             * @userdata2[16:31] Expected Mailbox Id to receive message on
+             * @userdata2[32:47] Acutal Link Id message was received on
+             * @userdata2[48:63] Actual Mailbox Id message was receiveed on
+             * @devdesc          Mismatch between expected and actual Link Mbox
+             *                   Ids a secure ABUS message was received on
+             * @custdesc         Secure Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_NCEX_MASTER,
+                                           RC_NCEX_MISMATCH_RECV_LINKS,
+                                           get_huid(i_mProcInfo.tgt),
+                                           FOUR_UINT16_TO_UINT64(
+                                             my_linkId,
+                                             my_mboxId,
+                                             actual_recv_linkId,
+                                             actual_recv_mboxId));
+
+            // Likely an issue with Processor or its bus
+            err->addHwCallout( i_mProcInfo.tgt,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DELAYED_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+
+
+            // @TODO RTC 184518 - Add bus callout
+            break;
+        }
 
     }
     if(err)
@@ -386,32 +672,35 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
  *         master processor on the master node
  *
  *  @param[in] i_mProcInfo - Information about Master Proc
- *  @param[in] i_obus_instances - Vector containing all of the OBUS connections
- *                                that the Master Proc of this slave node has.
- *                                One of these connections will be used by the
- *                                Master Proc on the Master Node to send
- *                                messages back and forth.
+ *  @param[in] i_obus_instance - OBUS connection that should pertain to the
+ *                               Master Proc on the master node that will send
+ *                               a message to Master Proc of this slave node
  *
  *  @return errlHndl_t Error log handle
  *  @retval nullptr Operation was successful
  *  @retval !nullptr Operation failed with valid error log
  */
 errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
-                                     const std::vector<obus_instances_t> &
-                                       i_obus_instances)
+                                     const obus_instances_t & i_obus_instance)
 {
     errlHndl_t err = nullptr;
 
     TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusExchangeSlave: mProc=0x%.08X "
-              "Looking for message from master node via %d obus connections",
-              get_huid(i_mProcInfo.tgt), i_obus_instances.size());
+              "Looking for message from master node via obus connection "
+              "n%d/p%d/obus%d",
+              get_huid(i_mProcInfo.tgt),
+              i_obus_instance.peerNodeInstance,
+              i_obus_instance.peerProcInstance,
+              i_obus_instance.peerObusInstance);
 
     do
     {
         // First Wait for Message From Master
-        uint64_t linkId = 0;
-        uint64_t mboxId = 0;
-        err = nodeCommAbusRecvMessage(i_mProcInfo,linkId,mboxId);
+        uint64_t actual_linkId = 0;
+        uint64_t actual_mboxId = 0;
+        err = nodeCommAbusRecvMessage(i_mProcInfo,
+                                      actual_linkId,
+                                      actual_mboxId);
         if (err)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeSlave: "
@@ -419,11 +708,74 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
            break;
         }
 
-        // @TODO RTC 184518 check that right node indicated itself as master
-        // and then use that value
+        // Check that right node indicated itself as master
+        uint8_t my_linkId = 0;
+        uint8_t my_mboxId = 0;
+        getSecureLinkMboxFromObus(i_obus_instance.myObusInstance,
+                                  my_linkId,
+                                  my_mboxId);
+
+        // Verify that actual receive link/mboxIds were the same as the
+        // expected ones
+        if ((actual_linkId != my_linkId) ||
+            (actual_mboxId != my_mboxId))
+        {
+            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeMaster: "
+                      "Expected Link (%d) Mbox (%d) IDs DO NOT Match the "
+                      "Actual Link (%d) Mbox (%d) IDs the message was "
+                      "received on",
+                       my_linkId, my_mboxId,
+                       actual_linkId, actual_mboxId);
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_NCEX_MISMATCH_RECV_LINKS
+             * @moduleid         MOD_NCEX_SLAVE
+             * @userdata1        Master Proc Target HUID
+             * @userdata2[0:15]  Expected Link Id to receive message on
+             * @userdata2[16:31] Expected Mailbox Id to receive message on
+             * @userdata2[32:47] Actual Link Id message was received on
+             * @userdata2[48:63] Actual Mailbox Id message was receiveed on
+             * @devdesc          Mismatch between expected and actual Link Mbox
+             *                   Ids a secure ABUS message was received on
+             * @custdesc         Secure Boot failure
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_NCEX_SLAVE,
+                                           RC_NCEX_MISMATCH_RECV_LINKS,
+                                           get_huid(i_mProcInfo.tgt),
+                                           FOUR_UINT16_TO_UINT64(
+                                             my_linkId,
+                                             my_mboxId,
+                                             actual_linkId,
+                                             actual_mboxId));
+
+            // Likely an issue with Processor or its bus
+            err->addHwCallout( i_mProcInfo.tgt,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::DELAYED_DECONFIG,
+                               HWAS::GARD_NULL );
+
+            // Or HB code failed to do the procedure correctly
+            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                     HWAS::SRCI_PRIORITY_MED);
+
+            // @TODO RTC 184518 - Add bus callout
+            break;
+        }
 
         // Send a message back to the master node
-        err =  nodeCommAbusSendMessage(i_mProcInfo, linkId, mboxId);
+        // Pass in expected peer linkId for nonce logging/extending purposes
+        uint8_t peer_linkId = 0;
+        uint8_t peer_mboxId = 0;
+        getSecureLinkMboxFromObus(i_obus_instance.peerObusInstance,
+                                  peer_linkId,
+                                  peer_mboxId);
+
+        err =  nodeCommAbusSendMessage(i_mProcInfo,
+                                       my_linkId,
+                                       my_mboxId,
+                                       peer_linkId);
         if (err)
         {
            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchangeSlave: "
@@ -451,6 +803,12 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
 errlHndl_t nodeCommAbusExchange(void)
 {
     errlHndl_t err = nullptr;
+
+#ifndef CONFIG_TPMDD
+    TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchange: Not running procedure "
+              "since CONFIG_TPMDD is not set");
+#else
+
 
     master_proc_info_t mProcInfo;
     std::vector<obus_instances_t> obus_instances;
@@ -490,7 +848,7 @@ errlHndl_t nodeCommAbusExchange(void)
                 my_round = count;
                 TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchange: "
                           "this node is position %d of %d total nodes "
-                          "(l_nodeId=%d, hb_existing_image=0x%X",
+                          "(l_nodeId=%d, hb_existing_image=0x%X)",
                           my_round, total_nodes, my_nodeid, hb_images );
                 break;
             }
@@ -524,7 +882,27 @@ errlHndl_t nodeCommAbusExchange(void)
                   "PHYS_PATH %s",
                   get_huid(mProcInfo.tgt),
                   l_phys_path_str);
-        // @TODO RTC 184518 Make An Error Log
+        /*@
+         * @errortype
+         * @reasoncode       RC_NCEX_INVALID_PHYS_PATH
+         * @moduleid         MOD_NCEX_MAIN
+         * @userdata1        Master Proc Target HUID
+         * @userdata2        <Unused>
+         * @devdesc          Master Proc's ATTR_PHYS_PATH is invalid as it
+         *                   doesn't have either a NODE or PROC elemenent
+         * @custdesc         Secure Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_NCEX_MAIN,
+                                       RC_NCEX_INVALID_PHYS_PATH,
+                                       get_huid(mProcInfo.tgt),
+                                       0,
+                                       true /*Add HB SW Callout*/ );
+
+        ERRORLOG::ErrlUserDetailsStringSet path;
+        path.add("mProc PHYS Entity Path", l_phys_path_str);
+        path.addToLog(err);
+
         break;
     }
     mProcInfo.nodeInstance = l_peMasterNode.instance;
@@ -629,14 +1007,14 @@ errlHndl_t nodeCommAbusExchange(void)
         l_obusInstance.peerNodeInstance = l_peNode.instance;
 
 
-        l_obusInstance.sendObusInstance = l_obusTgt->getAttr<ATTR_ORDINAL_ID>();
+        l_obusInstance.myObusInstance = l_obusTgt->getAttr<ATTR_ORDINAL_ID>();
 
         obus_instances.push_back(l_obusInstance);
         TRACFCOMP(g_trac_nc,"nodeCommAbusExchange: Using masterProc 0x%.08X "
                   "OBUS HUID 0x%.08X's peer path %s with obus_instance "
                   "send=%d, rcv/peer=n%d/p%d/obus%d (vector size=%d)",
                   get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
-                  l_peer_path_str, l_obusInstance.sendObusInstance,
+                  l_peer_path_str, l_obusInstance.myObusInstance,
                   l_obusInstance.peerNodeInstance,
                   l_obusInstance.peerProcInstance,
                   l_obusInstance.peerObusInstance, obus_instances.size());
@@ -647,12 +1025,47 @@ errlHndl_t nodeCommAbusExchange(void)
        (obus_instances.size() != (static_cast<uint32_t>(total_nodes)-1)))
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommAbusExchange: "
-                  "ERR: Invalid number of PEER_PATHs %d found when "
-                  "there are %d nodes in the system",
-                  obus_instances.size(), total_nodes);
-        // @TODO RTC 184518 Make An Error Log
+                  "ERR: Invalid number of PEER_PATHs %d found for proc=0x%.08X "
+                  "when there are %d nodes in the system",
+                  obus_instances.size(), get_huid(mProcInfo.tgt),
+                  total_nodes);
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_NCEX_INVALID_INSTANCE_COUNT
+         * @moduleid         MOD_NCEX_MAIN
+         * @userdata1        Master Proc Target HUID
+         * @userdata2[0:31]  Number of Valid OBUS Instances
+         * @userdata2[32:63] Total Number Of Nodes
+         * @devdesc          When processing the OBUS Peer paths, the wrong
+         *                   count of valid paths was found
+         * @custdesc         Secure Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_NCEX_MAIN,
+                                       RC_NCEX_INVALID_INSTANCE_COUNT,
+                                       get_huid(mProcInfo.tgt),
+                                       TWO_UINT32_TO_UINT64(
+                                         obus_instances.size(),
+                                         total_nodes),
+                                       true /*Add HB SW Callout*/ );
+
         break;
     }
+
+
+    // Master node should have lowest node number in vector of instance info.
+    // So sort here by node number and then only pass first instance to
+    // nodeCommAbusExchangeSlave() below.  Then when message is received it
+    // will be checked against the expected master instance.
+    std::sort(obus_instances.begin(),
+              obus_instances.end(),
+              [](obus_instances_t & lhs,
+                 obus_instances_t & rhs)
+    {
+        return lhs.peerNodeInstance < rhs.peerNodeInstance;
+    });
+
 
     // @TODO RTC 194053 - This won't work on simics until the action files
     // are there
@@ -675,7 +1088,9 @@ errlHndl_t nodeCommAbusExchange(void)
     }
     else
     {
-        err = nodeCommAbusExchangeSlave(mProcInfo,obus_instances);
+        // Only pass first instance, which should be master instance
+        err = nodeCommAbusExchangeSlave(mProcInfo,
+                                        obus_instances[0]);
         if (err)
         {
            TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchange: "
@@ -689,8 +1104,6 @@ errlHndl_t nodeCommAbusExchange(void)
         break;
     }
 
-
-
     } while( 0 );
 
     TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusExchange: "
@@ -701,6 +1114,7 @@ errlHndl_t nodeCommAbusExchange(void)
     {
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
     }
 
     if (l_phys_path_str != nullptr)
@@ -714,6 +1128,7 @@ errlHndl_t nodeCommAbusExchange(void)
         l_peer_path_str = nullptr;
     }
 
+#endif
 
     return err;
 
