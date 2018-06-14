@@ -161,7 +161,7 @@ constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b0000011 = 0b0000011;
 constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0b011 = 0b011;
-constexpr uint64_t literal_0b00011000010 = 0b00011000010;
+constexpr uint64_t literal_0b00000000000 = 0b00000000000;
 constexpr uint64_t literal_0b0001100000 = 0b0001100000;
 constexpr uint64_t literal_0b0001000000 = 0b0001000000;
 constexpr uint64_t literal_0b0000110000 = 0b0000110000;
@@ -6358,7 +6358,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<20, 10, 53, uint64_t>(literal_0b00011000010 );
+                l_scom_buffer.insert<20, 10, 53, uint64_t>(literal_0b00000000000 );
             }
 
             if (literal_1)
@@ -6410,7 +6410,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<19, 11, 53, uint64_t>(literal_0b00011000010 );
+                l_scom_buffer.insert<19, 11, 53, uint64_t>(literal_0b00000000000 );
             }
 
             if ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0))
