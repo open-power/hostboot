@@ -40,6 +40,7 @@
 #include <pnor/pnorif.H>
 #include <string.h>
 #include <devicefw/userif.H>
+#include <devicefw/driverif.H>
 #include <pnor/ecc.H>
 #include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
@@ -501,7 +502,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 TARGETING::Target* pnor_target =
                     TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-                //search cv_EYECATHCER for partitionname
+                //search cv_EYECATCHER for partitionname
                 l_id = find_sectionId(i_partitionName);
                 if (l_id == PNOR::INVALID_SECTION)
                 {
@@ -575,7 +576,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 TARGETING::Target* pnor_target =
                     TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-                //search cv_EYECATHCER for partitionname
+                //search cv_EYECATCHER for partitionname
                 l_id = find_sectionId(i_partitionName);
                 if (l_id == PNOR::INVALID_SECTION)
                 {
@@ -840,12 +841,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                   }
 
                   uint32_t* l_data =
-                             (uint32_t*) &(l_req_fw_msg->generic_msg.data);
+                         (uint32_t*) &(l_req_fw_msg->generic_msg.data);
                   TRACFCOMP(g_trac_hbrt,
-                      "rt_firmware_request for VPD Write Msg request: "
-                      "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
-                      "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
-                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
+                      "rt_firmware_request request: "
+                      "type:%d, magic:0x%.8X, dataSize:%d, "
+                      "structVer:0x%.8X, seqnum:%d, msgq:0x%.8X, "
+                      "msgType:0x%.8X, __req:%d, __onlyError:%d, "
+                      "data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
                       l_req_fw_msg->io_type,
                       l_req_fw_msg->generic_msg.magic,
                       l_req_fw_msg->generic_msg.dataSize,
@@ -859,34 +861,121 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       l_data[0],
                       l_data[1]);
 
-                  // random testing data
-                  struct
-                  {
-                     uint32_t plid;
-                     uint32_t huid;
-                  } l_resp_data;
+                  // Simple map of SCOM addresses to values, this ignores
+                  // the target (or huid).
+                  static std::map<uint64_t, uint64_t> l_scomCache;
+
+                  // Used to give unique, spoofed SCOM values
+                  static uint64_t l_fakeVal = 0x11;
+
+                  // Simulate response message from FSP
                   l_resp_fw_msg->io_type =
                                      hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP;
-                  l_resp_fw_msg->generic_msg.magic = 0x10;
-                  l_resp_fw_msg->generic_msg.dataSize =
-                                     sizeof(l_resp_fw_msg->generic_msg);
-                  l_resp_fw_msg->generic_msg.structVer = 0x2;
-                  l_resp_fw_msg->generic_msg.seqnum = 0x30;
-                  l_resp_fw_msg->generic_msg.msgq = 0x40;
-                  l_resp_fw_msg->generic_msg.msgType = 0x50;
+                  l_resp_fw_msg->generic_msg.magic =
+                                         GenericFspMboxMessage_t::MAGIC_NUMBER;
+                  l_resp_fw_msg->generic_msg.structVer =
+                                           l_req_fw_msg->generic_msg.structVer;
+                  l_resp_fw_msg->generic_msg.seqnum =
+                                          l_req_fw_msg->generic_msg.seqnum + 1;
+                  l_resp_fw_msg->generic_msg.msgq =
+                                                l_req_fw_msg->generic_msg.msgq;
+                  l_resp_fw_msg->generic_msg.msgType =
+                                             l_req_fw_msg->generic_msg.msgType;
                   l_resp_fw_msg->generic_msg.__req =
-                                        GenericFspMboxMessage_t::RESPONSE;
+                                             GenericFspMboxMessage_t::RESPONSE;
                   l_resp_fw_msg->generic_msg.__onlyError =
-                                  GenericFspMboxMessage_t::NOT_ERROR_ONLY;
-                  l_resp_data.plid = 0x60;
-                  l_resp_data.huid = 0x70;
-                  memcpy(&(l_resp_fw_msg->generic_msg.data),
-                         &(l_resp_data),
-                         sizeof(l_resp_fw_msg->generic_msg.data));
-                  retVal = 5;
+                                       GenericFspMboxMessage_t::NOT_ERROR_ONLY;
+                  switch (l_req_fw_msg->generic_msg.msgType)
+                  {
+                      case GenericFspMboxMessage_t::MSG_SINGLE_SCOM_OP:
+                      {
+                          SingleScomOpHbrtFspData_t* l_req_fspData =
+                                   reinterpret_cast<SingleScomOpHbrtFspData_t*>
+                                          (&(l_req_fw_msg->generic_msg.data));
+                          SingleScomOpHbrtFspData_t* l_resp_fspData =
+                                   reinterpret_cast<SingleScomOpHbrtFspData_t*>
+                                          (&(l_resp_fw_msg->generic_msg.data));
+
+                          l_resp_fw_msg->generic_msg.dataSize =
+                                           GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE +
+                                           sizeof(SingleScomOpHbrtFspData_t);
+
+                          auto l_scomAddr = l_req_fspData->scom_addr;
+                          auto targ = l_scomCache.find(l_scomAddr);
+                          if (targ == l_scomCache.end()) // need to create
+                          {                              // a cache entry
+                              l_scomCache[l_scomAddr] = l_fakeVal++;
+                          }
+
+                          l_resp_fspData->scom_op   = l_req_fspData->scom_op;
+                          l_resp_fspData->huid      = l_req_fspData->huid;
+                          l_resp_fspData->scom_addr = l_req_fspData->scom_addr;
+                          if (l_resp_fspData->scom_op == DeviceFW::WRITE)
+                          {
+                              l_scomCache[l_scomAddr] =
+                                                      l_req_fspData->scom_data;
+                          }
+                          l_resp_fspData->scom_data = l_scomCache[l_scomAddr];
+                          retVal = 0;
+                          break;
+                      }
+                      case GenericFspMboxMessage_t::MSG_MULTI_SCOM_OP:
+                      {
+                          MultiScomReadHbrtFspData_t* l_req_fspData =
+                                  reinterpret_cast<MultiScomReadHbrtFspData_t*>
+                                          (&(l_req_fw_msg->generic_msg.data));
+                          MultiScomReadHbrtFspData_t* l_resp_fspData =
+                                  reinterpret_cast<MultiScomReadHbrtFspData_t*>
+                                          (&(l_resp_fw_msg->generic_msg.data));
+
+                          l_resp_fw_msg->generic_msg.dataSize =
+                            GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE +
+                            sizeof(MultiScomReadHbrtFspData_t) +
+                            ((l_req_fspData->scom_num - 1) * sizeof(uint64_t));
+
+                          auto l_scomAddrs =
+                                    static_cast<uint64_t *>
+                                                 (&l_req_fspData->scom_data);
+                          auto l_scomData =
+                                    static_cast<uint64_t *>
+                                                 (&l_resp_fspData->scom_data);
+
+                          l_resp_fspData->huid      = l_req_fspData->huid;
+                          l_resp_fspData->scom_num  = l_req_fspData->scom_num;
+                          for (int i = 0;i < l_resp_fspData->scom_num;++i)
+                          {
+                              auto targ = l_scomCache.find(l_scomAddrs[i]);
+                              if (targ == l_scomCache.end()) // need to create
+                              {                              // a cache entry
+                                  l_scomCache[l_scomAddrs[i]] = l_fakeVal++;
+                              }
+                              l_scomData[i] = l_scomCache[l_scomAddrs[i]];
+                          }
+                          retVal = 0;
+                          break;
+                      }
+                      default:
+                          // random testing data
+                          struct
+                          {
+                             uint32_t plid;
+                             uint32_t huid;
+                          } l_resp_data;
+
+                          l_resp_fw_msg->generic_msg.dataSize =
+                                            sizeof(l_resp_fw_msg->generic_msg);
+
+                          l_resp_data.plid = 0x60;
+                          l_resp_data.huid = 0x70;
+                          memcpy(&(l_resp_fw_msg->generic_msg.data),
+                                 &(l_resp_data),
+                                 sizeof(l_resp_fw_msg->generic_msg.data));
+                          retVal = 5;
+                          break;
+                  }
 
                   TRACFCOMP(g_trac_hbrt,
-                      "rt_firmware_request for VPD Write Msg response: "
+                      "rt_firmware_request response: "
                       "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
                       "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
                       "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
@@ -908,8 +997,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                else
                {
                   TRACFCOMP(g_trac_hbrt,
-                      "rt_firmware_request an unrecognized request: "
-                      "type:%d", l_req_fw_msg->io_type);
+                      "rt_firmware_request: unrecognized request, type=%d",
+                      l_req_fw_msg->io_type);
                }
             } while (0) ;
 
