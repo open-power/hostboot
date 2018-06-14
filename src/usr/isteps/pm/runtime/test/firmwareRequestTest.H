@@ -78,7 +78,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             if (rc != 1)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
-                        "firware_request - hcode update failed - "
+                        "firmware_request - hcode update failed - "
                         "returned wrong value");
             }
 
@@ -86,14 +86,14 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
-                        "firware_request - hcode update failed - "
+                        "firmware_request - hcode update failed - "
                         "received incorrect msg_type");
             }
 
             if (l_resp_fw_msg.resp_generic.o_status != 264)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHcodeUpdate: "
-                        "firware_request - hcode update failed - "
+                        "firmware_request - hcode update failed - "
                         "received incorrect resp");
             }
         }  // end else
@@ -142,7 +142,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             if (rc != 0)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestErrLogToFsp: "
-                        "firware_request - error log failed - "
+                        "firmware_request - error log failed - "
                         "returned wrong value");
             }
 
@@ -150,14 +150,14 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestErrLogToFsp: "
-                        "firware_request - error log failed - "
+                        "firmware_request - error log failed - "
                         "received incorrect msg_type");
             }
 
             if (l_resp_fw_msg.resp_generic.o_status != 20)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestErrLogToFsp: "
-                        "firware_request - error log failed - "
+                        "firmware_request - error log failed - "
                         "received incorrect resp");
             }
         }  // end else
@@ -309,7 +309,8 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect msg_type");
             }
 
-            if (l_resp_fw_msg->generic_msg.magic != 0x10)
+            if (l_resp_fw_msg->generic_msg.magic !=
+                                GenericFspMboxMessage_t::MAGIC_NUMBER)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
                         "firmware_request - HBRT to FSP failed - "
@@ -323,45 +324,45 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "received incorrect datSize");
             }
 
-            if (l_resp_fw_msg->generic_msg.structVer != 0x02)
+            if (l_resp_fw_msg->generic_msg.structVer != 0x020)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect structVer");
             }
 
-            if (l_resp_fw_msg->generic_msg.seqnum != 0x30)
+            if (l_resp_fw_msg->generic_msg.seqnum != 0x301)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
                         "firmware_request - HBRT to FSP failed - "
                         "received incorrect seqnum");
             }
 
-            if (l_resp_fw_msg->generic_msg.msgq != 0x40)
+            if (l_resp_fw_msg->generic_msg.msgq != 0x400)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
-                        "firware_request - HBRT to FSP failed - "
+                        "firmware_request - HBRT to FSP failed - "
                         "received incorrect msgq");
             }
 
-            if (l_resp_fw_msg->generic_msg.msgType != 0x50)
+            if (l_resp_fw_msg->generic_msg.msgType != 0x500)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
-                        "firware_request - HBRT to FSP failed - "
+                        "firmware_request - HBRT to FSP failed - "
                         "received incorrect msgType");
             }
 
             if (l_resp_fw_msg->generic_msg.data >> 32 != 0x60)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
-                        "firware_request - HBRT to FSP failed - "
+                        "firmware_request - HBRT to FSP failed - "
                         "received incorrect errPlid");
             }
 
             if ((0x0000FFFF & l_resp_fw_msg->generic_msg.data) != 0x70)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
-                        "firware_request - HBRT to FSP failed - "
+                        "firmware_request - HBRT to FSP failed - "
                         "received incorrect huid");
             }
 
