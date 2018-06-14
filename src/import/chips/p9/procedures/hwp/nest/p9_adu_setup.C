@@ -55,6 +55,7 @@ extern "C"
                                    uint32_t& o_numGranules)
     {
         //return code
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         uint32_t num_attempts = 1;
         bool lock_pick = false;
 
@@ -129,9 +130,12 @@ extern "C"
 
     fapi_try_exit:
 
+        l_rc = fapi2::current_err;
+        FAPI_DBG("Error to return : %08X", (uint64_t) l_rc);
+
         //if an error has occurred, ADU is dirty, and instructed to clean up,
         //attempt to reset ADU and free lock (propogate rc of original fail)
-        if (fapi2::current_err && adu_is_dirty && !adu_leave_dirty)
+        if (l_rc && adu_is_dirty && !adu_leave_dirty)
         {
             (void) p9_adu_coherent_utils_reset_adu(i_target);
             (void) p9_adu_coherent_manage_lock(i_target, false, false, num_attempts);
@@ -140,15 +144,15 @@ extern "C"
         //Append the input data to an error if we got an error back
 #ifndef __PPE__
 
-        if (fapi2::current_err)
+        if (l_rc)
         {
             p9_adu_coherent_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
         }
 
 #endif
 
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
+        FAPI_DBG("Exiting with return code : %08X...", (uint64_t) l_rc);
+        return l_rc;
     }
 
 } // extern "C"
