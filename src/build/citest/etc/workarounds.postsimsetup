@@ -40,3 +40,6 @@ cp $BACKING_BUILD/src/simu/data/cec-chip/p9c.act $sb/simu/data/cec-chip
 cp $BACKING_BUILD/src/simu/data/cec-chip/p9n.act $sb/simu/data/cec-chip
 patch -p0 $sb/simu/data/cec-chip/p9c.act $PROJECT_ROOT/src/build/citest/etc/patches/p9c.act.iovalid.patch
 patch -p0 $sb/simu/data/cec-chip/p9n.act $PROJECT_ROOT/src/build/citest/etc/patches/p9n.act.iovalid.patch
+
+# Pull in Centaur action file changes to support Centaur security
+sbex -t 1058651
