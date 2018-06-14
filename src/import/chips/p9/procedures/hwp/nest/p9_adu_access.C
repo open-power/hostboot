@@ -65,6 +65,7 @@ extern "C" {
 
         bool l_busyBitStatus = false;
         adu_status_busy_handler l_busyHandling;
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // mark HWP entry
         FAPI_DBG("Entering ...\n");
@@ -147,8 +148,11 @@ extern "C" {
 
     fapi_try_exit:
 
+        l_rc = fapi2::current_err;
+        FAPI_DBG("Error to return : %08X", (uint64_t) l_rc);
+
         //If there is an error and we want to cleanup the ADU
-        if ( fapi2::current_err && l_myAduFlag.getOperFailCleanup() )
+        if ( l_rc && l_myAduFlag.getOperFailCleanup() )
         {
             //reset the ADU
             (void) p9_adu_coherent_utils_reset_adu(i_target);
@@ -160,16 +164,16 @@ extern "C" {
         //Append the input data to an error if we got an error back
 #ifndef __PPE__
 
-        if (fapi2::current_err)
+        if (l_rc)
         {
-            p9_adu_coherent_append_input_data(i_address, i_rnw, i_flags, fapi2::current_err);
+            p9_adu_coherent_append_input_data(i_address, i_rnw, i_flags, l_rc);
         }
 
 #endif
 
-        FAPI_DBG("Exiting...");
+        FAPI_DBG("Exiting with return code : %08X...", (uint64_t) l_rc);
         //Return the error that we got from up above
-        return fapi2::current_err;
+        return l_rc;
     }
 
 } // extern "C"
