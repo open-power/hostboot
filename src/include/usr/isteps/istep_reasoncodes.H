@@ -54,7 +54,7 @@ namespace ISTEP
         MOD_PM_LOAD_HOST_DATA_TO_SRAM                     = 0x12,
         MOD_VOLTAGE_CONFIG                                = 0x13,
         MOD_PM_VERIFY_OCC_CHKPT                           = 0x14,
-        MOD_UPDATE_REDUNDANT_TPM                          = 0x15,
+        MOD_VALIDATE_SECURITY_SETTINGS                    = 0x15,
         MOD_PROC_EXIT_CACHE_CONTAINED                     = 0x16,
         MOD_SBE_PERFORM_UPDATE_CHECK                      = 0x1A,
         MOD_SET_IPL_PARMS                                 = 0x1D,
@@ -127,6 +127,8 @@ namespace ISTEP
         RC_ULTRA_TURBO_FREQ_MISMATCH             = ISTEP_COMP_ID | 0x45,
         RC_NEST_FREQ_MISMATCH                    = ISTEP_COMP_ID | 0x46,
         RC_NO_VALID_MEM_CONFIG                   = ISTEP_COMP_ID | 0x47,
+        RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL      = ISTEP_COMP_ID | 0x48,
+        RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL       = ISTEP_COMP_ID | 0x49,
     };
 
 };
