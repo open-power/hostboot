@@ -186,8 +186,6 @@ public:
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
       uint64_t fails = 0;
       uint64_t total = 0;
-#if 0 // removing this test from runtime because HB doesn't have any FSI SCOM
-      // access during runtime (except through FSP)
       errlHndl_t l_err = NULL;
 
       // Setup some targets to use
@@ -351,7 +349,6 @@ public:
           }
       }
 
-#endif
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> %d/%d fails", fails, total );
   }
 
