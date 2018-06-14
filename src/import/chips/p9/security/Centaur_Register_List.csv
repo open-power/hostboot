@@ -1,11 +1,6 @@
 #Register Address,WAND,WOR,Init/Expected Value,Mask Value,
 1000000,1000004,1000005,7001900000000003,,
-# @TODO: CQ SW431769
-# Some bits (see mask) are not tracking as expected
-2000000,2000004,2000005,7001900000000003,FFFE7FFFFFFFFFFD,
-# @TODO: CQ SW431769
-# This is a FIR register and bits randomly pop on, making caching unreliable
-#2010800,2010801,2010802,0000400000000000,,
+2000000,2000004,2000005,7001900000000003,,
 2010803,2010804,2010805,FFFFFFE000000000,,
 2010C42,,,,,
 201140A,,,,,
@@ -38,31 +33,15 @@
 2012300,,,0000A00000000000,,
 201230B,,,,,
 2030000,,,,,
-# @TODO: CQ SW431769
-# 0:1 CLOCK_CMD masked off because it auto-resets to 0
-# Right now mask those bits off for the comparison, but consider
-# modeling the auto reset behavior
+# Bits 0:1 (CLOCK_CMD) masked off because they auto-reset to 0
 2030006,,,0FE00E0000000000,3FFFFFFFFFFFFFFF,
 2030007,,,,,
-# @TODO: CQ SW431769
-# Enabling causes 2011882 to report wrongly for some reason
-#20F0012,20F0013,20F0014,4016620000000000,3FFFBDFFFFFFFFFF,
-# @TODO: CQ SW431769
-# This is broken, needs more attention
-#3000000,3000004,3000005,7001900000000003,,
+20F0012,20F0013,20F0014,8016200000000000,,
+3000000,3000004,3000005,7001900000000003,,
 3010414,,,7FFFFFFFFFFFD7FF,,
 3010415,,,BFFFFFFFFFFFEFFF,,
 3010433,,,8484212100000000,,
 301060A,,,,,
-# @TODO: CQ SW431769
-# First 2 bits reset by HW without SW knowledge
-# So need to either let the HW read through for these bits, or
-# ignore the register
-#301060B,,,,3FFFFFFFFFFFFFFF,
-# @TODO: CQ SW431769
-# Expected value is way off from actual value for
-# unknown reasons.  Fix or ignore the register
-#301060D,,,,,
 301060E,,,,,
 301060F,,,,,
 3010614,,,FFE0000000000000,,
@@ -119,11 +98,6 @@
 3010651,,,,,
 3010652,,,,,
 3010653,,,,,
-# @TODO: CQ SW431769
-# First 2 bits reset by HW without SW knowledge
-# So need to either let the HW read through for these bits, or
-# ignore the register
-#30106A5,,,,3FFFFFFFFFFFFFFF,
 30106A7,,,0000000400000000,,
 30106BE,,,,,
 30106BF,,,,,
@@ -139,7 +113,4 @@
 3012300,,,0000A00000000000,,
 301230B,,,,,
 3030000,,,,,
-# @TODO: CQ SW431769
-# Enabling this register causes failing
-# behavior for 303000
-#30F0012,30F0013,30F0014,,,
+30F0012,30F0013,30F0014,8016200000000000,,
