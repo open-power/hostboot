@@ -192,8 +192,13 @@ namespace HTMGT
         uint8_t cmdData[2];
         cmdData[0] = OCC_RESET_CMD_VERSION;
 
-        TMGT_INF("resetPrep: OCC%d (failed=%c, reset count=%d)",
-                 iv_instance, iv_failed?'y':'n', iv_resetCount);
+        TMGT_INF("resetPrep: OCC%d (failed=%c, reset count=%d)"
+                 " reset reason=0x%x",
+                 iv_instance,
+                 iv_failed?'y':'n',
+                 iv_resetCount,
+                 iv_resetReason);
+
         if(iv_failed)
         {
             cmdData[1] = OCC_RESET_FAIL_THIS_OCC;

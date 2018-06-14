@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,7 @@ namespace HTMGT
     enum internalFlagTypes
     {
         FLAG_HALT_ON_OCC_SRC       = 0x00800000, // Prevent resets after SRC
+        FLAG_WOF_RESET_DISABLED    = 0x00001000, // Disable ONLY WOF resets
         FLAG_DISABLE_MEM_CONFIG    = 0x00000800, // Disable sending mem config
         FLAG_HALT_ON_RESET_FAIL    = 0x00000100, // Stop additional resets
         FLAG_EXT_RESET_DISABLED    = 0x00000080, // Ignore opal-prd/BMC resets
