@@ -207,7 +207,7 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
         if (i_rc==RC_PROC_SECURITY_STATE_MISMATCH)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    ERR_MRK"handleProcessorSecurityError: processor state does match master for processor tgt=0x%X",
+                    ERR_MRK"handleProcessorSecurityError: processor state doesn't match master for processor tgt=0x%X",
                     TARGETING::get_huid(i_pProc));
 
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -243,14 +243,16 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
         i_rc==RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL?"Master primary hash read":
         i_rc==RC_MASTER_PROC_BACKUP_HASH_READ_FAIL?"Master backup hash read":
         i_rc==RC_MASTER_PROC_CBS_CONTROL_READ_FAIL?"Master CBS control read":
+        i_rc==RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL?"Master get SBE boot Seeprom":
         i_rc==RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL?"Slave primary hash read":
         i_rc==RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL?"Slave backup hash read":
         i_rc==RC_SLAVE_PROC_CBS_CONTROL_READ_FAIL?"Slave CBS control read":
+        i_rc==RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL?"Slave get SBE Boot Seeprom":
         "unknown");
     }
 
     auto err = new ERRORLOG::ErrlEntry(l_severity,
-                ISTEP::MOD_UPDATE_REDUNDANT_TPM,
+                ISTEP::MOD_VALIDATE_SECURITY_SETTINGS,
                 i_rc,
                 TARGETING::get_huid(i_pProc),
                 TO_UINT64(i_mismatches.val),
@@ -295,7 +297,7 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
     }
 
     // save off reason code before committing
-    auto l_reason = err->reasonCode();
+    const auto l_reason = err->reasonCode();
 
     ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
@@ -399,7 +401,7 @@ void validateSecuritySettings()
                 TARGETING::get_huid(l_tpm));
 
             // save the plid from the error before commiting
-            auto plid = err->plid();
+            const auto plid = err->plid();
 
             ERRORLOG::ErrlUserDetailsTarget(*pProcItr).addToLog(err);
 
@@ -409,7 +411,7 @@ void validateSecuritySettings()
             /*@
              * @errortype
              * @reasoncode       ISTEP::RC_UPDATE_SECURITY_CTRL_HWP_FAIL
-             * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+             * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @userdata1        Processor Target
              * @userdata2        TPM Target
@@ -419,7 +421,7 @@ void validateSecuritySettings()
              * @custdesc         Platform security problem detected
             */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                ISTEP::MOD_UPDATE_REDUNDANT_TPM,
+                ISTEP::MOD_VALIDATE_SECURITY_SETTINGS,
                 ISTEP::RC_UPDATE_SECURITY_CTRL_HWP_FAIL,
                 TARGETING::get_huid(*pProcItr),
                 TARGETING::get_huid(l_tpm),
@@ -468,6 +470,17 @@ void validateSecuritySettings()
 
     uint64_t l_mainCbs = 0;
 
+    // we need to know if we're in manufacturing mode to do some logic later
+    TARGETING::Target* sys = nullptr;
+    (void) targetService().getTopLevelTarget(sys);
+    assert(sys, "validateSecuritySettings() system target is null");
+    const auto mnfg_flags = sys->getAttr<ATTR_MNFG_FLAGS>();
+    bool mnfg_mode = false;
+    if(mnfg_flags & MNFG_FLAG_SRC_TERM)
+    {
+        mnfg_mode = true;
+    }
+
     // a list of hashes we will be using to match primary to backups and
     // masters to slaves
     std::vector<HashNode> l_hashes;
@@ -495,7 +508,7 @@ void validateSecuritySettings()
     if (err)
     {
         // if this happens we are in big trouble
-        auto rc = err->reasonCode();
+        const auto rc = err->reasonCode();
         ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
             "Terminating because future security cannot be guaranteed.");
@@ -508,13 +521,13 @@ void validateSecuritySettings()
     err = SECUREBOOT::getProcCbsControlRegister(l_mainCbs, mProc);
     if (err)
     {
-        auto plid = err->plid();
+        const auto plid = err->plid();
         ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
         /*@
          * @errortype
          * @reasoncode       ISTEP::RC_MASTER_PROC_CBS_CONTROL_READ_FAIL
-         * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+         * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
          * @userdata1        Master Processor Target
          * @devdesc          Unable to read the master processor CBS control
          *                   register
@@ -528,62 +541,120 @@ void validateSecuritySettings()
         break;
     }
 
+    SBE::sbeSeepromSide_t bootSide = SBE::SBE_SEEPROM_INVALID;
+    err = SBE::getSbeBootSeeprom(mProc, bootSide);
+    if (err)
+    {
+        const auto plid = err->plid();
+        ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL
+         * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+         * @userdata1        Master Processor Target
+         * @devdesc          Unable to get the master SBE boot seeprom side
+         *
+         * @custdesc         Platform security problem detected
+         */
+        handleProcessorSecurityError(mProc,
+                              ISTEP::RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL,
+                              l_hashes,
+                              plid,
+                              false); // stop IPL and deconfig processor
+        break;
+    }
+
+    bool primaryReadFailAllowed = false;
+
     // read the primary sbe HW keys' hash for the master processor
     err = SBE::getHwKeyHashFromSbeImage(
                                      mProc,
                                      EEPROM::SBE_PRIMARY,
                                      l_masterHash);
+
     if (err)
     {
-        auto plid = err->plid();
-        ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+        if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
+        {
+            primaryReadFailAllowed = true;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master primary HW SBE Keys' hash from seeprom 0. Ignoring the error since we didn't boot from that seeprom");
+            err->collectTrace(ISTEP_COMP_NAME);
+            ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+        }
+        else
+        {
+            const auto plid = err->plid();
+            ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP::RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL
-         * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
-         * @userdata1        Master Processor Target
-         * @devdesc          Unable to read the master processor primary hash
-         *                   from the SBE
-         * @custdesc         Platform security problem detected
-         */
-        handleProcessorSecurityError(mProc,
+            /*@
+             * @errortype
+             * @reasoncode      ISTEP::RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL
+             * @moduleid        ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+             * @userdata1       Master Processor Target
+             * @devdesc         Unable to read the master processor primary hash
+             *                  from the SBE
+             * @custdesc         Platform security problem detected
+             */
+            handleProcessorSecurityError(mProc,
                                   ISTEP::RC_MASTER_PROC_PRIMARY_HASH_READ_FAIL,
                                   l_hashes,
                                   plid,
                                   false); // stop IPL and deconfig processor
+        }
     }
+
+    bool backupReadFailAllowed = false;
 
     // read the backup sbe HW keys' hash for the master processor
     err = SBE::getHwKeyHashFromSbeImage(
                                       mProc,
                                       EEPROM::SBE_BACKUP,
                                       l_backupHash);
+
     if (err)
     {
-        auto plid = err->plid();
-        ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+        if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)
+        {
+            backupReadFailAllowed = true;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the master backup HW SBE Keys' hash from seeprom 1. Ignoring the error since we didn't boot from that seeprom");
+            err->collectTrace(ISTEP_COMP_NAME);
+            ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+        }
+        else
+        {
+            const auto plid = err->plid();
+            ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
-        /*@
-         * @errortype
-         * @reasoncode       ISTEP::RC_MASTER_PROC_BACKUP_HASH_READ_FAIL
-         * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
-         * @userdata1        Processor Target
-         * @devdesc          Unable to read the master processor backup hash
-         *                   from the SBE
-         * @custdesc         Platform security problem detected
-         */
-        handleProcessorSecurityError(mProc,
+            /*@
+             * @errortype
+             * @reasoncode       ISTEP::RC_MASTER_PROC_BACKUP_HASH_READ_FAIL
+             * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+             * @userdata1        Processor Target
+             * @devdesc          Unable to read the master processor backup hash
+             *                   from the SBE
+             * @custdesc         Platform security problem detected
+             */
+            handleProcessorSecurityError(mProc,
                                   ISTEP::RC_MASTER_PROC_BACKUP_HASH_READ_FAIL,
                                   l_hashes,
                                   plid,
                                   false); // stop IPL and deconfig processor
-        break;
+            break;
+        }
     }
 
     // make sure the master processor primary and backup SBE HW keys' hashes
-    // match each other
-    if (memcmp(l_masterHash,l_backupHash, SHA512_DIGEST_LENGTH)!=0)
+    // match each other.
+    if (primaryReadFailAllowed)
+    {
+        memcpy(l_masterHash, l_backupHash, SHA512_DIGEST_LENGTH);
+    }
+    else if (backupReadFailAllowed)
+    {
+        memcpy(l_backupHash, l_masterHash, SHA512_DIGEST_LENGTH);
+    }
+    else if(memcmp(l_masterHash,l_backupHash, SHA512_DIGEST_LENGTH)!=0)
     {
         // add only the hashes relevant to the error to hashes vector
         l_hashes.push_back(l_master);
@@ -593,7 +664,7 @@ void validateSecuritySettings()
         /*@
          * @errortype
          * @reasoncode       ISTEP::RC_MASTER_PROC_SBE_KEYS_HASH_MISMATCH
-         * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+         * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
          * @severity         ERRL_SEV_UNRECOVERABLE
          * @userdata1        Master Processor Target
          * @devdesc          The primary SBE HW Keys' hash does not match the
@@ -630,13 +701,13 @@ void validateSecuritySettings()
         err = SECUREBOOT::getProcCbsControlRegister(l_procCbs, pProc);
         if (err)
         {
-            auto plid = err->plid();
+            const auto plid = err->plid();
             ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
             /*@
              * @errortype
              * @reasoncode       ISTEP::RC_SLAVE_PROC_CBS_CONTROL_READ_FAIL
-             * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+             * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
              * @userdata1        Slave Processor Target
              * @devdesc          Unable to read the slave processor CBS control
              *                   register
@@ -651,32 +722,72 @@ void validateSecuritySettings()
             continue;
         }
 
-        // read the primary sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeImage(
-                                         pProc,
-                                         EEPROM::SBE_PRIMARY,
-                                         l_slaveHashPri);
+        bootSide = SBE::SBE_SEEPROM_INVALID;
+        err = getSbeBootSeeprom(pProc, bootSide, false);
         if (err)
         {
-            auto plid = err->plid();
+            const auto plid = err->plid();
             ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
             /*@
              * @errortype
-             * @reasoncode       ISTEP::RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL
-             * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+             * @reasoncode       ISTEP::RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL
+             * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
              * @userdata1        Slave Processor Target
-             * @devdesc          Unable to read the slave processor primary
-             *                   hash from the SBE
+             * @devdesc          Unable to get the slave SBE boot seeprom side
+             *
              * @custdesc         Platform security problem detected
              */
             handleProcessorSecurityError(pProc,
-                                  ISTEP::RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL,
+                                  ISTEP::RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL,
                                   l_hashes,
                                   plid,
                                   true); // deconfigure proc and move on
             continue;
         }
+
+        bool skipPrimaryMatch = false;
+
+        // read the primary sbe HW keys' hash for the current processor
+        err = SBE::getHwKeyHashFromSbeImage(
+                                         pProc,
+                                         EEPROM::SBE_PRIMARY,
+                                         l_slaveHashPri);
+
+        if (err)
+        {
+
+            if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
+            {
+                skipPrimaryMatch = true;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash from seeprom 0, HUID:0x%.8X. Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
+                err->collectTrace(ISTEP_COMP_NAME);
+                ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                const auto plid = err->plid();
+                ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP::RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL
+                 * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+                 * @userdata1        Slave Processor Target
+                 * @devdesc          Unable to read the slave processor primary
+                 *                   hash from the SBE
+                 * @custdesc         Platform security problem detected
+                 */
+                handleProcessorSecurityError(pProc,
+                                  ISTEP::RC_SLAVE_PROC_PRIMARY_HASH_READ_FAIL,
+                                  l_hashes,
+                                  plid,
+                                  true); // deconfigure proc and move on
+                continue;
+            }
+        }
+
+        bool skipBackupMatch = false;
 
         // read the backup sbe HW keys' hash for the current processor
         err = SBE::getHwKeyHashFromSbeImage(
@@ -685,25 +796,35 @@ void validateSecuritySettings()
                                          l_slaveHashBac);
         if (err)
         {
-            auto plid = err->plid();
-            ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+            if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)
+            {
+                skipBackupMatch = true;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "It's a non-mnfg boot and we failed to read the HW SBE Keys' hash from seeprom 1, HUID:0x%.8X Ignoring the error since we didn't boot from that seeprom", TARGETING::get_huid(pProc));
+                err->collectTrace(ISTEP_COMP_NAME);
+                ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                const auto plid = err->plid();
+                ERRORLOG::errlCommit(err, ISTEP_COMP_ID);
 
-            /*@
-             * @errortype
-             * @reasoncode       ISTEP::RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL
-             * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
-             * @userdata1        Slave Processor Target
-             * @devdesc          Unable to read the slave processor backup
-             *                   hash from the SBE
-             * @custdesc         Platform security problem detected
-             */
-            handleProcessorSecurityError(pProc,
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP::RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL
+                 * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+                 * @userdata1        Slave Processor Target
+                 * @devdesc          Unable to read the slave processor backup
+                 *                   hash from the SBE
+                 * @custdesc         Platform security problem detected
+                 */
+                handleProcessorSecurityError(pProc,
                                   ISTEP::RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL,
                                   l_hashes,
                                   plid,
                                   true); // deconfigure proc and move on
 
-            continue;
+                continue;
+            }
         }
 
         // If the current processor has a key or SAB mismatch
@@ -722,14 +843,20 @@ void validateSecuritySettings()
                  (SECUREBOOT::ProcCbsControl::JumperStateBit & l_procCbs);
 
         // primary sbe hash mismatch
-        l_mismatches.primis = memcmp(l_slaveHashPri,
-                             l_masterHash,
-                             SHA512_DIGEST_LENGTH) != 0;
+        if (!skipPrimaryMatch)
+        {
+            l_mismatches.primis = memcmp(l_slaveHashPri,
+                                         l_masterHash,
+                                         SHA512_DIGEST_LENGTH) != 0;
+        }
 
         // backup sbe hash mismatch
-        l_mismatches.bacmis = memcmp(l_slaveHashBac,
-                             l_masterHash,
-                             SHA512_DIGEST_LENGTH) != 0;
+        if (!skipBackupMatch)
+        {
+            l_mismatches.bacmis = memcmp(l_slaveHashBac,
+                                         l_masterHash,
+                                         SHA512_DIGEST_LENGTH) != 0;
+        }
 
         // only provide the relevant hashes for error handling cases
         if(l_mismatches.primis || l_mismatches.bacmis)
@@ -766,7 +893,7 @@ void validateSecuritySettings()
             /*@
              * @errortype
              * @reasoncode       ISTEP::RC_PROC_SECURITY_STATE_MISMATCH
-             * @moduleid         ISTEP::MOD_UPDATE_REDUNDANT_TPM
+             * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
              * @userdata1        Processor Target
              * @userdata2[60:60] SAB bit mismatch
              * @userdata2[61:61] Jumper (SMD) bit mismatch

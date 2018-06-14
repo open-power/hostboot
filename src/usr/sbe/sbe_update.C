@@ -1624,7 +1624,8 @@ namespace SBE
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeBootSeeprom(TARGETING::Target* i_target,
-                                 sbeSeepromSide_t& o_bootSide)
+                                 sbeSeepromSide_t& o_bootSide,
+                                 const bool i_failoverToMaster)
     {
         TRACFCOMP( g_trac_sbe, ENTER_MRK"getSbeBootSeeprom()" );
 
@@ -1635,15 +1636,22 @@ namespace SBE
         o_bootSide = SBE_SEEPROM_INVALID;
 
         do{
+            assert(i_target != nullptr,"Bug! Attempting to get the boot seeprom of a null target.");
 
-             TARGETING::Target * l_target=i_target;
+            TARGETING::Target * l_target=i_target;
 
             // Get the Master Proc Chip Target for comparisons later
             TargetService& tS = targetService();
             err = tS.queryMasterProcChipTargetHandle(
                                                 masterProcChipTargetHandle);
 
-            if( (i_target != masterProcChipTargetHandle) &&
+            if ( err )
+            {
+                break;
+            }
+
+            if( i_failoverToMaster &&
+                (i_target != masterProcChipTargetHandle) &&
                 !(i_target->getAttr<ATTR_SBE_IS_STARTED>()) )
             {
                 l_target=masterProcChipTargetHandle;
