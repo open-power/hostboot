@@ -1579,8 +1579,10 @@ bool check_wof_support(uint16_t & o_nominal,
                 }
                 else if( largest_wof_reset_count >= WOF_RESET_COUNT_THRESHOLD )
                 {
-                    TMGT_INF("WOF reset count reached for OCC%d. WOF disabled.",
-                             occ_instance);
+                    TMGT_INF("WOF reset count reached for "
+                         "OCC%d count: %d. WOF disabled.",
+                         occ_instance,
+                         largest_wof_reset_count );
                     G_wofSupported = false;
                     o_ultra = WOF_RESET_COUNT_REACHED;
                 }
