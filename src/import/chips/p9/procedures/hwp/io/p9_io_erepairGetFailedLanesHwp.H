@@ -723,8 +723,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
     fapi2::ReturnCode l_rc                       = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err                           = fapi2::FAPI2_RC_SUCCESS;
     uint8_t* l_retBuf                            = NULL;
-    uint32_t l_bufSize                           = 0;
-    size_t l_mBufSize                            = 0;
+    size_t l_bufSize                             = 0;
     uint8_t                                      l_customDimm;
 
     FAPI_DBG(">> retrieveRepairDataMemBuf");
@@ -743,7 +742,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
                       fapi2::MBVPD_KEYWORD_PDI,
                       i_target,
                       NULL,
-                      l_mBufSize),
+                      l_bufSize),
                   "VPD size read failed w/rc=0x%x",
                   (uint64_t)fapi2::current_err );
 
@@ -784,7 +783,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
                       fapi2::MBVPD_KEYWORD_PDI,
                       i_target,
                       l_retBuf,
-                      l_mBufSize),
+                      l_bufSize),
                   "VPD read failed w/rc=0x%x",
                   (uint64_t)fapi2::current_err );
 
@@ -793,7 +792,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
         FAPI_TRY( determineRepairLanesMemBuf(
                       i_target,
                       l_retBuf,
-                      l_mBufSize,
+                      l_bufSize,
                       o_txFailLanes,
                       o_rxFailLanes),
                   "Call to determineRepairLanes failed w/rc=0x%x",
