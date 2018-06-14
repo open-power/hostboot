@@ -133,6 +133,8 @@ namespace HTMGT
             // Check if we need a WOF requested reset
             if(iv_needsWofReset == true)
             {
+                TMGT_ERR("WOF Reset detected! SRC = 0x%X",
+                        l_occSrc);
                 // We compare against one less than the threshold because
                 // the WOF reset count doesnt get incremented until resetPrep
                 if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
@@ -400,20 +402,30 @@ namespace HTMGT
 
     } // end Occ::elogAddCallout()
 
-
     void Occ::elogProcessActions(const uint8_t i_actions,
                                  bool        & o_occReset,
                                  ERRORLOG::errlSeverity_t & o_errlSeverity)
     {
         if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
-            o_occReset = true;
             iv_failed = false;
-            iv_needsWofReset = true;
             iv_resetReason = OCC_RESET_REASON_WOF_REQUEST;
-
-            TMGT_INF("elogProcessActions: OCC%d requested a WOF reset",
-                     iv_instance);
+            // Check if WOF resets are disabled
+            if(int_flags_set(FLAG_WOF_RESET_DISABLED) == true)
+            {
+                o_occReset = false;
+                iv_needsWofReset = false;
+                TMGT_INF("elogProcessActions: OCC%d requested a WOF reset "
+                         "but WOF resets are DISABLED",
+                         iv_instance);
+            }
+            else // WOF resets are enabled
+            {
+                o_occReset = true;
+                iv_needsWofReset = true;
+                TMGT_INF("elogProcessActions: OCC%d requested a WOF reset",
+                         iv_instance);
+            }
         }
         else
         {
