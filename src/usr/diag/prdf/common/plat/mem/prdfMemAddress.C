@@ -95,7 +95,7 @@ MemAddr MemAddr::fromMaintAddr<TYPE_MBA>( uint64_t i_addr )
     uint64_t srnk   = (i_addr >> 57) &     0x7; //  4: 6
     uint64_t bnk    = (i_addr >> 53) &     0xf; //  7:10
     uint64_t r16_r0 = (i_addr >> 36) & 0x1ffff; // 11:27
-    uint64_t col    = (i_addr >> 27) &   0x1ff; // 28:36
+    uint64_t col    = (i_addr >> 27) &   0x1ff; // 28:36 (37:39 tied to 0)
     uint64_t r17    = (i_addr >>  4) &     0x1; // 59
 
     uint64_t row    = (r17 << 17) | r16_r0;
@@ -106,12 +106,12 @@ MemAddr MemAddr::fromMaintAddr<TYPE_MBA>( uint64_t i_addr )
 template<>
 uint64_t MemAddr::toMaintAddr<TYPE_MBA>() const
 {
-    return ( ((uint64_t) iv_rnk.getMaster() << 60) |
-             ((uint64_t) iv_rnk.getSlave()  << 57) |
-             ((uint64_t) iv_bnk             << 53) |
-             ((uint64_t)(iv_row & 0x1ffff)  << 36) |  // r16-r0
-             ((uint64_t) iv_col             << 24) |
-             ((uint64_t)(iv_row & 0x20000)  << 13) ); // r17
+    return ( ((uint64_t) iv_rnk.getMaster() << 60) |  //  1: 3
+             ((uint64_t) iv_rnk.getSlave()  << 57) |  //  4: 6
+             ((uint64_t) iv_bnk             << 53) |  //  7:10
+             ((uint64_t)(iv_row & 0x1ffff)  << 36) |  // 11:27
+             ((uint64_t) iv_col             << 27) |  // 28:36 (37:39 tied to 0)
+             ((uint64_t)(iv_row & 0x20000)  >> 13) ); // 59
 }
 
 //------------------------------------------------------------------------------

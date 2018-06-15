@@ -145,7 +145,7 @@ void getRankBank( uint64_t i_ds,    uint64_t i_mrnk,    uint64_t i_srnk,
  *  @param  i_numLowerRnkBnk Number of configured lower rank/bank bits.
  *  @param  i_row       Row (R18-R0)
  *  @param  i_numRow    Number of configured row bits.
- *  @param  i_col       Column (C13,C11,C9-C3,C2-C0)
+ *  @param  i_col       Column (C13,C11,C9-C3)
  *  @param  i_numCol    Number of configured column bits.
  *  @param  i_ddrVer    DDR version (DDR3 or DDR4).
  *  @param  i_mbaIlMode MBA interleave mode.     (from MBAXCR[12])
@@ -177,12 +177,11 @@ uint64_t combineComponents( uint64_t i_upperRnkBnk, uint64_t i_numUpperRnkBnk,
         if ( 18 == i_numRow ) numUpperRow -= 1; // r17 is not in numUpperRow
     }
 
-    // Get the column components. Note c2-c1 will be added later. Also c0 is
-    // tied to 0 and not used at all.
-    uint64_t upperCol = (i_col & 0x00ff0) >> 4;
-    uint64_t c3       = (i_col & 0x00008) >> 3;
+    // Get the column components.
+    uint64_t upperCol = i_col & 0x1fe;
+    uint64_t c3       = i_col & 0x001;
 
-    uint64_t numUpperCol = i_numCol - 4;
+    uint64_t numUpperCol = i_numCol - 1;
     uint64_t numC3       = 1;
 
     // Start building the address.
@@ -221,7 +220,7 @@ uint64_t combineComponents( uint64_t i_upperRnkBnk, uint64_t i_numUpperRnkBnk,
  *  @param  i_numSrnk   Number of configured slave rank bits.
  *  @param  i_row       Row (R18-R0)
  *  @param  i_numRow    Number of configured row bits.
- *  @param  i_col       Column (C13,C11,C9-C3,C2-C0)
+ *  @param  i_col       Column (C13,C11,C9-C3)
  *  @param  i_numCol    Number of configured column bits.
  *  @param  i_bnk       Bank (DDR3: B2-B0, DDR4: BG1-BG0,B1-B0).
  *  @param  i_mba       MBA position (0 or 1)
@@ -274,11 +273,8 @@ uint64_t transPhysToCenAddr( uint64_t i_ds,  uint64_t i_mrnk, uint64_t i_srnk,
         addr = (addr & mask) << 1 | i_mba << shift | (addr & ~mask);
     }
 
-    // Add c2-c1 to the end (bits 33:34).
-    addr <<= 2; addr |= (i_col & 0x00006) >> 1;
-
-    // Bits 35:39 are zero.
-    addr <<= 5;
+    // Bits 33:39 are zero.
+    addr <<= 7;
 
     return addr;
 }
@@ -319,7 +315,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
     uint64_t srnk = i_addr.getRank().getSlave();    // S0-S2
 
     uint64_t row  = i_addr.getRow();    // R18-R0
-    uint64_t col  = i_addr.getCol();    // C13,C11,C9-C3,C2-C0
+    uint64_t col  = i_addr.getCol();    // C13,C11,C9-C3
     uint64_t bnk  = i_addr.getBank();   // DDR3: B2-B0, DDR4: BG1-BG0,B1-B0
 
     do
@@ -354,6 +350,12 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
                       i_mbaChip->GetId());
             break;
         }
+
+        // The attribute used in getDimmRowCol() returns a value for colBits
+        // which includes c2-c0. Those bits are tied to zero and are not
+        // included in col. Therefore, we need to subtract 3 to get the real
+        // value.
+        colBits = colBits - 3;
 
         // Get the DDR verion of the DIMM (DDR3, DDR4, etc...)
         uint8_t ddrVer = getDramGen<TYPE_MBA>( mba );
