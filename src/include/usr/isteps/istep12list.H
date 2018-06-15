@@ -289,6 +289,7 @@ const DepModInfo g_istep12Dependancies = {
         DEP_LIB(libistep12.so),
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libisteps_io.so),
+        DEP_LIB(libisteps_mss.so),
         NULL
     }
 };
