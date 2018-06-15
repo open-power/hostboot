@@ -79,6 +79,8 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_tgt,  l_tgt_str,  fapi2::MAX_ECMD_STRING_LEN);
     fapi2::buffer<uint64_t> l_data = 0;
+    fapi2::buffer<uint64_t> l_dl_control_data;
+    fapi2::buffer<uint64_t> l_dl_control_mask;
     fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_fbc_active;
     fapi2::ATTR_LINK_TRAIN_Type l_link_train;
     fapi2::ATTR_CHIP_EC_FEATURE_HW419022_Type l_hw419022 = 0;
@@ -178,13 +180,11 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
     // DD1.1+ HW Start training sequence
     if(!l_hw419022)
     {
-
-        l_data.flush<0>();
-
         // clear TX lane control overrides
         if (l_even)
         {
-            l_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+            l_dl_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+            l_dl_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
 
             FAPI_TRY(fapi2::putScom(i_tgt,
                                     OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL,
@@ -194,7 +194,8 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
 
         if (l_odd)
         {
-            l_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+            l_dl_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+            l_dl_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
 
             FAPI_TRY(fapi2::putScom(i_tgt,
                                     OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL,
@@ -203,7 +204,10 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
         }
 
         // Start phy training
-        FAPI_TRY(fapi2::putScom(i_tgt, OBUS_LL0_IOOL_CONTROL, l_data),
+        FAPI_TRY(fapi2::putScomUnderMask(i_tgt,
+                                         OBUS_LL0_IOOL_CONTROL,
+                                         l_dl_control_data,
+                                         l_dl_control_mask),
                  "Error writing DLL control register (0x%08X)!",
                  OBUS_LL0_IOOL_CONTROL);
     }
