@@ -1277,9 +1277,10 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
                 break;
             }
 
-            // Do not abort the procedure. UEs are expected. Since the command
-            // has to stop on error due to the hardware bugs, we need to resume
-            // the command and ensure it gets to the end of the rank.
+            // An error was found, but don't abort. We want to see if any UEs
+            // or MPEs exist on the rest of the rank. Also, since there was an
+            // error, clear the false alarm flag.
+            iv_tpsFalseAlarm = false;
         }
 
         // If there was an MPE.
