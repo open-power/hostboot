@@ -718,8 +718,8 @@ ReturnCode __badDqBitmapGetHelperAttrs(
                 l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
                 break;
             }
-            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
-                                  l_membuf, o_wiringData.cumulus );
+            //l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
+            //                      l_membuf, o_wiringData.cumulus );
         }
         else
         {
