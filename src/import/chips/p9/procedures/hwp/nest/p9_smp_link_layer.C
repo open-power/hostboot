@@ -83,7 +83,8 @@ p9_smp_link_layer_train_link_electrical(
     const uint8_t i_en)
 {
     FAPI_DBG("Start");
-    fapi2::buffer<uint64_t> l_dll_control;
+    fapi2::buffer<uint64_t> l_dll_control_data;
+    fapi2::buffer<uint64_t> l_dll_control_mask;
 
     bool l_even = (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
                   (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY);
@@ -91,22 +92,23 @@ p9_smp_link_layer_train_link_electrical(
     bool l_odd = (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE) ||
                  (i_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY);
 
-    // read control register
-    FAPI_TRY(fapi2::getScom(i_target, i_ctl.dl_control_addr, l_dll_control),
-             "Error reading DLL control register (0x%08X)!",
-             i_ctl.dl_control_addr);
-
     if (l_even)
     {
-        l_dll_control.setBit<XBUS_LL0_IOEL_CONTROL_LINK0_STARTUP>();
+        l_dll_control_data.setBit<XBUS_LL0_IOEL_CONTROL_LINK0_STARTUP>();
+        l_dll_control_mask.setBit<XBUS_LL0_IOEL_CONTROL_LINK0_STARTUP>();
     }
 
     if (l_odd)
     {
-        l_dll_control.setBit<XBUS_LL0_IOEL_CONTROL_LINK1_STARTUP>();
+        l_dll_control_data.setBit<XBUS_LL0_IOEL_CONTROL_LINK1_STARTUP>();
+        l_dll_control_mask.setBit<XBUS_LL0_IOEL_CONTROL_LINK1_STARTUP>();
     }
 
-    FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
+    // update control register
+    FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                     i_ctl.dl_control_addr,
+                                     l_dll_control_data,
+                                     l_dll_control_mask),
              "Error writing DLL control register (0x%08X)!",
              i_ctl.dl_control_addr);
 
@@ -266,7 +268,8 @@ p9_smp_link_layer_train_link_optical(
     const uint8_t i_en)
 {
     FAPI_DBG("Start");
-    fapi2::buffer<uint64_t> l_dll_control;
+    fapi2::buffer<uint64_t> l_dll_control_data;
+    fapi2::buffer<uint64_t> l_dll_control_mask;
     fapi2::Target<fapi2::TARGET_TYPE_OBUS> l_loc_target;
     fapi2::Target<fapi2::TARGET_TYPE_OBUS> l_rem_target;
     fapi2::ATTR_CHIP_EC_FEATURE_HW419022_Type l_hw419022 = 0;
@@ -301,26 +304,28 @@ p9_smp_link_layer_train_link_optical(
     FAPI_TRY(l_loc_target.getOtherEnd(l_rem_target),
              "Error from getOtherEnd");
 
-    // read control register
-    FAPI_TRY(fapi2::getScom(i_target, i_ctl.dl_control_addr, l_dll_control),
-             "Error reading DLL control register (0x%08X)!",
-             i_ctl.dl_control_addr);
-
     if (!l_hw419022)
     {
         if (l_even)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_PHY_TRAINING>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
         }
 
         if (l_odd)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_PHY_TRAINING>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
         }
 
-        FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
+        FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                         i_ctl.dl_control_addr,
+                                         l_dll_control_data,
+                                         l_dll_control_mask),
                  "Error writing DLL control register (0x%08X)!",
                  i_ctl.dl_control_addr);
     }
@@ -329,15 +334,20 @@ p9_smp_link_layer_train_link_optical(
         // force assertion of run_lane
         if (l_even)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
         }
 
         if (l_odd)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
         }
 
-        FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
+        FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                         i_ctl.dl_control_addr,
+                                         l_dll_control_data,
+                                         l_dll_control_mask),
                  "Error writing DLL control register (0x%08X, force RUN_LANE)",
                  i_ctl.dl_control_addr);
 
@@ -365,30 +375,40 @@ p9_smp_link_layer_train_link_optical(
         // enable link startup
         if (l_even)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_STARTUP>();
         }
 
         if (l_odd)
         {
-            l_dll_control.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
+            l_dll_control_data.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_STARTUP>();
         }
 
-        FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
+        FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                         i_ctl.dl_control_addr,
+                                         l_dll_control_data,
+                                         l_dll_control_mask),
                  "Error writing DLL control register (0x%08X, set LINK_STARTUP)!",
                  i_ctl.dl_control_addr);
 
         // disable run lane override
         if (l_even)
         {
-            l_dll_control.clearBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
+            l_dll_control_data.clearBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK0_RUN_LANE_OVERRIDE>();
         }
 
         if (l_odd)
         {
-            l_dll_control.clearBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
+            l_dll_control_data.clearBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
+            l_dll_control_mask.setBit<OBUS_LL0_IOOL_CONTROL_LINK1_RUN_LANE_OVERRIDE>();
         }
 
-        FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
+        FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                         i_ctl.dl_control_addr,
+                                         l_dll_control_data,
+                                         l_dll_control_mask),
                  "Error writing DLL control register (0x%08X, clar RUN_LANE_OVERRIDE)!",
                  i_ctl.dl_control_addr);
 
