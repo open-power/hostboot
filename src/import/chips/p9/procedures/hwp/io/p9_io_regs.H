@@ -192,6 +192,7 @@
 #define EDIP_RX_USERDEF_TIMEOUT                            0x800888000000003f, 52,  4 // rx_userdef_timeout timeout used when using the user defined servo ops       (see workbook table 4.10 for timer settings)
 #define EDIP_RX_BER_TIMEOUT                                0x800888000000003f, 56,  4 // rx_ber_timeout, used for when making bit error measurements with a servo op (see workbook table 4.10 for timer settings)
 #define EDIP_RX_CTL_MODE16_EO_PG                           0x800888000000003f, 48, 16 // register -- description
+#define EDIP_CHAN_FAIL_MASK                                0x0000000000000020, 15,  8 // scom mode reg spares.
 
 
 #define EDI_RX_WTM_STATE                                   0x800950000000003f, 48,  5 // main wiretest state machine current state (rjr)): \r\n\tx00: idle \r\n\tx01: drv data  wt \r\n\tx02: drv clock wt \r\n\tx03: drv data  0 \r\n\tx04: drv clock 0 \r\n\tx05: rx wt \r\n\tx06: wait all ones \r\n\tx07: reset pll \r\n\tx08: wait pll \r\n\tx09: drive clock \r\n\tx0a: drive data 1 \r\n\tx0b: wait all zeroes \r\n\tx0c: drive data 0 \r\n\tx0d: done \r\n\tx0e: unused \r\n\tx0f: unused \r\n\tx10: wait prev done \r\n\tx11: drv prev done \r\n\tx12: drv all done \r\n\tx13: wait all done \r\n\tx14: init tx fifo \r\n\tx15: unused \r\n\tx16: unused \r\n\tx17: unused \r\n\tx18: set c & d dr strength \r\n\tx19: set data only dr strength \r\n\tx1a: clock fail \r\n\tx1b: all bad lanes \r\n\tx1c: wt timeout fail \r\n\tx1d: pll/dll fail \r\n\tx1e: all ones fail \r\n\tx1f: all zeroes fail \r\n\trjr
