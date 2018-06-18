@@ -704,22 +704,61 @@ ReturnCode __badDqBitmapGetHelperAttrs(
             // versions and ensure zero initialized array.
             memset( o_wiringData.cumulus, 0, sizeof(o_wiringData.cumulus) );
 
+            // Check DIMM type
+            uint8_t l_dimmType = 0;
+
             Target<TARGET_TYPE_MBA> l_fapiMba =
                 l_fapiDimm.getParent<TARGET_TYPE_MBA>();
-            Target<TARGET_TYPE_MEMBUF_CHIP> l_fapiMembuf =
-                l_fapiMba.getParent<TARGET_TYPE_MEMBUF_CHIP>();
 
-            TARGETING::TargetHandle_t l_membuf = nullptr;
-            errlHndl_t l_errl = getTargetingTarget( l_fapiMembuf, l_membuf );
+            TARGETING::TargetHandle_t l_mba = nullptr;
+            errlHndl_t l_errl = getTargetingTarget( l_fapiMba, l_mba );
             if ( l_errl )
             {
                 FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error from "
-                          "getTargetingTarget getting Membuf." );
+                        "getTargetingTarget getting MBA." );
                 l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
                 break;
             }
-            //l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
-            //                      l_membuf, o_wiringData.cumulus );
+
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, l_mba,
+                                  l_dimmType );
+            if ( l_rc )
+            {
+                FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error getting "
+                          "fapi2::ATTR_CEN_EFF_CUSTOM_DIMM" );
+                break;
+            }
+
+            // C-DIMMs return a direct 1:1 mapping
+            if ( fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES == l_dimmType )
+            {
+                for ( uint8_t port = 0; port < MAX_PORTS_PER_CEN; port++ )
+                {
+                    for ( uint8_t i = 0; i < DIMM_BAD_DQ_NUM_BYTES; i++ )
+                    {
+                        o_wiringData.cumulus[port][i] = i;
+                    }
+                }
+            }
+            // ISDIMMs require the mapping from ATTR_CEN_VPD_ISDIMMTOC4DQ
+            else
+            {
+                Target<TARGET_TYPE_MEMBUF_CHIP> l_fapiMembuf =
+                    l_fapiMba.getParent<TARGET_TYPE_MEMBUF_CHIP>();
+
+                TARGETING::TargetHandle_t l_membuf = nullptr;
+                errlHndl_t l_errl = getTargetingTarget( l_fapiMembuf,
+                                                        l_membuf );
+                if ( l_errl )
+                {
+                    FAPI_ERR( "__badDqBitmapGetHelperAttrs: Error from "
+                              "getTargetingTarget getting Membuf." );
+                    l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                    break;
+                }
+                l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_ISDIMMTOC4DQ,
+                                      l_membuf, o_wiringData.cumulus );
+            }
         }
         else
         {
@@ -730,8 +769,8 @@ ReturnCode __badDqBitmapGetHelperAttrs(
 
         if ( l_rc )
         {
-            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read attribute - "
-                      "ATTR_MSS_VPD_DQ_MAP" );
+            FAPI_ERR( "__badDqBitmapGetHelperAttrs: Unable to read mapping "
+                      "attribute" );
             break;
         }
 
