@@ -519,6 +519,46 @@ void*    call_mss_attr_update( void *io_pArgs )
                 INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
 
             }
+
+            // Need to handle some code upgrade scenarios where the
+            //  Nimbus-style swap values aren't getting cleared out
+            //  correctly.  We will force the EFF attributes to match.
+            bool l_mismatch = false;
+            TARGETING::TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TYPE_PROC);
+            for (const auto & l_proc: l_procTargetList)
+            {
+                auto l_chipid =
+                  l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
+                auto l_effid =
+                  l_proc->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>();
+                if( l_chipid != l_effid )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "Mismatch on proc %.8X : chipid=%.8X, effid=%.8X",
+                              get_huid(l_proc), l_chipid, l_effid);
+                    l_mismatch = true;
+                    l_proc->setAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>
+                      (l_chipid);
+                }
+            }
+
+            // force an update to the SBE if needed
+            if( l_mismatch )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Forcing SBE update to fix old memory swap");
+                l_err = SBE::updateProcessorSbeSeeproms();
+                if( l_err )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR: updateProcessorSbeSeeproms");
+                    l_StepError.addErrorDetails(l_err);
+                    errlCommit(l_err, HWPF_COMP_ID);
+                }
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Unexpectedly didn't do a SBE update when we should have...");
+            }
         }
 
         // Get all functional MCS chiplets
