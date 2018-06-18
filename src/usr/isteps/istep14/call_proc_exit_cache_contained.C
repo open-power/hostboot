@@ -225,7 +225,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 uint64_t this_node = PIR_t(task_getcpuid()).groupId;
                 task_affinity_unpin();
 
-                l_mirrorBaseAddr += (this_node * hrmor_base)/2;
+                l_mirrorBaseAddr += (this_node * hrmor_base);
 
             }
 
