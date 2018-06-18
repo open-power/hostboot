@@ -62,6 +62,7 @@ const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FIR_ACTION1 = 0x2068686868000000ULL;
 const uint64_t FIR_MASK    = 0xDF97979797FFC000ULL;
 
+
 const uint64_t DMI_FIR_ACTION0_REG = 0x07011006;
 const uint64_t DMI_FIR_ACTION1_REG = 0x07011007;
 const uint64_t DMI_FIR_MASK_REG    = 0x07011003;
@@ -104,6 +105,7 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
     // mark HWP entry
     FAPI_INF("p9_io_dmi_scominit: Entering ...");
     const uint8_t GRP_03  = 3;
+    const uint8_t GRP_00  = 0;
     const uint8_t LANE_00 = 0;
     fapi2::ReturnCode rc  = fapi2::FAPI2_RC_SUCCESS;
 
@@ -134,6 +136,15 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
     {
         FAPI_ERR("P9 I/O DMI Scominit Failed");
         fapi2::current_err = rc;
+    }
+
+    // Configure Channel Fail Mask
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_tgt =
+            i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
+
+        // Set the Channel Fail Mask so only too many bus errors triggers a channel fail.
+        FAPI_TRY(io::rmw(EDIP_CHAN_FAIL_MASK, l_mc_tgt, GRP_00, LANE_00, 0x08));
     }
 
     // configure FIR
