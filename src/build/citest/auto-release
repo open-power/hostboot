@@ -146,7 +146,7 @@ function buildrel-create-track {
     #
     echo -e "[$(date)]\n##### -> git checkout gerrit/master || exit -1\n"
     git checkout gerrit/master || exit -1
-    # 
+    #
     echo -e "[$(date)]\n#####->  hbRelease create-track --level $RELEASE_NAME\
         --release $FIPS_RELEASE --released $PREVIOUS_RELEASE --track \
         $EXISTING_TRACK || exit -1\n"
@@ -339,6 +339,16 @@ function build {
     git log --date=short --pretty=format:"%h - %an, %ad : %s" ${PREVIOUS_RELEASE}..${RELEASE_NAME}|egrep -v "$RELEASE_NAME|$PREVIOUS_RELEASE" >> $RELEASENOTESTXT
     echo -e "#-----------<E-O-F>---------------#\n" >> $RELEASENOTESTXT
     cat $RELEASENOTESTXT | mail -s "List of commit(s) in track:$FEATURE (release: $RELEASE_NAME)" $RELEASE_ADMINS
+
+    # CMVC_FEATURE_FILE contains one line: 'FEATURE=<feature#>'.
+    # Get the feature#
+    IFS='=', read -r -a featureArray <<< $FEATURE
+    feature=${featureArray[1]}
+    # RELEASENOTESTXT contains the list of git commits in the HB release
+    # Post the list to the CMVC feature by adding the content of
+    # RELEASENOTESTXT as remarks to the feature identified by $feature
+    Feature -note $feature -remarks "$(cat $RELEASENOTESTXT)"
+
     #
     ### @todo RTC:171143
     ### Sleep for 5 minutes to allow time for CMVC req's to take effect
