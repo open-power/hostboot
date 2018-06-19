@@ -1757,22 +1757,13 @@ bool TargetService::updatePeerTarget(const Target* i_pTarget)
             // If we find a PEER_PATH we need to next look up the PEER_TARGET with toTarget
             l_peer = targetService().toTarget(l_peerPath);
 
-            // Make sure the path resolved to a non-null target
-            if (l_peer != NULL)
-            {
-                l_peerTargetUpdated = i_pTarget->_trySetAttr(ATTR_PEER_TARGET,
-                                                             sizeof(l_peer),
-                                                             &l_peer);
-                TRACFCOMP(g_trac_targeting, "Updated PEER_TARGET address for HUID 0x%x found to be %p",
-                          get_huid(i_pTarget), l_peer);
-            }
-            else
-            {
-                // This is unexpected so make the trace visible, but no need to assert
-                TRACFCOMP(g_trac_targeting,
-                          "PEER_PATH did not resolve to a valid target for the entity path %s",
-                          l_peerPath.toString());
-            }
+            TRACFCOMP(g_trac_targeting, "Updated PEER_TARGET address for HUID 0x%x found to be %p",
+                      get_huid(i_pTarget), l_peer);
+            // Set the address even if it is NULL for if it is NULL
+            // PRD will not attempt to use it during data collection
+            l_peerTargetUpdated = i_pTarget->_trySetAttr(ATTR_PEER_TARGET,
+                                                         sizeof(l_peer),
+                                                         &l_peer);
         }
         else
         {
