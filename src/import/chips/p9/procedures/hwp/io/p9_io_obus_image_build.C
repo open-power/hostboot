@@ -41,7 +41,7 @@
 #include "p9_xip_image.h"
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode extractPpeImgObus(void* const iImagePtr, uint8_t*& oObusImgPtr, uint32_t& oSize)
+fapi2::ReturnCode extractPpeImgObus(void* const iImagePtr, const int iSectionId, uint8_t*& oObusImgPtr, uint32_t& oSize)
 {
     FAPI_IMP("Entering getObusImageFromHwImage.");
     P9XipSection ppeSection;
@@ -60,7 +60,7 @@ fapi2::ReturnCode extractPpeImgObus(void* const iImagePtr, uint8_t*& oObusImgPtr
     oObusImgPtr = ppeSection.iv_offset + (uint8_t*)(iImagePtr);
 
     // From the I/O Section, lets pull the IOO Nvlink Image.
-    FAPI_TRY(p9_xip_get_section(oObusImgPtr, P9_XIP_SECTION_IOPPE_IOO_NV, &ppeSection));
+    FAPI_TRY(p9_xip_get_section(oObusImgPtr, iSectionId, &ppeSection));
 
     // Point to the IOO PPE Image of the I/O PPE Section
     oObusImgPtr = ppeSection.iv_offset + (uint8_t*)(oObusImgPtr);
@@ -102,41 +102,81 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     uint64_t data      = 0;
     uint8_t* pObusImg = NULL;
     uint32_t imgSize   = 0;
+    uint8_t configMode = 0;
+    int xipSectionId = 0;
+    bool loadImage = false;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_Type l_ATTR_CHIP_EC_FEATURE_HW446279;
 
-    FAPI_TRY(extractPpeImgObus(iHwImagePtr, pObusImg, imgSize), "Extract PPE Image Failed.");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, iTgt, configMode),
+             "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
 
-    // PPE Reset
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
-
-    // Set PPE Base Address
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSAR, SRAM_BASE_ADDR), "Set Base Address Failed.");
-
-    // Set PPE into Autoincrement Mode
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_EN), "Auto-Increment Enable Failed.");
-
-    for(uint32_t i = 0; i < imgSize; i += 8)
+    if(fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_NV == configMode)
     {
-        data = (((uint64_t) * (pObusImg + i + 0) << 56) & 0xFF00000000000000ull) |
-               (((uint64_t) * (pObusImg + i + 1) << 48) & 0x00FF000000000000ull) |
-               (((uint64_t) * (pObusImg + i + 2) << 40) & 0x0000FF0000000000ull) |
-               (((uint64_t) * (pObusImg + i + 3) << 32) & 0x000000FF00000000ull) |
-               (((uint64_t) * (pObusImg + i + 4) << 24) & 0x00000000FF000000ull) |
-               (((uint64_t) * (pObusImg + i + 5) << 16) & 0x0000000000FF0000ull) |
-               (((uint64_t) * (pObusImg + i + 6) <<  8) & 0x000000000000FF00ull) |
-               (((uint64_t) * (pObusImg + i + 7) <<  0) & 0x00000000000000FFull);
 
-        // Write Data, as the address will be autoincremented.
-        FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSDR, data), "Data Write Failed.");
+        FAPI_IMP("NV IMAGE.");
+        xipSectionId = P9_XIP_SECTION_IOPPE_IOO_NV;
+        //
+        // As of now there is no intended use of the nv ppe image.
+        //
+        //loadImage = true;
+    }
+    else if(fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP == configMode)
+    {
+        FAPI_IMP("ABUS IMAGE.");
+        xipSectionId = P9_XIP_SECTION_IOPPE_IOO_ABUS;
+        auto l_chip = iTgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279, l_chip, l_ATTR_CHIP_EC_FEATURE_HW446279));
+
+        if(l_ATTR_CHIP_EC_FEATURE_HW446279)
+        {
+            FAPI_IMP("ABUS IMAGE LOAD.");
+            loadImage = true;
+        }
+    }
+    else // fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI
+    {
+        FAPI_IMP("p9_io_obus_image_build:: Skipping I/O Image Load for CAPI interface.");
     }
 
-    // Disable Auto Increment
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_DIS), "Auto-Increment Disable Failed.");
+    if(loadImage)
+    {
+        FAPI_IMP("LOADING...");
 
-    // PPE Reset
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+        FAPI_TRY(extractPpeImgObus(iHwImagePtr, xipSectionId, pObusImg, imgSize), "Extract PPE Image Failed.");
 
-    // PPE Resume From Halt
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
+        // PPE Reset
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+
+        // Set PPE Base Address
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSAR, SRAM_BASE_ADDR), "Set Base Address Failed.");
+
+        // Set PPE into Autoincrement Mode
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_EN), "Auto-Increment Enable Failed.");
+
+        for(uint32_t i = 0; i < imgSize; i += 8)
+        {
+            data = (((uint64_t) * (pObusImg + i + 0) << 56) & 0xFF00000000000000ull) |
+                   (((uint64_t) * (pObusImg + i + 1) << 48) & 0x00FF000000000000ull) |
+                   (((uint64_t) * (pObusImg + i + 2) << 40) & 0x0000FF0000000000ull) |
+                   (((uint64_t) * (pObusImg + i + 3) << 32) & 0x000000FF00000000ull) |
+                   (((uint64_t) * (pObusImg + i + 4) << 24) & 0x00000000FF000000ull) |
+                   (((uint64_t) * (pObusImg + i + 5) << 16) & 0x0000000000FF0000ull) |
+                   (((uint64_t) * (pObusImg + i + 6) <<  8) & 0x000000000000FF00ull) |
+                   (((uint64_t) * (pObusImg + i + 7) <<  0) & 0x00000000000000FFull);
+
+            // Write Data, as the address will be autoincremented.
+            FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSDR, data), "Data Write Failed.");
+        }
+
+        // Disable Auto Increment
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_DIS), "Auto-Increment Disable Failed.");
+
+        // PPE Reset
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+
+        // PPE Resume From Halt
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
+    }
 
 fapi_try_exit:
     FAPI_IMP("Exit p9_io_obus_image_build.");
