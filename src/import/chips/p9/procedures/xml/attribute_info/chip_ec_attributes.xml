@@ -240,17 +240,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW430733</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CHIP_EC_FEATURE_FLUSH_L1D_TRIG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-       Nimbus DD2.2 - MTTRIG2 setup to flush L1D
-                    - Always obey SW branch hint bits
+       MTTRIG2 setup to flush L1D
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x12</value>
           <test>EQUAL</test>
         </ec>
       </chip>
@@ -4658,10 +4664,10 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CDD11_SEC_MEM</id>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD11_SECURITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Secure memory setting for Cumulus DD1.1
+      Security settings for Cumulus DD1.1
     </description>
     <chipEcFeature>
       <chip>
@@ -4675,10 +4681,27 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CDD11_CDD12_SEC_MEM</id>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD12_SECURITY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Security settings for Cumulus DD1.2
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x12</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_CDD11_CDD12_SECURITY</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Secure memory setting for Cumulus DD1.1 and DD1.2
+      Security settings for Cumulus DD1.1 and DD1.2
     </description>
     <chipEcFeature>
       <chip>
