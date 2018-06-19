@@ -300,12 +300,12 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
     // Check for the minimum
     if(o_calc_util < MIN_UTIL)
     {
-        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value",
+        FAPI_INF("Calculated utilization (%f) is less than the minimum utilization: %lu. Setting to minimum value",
                  o_calc_util, MIN_UTIL);
         o_calc_util = MIN_UTIL;
     }
 
-    FAPI_INF("In calc_util_from_throttles, calculated %d for output utilization", o_calc_util);
+    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization", o_calc_util);
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;

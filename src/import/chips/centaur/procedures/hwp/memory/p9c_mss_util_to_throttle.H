@@ -53,6 +53,16 @@ extern "C"
     ///
     fapi2::ReturnCode p9c_mss_util_to_throttle(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 
+    ///
+    /// @brief This function will determine the safemode dram utilization
+    ///    for the MRW safemode throttle values
+    /// @param[in]  i_target_mba:  MBA Target
+    /// @param[out]  o_safemode_util:  safemode utilization value from MRW attributes
+    /// @return fapi2::ReturnCode
+    ///
+    fapi2::ReturnCode p9c_mss_util_to_throttle_safemode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+            uint8_t& o_safemode_util);
+
 } // extern "C"
 
 #endif // MSS_UTIL_TO_THROTTLE_H_
