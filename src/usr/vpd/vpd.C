@@ -1106,4 +1106,30 @@ errlHndl_t validateSharedPnorCache()
     return errl;
 }
 
+/**
+ * @brief Get a list of all overridden sections
+ */
+void getListOfOverrideSections( OverrideRsvMemMap_t& o_overrides )
+{
+    // Note - any new sections need to be added here
+
+    PNOR::SectionInfo_t l_memd_info;
+    errlHndl_t l_elog = PNOR::getSectionInfo(PNOR::MEMD,l_memd_info);
+    if( l_elog )
+    {
+        TRACFCOMP( g_trac_vpd,
+                   "getListOfOverrideSections> failed getSectionInfo call" );
+        delete l_elog;
+        return;
+    }
+
+    // Add MEMD section
+    OverrideSpecifier_t l_memd = {
+        PNOR::MEMD,
+        l_memd_info.size
+    };
+
+    o_overrides[0x4D454D44/*MEMD*/] = l_memd;
+}
+
 }; //end VPD namespace

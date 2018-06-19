@@ -35,22 +35,32 @@ namespace Util
     typedef uint64_t hbrt_mem_label_t;
 
     // Ascii label "VPD     " in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD      = 0x5650442020202020;
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD       = 0x5650442020202020;
 
     // Ascii label "ATTR    " in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_ATTR     = 0x4154545220202020;
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_ATTR      = 0x4154545220202020;
 
     // Ascii label "ATTROVER" in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_ATTROVER = 0x415454524F564552;
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_ATTROVER  = 0x415454524F564552;
 
     // Ascii label "PADDING " in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_PADDING  = 0x50414444494E4720;
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_PADDING   = 0x50414444494E4720;
 
     // Ascii label "HYPCOMM " in hex
-    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_HYPCOMM  = 0x485950434f4d4d20;
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_HYPCOMM   = 0x485950434f4d4d20;
 
     // Ascii label "TRACEBUF" in hex
     constexpr hbrt_mem_label_t HBRT_MEM_LABEL_TRACEBUF  = 0x5452414345425546;
+
+    // Note : may be several sections of the format 'VPD_xxxx' if support
+    //  other overrides in the future
+    // Ascii label "VPD_"<blank> in hex
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_XXXX  = 0x5650445F00000000;
+    // Mask off specific VPD label
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_MASK  = 0x00000000FFFFFFFF;
+    // Ascii label "VPD_MEMD in hex
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_VPD_MEMD  = 0x5650445F4D454D44;
+
 
     /** @brief A 32 byte table of contents entry */
     struct hbrtTableOfContentsEntry_t

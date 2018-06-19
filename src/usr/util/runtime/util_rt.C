@@ -28,7 +28,6 @@
 #include <util/utilrsvdmem.H>
 #include <util/runtime/util_rt.H>
 
-
 /**
  *  @brief Get the address of a reserved hostboot memory region by its label
  *  @param[in] i_label      HBRT_MEM_LABEL_ constant
@@ -55,6 +54,7 @@ uint64_t hb_get_rt_rsvd_mem(Util::hbrt_mem_label_t i_label,
         case Util::HBRT_MEM_LABEL_PADDING:
         case Util::HBRT_MEM_LABEL_HYPCOMM:
         case Util::HBRT_MEM_LABEL_TRACEBUF:
+        case Util::HBRT_MEM_LABEL_VPD_MEMD:
             if( (g_hostInterfaces != NULL) &&
                 (g_hostInterfaces->get_reserved_mem) )
             {

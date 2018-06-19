@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -28,9 +28,12 @@
 
 
 #include <list>
+#include <map>
 #include <pnor/pnorif.H>
 #include <devicefw/driverif.H>
+#include <config.h>
 #include "vpd.H"
+
 
 /** @file ipvpd.H
  *  @brief Provides base support for i/p-Series style IBM VPD
@@ -84,8 +87,7 @@ class IpVpdFacade
     } input_args_t;
 
     /**
-     * @brief Structure of information needed to access requested
-     *      record/keyword combinations.
+     * @brief Mapping from keyword enum into 4 character string
      */
     typedef struct
     {
@@ -94,12 +96,23 @@ class IpVpdFacade
     } recordInfo;
 
     /**
+     * @brief Mapping from keyword enum into 2 character string
      */
     typedef struct
     {
         VPD::vpdKeyword keyword;
         char keywordName[KEYWORD_BYTE_SIZE+1];
     } keywordInfo;
+
+    /**
+     * @brief Mapping from record enum into PNOR section
+     *        where override might be
+     */
+    typedef struct
+    {
+        VPD::vpdRecord record;
+        PNOR::SectionId section;
+    } recordOverrideInfo_t;
 
     /**
      * @brief Structure defining where to read/write VPD data
@@ -138,7 +151,7 @@ class IpVpdFacade
      *
      * @param[in] i_vpdKeywords -    Pointer to array of VPD Keywords to use
      *
-     * @param[in] i_keyCount -       size of i_vpdKeywords array
+     * @param[in] i_keySize -        size of i_vpdKeywords array
      *
      * @param[in] i_pnorSection -    PNOR Section containing VPD for current
      *                               chip
@@ -292,6 +305,23 @@ class IpVpdFacade
      * @brief This function sets the config flags to use HW and not PNOR
      */
     void setConfigFlagsHW ( );
+
+#ifdef CONFIG_SECUREBOOT
+    /**
+     * @brief Load/unload the appropriate secure section for
+     *        an overriden PNOR section
+     * @param[in] i_args    Record/keyword
+     * @param[in] i_target  Target pointer
+     * @param[in] i_load    true=load, false=unload
+     * @param[out] o_loaded true=section loaded, false=section not loaded
+     * @return Error log
+     */
+    virtual errlHndl_t loadUnloadSecureSection( input_args_t i_args,
+                                                TARGETING::Target* i_target,
+                                                bool i_load,
+                                                bool& o_loaded );
+#endif
+
 
   protected:
 
@@ -578,6 +608,8 @@ class IpVpdFacade
      *
      * @param[in] i_location - VPD location to fetch data from (PNOR/SEEPROM)
      *
+     * @param[in] i_record - String representation of the record.
+     *
      * @return errHndl_t - NULL if successful, otherwise a pointer to the
      *      error log.
      */
@@ -585,7 +617,8 @@ class IpVpdFacade
                            size_t i_numBytes,
                            void * o_data,
                            TARGETING::Target * i_target,
-                           VPD::vpdCmdTarget i_location );
+                           VPD::vpdCmdTarget i_location,
+                           const char* i_record );
 
     /**
      * @brief This function actually reads the data from PNOR
@@ -625,8 +658,7 @@ class IpVpdFacade
                                      void * o_data,
                                      TARGETING::Target * i_target );
 
-
-    /**
+   /**
      * @brief This function compares 2 ipvpd record values.  Used for binary
      *       search to find a match.
      *
@@ -688,6 +720,51 @@ class IpVpdFacade
                 const  recordInfo* & o_altVpdRecords,
                 uint64_t           & o_altRecSize);
 
+    /**
+     * @brief Returns the cached pnor address
+     *
+     */
+    inline static uint64_t getPnorAddr(const IpVpdFacade& x)
+    {
+        return x.iv_cachePnorAddr;
+    };
+
+    /**
+     * @brief Set the cached pnor address to the given value
+     *
+     */
+    inline void setPnorAddr(uint64_t i_pnorAddr)
+    {
+        this->iv_cachePnorAddr = i_pnorAddr;
+    };
+
+
+    /**
+     * @brief Retrieves the MEMD record from PNOR, finds a matching
+     *        set of data, and sets up sets up the override pointer.
+     * @param[in] i_recKw  Record/Keyword values
+     * @param[in] i_target  Relevant Target
+     * @param[in] i_vmMask  Specific bits to compare with EEPROM
+     * @return Error log
+     */
+    errlHndl_t getMEMDFromPNOR( input_args_t i_recKw,
+                                TARGETING::Target* i_target,
+                                uint32_t i_vmMask );
+
+    /**
+     * @brief Callback function to check for a record override and
+     *        set iv_overridePtr appropriately
+     * @param[in] i_record  Record name
+     * @param[in] i_target  Target pointer
+     * @param[out] o_ptr    Pointer to location of record in PNOR,
+     *                      ==nullptr if there is no override
+     * @return Error log
+     */
+    virtual errlHndl_t checkForRecordOverride( const char* i_record,
+                                               TARGETING::Target* i_target,
+                                               uint8_t*& o_ptr );
+
+
   protected: // Variables
 
     /**
@@ -702,8 +779,7 @@ class IpVpdFacade
      */
     uint64_t iv_vpdMaxSections;
 
-
-  public: // Variables
+  public: //Used by static function
     /**
      * @brief Pointer to array of VPD Record information
      *
@@ -711,30 +787,12 @@ class IpVpdFacade
     const recordInfo* iv_vpdRecords;
 
     /**
-     * @brief Returns the cached pnor address
-     *
-     */
-    inline static uint64_t getPnorAddr(const IpVpdFacade& x)
-    {
-        return x.iv_cachePnorAddr;
-    }
-
-    /**
-     * @brief Set the cached pnor address to the given value
-     *
-     */
-    inline void setPnorAddr(uint64_t i_pnorAddr)
-    {
-        this->iv_cachePnorAddr = i_pnorAddr;
-    }
-
-    /**
      * @brief Number of VPD Records for current chip
      *
      */
-    uint64_t iv_recSize;
+    const uint64_t iv_recSize;
 
-  protected: // Variables
+  protected:
     /**
      * @brief Pointer to array of VPD Keyword information
      *
@@ -745,7 +803,7 @@ class IpVpdFacade
      * @brief Number of VPD Keywords for current chip
      *
      */
-    uint64_t iv_keySize;
+    const uint64_t iv_keySize;
 
     /**
      * @brief PNOR section enum for vpd type
@@ -778,10 +836,11 @@ class IpVpdFacade
     configInfo iv_configInfo;
 
     /**
-     * @brief Boolean variable to denote if the pnor section was
-     *        accessed for the MEMD section
+     * @brief Used to denote if a record is being
+     *        fetched from a copy in our code image versus the
+     *        real VPD EEPROM (or cache)
      */
-    bool iv_memdAccessed;
+    VPD::OverrideMap_t iv_overridePtr;
 
 };
 

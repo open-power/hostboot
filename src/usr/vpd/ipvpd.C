@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,7 +41,8 @@
 #include <vpd/vpd_if.H>
 #include <config.h>
 #include <vpd/ipvpdenums.H>
-#include <vpd/memd_vpdenums.H>
+#include <util/utilrsvdmem.H>
+#include <util/runtime/util_rt.H>
 
 #include "vpd.H"
 #include "cvpd.H"
@@ -68,7 +69,6 @@ extern trace_desc_t* g_trac_vpd;
 static const uint64_t IPVPD_TOC_SIZE = 0x100;  //256
 static const uint64_t IPVPD_TOC_ENTRY_SIZE = 8;
 static const uint64_t IPVPD_TOC_INVALID_DATA = 0xFFFFFFFFFFFFFFFF;
-uint64_t MEMD_HEADER_SIZE = sizeof(MemdHeader_t);
 
 /**
  * @brief  Constructor
@@ -88,7 +88,6 @@ IpVpdFacade::IpVpdFacade(const  recordInfo* i_vpdRecords,
 ,iv_mutex(i_mutex)
 ,iv_cachePnorAddr(0x0)
 ,iv_vpdMsgType(i_vpdMsgType)
-,iv_memdAccessed(false)
 {
     iv_configInfo.vpdReadPNOR   = false;
     iv_configInfo.vpdReadHW     = false;
@@ -243,11 +242,9 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
         //   write() recursively for each location
         if ( iv_configInfo.vpdWritePNOR &&
              iv_configInfo.vpdWriteHW &&
-             i_args.location == VPD::AUTOSELECT )
+             ((i_args.location & VPD::LOCATION_MASK) == VPD::AUTOSELECT) )
         {
-            input_args_t l_args;
-            l_args.record = i_args.record;
-            l_args.keyword = i_args.keyword;
+            input_args_t l_args = i_args;
 
             l_args.location = VPD::SEEPROM;
             err = write( i_target,
@@ -615,7 +612,8 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
                          sRecLength,
                          pRecPtr,
                          i_target,
-                         sRecArgs.location );
+                         sRecArgs.location,
+                         (*it).record_name );
         if( err )
         {
             TRACFCOMP(g_trac_vpd,"IpVpdFacade::loadPnor() Error reading record %s",(*it).record_name);
@@ -858,6 +856,43 @@ errlHndl_t IpVpdFacade::findRecordOffset ( const char * i_record,
 {
     errlHndl_t err = NULL;
 
+    // Look for a record override in our image unless explicitly told not to
+    if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
+    {
+        uint8_t* l_overridePtr = nullptr;
+        VPD::RecordTargetPair_t l_recTarg =
+          VPD::makeRecordTargetPair(i_record,i_target);
+
+        // Check if we already figured out where to get this record from
+        VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
+        if( l_overItr != iv_overridePtr.end() )
+        {
+            l_overridePtr = l_overItr->second;
+        }
+        else
+        {
+            // Now go see if we should be using the override and if so
+            //  where we find the right copy
+            err = checkForRecordOverride(i_record,i_target,l_overridePtr);
+            if( err )
+            {
+                TRACFCOMP( g_trac_vpd, ERR_MRK"findRecordOffset> failure calling checkForRecordOverride for %s on %.8X",
+                           i_record, get_huid(i_target) );
+                return err;
+            }
+
+            TRACFCOMP( g_trac_vpd, INFO_MRK" Record %s for target 0x%.8X exists at %p in PNOR",
+                       i_record, get_huid(i_target), l_overridePtr );
+        }
+
+        // If we have an override, the record is already pointed at directly
+        if( l_overridePtr != nullptr )
+        {
+            o_offset = 0;
+            return nullptr;
+        }
+    }
+
     // Determine the VPD source (PNOR/SEEPROM)
     VPD::vpdCmdTarget vpdSource = VPD::AUTOSELECT;
     bool configError = false;
@@ -940,17 +975,17 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
     uint16_t recordOffset = 0x0;
     input_args_t i_args;
     bool vpdPresent = false;
-    const char * recordName = NULL;
-    const char * keywordName = NULL;
+    const char * l_recordName = NULL;
+    const char * l_keywordName = NULL;
 
     i_args.record = i_record;
     i_args.keyword = i_keyword;
 
     do
     {
-        //get the Recod/Keyword names
+        //get the Record/Keyword names
         err = translateRecord( i_args.record,
-                               recordName );
+                               l_recordName );
 
         if( err )
         {
@@ -960,7 +995,7 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
         }
 
         err = translateKeyword( i_args.keyword,
-                                keywordName );
+                                l_keywordName );
 
         if( err )
         {
@@ -969,10 +1004,10 @@ bool IpVpdFacade::hasVpdPresent( TARGETING::Target * i_target,
             break;
         }
 
-        vpdPresent = recordPresent( recordName,
+        vpdPresent = recordPresent( l_recordName,
                                     recordOffset,
                                     i_target,
-                                    VPD::AUTOSELECT );
+                                    VPD::USEVPD );
 
     }while( 0 );
 
@@ -996,7 +1031,7 @@ bool IpVpdFacade::recordPresent( const char * i_record,
 {
     errlHndl_t err = NULL;
     uint64_t tmpOffset = 0x0;
-    char record[RECORD_BYTE_SIZE] = { '\0' };
+    char l_record[RECORD_BYTE_SIZE] = { '\0' };
     bool matchFound = false;
 
     do
@@ -1018,9 +1053,10 @@ bool IpVpdFacade::recordPresent( const char * i_record,
             //Read Record Name
             err = fetchData( tmpOffset,
                              RECORD_BYTE_SIZE,
-                             record,
+                             l_record,
                              i_target,
-                             i_location );
+                             i_location,
+                             i_record );
             tmpOffset += RECORD_BYTE_SIZE;
 
             if( err )
@@ -1028,7 +1064,7 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                 break;
             }
 
-            if( !(memcmp(record, i_record, RECORD_BYTE_SIZE )) )
+            if( !(memcmp(l_record, i_record, RECORD_BYTE_SIZE )) )
             {
                 matchFound = true;
 
@@ -1037,7 +1073,8 @@ bool IpVpdFacade::recordPresent( const char * i_record,
                                  RECORD_ADDR_BYTE_SIZE,
                                  &o_offset,
                                  i_target,
-                                 i_location );
+                                 i_location,
+                                 i_record );
                 if( err )
                 {
                     break;
@@ -1485,7 +1522,8 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
                          keywordSize,
                          io_buffer,
                          i_target,
-                         i_args.location );
+                         i_args.location,
+                         i_recordName );
         if( err )
         {
             break;
@@ -1525,7 +1563,8 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
                          sizeof(l_size),
                          &l_size,
                          i_target,
-                         i_args.location );
+                         i_args.location,
+                         i_recordName );
 
         if( err )
         {
@@ -1557,7 +1596,8 @@ errlHndl_t IpVpdFacade::retrieveRecord( const char * i_recordName,
                          l_size,
                          io_buffer,
                          i_target,
-                         i_args.location );
+                         i_args.location,
+                         i_recordName );
         if( err )
         {
             break;
@@ -1581,7 +1621,8 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                     size_t i_numBytes,
                                     void * o_data,
                                     TARGETING::Target * i_target,
-                                    VPD::vpdCmdTarget i_location )
+                                    VPD::vpdCmdTarget i_location,
+                                    const char* i_record )
 {
     errlHndl_t err = NULL;
 
@@ -1594,12 +1635,58 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
                                          i_location,
                                          vpdSource );
 
+    // Look for a record override in our image unless explicitly told not to
+    bool l_foundOverride = false;
+    if( (i_location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
+    {
+        uint8_t* l_overridePtr = nullptr;
+        VPD::RecordTargetPair_t l_recTarg =
+          VPD::makeRecordTargetPair(i_record,i_target);
+
+        // At this point we can assume that the pointer is set into our
+        //  map if we need it
+        VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
+        if( l_overItr != iv_overridePtr.end() )
+        {
+            l_overridePtr = l_overItr->second;
+
+            // Just do a simple memcpy
+            if( l_overridePtr != nullptr )
+            {
+                memcpy( o_data, l_overridePtr+i_byteAddr, i_numBytes );
+                l_foundOverride = true;
+            }
+        }
+        // Automatically populate a bunch of infrastructure records that
+        //   we would never override (makes the error checks pass cleaner)
+        else if( (0 == memcmp( i_record, "VHDR", 4 ))
+                 || (0 == memcmp( i_record, "VTOC", 4 )) )
+        {
+            iv_overridePtr[l_recTarg] = nullptr;
+        }
+        else
+        {
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
+                       "iv_overridePtr is not set as expected for %s on %.8X",
+                       i_record, TARGETING::get_huid(i_target) );
+            for( auto l_over : iv_overridePtr )
+            {
+                TRACFCOMP( g_trac_vpd, "%.8X : %.8X = %p",
+                           TARGETING::get_huid((l_over.first).second),
+                           (l_over.first).first,
+                           l_over.second );
+            }
+            assert( false,
+                    "iv_overridePtr is not set inside IpVpdFacade::fetchData" );
+        }
+    }
+
     // Get the data
-    if ( vpdSource == VPD::PNOR )
+    if ( (vpdSource == VPD::PNOR) && !l_foundOverride )
     {
         err = fetchDataFromPnor( i_byteAddr, i_numBytes, o_data, i_target );
     }
-    else if ( vpdSource == VPD::SEEPROM )
+    else if ( (vpdSource == VPD::SEEPROM) && !l_foundOverride )
     {
         err = fetchDataFromEeprom( i_byteAddr, i_numBytes, o_data, i_target );
     }
@@ -1608,7 +1695,7 @@ errlHndl_t IpVpdFacade::fetchData ( uint64_t i_byteAddr,
         configError = true;
     }
 
-    if( configError )
+    if( configError && !l_foundOverride  )
     {
         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
                    "Error resolving VPD source (PNOR/SEEPROM)");
@@ -1738,9 +1825,12 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
     int matchesFound = 0;
 
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::findKeywordAddr(%s, %s, . . .)",
+                ENTER_MRK"IpVpdFacade::findKeywordAddr(%s, %s, %d, %d, %.8X )",
                 i_keywordName,
-                i_recordName );
+                i_recordName,
+                i_offset,
+                i_index,
+                TARGETING::get_huid(i_target) );
 
     do
     {
@@ -1749,29 +1839,12 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                          RECORD_ADDR_BYTE_SIZE,
                          &recordSize,
                          i_target,
-                         i_args.location );
+                         i_args.location,
+                         i_recordName );
         offset += RECORD_ADDR_BYTE_SIZE;
         if( err )
         {
             break;
-        }
-
-        if((iv_pnorSection == PNOR::MEMD))
-        {
-            static uint64_t l_basePnorAddr = 0;//getPnorAddr(*this);
-            uint64_t l_cache_address = 0;
-
-            if((iv_cachePnorAddr !=0) && !(iv_memdAccessed))
-            {
-                l_basePnorAddr = getPnorAddr(*this);
-                iv_memdAccessed = true;
-            }
-
-            TARGETING::ATTR_MEMD_OFFSET_type l_memd_offset =
-                    i_target->getAttr<TARGETING::ATTR_MEMD_OFFSET>();
-            l_cache_address = l_basePnorAddr +
-                              MEMD_HEADER_SIZE + l_memd_offset;
-            setPnorAddr(l_cache_address);
         }
 
         // Byte Swap
@@ -1784,7 +1857,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                          RECORD_BYTE_SIZE,
                          record,
                          i_target,
-                         i_args.location );
+                         i_args.location,
+                         i_recordName );
 
         // If we were looking for the Record Type (RT) keyword, we are done.
         if (memcmp( i_keywordName, "RT", KEYWORD_BYTE_SIZE ) == 0) {
@@ -1809,10 +1883,11 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         if( memcmp( record, i_recordName, RECORD_BYTE_SIZE ) )
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::findKeywordAddr: "
-                       "Record(%s) for offset (0x%04x) did not match "
+                       "Record(%s) for offset (0x%04x->0x%04x) did not match "
                        "expected record(%s)!",
                        record,
                        i_offset,
+                       offset,
                        i_recordName );
 
             /*@
@@ -1866,7 +1941,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                              KEYWORD_BYTE_SIZE,
                              keyword,
                              i_target,
-                             i_args.location );
+                             i_args.location,
+                             i_recordName );
             offset += KEYWORD_BYTE_SIZE;
 
             if( err )
@@ -1894,7 +1970,8 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                              keywordLength,
                              &keywordSize,
                              i_target,
-                             i_args.location );
+                             i_args.location,
+                             i_recordName );
             offset += keywordLength;
 
             if( err )
@@ -2055,6 +2132,52 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                                              i_args.location,
                                              vpdDest );
 
+        // Look for a record override in our image unless explicitly told not to
+        if( (i_args.location & VPD::OVERRIDE_MASK) != VPD::USEVPD )
+        {
+            uint8_t* l_overridePtr = nullptr;
+            VPD::RecordTargetPair_t l_recTarg
+              = VPD::makeRecordTargetPair(i_recordName,i_target);
+
+            // At this point we can assume that the pointer is set into our
+            //  map if we need it
+            VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
+            if( l_overItr != iv_overridePtr.end() )
+            {
+                // If we are using an override, we can't write to it
+                if( l_overridePtr != nullptr )
+                {
+                    uint32_t l_kw = 0;
+                    memcpy( &l_kw, i_keywordName, KEYWORD_BYTE_SIZE );
+                    /*@
+                     * @errortype
+                     * @reasoncode       VPD::VPD_CANNOT_WRITE_OVERRIDDEN_VPD
+                     * @moduleid         VPD::VPD_IPVPD_WRITE_KEYWORD
+                     * @userdata1[0:31]  Target HUID
+                     * @userdata1[32:63] <unused>
+                     * @userdata2[0:31]  VPD Record (ASCII)
+                     * @userdata2[32:63] VPD Keyword (ASCII)
+                     * @devdesc          Attempting to write to a VPD record
+                     *                   that has been overridden by firmware
+                     * @custdesc         Firmware error writing VPD
+                     */
+                    err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                              VPD::VPD_IPVPD_WRITE_KEYWORD,
+                              VPD::VPD_WRITE_DEST_UNRESOLVED,
+                              TWO_UINT32_TO_UINT64(
+                                        TARGETING::get_huid(i_target),
+                                        0 ),
+                              TWO_UINT32_TO_UINT64(
+                                        l_recTarg.first,
+                                        l_kw),
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                    err->collectTrace( "VPD", 256 );
+                    break;
+                }
+            }
+        }
+
         // Write the data
         if ( vpdDest == VPD::PNOR )
         {
@@ -2119,7 +2242,7 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
 
         if( configError )
         {
-            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::fetchData: "
+            TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::writeKeyword: "
                        "Error resolving VPD source (PNOR/SEEPROM)");
 
             /*@
@@ -2270,3 +2393,230 @@ void IpVpdFacade::getRecordLists(
     o_altRecSize = 0;
 }
 
+/**
+ * @brief Callback function to check for a record override
+ */
+errlHndl_t IpVpdFacade::checkForRecordOverride( const char* i_record,
+                                                TARGETING::Target* i_target,
+                                                uint8_t*& o_ptr )
+{
+    // by default there is not an override
+    o_ptr = nullptr;
+    TRACDCOMP( g_trac_vpd, "No override for %s on %.8X", i_record, TARGETING::get_huid(i_target) );
+    VPD::RecordTargetPair_t l_recTarg =
+      VPD::makeRecordTargetPair(i_record,i_target);
+    iv_overridePtr[l_recTarg] = nullptr;
+    return nullptr;
+}
+
+/**
+ * @brief Retrieves the MEMD record from PNOR, finds a matching
+ *        set of data, and sets up sets up the override pointer.
+ */
+errlHndl_t IpVpdFacade::getMEMDFromPNOR( input_args_t i_recKw,
+                                         TARGETING::Target* i_target,
+                                         uint32_t i_vmMask )
+{
+    TRACFCOMP(g_trac_vpd,ENTER_MRK"IpVpdFacade::getMEMDFromPNOR( %d, %.8X )",
+              i_recKw.record, get_huid(i_target));
+    errlHndl_t l_errl = nullptr;
+
+    /**
+     * @brief Define the set of information included at the beginning of the
+     *        MEMD PNOR section
+     */
+    struct MemdHeader_t
+    {
+        uint32_t eyecatch;         /* Eyecatch to determine validity. "OKOK" */
+        uint32_t header_version;   /* What version of the header this is in */
+        uint32_t memd_version;     /* What version of the MEMD this includes */
+        uint32_t expected_size_k;  /* Size in thousands (not KB) of each MEMD instance */
+        uint16_t expected_num;     /* Number of MEMD instances in this section */
+        uint8_t  padding[14];      /* Padding for future changes */
+    }__attribute__((packed));
+
+    enum MEMD_valid_constants
+    {
+        MEMD_VALID_HEADER = 0x4f4b4f4b, // "OKOK"
+        MEMD_VALID_HEADER_VERSION = 0x30312e30, // "01.0";
+    };
+
+    do
+    {
+        // Get the Record/keyword names
+        const char* l_record = nullptr;
+        l_errl = translateRecord( i_recKw.record,
+                                  l_record );
+        if( l_errl )
+        {
+            break;
+        }
+
+        const char* l_keyword = nullptr;
+        l_errl = translateKeyword( i_recKw.keyword,
+                                   l_keyword );
+        if( l_errl )
+        {
+            break;
+        }
+
+        VPD::RecordTargetPair_t l_recTarg =
+          VPD::makeRecordTargetPair(l_record,i_target);
+
+        // MEMD Processing
+#ifdef __HOSTBOOT_RUNTIME
+        uint64_t l_memdSize = 0;
+        uint64_t l_memd_addr = hb_get_rt_rsvd_mem(
+                       Util::HBRT_MEM_LABEL_VPD_MEMD,
+                       0,
+                       l_memdSize );
+        if( (l_memd_addr == 0) || (l_memdSize == 0) )
+        {
+            TRACFCOMP(g_trac_vpd,"Optional MEMD section not found in reserved mem.");
+            break;
+        }
+
+        uint8_t* l_memd_vaddr
+          = reinterpret_cast<uint8_t *>(l_memd_addr);
+#else
+        PNOR::SectionInfo_t l_memd_info;
+        l_errl = PNOR::getSectionInfo(PNOR::MEMD,l_memd_info);
+        if( l_errl )
+        {
+            TRACFCOMP(g_trac_vpd,"Optional MEMD section not found in PNOR.");
+            delete l_errl;
+            l_errl = nullptr;
+            iv_overridePtr[l_recTarg] = nullptr;
+            break;
+        }
+
+        uint8_t* l_memd_vaddr
+          = reinterpret_cast<uint8_t *>(l_memd_info.vaddr);
+#endif
+
+        TRACFCOMP(g_trac_vpd,"MEMD is at %p", l_memd_vaddr);
+
+        // Get and process the header
+        MemdHeader_t l_header;
+        memcpy(&l_header, l_memd_vaddr, sizeof(l_header));
+        TRACFBIN(g_trac_vpd,"MEMD Header", &l_header, sizeof(l_header));
+
+        // See if we have any valid override records
+        bool l_valid_memd = ((l_header.eyecatch == MEMD_VALID_HEADER) &
+               (l_header.header_version == MEMD_VALID_HEADER_VERSION) &
+               ( (l_header.memd_version == l_recTarg.first)
+                 // also handle old version to avoid coreqs
+                 || (l_header.memd_version == MEMD_VALID_HEADER_VERSION) ));
+        if( !l_valid_memd )
+        {
+            TRACFCOMP(g_trac_vpd,"MEMD is not valid, ignoring it");
+            iv_overridePtr[l_recTarg] = nullptr;
+            break;
+        }
+
+        // Get the VM keyword size from the real VPD
+        size_t l_vm_size = 0;
+        input_args_t l_vm_args = i_recKw;
+        l_vm_args.location = VPD::USEVPD;
+        l_errl = read( i_target, nullptr, l_vm_size, l_vm_args );
+        if( l_errl )
+        {
+            TRACFCOMP(g_trac_vpd,"ERROR getting MEMD VM size");
+            break;
+        }
+
+        // VM should be exactly 4 bytes long
+        uint32_t l_vm_kw = 0;
+        assert( l_vm_size == sizeof(l_vm_kw) );
+
+        // Get the VM keyword from the real VPD
+        l_errl = read( i_target, &l_vm_kw, l_vm_size, l_vm_args );
+        if( l_errl )
+        {
+            TRACFCOMP(g_trac_vpd,"ERROR getting DVPD VM keyword");
+            break;
+        }
+        TRACFCOMP(g_trac_vpd,"VPD VM = %.8X", l_vm_kw);
+
+        // Offset past the header to start with
+        uint16_t l_memd_offset = sizeof(MemdHeader_t);
+        bool l_found_match = false;
+
+        // Loop through each possible instance until we find a match or run out
+        for( auto l_inst = 0; l_inst < l_header.expected_num; ++l_inst )
+        {
+            // Get the VM keyword from the copy in PNOR
+            TRACFCOMP(g_trac_vpd,"Attempting to read MEMD VM keyword from override");
+            input_args_t l_pnor_args = i_recKw;
+            l_pnor_args.location = VPD::USEOVERRIDE;
+
+            // Set the ptr in the map to allow the lookups inside
+            //  IpVpdFacade to work
+            iv_overridePtr[l_recTarg] = l_memd_vaddr + l_memd_offset;
+
+            uint32_t l_memd_vm = 0;
+            l_errl = retrieveKeyword( l_keyword, l_record,
+                                      0, 0,
+                                      i_target,
+                                      &l_memd_vm, l_vm_size,
+                                      l_pnor_args );
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_vpd,"getMEMDFromPNOR: ERROR getting %s:%s keyword in slot %d", l_record, l_keyword, l_inst);
+                // if we got this using the legacy header version then it is
+                //  because we are looking at a bunch of the wrong record
+                //  type, so just move on
+                if( l_header.memd_version == MEMD_VALID_HEADER_VERSION )
+                {
+                    delete l_errl;
+                    l_errl = nullptr;
+                }
+                break;
+            }
+
+            // Compare the appropriate portion of VM
+            if( (l_memd_vm != 0) &&
+                ((l_vm_kw & i_vmMask) == (l_memd_vm & i_vmMask)) )
+            {
+                TRACFCOMP(g_trac_vpd,"Matching data was found in PNOR at %.llX. VM: PNOR=%.8X, VPD=%.8X",
+                          l_memd_offset,
+                          l_memd_vm,
+                          l_vm_kw);
+                l_found_match = true;
+                break;
+            }
+
+            // VM's don't match, we need to keep looking
+            TRACFCOMP(g_trac_vpd,"No match. VM: PNOR=%.8X, VPD=%.8X",
+                      l_memd_vm,
+                      l_vm_kw );
+            l_memd_offset += (l_header.expected_size_k * 1000);
+        }
+        if( l_errl ) { break; }
+
+        // If we did not find a match, set our map back to a nullptr
+        if( !l_found_match )
+        {
+            iv_overridePtr[l_recTarg] = nullptr;
+        }
+    } while(0);
+
+    TRACFCOMP(g_trac_vpd,EXIT_MRK"getMEMDFromPNOR()");
+    return l_errl;
+}
+
+#ifdef CONFIG_SECUREBOOT
+/**
+ * @brief Load/unload the appropriate secure section for
+ *        an overriden PNOR section
+ */
+errlHndl_t IpVpdFacade::loadUnloadSecureSection( input_args_t i_args,
+                                                 TARGETING::Target* i_target,
+                                                 bool i_load,
+                                                 bool& o_loaded )
+{
+    // nothing to do by default
+    o_loaded = false;
+    return nullptr;
+}
+#endif

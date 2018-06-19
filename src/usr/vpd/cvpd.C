@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -115,10 +115,38 @@ namespace CVPD
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"cvpdRead()" );
 
-        err = Singleton<CvpdFacade>::instance().read(i_target,
-                                                     io_buffer,
-                                                     io_buflen,
-                                                     args);
+#ifdef CONFIG_SECUREBOOT
+        // Load the secure section just in case if we're using it
+        bool l_didload = false;
+        err = Singleton<CvpdFacade>::instance().
+          loadUnloadSecureSection( args, i_target, true, l_didload );
+#endif
+
+        if( !err )
+        {
+            err = Singleton<CvpdFacade>::instance().read(i_target,
+                                                         io_buffer,
+                                                         io_buflen,
+                                                         args);
+        }
+
+#ifdef CONFIG_SECUREBOOT
+        if( l_didload )
+        {
+            errlHndl_t err2 = Singleton<CvpdFacade>::instance().
+              loadUnloadSecureSection( args, i_target, false, l_didload );
+            if( err2 && !err )
+            {
+                err = err2;
+                err2 = nullptr;
+            }
+            else if( err2 )
+            {
+                err2->plid(err->plid());
+                errlCommit( err2, VPD_COMP_ID );
+            }
+        }
+#endif
 
         return err;
     }
@@ -288,3 +316,113 @@ void CvpdFacade::getRecordLists(
 #endif
 }
 
+/**
+ * @brief Callback function to check for a record override and
+ *        set iv_overridePtr appropriately
+ */
+errlHndl_t CvpdFacade::checkForRecordOverride( const char* i_record,
+                                               TARGETING::Target* i_target,
+                                               uint8_t*& o_ptr )
+{
+    TRACFCOMP(g_trac_vpd,ENTER_MRK"CvpdFacade::checkForRecordOverride( %s, 0x%.8X )",
+              i_record, get_huid(i_target));
+    errlHndl_t l_errl = nullptr;
+    o_ptr = nullptr;
+
+    assert( i_record != nullptr, "CvpdFacade::checkForRecordOverride() i_record is null" );
+    assert( i_target != nullptr, "CvpdFacade::checkForRecordOverride() i_target is null" );
+
+    VPD::RecordTargetPair_t l_recTarg =
+      VPD::makeRecordTargetPair(i_record,i_target);
+
+    do
+    {
+        // We only support overriding SPDX
+        if( strcmp( i_record, "SPDX" ) )
+        {
+            TRACFCOMP(g_trac_vpd,"Record %s has no override", i_record);
+            iv_overridePtr[l_recTarg] = nullptr;
+            break;
+        }
+
+        // Compare the 5th nibble
+        constexpr uint32_t l_vmMask = 0x00000F00;
+        input_args_t l_args = { CVPD::SPDX, CVPD::VM, VPD::AUTOSELECT };
+        l_errl = getMEMDFromPNOR( l_args,
+                                  i_target,
+                                  l_vmMask );
+        if( l_errl )
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK"ERROR from getMEMDFromPNOR.");
+            break;
+        }
+
+    } while(0);
+
+    // For any error, we should reset the override map so that we'll
+    //  attempt everything again the next time we want VPD
+    if( l_errl )
+    {
+        iv_overridePtr.erase(l_recTarg);
+    }
+    else
+    {
+        o_ptr = iv_overridePtr[l_recTarg];
+    }
+
+    return l_errl;
+}
+
+#ifdef CONFIG_SECUREBOOT
+/**
+ * @brief Load/unload the appropriate secure section for
+ *        an overriden PNOR section
+ */
+errlHndl_t CvpdFacade::loadUnloadSecureSection( input_args_t i_args,
+                                                TARGETING::Target* i_target,
+                                                bool i_load,
+                                                bool& o_loaded )
+{
+    errlHndl_t l_err = nullptr;
+    o_loaded = false;
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Only relevant for SPDX
+    if( i_args.record != CVPD::SPDX )
+    {
+        return nullptr;
+    }
+
+    const char* l_record = nullptr;
+    l_err = translateRecord( i_args.record, l_record );
+    if( l_err )
+    {
+        return l_err;
+    }
+
+    // Jump out if we don't have an override
+    VPD::RecordTargetPair_t l_recTarg =
+      VPD::makeRecordTargetPair(l_record,i_target);
+    VPD::OverrideMap_t::iterator l_overItr = iv_overridePtr.find(l_recTarg);
+    if( l_overItr == iv_overridePtr.end() )
+    {
+        return nullptr;
+    }
+
+    if( i_load )
+    {
+        l_err = loadSecureSection(PNOR::MEMD);
+        if( !l_err )
+        {
+            o_loaded = true;
+        }
+    }
+    else
+    {
+        l_err = unloadSecureSection(PNOR::MEMD);
+    }
+#endif
+
+    return l_err;
+}
+#endif

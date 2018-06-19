@@ -461,6 +461,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             }
         }
     }
+
     if ( l_errl )
     {
         // Create IStep error log and cross reference to error that occurred
@@ -469,6 +470,17 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
         // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
     }
+
+#ifdef CONFIG_SECUREBOOT
+    // Unload the MEMD section that was loaded at the beginning of step11
+    l_errl = unloadSecureSection(PNOR::MEMD);
+    if (l_errl)
+    {
+        l_stepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+#endif
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained exit" );
