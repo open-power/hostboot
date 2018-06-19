@@ -138,6 +138,7 @@ namespace RUNTIME
         RC_RT_RES_TRACE_BUF_INVALID    = RUNTIME_COMP_ID | 0x41,
         RC_SP_ATTN_AREA_OVERFLOW       = RUNTIME_COMP_ID | 0x42,
         RC_SP_ATTN_AREA1_SIZE_OVERFLOW = RUNTIME_COMP_ID | 0x43,
+        RC_UNKNOWN_LABEL               = RUNTIME_COMP_ID | 0x44,
     };
 
     enum UserDetailsTypes

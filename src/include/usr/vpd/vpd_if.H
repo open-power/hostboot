@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,8 @@
 #if !defined(__VPD_IF_H)
 #define __VPD_IF_H
 
+#include <pnor/pnorif.H>
+#include <map>
 
 namespace VPD
 {
@@ -41,9 +43,18 @@ namespace VPD
      */
     enum vpdCmdTarget
     {
-        AUTOSELECT,
-        PNOR,
-        SEEPROM,
+        AUTOSELECT         = 0x0000,
+
+        // Use our cache or read the eeprom
+        PNOR               = 0x0001,
+        SEEPROM            = 0x0002,
+        LOCATION_MASK      = 0x000F,
+
+        // Use the real vpd or a firmware override
+        USEVPD             = 0x0010,
+        USEOVERRIDE        = 0x0020,
+        OVERRIDE_MASK      = 0x00F0,
+
         INVALID_LOCATION   = 0xFFFF,
     };
 
@@ -136,6 +147,29 @@ namespace VPD
      *      error log.
      */
     errlHndl_t goldenCacheInvalidate ( void );
+
+    /**
+     * @brief Structure used to specify VPD overrides for runtime
+     *        reserved memory usage
+     */
+    struct OverrideSpecifier_t
+    {
+        PNOR::SectionId pnorId;
+        size_t size; // size in bytes
+    };
+
+    /**
+     * @brief Map of override labels to sections
+     *   index : uint64_t label = right-justified 4-digit ASCII string
+     *   result : OverrideSpecifier_t
+     */
+    typedef std::map<uint64_t,OverrideSpecifier_t> OverrideRsvMemMap_t;
+
+    /**
+     * @brief Get a list of all overridden sections
+     * @param[out]  List of known override sections
+     */
+    void getListOfOverrideSections( OverrideRsvMemMap_t& o_overrides );
 
 }; //end vpd namespace
 

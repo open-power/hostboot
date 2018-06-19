@@ -443,9 +443,12 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
  *  -----  HB Data Layout -------
  * io_start_address
  *    -- HB Table of Contents
- *    -- ATTR Override Data
+ *    -- ATTR Override Data (optional)
  *    -- ATTR Data
  *    -- VPD
+ *    -- HYPCOMM
+ *    -- VPD Overrides
+ *    -- HBRT Trace Area (master node only)
  *    -- Padding
  * io_end_address
  *
@@ -563,6 +566,21 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     l_totalSectionSize +=
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
+
+    // Fill in VPD_XXXX sizes (if there are any)
+    VPD::OverrideRsvMemMap_t l_vpdOverrides;
+    VPD::getListOfOverrideSections( l_vpdOverrides );
+    for( auto l_over : l_vpdOverrides )
+    {
+        // Or in the specific label with the "VPD_" prefix
+        l_hbTOC.entry[l_hbTOC.total_entries].label =
+          Util::HBRT_MEM_LABEL_VPD_XXXX | l_over.first;
+        l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+        l_hbTOC.entry[l_hbTOC.total_entries].size = l_over.second.size;
+        l_totalSectionSize +=
+          ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+        l_hbTOC.total_entries++;
+    }
 
     // Fill in the TRACEBUF only for Master Node
     if(i_master_node == true )
@@ -778,7 +796,84 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     memset(reinterpret_cast<uint8_t*>(l_prevDataAddr),0,aligned_size);
                     break;
 
+                case Util::HBRT_MEM_LABEL_VPD_MEMD:
+                    {
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD_MEMD v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+
+                    VPD::OverrideSpecifier_t l_over =
+                      l_vpdOverrides[l_hbTOC.entry[i].label
+                                     & Util::HBRT_MEM_LABEL_VPD_MASK];
+
+#ifdef CONFIG_SECUREBOOT
+                    // load the section in, copy the data, then unload it
+                    l_elog = PNOR::loadSecureSection(l_over.pnorId);
+                    if(l_elog)
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                   "fill_RsvMem_hbData> failed secure load call" );
+                        break;
+                    }
+#endif
+
+                    PNOR::SectionInfo_t l_memd_info;
+                    l_elog = PNOR::getSectionInfo(l_over.pnorId,l_memd_info);
+                    if( l_elog )
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                   "fill_RsvMem_hbData> failed getSectionInfo call" );
+                        break;
+                    }
+
+#ifdef CONFIG_SECUREBOOT
+                    memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
+                           reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
+                           l_memd_info.secureProtectedPayloadSize);
+#else
+                    memcpy(reinterpret_cast<uint8_t*>(l_prevDataAddr),
+                           reinterpret_cast<uint8_t *>(l_memd_info.vaddr),
+                           l_memd_info.size);
+#endif
+
+
+#ifdef CONFIG_SECUREBOOT
+                    l_elog = PNOR::unloadSecureSection(l_over.pnorId);
+                    if(l_elog)
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                   "fill_RsvMem_hbData> failed secure unload call" );
+                        break;
+                    }
+#endif
+
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD v address 0x%.16llX, size: %lld done", l_prevDataAddr, aligned_size);
+                    break;
+                    }
+
+                case(Util::HBRT_MEM_LABEL_PADDING):
+                    // NOOP
+                    break;
+
                 default:
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> Unrecognized label 0x%.ll16X", l_hbTOC.entry[i].label );
+                    /*@
+                     * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid        RUNTIME::MOD_FILL_RSVMEM_HBDATA
+                     * @reasoncode      RUNTIME::RC_UNKNOWN_LABEL
+                     * @userdata1       Unknown Label
+                     * @userdata2       <unused>
+                     *
+                     * @devdesc         Unknown reserved memory label attempted
+                     * @custdesc        Firmware error initializing system
+                     *                  data structures during boot
+                     */
+                    l_elog = new ERRORLOG::ErrlEntry(
+                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                  RUNTIME::MOD_FILL_RSVMEM_HBDATA,
+                                  RUNTIME::RC_UNKNOWN_LABEL,
+                                  l_hbTOC.entry[i].label,
+                                  0,
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                    l_elog->collectTrace(RUNTIME_COMP_NAME);
                     break;
             }
             i++;
@@ -3138,6 +3233,7 @@ errlHndl_t populate_hbRuntimeData( void )
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData failed" );
+                    break;
                 }
 
                 // Get list of processor chips

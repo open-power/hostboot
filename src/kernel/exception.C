@@ -110,6 +110,7 @@ void kernel_execute_data_storage()
                "Instruction where it occurred: %p\n",
                t->tid, getDAR(), getDSISR(), t->context.nip);
         KernelMisc::printkBacktrace(t);
+        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }

@@ -29,7 +29,7 @@ use strict;
 use File::Basename;
 
 ### CONSTANTS ###
-use constant ROUNDING_DIVISOR => 1000;
+use constant ROUNDING_DIVISOR => 1000; # 1K (not 1KB)
 use constant HEADER_INPUT_LOCATION => 12;
 
 print "Creating MEMD binary...\n";
@@ -44,6 +44,7 @@ print "Creating MEMD binary...\n";
 my $memd_dir = "";
 my $memd_output = "";
 my @memd_files = "";
+my $record_name = "01.0"; #legacy support
 my $help = 0;
 my $man = 0;
 
@@ -51,6 +52,7 @@ GetOptions(
     "memd_dir=s" => \$memd_dir,
     "memd_output=s" => \$memd_output,
     "memd_files=s" => \@memd_files,
+    "record=s" => \$record_name,
     "help" => \$help,
     "man" => \$man) || pod2usage(-verbose=>0);
 
@@ -92,8 +94,8 @@ my $number_of_files = scalar(@memd_files);
 # Generate header - add to file
 my $header = "OKOK";      # shows that the memd partition is valid
 $header .= "01.0";        # current metadata header version
-$header .= "01.0";        # current memd version
-$header .= "0000";        # expected size of each memd blob (in KB's) placeholder
+$header .= $record_name;  # vpd record
+$header .= "0000";        # expected size of each memd blob (in 1000's) placeholder
 $header .= "00";          # number of memd instances placeholder
 $header .= "00000000";    # padding for the future
 $header .= "000000";      # rounding up to 16 bytes

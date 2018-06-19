@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
+#include <config.h>
 
 #include <vpd/dvpdenums.H>
 #include <vpd/vpdreasoncodes.H>
@@ -204,6 +205,7 @@ class DVPDTest: public CxxTest::TestSuite
 
         /**
          * @brief This function will test DVPD writes.
+         *    Note: this forces the path to not use the FW override
          */
         void testDvpdWrite ( void )
         {
@@ -234,7 +236,9 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
+                                  DEVICE_DVPD_FORCE_ADDRESS(DVPD::MEMD,
+                                                            TSTKEYWD,
+                                                            VPD::USEVPD) );
                 if( err )
                 {
                     fails++;
@@ -254,7 +258,9 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   origData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
+                                  DEVICE_DVPD_FORCE_ADDRESS(DVPD::MEMD,
+                                                            TSTKEYWD,
+                                                            VPD::USEVPD) );
                 if( err )
                 {
                     fails++;
@@ -282,7 +288,9 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    testData,
                                    theSize,
-                                   DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
+                                   DEVICE_DVPD_FORCE_ADDRESS(DVPD::MEMD,
+                                                             TSTKEYWD,
+                                                             VPD::USEVPD) );
                 if( err )
                 {
                     fails++;
@@ -302,7 +310,9 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
+                                  DEVICE_DVPD_FORCE_ADDRESS(DVPD::MEMD,
+                                                            TSTKEYWD,
+                                                            VPD::USEVPD) );
                 if( err )
                 {
                     fails++;
@@ -334,7 +344,9 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    origData,
                                    theSize,
-                                   DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
+                                   DEVICE_DVPD_FORCE_ADDRESS(DVPD::MEMD,
+                                                             TSTKEYWD,
+                                                             VPD::USEVPD) );
                 if( err )
                 {
                     fails++;
@@ -715,6 +727,36 @@ class DVPDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_vpd,
                        "testDvpdCheckStructOrder - %d fails",
                        fails );
+        }
+
+        DVPDTest() : CxxTest::TestSuite()
+        {
+            TRACFCOMP( g_trac_vpd, "Starting DVPDTest" );
+#ifdef CONFIG_SECUREBOOT
+#ifndef __HOSTBOOT_RUNTIME
+            errlHndl_t l_err = loadSecureSection(PNOR::MEMD);
+            if(l_err)
+            {
+                TS_FAIL( "DVPDTest : loadSecureSection" );
+                delete l_err;
+            }
+#endif
+#endif
+        }
+
+        ~DVPDTest()
+        {
+#ifdef CONFIG_SECUREBOOT
+#ifndef __HOSTBOOT_RUNTIME
+            errlHndl_t l_err = unloadSecureSection(PNOR::MEMD);
+            TRACFCOMP( g_trac_vpd, "Ending DVPDTest" );
+            if(l_err)
+            {
+                TS_FAIL( "DVPDTest : unloadSecureSection" );
+                delete l_err;
+            }
+#endif
+#endif
         }
 };
 

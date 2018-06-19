@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -225,6 +225,22 @@ class DvpdFacade: public IpVpdFacade
      */
     DvpdFacade( );
 
+#ifdef CONFIG_SECUREBOOT
+    /**
+     * @brief Load/unload the appropriate secure section for
+     *        an overriden PNOR section
+     * @param[in] i_args    Record/keyword
+     * @param[in] i_target  Target pointer
+     * @param[in] i_load    true=load, false=unload
+     * @param[out] o_loaded true=section loaded, false=section not loaded
+     * @return Error log
+     */
+    virtual errlHndl_t loadUnloadSecureSection( input_args_t i_args,
+                                                TARGETING::Target* i_target,
+                                                bool i_load,
+                                                bool& o_loaded );
+#endif
+
   private:
 
     /**
@@ -245,6 +261,20 @@ class DvpdFacade: public IpVpdFacade
                 uint64_t           & o_primaryRecSize,
                 const  recordInfo* & o_altVpdRecords,
                 uint64_t           & o_altRecSize);
+
+  protected:
+    /**
+     * @brief Callback function to check for a record override and
+     *        set iv_overridePtr appropriately
+     * @param[in] i_record  Record name
+     * @param[in] i_target  Target pointer
+     * @param[out] o_ptr    Pointer to location of record in PNOR,
+     *                      ==nullptr if there is no override
+     * @return Error log
+     */
+    virtual errlHndl_t checkForRecordOverride( const char* i_record,
+                                               TARGETING::Target* i_target,
+                                               uint8_t*& o_ptr );
 
 };
 #endif  // __DVPD_H
