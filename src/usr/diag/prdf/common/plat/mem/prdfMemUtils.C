@@ -677,14 +677,14 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
     reg = mcChip->getRegister( "MC_CHIPLET_UCS_FIR_MASK" );
     if ( SUCCESS == reg->Read() )
     {
-        reg->SetBit( 1 + (dmiPos * 2) ); // 1, 3, 5, 7
+        reg->SetBit( 0 + (dmiPos * 2) ); // 0, 2, 4, 6 (masks 1, 3, 5, 7)
         reg->Write();
     }
 
     reg = mcChip->getRegister( "MC_CHIPLET_HA_FIR_MASK" );
     if ( SUCCESS == reg->Read() )
     {
-        reg->SetBit( 1 + (dmiPos * 2) ); // 1, 3, 5, 7
+        reg->SetBit( 0 + (dmiPos * 2) ); // 0, 2, 4, 6 (masks 1, 3, 5, 7)
         reg->Write();
     }
 

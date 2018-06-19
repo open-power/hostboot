@@ -68,7 +68,7 @@ void maskIfCoreCs( ExtensibleChip * i_chip )
         coreFirMask->SetBit(26);
 
         // Mask bit 1 for Unit checkstop
-        coreUcsMask->SetBit(1);
+        coreUcsMask->SetBit(0); // setting bit 0 masks the FIR bit 1.
 
         coreFirMask->Write();
         coreUcsMask->Write();
