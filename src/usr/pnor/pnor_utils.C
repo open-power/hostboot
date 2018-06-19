@@ -260,7 +260,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         {
             PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_PARSE_CHECKSUM_ERROR,
                                    "E>PNOR::parseEntries:  "
-                                   "Check sum error while parseing entry ",
+                                   "Check sum error while parseing entry "
                                    "%d in TOC", i);
             io_errCode |= ENTRY_ERR;
             io_errCode |= ENTRY_CHECKSUM_ERR;
@@ -276,7 +276,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         {
             PNOR_UTIL_TRACE_BL_SKIP(BTLDR_TRC_UTILS_PARSE_INVALID_SECTION,
                                     "PNOR::parseEntries: "
-                                    "Unsupported section found while parsing ",
+                                    "Unsupported section found while parsing "
                                     "entry %d in TOC \n Entry name is \"%s\"",
                                     i, cur_entry->name);
             //continue to skip invalid section
@@ -305,7 +305,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         {
             PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_PARSE_EXCEEDS_FLASH,
                                   "E>PNOR::parseEntries:  "
-                                   "Exceeded flash while parsing entry ",
+                                   "Exceeded flash while parsing entry "
                                    "%d in TOC \n Entry name is \"%s\"", i,
                                     cur_entry->name);
             io_errCode |= ENTRY_ERR;
