@@ -85,7 +85,9 @@ fapi2::ReturnCode scomWrite(CONST_PROC& iTgt, const uint64_t iAddr, const uint64
 fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iHwImagePtr)
 {
     FAPI_IMP("Entering p9_io_xbus_image_build.");
-
+    /*
+     * Currently a NOP as we do not have a POR to use the xbus image.
+     *
     const uint64_t SRAM_BASE_ADDR   = 0xFFFF000000000000ull;
     const uint64_t AUTOINC_EN       = 0x8000000000000000ull;
     const uint64_t AUTOINC_DIS      = 0x0000000000000000ull;
@@ -148,7 +150,8 @@ fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iHwImageP
         FAPI_INF("No functional xbus units found. Skipping Xbus PPE Load...");
     }
 
-fapi_try_exit:
+    fapi_try_exit:
+    */
     FAPI_IMP("Exit p9_io_xbus_image_build.");
     return fapi2::current_err;
 }
