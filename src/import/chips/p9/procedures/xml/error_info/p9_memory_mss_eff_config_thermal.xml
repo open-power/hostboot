@@ -26,8 +26,8 @@
 <!-- @file memory_mss_timing.xml                                            -->
 <!-- @brief Error xml for timing.H                                          -->
 <!-- -->
-<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>                     -->
-<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>                     -->
+<!-- *HWP HWP Owner: Andre A. Marin  <aamarin@us.ibm.com>                   -->
+<!-- *HWP HWP Backup: Michael Pardeik <pardeik@us.ibm.com>                  -->
 <!-- *HWP Team: Memory                                                      -->
 <!-- *HWP Level: 3                                                          -->
 <!-- *HWP Consumed by: HB:FSP                                               -->
@@ -219,6 +219,33 @@
     </description>
     <ffdc>MAX_DIMM_AMOUNT</ffdc>
     <ffdc>DIMMS_SEEN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_MRW_SAFEMODE_THROTTLE_NOT_SUPPORTED</rc>
+    <description>
+        The MRW safemode throttle N value gives a utilization that is less than the minimum utilization supported.  Check ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT.
+    </description>
+    <ffdc>MRW_SAFEMODE_N_VALUE</ffdc>
+    <ffdc>MRW_DRAM_CLOCK_THROTTLE_M</ffdc>
+    <ffdc>MIN_UTIL_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+ <hwpError>
+    <rc>RC_MSS_MIN_UTILIZATION_ERROR</rc>
+    <description>
+        The input utilization is less than the minimum utilization allowed.
+    </description>
+    <ffdc>INPUT_UTIL_VALUE</ffdc>
+    <ffdc>MIN_UTIL_VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
