@@ -2600,7 +2600,7 @@ group gN0_CHIPLET_FIR filter singlebit
 rule rN0_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    N0_CHIPLET_UCS_FIR & ~N0_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    N0_CHIPLET_UCS_FIR & ~(N0_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN0_CHIPLET_UCS_FIR filter singlebit
@@ -3237,7 +3237,7 @@ group gN1_CHIPLET_FIR filter singlebit
 rule rN1_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    N1_CHIPLET_UCS_FIR & ~N1_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    N1_CHIPLET_UCS_FIR & ~(N1_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN1_CHIPLET_UCS_FIR filter singlebit
@@ -3266,7 +3266,7 @@ group gN1_CHIPLET_UCS_FIR filter singlebit
 rule rN1_CHIPLET_HA_FIR
 {
   HOST_ATTN:
-    N1_CHIPLET_HA_FIR & ~N1_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+    N1_CHIPLET_HA_FIR & ~(N1_CHIPLET_HA_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN1_CHIPLET_HA_FIR filter singlebit
@@ -3907,7 +3907,7 @@ group gN2_CHIPLET_FIR filter singlebit
 rule rN2_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    N2_CHIPLET_UCS_FIR & ~N2_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    N2_CHIPLET_UCS_FIR & ~(N2_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN2_CHIPLET_UCS_FIR filter singlebit
@@ -4189,7 +4189,7 @@ group gN3_CHIPLET_FIR filter singlebit
 rule rN3_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    N3_CHIPLET_UCS_FIR & ~N3_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    N3_CHIPLET_UCS_FIR & ~(N3_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN3_CHIPLET_UCS_FIR filter singlebit
@@ -4238,7 +4238,7 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
 rule rN3_CHIPLET_HA_FIR
 {
   HOST_ATTN:
-    N3_CHIPLET_HA_FIR & ~N3_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+    N3_CHIPLET_HA_FIR & ~(N3_CHIPLET_HA_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gN3_CHIPLET_HA_FIR filter singlebit
@@ -7485,7 +7485,7 @@ group gXB_CHIPLET_FIR filter singlebit
 rule rXB_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    XB_CHIPLET_UCS_FIR & ~XB_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    XB_CHIPLET_UCS_FIR & ~(XB_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gXB_CHIPLET_UCS_FIR filter singlebit

@@ -327,7 +327,7 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
 rule rMC_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    MC_CHIPLET_UCS_FIR & ~MC_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    MC_CHIPLET_UCS_FIR & ~(MC_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
@@ -376,7 +376,7 @@ group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
 rule rMC_CHIPLET_HA_FIR
 {
   HOST_ATTN:
-    MC_CHIPLET_HA_FIR & ~MC_CHIPLET_HA_FIR_MASK & `7fffffffffffffff`;
+    MC_CHIPLET_HA_FIR & ~(MC_CHIPLET_HA_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gMC_CHIPLET_HA_FIR attntype HOST_ATTN filter singlebit
