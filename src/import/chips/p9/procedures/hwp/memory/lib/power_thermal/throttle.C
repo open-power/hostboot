@@ -907,13 +907,14 @@ fapi2::ReturnCode equalize_throttles (const std::vector< fapi2::Target<fapi2::TA
 
                     o_exceeded_power.push_back(l_mca);
                 }
+
+                FAPI_INF("%s Final throttles values for slot %d, for port %d, power value %d",
+                         mss::c_str(l_mca),
+                         l_fin_port[l_pos],
+                         l_fin_slot[l_pos],
+                         l_fin_power[l_pos]);
             }
 
-            FAPI_INF("%s Final throttles values for slot %d, for port %d, power value %d",
-                     mss::c_str(l_mcs),
-                     l_fin_port,
-                     l_fin_slot,
-                     l_fin_port);
             //Even if there's an error, still calculate and set the throttles.
             //OCC will set to safemode if there's an error
             //Better to set the throttles than leave them 0, and potentially brick the memory
