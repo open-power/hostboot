@@ -27,8 +27,8 @@
 /// @file p9_mss_eff_config_thermal.C
 /// @brief Perform thermal calculations as part of the effective configuration
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Michael Pardeik <pardeik@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -71,6 +71,24 @@ extern "C"
         FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit (i_targets), "Error in p9_mss_eff_config_thermal");
 
         FAPI_INF("Size of vectors are %d %d %d", l_slope.size(), l_intercept.size(), l_thermal_power_limit.size());
+
+        // Return error if safemode throttle utilization is less than MIN_UTIL
+        // This section needs to be in braces otherwise the compile will fail
+        {
+            uint16_t l_throttle_per_port = 0;
+            uint32_t l_throttle_denominator = 0;
+            FAPI_TRY(mss::mrw_mem_m_dram_clocks(l_throttle_denominator), "Error in p9_mss_eff_config_thermal" );
+            FAPI_TRY(mss::mrw_safemode_mem_throttled_n_commands_per_port(l_throttle_per_port),
+                     "Error in p9_mss_eff_config_thermal" );
+            FAPI_ASSERT( (l_throttle_per_port  >= (mss::power_thermal::MIN_UTIL * l_throttle_denominator /
+                                                   mss::power_thermal::DRAM_BUS_UTILS / mss::power_thermal::UTIL_CONVERSION)),
+                         fapi2::MSS_MRW_SAFEMODE_THROTTLE_NOT_SUPPORTED()
+                         .set_MRW_SAFEMODE_N_VALUE(l_throttle_per_port)
+                         .set_MRW_DRAM_CLOCK_THROTTLE_M(l_throttle_denominator)
+                         .set_MIN_UTIL_VALUE(mss::power_thermal::MIN_UTIL),
+                         "MRW safemode attribute (N=%d, M=%d) has less util than the min util allowed (%d centi percent)",
+                         l_throttle_per_port, l_throttle_denominator, mss::power_thermal::MIN_UTIL);
+        }
 
         //Restore runtime_throttles from safemode setting
         //Decode and set power curve attributes at the same time
