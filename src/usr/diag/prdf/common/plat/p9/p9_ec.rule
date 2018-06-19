@@ -215,7 +215,7 @@ group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
 rule rEC_CHIPLET_UCS_FIR
 {
   UNIT_CS:
-    EC_CHIPLET_UCS_FIR & ~EC_CHIPLET_UCS_FIR_MASK & `7fffffffffffffff`;
+    EC_CHIPLET_UCS_FIR & ~(EC_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
 group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
