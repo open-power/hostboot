@@ -1306,6 +1306,10 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
 
             if ($cfgFapiAttributesXmlFile eq "")
             {
+                if ($attribute->{id} ~~ @nonSyncAttributes)
+                {
+                    next;
+                }
                 #No FAPI attributes xml file specified
                 if(exists $attribute->{readable})
                 {
