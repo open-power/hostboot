@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -164,7 +166,7 @@ public:
 
         // Reverse the wildcard test
         l_errl = as.registerRoute(WILDCARD,
-                                  PNOR,
+                                  DeviceFW::PNOR,
                                   TYPE_NODE,
                                   &performOperation);
         if (l_errl)
@@ -172,7 +174,7 @@ public:
             TS_FAIL("testDoubleRegistration> Error received from registerRoute (2).");
         }
         l_errl = as.registerRoute(WRITE,
-                                  PNOR,
+                                  DeviceFW::PNOR,
                                   TYPE_NODE,
                                   &performOperation);
         if (l_errl)

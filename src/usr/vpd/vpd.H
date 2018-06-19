@@ -27,6 +27,7 @@
 
 #include <pnor/pnorif.H>
 #include <vpd/vpd_if.H>
+#include <map>
 
 namespace VPD
 {
@@ -82,6 +83,35 @@ union VpdWriteMsg_t
         };
     } PACKED;
 };
+
+/**
+ * first = 4-character record name as a 4-byte uint
+ * second = Target pointer
+ */
+typedef std::pair<uint32_t, TARGETING::Target*> RecordTargetPair_t;
+
+/**
+ * @brief Helper function to convert record string to uint
+ * @param[in]  4-character record string
+ * @param[in]  Target pointer
+ * @return  Fully formed RecordTargetPair_t
+ */
+inline RecordTargetPair_t makeRecordTargetPair( const char* i_rec,
+                                                TARGETING::Target* i_targ )
+{
+    uint32_t l_rec = 0;
+    memcpy( &l_rec, i_rec, sizeof(l_rec) );
+    return std::make_pair(l_rec,i_targ);
+};
+
+
+/**
+ *  Indexed by RecordTargetPair_t
+ *  Returns a pointer to this record within the override section
+ *   if it is being used, or nullptr if not.
+ */
+typedef std::map<RecordTargetPair_t,uint8_t*> OverrideMap_t;
+
 
 
 /**
@@ -258,6 +288,10 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
                                                  vpdKeyword & io_partKeyword,
                                                  vpdKeyword & io_serialKeyword);
 
+/**
+ * @brief Read data from the BMC to update the system serial number
+ * @param[in] i_target - node target to update vpd of
+ */
 void updateSerialNumberFromBMC( TARGETING::Target * i_nodetarget );
 
 }; //end VPD namespace

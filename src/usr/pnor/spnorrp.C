@@ -884,12 +884,14 @@ void SPnorRP::waitForMessage()
                             }
                             else
                             {
+                                TRACDCOMP(g_trac_pnor,"Loading %s for the first time", PNOR::SectionIdToString(l_id));
                                 l_record = new LoadRecord;
                             }
 
                             TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage> MSG_LOAD_SECTION refCount is %i",l_record->refCount);
                             if (l_record->refCount == 0)
                             {
+                                TRACDCOMP(g_trac_pnor,"Loading %s fresh", PNOR::SectionIdToString(l_id));
                                 uint32_t loadPlid=0;
                                 l_rc = verifySections(l_id,
                                                       l_loadedPreviously,
@@ -1027,6 +1029,7 @@ void SPnorRP::waitForMessage()
                                  // 2 or more
                                 break;
                             }
+                            TRACDCOMP(g_trac_pnor,"Completely unloading %s", PNOR::SectionIdToString(l_id));
 
                             l_errhdl = removePages(l_rec->secAddr,
                                                    l_sizeWithHdr);

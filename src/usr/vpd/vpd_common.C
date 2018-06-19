@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/vpd/vpd.C $                                           */
+/* $Source: src/usr/vpd/vpd_common.C $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ bool resolveVpdSource( TARGETING::Target * i_target,
     bool badConfig = false;
     o_vpdSource = VPD::INVALID_LOCATION;
 
-    if( i_vpdCmdTarget == VPD::PNOR )
+    if( (i_vpdCmdTarget & VPD::LOCATION_MASK) == VPD::PNOR )
     {
         if( i_rwPnorEnabled )
         {
@@ -89,7 +89,7 @@ bool resolveVpdSource( TARGETING::Target * i_target,
             TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=PNOR but READ/WRITE PNOR CONFIG is disabled");
         }
     }
-    else if( i_vpdCmdTarget == VPD::SEEPROM )
+    else if( (i_vpdCmdTarget & VPD::LOCATION_MASK) == VPD::SEEPROM )
     {
         if( i_rwHwEnabled )
         {
