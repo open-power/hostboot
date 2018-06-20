@@ -219,7 +219,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 // because this is only for MemTdCtlr internal use and it didn't make much sense
 // to create a public function.
 template<TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __checkEcc( ExtensibleChip * i_chip,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -227,7 +227,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
 template<TARGETING::TYPE T>
 uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
-                               TdQueue & io_queue,
                                TdRankListEntry & o_stoppedRank,
                                const MemAddr & i_addr,
                                bool & o_errorsFound,
@@ -235,7 +234,6 @@ uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
 
 template<>
 uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
-                                            TdQueue & io_queue,
                                             TdRankListEntry & o_stoppedRank,
                                             const MemAddr & i_addr,
                                             bool & o_errorsFound,
@@ -272,7 +270,7 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
         for ( auto & mcaChip : portList )
         {
             bool errorsFound;
-            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, io_queue, i_addr,
+            uint32_t l_rc = __checkEcc<TYPE_MCA>( mcaChip, i_addr,
                                                   errorsFound, io_sc );
             if ( SUCCESS != l_rc )
             {
@@ -294,7 +292,6 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
 
 template<>
 uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
-                                         TdQueue & io_queue,
                                          TdRankListEntry & o_stoppedRank,
                                          const MemAddr & i_addr,
                                          bool & o_errorsFound,
@@ -304,7 +301,7 @@ uint32_t __analyzeCmdComplete<TYPE_MBA>( ExtensibleChip * i_chip,
     o_stoppedRank = __getStopRank<TYPE_MBA>( i_chip, i_addr );
 
     // Check the MBA for ECC errors.
-    return __checkEcc<TYPE_MBA>(i_chip, io_queue, i_addr, o_errorsFound, io_sc);
+    return __checkEcc<TYPE_MBA>(i_chip, i_addr, o_errorsFound, io_sc);
 }
 
 //------------------------------------------------------------------------------
@@ -330,7 +327,7 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
         }
 
         // Then, check for ECC errors, if they exist.
-        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_queue, iv_stoppedRank,
+        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_stoppedRank,
                                         addr, o_errorsFound, io_sc );
         if ( SUCCESS != o_rc )
         {
