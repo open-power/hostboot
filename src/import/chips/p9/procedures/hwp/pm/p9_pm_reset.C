@@ -244,6 +244,19 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(l_rc, "ERROR: Failed to reset the PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After reset of PGPE"));
 
+    // Mask OCC HB bit in OCC fir mask register
+    {
+        const uint32_t l_OCC_HB_ERR_NOTIFY = 4;
+        p9pmFIR::PMFir <p9pmFIR::FIRTYPE_OCC_LFIR> l_occFir(i_target);
+        FAPI_TRY(l_occFir.get(p9pmFIR::REG_ALL),
+                 "ERROR: Failed to get the OCC FIR values");
+        FAPI_TRY(l_occFir.mask(l_OCC_HB_ERR_NOTIFY));
+        // Not doing the restoreSavedMask, as this is a special case between reset->init
+        // and pm init handles it
+        FAPI_TRY(l_occFir.put(),
+                 "ERROR: Failed to write OCC LFIR setting for STOP_RCV_NOTIFY_PRD");
+    }
+
     //  ************************************************************************
     //  Collect PGPE FFDC into FFDC section in HOMER
     //  ************************************************************************
