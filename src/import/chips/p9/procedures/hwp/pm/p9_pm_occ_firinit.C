@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,6 +214,8 @@ fapi2::ReturnCode pm_occ_fir_reset(
 
     FAPI_TRY(l_occFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
              "ERROR: Faled to set the OCC FIR MASK");
+
+    FAPI_TRY(l_occFir.setRecvIntr(OCC_HB_NOTIFY));
 
     FAPI_TRY(l_occFir.put(),
              "ERROR:Failed to write to the OCC FIR MASK");
