@@ -229,7 +229,10 @@ template<> inline
 void banTps<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
                                   const MemRank & i_rank )
 {
+    // Ban TPS on this rank.
     getMcaDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
+    // Permanently mask mainline NCEs and TCEs because of the TPS ban.
+    getMcaDataBundle(i_chip)->iv_maskMainlineNceTce = true;
 }
 
 template<> inline
