@@ -231,10 +231,6 @@ namespace INTR
                 ESB_QUERY_OFFSET = 0x800,
                 ESB_OFF_OFFSET   = 0xD00,
                 ESB_RESET_OFFSET = 0XC00,
-                ESB_STATE_RESET   = 0,
-                ESB_STATE_OFF     = 1,
-                ESB_STATE_PENDING = 2,
-                ESB_STATE_QUEUED  = 3,
             };
 
             enum INTR_ROUTING_t
@@ -888,6 +884,30 @@ namespace INTR
              * @return error log handle
              */
             errlHndl_t resetIntpForMpipl(void);
+
+            /**
+            * Print out the ESB state for every source on all processors
+            * that the Interrp is aware of
+            *
+            * @return void
+            */
+            void printEsbStates() const;
+
+            /**
+            * Print out the PSIHB info for all processors
+            * that the Interrp is aware of
+            *
+            * @return void
+            */
+            void printPSIHBInfo() const;
+
+            /**
+            * Print out the LSI info for all processors
+            * that the Interrp is aware of
+            *
+            * @return void
+            */
+            void printLSIInfo() const;
 
     };
 }; // INTR namespace

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@ namespace MBOX
     /*
      * Mbox device driver public constants
      */
-    enum 
+    enum
     {
         MBOX_MAX_DATA_BYTES = 64, //16 32-bit Data Registers
     };
@@ -45,7 +45,7 @@ namespace MBOX
     /*
      * Mbox device driver status values
      */
-    enum MboxReadStatus 
+    enum MboxReadStatus
     {
         MBOX_DOORBELL_ERROR  = 0x00000004, /* Error Set In Error Register */
         MBOX_HW_ACK          = 0x00000002, /* LBUS Data Acknowledgment */
@@ -58,7 +58,7 @@ namespace MBOX
 
     /**
      * @brief Initialize device driver hardware
-     * 
+     *
      * @param[in] i_target, Chip target of the MBOX operation
      * @return errlHndl_t If scom error | NULL (success)
      */
@@ -111,6 +111,14 @@ namespace MBOX
     errlHndl_t mboxWrite(TARGETING::Target* i_target,
                          void* i_buffer,
                          size_t& i_buflen);
+
+     /**
+     * @brief Print all the mailbox state information to slow trace
+     *        buffer to aid in debug.
+     *
+     * @return errlHndl_t  nullptr on success
+     */
+    errlHndl_t dumpMboxRegs();
 
     /**
      * @brief Reads the mailbox PIB error status register
