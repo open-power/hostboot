@@ -229,7 +229,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
             // Add a TPS procedure to the queue.
             TdEntry * e = new TpsEvent<T>{ i_chip, rank };
-            io_queue.push( e );
+            MemDbUtils::pushToQueue<T>( i_chip, e );
         }
         else // Nothing found.
         {
