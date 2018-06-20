@@ -39,26 +39,27 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
-#include    <stdint.h>
+#include <array>
+#include <stdint.h>
 #include <sys/time.h>
 
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
-#include    <errl/errlentry.H>
+#include <trace/interface.H>
+#include <initservice/taskargs.H>
+#include <errl/errlentry.H>
 
-#include    <initservice/isteps_trace.H>
-#include    <isteps/hwpisteperror.H>
-#include    <errl/errludtarget.H>
+#include <initservice/isteps_trace.H>
+#include <isteps/hwpisteperror.H>
+#include <errl/errludtarget.H>
 
-#include    <istep_mbox_msgs.H>
-#include    <vfs/vfs.H>
-#include    <config.h>
+#include <istep_mbox_msgs.H>
+#include <vfs/vfs.H>
+#include <config.h>
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/common/attributes.H>
-#include    <targeting/targplatutil.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/attributes.H>
+#include <targeting/targplatutil.H>
 
 //  fapi support
 
@@ -69,8 +70,8 @@
 #include <isteps/hwpf_reasoncodes.H>
 
 
-#include    <mbox/ipc_msg_types.H>
-#include    <intr/interrupt.H>
+#include <mbox/ipc_msg_types.H>
+#include <intr/interrupt.H>
 #include <secureboot/nodecommif.H>
 
 //  Uncomment these files as they become available:
@@ -79,9 +80,9 @@
 #include <initservice/istepdispatcherif.H>
 #include <isteps/hwpf_reasoncodes.H>
 
-#include    "smp_unfencing_inter_enclosure_abus_links.H"
-
-#include    "establish_system_smp.H"
+#include "smp_unfencing_inter_enclosure_abus_links.H"
+#include "p9_obus_extfir_setup.H"
+#include "establish_system_smp.H"
 
 #include <secureboot/service_ext.H>
 
@@ -176,6 +177,123 @@ errlHndl_t call_host_coalesce_host( )
     TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
 
     hb_existing_image = sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+
+    // Set FIR mask bits for inactive OBUS links. The earlier SMP stitching
+    // steps should have caught any irregularities and deconfigured misbehaving
+    // processors, so it's assumed that any functional processors at
+    // this stage have OBUSes with accurate PEER_PATHs.  Thus, this algorithm
+    // only needs to confirm that each functional OBUS PEER_PATH is logically
+    // populated, and that it points to a node that is part of the current SMP.
+    TARGETING::TargetHandleList procs;
+    (void)TARGETING::getAllChips(procs,TYPE_PROC);
+    for(auto * const pProc : procs)
+    {
+        // This array (4 records, one per OBUS under a given processor)
+        // tracks whether each OBUS is part of the SMP (true) or not (false).
+        // Array index X holds state for an OBUS with relative position X
+        // within the current processor.
+        std::array<bool,4> obusSmpActive={false,false,false,false};
+
+        TARGETING::TargetHandleList obuses;
+        (void)TARGETING::getChildChiplets(obuses, pProc, TYPE_OBUS);
+        for(auto * const pObus : obuses)
+        {
+            TARGETING::EntityPath peerPath =
+                pObus->getAttr<TARGETING::ATTR_PEER_PATH>();
+            TARGETING::EntityPath::PathElement peerNode =
+                peerPath.pathElementOfType(TARGETING::TYPE_NODE);
+
+            if(peerNode.type == TARGETING::TYPE_NA)
+            {
+                auto peerPathStr = peerPath.toString();
+                TRACDCOMP(
+                    ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK "call_host_coalesce_host: "
+                    "OBUS with HUID of 0x%08X (child of PROC with HUID "
+                    "of 0x%08X) is not participating in SMP as "
+                    "its PEER_PATH (%s) has no valid node component",
+                    get_huid(pObus), get_huid(pProc),
+                    peerPathStr);
+                free(peerPathStr);
+                peerPathStr=nullptr;
+                continue;
+            }
+
+            decltype(hb_existing_image) mask = 0x1 <<
+                ((sizeof(hb_existing_image) * 8) -1);
+
+            if(!(hb_existing_image & (mask >> peerNode.instance)))
+            {
+                auto peerPathStr = peerPath.toString();
+                TRACDCOMP(
+                    ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK "call_host_coalesce_host: "
+                    "OBUS with HUID of 0x%08X (child of PROC with HUID "
+                    "of 0x%08X) is not participating in SMP as "
+                    "the node referenced in its PEER_PATH (%s) "
+                    "is not part of the SMP.  Mask of nodes participating "
+                    "in SMP = 0x%02X, peer node instance = %d",
+                    get_huid(pObus), get_huid(pProc),
+                    peerPathStr,
+                    hb_existing_image,
+                    peerNode.instance);
+                free(peerPathStr);
+                peerPathStr=nullptr;
+                continue;
+            }
+
+            const auto obusRelPos=pObus->getAttr<TARGETING::ATTR_REL_POS>();
+            assert(obusRelPos < obusSmpActive.size(),
+                "OBUS with HUID of 0x%08X has invalid relative position %d "
+                "(must be less than %d)",
+                get_huid(pObus),obusRelPos,obusSmpActive.size());
+
+            obusSmpActive[obusRelPos]=true;
+
+            TRACDCOMP(
+                ISTEPS_TRACE::g_trac_isteps_trace,
+                INFO_MRK "call_host_coalesce_host: "
+                "OBUS with HUID of 0x%08X (child of PROC with HUID "
+                "of 0x%08X) is participating in SMP",
+                get_huid(pObus), get_huid(pProc));
+        }
+
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2Proc(pProc);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_obus_extfir_setup HWP on PROC with HUID of 0x%08X. "
+            "OBUS 0/1/2/3 active in SMP = %d/%d/%d/%d",
+            TARGETING::get_huid(pProc),
+            obusSmpActive[0],
+            obusSmpActive[1],
+            obusSmpActive[2],
+            obusSmpActive[3]);
+
+        FAPI_INVOKE_HWP(
+            l_errl,
+            p9_obus_extfir_setup,
+            fapi2Proc,
+            obusSmpActive[0],
+            obusSmpActive[1],
+            obusSmpActive[2],
+            obusSmpActive[3]);
+
+        if (l_errl)
+        {
+            TRACFCOMP(
+                ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK "ERROR : p9_obus_extfir_setup" );
+            ErrlUserDetailsTarget(pProc).addToLog(l_errl);
+            l_errl->collectTrace("ISTEPS_TRACE");
+            errlCommit(l_errl,HWPF_COMP_ID);
+        }
+        else
+        {
+            TRACFCOMP(
+                ISTEPS_TRACE::g_trac_isteps_trace,
+                INFO_MRK "SUCCESS : p9_obus_extfir_setup" );
+        }
+    }
 
     if (hb_existing_image == 0)
     {

@@ -39,6 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 EXTRAINCDIR += ${ROOTPATH}/src/usr/include/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
 
 ## pointer to common HWP files
 
@@ -51,6 +52,7 @@ include ${ROOTPATH}/procedure.rules.mk
 include ${PROCEDURES_PATH}/nest/p9_tod_init.mk
 include ${PROCEDURES_PATH}/nest/p9_tod_setup.mk
 include ${PROCEDURES_PATH}/nest/p9_tod_save_config.mk
+include ${PROCEDURES_PATH}/nest/p9_obus_extfir_setup.mk
 include ${ROOTPATH}/config.mk
 
 VPATH += ${PROCEDURES_PATH}
