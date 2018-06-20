@@ -836,10 +836,11 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 
         #ifdef __HOSTBOOT_RUNTIME
 
-        // Add a TPS request to the TD queue and ban any further TPS requests
-        // for this rank.
+        // Add a TPS request to the TD queue for additional analysis. It is
+        // unlikely the procedure will result in a repair because of the UE.
+        // However, we want to run TPS once just to see how bad the rank is.
         MemRank rank = addr.getRank();
-        MemDbUtils::pushToQueue<T>(i_chip, new TpsEvent<T>(i_chip, rank, true));
+        MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank) );
         o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
         if ( SUCCESS != o_rc )
         {
@@ -847,6 +848,10 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
                       i_chip->getHuid(), rank.getKey() );
             break;
         }
+
+        // Because of the UE, any further TPS requests will likely have no
+        // effect. So ban all subsequent requests.
+        MemDbUtils::banTps<T>( i_chip, rank );
 
         #endif // __HOSTBOOT_RUNTIME
 
