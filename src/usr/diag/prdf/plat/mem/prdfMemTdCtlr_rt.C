@@ -380,7 +380,7 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
             if ( doTps )
             {
                 TdEntry * e = new TpsEvent<T>{ i_chip, rank };
-                io_queue.push( e );
+                MemDbUtils::pushToQueue<T>( i_chip, e );
             }
         }
         if ( SUCCESS != o_rc ) break;
@@ -423,7 +423,8 @@ uint32_t __handleSoftInterCeEte<TYPE_MBA>( ExtensibleChip * i_chip,
                    MemoryMruData::CALLOUT_RANK };
     io_sc.service_data->SetCallout( mm );
 
-    io_queue.push( new TpsEvent<TYPE_MBA>(i_chip, i_addr.getRank()) );
+    TdEntry * e = new TpsEvent<TYPE_MBA>{ i_chip, i_addr.getRank() };
+    MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
 
     return SUCCESS;
 }
@@ -533,7 +534,8 @@ uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
         // Add a TPS procedure to the queue, if needed.
         if ( doTps )
         {
-            io_queue.push( new TpsEvent<TYPE_MBA>(i_chip, i_rank) );
+            TdEntry * e = new TpsEvent<TYPE_MBA>{ i_chip, i_rank };
+            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, e );
         }
 
     } while (0);
@@ -674,7 +676,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
             // Add a TPS procedure to the queue.
             TdEntry * e = new TpsEvent<T>{ i_chip, rank, true };
-            io_queue.push( e );
+            MemDbUtils::pushToQueue<T>( i_chip, e );
         }
 
     } while (0);
@@ -936,7 +938,8 @@ uint32_t __findChipMarks( TdQueue & o_queue, TdRankList<TC> & i_rankList )
         if ( !cmVerified )
         {
             // Chip mark is not present in VPD. Add it to queue.
-            o_queue.push( new VcmEvent<TP>(chip, rank, chipMark) );
+            TdEntry * e = new VcmEvent<TP>{ chip, rank, chipMark };
+            MemDbUtils::pushToQueue<TP>( chip, e );
 
             // We will want to clear the MPE attention for the unverified chip
             // mark so we don't get any redundant attentions for chip marks that
