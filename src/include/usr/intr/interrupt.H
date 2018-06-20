@@ -115,6 +115,7 @@ namespace INTR
         MSG_INTR_DRAIN_QUEUE,       //!< Allow intrp to drain Q of EOI
         MSG_INTR_COALESCE,          //!< Pending interrupt to be handled
         MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSIHB Interrupts
+        MSG_INTR_DUMP,              //!< Print out interrupt info to slow buffer
     };
 
 
@@ -142,6 +143,14 @@ namespace INTR
         uint64_t lsiintstatus; //LSI Interrupt Status register    - 0x80
         uint64_t reserved3; //Unused / Reserved                   - 0x88
         uint64_t phbsecure; //PSI Host Bridge Secure Control reg  - 0x90
+    };
+
+    enum esbStates
+    {
+        ESB_STATE_RESET   = 0,
+        ESB_STATE_OFF     = 1,
+        ESB_STATE_PENDING = 2,
+        ESB_STATE_QUEUED  = 3,
     };
 
 
@@ -192,6 +201,18 @@ namespace INTR
     void sendEOI(msg_q_t i_q, msg_t* i_msg);
 
     /**
+    * Sends a message to the intrrp Q to tell it to print out current state
+    * of interrupts from hostboot perspective to the slow trace buffer
+    *
+    * This will call the private intrrp functions:
+    *  printEsbStates
+    *  printPSIHBInfo
+    *  printLSIInfo
+    * @return errlHndl_t on error.
+    */
+    errlHndl_t printInterruptInfo();
+
+    /**
      * Un register a message queue from the interrupt handler
      * @param[in] i_type the type of interrupt (ISN value)
      * @return The message queue that was unregistered with i_type
@@ -240,6 +261,13 @@ namespace INTR
      * is to allow any pending EOIs (since they are async) to
      * drain     */
     void drainQueue(void);
+
+    /**
+    * Convert the esb state to a human readable string
+    * @param[in] i_esbState  ESB state as hex
+    * @return human readable string, "INVALID" if cannot translate
+    */
+    void esbStateToString(uint64_t i_esbState, const char** o_esbStateString);
 
 };
 

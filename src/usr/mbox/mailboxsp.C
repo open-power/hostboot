@@ -44,6 +44,7 @@
 #include <arch/ppc.H>
 #include <errl/errlmanager.H>
 #include <sys/misc.h>
+#include <util/misc.H>
 #include <errl/errludprintk.H>
 #include <errno.h>
 #include <kernel/console.H>
@@ -82,6 +83,7 @@ MailboxSp::MailboxSp()
         iv_sendq(),
         iv_respondq(),
         iv_dmaBuffer(),
+        iv_dmaRequestWatchdog(0),
         iv_trgt(NULL),
         iv_shutdown_msg(NULL),
         iv_rts(true),
@@ -832,6 +834,17 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                                     &iv_msg_to_send,
                                     mbox_msg_len,
                                     DeviceFW::MAILBOX);
+
+        // Create a watchdog task that will run for 60 seconds
+        // if there is no response in 60 seconds then dbg info will
+        // be printed in the slow trace buffer
+        if(iv_msg_to_send.msg_payload.type == MSG_REQUEST_DMA_BUFFERS
+            && !Util::isSimicsRunning()
+            && !iv_dmaRequestWatchdog)
+        {
+            iv_dmaRequestWatchdog = task_create(&watchdogTimeoutTask, this);
+            assert (iv_dmaRequestWatchdog > 0 );
+        }
     }
 
     if(err)
@@ -1446,6 +1459,89 @@ void MailboxSp::sendReclaimDmaBfrsMsg( mbox_msg_t & i_mbox_msg )
     send_msg(&i_mbox_msg);
 
     return;
+}
+
+void * MailboxSp::watchdogTimeoutTask(void * i_mailboxSp)
+{
+    // We don't want this to be a zombie because parent keeps going
+    task_detach();
+
+    // create a task which we can wait, this way we can print
+    // an error message if the taskWorker crashes
+    tid_t l_tid = task_create( &watchdogTimeoutTaskWorker, i_mailboxSp);
+    assert (l_tid > 0 );
+
+    int   l_status = 0;
+    void* l_rc     = nullptr;
+
+    tid_t l_tidRc = task_wait_tid(l_tid, &l_status, &l_rc);
+
+    if(l_status == TASK_STATUS_CRASHED)
+    {
+        TRACFCOMP(g_trac_mbox,
+                  ERR_MRK
+                  "MailboxSp::watchdogTimeoutTask - "
+                  "Watchdog timeout crashed!! %lx", l_tidRc);
+    }
+
+    return nullptr;
+}
+
+void * MailboxSp::watchdogTimeoutTaskWorker(void * i_mailboxSp)
+{
+
+    uint64_t MAX_TIMEOUT = 200000000000;  // nanoseconds
+    uint64_t POLL_RATE   = 1000000;       // nanoseconds
+    uint64_t cur_timeout = 0;             // nanoseconds
+    errlHndl_t err = nullptr;
+
+    assert(i_mailboxSp != nullptr, "nullptr was passed to watchdogTimeoutTaskWorker");
+
+    MailboxSp & mboxSp = *static_cast<MailboxSp *>(i_mailboxSp);
+
+    while(cur_timeout < MAX_TIMEOUT)
+    {
+        if( !mboxSp.iv_dma_pend )
+        {
+            TRACFCOMP(g_trac_mbox,
+                      INFO_MRK
+                      "Breaking out of watchdog because FSP responded to DMA request");
+            break;
+        }
+        // sleep for 1 ms
+        nanosleep(0, POLL_RATE);
+        cur_timeout += POLL_RATE;
+    }
+
+    if(cur_timeout >= MAX_TIMEOUT)
+    {
+        TRACFCOMP(g_trac_mbox,
+                  INFO_MRK
+                  "Hang during DMA request detected, dumping state information");
+        err = dumpMboxRegs();
+        if(err)
+        {
+            TRACFCOMP(g_trac_mbox,
+                      INFO_MRK
+                      "Error occured while dumping MBOX information");
+                      err->collectTrace(MBOX_COMP_NAME);
+                      errlCommit(err,MBOX_COMP_ID);
+        }
+        err = INTR::printInterruptInfo();
+        if(err)
+        {
+            TRACFCOMP(g_trac_mbox,
+                      INFO_MRK
+                      "Error occured while dumping INTR information");
+                      err->collectTrace(INTR_COMP_NAME);
+                      errlCommit(err,MBOX_COMP_ID);
+        }
+    }
+
+    //Zero out the TID so another watchdog task can be created if needed
+    mboxSp.iv_dmaRequestWatchdog = 0;
+    return nullptr;
+
 }
 
 

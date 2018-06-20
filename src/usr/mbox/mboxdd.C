@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,11 +29,12 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
 #include <intr/interrupt.H>
 
 
 trace_desc_t* g_trac_mbox = NULL;
-TRAC_INIT(&g_trac_mbox, "MBOX", KILOBYTE, TRACE::BUFFER_SLOW); //4K
+TRAC_INIT(&g_trac_mbox, "MBOX", 16*KILOBYTE, TRACE::BUFFER_SLOW); //16K
 
 
 namespace MBOX
@@ -695,6 +696,85 @@ errlHndl_t mboxddShutDown(TARGETING::Target* i_target)
     // Others?
 
     return err;
+}
+
+errlHndl_t dumpMboxRegs()
+{
+    errlHndl_t l_err = nullptr;
+    TARGETING::TargetHandleList l_procList;
+    TARGETING::getAllChips( l_procList, TARGETING::TYPE_PROC);
+    assert(l_procList.size(), "No functional processors found");
+
+    TRACFCOMP(g_trac_mbox, "---Dumping Mbox registers---");
+
+    for( const auto l_procChip : l_procList)
+    {
+        uint32_t l_64bitBuf[2] = {0};
+        size_t l_64bitSize = sizeof(uint64_t);
+        uint32_t l_huid = TARGETING::get_huid(l_procChip);
+        TRACFCOMP(g_trac_mbox, "Processor 0x%lx",l_huid);
+
+        // Read the MBOX_DB_INT_REG_PIB
+        l_err = deviceOp(DeviceFW::READ,l_procChip,
+                        l_64bitBuf,l_64bitSize,
+                        DEVICE_XSCOM_ADDRESS(MBOX_DB_INT_REG_PIB));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK "dumpMboxRegs> Unable to read PIB Interrupt Register");
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mbox, "                 PIB Interrupt Register           (0x%08X) = 0x%08X",
+                      MBOX_DB_INT_REG_PIB, l_64bitBuf[0]);
+        }
+
+        // Read the MBOX_DB_STAT_CNTRL_1
+        l_err = deviceOp(DeviceFW::READ,l_procChip,
+                        l_64bitBuf,l_64bitSize,
+                        DEVICE_XSCOM_ADDRESS(MBOX_DB_STAT_CNTRL_1));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK "dumpMboxRegs> Unable to read Doorbell Status/Control Register");
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mbox, "                 Doorbell Status/Control Register (0x%08X) = 0x%08X",
+                      MBOX_DB_STAT_CNTRL_1, l_64bitBuf[0]);
+        }
+
+        // Read the MBOX_DB_ERR_STAT_PIB
+        l_err = deviceOp(DeviceFW::READ,l_procChip,
+                        l_64bitBuf,l_64bitSize,
+                        DEVICE_XSCOM_ADDRESS( MBOX_DB_ERR_STAT_LBUS));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_mbox, ERR_MRK "dumpMboxRegs> Unable to read Doorbell Error/Status Register");
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_mbox, "                 Doorbell Error/Status Register  (0x%08X)  = 0x%08lx",
+                      MBOX_DB_ERR_STAT_LBUS, l_64bitBuf[0]);
+        }
+
+        for(uint8_t i = 0x0; i <= (MBOX_DATA_LBUS_END - MBOX_DATA_LBUS_START) ; i++)
+        {
+                // Read the MBOX_DATA_LBUS_START + i
+                l_err = deviceOp(DeviceFW::READ,l_procChip,
+                                l_64bitBuf,l_64bitSize,
+                                DEVICE_XSCOM_ADDRESS(MBOX_DATA_LBUS_START + i));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_mbox, ERR_MRK "dumpMboxRegs> Unable to read MBOX_DATA_LBUS_START + %d Register", i);
+                    break;
+                }
+                TRACFCOMP(g_trac_mbox, "                 MBOX_DATA_LBUS_START + %02d        (0x%08X) = 0x%08lx",
+                          i, MBOX_DATA_LBUS_START + i , l_64bitBuf[0]);
+        }
+    }
+    return l_err;
 }
 
 #if defined(__DESTRUCTIVE_MBOX_TEST__)
