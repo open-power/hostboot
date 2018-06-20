@@ -53,6 +53,7 @@ namespace INTR
         MOD_INTRRP_RESETINTUNIT      = 0x11, /**< intrrp.C : IntrRp::resetIntUnit */
         MOD_INTRRP_XIVE_SENDEOI      = 0x12,
         MOD_INTRRP_IPC               = 0x13,
+        MOD_INTR_DUMP                = 0x14, /**< intrrp.C : INTR::printInterruptInfo */
     };
 
     enum IntrReasonCode

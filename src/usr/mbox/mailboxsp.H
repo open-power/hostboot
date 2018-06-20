@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -310,6 +310,21 @@ namespace MBOX
             void sendReclaimDmaBfrsMsg( void );
 
             /**
+             * Start the watchdogTimeoutTaskWorker and print
+             * out an error if it crashes
+             */
+            static void * watchdogTimeoutTask(void * i_mailboxSp);
+
+            /**
+             * Used to start a timer , if the timer expires then
+             * Hostboot will print out a bunch of MBOX and INTR
+             * error information to the SLOW buffer. This is used
+             * to collect debug information in the case where we
+             * are hanging, waiting for a response to an mailbox msg
+             */
+            static void * watchdogTimeoutTaskWorker(void * i_mailboxSp);
+
+            /**
              * Determine if a Reclaim Bfr message is outstanding
              * @return [true - Msg active | false - no msg active]
              */
@@ -367,6 +382,7 @@ namespace MBOX
             registry_t  iv_registry;    //!< Registered queue
             DmaBuffer   iv_dmaBuffer;   //!< DMA buffer manager
             send_q_t    iv_pendingq;    //!< Pending for queue registration
+            tid_t       iv_dmaRequestWatchdog; //!< TID of dma buffer request watchdog
 
             TARGETING::Target * iv_trgt;//!< mailbox device driver target
             msg_t *     iv_shutdown_msg;//!< Message to shutdown mbox

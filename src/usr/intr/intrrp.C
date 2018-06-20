@@ -30,6 +30,7 @@
 #include "intrrp.H"
 #include <trace/interface.H>
 #include <errno.h>
+#include <string.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
 #include <util/singleton.H>
@@ -1329,6 +1330,16 @@ void IntrRp::msgHandler()
                     //intrp to drain its message queue of pending EOIs
                     //just respond
                     msg_respond(iv_msgQ,msg);
+                }
+                break;
+            case MSG_INTR_DUMP:
+                {
+                    // Run the functions that dump out
+                    // interrupt info to slow buffer
+                    printEsbStates();
+                    printLSIInfo();
+                    printPSIHBInfo();
+                    msg_free(msg); // async message
                 }
                 break;
 
@@ -3392,3 +3403,152 @@ errlHndl_t INTR::IntrRp::enableSlaveProcInterrupts(TARGETING::Target * i_target)
     return l_err;
 }
 
+void INTR::esbStateToString(uint64_t i_esbState, const char** o_esbStateString)
+{
+    switch(i_esbState)
+    {
+        case ESB_STATE_RESET:
+            *o_esbStateString = "RESET";
+            break;
+        case ESB_STATE_OFF:
+            *o_esbStateString = "OFF";
+            break;
+        case ESB_STATE_PENDING:
+            *o_esbStateString = "PENDING";
+            break;
+        case ESB_STATE_QUEUED:
+            *o_esbStateString = "QUEUED";
+            break;
+        default:
+            *o_esbStateString = "INVALID";
+            break;
+    }
+}
+
+errlHndl_t INTR::printInterruptInfo()
+{
+    errlHndl_t err = NULL;
+    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+    if(intr_msgQ)
+    {
+        msg_t * msg = msg_allocate();
+        msg->type = MSG_INTR_DUMP;
+        int send_rc = msg_send(intr_msgQ, msg);
+        if (send_rc != 0)
+        {
+            TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::printInterruptInfo error "
+            "sending print intr info message");
+            /*@ errorlog tag
+            * @errortype       ERRL_SEV_UNRECOVERABLE
+            * @moduleid        INTR::MOD_INTR_DUMP
+            * @reasoncode      INTR::RC_MESSAGE_SEND_ERROR
+            * @userdata1       RC from msg_send command
+            * @devdesc         Error encountered sending print intr info
+            *                  message to INTRP
+            * @custdesc        Error encountered gathering diagnostic info
+            */
+            err = new ERRORLOG::ErrlEntry
+            (
+             ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+             INTR::MOD_INTR_DUMP,               // moduleid
+             INTR::RC_MESSAGE_SEND_ERROR,       // reason code
+             send_rc,
+             0
+             );
+        }
+    }
+    else
+    {
+        /*@ errorlog tag
+        * @errortype       ERRL_SEV_INFORMATIONAL
+        * @moduleid        INTR::MOD_INTR_DUMP
+        * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
+        * @userdata1       MSG_INTR_DUMP
+        * @userdata2       0
+        * @devdesc         Interrupt resource provider not initialized yet.
+        * @custdesc        Error encountered gathering diagnostic info
+        */
+        err = new ERRORLOG::ErrlEntry
+        (
+         ERRORLOG::ERRL_SEV_INFORMATIONAL,     // severity
+         INTR::MOD_INTR_DUMP,                  // moduleid
+         INTR::RC_RP_NOT_INITIALIZED,          // reason code
+         static_cast<uint64_t>(MSG_INTR_DUMP),
+         0
+         );
+    }
+    return err;
+}
+
+void INTR::IntrRp::printLSIInfo() const
+{
+    TRACFCOMP(g_trac_intr, "---LSI Sources---");
+
+    //Read LSI Interrupt Status register from each enabled
+    // proc chip to see which caused the interrupt
+    for(auto targ_itr = iv_chipList.begin();
+    targ_itr != iv_chipList.end(); ++targ_itr)
+    {
+        uint64_t l_mmioRead = (*targ_itr)->psiHbBaseAddr->lsiintstatus;
+        uint32_t l_huid = get_huid((*targ_itr)->proc);
+        TRACFCOMP(g_trac_intr, "Processor 0x%lx", l_huid);
+        TRACFCOMP(g_trac_intr, "                 lsiIntStatus :  vAddr=0x%016lx    Value=0x%016lx", &(*targ_itr)->psiHbBaseAddr->lsiintstatus , l_mmioRead);
+        l_mmioRead = (*targ_itr)->psiHbBaseAddr->lsiintlevel;
+        TRACFCOMP(g_trac_intr, "                 lsiIntLevel  :  vAddr=0x%016lx    Value=0x%016lx", &(*targ_itr)->psiHbBaseAddr->lsiintlevel, l_mmioRead);
+    }
+}
+
+void INTR::IntrRp::printPSIHBInfo() const
+{
+    TRACFCOMP(g_trac_intr, "---PSIHB Info---");
+    //Read LSI Interrupt Status register from each enabled
+    // proc chip to see which caused the interrupt
+    for(auto targ_itr = iv_chipList.begin();
+    targ_itr != iv_chipList.end(); ++targ_itr)
+    {
+        uint32_t l_huid = get_huid((*targ_itr)->proc);
+        uint64_t l_mmioRead = (*targ_itr)->psiHbBaseAddr->psihbcr;
+
+        TRACFCOMP(g_trac_intr, "Processor 0x%lx", l_huid);
+
+        TRACFCOMP(g_trac_intr, "                 PSIHB Ctrl/Status Reg       :  vAddr=0x%016lx    Value=0x%016lx",
+                  &(*targ_itr)->psiHbBaseAddr->psihbcr, l_mmioRead);
+
+        l_mmioRead = (*targ_itr)->psiHbBaseAddr->psisemr;
+        TRACFCOMP(g_trac_intr, "                 PSIHB Error/Status Reg      :  vAddr=0x%016lx    Value=0x%016lx",
+                  &(*targ_itr)->psiHbBaseAddr->psisemr,  l_mmioRead);
+
+        l_mmioRead = (*targ_itr)->psiHbBaseAddr->phbdsr;
+        TRACFCOMP(g_trac_intr, "                 PSIHB Dbg Setting Reg       :  vAddr=0x%016lx    Value=0x%016lx",
+                  &(*targ_itr)->psiHbBaseAddr->phbdsr, l_mmioRead);
+
+        l_mmioRead = (*targ_itr)->psiHbBaseAddr->icr;
+        TRACFCOMP(g_trac_intr, "                 PSIHB Interrupt Control Reg :  vAddr=0x%016lx    Value=0x%016lx",
+                  &(*targ_itr)->psiHbBaseAddr->icr, l_mmioRead);
+    }
+}
+
+void INTR::IntrRp::printEsbStates() const
+{
+    TRACFCOMP(g_trac_intr, "---ESB States---");
+    for(auto targ_itr = iv_chipList.begin();
+    targ_itr != iv_chipList.end(); ++targ_itr)
+    {
+        TRACFCOMP(g_trac_intr, "Processor 0x%lx", get_huid((*targ_itr)->proc));
+        for (uint8_t i = 0; i < LSI_LAST_SOURCE; i++)
+        {
+            // Ready from the ESB_QUERY_OFFSET to ensure the read doesn't
+            // affect the state
+            uint64_t * l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr +
+                            (((i*PAGE_SIZE)+ESB_QUERY_OFFSET) /sizeof(uint64_t));
+
+            volatile uint64_t l_esbState = *l_psiHbEsbptr;
+            const char* l_esbStateString = nullptr;
+
+            // Use toString method to look up human readable string
+            esbStateToString(l_esbState, &l_esbStateString);
+
+            TRACFCOMP(g_trac_intr, "                 SRC: %02d         State: %s", i , l_esbStateString );
+        }
+    }
+}
