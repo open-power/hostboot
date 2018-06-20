@@ -1151,9 +1151,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         {
             // Ban TPS on this rank.
             MemDbUtils::banTps<TYPE_MCA>( iv_chip, iv_rank );
-
-            // Permanently mask mainline NCEs and TCEs.
-            getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
         }
     }
 
