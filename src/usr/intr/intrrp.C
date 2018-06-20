@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
+#include <errl/errludprintk.H>
 
 using namespace INTR;
 using namespace TARGETING;
@@ -990,6 +991,9 @@ void IntrRp::msgHandler()
                              KernelIpc::ipc_data_area.msg_queue_id,
                              l_xirr_pir
                             );
+                        //Add the printk to give more data as to how we got
+                        // in this situation
+                        ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_err);
                     }
                     else
                     {
