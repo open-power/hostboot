@@ -104,6 +104,9 @@ void IpcSp::distributeLocalNodeAddr( void )
 
         if (l_err)
         {
+            TRACFCOMP( g_trac_ipc,
+                   "ERROR: distributeLocalNodeAddr == failed to scom Addr=0x%x"
+                   " Target=0x%x", C_SCR2, get_huid(l_core_target));
             errlCommit(l_err, IPC_COMP_ID);
         }
     }
