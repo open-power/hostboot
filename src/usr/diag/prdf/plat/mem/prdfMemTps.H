@@ -190,10 +190,12 @@ class TpsEvent : public TdEntry
 
     /**
      * @brief  Analyzes the maintenance CE statistics.
-     * @param  io_sc The step code data struct.
+     * @param  io_sc  The step code data struct.
+     * @param  o_done True if the procedure is complete or has aborted.
+     *                False otherwise.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
 
     /**
      * @brief Additional processing if no errors are handled during the

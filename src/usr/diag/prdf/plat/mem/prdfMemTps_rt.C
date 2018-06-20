@@ -1048,7 +1048,8 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
 //------------------------------------------------------------------------------
 
 template <>
-uint32_t TpsEvent<TYPE_MCA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t TpsEvent<TYPE_MCA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
+                                             bool & o_done )
 {
     #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeCeStats] "
 
@@ -1134,12 +1135,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         if ( o_done ) break;
 
         // Analyze CEs
-        o_rc = analyzeCeStats( io_sc );
+        o_rc = analyzeCeStats( io_sc, o_done );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "analyzeCeStats() failed." );
             break;
         }
+        if ( o_done ) break;
 
         // At this point, we are done with the procedure.
         o_done = true;
@@ -1331,7 +1333,8 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
+                                             bool & o_done )
 {
     #define PRDF_FUNC "[TpsEvent::analyzeCeStats] "
 
@@ -1483,8 +1486,15 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
         // If a chip mark was placed add a VCM procedure to the queue.
         if ( cmPlaced )
         {
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_TpsChipMark );
+
             TdEntry * e = new VcmEvent<TYPE_MBA> { iv_chip, iv_rank, chipMark };
             MemDbUtils::pushToQueue<TYPE_MBA>( iv_chip, e );
+
+            // Abort this procedure because the chip mark may have fixed the
+            // symbol that triggered TPS.
+            o_done = true; break;
         }
 
         // Check if the symbol mark is available. Note that symbol marks are not
@@ -1496,6 +1506,9 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc )
         // mark.
         if ( !cmPlaced && !isDramWidthX4(trgt) && !symMark.isValid() )
         {
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_TpsSymbolMark );
+
             // Use the symbol with the highest count.
             symMark = MemMark ( trgt, iv_rank, symData.back().symbol );
             o_rc = MarkStore::writeSymbolMark<TYPE_MBA>( iv_chip, iv_rank,
@@ -1646,6 +1659,9 @@ uint32_t TpsEvent<TYPE_MBA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         // not available in x4 mode.
         if ( !isDramWidthX4(iv_chip->getTrgt()) && !symMark.isValid() )
         {
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_TpsSymbolMark );
+
             MemMark sm( iv_chip->getTrgt(), iv_rank, highestSymbol );
             o_rc = MarkStore::writeSymbolMark<TYPE_MBA>( iv_chip, iv_rank, sm );
             if ( SUCCESS != o_rc )
@@ -1676,6 +1692,9 @@ uint32_t TpsEvent<TYPE_MBA>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         // Check if the chip mark is available
         else if ( !chipMark.isValid() )
         {
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_TpsChipMark );
+
             MemMark cm( iv_chip->getTrgt(), iv_rank, highestSymbol );
             o_rc = MarkStore::writeChipMark<TYPE_MBA>( iv_chip, iv_rank, cm );
             if ( SUCCESS != o_rc )
@@ -1760,13 +1779,14 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
              ((TD_PHASE_2 == iv_phase) && ((eccAttns & MAINT_INT_NCE_ETE) ||
                                            (eccAttns & MAINT_SOFT_NCE_ETE)  )) )
         {
-            o_rc = analyzeCeStats( io_sc );
+            o_rc = analyzeCeStats( io_sc, o_done );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "analyzeCeStats() failed on 0x%08x,0x%02x",
                           iv_chip->getHuid(), getKey() );
                 break;
             }
+            if ( o_done ) break; // abort the procedure.
         }
 
         // If the command reached the last address, the procedure is complete.
