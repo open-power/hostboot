@@ -54,8 +54,8 @@ class TpsEvent : public TdEntry
      * @param i_rank Target rank.
      * @param i_ban  True to ban all subsequent requests for TPS on this rank.
      */
-    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank, bool i_ban = false ) :
-        TdEntry(TPS_EVENT, i_chip, i_rank), iv_ban(i_ban)
+    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank ) :
+        TdEntry(TPS_EVENT, i_chip, i_rank)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -207,9 +207,6 @@ class TpsEvent : public TdEntry
 
 
   private: // instance variables
-
-    /** True to ban all subsequent requests for TPS on this rank. */
-    bool iv_ban = false;
 
     #ifdef __HOSTBOOT_RUNTIME
     /** TPS false alarm (MBA only). Initially true when the object is created.

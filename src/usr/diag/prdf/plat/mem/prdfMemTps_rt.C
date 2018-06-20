@@ -1146,12 +1146,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
     {
         // Clear the ECC FFDC for this master rank.
         MemDbUtils::resetEccFfdc<TYPE_MCA>( iv_chip, iv_rank, SLAVE_RANK );
-
-        if ( iv_ban )
-        {
-            // Ban TPS on this rank.
-            MemDbUtils::banTps<TYPE_MCA>( iv_chip, iv_rank );
-        }
     }
 
     return o_rc;
@@ -1790,10 +1784,6 @@ uint32_t TpsEvent<TYPE_MBA>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
     {
         // Clear the ECC FFDC for this master rank.
         MemDbUtils::resetEccFfdc<TYPE_MBA>( iv_chip, iv_rank, SLAVE_RANK );
-
-        // Ban TPS on this rank, if needed.
-        if ( iv_ban ) MemDbUtils::banTps<TYPE_MBA>( iv_chip, iv_rank );
-
     }
 
     return o_rc;
