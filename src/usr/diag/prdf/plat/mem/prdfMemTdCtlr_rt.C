@@ -329,7 +329,7 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __handleNceEte( ExtensibleChip * i_chip,
                          const MemAddr & i_addr, STEP_CODE_DATA_STRUCT & io_sc,
                          bool i_isHard = false )
 {
@@ -395,22 +395,20 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t __handleSoftInterCeEte( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __handleSoftInterCeEte( ExtensibleChip * i_chip,
                                  const MemAddr & i_addr,
                                  STEP_CODE_DATA_STRUCT & io_sc );
 
 template<>
 uint32_t __handleSoftInterCeEte<TYPE_MCA>( ExtensibleChip * i_chip,
-                                           TdQueue & io_queue,
                                            const MemAddr & i_addr,
                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
-    return __handleNceEte<TYPE_MCA>( i_chip, io_queue, i_addr, io_sc );
+    return __handleNceEte<TYPE_MCA>( i_chip, i_addr, io_sc );
 }
 
 template<>
 uint32_t __handleSoftInterCeEte<TYPE_MBA>( ExtensibleChip * i_chip,
-                                           TdQueue & io_queue,
                                            const MemAddr & i_addr,
                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -432,12 +430,12 @@ uint32_t __handleSoftInterCeEte<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t __handleRceEte( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __handleRceEte( ExtensibleChip * i_chip,
                          const MemRank & i_rank, bool & o_errorsFound,
                          STEP_CODE_DATA_STRUCT & io_sc );
 
 template<>
-uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip,
                                    const MemRank & i_rank, bool & o_errorsFound,
                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -482,7 +480,7 @@ uint32_t __handleRceEte<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template<>
-uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip,
                                    const MemRank & i_rank, bool & o_errorsFound,
                                    STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -548,7 +546,7 @@ uint32_t __handleRceEte<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __checkEcc( ExtensibleChip * i_chip,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -582,7 +580,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintINTER_CTE);
 
-            o_rc = __handleSoftInterCeEte<T>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleSoftInterCeEte<T>( i_chip, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__handleSoftInterCeEte<T>(0x%08x) failed",
@@ -596,7 +594,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintSOFT_CTE );
 
-            o_rc = __handleSoftInterCeEte<T>( i_chip, io_queue, i_addr, io_sc );
+            o_rc = __handleSoftInterCeEte<T>( i_chip, i_addr, io_sc );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__handleSoftInterCeEte<T>(0x%08x) failed",
@@ -610,7 +608,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            o_rc = __handleNceEte<T>( i_chip, io_queue, i_addr, io_sc, true );
+            o_rc = __handleNceEte<T>( i_chip, i_addr, io_sc, true );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
@@ -646,7 +644,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 
         if ( 0 != (eccAttns & MAINT_RCE_ETE) )
         {
-            o_rc = __handleRceEte<T>( i_chip, io_queue, rank, o_errorsFound,
+            o_rc = __handleRceEte<T>( i_chip, rank, o_errorsFound,
                                       io_sc );
             if ( SUCCESS != o_rc )
             {
@@ -687,11 +685,11 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
 }
 
 template
-uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __checkEcc<TYPE_MCA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 template
-uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
+uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip,
                                const MemAddr & i_addr, bool & o_errorsFound,
                                STEP_CODE_DATA_STRUCT & io_sc );
 
@@ -891,7 +889,7 @@ SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_MBA>( ExtensibleChip * i_chip )
 }
 
 template <TARGETING::TYPE TP, DIMMS_PER_RANK D, TARGETING::TYPE TC>
-uint32_t __findChipMarks( TdQueue & o_queue, TdRankList<TC> & i_rankList )
+uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
 {
     #define PRDF_FUNC "[__findChipMarks] "
 
@@ -986,8 +984,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
         }
 
         // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MCA,DIMMS_PER_RANK::MCA>( iv_queue,
-                                                              iv_rankList );
+        o_rc = __findChipMarks<TYPE_MCA,DIMMS_PER_RANK::MCA>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
@@ -1026,8 +1023,7 @@ uint32_t MemTdCtlr<TYPE_MBA>::initialize()
         }
 
         // Find all unverified chip marks.
-        o_rc = __findChipMarks<TYPE_MBA,DIMMS_PER_RANK::MBA>( iv_queue,
-                                                              iv_rankList );
+        o_rc = __findChipMarks<TYPE_MBA,DIMMS_PER_RANK::MBA>( iv_rankList );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "__findChipMarks() failed on 0x%08x",
