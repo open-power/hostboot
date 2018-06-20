@@ -111,6 +111,7 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     fapi2::ReturnCode l_rc;
 
     uint32_t attr_mvpd_poundv[PV_D][PV_W];
+    uint32_t attr_mvpd_poundv_biased[PV_D][PV_W];
     uint32_t valid_pdv_points;
     uint8_t present_chiplets;
 
@@ -173,8 +174,21 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     attrs->proc_dpll_divider = 8;
                 }
 
+                FAPI_DBG("Copy to Bias array");
+
+                for (int i = 0; i < NUM_OP_POINTS; i++)
+                {
+                    for (int d = 0; d < PV_D; ++d)
+                    {
+                        for (int w = 0; w < PV_W; ++w)
+                        {
+                            attr_mvpd_poundv_biased[d][w] = attr_mvpd_poundv[d][w];
+                        }
+                    }
+                }
+
                 // Apply Bias values
-                FAPI_TRY(proc_get_extint_bias(attr_mvpd_poundv,
+                FAPI_TRY(proc_get_extint_bias(attr_mvpd_poundv_biased,
                                               attrs, l_vpdbias),
                          "Bias application function failed");
 
@@ -255,13 +269,12 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 else
                 {
                     FAPI_INF("VCS boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vcs_mv = (attr_mvpd_poundv[POWERSAVE][VPD_PV_VCS_MV]);
-                    uint32_t l_ics_ma = (attr_mvpd_poundv[POWERSAVE][VPD_PV_ICS_100MA]) * 100;
+                    uint32_t l_int_vcs_mv = (attr_mvpd_poundv_biased[POWERSAVE][VPD_PV_VCS_MV]);
+                    uint32_t l_ics_ma = (attr_mvpd_poundv_biased[POWERSAVE][VPD_PV_ICS_100MA]) * 100;
 
                     uint32_t l_ext_vcs_mv = sysparm_uplift(l_int_vcs_mv,
                                                            l_ics_ma,
                                                            attrs->r_loadline_vcs_uohm,
-
                                                            attrs->r_distloss_vcs_uohm,
                                                            attrs->vrm_voffset_vcs_uv);
 
@@ -287,8 +300,8 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 else
                 {
                     FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vdn_mv = (attr_mvpd_poundv[POWERBUS][VPD_PV_VDN_MV]);
-                    uint32_t l_idn_ma = (attr_mvpd_poundv[POWERBUS][VPD_PV_IDN_100MA]) * 100;
+                    uint32_t l_int_vdn_mv = (attr_mvpd_poundv_biased[POWERBUS][VPD_PV_VDN_MV]);
+                    uint32_t l_idn_ma = (attr_mvpd_poundv_biased[POWERBUS][VPD_PV_IDN_100MA]) * 100;
                     // Returns revle32
                     uint32_t l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
                                                            l_idn_ma,
