@@ -356,6 +356,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeEccErrors( const uint32_t & i_eccAttns,
                 break;
             }
 
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<TYPE_MCA>( iv_chip, addr.getRank() );
+
             // Abort this procedure because additional repairs will likely
             // not help (also avoids complication of having UE and MPE at
             // the same time).
@@ -1267,6 +1271,10 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeEccErrors( const uint32_t & i_eccAttns,
                           iv_chip->getHuid(), getKey() );
                 break;
             }
+
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<TYPE_MBA>( iv_chip, addr.getRank() );
 
             // An error was found, but don't abort. We want to see if any UEs
             // or MPEs exist on the rest of the rank. Also, since there was an
