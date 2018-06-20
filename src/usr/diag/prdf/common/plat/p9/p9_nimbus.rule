@@ -6022,7 +6022,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[52:54]
      *  INT_CQ_FIR_PC_RECOV_ERROR_0_2:
      */
-    (rINTCQFIR, bit(52|53|54)) ? level2_M_self_L_th_1;
+    (rINTCQFIR, bit(52|53|54)) ? analyzeIntCqFirPcRecovError;
 
     /** INTCQFIR[55:57]
      *  INT_CQ_FIR_PC_INFO_ERROR_0_2:

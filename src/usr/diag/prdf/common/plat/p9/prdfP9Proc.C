@@ -493,6 +493,81 @@ PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, PmRecovery );
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief  Special action for INT_CQ_FIR_PC_RECOV_ERROR_0_2
+ * @param  i_chip         A P9 chip.
+ * @param  io_sc          step code data struct
+ * @return PRD_SCAN_COMM_REGISTER_ZERO if we take normal action, SUCCESS for
+ *         conditional action, FAIL if an internal function fails
+ */
+int32_t handleIntCqFirPcRecovError( ExtensibleChip * i_chip,
+                                    STEP_CODE_DATA_STRUCT & io_sc)
+{
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        SCAN_COMM_REGISTER_CLASS * l_intPcVpcErr1Wof =
+            i_chip->getRegister("INT_PC_VPC_ERR1_WOF");
+        SCAN_COMM_REGISTER_CLASS * l_intPcVpcErr1WofDetail =
+            i_chip->getRegister("INT_PC_VPC_ERR1_WOF_DETAIL");
+
+        l_rc |= l_intPcVpcErr1Wof->Read();
+        l_rc |= l_intPcVpcErr1WofDetail->Read();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( "[handleIntCqFirPcRecovError] Error reading "
+                      "INT_PC_VPC_ERR1_WOF or INT_PC_VPC_ERR1_WOF_DETAIL" );
+            break;
+        }
+
+        // If INT_PC_VPC_ERR1_WOF[30] or INT_PC_VPC_ERR1_WOF_DETAIL[3] is not
+        // set, set rc to FAIL and let rule code take action as normal
+        if ( !l_intPcVpcErr1Wof->IsBitSet(30) ||
+             !l_intPcVpcErr1WofDetail->IsBitSet(3) )
+        {
+            l_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+            break;
+        }
+        // Else if INT_PC_VPC_ERR1_WOF[30] and INT_PC_VPC_ERR1_WOF_DETAIL[3] are
+        // both set.
+        // Don't increment thresholding
+
+        // Don't commit the error log
+        io_sc.service_data->setDontCommitErrl();
+
+        // Clear INT_PC_VPC_ERR1_WOF[30]
+        l_intPcVpcErr1Wof->ClearBit(30);
+        l_rc = l_intPcVpcErr1Wof->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( "[handleIntCqFirPcRecovError] Error clearing "
+                      "INT_PC_VPC_ERR1_WOF[30]" );
+            break;
+        }
+
+        // Clear all of INT_PC_VPC_ERR1_WOF_DETAIL because there are other bits
+        // in that register that have detauls about why bit 3 is set.
+        l_intPcVpcErr1WofDetail->clearAllBits();
+        l_rc = l_intPcVpcErr1WofDetail->Write();
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( "[handleIntCqFirPcRecovError] Error clearing "
+                      "INT_PC_VPC_ERR1_WOF_DETAIL" );
+            break;
+        }
+
+        // Clear INTCQFIR[52:54] (Should be done automatically by the rule code)
+
+    }while(0);
+
+    return l_rc;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleIntCqFirPcRecovError );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleIntCqFirPcRecovError );
+
+//------------------------------------------------------------------------------
+
 } // end namespace Proc
 
 } // end namespace PRDF
