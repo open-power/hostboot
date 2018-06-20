@@ -130,6 +130,10 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<TYPE_MCA>( iv_chip, addr.getRank() );
+
             // Leave the mark in place and abort this procedure.
             o_done = true; break;
         }
@@ -341,6 +345,10 @@ uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
                           iv_chip->getHuid(), getKey() );
                 break;
             }
+
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<TYPE_MBA>( iv_chip, addr.getRank() );
 
             // Leave the mark in place and abort this procedure.
             o_done = true; break;
