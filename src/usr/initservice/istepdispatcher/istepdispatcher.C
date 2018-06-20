@@ -2182,6 +2182,12 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
                    "Returned from cpu_all_winkle." );
             }
 
+            //Temporary hack to sleep for 15 seconds to avoid race condition
+            //where other nodes are trying to read the core scratch registers
+            //while this node might not be out of winkle. To make it worse,
+            //if we fail in this case, we don't TI gracefully.
+            nanosleep(15,0);
+
             // identify IPC msg address to remote node(s)
             // this must be after the winkle call because the data is stored
             // in a core scom which will get lost
