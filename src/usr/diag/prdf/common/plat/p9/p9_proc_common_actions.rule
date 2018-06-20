@@ -574,3 +574,8 @@ actionclass analyzePhypTodError
     try( funccall("isTodDisabled"), TodReportByPHYP );
 };
 
+/** action to analyze INT_CQ_FIR_PC_RECOV_ERROR_0_2 */
+actionclass analyzeIntCqFirPcRecovError
+{
+    try( funccall("handleIntCqFirPcRecovError"), level2_M_self_L_th_1 );
+};
