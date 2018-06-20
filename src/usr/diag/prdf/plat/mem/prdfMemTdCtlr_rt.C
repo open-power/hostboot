@@ -672,9 +672,15 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
                 break;
             }
 
-            // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank, true };
+            // Add a TPS request to the TD queue for additional analysis. It is
+            // unlikely the procedure will result in a repair because of the UE.
+            // However, we want to run TPS once just to see how bad the rank is.
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
             MemDbUtils::pushToQueue<T>( i_chip, e );
+
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<T>( i_chip, rank );
         }
 
     } while (0);
