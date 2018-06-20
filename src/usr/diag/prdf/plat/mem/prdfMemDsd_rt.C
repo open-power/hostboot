@@ -81,6 +81,10 @@ uint32_t DsdEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,
                 break;
             }
 
+            // Because of the UE, any further TPS requests will likely have no
+            // effect. So ban all subsequent requests.
+            MemDbUtils::banTps<TYPE_MBA>( iv_chip, addr.getRank() );
+
             // Leave the mark in place and abort this procedure.
             o_done = true; break;
         }
