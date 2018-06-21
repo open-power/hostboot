@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -115,18 +115,6 @@
     <ffdc>BUFFER_SIZE</ffdc>
     <ffdc>RING_SIZE</ffdc>
     <ffdc>OCCURRENCE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_MVPD_RINGID_DATA_NOT_FOUND</rc>
-    <description>Data for given ringId missing in p9_ringId</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

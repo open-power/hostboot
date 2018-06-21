@@ -425,191 +425,11 @@ extern "C"
     }
 
 
-// Returns a matching MVPD ring in RS4 v2 format at given buffer address,
+// Returns a matching MVPD ring in RS4 format at given buffer address,
 // NULL otherwise.
 // Adjusts buffer pointer and remaining length for the consumed portion
 // of buffer, that is, for the size of a matching MVPD ring, if any.
-// This function is needed only for backward compatibility, and may be
-// removed as soon as no RS4 v2 MVPD rings will be available.
-    fapi2::ReturnCode mvpdRingFuncFindOld( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                           & i_fapiTarget,
-                                           const uint8_t       i_chipletId,
-                                           const uint8_t       i_evenOdd,
-                                           const RingId_t      i_ringId,
-                                           uint8_t**           io_pBufLeft,
-                                           uint32_t*           io_pBufLenLeft,
-                                           CompressedScanData** o_pScanData)
-    {
-        uint64_t l_evenOddMask;
-        CompressedScanData l_scanData;
-
-        // old CompressedScanData structure
-        typedef struct
-        {
-            uint32_t iv_magic;
-            uint32_t iv_size;
-            uint32_t iv_algorithmReserved;
-            uint32_t iv_length;
-            uint64_t iv_scanSelect;
-            uint8_t  iv_headerVersion;
-            uint8_t  iv_flushOptimization;
-            uint8_t  iv_ringId;
-            uint8_t  iv_chipletId;
-        } OldCompressedScanData;
-
-        OldCompressedScanData* l_pScanDataOld =
-            reinterpret_cast<OldCompressedScanData*>(*io_pBufLeft);
-
-        *o_pScanData = NULL;
-
-        // check if buffer is big enough for old ring header
-        if (*io_pBufLenLeft < sizeof(OldCompressedScanData))
-        {
-            return fapi2::current_err;
-        }
-
-        // check magic word assuming an old ring header
-        if ((be32toh(l_pScanDataOld->iv_magic) & 0xffffff00) != 0x52533400)
-        {
-            return fapi2::current_err;
-        }
-
-        // make sure that buffer is big enough for entire ring
-        FAPI_ASSERT(*io_pBufLenLeft >= be32toh(l_pScanDataOld->iv_size),
-                    fapi2::MVPD_INSUFFICIENT_RING_BUFFER_SPACE().
-                    set_CHIP_TARGET(i_fapiTarget).
-                    set_RING_ID(i_ringId).
-                    set_CHIPLET_ID(i_chipletId).
-                    set_BUFFER_SIZE(*io_pBufLenLeft).
-                    set_RING_SIZE(be32toh(l_pScanDataOld->iv_size)).
-                    set_OCCURRENCE(1),
-                    "mvpdRingFuncFindOld: Not enough ring buffer space to contain ring: "
-                    "ringId=0x%x, chipletId=0x%x, ",
-                    "pBufLenLeft=%d, ring->iv_size=%d",
-                    i_ringId, i_chipletId,
-                    *io_pBufLenLeft, be32toh(l_pScanDataOld->iv_size));
-
-        // ok, this is a ring with an old header,
-        // hence this part of the input buffer can be considered consumed,
-        // regardless of it being the ring to be found or not
-        *io_pBufLeft    += be32toh(l_pScanDataOld->iv_size);
-        *io_pBufLenLeft -= be32toh(l_pScanDataOld->iv_size);
-
-        // for a few rings there are two different copies,
-        // called even and odd, which we need to consider
-        // as an extra search criterion for those rings (EX only)
-        switch (i_ringId)
-        {
-            case ex_l3_refr_time:
-            case ex_l3_refr_repr:
-                l_evenOddMask = 0x0008000000000000 >> i_evenOdd;
-                break;
-
-            case ex_l2_repr:
-                l_evenOddMask = 0x0080000000000000 >> i_evenOdd;
-                break;
-
-            case ex_l3_repr:
-                l_evenOddMask = 0x0200000000000000 >> i_evenOdd;
-                break;
-
-            default:
-                l_evenOddMask = 0;
-        }
-
-        // check if this ring matches the given criteria
-        // (ring ID, chiplet Id, and even/odd for EX)
-        if ( ( i_ringId <= 0xff &&
-               l_pScanDataOld->iv_ringId == i_ringId )   &&
-             l_pScanDataOld->iv_chipletId == i_chipletId &&
-             ( l_evenOddMask == 0 ||
-               be64toh(l_pScanDataOld->iv_scanSelect) & l_evenOddMask ) )
-        {
-            // look up ring in p9_ringId and retrieve scanAddr
-            int l_rc = INFRASTRUCT_RC_SUCCESS;
-            ChipType_t l_chipType = CT_P9N; // Any P9 CT will do here
-            GenRingIdList* l_ringProp = NULL;
-
-            l_rc = ringid_get_ring_list( l_chipType,
-                                         i_ringId,
-                                         &l_ringProp );
-
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
-                         l_ringProp != NULL,
-                         fapi2::MVPD_RINGID_DATA_NOT_FOUND().
-                         set_CHIP_TARGET(i_fapiTarget).
-                         set_RING_ID(i_ringId).
-                         set_CHIPLET_ID(i_chipletId),
-                         "mvpdRingFuncFind: lookup of scanAddr failed "
-                         "for chipType=%d, ringId=0x%x, chipletId=0x%x",
-                         l_chipType,
-                         i_ringId,
-                         i_chipletId );
-
-            // update chipletId in iv_scanScomAddress (for instance rings)
-            uint32_t l_scanScomAddr = l_ringProp->scanScomAddress;
-
-            if (i_chipletId != (l_scanScomAddr & 0xff000000) >> 24)
-            {
-                l_scanScomAddr = (l_scanScomAddr & 0x00ffffff) |
-                                 (((uint32_t)i_chipletId) << 24);
-            }
-
-            // update even/odd region mask in iv_scanScomAddress (for EX):
-            // p9_ringId.C stores scan addresses for even EX rings. Hence we
-            // only need to clear the even bit and set the odd bit
-            // to create the correct scan address for odd EX rings.
-            if (l_evenOddMask && i_evenOdd)
-            {
-                uint32_t l_evenOddMask32 = (uint32_t)(l_evenOddMask >> 45);
-                l_scanScomAddr &= ~(l_evenOddMask32 << i_evenOdd);
-                l_scanScomAddr |= l_evenOddMask32;
-            }
-
-            // translate old ring header to new ring header
-            l_scanData.iv_magic    = htobe16(RS4_MAGIC);
-            l_scanData.iv_version  = RS4_VERSION;
-            l_scanData.iv_type     = RS4_SCAN_DATA_TYPE_NON_CMSK;
-            l_scanData.iv_size     = htobe16(
-                                         (be32toh(l_pScanDataOld->iv_size)
-                                          - sizeof(OldCompressedScanData)
-                                          + sizeof(CompressedScanData)));
-            l_scanData.iv_ringId   = htobe16(i_ringId);
-            l_scanData.iv_scanAddr = htobe32(l_scanScomAddr);
-
-            // overwrite old ring header with new ring header
-            memcpy(l_pScanDataOld, &l_scanData, sizeof(l_scanData));
-
-            // move compressed ring data to position adjacent to new header
-            memmove((uint8_t*)l_pScanDataOld + sizeof(CompressedScanData),
-                    (uint8_t*)l_pScanDataOld + sizeof(OldCompressedScanData),
-                    be16toh(l_scanData.iv_size) - sizeof(CompressedScanData));
-
-            // return found ring in new format
-            *o_pScanData = reinterpret_cast<CompressedScanData*>
-                           (l_pScanDataOld);
-
-            FAPI_DBG("mvpdRingFuncFindOld: found RS4 v2 ring for "
-                     "chipletId 0x%x, evenOdd %d and ringId %d "
-                     "at address 0x%x and with old/translated size %d/%d",
-                     i_chipletId,
-                     i_evenOdd,
-                     i_ringId,
-                     *o_pScanData,
-                     be32toh(l_pScanDataOld->iv_size),
-                     be16toh((*o_pScanData)->iv_size));
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
-
-// Returns a matching MVPD ring in RS4 v3 format at given buffer address,
-// NULL otherwise.
-// Adjusts buffer pointer and remaining length for the consumed portion
-// of buffer, that is, for the size of a matching MVPD ring, if any.
-    fapi2::ReturnCode mvpdRingFuncFindNew( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+    fapi2::ReturnCode mvpdRingFuncFindHdr( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                                            & i_fapiTarget,
                                            const uint8_t       i_chipletId,
                                            const uint8_t       i_evenOdd,
@@ -646,7 +466,7 @@ extern "C"
                     set_BUFFER_SIZE(*io_pBufLenLeft).
                     set_RING_SIZE(be16toh(l_pScanData->iv_size)).
                     set_OCCURRENCE(2),
-                    "mvpdRingFuncFindNew: Not enough ring buffer space to contain ring: "
+                    "mvpdRingFuncFindHdr: Not enough ring buffer space to contain ring: "
                     "ringId=0x%x, chipletId=0x%x, ",
                     "pBufLenLeft=%d, ring->iv_size=%d",
                     i_ringId, i_chipletId,
@@ -689,7 +509,7 @@ extern "C"
             // found it, return pointer to ring
             *o_pScanData = l_pScanData;
 
-            FAPI_DBG("mvpdRingFuncFindNew: found RS4 v3 ring for "
+            FAPI_DBG("mvpdRingFuncFindHdr: found RS4 ring for "
                      "chipletId 0x%x, evenOdd %d and ringId %d "
                      "at address 0x%x and with size %d",
                      i_chipletId,
@@ -792,31 +612,17 @@ extern "C"
                                          &l_mvpdEnd),
                      "mvpdRingFuncFind: mvpdRingFuncFindEnd failed");
 
-            // next look for old ring header, because
-            // its magic "RS4" is not as ambigiuous as the new "RS" magic
-            if (!l_mvpdEnd)
-            {
-                FAPI_TRY(mvpdRingFuncFindOld(i_fapiTarget,
-                                             i_chipletId,
-                                             i_evenOdd,
-                                             i_ringId,
-                                             &i_pRecordBuf,
-                                             &l_recordBufLenLeft,
-                                             &l_pScanData),
-                         "mvpdRingFuncFind: mvpdRingFuncFindOld failed");
-            }
-
-            // last look for new ring header
+            // second look for ring header
             if (!l_mvpdEnd && !l_pScanData)
             {
-                FAPI_TRY(mvpdRingFuncFindNew(i_fapiTarget,
+                FAPI_TRY(mvpdRingFuncFindHdr(i_fapiTarget,
                                              i_chipletId,
                                              i_evenOdd,
                                              i_ringId,
                                              &i_pRecordBuf,
                                              &l_recordBufLenLeft,
                                              &l_pScanData),
-                         "mvpdRingFuncFind: mvpdRingFuncFindNew failed");
+                         "mvpdRingFuncFind: mvpdRingFuncFindHdr failed");
             }
 
             FAPI_ASSERT(l_prevLen != l_recordBufLenLeft,

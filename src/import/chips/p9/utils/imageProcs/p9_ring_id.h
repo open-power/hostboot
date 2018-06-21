@@ -110,8 +110,7 @@ enum RingID
     n2_psi_time = 57, //0x39
     n2_repr = 58, //0x3A
     n2_cxa1_repr = 59, //0x3B
-    n2_psi_repr = 60, //0x3C
-    // values 61 unused
+    // values 60-61 unused
 
     // Nest Chiplet Rings - N3
     n3_fure = 62, //0x3E
@@ -177,8 +176,8 @@ enum RingID
     // MC Chiplet Rings
     // MC01 and MC23 instance specific Rings
     mc_repr = 113, //0x71
-    mc_iom01_repr = 114, //0x72
-    mc_iom23_repr = 115, //0x73
+    // value 114 unused
+    mc_iom23_repr = 115, //0c73
 
     // OB0 Chiplet Rings
     ob0_pll_bndy = 116, //0x74

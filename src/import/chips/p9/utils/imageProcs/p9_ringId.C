@@ -135,7 +135,6 @@ const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"n2_repr"             , 0x09, 0x04, 0x04, VPD_RING    , 0x04035C06},
     {"n2_cxa1_repr"        , 0x0a, 0x04, 0x04, VPD_RING    , 0x04032006},
-    {"n2_psi_repr"         , 0x0b, 0x04, 0x04, VPD_RING    , 0x04030206},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
@@ -221,8 +220,7 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
     {"mc_repr"             , 0x10, 0x07, 0x08, VPD_RING    , 0x07036006},
-    {"mc_iom01_repr"       , 0x11, 0x07, 0x08, VPD_RING    , 0x07031006},
-    {"mc_iom23_repr"       , 0x12, 0x07, 0x08, VPD_RING    , 0x07030806},
+    {"mc_iom23_repr"       , 0x11, 0x07, 0x08, VPD_RING    , 0x07030806},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
