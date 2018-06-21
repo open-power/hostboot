@@ -122,18 +122,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_RINGID_DATA_NOT_FOUND</rc>
-    <description>Data for given ringId missing in p9_ringId</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_MVPD_RING_REDUNDANT_DATA</rc>
     <description>MVPD ring has redundant data (Not a bug. Info to caller.)</description>
   </hwpError>
