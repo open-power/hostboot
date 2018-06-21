@@ -255,11 +255,6 @@
      </attribute>
 
     <attribute>
-          <id>ATTR_VCS_I2C_RAIL</id>
-          <default>0</default>
-     </attribute>
-
-    <attribute>
           <id>ATTR_FAPI_POS</id>
           <default>0xFFFFFFFF</default>
      </attribute>
