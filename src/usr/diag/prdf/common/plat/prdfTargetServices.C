@@ -577,6 +577,7 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
 
         { TYPE_L4,     TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
 
+        { TYPE_MBA,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
         { TYPE_MBA,    TYPE_MEMBUF,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MBA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 

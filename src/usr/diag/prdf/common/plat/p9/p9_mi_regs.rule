@@ -48,3 +48,16 @@
         capture     group default;
     };
 
+    register MCFGP
+    {
+        name        "MCFGP";
+        scomaddr    0x501080A;
+        capture     group default;
+    };
+
+    register MCFGPM
+    {
+        name        "MCFGPM";
+        scomaddr    0x501080C;
+        capture     group default;
+    };
