@@ -32,6 +32,9 @@
 #include <hdat/hdat.H>
 #include "../../../src/usr/runtime/hdatstructs.H"
 #include <vmmconst.h>
+#include <sys/misc.h>
+#include <kernel/vmmmgr.H>
+
 
 namespace RUNTIME
 {
@@ -370,6 +373,22 @@ void findHdatLocation(uint64_t payloadBase_va,
  * @return errlHndl_t Returns nullptr on success; otherwise errlog
  */
 errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size);
+
+
+/*
+ *  @brief Calculates the node's proposed start address for the system's
+ *         SP ATTN areas, which becomes the effective configuration if it's
+ *         elected as the master.
+ *
+ *  @return uint64_t Absolute start address for the intended SP ATTN areas
+ */
+inline uint64_t calcSpAttnAreaStart()
+{
+    auto hrmorVal = cpu_spr_value(CPU_SPR_HRMOR);
+    return  (hrmorVal - VMM_HRMOR_OFFSET + PHYP_ATTN_AREA_OFFSET)
+                                              | VmmManager::FORCE_PHYS_ADDR;
+}
+
 
 }
 
