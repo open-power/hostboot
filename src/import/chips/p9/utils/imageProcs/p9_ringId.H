@@ -299,15 +299,14 @@ enum RingOffset
     // Instance Rings
     n2_repr      = (0 | INSTANCE_RING_MARK),
     n2_cxa1_repr = (1 | INSTANCE_RING_MARK),
-    n2_psi_repr  = (2 | INSTANCE_RING_MARK)
 };
 
 static const ChipletData_t g_chipletData =
 {
     4, // N2 Chiplet ID is 4.
     9, // 9 common rings for N2 Chiplet
-    3, // 3 instance specific rings for N2 chiplet
-    3,
+    2, // 2 instance specific rings for N2 chiplet
+    2,
     2,  // 2 common ring variants: BASE, RL
 };
 };
@@ -404,16 +403,15 @@ enum RingOffset
     mc_pll_func = 15,
     // Instance Rings
     mc_repr       = (0 | INSTANCE_RING_MARK),
-    mc_iom01_repr = (1 | INSTANCE_RING_MARK),
-    mc_iom23_repr = (2 | INSTANCE_RING_MARK)
+    mc_iom23_repr = (1 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     7,  // MC Chiplet ID range is 7 - 8. The base ID is 7.
     16, // 16 common rings for MC Chiplet
-    3,  // 3 instance specific rings for each MC instance
-    3,
+    2,  // 1 instance specific rings for each MC instance
+    2,
     2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace MC
@@ -780,7 +778,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N2::n2_psi_time                    , "n2_psi_time"                 , N2_TYPE    }, // 57
     { N2::n2_repr                        , "n2_repr"                     , N2_TYPE    }, // 58
     { N2::n2_cxa1_repr                   , "n2_cxa1_repr"                , N2_TYPE    }, // 59
-    { N2::n2_psi_repr                    , "n2_psi_repr"                 , N2_TYPE    }, // 60
+    { INVALID_RING_OFFSET                , "invalid"                     , N2_TYPE    }, // 60
     { INVALID_RING_OFFSET                , "invalid"                     , N2_TYPE    }, // 61
     { N3::n3_fure                        , "n3_fure"                     , N3_TYPE    }, // 62
     { N3::n3_gptr                        , "n3_gptr"                     , N3_TYPE    }, // 63
@@ -834,7 +832,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { MC::mc_pll_bndy_bucket_5           , "mc_pll_bndy_bucket_5"        , MC_TYPE    }, // 111
     { MC::mc_pll_func                    , "mc_pll_func"                 , MC_TYPE    }, // 112
     { MC::mc_repr                        , "mc_repr"                     , MC_TYPE    }, // 113
-    { MC::mc_iom01_repr                  , "mc_iom01_repr"               , MC_TYPE    }, // 114
+    { INVALID_RING_OFFSET                , "invalid"                     , MC_TYPE    }, // 114
     { MC::mc_iom23_repr                  , "mc_iom23_repr"               , MC_TYPE    }, // 115
     { OB0::ob0_pll_bndy                  , "ob0_pll_bndy"                , OB0_TYPE   }, // 116
     { OB0::ob0_pll_bndy_bucket_1         , "ob0_pll_bndy_bucket_1"       , OB0_TYPE   }, // 117
@@ -1043,7 +1041,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { N2::n2_psi_time                    , N2_TYPE    }, // 57
     { N2::n2_repr                        , N2_TYPE    }, // 58
     { N2::n2_cxa1_repr                   , N2_TYPE    }, // 59
-    { N2::n2_psi_repr                    , N2_TYPE    }, // 60
+    { INVALID_RING_OFFSET                , N2_TYPE    }, // 60
     { INVALID_RING_OFFSET                , N2_TYPE    }, // 61
     { N3::n3_fure                        , N3_TYPE    }, // 62
     { N3::n3_gptr                        , N3_TYPE    }, // 63
@@ -1097,7 +1095,7 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { MC::mc_pll_bndy_bucket_5           , MC_TYPE    }, // 111
     { MC::mc_pll_func                    , MC_TYPE    }, // 112
     { MC::mc_repr                        , MC_TYPE    }, // 113
-    { MC::mc_iom01_repr                  , MC_TYPE    }, // 114
+    { INVALID_RING_OFFSET                , MC_TYPE    }, // 114
     { MC::mc_iom23_repr                  , MC_TYPE    }, // 115
     { OB0::ob0_pll_bndy                  , OB0_TYPE   }, // 116
     { OB0::ob0_pll_bndy_bucket_1         , OB0_TYPE   }, // 117
