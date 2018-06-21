@@ -47,6 +47,15 @@ using namespace PlatServices;
 namespace MemDealloc
 {
 
+enum
+{
+    DDR3 = fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR3,
+    DDR4 = fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+
+    HASH_MODE_128B = 0,
+    HASH_MODE_256B,
+};
+
 bool isEnabled()
 {
     return ( isHyprRunning() && (isHyprConfigPhyp() || isHyprConfigOpal()) &&
@@ -136,8 +145,251 @@ uint64_t __countBits( uint64_t i_val )
     return o_count;
 }
 
-int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                          uint64_t & o_addr )
+/** @brief  Combines the rank and bank together. Note that the rank/bank will be
+ *          split in two to make room for the row and column. This function will
+ *          return the rank/bank in both parts (right justified).
+ *  @param  i_ds             DIMM select (D).
+ *  @param  i_mrnk           Master rank (M0-M2).
+ *  @param  i_srnk           Slave rank  (S0-S2).
+ *  @param  i_numDs          Number of configured DIMM select bits.
+ *  @param  i_numMrnk        Number of configured master rank bits.
+ *  @param  i_numSrnk        Number of configured slave rank bits.
+ *  @param  i_bnk            Bank (DDR3: B2-B0, DDR4: BG1-BG0,B1-B0).
+ *  @param  i_ddrVer         DDR version (DDR3 or DDR4).
+ *  @param  i_hash           Hash value (0, 1, or 2).
+ *  @param  o_upperRnkBnk    Upper rank/bank bits (right justified).
+ *  @param  o_numUpperRnkBnk Number of configured upper rank/bank bits.
+ *  @param  o_lowerRnkBnk    Lower rank/bank bits (right justified).
+ *  @param  o_numLowerRnkBnk Number of configured lower rank/bank bits.
+ */
+void getRankBank( uint64_t i_ds,    uint64_t i_mrnk,    uint64_t i_srnk,
+                  uint64_t i_numDs, uint64_t i_numMrnk, uint64_t i_numSrnk,
+                  uint64_t i_bnk,   uint64_t i_ddrVer,  uint64_t i_hash,
+                  uint64_t & o_upperRnkBnk, uint64_t & o_numUpperRnkBnk,
+                  uint64_t & o_lowerRnkBnk, uint64_t & o_numLowerRnkBnk )
+{
+    // The number of bank bits can be determined from the DDR version.
+    uint64_t numBnk = (DDR3 == i_ddrVer) ? 3 : 4;
+
+    // Calculate the number of combined rank/bank bits.
+    uint64_t numRnkBnk = i_numDs + i_numMrnk + i_numSrnk + numBnk;
+
+    // Build the rank (D,M0-M2,S0-S2)
+    uint64_t rnk = i_ds;
+    rnk <<= i_numMrnk; rnk |= i_mrnk;
+    rnk <<= i_numSrnk; rnk |= i_srnk;
+
+    // Get the rank components
+    uint64_t upperRnk = (rnk & ~0x1) << numBnk;
+    uint64_t lowerRnk = (rnk &  0x1) << numBnk;
+
+    // Get the bank components
+    uint64_t upperBnk = 0, lowerBnk = 0;
+    if ( DDR3 == i_ddrVer )
+    {
+        upperBnk = i_bnk & 0x4; // B2
+        lowerBnk = i_bnk & 0x3; // B1-B0
+    }
+    else // DDR4
+    {
+        upperBnk = (i_bnk & 0x3) << 2; // B1-B0
+        lowerBnk = (i_bnk & 0xC) >> 2; // BG1-BG0
+    }
+
+    // The last bit of the rank and the upper part of the bank will be swapped
+    // in certain conditions.
+    bool swap = ( (0 != i_hash)    || // Normal case:  hash is non-zero
+                  (0 != i_numSrnk) || // Special case: any slave ranks
+                  (3 == i_numMrnk) ); // Special case: 8 master ranks (3 bits)
+
+    // Combine rank and bank.
+    uint64_t rnkBnk = upperRnk                              |
+                      lowerRnk >> (swap ? (numBnk - 2) : 0) |
+                      upperBnk << (swap ? 1            : 0) |
+                      lowerBnk;
+
+    // The combined rank/bank will need to be split to insert the column and
+    // row bits.
+    uint64_t shift = numBnk + i_hash;
+    if ( 0 != i_numSrnk ) shift += i_numSrnk; // Special case: any slave ranks
+    if ( 3 == i_numMrnk ) shift += i_numMrnk; // Special case: 8 master ranks
+
+    uint64_t mask = (0xffffffffffffffffull >> shift) << shift;
+
+    o_upperRnkBnk = (rnkBnk &  mask) >> shift;
+    o_lowerRnkBnk =  rnkBnk & ~mask;
+
+    o_numUpperRnkBnk = numRnkBnk - shift;
+    o_numLowerRnkBnk = shift;
+}
+
+/** @brief  Takes the combined rank/bank and adds the row and column. This will
+ *          give us bits 0:32 of the Centaur address as described in sections
+ *          5.6 and 5.7 of Centaur chip spec.
+ *  @param  i_upperRnkBnk    Upper rank/bank bits (right justified).
+ *  @param  i_numUpperRnkBnk Number of configured upper rank/bank bits.
+ *  @param  i_lowerRnkBnk    Lower rank/bank bits (right justified).
+ *  @param  i_numLowerRnkBnk Number of configured lower rank/bank bits.
+ *  @param  i_row       Row (R18-R0)
+ *  @param  i_numRow    Number of configured row bits.
+ *  @param  i_col       Column (C13,C11,C9-C3)
+ *  @param  i_numCol    Number of configured column bits.
+ *  @param  i_ddrVer    DDR version (DDR3 or DDR4).
+ *  @param  i_mbaIlMode MBA interleave mode.     (from MBAXCR[12])
+ *  @return Bits 0-34 of the Centaur address (right justified).
+ */
+uint64_t combineComponents( uint64_t i_upperRnkBnk, uint64_t i_numUpperRnkBnk,
+                            uint64_t i_lowerRnkBnk, uint64_t i_numLowerRnkBnk,
+                            uint64_t i_row, uint64_t i_numRow,
+                            uint64_t i_col, uint64_t i_numCol,
+                            uint64_t i_ddrVer, uint64_t i_mbaIlMode )
+{
+    // Get the row components.
+    uint64_t r17 = 0; // DDR4 only
+    uint64_t upperRow = 0, numUpperRow = 0;
+    uint64_t lowerRow = 0, numLowerRow = 0;
+    if ( DDR3 == i_ddrVer )
+    {
+        // upper:r16-r15 lower:r14-r0
+        upperRow = (i_row & 0x18000) >> 15; numUpperRow = i_numRow - 15;
+        lowerRow =  i_row & 0x07fff;        numLowerRow = 15;
+    }
+    else // DDR4
+    {
+        // upper:r16-r14 lower:r13-r0
+        r17      = (i_row & 0x20000) >> 17;
+        upperRow = (i_row & 0x1c000) >> 14; numUpperRow = i_numRow - 14;
+        lowerRow =  i_row & 0x03fff;        numLowerRow = 14;
+
+        if ( 18 == i_numRow ) numUpperRow -= 1; // r17 is not in numUpperRow
+    }
+
+    // Get the column components.
+    uint64_t upperCol = i_col & 0x1fe;
+    uint64_t c3       = i_col & 0x001;
+
+    uint64_t numUpperCol = i_numCol - 1;
+    uint64_t numC3       = 1;
+
+    // Start building the address.
+    uint64_t addr = r17;
+    addr <<= i_numUpperRnkBnk; addr |= i_upperRnkBnk;
+    addr <<=   numUpperRow;    addr |=   upperRow;
+    addr <<=   numUpperCol;    addr |=   upperCol;
+
+    if ( HASH_MODE_128B == i_mbaIlMode )
+    {
+        addr <<=   numC3;          addr |=   c3;
+        addr <<= i_numLowerRnkBnk; addr |= i_lowerRnkBnk;
+
+    }
+    else // HASH_MODE_256B
+    {
+        addr <<= i_numLowerRnkBnk; addr |= i_lowerRnkBnk;
+        addr <<=   numC3;          addr |=   c3;
+    }
+
+    // Insert the fixed row bits.
+    addr = (addr & 0xfffffffffffffc00ull) << numLowerRow |
+           lowerRow                       << 10          |
+           (addr & 0x00000000000003ffull);
+
+    return addr;
+}
+
+/** @brief  Translates a physical address (rank, bank, row, col) to a 40 bit
+ *          Centaur address. The algorithm is derived from Sections 5.4, 5.6,
+ *          and 5.7 of Centaur chip spec.
+ *  @param  i_ds        DIMM select (D).
+ *  @param  i_mrnk      Master rank (M0-M2).
+ *  @param  i_srnk      Slave rank  (S0-S2).
+ *  @param  i_numMrnk   Number of configured master rank bits.
+ *  @param  i_numSrnk   Number of configured slave rank bits.
+ *  @param  i_row       Row (R18-R0)
+ *  @param  i_numRow    Number of configured row bits.
+ *  @param  i_col       Column (C13,C11,C9-C3)
+ *  @param  i_numCol    Number of configured column bits.
+ *  @param  i_bnk       Bank (DDR3: B2-B0, DDR4: BG1-BG0,B1-B0).
+ *  @param  i_mba       MBA position (0 or 1)
+ *  @param  i_ddrVer    DDR version (DDR3 or DDR4).
+ *  @param  i_cenIlMode Centaur interleave mode. (from MBSXCR[0:4])
+ *  @param  i_mbaIlMode MBA interleave mode.     (from MBAXCR[12])
+ *  @param  i_hash      Rank hash.               (from MBAXCR[10:11])
+ *  @param  i_cfg       Rank config.             (from MBAXCR[8])
+ *  @return The returned 40-bit Cenaur address.
+ */
+uint64_t transPhysToCenAddr( uint64_t i_ds,  uint64_t i_mrnk, uint64_t i_srnk,
+                             uint64_t i_numMrnk, uint64_t i_numSrnk,
+                             uint64_t i_row, uint64_t i_numRow,
+                             uint64_t i_col, uint64_t i_numCol,
+                             uint64_t i_bnk, uint64_t i_mba,
+                             uint64_t i_ddrVer,
+                             uint64_t i_cenIlMode, uint64_t i_mbaIlMode,
+                             uint64_t i_hash, uint64_t i_cfg )
+{
+    // Get the combine rank/bank.
+    uint64_t upperRnkBnk, numUpperRnkBnk;
+    uint64_t lowerRnkBnk, numLowerRnkBnk;
+    getRankBank( i_ds,  i_mrnk,    i_srnk,
+                 i_cfg, i_numMrnk, i_numSrnk,
+                 i_bnk, i_ddrVer,  i_hash,
+                 upperRnkBnk, numUpperRnkBnk,
+                 lowerRnkBnk, numLowerRnkBnk );
+
+    // Get bits 0:32 as described in sections 5.6 and 5.7 of the Centaur spec.
+    uint64_t addr = combineComponents( upperRnkBnk, numUpperRnkBnk,
+                                       lowerRnkBnk, numLowerRnkBnk,
+                                       i_row, i_numRow, i_col, i_numCol,
+                                       i_ddrVer, i_mbaIlMode );
+
+    // Adjust for Centaur interleave mode as described in sections 5.4.1 of the
+    // Centaur spec.
+    if ( 0 != i_cenIlMode )
+    {
+        // MBSXCR[0] just indicates there is interleaving so that can be
+        // ignored and we'll just use MBSXCR[1:4].
+        i_cenIlMode &= 0xf;
+
+        // Now, a value of 0 indicates bit 23 is interleaved and a value of 9
+        // indicates bit 32 is interleaved. So we should be able to invert it to
+        // give us the shift value.
+        uint64_t shift = 9 - i_cenIlMode;
+        uint64_t mask  = (0xffffffffffffffffull >> shift) << shift;
+
+        // Insert the MBA bit.
+        addr = (addr & mask) << 1 | i_mba << shift | (addr & ~mask);
+    }
+
+    // Bits 33:39 are zero.
+    addr <<= 7;
+
+    return addr;
+}
+
+// Given the number of configured ranks, return the number of configured rank
+// bits (i.e. 1 rank=0 bits, 2 ranks=1 bit, 4 ranks=2 bits, 8 ranks=3 bits).
+// This could be achieved with log2() from math.h, but we don't want to mess
+// with floating point numbers (FSP uses C++ standard).
+uint64_t ranks2bits( uint64_t i_numRnks )
+{
+    switch ( i_numRnks )
+    {
+        case 1: return 0;
+        case 2: return 1;
+        case 4: return 2;
+        case 8: return 3;
+    }
+
+    return 0;
+}
+
+template <TYPE T>
+int32_t __getPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
+                               uint64_t & o_addr );
+
+template <>
+int32_t __getPortAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                 uint64_t & o_addr )
 {
     int32_t o_rc = SUCCESS;
 
@@ -233,17 +485,142 @@ int32_t __getMcaPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
     return o_rc;
 }
 
+template <>
+int32_t __getPortAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
+                                 uint64_t & o_addr )
+{
+    #define PRDF_FUNC "[DEALLOC::__getPortAddr<TYPE_MBA>] "
+
+    int32_t o_rc = SUCCESS;
+
+    o_addr = 0;
+
+    TargetHandle_t mba  = i_chip->GetChipHandle();
+
+    ExtensibleChip * mbChip = getConnectedParent(i_chip, TYPE_MEMBUF);
+    uint64_t mbaPos = i_chip->getPos();
+
+    uint64_t ds   = i_addr.getRank().getDimmSlct(); // D
+    uint64_t mrnk = i_addr.getRank().getRankSlct(); // M0-M2
+    uint64_t srnk = i_addr.getRank().getSlave();    // S0-S2
+
+    uint64_t row  = i_addr.getRow();    // R18-R0
+    uint64_t col  = i_addr.getCol();    // C13,C11,C9-C3
+    uint64_t bnk  = i_addr.getBank();   // DDR3: B2-B0, DDR4: BG1-BG0,B1-B0
+
+    // Get the number of configured address bits for the master and slave ranks.
+    uint64_t num_mrnk = getNumMasterRanksPerDimm<TYPE_MBA>( mba, ds );
+    uint64_t num_srnk = getNumRanksPerDimm<TYPE_MBA>( mba, ds ) / num_mrnk;
+
+    uint64_t mrnkBits = ranks2bits( num_mrnk );
+    uint64_t srnkBits = ranks2bits( num_srnk );
+
+    do
+    {
+        // Get the number of configured address bits for the row and column.
+        uint8_t rowBits, colBits;
+        o_rc = getDimmRowCol( mba, rowBits, colBits );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getDimmConfig() failed. HUID:0x%08X",
+                      i_chip->GetId());
+            break;
+        }
+
+        // The attribute used in getDimmRowCol() returns a value for colBits
+        // which includes c2-c0. Those bits are tied to zero and are not
+        // included in col. Therefore, we need to subtract 3 to get the real
+        // value.
+        colBits = colBits - 3;
+
+        // Get the DDR verion of the DIMM (DDR3, DDR4, etc...)
+        uint8_t ddrVer = getDramGen<TYPE_MBA>( mba );
+
+        // Get the Centaur interleave mode (MBSXCR[0:4]).
+        SCAN_COMM_REGISTER_CLASS * mbsxcr = mbChip->getRegister("MBSXCR");
+        o_rc = mbsxcr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBSXCR. HUID:0x%08X",
+                      mbChip->GetId() ) ;
+            break;
+        }
+
+        uint64_t cenIlMode = mbsxcr->GetBitFieldJustified( 0, 5 );
+
+        // Get the rank config (MBAXCR[8]), rank hash (MBAXCR[10:11]), and
+        // MBA interleave mode (MBAXCR[12]).
+        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
+        SCAN_COMM_REGISTER_CLASS * mbaxcr = mbChip->getRegister( reg_str );
+        o_rc = mbaxcr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s. HUID:0X%08X",
+                      reg_str, mbChip->GetId() );
+            break;
+        }
+
+        uint8_t cfg       = mbaxcr->GetBitFieldJustified(  8, 1 );
+        uint8_t hash      = mbaxcr->GetBitFieldJustified( 10, 2 );
+        uint8_t mbaIlMode = mbaxcr->GetBitFieldJustified( 12, 1 );
+
+        // Form the address from info gathered above
+        o_addr = transPhysToCenAddr( ds, mrnk, srnk,
+                                     mrnkBits, srnkBits,
+                                     row, rowBits, col, colBits,
+                                     bnk, mbaPos,
+                                     ddrVer,
+                                     cenIlMode, mbaIlMode,
+                                     hash, cfg );
+
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
 //------------------------------------------------------------------------------
+
+template<TYPE T>
+void __getGrpPrms( ExtensibleChip * i_chip, uint8_t o_portPos,
+                   SCAN_COMM_REGISTER_CLASS * mcfgp,
+                   SCAN_COMM_REGISTER_CLASS * mcfgpm );
+
+template<>
+void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
+                             SCAN_COMM_REGISTER_CLASS * o_mcfgp,
+                             SCAN_COMM_REGISTER_CLASS * o_mcfgpm )
+{
+    // Get the connected MCS chip and MCA target position.
+    ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
+    o_portPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+
+    o_mcfgp  = mcs_chip->getRegister("MCFGP");
+    o_mcfgpm = mcs_chip->getRegister("MCFGPM");
+
+}
+
+template<>
+void __getGrpPrms<TYPE_MBA>( ExtensibleChip * i_chip, uint8_t o_portPos,
+                             SCAN_COMM_REGISTER_CLASS * o_mcfgp,
+                             SCAN_COMM_REGISTER_CLASS * o_mcfgpm )
+{
+    // Get the connected MI chip and MBA target position.
+    ExtensibleChip * mi_chip = getConnectedParent( i_chip, TYPE_MI );
+    o_portPos = i_chip->getPos();
+
+    o_mcfgp  = mi_chip->getRegister("MCFGP");
+    o_mcfgpm = mi_chip->getRegister("MCFGPM");
+}
+
+
 
 template<TYPE T>
 uint32_t __getGrpInfo( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
                        uint64_t & o_grpId, uint64_t & o_grpSize,
-                       uint64_t & o_grpBar );
-
-template<>
-uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
-                                 uint64_t & o_grpId, uint64_t & o_grpSize,
-                                 uint64_t & o_grpBar )
+                       uint64_t & o_grpBar )
 {
     #define PRDF_FUNC "[MemDealloc::__getGrpInfo] "
 
@@ -251,12 +628,12 @@ uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
 
     do
     {
-        // Get the connecte MCS chip and MCA target position.
-        ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
-        uint8_t mcaPos = i_chip->getPos() % MAX_MCA_PER_MCS;
+        // Get mcaPos and MCFGP/M registers
+        uint8_t portPos = 0xFF;
+        SCAN_COMM_REGISTER_CLASS * mcfgp  = nullptr;
+        SCAN_COMM_REGISTER_CLASS * mcfgpm = nullptr;
+        __getGrpPrms<T>( i_chip, portPos, mcfgp, mcfgpm );
 
-        SCAN_COMM_REGISTER_CLASS * mcfgp  = mcs_chip->getRegister("MCFGP");
-        SCAN_COMM_REGISTER_CLASS * mcfgpm = mcs_chip->getRegister("MCFGPM");
         o_rc = mcfgp->Read();  if ( SUCCESS != o_rc ) break;
         o_rc = mcfgpm->Read(); if ( SUCCESS != o_rc ) break;
 
@@ -264,29 +641,28 @@ uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
         uint8_t mcGrpCnfg = mcfgp->GetBitFieldJustified( 1, 4 );
         switch ( mcGrpCnfg )
         {
-            case 0: o_grpChnls = 1;                     break; // 11
-            case 1: o_grpChnls = (0 == mcaPos) ? 1 : 3; break; // 13
-            case 2: o_grpChnls = (0 == mcaPos) ? 3 : 1; break; // 31
-            case 3: o_grpChnls = 3;                     break; // 33
-            case 4: o_grpChnls = 2;                     break; // 2D
-            case 5: o_grpChnls = 2;                     break; // 2S
-            case 6: o_grpChnls = 4;                     break; // 4
-            case 7: o_grpChnls = 6;                     break; // 6
-            case 8: o_grpChnls = 8;                     break; // 8
+            case 0: o_grpChnls = 1;                      break; // 11
+            case 1: o_grpChnls = (0 == portPos) ? 1 : 3; break; // 13
+            case 2: o_grpChnls = (0 == portPos) ? 3 : 1; break; // 31
+            case 3: o_grpChnls = 3;                      break; // 33
+            case 4: o_grpChnls = 2;                      break; // 2D
+            case 5: o_grpChnls = 2;                      break; // 2S
+            case 6: o_grpChnls = 4;                      break; // 4
+            case 7: o_grpChnls = 6;                      break; // 6
+            case 8: o_grpChnls = 8;                      break; // 8
             default:
                 PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: 0x%x "
-                          "on 0x%08x port %d", mcGrpCnfg, mcs_chip->getHuid(),
-                          mcaPos );
+                          "on 0x%08x", mcGrpCnfg, i_chip->getHuid() );
                 o_rc = FAIL;
         }
         if ( SUCCESS != o_rc ) break;
 
         // Get the group ID and group size.
-        o_grpId   = mcfgp->GetBitFieldJustified( (0 == mcaPos) ? 5 : 8, 3 );
+        o_grpId   = mcfgp->GetBitFieldJustified( (0 == portPos) ? 5 : 8, 3 );
         o_grpSize = mcfgp->GetBitFieldJustified( 13, 11 );
 
         // Get the base address (BAR).
-        if ( 0 == mcaPos ) // MCS channel 0
+        if ( 0 == portPos ) // MCS channel 0
         {
             // Channel 0 is always from the MCFGP.
             o_grpBar = mcfgp->GetBitFieldJustified(24, 24);
@@ -314,8 +690,8 @@ uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
 
                 default:
                     PRDF_ERR( PRDF_FUNC "Invalid MC channels per group value: "
-                              "0x%x on 0x%08x port %d", mcGrpCnfg,
-                              mcs_chip->getHuid(), mcaPos );
+                              "0x%x on 0x%08x", mcGrpCnfg,
+                              i_chip->getHuid() );
                     o_rc = FAIL;
             }
         }
@@ -330,13 +706,8 @@ uint32_t __getGrpInfo<TYPE_MCA>( ExtensibleChip * i_chip, uint64_t & o_grpChnls,
 
 //------------------------------------------------------------------------------
 
-template<TYPE T>
 uint32_t __insertGrpId( uint64_t & io_addr, uint64_t i_grpChnls,
-                        uint64_t i_grpId );
-
-template<>
-uint32_t __insertGrpId<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpChnls,
-                                  uint64_t i_grpId )
+                        uint64_t i_grpId )
 {
     #define PRDF_FUNC "[MemDealloc::__insertGrpId] "
 
@@ -437,12 +808,7 @@ uint8_t __lrotate( uint8_t i_b3mf, uint8_t i_num )
     return o_b3mf;
 }
 
-template<TYPE T>
-uint64_t __getMsb( uint64_t i_addr, uint64_t i_grpChnls, uint64_t i_grpId );
-
-template<>
-uint64_t __getMsb<TYPE_MCA>( uint64_t i_addr, uint64_t i_grpChnls,
-                             uint64_t i_grpId )
+uint64_t __getMsb( uint64_t i_addr, uint64_t i_grpChnls, uint64_t i_grpId )
 {
     uint64_t o_msb = 0;
 
@@ -480,12 +846,7 @@ uint64_t __getMsb<TYPE_MCA>( uint64_t i_addr, uint64_t i_grpChnls,
 
 //------------------------------------------------------------------------------
 
-template<TYPE T>
-void __insertMsb( uint64_t & io_addr, uint64_t i_grpSize, uint64_t i_msb );
-
-template<>
-void __insertMsb<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpSize,
-                            uint64_t i_msb )
+void __insertMsb( uint64_t & io_addr, uint64_t i_grpSize, uint64_t i_msb )
 {
     // i_grpSize is a mask for the BAR. All we have to do is count the number
     // of bits in that value to determine how many extra bits we need to shift
@@ -496,11 +857,7 @@ void __insertMsb<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpSize,
 
 //------------------------------------------------------------------------------
 
-template<TYPE T>
-void __addBar( uint64_t & io_addr, uint64_t i_grpBar );
-
-template<>
-void __addBar<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpBar )
+void __addBar( uint64_t & io_addr, uint64_t i_grpBar )
 {
     // The BAR field is 24 bits and always starts at bit 8 of the real address.
     io_addr |= (i_grpBar << 32);
@@ -510,10 +867,6 @@ void __addBar<TYPE_MCA>( uint64_t & io_addr, uint64_t i_grpBar )
 
 template<TYPE T>
 uint32_t getSystemAddr( ExtensibleChip * i_chip, MemAddr i_addr,
-                        uint64_t & o_addr );
-
-template<>
-uint32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
                                   uint64_t & o_addr )
 {
     #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
@@ -524,15 +877,15 @@ uint32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     {
         // Get the group information.
         uint64_t grpChnls, grpId, grpSize, grpBar;
-        o_rc = __getGrpInfo<TYPE_MCA>(i_chip, grpChnls, grpId, grpSize, grpBar);
+        o_rc = __getGrpInfo<T>(i_chip, grpChnls, grpId, grpSize, grpBar);
         if ( SUCCESS != o_rc ) break;
 
         // Get the 40-bit port address (right justified).
-        o_rc = __getMcaPortAddr( i_chip, i_addr, o_addr );
+        o_rc = __getPortAddr<T>( i_chip, i_addr, o_addr );
         if ( SUCCESS != o_rc ) break;
 
         // Insert the group ID.
-        o_rc = __insertGrpId<TYPE_MCA>( o_addr, grpChnls, grpId );
+        o_rc = __insertGrpId( o_addr, grpChnls, grpId );
         if ( SUCCESS != o_rc ) break;
 
         // Notes on 3 and 6 channel per group configs:
@@ -542,12 +895,12 @@ uint32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
         //      hashing algorithm.
         if ( 3 == grpChnls || 6 == grpChnls )
         {
-            uint64_t msb = __getMsb<TYPE_MCA>( o_addr, grpChnls, grpId );
-            __insertMsb<TYPE_MCA>( o_addr, grpSize, msb );
+            uint64_t msb = __getMsb( o_addr, grpChnls, grpId );
+            __insertMsb( o_addr, grpSize, msb );
         }
 
         // Add the BAR to the rest of the address.
-        __addBar<TYPE_MCA>( o_addr, grpBar );
+        __addBar( o_addr, grpBar );
 
     } while (0);
 
@@ -556,32 +909,12 @@ uint32_t getSystemAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     #undef PRDF_FUNC
 }
 
-template<>
-uint32_t getSystemAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
-                                  uint64_t & o_addr )
-{
-    #define PRDF_FUNC "[MemDealloc::getSystemAddr] "
-
-    // TODO - RTC: 190115
-    PRDF_ERR( PRDF_FUNC "not supported on MBA yet: i_chip=0x%08x",
-              i_chip->getHuid() );
-    return FAIL; // Returning FAIL will prevent us from sending any false
-                 // messages to the hypervisor.
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<TYPE T>
 uint32_t getSystemAddrRange( ExtensibleChip * i_chip,
-                             MemAddr    i_saddr, MemAddr    i_eaddr,
-                             uint64_t & o_saddr, uint64_t & o_eaddr );
-
-template<>
-uint32_t getSystemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
-                                       MemAddr    i_saddr, MemAddr    i_eaddr,
-                                       uint64_t & o_saddr, uint64_t & o_eaddr )
+                                MemAddr    i_saddr, MemAddr    i_eaddr,
+                                uint64_t & o_saddr, uint64_t & o_eaddr )
 {
     #define PRDF_FUNC "[MemDealloc::getSystemAddrRange] "
 
@@ -591,17 +924,17 @@ uint32_t getSystemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
     {
         // Get the group information.
         uint64_t grpChnls, grpId, grpSize, grpBar;
-        o_rc = __getGrpInfo<TYPE_MCA>(i_chip, grpChnls, grpId, grpSize, grpBar);
+        o_rc = __getGrpInfo<T>(i_chip, grpChnls, grpId, grpSize, grpBar);
         if ( SUCCESS != o_rc ) break;
 
         // Get the 40-bit port addresses (right justified).
-        o_rc  = __getMcaPortAddr( i_chip, i_saddr, o_saddr );
-        o_rc |= __getMcaPortAddr( i_chip, i_eaddr, o_eaddr );
+        o_rc  = __getPortAddr<T>( i_chip, i_saddr, o_saddr );
+        o_rc |= __getPortAddr<T>( i_chip, i_eaddr, o_eaddr );
         if ( SUCCESS != o_rc ) break;
 
         // Insert the group ID.
-        o_rc  = __insertGrpId<TYPE_MCA>( o_saddr, grpChnls, grpId );
-        o_rc |= __insertGrpId<TYPE_MCA>( o_eaddr, grpChnls, grpId );
+        o_rc  = __insertGrpId( o_saddr, grpChnls, grpId );
+        o_rc |= __insertGrpId( o_eaddr, grpChnls, grpId );
         if ( SUCCESS != o_rc ) break;
 
         // Notes on 3 and 6 channel per group configs:
@@ -615,13 +948,13 @@ uint32_t getSystemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
         //   MSB b00 and MSB b10, respectively.
         if ( 3 == grpChnls || 6 == grpChnls )
         {
-            __insertMsb<TYPE_MCA>( o_saddr, grpSize, 0 );
-            __insertMsb<TYPE_MCA>( o_eaddr, grpSize, 2 );
+            __insertMsb( o_saddr, grpSize, 0 );
+            __insertMsb( o_eaddr, grpSize, 2 );
         }
 
         // Add the BAR to the rest of the address.
-        __addBar<TYPE_MCA>( o_saddr, grpBar );
-        __addBar<TYPE_MCA>( o_eaddr, grpBar );
+        __addBar( o_saddr, grpBar );
+        __addBar( o_eaddr, grpBar );
 
     } while (0);
 
@@ -629,23 +962,6 @@ uint32_t getSystemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-
-template<>
-uint32_t getSystemAddrRange<TYPE_MBA>( ExtensibleChip * i_chip,
-                                       MemAddr    i_saddr, MemAddr    i_eaddr,
-                                       uint64_t & o_saddr, uint64_t & o_eaddr )
-{
-    #define PRDF_FUNC "[MemDealloc::getSystemAddrRange] "
-
-    // TODO - RTC: 190115
-    PRDF_ERR( PRDF_FUNC "not supported on MBA yet: i_chip=0x%08x",
-              i_chip->getHuid() );
-    return FAIL; // Returning FAIL will prevent us from sending any false
-                 // messages to the hypervisor.
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<TYPE T>
