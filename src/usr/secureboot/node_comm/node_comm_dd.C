@@ -418,16 +418,14 @@ errlHndl_t ncddWrite (node_comm_args_t & i_args)
                                        i_args.tgt_huid);
 
         // Likely an issue with Processor or its bus
-        err->addHwCallout( i_args.tgt,
-                           HWAS::SRCI_PRIORITY_HIGH,
-                           HWAS::DELAYED_DECONFIG,
-                           HWAS::GARD_NULL );
+        addNodeCommBusCallout(i_args.mode,
+                              i_args.tgt,
+                              i_args.linkId,
+                              err);
 
         // Or HB code failed to do the procedure correctly
         err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_MED);
-
-        // @TODO RTC 184518 - Look into bus callouts
+                                 HWAS::SRCI_PRIORITY_LOW);
 
         break;
     }
@@ -512,18 +510,16 @@ errlHndl_t ncddCheckStatus (node_comm_args_t & i_args,
                                            i_args.tgt_huid);
 
             // Likely an issue with Processor or its bus
-            err->addHwCallout( i_args.tgt,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::DELAYED_DECONFIG,
-                               HWAS::GARD_NULL );
+            addNodeCommBusCallout(i_args.mode,
+                                  i_args.tgt,
+                                  i_args.linkId,
+                                  err);
 
             // Or HB code failed to do the procedure correctly
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_MED);
+                                     HWAS::SRCI_PRIORITY_LOW);
 
-            // @TODO RTC 184518 - Look into bus callouts
-
-           break;
+            break;
         }
 
 
@@ -612,16 +608,14 @@ errlHndl_t ncddWaitForCmdComp (node_comm_args_t & i_args,
                                                 i_args.tgt_huid));
 
                 // Likely an issue with Processor or its bus
-                err->addHwCallout(i_args.tgt,
-                                  HWAS::SRCI_PRIORITY_HIGH,
-                                  HWAS::DELAYED_DECONFIG,
-                                  HWAS::GARD_NULL);
+                addNodeCommBusCallout(i_args.mode,
+                                      i_args.tgt,
+                                      i_args.linkId,
+                                      err);
 
                 // Or HB code failed to do the procedure correctly
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                         HWAS::SRCI_PRIORITY_MED);
-
-                // @TODO RTC 184518 - Look into bus callouts
+                                         HWAS::SRCI_PRIORITY_LOW);
 
                 break;
             }
