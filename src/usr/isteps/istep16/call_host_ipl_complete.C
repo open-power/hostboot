@@ -290,7 +290,7 @@ void* call_host_ipl_complete (void *io_pArgs)
         if ( INITSERVICE::spBaseServicesEnabled() && is_phyp_load())
         {
             // calculate absolute address for PHYP SP ATTN areas
-            auto l_abs = SECUREBOOT::calcSpAttnAreaStart();
+            auto l_abs = RUNTIME::calcSpAttnAreaStart();
 
             auto spAttnArea1Addr = l_abs;
             auto spAttnArea2Addr = l_abs + PHYP_ATTN_AREA_1_SIZE;
