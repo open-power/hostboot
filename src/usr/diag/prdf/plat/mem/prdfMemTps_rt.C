@@ -1345,7 +1345,11 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
     do
     {
         // Get the current threshold.
-        uint16_t thr = ( TD_PHASE_2 == iv_phase )
+        // Phase 1 (hard CEs): 48 in the field or 1 in MNFG
+        // Phase 2 (all CEs):  80 in the field or the calculated per DRAM
+        //                     threshold (configurable via
+        //                     ATTR_MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO) in MNFG.
+        uint16_t thr = ( TD_PHASE_1 == iv_phase )
                             ? (mfgMode() ? 1 : 48)
                             : getScrubCeThreshold<TYPE_MBA>(iv_chip, iv_rank);
 
