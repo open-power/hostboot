@@ -32,12 +32,13 @@
 #include <mbox/mbox_reasoncodes.H>
 #include <intr/interrupt.H>
 #include <initservice/initserviceif.H>
+#include <initservice/mboxRegs.H>
 #include <sbeio/sbeioif.H>
 #include <util/utiltce.H>
+#include <util/utilmbox_scratch.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/attributes.H>
-#include <p9_quad_scom_addresses.H>
 #include <sys/internode.h>
 #include <sys/mmio.h>
 #include <xscom/xscomif.H>
@@ -52,7 +53,7 @@ namespace ISTEP_21
 };
 
 trace_desc_t* g_trac_ipc = NULL;
-TRAC_INIT(&g_trac_ipc, IPC_TRACE_NAME, KILOBYTE);
+TRAC_INIT(&g_trac_ipc, IPC_TRACE_NAME, 4*KILOBYTE);
 
 using namespace IPC;
 using namespace ERRORLOG;
@@ -77,41 +78,16 @@ void IpcSp::init(errlHndl_t & o_errl)
 
 void IpcSp::distributeLocalNodeAddr( void )
 {
-    // Store IPC address for local node in core scratch registers
+    // Store IPC address for local node in mbox scratch register 7
     //  to identify IPC msg address to remote node(s)
     uint64_t l_localNode;
     uint64_t l_remoteAddr;
     qryLocalIpcInfo( l_localNode, l_remoteAddr );
 
-    TARGETING::Target * l_pSys = NULL;
-    TARGETING::targetService().getTopLevelTarget( l_pSys );
-    TARGETING::TargetHandleList l_coreTargetList;
-    TARGETING::getChildChiplets( l_coreTargetList,
-                                 l_pSys,
-                                 TARGETING::TYPE_CORE,
-                                 true );
-
-    // Store IPC address into scom reg for each core
-    // Every core on this node needs to have the value stored
-    //  in it's scratch register in case any cores get deconfigured
-    for(const auto & l_core_target : l_coreTargetList)
-    {
-        uint64_t l_remoteAddrSize = sizeof(l_remoteAddr);
-        errlHndl_t l_err = deviceWrite( l_core_target,
-                                        &l_remoteAddr,
-                                        l_remoteAddrSize,
-                                        DEVICE_SCOM_ADDRESS(C_SCR2) );
-
-        if (l_err)
-        {
-            TRACFCOMP( g_trac_ipc,
-                   "ERROR: distributeLocalNodeAddr == failed to scom Addr=0x%x"
-                   " Target=0x%x", C_SCR2, get_huid(l_core_target));
-            errlCommit(l_err, IPC_COMP_ID);
-        }
-    }
-
-    return;
+    Util::writeScratchReg (INITSERVICE::SPLESS::MBOX_SCRATCH_REG7,
+                           l_remoteAddr>>32);
+    Util::writeScratchReg (INITSERVICE::SPLESS::MBOX_SCRATCH_REG8,
+                           l_remoteAddr);
 }
 
 void IpcSp::acquireRemoteNodeAddrs( void )
@@ -681,9 +657,20 @@ void IpcSp::_acquireRemoteNodeAddrs( void )
                           ( (validNodeBitMap & (0x80 >> i)) != 0  )
                         {
                             // read scoms for remote node
-                            l_RemoteAddr =
-                                    XSCOM::readRemoteCoreScomMultiCast(i,
-                                                                       C_SCR2);
+                            uint64_t l_remoteAddrHighBits =
+                                    XSCOM::readRemoteScom(i,
+                                    INITSERVICE::SPLESS::MBOX_SCRATCH_REG7);
+
+                            uint64_t l_remoteAddrLowBits =
+                                    XSCOM::readRemoteScom(i,
+                                    INITSERVICE::SPLESS::MBOX_SCRATCH_REG8);
+
+                            l_RemoteAddr = (l_remoteAddrHighBits ) |
+                                           (l_remoteAddrLowBits >> 32);
+
+                            TRACFCOMP( g_trac_ipc,"readRemoteScom"
+                                    " node=%d, remoteAddr=0x%x",
+                                    i, l_RemoteAddr);
                         } // end valid node
                         else
                         {

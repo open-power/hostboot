@@ -45,13 +45,13 @@ uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
                              uint64_t i_scomAddr );
 
 /**
- *  @brief Multicast Read of core XSCOM register on remote Node
+ *  @brief Read of XSCOM register on remote Node
  *  @param[in] i_node - logical Node Number
  *  @param[in] i_scomAddr - Physical scom address to read
  *  @return uint64_t - Register value
  */
-uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
-                                      uint64_t i_scomAddr );
+uint64_t readRemoteScom( uint64_t i_node,
+                         uint64_t i_scomAddr );
 
 };  // namespace XSCOM
 

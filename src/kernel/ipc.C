@@ -102,6 +102,7 @@ int KernelIpc::updateRemoteIpcAddr(uint64_t i_Node, uint64_t i_RemoteAddr)
     {
         // update local array entry
         rc = 0;
+        printk("IPC ADDR %d = 0x%lx\n", (int)i_Node, i_RemoteAddr);
         ipc_data_area.remote_ipc_data_addr[i_Node] =
                 reinterpret_cast<ipc_data_area_t*>(i_RemoteAddr);
     }
