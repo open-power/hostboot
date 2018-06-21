@@ -3403,7 +3403,7 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
                l_spAttnStartAddr,
                l_spAttnCombinedSize);
 
-    // If in phyp mode and the master
+    // If in phyp mode and the master then update SP ATTN area values in HDAT
     if (TARGETING::is_phyp_load() && TARGETING::UTIL::isCurrentMasterNode())
     {
         // make sure ATTN area never grows beyond the SP/PHyp untrusted region
@@ -3465,7 +3465,7 @@ errlHndl_t openUntrustedSpCommArea(const uint64_t i_commBase)
         }
 
         // calculate absolute address for PHYP SP ATTN areas
-        auto l_abs = SECUREBOOT::calcSpAttnAreaStart();
+        auto l_abs = RUNTIME::calcSpAttnAreaStart();
 
         l_pCpuCtrlInfo->spAttnArea1.address = l_abs;
         l_pCpuCtrlInfo->spAttnArea2.address = l_abs + PHYP_ATTN_AREA_1_SIZE;
