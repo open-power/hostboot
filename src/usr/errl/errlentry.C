@@ -51,6 +51,7 @@
 #include <hwas/common/deconfigGard.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/commontargeting.H>
 #include <config.h>
 #include <initservice/initserviceif.H>
 #include <attributeenums.H>
@@ -377,8 +378,9 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
                         const HWAS::DeconfigEnum i_deconfigState,
                         const HWAS::GARD_ErrorType i_gardErrorType)
 {
-    TRACFCOMP(g_trac_errl, ENTER_MRK"addPartCallout(%p, %d, 0x%x)",
-                i_target, i_partType, i_priority);
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addPartCallout(%p, %d, 0x%x, %d, 0x%x)",
+                i_target, i_partType, i_priority,
+                i_deconfigState, i_gardErrorType);
 
     const void* pData = nullptr;
     uint32_t size = 0;
@@ -437,6 +439,73 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
     }
 } // addBusCallout
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::addBusCallout(const TARGETING::EntityPath & i_target_endp1,
+                              const TARGETING::EntityPath & i_target_endp2,
+                              const HWAS::busTypeEnum i_busType,
+                              const HWAS::callOutPriority i_priority)
+{
+    char * l_target_endp1_path_str = nullptr;
+    char * l_target_endp2_path_str = nullptr;
+
+    do
+    {
+
+    // Need targeting module loaded before calculating the size of the
+    // EntityPaths.  If not loaded, don't make error callout, which
+    // shouldn't be an issue as without targeting only 1 target is
+    // available in the system: TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    if(Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+    {
+
+        l_target_endp1_path_str = i_target_endp1.toString();
+        l_target_endp2_path_str = i_target_endp2.toString();
+
+        TRACFCOMP(g_trac_errl, ENTER_MRK"addBusCallout(%s, %s, %d, 0x%x)",
+                  l_target_endp1_path_str, l_target_endp2_path_str,
+                  i_busType, i_priority);
+
+        auto size1 = sizeof(i_target_endp1) -
+          (TARGETING::EntityPath::MAX_PATH_ELEMENTS - i_target_endp1.size()) *
+          sizeof(TARGETING::EntityPath::PathElement);
+
+        auto size2 = sizeof(i_target_endp2) -
+          (TARGETING::EntityPath::MAX_PATH_ELEMENTS - i_target_endp2.size()) *
+          sizeof(TARGETING::EntityPath::PathElement);
+
+        ErrlUserDetailsCallout(&i_target_endp1,
+                               size1,
+                               &i_target_endp2,
+                               size2,
+                               i_busType,
+                               i_priority).addToLog(this);
+
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl, ERR_MRK"addBusCallout(ep1, ep2, %d, 0x%x): "
+                  "Can't process because targeting isn't loaded",
+                  i_busType, i_priority);
+    }
+
+    } while (0);
+
+    if (l_target_endp1_path_str != nullptr)
+    {
+        free(l_target_endp1_path_str);
+        l_target_endp1_path_str = nullptr;
+    }
+
+    if (l_target_endp2_path_str != nullptr)
+    {
+        free(l_target_endp2_path_str);
+        l_target_endp2_path_str = nullptr;
+    }
+
+    return;
+
+} // addBusCallout (with EntityPath inputs)
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
