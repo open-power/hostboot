@@ -143,6 +143,7 @@ const RingIdList RING_ID_LIST_PDR[] =
     {"xb_io1_repr",      xb_io1_repr, 0x06, 0x06, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"xb_io2_repr",      xb_io2_repr, 0x06, 0x06, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"mc_repr",              mc_repr, 0x07, 0x08, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
+    {"mc_iom23_repr",  mc_iom23_repr, 0x07, 0x08, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"ob0_repr",            ob0_repr, 0x09, 0x09, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"ob1_repr",            ob1_repr, 0x0A, 0x0A, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
     {"ob2_repr",            ob2_repr, 0x0B, 0x0B, VPD_KEYWORD_PDR, VPD_RING_CLASS_NEST},
