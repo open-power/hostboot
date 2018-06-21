@@ -62,7 +62,7 @@ namespace SECUREBOOT
         MOD_NCEX_MASTER                     = 0x27,
         MOD_NCEX_SLAVE                      = 0x28,
         MOD_NCEX_GET_RANDOM                 = 0x29,
-        MOD_NCEX_RECV                       = 0x2A,
+        MOD_NC_RECV                         = 0x2A,
    };
 
     enum SECUREReasonCode
@@ -102,7 +102,7 @@ namespace SECUREBOOT
         RC_NCEX_NO_FUNCTIONAL_TPMS         = SECURE_COMP_ID | 0x28,
         RC_NCEX_INVALID_PHYS_PATH          = SECURE_COMP_ID | 0x29,
         RC_NCEX_INVALID_INSTANCE_COUNT     = SECURE_COMP_ID | 0x2A,
-        RC_NCEX_WAITING_TIMEOUT            = SECURE_COMP_ID | 0x2B,
+        RC_NC_WAITING_TIMEOUT              = SECURE_COMP_ID | 0x2B,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

@@ -557,6 +557,22 @@ public:
                        const HWAS::callOutPriority i_priority);
 
     /**
+     *  @brief Add a bus callout with entity paths
+     *
+     *  @param[in]  i_target1       The PHYS_PATH of HW bus endpoint target1
+     *  @param[in]  i_target2       The PHYS_PATH of HW bus endpoint target2
+     *  @param[in]  i_busType       The hardware bus type
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addBusCallout(const TARGETING::EntityPath & i_target1,
+                       const TARGETING::EntityPath & i_target2,
+                       HWAS::busTypeEnum i_busType,
+                       HWAS::callOutPriority i_priority);
+
+
+    /**
      *  @brief Add a hardware callout
      *
      *  @param[in]  i_target        The hardware target

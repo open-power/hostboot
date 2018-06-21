@@ -67,8 +67,8 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     uint64_t read_data = 0;
     Target* read_tgt = nullptr;
     node_comm_modes_t mode = NCDD_MODE_XBUS;
-    uint64_t linkId = 0;
-    uint64_t mboxId = 0;
+    uint8_t linkId = 0;
+    uint8_t mboxId = 0;
     bool attn_found = false;
 
     do

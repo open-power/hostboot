@@ -148,7 +148,6 @@ case HWAS::_type: i_parser.PrintString( "Part Type", #_type); break;
                     case_PART_TYPE(MEM_REF_CLOCK)
                     case_PART_TYPE(PROC_REF_CLOCK)
                     case_PART_TYPE(PCI_REF_CLOCK)
-                    case_PART_TYPE(SMP_CABLE)
 
                     default:
                         i_parser.PrintNumber( "Part Type", "UNKNOWN: 0x%X",

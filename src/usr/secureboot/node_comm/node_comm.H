@@ -29,6 +29,7 @@
 // Includes
 // ----------------------------------------------
 #include <config.h>
+#include <time.h>
 #include <devicefw/userif.H>
 #include <trace/interface.H>
 #include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
@@ -176,6 +177,45 @@ inline uint64_t getLinkMboxFirAttnBit(uint8_t i_linkId, uint8_t i_mboxId)
 
 
 /**
+ *  @brief This function waits for the processor to receive a message over
+ *         ABUS from a processor on another node.
+ *
+ *  @param[in]  i_pProc  - Processor target to look for attentions on
+ *                         Can't be nullptr
+ *  @param[out] o_data   - Data received
+ *  @param[out] o_linkId - Link Id that received the message
+ *  @param[out] o_mboxId - Mailbox Id that received the message
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommAbusRecvMessage(TARGETING::Target* i_pProc,
+                                   uint64_t & o_data,
+                                   uint8_t & o_linkId,
+                                   uint8_t & o_mboxId);
+
+/**
+ *  @brief This function sends a message over the ABUS from the processor of
+ *         the current node to a processor on another node.
+ *
+ *  @param[in] i_pProc  - Processor target to look for attentions on
+ *                        Can't be nullptr
+ *  @param[in] i_data   - Data to be sent
+ *  @param[in] i_linkId - Link Id Message is sent from
+ *  @param[in] i_mboxId - Mailbox Id Message is sent from
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
+                                   const uint64_t & i_data,
+                                   const uint8_t & i_linkId,
+                                   const uint8_t & i_mboxId);
+
+
+/**
  *  @brief Map Attention Bits in XBUS/ABUS FIR Register to specific Link Mailbox
  *
  *  @param[in] i_pProc      Processor target to look for attentions on
@@ -193,8 +233,8 @@ inline uint64_t getLinkMboxFirAttnBit(uint8_t i_linkId, uint8_t i_mboxId)
 errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                            node_comm_modes_t i_mode,
                            bool & o_attn_found,
-                           uint64_t & o_linkId,
-                           uint64_t & o_mboxId);
+                           uint8_t & o_linkId,
+                           uint8_t & o_mboxId);
 
 /**
  * @brief Add FFDC for the target to an error log
@@ -206,8 +246,28 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
  * @return void
  */
 void getNodeCommFFDC(node_comm_modes_t i_mode,
-                     TARGETING::Target*  i_pProc,
+                     TARGETING::Target* i_pProc,
                      errlHndl_t & io_log);
+
+/**
+ * @brief Adds a bus callout to the error log by determining the bus and the two
+ *        targets associated with it
+ *
+ * @param[in] i_mode       Specifies XBUS or ABUS mode
+ * @param[in] i_pProc      Proc Chip Target used to collect info from
+ *                         Can't be nullptr
+ * @param[in] i_linkId     Link ID associated with i_pProc
+ * @param[in,out] io_log   Error Log to add FFDC to
+ * @param[in] i_priority   Optional: Callout Priority (defaulted to HIGH)
+ *
+ * @return void
+ */
+void addNodeCommBusCallout(
+    node_comm_modes_t i_mode,
+    TARGETING::Target* i_pProc,
+    uint8_t & i_linkId,
+    errlHndl_t & io_log,
+    HWAS::callOutPriority i_priority = HWAS::SRCI_PRIORITY_HIGH);
 
 } // end NODECOMM namespace
 

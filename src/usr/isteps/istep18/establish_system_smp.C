@@ -676,7 +676,7 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
                 err->plid());
             delete err;
             err = nullptr;
-        }
+       }
 
         // Lock the secure ABUS Link Mailboxes now
         SECUREBOOT::lockAbusSecMailboxes();
