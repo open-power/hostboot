@@ -350,8 +350,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
     uint64_t l_data = 0;
 
     // retry counter.
-    uint32_t l_retryCtr = 0;
-    uint32_t l_retryTraceCtr = 128;
+    uint32_t l_retryCtr = 1;
 
     errlHndl_t l_err = NULL;
 
@@ -378,10 +377,9 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         // Check for error or done
         io_hmer = waitForHMERStatus();
 
-        l_retryCtr++;
 
         // If the retry counter is a multiple of 128,256,512,etc.
-        if (l_retryCtr % l_retryTraceCtr*2 == 0)
+        if (l_retryCtr % 100000 == 0)
         {
             // print a trace message.. for debug purposes
             // incase we are stuck in a retry loop.
@@ -395,6 +393,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
                 break;
             }
         }
+        l_retryCtr++;
     } while (io_hmer.mXSComStatus == PIB::PIB_RESOURCE_OCCUPIED);
 
 
@@ -822,10 +821,10 @@ uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
 
 
 /**
- * @brief Multicast Read of core XSCOM register on remote Node
+ * @brief Read of XSCOM register on remote Node
  */
-uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
-                                      uint64_t i_scomAddr )
+uint64_t readRemoteScom( uint64_t i_node,
+                         uint64_t i_scomAddr )
 {
     // definitions of 64 bit xscom address contents that are
     //   useful for this function
@@ -853,10 +852,6 @@ uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
     //    - rsvd                               38
     //  multicast group           0x0000_0000__0700_0000
     //  relative scomAddr field   0x0000_0000__00FF_FFFF
-    constexpr uint64_t XSCOM_MULTICAST =                  0x0000000040000000;
-    constexpr uint64_t XSCOM_MULTICAST_OP_READ_OR =       0x0000000000000000;
-    constexpr uint64_t XSCOM_MULTICAST_GROUP_CORE =       0x0000000001000000;
-    constexpr uint64_t XSCOM_MULTICAST_REL_ADDR_MASK =    0x0000000000FFFFFF;
 
     // Symmetry between nodes is enforced so we know the remote
     //  node contains this chip
@@ -866,17 +861,15 @@ uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
     uint8_t l_chipId =
             l_MasterProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-    // compute xscom address & control, then map into processor space
+    // compute xscom address & control
+    // This will return xscom base of the remote node
     uint64_t l_xscomBaseAddr =
             computeMemoryMapOffset( MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR,
                                     i_node,
                                     l_chipId );
 
-    uint64_t l_xscomAddr = ( (i_scomAddr & XSCOM_MULTICAST_REL_ADDR_MASK) |
-                             XSCOM_MULTICAST |
-                             XSCOM_MULTICAST_OP_READ_OR |
-                             XSCOM_MULTICAST_GROUP_CORE );
 
+    //Map xscom base into processor space
     uint64_t * l_virtAddr =
             static_cast<uint64_t*>
             (mmio_dev_map(reinterpret_cast<void*>(l_xscomBaseAddr),
@@ -892,7 +885,7 @@ uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
     {
         errlHndl_t  l_err = xScomDoOp( DeviceFW::READ,
                 l_virtAddr,
-                l_xscomAddr,
+                i_scomAddr,
                 &l_rv,
                 l_rvSize,
                 l_hmer );
@@ -904,16 +897,13 @@ uint64_t readRemoteCoreScomMultiCast( uint64_t i_node,
             l_err = nullptr;
 
             TRACFCOMP( g_trac_xscom,
-                    ERR_MRK "readRemoteCoreScomMultiCast()  Read xScom Failed: "
+                    ERR_MRK "readRemoteScom()  Read xScom Failed: "
                     "XscomAddr = %.16llx, VAddr=%llx",
-                    l_xscomAddr, l_virtAddr );
+                    i_scomAddr, l_virtAddr );
 
             // re-seed return value in case changed before error detected
             l_rv = IPC_INVALID_REMOTE_ADDR | i_node;
             break;
-        }
-        else
-        {
         }
 
         // regs not yet populated
