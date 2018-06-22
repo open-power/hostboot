@@ -416,7 +416,7 @@ namespace Bootloader{
         // our actual image.
         KernelMemState::MemState_t l_memstate;
         l_memstate.location = KernelMemState::MEM_CONTAINED_L3;
-        l_memstate.hrmor = getHRMOR() - HBB_RUNNING_ADDR;
+        l_memstate.hrmor = (HBB_RUNNING_ADDR);
         l_memstate.size = KernelMemState::HALF_CACHE;
         writeScratchReg(MMIO_SCRATCH_MEMORY_STATE, l_memstate.fullData);
 
