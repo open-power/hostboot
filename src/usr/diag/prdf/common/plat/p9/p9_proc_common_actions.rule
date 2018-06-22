@@ -579,3 +579,92 @@ actionclass analyzeIntCqFirPcRecovError
 {
     try( funccall("handleIntCqFirPcRecovError"), level2_M_self_L_th_1 );
 };
+
+/** proc targets for PBIOOFIR handling **/
+actionclass obus0SmpFailure_L0
+{
+    funccall("captureSmpObus0");
+    funccall("obus0_callout_L0");
+    threshold1;
+};
+
+actionclass obus0SmpFailure_L1
+{
+    funccall("captureSmpObus0");
+    funccall("obus0_callout_L1");
+    threshold1;
+};
+
+actionclass obus1SmpFailure_L0
+{
+    funccall("captureSmpObus1");
+    funccall("obus1_callout_L0");
+    threshold1;
+};
+
+actionclass obus1SmpFailure_L1
+{
+    funccall("captureSmpObus1");
+    funccall("obus1_callout_L1");
+    threshold1;
+};
+
+actionclass obus2SmpFailure_L0
+{
+    funccall("captureSmpObus2");
+    funccall("obus2_callout_L0");
+    threshold1;
+};
+
+actionclass obus2SmpFailure_L1
+{
+    funccall("captureSmpObus2");
+    funccall("obus2_callout_L1");
+    threshold1;
+};
+
+actionclass obus3SmpFailure_L0
+{
+    funccall("captureSmpObus3");
+    funccall("obus3_callout_L0");
+    threshold1;
+};
+
+actionclass obus3SmpFailure_L1
+{
+    funccall("captureSmpObus3");
+    funccall("obus3_callout_L1");
+    threshold1;
+};
+
+actionclass obus0SmpFailure_LALL
+{
+    funccall("captureSmpObus0");
+    funccall("obus0_callout_L0");
+    funccall("obus0_callout_L1");
+    threshold1;
+};
+
+actionclass obus1SmpFailure_LALL
+{
+    funccall("captureSmpObus1");
+    funccall("obus1_callout_L0");
+    funccall("obus1_callout_L1");
+    threshold1;
+};
+
+actionclass obus2SmpFailure_LALL
+{
+    funccall("captureSmpObus2");
+    funccall("obus2_callout_L0");
+    funccall("obus2_callout_L1");
+    threshold1;
+};
+
+actionclass obus3SmpFailure_LALL
+{
+    funccall("captureSmpObus3");
+    funccall("obus3_callout_L0");
+    funccall("obus3_callout_L1");
+    threshold1;
+};

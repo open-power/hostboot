@@ -133,6 +133,7 @@ chip p9_obus
         reset       (&, 0x09010801);
         mask        (|, 0x09010805);
         capture     group default;
+        capture     group smpCableFFDC;
     };
 
     register IOOLFIR_MASK
@@ -157,6 +158,23 @@ chip p9_obus
         capture     group default;
         capture     req nonzero("IOOLFIR");
     };
+
+    register IOOLFIR_AND
+    {
+        name        "P9 chip IOOLFIR atomic AND";
+        scomaddr    0x09010801;
+        capture     group never;
+        access      write_only;
+    };
+
+    register IOOLFIR_MASK_OR
+    {
+        name        "P9 chip IOOLFIR atomic OR";
+        scomaddr    0x09010805;
+        capture     group never;
+        access      write_only;
+    };
+
 
     ############################################################################
     # P9 OBUS target IOOBFIR
@@ -228,6 +246,94 @@ chip p9_obus
         scomaddr    0x09011047;
         capture     group default;
         capture     req nonzero("OBPPEFIR");
+    };
+
+    ############################################################################
+    # P9 OBUS targets for cable FFDC
+    #    One additional reg (IOOLFIR) is in default group
+    ############################################################################
+    register OLL0_XMITLANE_CTL
+    {
+        name        "P9 OBUS target OLL LINK0 TRANSMIT LANE CTL";
+        scomaddr    0x09010810;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL1_XMITLANE_CTL
+    {
+        name        "P9 OBUS target OLL LINK1 TRANSMIT LANE CTL";
+        scomaddr    0x09010811;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL0_RECVLANE_CTL
+    {
+        name        "P9 OBUS target OLL LINK0 RECEIVE LANE CTL";
+        scomaddr    0x09010812;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL1_RECVLANE_CTL
+    {
+        name        "P9 OBUS target OLL LINK1 RECEIVE LANE CTL";
+        scomaddr    0x09010813;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL0_INFO_REG
+    {
+        name        "P9 OBUS target OLL LINK0 INFORMATION REG";
+        scomaddr    0x09010814;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL1_INFO_REG
+    {
+        name        "P9 OBUS target OLL LINK1 INFORMATION REG";
+        scomaddr    0x09010815;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL0_ERROR_STATUS_REG
+    {
+        name        "P9 OBUS target OLL LINK0 ERROR STATUS";
+        scomaddr    0x09010816;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL1_ERROR_STATUS_REG
+    {
+        name        "P9 OBUS target OLL LINK1 ERROR STATUS";
+        scomaddr    0x09010817;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL_REPLAY_THRESHOLD_REG
+    {
+        name        "P9 OBUS target OLL REPLAY THRESHOLD";
+        scomaddr    0x09010818;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL_SLECC_THRESHOLD_REG
+    {
+        name        "P9 OBUS target OLL SL ECC THRESHOLD";
+        scomaddr    0x09010819;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL0_SYNDROME_CAP_REG
+    {
+        name        "P9 OBUS target OLL LINK0 SYNDROME CAPTURE";
+        scomaddr    0x09010822;
+        capture     group smpCableFFDC;
+    };
+
+    register OLL1_SYNDROME_CAP_REG
+    {
+        name        "P9 OBUS target OLL LINK1 SYNDROME CAPTURE";
+        scomaddr    0x09010823;
+        capture     group smpCableFFDC;
     };
 
 # Include registers not defined by the xml
@@ -629,32 +735,32 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[42]
      *  link0 no spare lane available
      */
-    (rIOOLFIR, bit(42)) ? maxSparesExceeded_obus_clkgrp0;
+    (rIOOLFIR, bit(42)) ? obusSmpCallout_L0;
 
     /** IOOLFIR[43]
      *  link1 no spare lane available
      */
-    (rIOOLFIR, bit(43)) ? maxSparesExceeded_obus_clkgrp1;
+    (rIOOLFIR, bit(43)) ? obusSmpCallout_L1;
 
     /** IOOLFIR[44]
      *  link0 spare done
      */
-    (rIOOLFIR, bit(44)) ? spareDeployed_obus_clkgrp0;
+    (rIOOLFIR, bit(44)) ? obusSmpCallout_th32_L0;
 
     /** IOOLFIR[45]
      *  link1 spare done
      */
-    (rIOOLFIR, bit(45)) ? spareDeployed_obus_clkgrp1;
+    (rIOOLFIR, bit(45)) ? obusSmpCallout_th32_L1;
 
     /** IOOLFIR[46]
      *  link0 too many crc errors
      */
-    (rIOOLFIR, bit(46)) ? tooManyBusErrors_obus_clkgrp0;
+    (rIOOLFIR, bit(46)) ? obusSmpCallout_L0;
 
     /** IOOLFIR[47]
      *  link1 too many crc errors
      */
-    (rIOOLFIR, bit(47)) ? tooManyBusErrors_obus_clkgrp1;
+    (rIOOLFIR, bit(47)) ? obusSmpCallout_L1;
 
     /** IOOLFIR[48]
      *  link0 npu error
@@ -679,42 +785,42 @@ group gIOOLFIR filter singlebit, cs_root_cause( 54, 55, 56, 57, 58, 59 )
     /** IOOLFIR[52]
      *  link0 correctable array error
      */
-    (rIOOLFIR, bit(52)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(52)) ? obusSmpCallout_th32_L0;
 
     /** IOOLFIR[53]
      *  link1 correctable array error
      */
-    (rIOOLFIR, bit(53)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(53)) ? obusSmpCallout_th32_L1;
 
     /** IOOLFIR[54]
      *  link0 uncorrectable array error
      */
-    (rIOOLFIR, bit(54)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(54)) ? obusSmpCallout_th32_L0;
 
     /** IOOLFIR[55]
      *  link1 uncorrectable array error
      */
-    (rIOOLFIR, bit(55)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(55)) ? obusSmpCallout_th32_L1;
 
     /** IOOLFIR[56]
      *  link0 training failed
      */
-    (rIOOLFIR, bit(56)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(56)) ? obusSmpFailure_L0;
 
     /** IOOLFIR[57]
      *  link1 training failed
      */
-    (rIOOLFIR, bit(57)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(57)) ? obusSmpFailure_L1;
 
     /** IOOLFIR[58]
      *  link0 unrecoverable error
      */
-    (rIOOLFIR, bit(58)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(58)) ? obusSmpCallout_th32_L0;
 
     /** IOOLFIR[59]
      *  link1 unrecoverable error
      */
-    (rIOOLFIR, bit(59)) ? calloutBusInterface_th_32perDay;
+    (rIOOLFIR, bit(59)) ? obusSmpCallout_th32_L1;
 
     /** IOOLFIR[60]
      *  link0 internal error
