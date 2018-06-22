@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,9 @@ void* call_host_update_master_tpm( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_update_master_tpm entry" );
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
+
+    (void)SECUREBOOT::logPlatformSecurityConfiguration();
 
 #ifdef CONFIG_TPMDD
     // Initialize the master TPM
