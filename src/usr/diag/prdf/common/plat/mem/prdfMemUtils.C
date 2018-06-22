@@ -521,10 +521,92 @@ uint32_t __queryChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
 template<>
 uint32_t __queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
 {
-    // There is a HWP on the processor side that will query the CHIFIR, IOMCFIR,
-    // and associated configuration registers for a valid channel failure
-    // attention.
-    return PlatServices::queryChnlFail<TYPE_DMI>( i_chip, o_chnlFail );
+    #define PRDF_FUNC "[MemUtils::__queryChnlFail] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    o_chnlFail = false;
+
+    SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
+    SCAN_COMM_REGISTER_CLASS * mask = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act1 = nullptr;
+
+    do
+    {
+        // There is a HWP on the processor side that will query if this channel
+        // has failed. Unfortunately, it does not check for an active channel
+        // fail attention (i.e. not masked). That will need to be done
+        // afterwards.
+        bool tmpChnlFail = false;
+        o_rc = PlatServices::queryChnlFail<TYPE_DMI>( i_chip, tmpChnlFail );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+        if ( !tmpChnlFail ) break; // nothing more to do.
+
+        // Check for an active attention on the CHIFIR.
+        fir  = i_chip->getRegister( "CHIFIR" );
+        mask = i_chip->getRegister( "CHIFIR_MASK" );
+        act0 = i_chip->getRegister( "CHIFIR_ACT0" );
+        act1 = i_chip->getRegister( "CHIFIR_ACT1" );
+        o_rc = fir->Read() | mask->Read() | act0->Read() | act1->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read CHIFIRs on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        if ( 0 != (  fir->GetBitFieldJustified( 0,64) &
+                    ~mask->GetBitFieldJustified(0,64) &
+                     act0->GetBitFieldJustified(0,64) &
+                     act1->GetBitFieldJustified(0,64) ) )
+        {
+            o_chnlFail = true;
+            break; // nothing more to do.
+        }
+
+        // Check for an active attention on the IOMCFIR.
+        ExtensibleChip * mcChip = getConnectedParent( i_chip, TYPE_MC );
+        uint32_t dmiPos = i_chip->getPos() % MAX_DMI_PER_MC;
+        uint32_t bitPos = 8 + dmiPos * 8;
+
+        fir  = mcChip->getRegister( "IOMCFIR" );
+        mask = mcChip->getRegister( "IOMCFIR_MASK" );
+        act0 = mcChip->getRegister( "IOMCFIR_ACT0" );
+        act1 = mcChip->getRegister( "IOMCFIR_ACT1" );
+        o_rc = fir->Read() | mask->Read() | act0->Read() | act1->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read IOMCFIRs on 0x%08x",
+                      mcChip->getHuid() );
+            break;
+        }
+
+        if ( 0 != (  fir->GetBitFieldJustified( bitPos,8) &
+                    ~mask->GetBitFieldJustified(bitPos,8) &
+                     act0->GetBitFieldJustified(bitPos,8) &
+                     act1->GetBitFieldJustified(bitPos,8) ) )
+        {
+            o_chnlFail = true;
+            break; // nothing more to do.
+        }
+
+        PRDF_INF( PRDF_FUNC "Failed channel detected on 0x%08x, but no active "
+                  "attentions found", i_chip->getHuid() );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
@@ -666,27 +748,10 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
     ExtensibleChip * mcChip = getConnectedParent( i_dmiChip, TYPE_MC );
     uint32_t dmiPos = i_dmiChip->getPos() % MAX_DMI_PER_MC;
 
-    // Mask off all attentions from the DMI target in the chiplet FIRs.
-    reg = mcChip->getRegister( "MC_CHIPLET_FIR_MASK" );
-    if ( SUCCESS == reg->Read() )
-    {
-        reg->SetBit( 4 + (dmiPos * 2) ); // 4, 6, 8, 10
-        reg->Write();
-    }
-
-    reg = mcChip->getRegister( "MC_CHIPLET_UCS_FIR_MASK" );
-    if ( SUCCESS == reg->Read() )
-    {
-        reg->SetBit( 0 + (dmiPos * 2) ); // 0, 2, 4, 6 (masks 1, 3, 5, 7)
-        reg->Write();
-    }
-
-    reg = mcChip->getRegister( "MC_CHIPLET_HA_FIR_MASK" );
-    if ( SUCCESS == reg->Read() )
-    {
-        reg->SetBit( 0 + (dmiPos * 2) ); // 0, 2, 4, 6 (masks 1, 3, 5, 7)
-        reg->Write();
-    }
+    // Mask off all attentions from the DMI target in the CHIFIR.
+    reg = i_dmiChip->getRegister( "CHIFIR_MASK_OR" );
+    reg->setAllBits();
+    reg->Write();
 
     // Mask off all attentions from the DMI target in the IOMCFIR.
     reg = mcChip->getRegister( "IOMCFIR_MASK_OR" );

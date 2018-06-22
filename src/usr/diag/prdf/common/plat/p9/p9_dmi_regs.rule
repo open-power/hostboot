@@ -35,6 +35,14 @@
         access      write_only;
     };
 
+    register CHIFIR_MASK_OR
+    {
+        name        "P9 DMI target CHIFIR_MASK atomic OR";
+        scomaddr    0x07010905;
+        capture     group never;
+        access      write_only;
+    };
+
     register MCICFG0
     {
         name        "MCI Configuration Register 0";
