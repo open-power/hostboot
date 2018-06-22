@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -474,7 +474,7 @@ fapi2::ReturnCode PMFir<Ftype>::put()
     {
         if (iv_fir_write == true)
         {
-            l_address = iv_fir_address + BASE_WOR_INCR;
+            l_address = iv_fir_address;
             FAPI_TRY(putScom(iv_proc, l_address, iv_fir));
         }
 
@@ -505,7 +505,7 @@ fapi2::ReturnCode PMFir<Ftype>::put()
     {
         if (iv_fir_write == true)
         {
-            l_address = iv_fir_address + BASE_WOR_INCR;
+            l_address = iv_fir_address;
             FAPI_TRY(putScom(iv_ex, l_address, iv_fir));
         }
 
