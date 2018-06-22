@@ -95,7 +95,7 @@ cvpdTestData cvpdDataCumulus[] =
     { CVPD::VNDR, CVPD::VD },
     { CVPD::SPDX, CVPD::VM },
     { CVPD::SPDX, CVPD::M0 },
-    { CVPD::SPDX, CVPD::M5 },
+    { CVPD::SPDX, CVPD::M4 },
     { CVPD::SPDX, CVPD::DW },
     { CVPD::SPDX, CVPD::MX },
     { CVPD::SPDX, CVPD::Q0 },
