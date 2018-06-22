@@ -606,6 +606,26 @@ void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
     //Note: adding UdTargetHwKeyHash left to Extended image
 }
 
+void logPlatformSecurityConfiguration(void)
+{
+    /*@
+     * @errortype
+     * @moduleid   SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG
+     * @reasoncode SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG
+     * @devdesc    Planar jumper configuration
+     * @custdesc   Planar jumper configuration
+     */
+    errlHndl_t pError = new ERRORLOG::ErrlEntry(
+        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+        SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG,
+        SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG,
+        0,
+        0);
+    (void)addSecureUserDetailsToErrlog(
+        pError);
+    ERRORLOG::errlCommit(pError,SECURE_COMP_ID);
+}
+
 #ifndef __HOSTBOOT_RUNTIME
 bool allowAttrOverrides()
 {

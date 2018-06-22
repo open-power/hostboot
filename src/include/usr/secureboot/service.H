@@ -328,6 +328,12 @@ namespace SECUREBOOT
     void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
                                       bool i_calledByRP = false);
 
+    /**
+     *  @brief Log an informational error containing platform security
+     *      configuration.
+     */
+    void logPlatformSecurityConfiguration(void);
+
     /*
      *  @brief Determines if Attribute Overrides are Allowed
      *         If Secureboot is enabled, check allowAttrOverrides setting;
