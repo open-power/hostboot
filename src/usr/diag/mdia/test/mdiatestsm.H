@@ -56,8 +56,7 @@ class MdiaSmTest : public CxxTest::TestSuite
             fapi2::TargetType type = getMdiaTargetType();
             if (fapi2::TARGET_TYPE_MBA_CHIPLET == type)
             {
-                // @todo RTC 178802 Enable test cases turned off during bring up
-                //TARGETING::getAllChiplets(tmp, TYPE_MBA);
+                TARGETING::getAllChiplets(tmp, TYPE_MBA);
             }
             else
             {
