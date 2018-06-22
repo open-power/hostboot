@@ -1351,14 +1351,35 @@ fapi2::ReturnCode unmaskMCFIR(
     l_mcfiraction.setBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
     l_mcfiraction.setBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
 
+    if (T == fapi2::TARGET_TYPE_MI)
+    {
+        l_mcfiraction.setBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+    }
+
     // Setup FIR bits in MC Fault Isolation Mask Register buffer
     l_mcfirmask_and.flush<1>();
+
+    if (T == fapi2::TARGET_TYPE_MI)
+    {
+        l_mcfirmask_and.clearBit<MCS_MCFIR_INBAND_BAR_HIT_WITH_INCORRECT_TTYPE>();
+    }
+
     l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_POWERBUS_PROTOCOL_ERROR>();
     l_mcfirmask_and.clearBit<MCS_MCFIR_MULTIPLE_BAR>();
-    l_mcfirmask_and.clearBit<MCS_MCFIR_INVALID_ADDRESS>();
+
+    if (T == fapi2::TARGET_TYPE_MCS)
+    {
+        l_mcfirmask_and.clearBit<MCS_MCFIR_INVALID_ADDRESS>();
+    }
+
     l_mcfirmask_and.clearBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
+
+    if (T == fapi2::TARGET_TYPE_MI)
+    {
+        l_mcfirmask_and.clearBit<MCS_MCFIR_MS_WAT_DEBUG_CONFIG_REG_ERROR>();
+    }
 
     for (auto l_pair : i_mcBarDataPair)
     {
