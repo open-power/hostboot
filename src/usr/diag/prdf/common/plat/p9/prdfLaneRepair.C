@@ -40,6 +40,10 @@
 #include <prdfP9ProcMbCommonExtraSig.H>
 #include <hwas/common/hwasCallout.H>
 
+#ifndef __HOSTBOOT_MODULE
+#include <hwsvSvrErrl.H>
+#endif // not hostboot module
+
 
 using namespace TARGETING;
 
@@ -365,6 +369,463 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     }
     return rc;
 }
+
+
+void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
+{
+    errlHndl_t l_mainElog = NULL;
+    l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+
+
+    if ( NULL == l_mainElog )
+    {
+        PRDF_ERR("smpCallout_link Failed to get the global error log" );
+    }
+    else
+    {
+        // add callout(s) on any bit firing
+    #ifdef __HOSTBOOT_MODULE
+        l_mainElog->addPartCallout( i_smpTgt, HWAS::SMP_CABLE,
+               HWAS::SRCI_PRIORITY_MED, HWAS::NO_DECONFIG, HWAS::GARD_Predictive );
+    #else
+        // FSP code
+        #ifndef ESW_SIM_COMPILE
+        errlHndl_t  l_err = NULL;
+
+        // Call SVPD routine to add callouts
+        l_err = HWSV::SvrError::AddSMPCalloutAndFFDC(i_smpTgt, l_mainElog);
+
+        if (NULL != l_err)
+        {
+            PRDF_ERR("handleSmpCable callouts failed");
+            l_err->CollectTrace(PRDF_COMP_NAME, 1024);
+            l_err->commit( PRDF_COMP_ID, ERRL_ACTION_REPORT );
+            delete l_err;
+           l_err = NULL;
+        }
+        #endif // not simulation
+
+    #endif  // else FSP side
+    } // main elog is non-null
+
+
+} // end  obus_smpCallout_link - SMP target
+
+
+/** Given the OBUS TARGET and SMP link number -- do the callout **/
+void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
+{
+    PredicateCTM           l_unitMatch(CLASS_UNIT, TYPE_SMPGROUP );
+    TargetHandleList       l_smpTargetList;
+    uint32_t               l_smpNum    = 0;
+    TYPE                   l_targType = getTargetType(i_obusTgt);
+
+
+    // Validate we have expected target
+    if ( TYPE_OBUS != l_targType )
+    {
+        PRDF_ERR("obus_callout Invalid Target(%d) on link%d",
+                  l_targType, i_link );
+        PRDF_ASSERT(false);
+    }
+
+    // Get all SMPGROUPS associated with OBUS target
+    targetService().getAssociated(
+                l_smpTargetList,
+                i_obusTgt,
+                TARGETING::TargetService::CHILD,
+                TARGETING::TargetService::ALL,
+                &l_unitMatch);
+
+    // Find the match in SMPGROUP targets
+    for ( auto  l_smp : l_smpTargetList )
+    {
+        l_smpNum = l_smp->getAttr<ATTR_CHIP_UNIT>();
+
+        if (i_link == l_smpNum)
+        {
+            // We found the right SMPGROUP to call out
+            obus_smpCallout_link( l_smp );
+            break;
+        } // end if right LINK
+
+    } // end for on smp targets
+
+    return;
+} // end  obus_smpCallout_link -  smp link number
+
+
+/** Given the OBUS unit number and SMP link number -- do the callout **/
+void  obus_smpCallout_link( uint32_t  i_obusNum,
+                            ExtensibleChip * i_chip,  uint32_t i_link )
+{
+    // From NEST so it will be a processor target
+    TargetHandle_t rxTrgt = i_chip->getTrgt();
+
+    // We need the right OBUS target from this processor
+    TargetHandle_t   l_obus = getConnectedChild(rxTrgt,
+                                                TYPE_OBUS, i_obusNum);
+
+    PRDF_ASSERT( NULL != l_obus );
+
+    // We found the right OBUS target
+    obus_smpCallout_link( l_obus, i_link );
+
+} // end  obus_smpCallout_link - obus & smp link numbers
+
+
+int32_t obus_callout_L0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // Need the obus target
+    TargetHandle_t rxTrgt = i_chip->getTrgt();
+    // Call out LINK0 in SMPGROUP
+    obus_smpCallout_link( rxTrgt, 0 );
+
+    return rc;
+
+} // end  obus_callout_L0
+PRDF_PLUGIN_DEFINE_NS( p9_obus,     LaneRepair, obus_callout_L0 );
+
+
+int32_t obus_callout_L1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+   int32_t rc = SUCCESS;
+
+    // Need the obus target
+    TargetHandle_t rxTrgt = i_chip->getTrgt();
+    // Call out LINK1 in SMPGROUP
+    obus_smpCallout_link( rxTrgt, 1 );
+
+    return rc;
+
+} // end  obus_callout_L1
+PRDF_PLUGIN_DEFINE_NS( p9_obus,     LaneRepair, obus_callout_L1 );
+
+
+int32_t obus0_callout_L0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus0 link0
+    obus_smpCallout_link( 0, i_chip, 0 );
+
+    return rc;
+
+} // end obus0_callout_L0
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus0_callout_L0 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus0_callout_L0 );
+
+
+int32_t obus0_callout_L1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus0 link1
+    obus_smpCallout_link( 0, i_chip, 1 );
+
+    return rc;
+
+} // end obus0_callout_L1
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus0_callout_L1 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus0_callout_L1 );
+
+
+int32_t obus1_callout_L0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus1 link0
+    obus_smpCallout_link( 1, i_chip, 0 );
+
+    return rc;
+
+} // end obus1_callout_L0
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus1_callout_L0 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus1_callout_L0 );
+
+
+int32_t obus1_callout_L1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus1 link1
+    obus_smpCallout_link( 1, i_chip, 1 );
+
+    return rc;
+
+} // end obus1_callout_L1
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus1_callout_L1 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus1_callout_L1 );
+
+
+int32_t obus2_callout_L0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus2 link0
+    obus_smpCallout_link( 2, i_chip, 0 );
+
+    return rc;
+
+} // end obus2_callout_L0
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus2_callout_L0 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus2_callout_L0 );
+
+
+int32_t obus2_callout_L1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus2 link1
+    obus_smpCallout_link( 2, i_chip, 1 );
+
+    return rc;
+
+} // end obus2_callout_L1
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus2_callout_L1 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus2_callout_L1 );
+
+
+int32_t obus3_callout_L0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus3 link0
+    obus_smpCallout_link( 3, i_chip, 0 );
+
+    return rc;
+
+} // end obus3_callout_L0
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus3_callout_L0 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus3_callout_L0 );
+
+
+int32_t obus3_callout_L1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    // callout obus3 link0
+    obus_smpCallout_link( 3, i_chip, 1 );
+
+    return rc;
+
+} // end obus3_callout_L1
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, obus3_callout_L1 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, obus3_callout_L1 );
+
+
+void  obus_clearMaskFail( errlHndl_t &io_errl, TargetHandle_t &i_rxTrgt,
+                          TargetHandle_t &i_txTrgt, uint32_t i_link )
+{
+    // ensure we have valid inputs
+    PRDF_ASSERT( NULL != i_rxTrgt );
+    PRDF_ASSERT( NULL != i_txTrgt );
+    PRDF_ASSERT( NULL != io_errl );
+
+    uint32_t         l_rc = SUCCESS;
+    ExtensibleChip  *l_rxChip =
+                            (ExtensibleChip *)systemPtr->GetChip( i_rxTrgt );
+    ExtensibleChip  *l_txChip =
+                            (ExtensibleChip *)systemPtr->GetChip( i_txTrgt );
+
+
+    do
+    {
+        if (MODEL_NIMBUS == getChipModel(i_rxTrgt))
+        {
+            PRDF_ERR("[obus_clearMaskFail] called on NIMBUS");
+            break;
+        } // nimbus not supported
+
+
+        // These defines are for LINK0
+        // (LINK1 will be the next bit for each of these)
+        #define OBUS_CRC_ERRORS     6
+        #define OBUS_ECC_ERRORS    14
+        #define OBUS_NO_SPARE      42
+        #define OBUS_SPARE_DONE    44
+        #define OBUS_TOO_MANY_CRC  46
+        #define OBUS_LNK0_TRAINING_FAILED  56
+
+        // Normal rule file handling should clear bit 56
+        // or bit 57 and mask it for the target we got the
+        // attention on.
+        // We still need to do it for the other end of the cable.
+
+        // Clear the FIR on other end
+        SCAN_COMM_REGISTER_CLASS * obusTxFir_and = l_txChip->getRegister("IOOLFIR_AND");
+        obusTxFir_and->setAllBits();
+        obusTxFir_and->ClearBit(OBUS_LNK0_TRAINING_FAILED + i_link);
+        // MASK the attention on the other end
+        SCAN_COMM_REGISTER_CLASS * obusTxMask_or = l_txChip->getRegister("IOOLFIR_MASK_OR");
+        obusTxMask_or->clearAllBits();
+        obusTxMask_or->SetBit(OBUS_LNK0_TRAINING_FAILED + i_link);
+
+        // Clear other related bits for link0 or link1
+        // on the current target with the active attention
+        SCAN_COMM_REGISTER_CLASS * obusRxFir_and = l_rxChip->getRegister("IOOLFIR_AND");
+        obusRxFir_and->setAllBits();
+        obusRxFir_and->ClearBit(OBUS_CRC_ERRORS   + i_link);
+        obusRxFir_and->ClearBit(OBUS_ECC_ERRORS   + i_link);
+        obusRxFir_and->ClearBit(OBUS_NO_SPARE     + i_link);
+        obusRxFir_and->ClearBit(OBUS_SPARE_DONE   + i_link);
+        obusRxFir_and->ClearBit(OBUS_TOO_MANY_CRC + i_link);
+
+        // put back the MASK and FIRs to hardware
+        l_rc  = obusTxMask_or->Write();
+        l_rc |= obusTxFir_and->Write();
+        l_rc |= obusRxFir_and->Write();
+
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR("obus_clearMaskFail failed handling link %d", i_link);
+        }
+
+    } while (0);
+
+} // end obus_clearMaskFail
+
+
+
+int32_t obus_fail_L0( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & i_sc )
+{
+    int32_t rc = SUCCESS;
+
+    TargetHandle_t  rxTrgt = i_chip->getTrgt();
+    TargetHandle_t  txTrgt = getTxBusEndPt(rxTrgt);
+
+    do
+    {
+        errlHndl_t l_mainElog = NULL;
+        l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+        if ( NULL == l_mainElog )
+        {
+            PRDF_ERR( "obus_fail Failed to get the global error log" );
+            rc = FAIL;
+            break;
+        }
+
+        // invoke routine to clear and mask the failure and
+        // other related bits.
+        obus_clearMaskFail( l_mainElog, rxTrgt, txTrgt, 0 );
+
+    } while(0);
+
+
+    return rc;
+
+} // end obus_fail_L0
+PRDF_PLUGIN_DEFINE_NS( p9_obus,     LaneRepair, obus_fail_L0 );
+
+
+int32_t obus_fail_L1( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & i_sc )
+{
+   int32_t rc = SUCCESS;
+
+    TargetHandle_t  rxTrgt = i_chip->getTrgt();
+    TargetHandle_t  txTrgt = getTxBusEndPt(rxTrgt);
+
+    do
+    {
+        errlHndl_t l_mainElog = NULL;
+        l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
+        if ( NULL == l_mainElog )
+        {
+            PRDF_ERR( "obus_fail_Failed to get the global error log" );
+            rc = FAIL;
+            break;
+        }
+
+        // invoke routine to clear and mask the failure and
+        // other related bits.
+        obus_clearMaskFail( l_mainElog, rxTrgt, txTrgt, 1 );
+
+    } while(0);
+
+    return rc;
+
+} // end obus_fail_L1
+PRDF_PLUGIN_DEFINE_NS( p9_obus,     LaneRepair, obus_fail_L1 );
+
+
+/** Need routine to capture FFDC for PBIOOFIR **/
+void    baseCaptureSmpFFDC( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc,
+                            uint32_t  i_obusNum )
+{
+    // get the specific OBUS target we are interested in
+    TargetHandle_t   l_obus = getConnectedChild(i_chip->getTrgt(),
+                                                TYPE_OBUS, i_obusNum);
+
+    ExtensibleChip * l_obusChip;
+    l_obusChip = (ExtensibleChip *)systemPtr->GetChip(l_obus);
+    // Add OBUS registers for this instance
+    if( NULL != l_obusChip )
+    {
+        l_obusChip->CaptureErrorData(
+                          io_sc.service_data->GetCaptureData(),
+                          Util::hashString("smpCableFFDC"));
+    }
+
+} // baseCaptureSmpFFDC
+
+int32_t captureSmpObus0( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    baseCaptureSmpFFDC( i_chip, io_sc, 0 );
+    return SUCCESS;
+
+} // end captureSmpObus0
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, captureSmpObus0 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, captureSmpObus0 );
+
+
+int32_t captureSmpObus1( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    baseCaptureSmpFFDC( i_chip, io_sc, 1 );
+    return SUCCESS;
+
+} // end captureSmpObus1
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, captureSmpObus1 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, captureSmpObus1 );
+
+
+int32_t captureSmpObus2( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    baseCaptureSmpFFDC( i_chip, io_sc, 2 );
+    return SUCCESS;
+
+} // end captureSmpObus2
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, captureSmpObus2 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, captureSmpObus2 );
+
+
+int32_t captureSmpObus3( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    baseCaptureSmpFFDC( i_chip, io_sc, 3 );
+    return SUCCESS;
+
+} // end captureSmpObus3
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus,  LaneRepair, captureSmpObus3 );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,   LaneRepair, captureSmpObus3 );
+
 
 
 int32_t calloutBusInterface( ExtensibleChip * i_chip,

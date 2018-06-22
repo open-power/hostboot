@@ -6519,42 +6519,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[28]
      *  parser00 attn
      */
-    (rPBIOOFIR, bit(28)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(28)) ? obus0SmpFailure_L0;
 
     /** PBIOOFIR[29]
      *  parser01 attn
      */
-    (rPBIOOFIR, bit(29)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(29)) ? obus0SmpFailure_L1;
 
     /** PBIOOFIR[30]
      *  parser02 attn
      */
-    (rPBIOOFIR, bit(30)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(30)) ? obus1SmpFailure_L0;
 
     /** PBIOOFIR[31]
      *  parser03 attn
      */
-    (rPBIOOFIR, bit(31)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(31)) ? obus1SmpFailure_L1;
 
     /** PBIOOFIR[32]
      *  parser04 attn
      */
-    (rPBIOOFIR, bit(32)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(32)) ? obus2SmpFailure_L0;
 
     /** PBIOOFIR[33]
      *  parser05 attn
      */
-    (rPBIOOFIR, bit(33)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(33)) ? obus2SmpFailure_L1;
 
     /** PBIOOFIR[34]
      *  parser06 attn
      */
-    (rPBIOOFIR, bit(34)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(34)) ? obus3SmpFailure_L0;
 
     /** PBIOOFIR[35]
      *  parser07 attn
      */
-    (rPBIOOFIR, bit(35)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(35)) ? obus3SmpFailure_L1;
 
     /** PBIOOFIR[36]
      *  mailbox 00 special attention
@@ -6639,42 +6639,42 @@ group gPBIOOFIR filter singlebit, cs_root_cause( 8, 11, 14, 17 )
     /** PBIOOFIR[52]
      *  data outbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(52)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(52)) ? obus0SmpFailure_LALL;
 
     /** PBIOOFIR[53]
      *  data outbound switch internal - links 23
      */
-    (rPBIOOFIR, bit(53)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(53)) ? obus1SmpFailure_LALL;
 
     /** PBIOOFIR[54]
      *  data outbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(54)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(54)) ? obus2SmpFailure_LALL;
 
     /** PBIOOFIR[55]
      *  data outbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(55)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(55)) ? obus3SmpFailure_LALL;
 
     /** PBIOOFIR[56]
      *  data inbound switch internal-links 01
      */
-    (rPBIOOFIR, bit(56)) ? calloutBusInterface_obus0_th_1;
+    (rPBIOOFIR, bit(56)) ? obus0SmpFailure_LALL;
 
     /** PBIOOFIR[57]
      *  data inbound switch internal-links 23
      */
-    (rPBIOOFIR, bit(57)) ? calloutBusInterface_obus1_th_1;
+    (rPBIOOFIR, bit(57)) ? obus1SmpFailure_LALL;
 
     /** PBIOOFIR[58]
      *  data inbound switch internal-links 45
      */
-    (rPBIOOFIR, bit(58)) ? calloutBusInterface_obus2_th_1;
+    (rPBIOOFIR, bit(58)) ? obus2SmpFailure_LALL;
 
     /** PBIOOFIR[59]
      *  data inbound switch internal-links 67
      */
-    (rPBIOOFIR, bit(59)) ? calloutBusInterface_obus3_th_1;
+    (rPBIOOFIR, bit(59)) ? obus3SmpFailure_LALL;
 
     /** PBIOOFIR[60:61]
      *  spare

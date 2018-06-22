@@ -23,48 +23,68 @@
 #
 # IBM_PROLOG_END_TAG
 
-/** Callout the OBUS interface */
-actionclass calloutObusInterface
+actionclass smpCallout0
 {
-    funccall("calloutBusInterfacePlugin");
+    funccall("obus_callout_L0");
 };
 
-/** Callout the OBUS interface, threshold 32 per day */
-actionclass calloutBusInterface_th_32perDay
+actionclass smpCallout1
 {
-    calloutObusInterface;
+    funccall("obus_callout_L1");
+};
+
+actionclass smpCableFail0
+{
+    funccall("obus_fail_L0");
+};
+
+actionclass smpCableFail1
+{
+    funccall("obus_fail_L1");
+};
+
+/** OBUS targets for IOOLFIR handling **/
+actionclass obusSmpCallout_th32_L0
+{
+    capture(smpCableFFDC);
+    smpCallout0;
     threshold32pday;
 };
 
-/** Lane Repair: spare deployed */
-actionclass spareDeployed
+actionclass obusSmpCallout_th32_L1
 {
-    calloutObusInterface;
-    funccall("spareDeployed");
+    capture(smpCableFFDC);
+    smpCallout1;
+    threshold32pday;
 };
 
-/** Lane Repair: max spares exceeded */
-actionclass maxSparesExceeded
+actionclass obusSmpCallout_L0
 {
-    calloutObusInterface;
+    capture(smpCableFFDC);
+    smpCallout0;
     threshold1;
-    funccall("maxSparesExceeded");
 };
 
-/** Lane Repair: too many bus errors */
-actionclass tooManyBusErrors
+actionclass obusSmpCallout_L1
 {
-    calloutObusInterface;
+    capture(smpCableFFDC);
+    smpCallout1;
     threshold1;
-    funccall("tooManyBusErrors");
 };
 
-# Currently handling each OBUS clock group with the same plugins. May optimize
-# this later when we add in the DMI Lane Repair support.
-actionclass spareDeployed_obus_clkgrp0 { spareDeployed; };
-actionclass spareDeployed_obus_clkgrp1 { spareDeployed; };
-actionclass maxSparesExceeded_obus_clkgrp0 { maxSparesExceeded; };
-actionclass maxSparesExceeded_obus_clkgrp1 { maxSparesExceeded; };
-actionclass tooManyBusErrors_obus_clkgrp0 { tooManyBusErrors; };
-actionclass tooManyBusErrors_obus_clkgrp1 { tooManyBusErrors; };
+actionclass obusSmpFailure_L0
+{
+    capture(smpCableFFDC);
+    smpCallout0;
+    smpCableFail0;
+    threshold1;
+};
+
+actionclass obusSmpFailure_L1
+{
+    capture(smpCableFFDC);
+    smpCallout1;
+    smpCableFail1;
+    threshold1;
+};
 
