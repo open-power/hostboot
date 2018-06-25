@@ -69,5 +69,7 @@ OBJS += workitem.o
 
 OBJS += bltohbdatamgr.o
 
+EXTRAINCDIR += ${ROOTPATH}/src/include
+
 include ${ROOTPATH}/config.mk
 
