@@ -596,7 +596,7 @@ sub prune
     }
 }
 
-## This function returns the position of the Node corresponding to the 
+## This function returns the position of the Node corresponding to the
 ## incoming target
 ##
 sub getParentNodePos
@@ -1590,7 +1590,7 @@ sub processMc
                                 $self->setAttribute($membuf_child, "FAPI_POS",  $fapi_pos);
                                 $self->setAttribute($membuf_child, "ORDINAL_ID", $fapi_pos);
                                 $self->setAttribute($membuf_child, "REL_POS", 0);
-                                
+
                                 # HUID needs to be node relative
                                 # L4 is 1 to 1 mapping with membuf
                                 $self->{huid_idx}->{"L4"} = $membufnum;
@@ -1640,6 +1640,13 @@ sub processMc
 
                                 ## Trace the DDR busses to find connected DIMM
                                 my $ddrs = $self->findConnections($membuf_child,"DDR4","");
+
+                                if($ddrs eq "")
+                                {
+                                   # on multi node system there is a possibility that either
+                                   # DDR4 or DDR3 dimms are connected under a node
+                                   my $ddrs = $self->findConnections($membuf_child,"DDR3","");
+                                }
                                 if ($ddrs ne "")
                                 {
                                     my $dimmPos=0;
@@ -1776,7 +1783,7 @@ sub setFsiAttributes
         $self->setAttribute($target, "ALTFSI_MASTER_PORT", $fsi_port);
       }
     }
-    
+
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","flipPort",
           $flip_port);
     $self->setAttributeField($target, "FSI_OPTION_FLAGS","reserved", "0");

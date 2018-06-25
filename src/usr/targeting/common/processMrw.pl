@@ -2235,6 +2235,13 @@ sub processMembuf
              # follow the DDR4 bus connection to find the 'ddr' targets
              my $ddrs = $targetObj->findConnections($child,"DDR4","");
 
+             if($ddrs eq "")
+             {
+                # on multi node system there is a possibility that either
+                # DDR4 or DDR3 dimms are connected under a node
+                my $ddrs = $targetObj->findConnections($child,"DDR3","");
+             }
+
              if ($ddrs ne "")
              {
                  foreach my $ddr (@{$ddrs->{CONN}})
