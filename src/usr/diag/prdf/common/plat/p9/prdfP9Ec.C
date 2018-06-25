@@ -110,7 +110,7 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
 #ifdef __HOSTBOOT_RUNTIME
-    if ( io_sc.service_data->IsUnitCS() )
+    if ( io_sc.service_data->isProcCoreCS() )
     {
         maskIfCoreCs(i_chip);
         rtDcnfgCore(i_chip);
@@ -291,7 +291,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     do
     {
         // Skip if we're already at core checkstop in SDC.
-        if (io_sc.service_data->IsUnitCS())
+        if (io_sc.service_data->isProcCoreCS())
             break;
 
         // Read core checkstop bit in chiplet RER.
@@ -306,7 +306,7 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
             break;
 
         // We must be at core checkstop.
-        io_sc.service_data->setFlag(ServiceDataCollector::UNIT_CS);
+        io_sc.service_data->setProcCoreCS();
         io_sc.service_data->SetThresholdMaskId(0);
 
         // Check if we need to switch attn type to analyze Unit checkstop
