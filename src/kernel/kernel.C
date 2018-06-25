@@ -44,6 +44,7 @@
 #include <usr/debugpointers.H>
 #include <kernel/segmentmgr.H>
 #include <kernel/block.H>
+#include <kernel/terminate.H>
 
 #include <stdlib.h>
 
@@ -110,6 +111,8 @@ int main()
            ProcessorCoreTypeStrings[CpuID::getCpuType()],
            static_cast<uint64_t>(getPIR()));
     MAGIC_INST_PRINT_ISTEP(6,2);
+
+    initKernelTIMutex();
 
     // Erase task-pointer so that TaskManager::getCurrentTask() returns NULL.
     setSPRG3(NULL);

@@ -30,11 +30,16 @@
 
 #include <kernel/types.h>
 
-
 /** @fn terminateExecuteTI
  *  @brief Sequence to execute a TI attn
  */
 void terminateExecuteTI();
+
+/** @fn initKernelMutex
+ *  @brief initialize the internal kernel mutex used to lock
+ *         the HB TI area.
+ */
+void initKernelTIMutex();
 
 /** @fn termWritePlid
  *  Update TI data area with a PLID.
@@ -50,12 +55,15 @@ void termWritePlid(uint16_t i_source, uint32_t plid);
  *  @param[in] i_reasoncode: reasoncode for the failure(assert or shutdown)
  *  @param[in] i_failAddr: i_linkRegister() value (address of failure)
  *  @param[in] i_error_info: addt'l error info to add to TI data
+ *  @param[in] i_forceWrite: force the HB TI area to be overwritten with
+ *             the passed parameters.
  *  @param[out] NONE:
  */
 void termWriteSRC(uint16_t i_source,
                     uint16_t i_reasoncode,
                     uint64_t i_failAddr = 0,
-                    uint32_t i_error_info = 0);
+                    uint32_t i_error_info = 0,
+                    bool i_forceWrite = false);
 
 /** @fn termModifySRC
  *  Modify an SRC and the TI data area for Bootloader

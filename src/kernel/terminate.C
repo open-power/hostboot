@@ -26,6 +26,7 @@
 #include <kernel/hbdescriptor.H>
 #include <kernel/hbterminatetypes.H>
 #include <kernel/terminate.H>
+#include <sys/sync.h>
 #ifndef BOOTLOADER
 #include <stdint.h>
 #include <kernel/console.H>
@@ -37,10 +38,11 @@
 
 extern "C" void p9_force_attn() NO_RETURN;
 
-
 #ifndef BOOTLOADER
+mutex_t g_kernelMutex;
+
 /* Instance of the TI Data Area */
-HB_TI_DataArea kernel_TIDataArea;
+HB_TI_DataArea kernel_TIDataArea = {};
 
 /* Instance of the HB descriptor struct */
 HB_Descriptor kernel_hbDescriptor =
@@ -58,6 +60,13 @@ void terminateExecuteTI()
     p9_force_attn();
 }
 
+void initKernelTIMutex()
+{
+#ifndef BOOTLOADER
+    mutex_init(&g_kernelMutex);
+#endif
+}
+
 #ifndef BOOTLOADER
 void termWritePlid(uint16_t i_source, uint32_t plid)
 {
@@ -68,24 +77,37 @@ void termWritePlid(uint16_t i_source, uint32_t plid)
 #endif // BOOTLOADER
 
 void termWriteSRC(uint16_t i_source, uint16_t i_reasoncode,uint64_t i_failAddr,
-                  uint32_t i_error_data)
+                  uint32_t i_error_data, bool i_forceWrite)
 {
-    // Update the TI structure with the type of TI, who called,
-    // and extra error data (if applicable, otherwise 0)
-    kernel_TIDataArea.type = TI_WITH_SRC;
-    kernel_TIDataArea.source = i_source;
-    kernel_TIDataArea.error_data = i_error_data;
+#ifndef BOOTLOADER
+    mutex_lock(&g_kernelMutex);
+#endif
+    // If this is the first TI on the system or if i_forceWrite is true, then
+    // overwrite the HB TI area with the given info. Unless i_forceWrite is
+    // true, all subsequent TI codes will NOT overwrite the original TI
+    // information.
+    if(kernel_TIDataArea.src.reasoncode == NO_TI_ERROR || i_forceWrite)
+    {
+        // Update the TI structure with the type of TI, who called,
+        // and extra error data (if applicable, otherwise 0)
+        kernel_TIDataArea.type = TI_WITH_SRC;
+        kernel_TIDataArea.source = i_source;
+        kernel_TIDataArea.error_data = i_error_data;
 
-    // Update TID data area with the SRC info we have avail
-    kernel_TIDataArea.src.ID = 0xBC;
-    kernel_TIDataArea.src.subsystem = 0x8A;
-    kernel_TIDataArea.src.reasoncode = i_reasoncode;
-    kernel_TIDataArea.src.moduleID = 0;
-    kernel_TIDataArea.src.iType = TI_WITH_SRC;
-    kernel_TIDataArea.src.iSource = i_source;
+        // Update TID data area with the SRC info we have avail
+        kernel_TIDataArea.src.ID = 0xBC;
+        kernel_TIDataArea.src.subsystem = 0x8A;
+        kernel_TIDataArea.src.reasoncode = i_reasoncode;
+        kernel_TIDataArea.src.moduleID = 0;
+        kernel_TIDataArea.src.iType = TI_WITH_SRC;
+        kernel_TIDataArea.src.iSource = i_source;
 
-    // Update User Data with address of fail location
-    kernel_TIDataArea.src.word6 = i_failAddr;
+        // Update User Data with address of fail location
+        kernel_TIDataArea.src.word6 = i_failAddr;
+    }
+#ifndef BOOTLOADER
+    mutex_unlock(&g_kernelMutex);
+#endif
 }
 
 void termModifySRC(uint8_t i_moduleID, uint32_t i_word7, uint32_t i_word8)

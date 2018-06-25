@@ -107,6 +107,7 @@ enum hb_terminate_type
 // Enum used in the flag indicating who initiated the TI
 enum hb_terminate_source
 {
+    NO_TI_ERROR =      0x0000,
     TI_KERNEL_ASSERT = 0x0001,
     TI_CRIT_ASSERT =   0x0002,
     TI_SHUTDOWN =      0x0003,

@@ -33,6 +33,9 @@
 #define __HIDDEN_SYSCALL_SHUTDOWN
 
 #include    <kernel/console.H>                  // printk status
+#include    <kernel/terminate.H>                // termWriteSRC
+#include    <kernel/hbterminatetypes.H>         // TI_SHUTDOWN
+#include    <builtins.h>                        // linkRegister
 
 #include    <sys/vfs.h>
 #include    <vfs/vfs.H>
@@ -667,6 +670,11 @@ void doShutdown(uint64_t i_status,
                 uint64_t i_masterHBInstance,
                 uint32_t i_error_info)
 {
+    termWriteSRC(TI_SHUTDOWN,
+                 i_status,
+                 reinterpret_cast<uint64_t>(linkRegister()),
+                 i_error_info);
+
     class ShutdownExecute
     {
         public:
@@ -885,6 +893,13 @@ void InitService::doShutdown(uint64_t i_status,
 
     TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
     MAGIC_INST_PRINT_ISTEP(21,4);
+
+    // Update the HB TI area with the worst status.
+    termWriteSRC(TI_SHUTDOWN,
+                 worst_status,
+                 reinterpret_cast<uint64_t>(linkRegister()),
+                 i_error_info,
+                 true); // Force write
 
     shutdown(worst_status,
              i_payload_base,
