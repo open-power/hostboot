@@ -54,18 +54,13 @@
 #include <p9_io_dmi_scominit.H>
 #include <p9c_dmi_io_scom.H>
 
-
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FIR_ACTION1 = 0x2068686868000000ULL;
-const uint64_t FIR_MASK    = 0xDF97979797FFC000ULL;
-
-
 const uint64_t DMI_FIR_ACTION0_REG = 0x07011006;
 const uint64_t DMI_FIR_ACTION1_REG = 0x07011007;
 const uint64_t DMI_FIR_MASK_REG    = 0x07011003;
+
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -142,18 +137,97 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_tgt =
             i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
 
-        FAPI_TRY(fapi2::putScom(l_mc_tgt,
-                                DMI_FIR_ACTION0_REG,
-                                FIR_ACTION0),
-                 "Error from putScom (DMI_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(l_mc_tgt,
-                                DMI_FIR_ACTION1_REG,
-                                FIR_ACTION1),
-                 "Error from putScom (DMI_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(l_mc_tgt,
-                                DMI_FIR_MASK_REG,
-                                FIR_MASK),
-                 "Error from putScom (DMI_FIR_MASK_REG)");
+        // mask(1) action0(X) action1(X) : Masked
+        // mask(0) action0(0) action1(0) : System Checkstop
+        // mask(0) action0(0) action1(1) : Recoverable
+        // mask(0) action0(1) action1(0) : Host Attention
+        // mask(0) action0(1) action1(1) : Unit Checkstop
+        fapi2::buffer<uint64_t> l_fir_mask;
+        fapi2::buffer<uint64_t> l_fir_action0;
+        fapi2::buffer<uint64_t> l_fir_action1;
+        l_fir_mask.flush<1>();
+        l_fir_action0.flush<0>();
+        l_fir_action1.flush<0>();
+
+        // 0    Rx Invalid State or Parity Error         recoverable
+        l_fir_mask.clearBit<0>();
+        l_fir_action1.setBit<0>();
+        // 1    Tx Invalid State or Parity Error         recoverable
+        l_fir_mask.clearBit<1>();
+        l_fir_action1.setBit<1>();
+        // 2    GCR Hange Error                          recoverable
+        l_fir_mask.clearBit<2>();
+        l_fir_action1.setBit<2>();
+        // 3:7  Reserved                                 mask
+        // 8    Rx Bus 0 Training Error                  mask
+        // 9    Rx Bus 0 Spare Lane Deployed             recoverable
+        l_fir_mask.clearBit<9>();
+        l_fir_action1.setBit<9>();
+        // 10   Rx Bus 0 Max Spares Exceeded             recoverable
+        l_fir_mask.clearBit<10>();
+        l_fir_action1.setBit<10>();
+        // 11   Rx Bus 0 Recal or Dynamic Repair Error   recoverable
+        l_fir_mask.clearBit<11>();
+        l_fir_action1.setBit<11>();
+        // 12   Rx Bus 0 Too Many Bus Errors             unit_cs
+        l_fir_mask.clearBit<12>();
+        l_fir_action0.setBit<12>();
+        l_fir_action1.setBit<12>();
+        // 13:15 Reserved                                mask
+        // 16   Rx Bus 1 Training Error                  mask
+        // 17   Rx Bus 1 Spare Lane Deployed             recoverable
+        l_fir_mask.clearBit<17>();
+        l_fir_action1.setBit<17>();
+        // 18   Rx Bus 1 Max Spares Exceeded             recoverable
+        l_fir_mask.clearBit<18>();
+        l_fir_action1.setBit<18>();
+        // 19   Rx Bus 1 Recal or Dynamic Repair Error   recoverable
+        l_fir_mask.clearBit<19>();
+        l_fir_action1.setBit<19>();
+        // 20   Rx Bus 1 Too Many Bus Errors             unit_cs
+        l_fir_mask.clearBit<20>();
+        l_fir_action0.setBit<20>();
+        l_fir_action1.setBit<20>();
+        // 21:23 Reserved                                mask
+        // 24   Rx Bus 2 Training Error                  mask
+        // 25   Rx Bus 2 Spare Lane Deployed             recoverable
+        l_fir_mask.clearBit<25>();
+        l_fir_action1.setBit<25>();
+        // 26   Rx Bus 2 Max Spares Exceeded             recoverable
+        l_fir_mask.clearBit<26>();
+        l_fir_action1.setBit<26>();
+        // 27   Rx Bus 2 Recal or Dynamic Repair Error   recoverable
+        l_fir_mask.clearBit<27>();
+        l_fir_action1.setBit<27>();
+        // 28   Rx Bus 2 Too Many Bus Errors             unit_cs
+        l_fir_mask.clearBit<28>();
+        l_fir_action0.setBit<28>();
+        l_fir_action1.setBit<28>();
+        // 29:31 Reserved                                mask
+        // 32   Rx Bus 3 Training Error                  mask
+        // 33   Rx Bus 3 Spare Lane Deployed             recoverable
+        l_fir_mask.clearBit<33>();
+        l_fir_action1.setBit<33>();
+        // 34   Rx Bus 3 Max Spares Exceeded             recoverable
+        l_fir_mask.clearBit<34>();
+        l_fir_action1.setBit<34>();
+        // 35   Rx Bus 3 Recal or Dynamic Repair Error   recoverable
+        l_fir_mask.clearBit<35>();
+        l_fir_action1.setBit<35>();
+        // 36   Rx Bus 3 Too Many Bus Errors             unit_cs
+        l_fir_mask.clearBit<36>();
+        l_fir_action0.setBit<36>();
+        l_fir_action1.setBit<36>();
+        // 37:39 Reserved                                mask
+        // 40:47 Bus 4 - Unused                          mask
+        // 48    Scom Error                              mask
+        // 49    Scom Error                              mask
+        // 50:63 Unused                                  mask
+
+
+        FAPI_TRY(fapi2::putScom(l_mc_tgt, DMI_FIR_ACTION0_REG, l_fir_action0));
+        FAPI_TRY(fapi2::putScom(l_mc_tgt, DMI_FIR_ACTION1_REG, l_fir_action1));
+        FAPI_TRY(fapi2::putScom(l_mc_tgt, DMI_FIR_MASK_REG, l_fir_mask));
     }
 
     // mark HWP exit
