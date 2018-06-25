@@ -588,47 +588,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
 
             /****************************************************/
-            /*  Find a valid MemBuf                             */
-            /****************************************************/
-            theTarget = getFunctionalTarget(TARGETING::TYPE_MEMBUF);
-            if(theTarget == NULL)
-            {
-                TS_TRACE("testReadSbeFromPnor() - No Functional MemBuf Targets "
-                         "found!");
-            }
-            else
-            {
-                total++;
-                // @todo RTC 178802 Enable test cases turned off during bring up
-                /*
-                err = findSBEInPnor(theTarget,
-                                    sbeImgPtr,
-                                    sbeImgSize,
-                                    &version);
-
-                if(err || (sbeImgPtr == NULL) || (sbeImgSize == 0) )
-                {
-                    fails++;
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"testFindSbeInPnor() - "
-                               "failure finding MemBuf SBE image for uid=0x%X, "
-                               "ec=0x%.2X, sbeImgPtr=%p, sbeImgSize=0x%x",
-                               TARGETING::get_huid(theTarget),
-                               theTarget->getAttr<TARGETING::ATTR_EC>(),
-                               sbeImgPtr, sbeImgSize );
-                    TS_FAIL("testFindSbeInPnor() -failure finding SBE image!");
-                    errlCommit( err,
-                                SBE_COMP_ID );
-
-                }
-                TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Version",
-                         &version, sizeof(version));
-                TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-MEMBUF PNOR Image",
-                         sbeImgPtr, 0x80);
-                */
-            }
-
-
-            /****************************************************/
             /* Verify invalid target Type is not found          */
             /****************************************************/
             // test with system target -- safe that this target is configured
