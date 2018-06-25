@@ -136,7 +136,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
     Target* tpm_tgt = nullptr;
     TargetHandleList tpmTargetList;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
+    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusGetRandom:");
 
     do
     {
@@ -232,7 +232,7 @@ errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
 {
     errlHndl_t err = nullptr;
 
-    TRACFCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX",
+    TRACUCOMP(g_trac_nc,ENTER_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX",
               i_nonce);
 
     do
@@ -257,8 +257,9 @@ errlHndl_t nodeCommAbusLogNonce(uint64_t & i_nonce)
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusLogNonce: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusLogNonce: i_nonce=0x%.16llX. "
               TRACE_ERR_FMT,
+              i_nonce,
               TRACE_ERR_ARGS(err));
 
     return err;
@@ -569,8 +570,8 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
                                   expected_peer_mboxId);
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: "
-                  "send: linkId=%d, mboxId=%d, ObusInstance=%d. "
-                  "expected peer recv: linkId=%d, mboxId=%d, ObusInstance=%d.",
+                  "my: linkId=%d, mboxId=%d, ObusInstance=%d. "
+                  "expected peer: linkId=%d, mboxId=%d, ObusInstance=%d.",
                   my_linkId, my_mboxId, l_obus.myObusInstance,
                   expected_peer_linkId, expected_peer_mboxId,
                   l_obus.peerObusInstance);
@@ -695,6 +696,13 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
 
     do
     {
+        // Used for check that right node indicated itself as master
+        uint8_t my_linkId = 0;
+        uint8_t my_mboxId = 0;
+        getSecureLinkMboxFromObus(i_obus_instance.myObusInstance,
+                                  my_linkId,
+                                  my_mboxId);
+
         // First Wait for Message From Master
         uint64_t actual_linkId = 0;
         uint64_t actual_mboxId = 0;
@@ -707,13 +715,6 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
                       "nodeCommAbusRecvMessage returned an error");
            break;
         }
-
-        // Check that right node indicated itself as master
-        uint8_t my_linkId = 0;
-        uint8_t my_mboxId = 0;
-        getSecureLinkMboxFromObus(i_obus_instance.myObusInstance,
-                                  my_linkId,
-                                  my_mboxId);
 
         // Verify that actual receive link/mboxIds were the same as the
         // expected ones
@@ -1005,14 +1006,44 @@ errlHndl_t nodeCommAbusExchange(void)
         l_obusInstance.peerObusInstance = l_peObus.instance;
         l_obusInstance.peerProcInstance = l_peProc.instance;
         l_obusInstance.peerNodeInstance = l_peNode.instance;
+        l_obusInstance.myObusInstance = l_obusTgt->getAttr<ATTR_REL_POS>();
 
+        // Before adding to list check that on a 2-node system that we ignore
+        // redundant connections to the same node
+        if (total_nodes==2)
+        {
+            bool l_duplicate_found = false;
+            for (auto l_saved_instance : obus_instances)
+            {
+                if (l_saved_instance.peerNodeInstance ==
+                    l_obusInstance.peerNodeInstance)
+                {
+                    TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchange: "
+                      "Skipping masterProc 0x%.08X OBUS HUID 0x%.08X's "
+                      "PEER_PATH %s because already have saved connection to "
+                      "that node: myObusInstance=%d, peerInstance:n%d/p%d/obus%d",
+                      get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
+                      l_peer_path_str,
+                      l_saved_instance.myObusInstance,
+                      l_saved_instance.peerNodeInstance,
+                      l_saved_instance.peerProcInstance,
+                      l_saved_instance.peerObusInstance);
 
-        l_obusInstance.myObusInstance = l_obusTgt->getAttr<ATTR_ORDINAL_ID>();
+                    l_duplicate_found = true;
+                    continue;
+                }
+            }
+            if (l_duplicate_found == true)
+            {
+                 // continue to skip adding this instance to obus_instances
+                 continue;
+            }
+        }
 
         obus_instances.push_back(l_obusInstance);
         TRACFCOMP(g_trac_nc,"nodeCommAbusExchange: Using masterProc 0x%.08X "
                   "OBUS HUID 0x%.08X's peer path %s with obus_instance "
-                  "send=%d, rcv/peer=n%d/p%d/obus%d (vector size=%d)",
+                  "myObusInstance=%d, peer=n%d/p%d/obus%d (vector size=%d)",
                   get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
                   l_peer_path_str, l_obusInstance.myObusInstance,
                   l_obusInstance.peerNodeInstance,
@@ -1106,8 +1137,9 @@ errlHndl_t nodeCommAbusExchange(void)
 
     } while( 0 );
 
-    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusExchange: "
+    TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusExchange: %s: "
               TRACE_ERR_FMT,
+              (err == nullptr) ? "SUCCESSFUL" : "FAILED",
               TRACE_ERR_ARGS(err));
 
     if (err)

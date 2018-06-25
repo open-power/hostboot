@@ -146,10 +146,7 @@ inline void getSecureLinkMboxFromObus(uint8_t i_obusInstance,
     // and the Secure Link and Mailbox is always the relative 'L0M0'
     // of these 4 possibilities
     o_linkId = (2*i_obusInstance);
-
-    // @TODO RTC 184518 Until Secure Mailbox is not fenced off by FSP, use
-    // non-secure mailbox for communications
-    o_mboxId = 1;
+    o_mboxId = 0;
 
     return;
 }
@@ -208,9 +205,9 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
  *
  * @return void
  */
-void getNodeCommFFDC(node_comm_modes_t   i_mode,
+void getNodeCommFFDC(node_comm_modes_t i_mode,
                      TARGETING::Target*  i_pProc,
-                     errlHndl_t          &io_log);
+                     errlHndl_t & io_log);
 
 } // end NODECOMM namespace
 
