@@ -57,7 +57,7 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 {
     if ( i_sc.service_data->IsAtThreshold() && !mfgMode() &&
          (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
-         (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
+         (UNIT_CS    != i_sc.service_data->getSecondaryAttnType()) )
     {
         i_sc.service_data->clearServiceCall();
     }

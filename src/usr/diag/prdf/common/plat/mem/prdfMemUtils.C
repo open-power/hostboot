@@ -649,7 +649,7 @@ uint32_t handleChnlFail( ExtensibleChip * i_chip,
     do
     {
         // Skip if already handling channel failure.
-        if ( io_sc.service_data->IsUnitCS() ) break;
+        if ( io_sc.service_data->isMemChnlFail() ) break;
 
         // Skip if currently analyzing a host attention. This is a required for
         // a rare scenario when a channel failure occurs after PRD is called to
@@ -667,9 +667,9 @@ uint32_t handleChnlFail( ExtensibleChip * i_chip,
         // start looking for UNIT_CS attentions instead of recoverable.
         io_sc.service_data->setSecondaryAttnType( UNIT_CS );
 
-        // Set the UNIT_CS flag in the SDC to indicate a channel failure has
-        // been detected and there is no need to check again.
-        io_sc.service_data->setFlag( ServiceDataCollector::UNIT_CS );
+        // Set the MEM_CHNL_FAIL flag in the SDC to indicate a channel failure
+        // has been detected and there is no need to check again.
+        io_sc.service_data->setMemChnlFail();
 
         // Make the error log predictive and set threshold.
         io_sc.service_data->setFlag( ServiceDataCollector::SERVICE_CALL );

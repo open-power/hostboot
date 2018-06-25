@@ -797,50 +797,6 @@ PLUGIN_BUS_INTERFACE_CALLOUT( dmi, TYPE_MCS, 7 )
 #undef PLUGIN_BUS_INTERFACE_CALLOUT
 
 //------------------------------------------------------------------------------
-
-/**
- * @brief   When not in MNFG mode, clear the service call flag so that
- *          thresholding will still be done, but no visible error log committed.
- * @param   i_chip P8 chip
- * @param   i_sc   Step code data struct
- * @returns SUCCESS always
- */
-int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
-                              STEP_CODE_DATA_STRUCT & i_sc )
-{
-    if ( i_sc.service_data->IsAtThreshold() && !mfgMode() &&
-         (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
-         (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
-    {
-        i_sc.service_data->clearServiceCall();
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearServiceCallFlag );
-
-/**
- * @brief   Clear the service call flag (field and MNFG) so that thresholding
- *          will still be done, but no visible error log committed.
- * @param   i_chip P8 chip
- * @param   i_sc   Step code data struct
- * @returns SUCCESS always
- */
-int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
-                                       STEP_CODE_DATA_STRUCT & i_sc )
-{
-    if ( i_sc.service_data->IsAtThreshold() )
-    {
-        i_sc.service_data->clearServiceCall();
-    }
-
-    return SUCCESS;
-}
-PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, ClearServiceCallFlag_mnfgInfo );
-PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, ClearServiceCallFlag_mnfgInfo );
-
-//------------------------------------------------------------------------------
 //                   PHB Plugins for IOPCIFIR_x
 //------------------------------------------------------------------------------
 

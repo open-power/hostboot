@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,8 +153,7 @@ public:
     PRDF_SDC_FLAG(DONT_SAVE_SDC,           0x80000)
     PRDF_SDC_FLAG(USING_SAVED_SDC,         0x40000)
     PRDF_SDC_FLAG(PROC_CORE_CS,            0x20000)
-    //(Note UNIT_CS is intentionally the same value as PROC_CORE_CS)
-    PRDF_SDC_FLAG(UNIT_CS,                 0x20000)
+    PRDF_SDC_FLAG(MEM_CHNL_FAIL,           0x10000)
     PRDF_SDC_FLAG(DONT_COMMIT_ERRL,        0x01000)
     PRDF_SDC_FLAG(DUMP,                    0x00800)
     PRDF_SDC_FLAG(UERE,                    0x00400)
@@ -703,11 +702,11 @@ public:
    */
   void SetTOE(Timer& theTime) { ivCurrentEventTime = theTime; }
 
-  /** Is a Proc Core CS flag on? */
-  bool IsProcCoreCS (void) const { return queryFlag(PROC_CORE_CS); }
+    void setProcCoreCS()      { return setFlag(  PROC_CORE_CS); }
+    bool isProcCoreCS() const { return queryFlag(PROC_CORE_CS); }
 
-  /** Is a Unit CS flag on? */
-  bool IsUnitCS (void) const { return queryFlag(UNIT_CS); }
+    void setMemChnlFail()      { return setFlag(  MEM_CHNL_FAIL); }
+    bool isMemChnlFail() const { return queryFlag(MEM_CHNL_FAIL); }
 
   /** Is a Using Saved SDC on? */
   bool IsUsingSavedSdc (void) const { return queryFlag(USING_SAVED_SDC); }
