@@ -108,7 +108,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // First, check if an error log should be committed. Note that there should
     // always be an error log if there was a system or unit checkstop.
     if ( io_sdc.queryDontCommitErrl() &&
-         MACHINE_CHECK != i_attnType && !io_sdc.IsUnitCS() )
+         MACHINE_CHECK != i_attnType &&
+         UNIT_CS != io_sdc.getSecondaryAttnType() )
     {
         // User did not want this error log committed. No need to continue. So
         // delete it and exit.
@@ -751,7 +752,8 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     o_pfa.TRACKIT             = i_sdc.IsMfgTracking()       ? 1 : 0;
     o_pfa.TERMINATE           = i_sdc.Terminate()           ? 1 : 0;
     o_pfa.LOGIT               = i_sdc.queryLogging()        ? 1 : 0;
-    o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()            ? 1 : 0;
+    o_pfa.MEM_CHNL_FAIL       = i_sdc.isMemChnlFail()       ? 1 : 0;
+    o_pfa.PROC_CORE_CS        = i_sdc.isProcCoreCS()        ? 1 : 0;
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc()     ? 1 : 0;
     o_pfa.DEFER_DECONFIG      = i_deferDeconfig             ? 1 : 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,12 +160,13 @@ struct PfaData
              TRACKIT              :1,
              TERMINATE            :1,
              LOGIT                :1,
-             UNIT_CHECKSTOP       :1,
+             MEM_CHNL_FAIL        :1,
+             PROC_CORE_CS         :1,
              USING_SAVED_SDC      :1,
              LAST_CORE_TERMINATE  :1,
              DEFER_DECONFIG       :1,
              SECONDARY_ERROR      :1,
-             Reserved             :18;
+             Reserved             :17;
 
     // Thresholding
     uint32_t errorCount :16, // Number of occurrences of this attention
@@ -210,12 +211,13 @@ struct PfaData
                     (i_right.TRACKIT              << 25) |
                     (i_right.TERMINATE            << 24) |
                     (i_right.LOGIT                << 23) |
-                    // FYI, two deprecated entries were removed. To make the
-                    // parser compatible with older or newer error logs, these
-                    // bits must remain a hole (i.e. it can be reused, but
+                    // FYI, one deprecated entry was removed. To make the
+                    // parser compatible with older or newer error logs, this
+                    // bit must remain a hole (i.e. it can be reused, but
                     // subsequent data must remain in the bit positions that
                     // they are currently in).
-                    (i_right.UNIT_CHECKSTOP       << 20) |
+                    (i_right.MEM_CHNL_FAIL        << 21) |
+                    (i_right.PROC_CORE_CS         << 20) |
                     (i_right.USING_SAVED_SDC      << 19) |
                     (i_right.LAST_CORE_TERMINATE  << 18) |
                     (i_right.DEFER_DECONFIG       << 17) |
@@ -264,11 +266,12 @@ struct PfaData
         i_right.TRACKIT             = (l_tmp[2] >> 25) & 0x01;
         i_right.TERMINATE           = (l_tmp[2] >> 24) & 0x01;
         i_right.LOGIT               = (l_tmp[2] >> 23) & 0x01;
-        // FYI, two deprecated entries were removed. To make the parser
-        // compatible with older or newer error logs, these bits must remain a
+        // FYI, one deprecated entry was removed. To make the parser
+        // compatible with older or newer error logs, this bit must remain a
         // hole (i.e. it can be reused, but subsequent data must remain in the
         // bit positions that they are currently in).
-        i_right.UNIT_CHECKSTOP      = (l_tmp[2] >> 20) & 0x01;
+        i_right.MEM_CHNL_FAIL       = (l_tmp[2] >> 21) & 0x01;
+        i_right.PROC_CORE_CS        = (l_tmp[2] >> 20) & 0x01;
         i_right.USING_SAVED_SDC     = (l_tmp[2] >> 19) & 0x01;
         i_right.LAST_CORE_TERMINATE = (l_tmp[2] >> 18) & 0x01;
         i_right.DEFER_DECONFIG      = (l_tmp[2] >> 17) & 0x01;
