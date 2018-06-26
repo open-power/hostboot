@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2017
+# Contributors Listed Below - COPYRIGHT 2010,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -59,7 +59,7 @@ OBJS += intmsghandler.o
 OBJS += deferred.o
 
 OBJS += shutdown.o
-OBJS += forceattn_p8.o
+OBJS += forceattn_p9.o
 OBJS += terminate.o
 OBJS += ipc.o
 OBJS += machchk.o

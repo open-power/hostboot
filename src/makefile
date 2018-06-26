@@ -72,7 +72,7 @@ BOOTLDR_OBJECTS += bl_pnorAccess.o
 BOOTLDR_OBJECTS += bl_pnor_utils.o
 BOOTLDR_OBJECTS += bl_pnor_ecc.o
 BOOTLDR_OBJECTS += bl_terminate.o
-BOOTLDR_OBJECTS += forceattn_p8.o
+BOOTLDR_OBJECTS += forceattn_p9.o
 BOOTLDR_OBJECTS += bl_string_utils.o
 BOOTLDR_OBJECTS += rom_entry.o
 
@@ -116,7 +116,7 @@ DIRECT_BOOT_OBJECTS += blockmsghdlr.o
 DIRECT_BOOT_OBJECTS += stacksegment.o
 DIRECT_BOOT_OBJECTS += softpatch_p8.o
 DIRECT_BOOT_OBJECTS += shutdown.o
-DIRECT_BOOT_OBJECTS += forceattn_p8.o
+DIRECT_BOOT_OBJECTS += forceattn_p9.o
 DIRECT_BOOT_OBJECTS += terminate.o
 DIRECT_BOOT_OBJECTS += ipc.o
 DIRECT_BOOT_OBJECTS += machchk.o
