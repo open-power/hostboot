@@ -67,16 +67,23 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
                        tpm_locality_t i_locality);
 
 /**
- * @brief Create an error log entry for potential logging
- * @param[in] i_modId Code Module ID
- * @param[in] i_reasonCode Error Reason Code
- * @param[in] i_user1 User data 1
- * @param[in] i_user2 User data 2
+ *  @brief Create an error log entry for potential logging
+ *
+ *  @param[in] i_modId Code Module ID
+ *  @param[in] i_reasonCode Error Reason Code
+ *  @param[in] i_user1 User data 1
+ *  @param[in] i_user2 User data 2
+ *  @param[in] i_addSwCallout Whether to add a high priority Hostboot software
+ *      callout to the error log or not (default: true)
+ *
+ *  @return errlHndl_t Handle to newly created error log
  */
-errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
-                             const uint16_t i_reasonCode,
-                             const uint64_t i_user1,
-                             const uint64_t i_user2);
+errlHndl_t tpmCreateErrorLog(
+    uint8_t  i_modId,
+    uint16_t i_reasonCode,
+    uint64_t i_user1,
+    uint64_t i_user2,
+    bool     i_addSwCallout = ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
 /**
  *  @brief Mark the TPM as non-functional and take required steps
