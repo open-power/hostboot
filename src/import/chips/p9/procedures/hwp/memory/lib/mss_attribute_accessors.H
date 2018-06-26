@@ -20758,8 +20758,8 @@ fapi_try_exit:
 /// @note  Row Repair Data for a DIMM target. Data for 4 master ranks * 32 bits per row
 /// repair Each row repair contains: -5 bits: DRAM position (x8: 0-9, x4: 0-19) -3
 /// bits: slave ranks (0-7) -2 bits: bank group (0-3) -3 bits: bank (0-7) -18 bits:
-/// row -1 bits:
-/// unused
+/// row -1 bits: repair validity (0: repair is invalid, 1: repair is
+/// valid)
 ///
 inline fapi2::ReturnCode row_repair_data(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_array)
 {
