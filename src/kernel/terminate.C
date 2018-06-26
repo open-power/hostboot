@@ -35,7 +35,7 @@
 #include <kernel/kernel_reasoncodes.H>
 #endif // BOOTLOADER
 
-extern "C" void p8_force_attn() NO_RETURN;
+extern "C" void p9_force_attn() NO_RETURN;
 
 
 #ifndef BOOTLOADER
@@ -55,7 +55,7 @@ HB_Descriptor kernel_hbDescriptor =
 void terminateExecuteTI()
 {
     // Call the function that actually executes the TI code.
-    p8_force_attn();
+    p9_force_attn();
 }
 
 #ifndef BOOTLOADER

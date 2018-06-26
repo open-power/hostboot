@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/kernel/forceattn_p8.S $
+# $Source: src/kernel/forceattn_p9.S $
 #
 # OpenPOWER HostBoot Project
 #
@@ -25,19 +25,23 @@
 .include "kernel/ppcconsts.S"
 
 
-.global p8_force_attn
-p8_force_attn:
-    li r0, 1
+.global p9_force_attn
+p9_force_attn:
+# Update HID0 to enable attentions
+    li r0, 3
     mfspr r9, HID0
-    insrdi r9,r0,1,3 	/* Turn on bit 3 */
+    rldimi r9,r0,60,2 /* Turn on bits 2 (flush icache) + 3 (enable attn) */
     sync
-    mtspr HID0,r9	/* Enable attentions */
+    mtspr HID0,r9 /* Enable attentions */
     mfspr r9, HID0
     mfspr r9, HID0
     mfspr r9, HID0
     mfspr r9, HID0
     mfspr r9, HID0
     mfspr r9, HID0
+    isync
+# Invoke attention instruction
+    sync
     isync
     rlwimi 31,31,0,4,22   /* MAGIC_SIMICS_SHUTDOWN */
     attn
