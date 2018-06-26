@@ -134,17 +134,17 @@ namespace TARGETING
                         ++l_node;
                     } // while
                 }
-                else // Single-node system
+                else // Single-node system, hb_images will be zero, but the
+                     // variable, i_instance, will be equal to the node id
+                     // of the only functional node in the system, and will
+                     // not always be node zero
                 {
-                    // Check if current node is the node of interest
-                    if(l_node == i_instance)
-                    {
-                        // Flag that input instance is a valid node
-                        l_validNode = true;
-                    }
+                    // Flag that input instance is a valid node
+                    l_validNode = true;
 
-                    // Replace maximum node ID
-                    io_maxNodeId = l_node;
+                    // Replace maximum node ID with
+                    // this nodes instance id
+                    io_maxNodeId = i_instance;
                 }
 
                 // Input instance is not a valid node
