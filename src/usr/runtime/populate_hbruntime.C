@@ -338,32 +338,29 @@ errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
 {
     errlHndl_t l_errl = nullptr;
 
-    //Get base HRMOR Base attribute
-    TARGETING::Target * pTgt = NULL;
-    TARGETING::targetService().getTopLevelTarget(pTgt);
-    assert(pTgt != NULL);
-    auto hrmor_base = pTgt->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+    // Start 256M HB addr space
+    uint64_t l_hbAddr = cpu_hrmor_nodal_base();
 
-    //get this hb instance
-    pTgt = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(pTgt);
-    auto epath = pTgt->getAttr<TARGETING::ATTR_PHYS_PATH>();
-    auto pe = epath.pathElementOfType(TARGETING::TYPE_NODE);
-    auto this_node = pe.instance;
+    // Address limits
+    uint64_t l_lowerLimit = HB_RES_MEM_LOWER_LIMIT + l_hbAddr;
+    uint64_t l_upperLimit = HB_RES_MEM_UPPER_LIMIT + l_hbAddr;
 
-    auto hrmor = hrmor_base * this_node;
+    TRACDCOMP(g_trac_runtime, "l_hbAddr 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
+              l_hbAddr, i_addr, l_lowerLimit);
+    TRACDCOMP(g_trac_runtime, "i_size = 0x%.16llX, l_upperLimit = 0x%.16llX",
+              i_size, l_upperLimit);
+
     // Only check if PHYP is running or if running in standalone.
     if(TARGETING::is_phyp_load() || TARGETING::is_no_load())
     {
-        if((i_addr < (HB_RES_MEM_LOWER_LIMIT + hrmor)) or
-           ((i_addr + i_size - 1) > (HB_RES_MEM_UPPER_LIMIT+hrmor)))
+        if( (i_addr < l_lowerLimit) ||
+            ((i_addr + i_size - 1) > l_upperLimit) )
         {
             TRACFCOMP(g_trac_runtime, "checkHbResMemLimit> Attempt to write"
             " to hostboot reserved memory outside of allowed hostboot address"
             " range. Start addresss - 0x%08x end address - 0x%08x;"
             " bottom limit - 0x%08x top limit - 0x%08x.",
-            i_addr, i_addr + i_size - 1,
-            HB_RES_MEM_LOWER_LIMIT, HB_RES_MEM_UPPER_LIMIT);
+            i_addr, i_addr + i_size - 1, l_lowerLimit, l_upperLimit);
 
             /*@
              * @errortype
@@ -3775,4 +3772,3 @@ errlHndl_t getRsvdMemTraceBuf(uint64_t& o_RsvdMemAddress, uint64_t& o_size)
 }
 
 } //namespace RUNTIME
-
