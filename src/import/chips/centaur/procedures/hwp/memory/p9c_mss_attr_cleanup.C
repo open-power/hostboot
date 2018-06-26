@@ -340,6 +340,30 @@ fapi2::ReturnCode set_spd_attributes( const fapi2::Target<fapi2::TARGET_TYPE_DIM
               "%s Failed to set ATTR_CEN_SPD_SDRAM_THERMAL_AND_REFRESH_OPTIONS", l_target_str_storage );
     FAPI_INF("%s Set ATTR_CEN_SPD_SDRAM_THERMAL_AND_REFRESH_OPTIONS 0x%02X ", l_target_str_storage, l_spd_byte1);
 
+    // SDRAM_OTHER_OPT_FEATURES = 9
+    l_spd_byte1 = i_spd[SDRAM_OTHER_OPT_FEATURES];
+    l_work_byte = (l_spd_byte1 >> 5) & 0x07; // bit 7-5
+
+    // Bits 7~6 (little endian order)
+    // 00: PPR not supported
+    // 01: Post package repair supported, one row per bank group
+    // 10: Reserved
+    // 11: Reserved
+
+    // Bit 5 - 0: sPPR not supported, 1: sPPR supported
+    if ( 0x03 == l_work_byte )
+    {
+        l_work2_byte = fapi2::ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED;
+    }
+    else
+    {
+        l_work2_byte = fapi2::ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_UNSUPPORTED;
+    }
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED, i_dimm, l_work2_byte),
+              "%s Failed to set ATTR_ROW_REPAIR_SPPR_SUPPORTED", l_target_str_storage );
+    FAPI_INF( "%s Set ATTR_ROW_REPAIR_SPPR_SUPPORTED 0x%02X ", l_target_str_storage, l_work2_byte );
+
     // MODULE_NOMINAL_VOLTAGE = 11
     l_spd_byte1 = i_spd[MODULE_NOMINAL_VOLTAGE];
     l_work_byte = l_spd_byte1 & 0x3;  // bits 1-0

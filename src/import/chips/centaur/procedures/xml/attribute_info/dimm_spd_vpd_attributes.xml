@@ -339,6 +339,19 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 
 <attribute>
+    <id>ATTR_ROW_REPAIR_SPPR_SUPPORTED</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+      True or false whether sPPR (soft post package row repair) is supported
+      Located in DDR4 SPD byte 9, bit 5 (bits 7-6 denote whether PPR in general
+      is supported)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>SUPPORTED = 1, UNSUPPORTED = 0</enum>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>ATTR_CEN_SPD_MODULE_THERMAL_SENSOR</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>

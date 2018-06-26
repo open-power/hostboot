@@ -701,13 +701,27 @@
           -2 bits:  bank group (0-3)
           -3 bits:  bank (0-7)
           -18 bits: row
-          -1 bits:  unused
+          -1 bits:  repair validity (0: repair is invalid, 1: repair is valid)
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <array>4 4</array>
         <mssAccessorName>row_repair_data</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ROW_REPAIR_SUPPORTED_MRW</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          True or false whether row repair is supported
+          MRW attribute
+        </description>
+        <valueType>uint8</valueType>
+        <enum>SUPPORTED = 1, UNSUPPORTED = 0</enum>
+        <platInit/>
+        <default>0</default>
+        <writeable/>
     </attribute>
 
 </attributes>
