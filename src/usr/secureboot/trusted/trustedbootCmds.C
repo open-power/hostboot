@@ -887,24 +887,39 @@ errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
 
         /*@
          * @errortype
-         * @reasoncode     RC_TPM_NVINDEX_VALIDATE_FAIL
-         * @severity       ERRL_SEV_UNRECOVERABLE
-         * @moduleid       MOD_TPM_CMD_GETCAPNVINDEX
-         * @userdata1[0:3] foundRSAEKCert
-         * @userdata1[4:7] foundECCEKCert
-         * @userdata1[8:11] foundPlatCert
-         * @userdata1[12:31] 0
-         * @userdata2[0:3] moreData
-         * @userdata2[4:31] 0
-         * @devdesc        Command failure reading TPM NV indexes.
-         * @custdesc       Failure detected in security subsystem
+         * @reasoncode       RC_TPM_NVINDEX_VALIDATE_FAIL
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_TPM_CMD_GETCAPNVINDEX
+         * @userdata1[0:7]   foundRSAEKCert
+         * @userdata1[7:15]  foundECCEKCert
+         * @userdata1[16:23] foundPlatCert
+         * @userdata1[24:31] moreData
+         * @userdata1[32:63] 0
+         * @devdesc          Command failure reading TPM NV indexes.
+         *                   TPM is likely provisioned incorrectly.
+         * @custdesc         Failure detected in security subsystem.
          */
-        err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPNVINDEX,
-                                RC_TPM_NVINDEX_VALIDATE_FAIL,
-                                (uint32_t)foundRSAEKCert << 28 |
-                                (uint32_t)foundECCEKCert << 14 |
-                                (uint32_t)foundPlatCert << 20,
-                                (uint32_t)moreData << 28);
+        err = tpmCreateErrorLog(
+            MOD_TPM_CMD_GETCAPNVINDEX,
+            RC_TPM_NVINDEX_VALIDATE_FAIL,
+            TWO_UINT32_TO_UINT64(
+                FOUR_UINT8_TO_UINT32(
+                    foundRSAEKCert,foundECCEKCert,
+                    foundPlatCert,moreData),
+                0),
+            0,
+            ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+        // Likely a TPM provisioning issue
+        err->addHwCallout(io_target,
+                          HWAS::SRCI_PRIORITY_HIGH,
+                          HWAS::NO_DECONFIG,
+                          HWAS::GARD_NULL);
+
+        // Small chance HB code failed to check the provisoning
+        // correctly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
     }
 
     TRACDCOMP( g_trac_trustedboot,
