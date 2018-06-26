@@ -1445,7 +1445,7 @@ uint32_t TpsEvent<TYPE_MBA>::analyzeCeStats( STEP_CODE_DATA_STRUCT & io_sc,
             if ( targetCm.isValid() )
             {
                 // Use the DRAM with the highest total count.
-                chipMark = MemMark ( trgt, iv_rank, targetCm.getSymbol() );
+                chipMark = MemMark ( trgt, iv_rank, targetCm );
                 o_rc = MarkStore::writeChipMark<TYPE_MBA>( iv_chip, iv_rank,
                                                            chipMark );
                 if ( SUCCESS != o_rc )
