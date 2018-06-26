@@ -313,8 +313,7 @@ errlHndl_t IntrRp::_init()
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
     assert(sys != NULL);
-    uint64_t hrmor_base =
-        sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
+    uint64_t hrmor_base = cpu_hrmor_nodal_base();
 
     KernelIpc::ipc_data_area.pir = iv_masterCpu.word;
     KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
