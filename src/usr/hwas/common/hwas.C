@@ -3402,7 +3402,8 @@ errlHndl_t validateProcessorEcLevels()
         getAllChips(l_procChips, TYPE_PROC);
 
         // check for functional Master Proc on this node
-        l_err = targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+        l_err = targetService().queryMasterProcChipTargetHandle(l_pMasterProc,
+                                                                NULL, true);
 
         //queryMasterProcChipTargetHandle will check for null, make sure
         //there was no problem finding the master proc
