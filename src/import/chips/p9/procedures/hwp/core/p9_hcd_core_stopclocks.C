@@ -181,6 +181,16 @@ p9_hcd_core_stopclocks(
             }
 
 #endif
+
+            //if a core is only in special wakeup and asserting pm_exit,
+            //then setting 6,7 of SICR will cause pm_exit to drop and
+            //the core will re-enter a power saving state
+            FAPI_DBG("Prevent Core-L2 Quiesce from removing PM_EXIT CME_SCOM_LMCR[22]");
+            FAPI_TRY(putScom(l_quad,
+                             (l_attr_chip_unit_pos < 2) ?
+                             EX_0_CME_SCOM_LMCR_OR : EX_1_CME_SCOM_LMCR_OR,
+                             (BIT64(22))));
+
             FAPI_DBG("Assert Core-L2/CC Quiesces via CME_SCOM_SICR[6,8]/[7,9]");
             FAPI_TRY(putScom(l_quad,
                              (l_attr_chip_unit_pos < 2) ?
