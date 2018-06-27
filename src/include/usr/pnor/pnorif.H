@@ -81,6 +81,25 @@ errlHndl_t getSideInfo (SideId i_side, SideInfo_t& o_info);
 errlHndl_t getSectionInfo( SectionId i_section,
                            SectionInfo_t& o_info );
 
+#ifndef __HOSTBOOT_RUNTIME
+/**
+ *  @brief Returns whether requested section is available or not
+ *
+ *  @par Detailed Description:
+ *      Returns whether requested section is available or not.  Resource
+ *      provider must be functional, section ID must be valid, section must
+ *      not be inhibited by secure boot, and section must exist in the PNOR
+ *      to be considered available.
+ *
+ *  @param[in] i_section PNOR section to check for availability
+ *
+ *  @return boolean Whether section is available or not
+ *  @retval true Section is available
+ *  @retval false Section is not available
+ */
+bool isSectionAvailable(PNOR::SectionId i_section);
+#endif
+
 #ifdef CONFIG_SECUREBOOT
 /**
  *  @brief Loads requested PNOR section to secure virtual address space

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -78,6 +78,25 @@ class PnorRP
      */
     errlHndl_t getSectionInfo( PNOR::SectionId i_section,
                                PNOR::SectionInfo_t& o_info );
+
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     *  @brief Returns whether requested section is available or not
+     *
+     *  @par Detailed Description:
+     *      Returns whether requested section is available or not.  Resource
+     *      provider must be functional, section ID must be valid, section must
+     *      not be inhibited by secure boot, and section must exist in the PNOR
+     *      to be considered available.
+     *
+     *  @param[in] i_section PNOR section to check for availability
+     *
+     *  @return boolean Whether section is available or not
+     *  @retval true Section is available
+     *  @retval false Section is not available
+     */
+    bool isSectionAvailable(PNOR::SectionId i_section);
+#endif
 
     /**
      * @brief  Clears the specified PNOR section with all FF's (w/ good ECC)
