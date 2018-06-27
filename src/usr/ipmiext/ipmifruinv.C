@@ -1048,7 +1048,7 @@ errlHndl_t systemFwIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
 errlHndl_t systemFwIpmiFruInv::buildProductInfoArea(std::vector<uint8_t>
                                                                        &io_data)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr, l_errl_version = nullptr;
 
     do {
         //Set formatting data that goes at the beginning of the record
@@ -1062,6 +1062,16 @@ errlHndl_t systemFwIpmiFruInv::buildProductInfoArea(std::vector<uint8_t>
         io_data.insert( io_data.end(),
                     &l_data[0],
                     &l_data[0] + (uint8_t(sizeof(l_data) / sizeof(uint8_t))));
+
+#ifdef CONFIG_SECUREBOOT
+        l_errl_version = PNOR::loadSecureSection(PNOR::VERSION);
+        if (l_errl_version)
+        {
+            TRACFCOMP(g_trac_ipmi,
+                    "buildProductInfoArea: Failed to load secure VERSION");
+            break;
+        }
+#endif
 
         //Get PNOR Version Here
         PNOR::SectionInfo_t l_pnorInfo;
@@ -1193,6 +1203,40 @@ errlHndl_t systemFwIpmiFruInv::buildProductInfoArea(std::vector<uint8_t>
         io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
 
     } while(0);
+
+#ifdef CONFIG_SECUREBOOT
+    if (l_errl_version == nullptr)
+    {
+        l_errl_version = unloadSecureSection(PNOR::VERSION);
+        if (l_errl_version)
+        {
+            TRACFCOMP(g_trac_ipmi,
+                    "buildProductInfoArea: Failed to unload secure VERSION");
+            if (l_errl)
+            {
+                errlCommit(l_errl_version, IPMI_COMP_ID);
+            }
+            else
+            {
+                l_errl = l_errl_version;
+                l_errl_version = nullptr;
+            }
+        }
+    }
+    else
+    {
+        if (l_errl)
+        {
+            errlCommit(l_errl_version, IPMI_COMP_ID);
+        }
+        else
+        {
+            l_errl = l_errl_version;
+            l_errl_version = nullptr;
+        }
+    }
+#endif
+
 
     //Finalize section formatting
     postFormatProcessing(io_data);
