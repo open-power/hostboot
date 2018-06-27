@@ -212,7 +212,7 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
         FAPI_DBG("p9_query_mssinfo: Current mirror_policy=%u!\n", mirror_policy);
 
 
-        if (l_mirrorEnabled == 1)
+        if (l_mirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
         {
             // ATTR_PROC_MIRROR_SIZES
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_SIZES, i_vect_pu_targets[i], mirror_sizes),
@@ -303,7 +303,8 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
         // Print out memory reservations
         //------------------------------------------------------------------------------------------------------------------------
         if(((mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL ) ||
-            (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)    ) && (l_mirrorEnabled == 1) )
+            (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)    )
+           && (l_mirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE) )
         {
             // ATTR_PROC_NHTM_BAR_BASE_ADDR: Get Nest Hardware Trace Macro (NHTM) bar base addr
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_BASE_ADDR, i_vect_pu_targets[i], nhtm_base),
