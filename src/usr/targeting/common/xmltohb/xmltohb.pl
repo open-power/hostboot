@@ -204,11 +204,19 @@ if ($cfgFapiAttributesXmlFile ne "")
 }
 
 my @nonSyncAttributes = {};
+my @fspAccesCheck = {};
 if ($nonSyncAttribFile ne "")
 {
-    my $nsa = $xml->XMLin($nonSyncAttribFile,
-       KeyAttr => 'id', ForceArray=>1);
-    @nonSyncAttributes = values %$nsa;
+    my $nsa = $xml->XMLin($nonSyncAttribFile, ForceArray=>['attribute']);
+    foreach my $attr (@{$nsa->{attribute}})
+    {
+        my $attrName = $attr->{id};
+        if (!defined($attr->{fspaccess_nosync}))
+        {
+            push(@fspAccesCheck, $attrName);
+        }
+        push(@nonSyncAttributes, $attrName);
+    }
 }
 
 # save attributes defined as Target_t type
@@ -2501,7 +2509,7 @@ sub writeTraitFileTraits {
             $traits .= " notFspMutex,";
         }
 
-        if (!($attribute->{id} ~~ @nonSyncAttributes))
+        if (!($attribute->{id} ~~ @fspAccesCheck))
         {
             $traits .= " fspAccessible,";
         }
