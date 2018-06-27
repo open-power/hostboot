@@ -67,22 +67,26 @@ class PreVerifiedLidMgr
                                    const size_t i_size);
 
     /**
-     * @brief Load PNOR section into HB reserved memory
+     * @brief Load LID into HB reserved memory
      *
-     * @param[in] i_sec - PNOR section ID
-     * @param[in] i_addr - Virtual Address of PNOR section
-     * @param[in] i_size - Size of PNOR section
-     * @param[in] i_isPhypComp - Indicates if PHYP lids
-     *                           NOTE: PHYP lids go to address HRMOR - 4K
-     * @param[out] o_resvMemAddr - Mainstore address Lid was put in
+     * @param[in] i_lidId ID of LID to load
+     * @param[in] i_addr Virtual address of LID data
+     * @param[in] i_size Size of LID data
+     * @param[in] i_isPhypComp Whether LID is part of the PHyp component
+     *     NOTE: PHYP LIDs (other than signature LID) will be loaded to
+     *     an area anchored at PHyp's HRMOR
+     * @param[in] i_firstLid Whether this is the first LID of a component
+     * @param[out] o_resvMemAddr Mainstore address LID was loaded to
      *
-     * @return Error handle if error
+     * @return errlHndl_t Error log handle on failure, else nullptr
      */
-    static errlHndl_t loadFromMCL(const uint32_t i_lidId,
-                                  const uint64_t i_addr,
-                                  const size_t i_size,
-                                  const bool i_isPhypComp,
-                                  uint64_t &o_resvMemAddr);
+    static errlHndl_t loadFromMCL(
+        uint32_t  i_lidId,
+        uint64_t  i_addr,
+        size_t    i_size,
+        bool      i_isPhypComp,
+        bool      i_firstLid,
+        uint64_t& o_resvMemAddr);
 
   protected:
 
@@ -127,11 +131,13 @@ class PreVerifiedLidMgr
     /**
      * @brief Internal implementation of loadFromMCL function.
      */
-    errlHndl_t _loadFromMCL(const uint32_t i_lidId,
-                            const uint64_t i_addr,
-                            const size_t i_size,
-                            const bool i_isPhypComp,
-                            uint64_t &o_resvMemAddr);
+    errlHndl_t _loadFromMCL(
+        uint32_t  i_lidId,
+        uint64_t  i_addr,
+        size_t    i_size,
+        bool      i_isPhypComp,
+        bool      i_firstLid,
+        uint64_t& o_resvMemAddr);
 
     // Private Members/Variables
 

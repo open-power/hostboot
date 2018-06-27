@@ -39,6 +39,7 @@
 #include <secureboot/containerheader.H>
 #include <runtime/common/runtime_utils.H>
 #include <runtime/runtime_reasoncodes.H>
+#include <util/utilmclmgr.H>
 
 extern trace_desc_t *g_trac_runtime;
 
@@ -81,17 +82,22 @@ errlHndl_t PreVerifiedLidMgr::loadFromPnor(const PNOR::SectionId i_sec,
                                                                   i_size);
 }
 
-errlHndl_t PreVerifiedLidMgr::loadFromMCL(const uint32_t i_lidId,
-                                          const uint64_t i_addr,
-                                          const size_t i_size,
-                                          const bool i_isPhypComp,
-                                          uint64_t &o_resvMemAddr)
+errlHndl_t PreVerifiedLidMgr::loadFromMCL(
+    const uint32_t  i_lidId,
+    const uint64_t  i_addr,
+    const size_t    i_size,
+    const bool      i_isPhypComp,
+    const bool      i_firstLid,
+          uint64_t& o_resvMemAddr)
 {
-    return Singleton<PreVerifiedLidMgr>::instance()._loadFromMCL(i_lidId,
-                                                                  i_addr,
-                                                                  i_size,
-                                                                  i_isPhypComp,
-                                                                  o_resvMemAddr);
+    return Singleton<PreVerifiedLidMgr>::instance().
+        _loadFromMCL(
+            i_lidId,
+            i_addr,
+            i_size,
+            i_isPhypComp,
+            i_firstLid,
+            o_resvMemAddr);
 }
 
 /********************
@@ -113,15 +119,15 @@ void PreVerifiedLidMgr::_initLock(const uint64_t i_prevAddr,
 
     // PHYP Reserved Memory Information
     cv_phypResvMemInfo.rangeId = i_rangeId;
-    // PHYP lids loaded at HRMOR - 4K (Header)
+    // PHYP lids loaded at HRMOR
     // Get Target Service, and the system target.
     TARGETING::Target* l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
     assert(l_sys!=nullptr,"Top Level Target is nullptr");
     cv_phypResvMemInfo.curAddr = (l_sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>()
-                                 * MEGABYTE) - PAGE_SIZE;
+                                 * MEGABYTE);
 
-    // PHYP should be placed starting exactly at HRMOR - 4K, so make prevSize 0
+    // PHYP should be placed starting exactly at HRMOR, so make prevSize 0
     cv_phypResvMemInfo.prevSize = 0;
 
     // Refer to default reserved memory
@@ -342,11 +348,13 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     return l_errl;
 }
 
-errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
-                                           const uint64_t i_addr,
-                                           const size_t i_size,
-                                           const bool i_isPhypComp,
-                                           uint64_t &o_resvMemAddr)
+errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
+    const uint32_t  i_lidId,
+    const uint64_t  i_addr,
+    const size_t    i_size,
+    const bool      i_isPhypComp,
+    const bool      i_firstLid,
+          uint64_t& o_resvMemAddr)
 {
     mutex_lock(&cv_loadImageMutex);
 
@@ -359,7 +367,8 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
     errlHndl_t l_errl = nullptr;
 
     // Switch to Different Memory Info for PHYP component
-    if (i_isPhypComp)
+    // Exception: put the PHyp signature LID in the normal reserved memory area
+    if (i_isPhypComp && !i_firstLid)
     {
         cv_pResvMemInfo = &cv_phypResvMemInfo;
     }
@@ -402,16 +411,25 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
 
         // Phyp component has already been loaded and verified before MCL mgr
         // Simply update HB reserved prev size in Phyp component case
-        if (i_isPhypComp)
+        // Special case: If it's the PHyp signature LID, handle below
+        if (i_isPhypComp && !i_firstLid)
         {
-            // align previous size to page size to ensure starting addresses are
-            // page aligned.
+            // align previous size to page size to ensure starting addresses
+            // are page aligned.
             cv_pResvMemInfo->prevSize = ALIGN_PAGE(i_size);
         }
         else
         {
             // Load image into HB reserved memory
-            l_errl = loadImage(i_addr, i_size);
+            // Special case: If it's the PHyp signature LID, pull the
+            // data from the cached PHyp header, instead of the
+            // scratch area
+            uint64_t addr = (i_isPhypComp && i_firstLid) ?
+                reinterpret_cast<uint64_t>(
+                    const_cast<uint8_t*>(
+                        ::MCL::MasterContainerLidMgr::getPhypHeader()))
+                : i_addr;
+            l_errl = loadImage(addr, i_size);
             if(l_errl)
             {
                 TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
