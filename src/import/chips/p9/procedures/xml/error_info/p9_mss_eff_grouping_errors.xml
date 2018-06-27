@@ -32,7 +32,7 @@
     <description>
         Mirroring is disabled but Mirror placement policy is flipped.
         Firmware error.
-        - ATTR_MRW_HW_MIRRORING_ENABLE is true
+        - ATTR_MRW_HW_MIRRORING_ENABLE is not false
         - ATTR_MEM_MIRROR_PLACEMENT_POLICY is FLIPPED
     </description>
     <ffdc>MRW_HW_MIRRORING_ENABLE</ffdc>
@@ -58,13 +58,14 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC</rc>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP</rc>
     <description>
-        p9_mss_eff_grouping is unable to group this MCA/DMI port.
-        This is a memory plugging error. Refer to memory plugging rules.
+        p9_mss_eff_grouping is unable to group at least one
+        MCA/DMI port on this chip, based on the specified
+	memory interleaving and mirroring rules.
+        This is a memory plugging error.
+	Refer to memory plugging rules.
     </description>
-    <ffdc>MC_PORT</ffdc>
-    <ffdc>MC_PORT_SIZE</ffdc>
     <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
@@ -72,8 +73,30 @@
     </callout>
     <callout>
         <procedure>CODE</procedure>
-        <priority>MEDIUM</priority>
+        <priority>LOW</priority>
     </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM</rc>
+    <description>
+        p9_mss_eff_grouping is unable to group this DIMM
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MC_PORT</ffdc>
+    <ffdc>MC_PORT_SIZE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
 </hwpError>
 
 <hwpError>
