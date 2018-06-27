@@ -276,6 +276,14 @@ namespace HTMGT
 
 
             /**
+             * @brief Returns a bit vector representing aggregate WOF
+             *        resets reasons
+             *
+             * @return WOF Reset reason bit vector
+             */
+            uint32_t getWofResetReasons() { return iv_wofResetReasons; }
+
+            /**
              * @brief Return OCCs present bits
              *
              * @return bitmask representing this OCC position
@@ -385,6 +393,8 @@ namespace HTMGT
             bool            iv_needsWofReset;
             // WOF reset count
             uint8_t         iv_wofResetCount;
+            // WOF reset reason. Aggregate across all WOF resets until cleared.
+            uint32_t        iv_wofResetReasons;
             // true if OCC failed
             bool            iv_failed;
             // Sequence number of last/current OCC command
@@ -604,6 +614,16 @@ namespace HTMGT
              */
             static void getOccData(uint16_t & o_length, uint8_t *o_data);
 
+            /**
+             * @brief Collect WOF reset reasons for ALL OCCs
+             *
+             * @param[out] o_length Length of data returned in o_data
+             * @param[out] o_data   Buffer containing all OCCs 32-bit
+             *                      WOF reset reason vector preceded by
+             *                      their instanceId
+             */
+            static void getWOFResetReasons(uint16_t & o_length,
+                                           uint8_t * o_data);
 
             /**
              * @brief Load specified pstate tables for all OCCs.
@@ -770,6 +790,9 @@ namespace HTMGT
 
             /** See getOccData() above */
             void _getOccData(uint16_t & o_length, uint8_t *o_data);
+
+            /** See getWOFResetReasons above */
+            void _getWOFResetReasons(uint16_t & o_length, uint8_t *o_data);
 
             /** See loadPstates() above */
             errlHndl_t _loadPstates(bool i_normalPstates);

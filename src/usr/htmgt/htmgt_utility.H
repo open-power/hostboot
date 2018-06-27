@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,7 @@ namespace HTMGT
         //HOLD for future need.  PASSTHRU_QUERY_MODE_FUNCTION    = 0x07,
         PASSTHRU_ENA_DIS_OPAL_STATE     = 0x08,
         PASSTHRU_SET_OCC_STATE          = 0x09,
+        PASSTHRU_WOF_RESET_REASONS      = 0x0A,
         PASSTHRU_OCC_CFG_DATA           = 0x0C,
     };
 
