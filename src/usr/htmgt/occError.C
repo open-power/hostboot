@@ -109,6 +109,11 @@ namespace HTMGT
 
             TMGT_BIN("OCC ELOG", l_occElog, 256);
 
+
+            // Get user details section
+            const occErrlUsrDtls_t *l_usrDtls_ptr = (occErrlUsrDtls_t *)
+                ((uint8_t*)l_occElog + sizeof(occErrlEntry_t));
+
             const uint32_t l_occSrc = OCCC_COMP_ID | l_occElog->reasonCode;
             ERRORLOG::errlSeverity_t severity =
                 ERRORLOG::ERRL_SEV_INFORMATIONAL;
@@ -130,13 +135,27 @@ namespace HTMGT
             bool l_occReset = false;
             elogProcessActions(l_occElog->actions, l_occReset, severity);
 
+
+
+            // Need to add WOF reason code to OCC object regardless of
+            // whether WOF resets are disabled.
+            if( l_occElog->actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED )
+            {
+                iv_wofResetReasons |= l_usrDtls_ptr->userData1;
+                TMGT_ERR("WOF Reset Reasons for OCC%d = 0x%08x",
+                        iv_instance,
+                        iv_wofResetReasons);
+
+            }
+
             // Check if we need a WOF requested reset
             if(iv_needsWofReset == true)
             {
                 TMGT_ERR("WOF Reset detected! SRC = 0x%X",
                         l_occSrc);
+
                 // We compare against one less than the threshold because
-                // the WOF reset count doesnt get incremented until resetPrep
+                // the WOF reset count doesn't get incremented until resetPrep
                 if( iv_wofResetCount < (WOF_RESET_COUNT_THRESHOLD-1) )
                 {
                     // Not at WOF reset threshold yet. Set sev to INFO
@@ -156,8 +175,6 @@ namespace HTMGT
             //       srcs which have similar uniqueness
             // NOTE: SRC tags are NOT required here as these logs will get
             //       parsed with the OCC src tags
-            const occErrlUsrDtls_t *l_usrDtls_ptr = (occErrlUsrDtls_t *)
-                ((uint8_t*)l_occElog + sizeof(occErrlEntry_t));
             bldErrLog(l_errlHndl,
                       (htmgtModuleId)(l_usrDtls_ptr->modId & 0x00FF),
                       (htmgtReasonCode)l_occSrc, // occ reason code

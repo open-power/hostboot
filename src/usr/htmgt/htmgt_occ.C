@@ -60,6 +60,7 @@ namespace HTMGT
         iv_needsReset(false),
         iv_needsWofReset(false),
         iv_wofResetCount(0),
+        iv_wofResetReasons(0),
         iv_failed(false),
         iv_seqNumber(0),
         iv_homer(i_homer),
@@ -1336,7 +1337,7 @@ namespace HTMGT
             (0 == safeMode))
         {
             // Make sure OCCs were built first (so data is valid)
-            errlHndl_t err = _buildOccs(); // if not a already built.
+            errlHndl_t err = _buildOccs(); // if not already built.
             if (err)
             {
                 TMGT_ERR("_getOccData: failed to build OCC structures "
@@ -1395,6 +1396,35 @@ namespace HTMGT
 
         o_length = index;
     }
+
+    // Get WOF Reset reasons for all OCCs
+    // NOTE: Data returned is of the form [ 1-byte ID | 4-byte bit vector]
+    //       per OCC instance found
+    void OccManager::_getWOFResetReasons(uint16_t & o_length,
+                                         uint8_t * o_data)
+    {
+        uint16_t index = 0;
+
+        // Make sure OCCs were built first (so data is valid)
+        errlHndl_t l_err = _buildOccs(); // if not already built.
+        if( l_err )
+        {
+            TMGT_ERR("_getWOFResetReasons: Failed to build OCC structures "
+                     "rc=0x%04X", l_err->reasonCode());
+            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+        }
+
+        // Iterate through OCC objects to get bit vectors.
+        for( const auto & occ : iv_occArray )
+        {
+            o_data[index++] = occ->getInstance();
+            UINT32_PUT(&o_data[index], occ->getWofResetReasons());
+            index += 4;
+        }
+
+        o_length = index;
+    }
+
 
 
     // Set default pstate table type and reset all OCCs to pick them up
@@ -1456,36 +1486,39 @@ namespace HTMGT
         {
             sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode);
         }
-
         for( const auto & occ : iv_occArray )
         {
-            if (occ->iv_resetCount != 0)
+            if ( occ->iv_resetCount != 0 )
             {
                 TMGT_INF("_clearResetCounts: Clearing OCC%d reset count "
                          "(was %d)",
                          occ->getInstance(),
                          occ->iv_resetCount);
                 occ->iv_resetCount = 0;
-                if (safeMode)
-                {
-                    // Clear OCC flags (failed, commEstablished, etc)
-                    occ->postResetClear();
-                }
             }
 
-            if(occ->iv_wofResetCount != 0)
+            if( occ->iv_wofResetCount != 0 )
             {
                 occ->iv_wofResetCount = 0;
                 TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset count "
                          "( was %d)",
                          occ->getInstance(),
                          occ->iv_wofResetCount);
-                if(safeMode)
-                {
-                    // Clear OCC flags
-                    occ->postResetClear();
-                }
             }
+
+            if( occ->iv_wofResetReasons != 0 )
+            {
+                TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset reasons "
+                         "( was 0x%08x)",
+                         occ->getInstance(),
+                         occ->iv_wofResetReasons );
+            }
+            if( safeMode )
+            {
+                // Clear OCC flags (failed, commEstablished, etc)
+                occ->postResetClear();
+            }
+
         }
 
         if (iv_sysResetCount != 0)
@@ -1582,6 +1615,12 @@ namespace HTMGT
     void OccManager::getOccData(uint16_t & o_length, uint8_t *o_data)
     {
         Singleton<OccManager>::instance()._getOccData(o_length, o_data);
+    }
+
+    void OccManager::getWOFResetReasons(uint16_t & o_length, uint8_t * o_data)
+    {
+        Singleton<OccManager>::instance()._getWOFResetReasons(o_length,
+                                                              o_data);
     }
 
     errlHndl_t OccManager::loadPstates(bool i_normalPstates)
