@@ -175,7 +175,11 @@ p9_query_core_access_state(
             FAPI_TRY(fapi2::getScom(i_target, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
 
             l_data64.extractToRight<uint8_t>(c_exec_hasclocks, 6, 1);
+            // Inverted logic in the HW
+            c_exec_hasclocks = !c_exec_hasclocks;
             l_data64.extractToRight<uint8_t>(c_pc_hasclocks,   5, 1);
+            // Inverted logic in the HW
+            c_pc_hasclocks = !c_pc_hasclocks;
         }
         else
         {
