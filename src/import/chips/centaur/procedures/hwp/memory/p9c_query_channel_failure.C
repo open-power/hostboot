@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9c_query_channel_failure.C
-/// @brief Query IOMCFIRS and CHIFIRS for an active attention that is
+/// @brief Query CHIFIRS for an active attention that is
 ///        configured to channel failure
 ///
 
@@ -42,14 +42,7 @@
 #include <p9c_query_channel_failure.H>
 #include <generic/memory/lib/utils/c_str.H>
 
-// How many DMIs are allowed on MC
-constexpr uint32_t DMI_TARGETS_PER_MC = 4;
-
 // SCOM registers needed for channel failure checking
-// MC target register addresses
-constexpr uint64_t SCOM_IOMCFIR_ADDR = 0x07011000ull;
-constexpr uint64_t SCOM_MODE_PB_ADDR = 0x07011020ull;
-
 // DMI target register addresses
 constexpr uint64_t SCOM_CHIFIR_ADDR =  0x07010900ull;
 constexpr uint64_t SCOM_MCICFG0_ADDR = 0x0701090Aull;
@@ -141,60 +134,15 @@ fapi2::ReturnCode p9c_query_channel_failure(
     o_failed = false;
 
     // storage for register data
-    fapi2::buffer<uint64_t> l_iomcfir_data;
-    fapi2::buffer<uint64_t> l_scom_mode_pb_data;
     fapi2::buffer<uint64_t> l_chifir_data;
     fapi2::buffer<uint64_t> l_mcicfg1_data;
     fapi2::buffer<uint64_t> l_mcicfg0_data;
 
     do
     {
-        // IOMCFIR
-        //   - These FIRs exist on the MC targets.
-        //   Each FIR characterizes the four DMI targets attached to the MC
-        //  (DMI 0: bits 8-15,  DMI 1: bits 16-23,
-        //   DMI 2: bits 24-31, DMI 3: bits 32-39).
-        // - Each logical byte within that FIR is configured with
-        //   SCOM_MODE_PB[15:22].
-        // - So all that we need to do is AND the eight bits for the target DMI
-        //   in the IOMCFIR with the eight bits from SCOM_MODE_PB. If the value
-        //   is non-zero, there was a channel failure.
-
-        // get the MC target from the child DMI
-        const auto& l_mc_tgt = i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
-
-        FAPI_TRY(fapi2::getScom(l_mc_tgt, SCOM_IOMCFIR_ADDR, l_iomcfir_data),
-                 "Error from getScom (IOMCFIR Register)");
-
-        FAPI_TRY(fapi2::getScom(l_mc_tgt, SCOM_MODE_PB_ADDR, l_scom_mode_pb_data),
-                 "Error from getScom (SCOM_MODE_PB Register)");
-
-
-        // Calculate the starting index based on relative DMI target position
-        // DMI 0: 8, DMI 1: 16, DMI 2: 24, DMI 3: 32
-        uint32_t l_pos = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_tgt, l_pos));
-        uint32_t l_iomcfir_idx = ((l_pos % DMI_TARGETS_PER_MC) + 1) * 8;
-
-        uint8_t l_firData_byte = 0x00;
-        uint8_t l_modePB_byte  = 0x00;
-
-        // extract logical byte within the FIR based on DMI relative position
-        FAPI_TRY( l_iomcfir_data.extract(l_firData_byte, l_iomcfir_idx, 8),
-                  " Error grabbing IOMCFIR buffer" );
-
-        // extract configuration byte at SCOM_MOD_PB[15:22]
-        l_scom_mode_pb_data.extract<15, 8>(l_modePB_byte);
-
-        // check for channel failure(s) in configured byte
-        if ((l_firData_byte & l_modePB_byte) != 0)
-        {
-            FAPI_INF("Found channel failure in IOMCFIR (0x%02X & 0x%02X) "
-                     "of %s target", l_firData_byte, l_modePB_byte,
-                     mss::c_str(l_mc_tgt));
-            o_failed = true;
-            break;  // Found a channel failure, no need to keep looking for one
-        }
+        // No longer need to check IOMCFIR and SCOM_MODE_PB since
+        // any IOMCFIR bit configured for channel fail will turn on CHIFIR[4]
+        // which is checked below (FIR_DMI_CHANNEL_FAIL_BIT)
 
         ////////////////////////////////////////////////////////////////
         // Check for channel failures using CHIFIR of the DMI target
