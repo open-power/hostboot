@@ -314,6 +314,12 @@ errlHndl_t verifyAndMovePayload(void)
         }
     }
 
+    if(is_phyp)
+    {
+        MCL::MasterContainerLidMgr::cachePhypHeader(
+            reinterpret_cast<uint8_t*>(payload_tmp_virt_addr));
+    }
+
     // Extend PAYLOAD
     l_err = MCL::MasterContainerLidMgr::tpmExtend(l_compId, l_conHdr);
     if (l_err)
@@ -335,20 +341,12 @@ errlHndl_t verifyAndMovePayload(void)
 
     payloadBase = payloadBase * MEGABYTE;
 
-    if (is_phyp)
-    {
-        // Put header before PAYLOAD_BASE for PHYP/POWERVM
-        payloadBase -= PAGESIZE;
-    }
-    else
-    {
-        // Move virtual address past OPAL header for memcpy below
-        payload_tmp_virt_addr = reinterpret_cast<void*>(
-                                  reinterpret_cast<uint64_t>(
-                                    payload_tmp_virt_addr) +
-                                    PAGESIZE);
-        payload_size -= PAGESIZE;
-    }
+    // Move virtual address past payload header for memcpy below
+    payload_tmp_virt_addr = reinterpret_cast<void*>(
+                              reinterpret_cast<uint64_t>(
+                                payload_tmp_virt_addr) +
+                                PAGESIZE);
+    payload_size -= PAGESIZE;
 
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
@@ -376,9 +374,7 @@ errlHndl_t verifyAndMovePayload(void)
             payload_tmp_virt_addr,
             payload_size);
 
-    // Convert the move payloadBase_va to after secure header for PHYP
     uint64_t payloadBase_va = reinterpret_cast<uint64_t>(payloadBase_virt_addr);
-    payloadBase_va += (is_phyp ? PAGESIZE : 0 );
 
     // Move HDAT into its proper place after it was temporarily put into
     // HDAT_TMP_ADDR-relative-to-HRMOR (HDAT_TMP_SIZE) by the FSP via TCEs
@@ -436,13 +432,6 @@ errlHndl_t verifyAndMovePayload(void)
                               true /*Add HB SW Callout*/);
         l_err ->collectTrace("ISTEPS_TRACE",256);
         break;
-    }
-
-    // PHYP images require adding 1 PAGESIZE since our virtual address starts
-    // at the secure header of PAYLOAD before PAYLOAD_BASE
-    if (is_phyp)
-    {
-        hdat_cpy_offset += PAGESIZE;
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

@@ -39,6 +39,8 @@
 namespace MCL
 {
 
+uint8_t MasterContainerLidMgr::cv_pPhypHeader[PAGESIZE] = {0};
+
 const size_t MclCompSectionPadSize = 16;
 
 const ComponentID g_MclCompId {"MSTCONT"};
@@ -506,6 +508,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
                                                     l_curAddr,
                                                     lidInfo.size,
                                                     isPhypComp,
+                                                    l_firstLid,
                                                     l_addr);
             if(l_errl)
             {

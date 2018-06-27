@@ -31,6 +31,7 @@
 #include <errl/errlentry.H>
 #include <usr/vmmconst.h>
 #include <securerom/ROM.H>
+#include <limits.h>
 
 // Forward declarations
 class MasterContainerLidMgrTest;
@@ -267,6 +268,30 @@ class MasterContainerLidMgr
     static errlHndl_t tpmExtend(const ComponentID& i_compId,
                                 const SECUREBOOT::ContainerHeader& i_conHdr);
 
+    /**
+     *  @brief Caches a copy of the PHyp secure header
+     *
+     *  @param[in] i_pHeader Pointer to PHyp secure header;
+     *      Must not be nullptr or API will assert.  Input header must be
+     *      exactly PAGESIZE bytes
+     */
+    static void cachePhypHeader(const uint8_t* i_pHeader)
+    {
+        assert(i_pHeader != nullptr,
+            "Bug! PHyp header pointer was nullptr");
+        memcpy(cv_pPhypHeader,i_pHeader,PAGESIZE);
+    }
+
+    /**
+     *  @brief Returns pointer to the cached PHyp secure header
+     *
+     *  @return const uint8_t* Pointer to cached Phyp secure header
+     */
+    static const uint8_t* getPhypHeader()
+    {
+        return cv_pPhypHeader;
+    };
+
     protected:
 
     /**
@@ -402,6 +427,9 @@ class MasterContainerLidMgr
 
     // Cache current comp id string for easy tracing
     CompIdString iv_curCompIdStr;
+
+    // Cached PHyp header
+    static uint8_t cv_pPhypHeader[PAGE_SIZE];
 
     // Allow test cases to call custom constructors and have direct access
     friend class ::MasterContainerLidMgrTest;

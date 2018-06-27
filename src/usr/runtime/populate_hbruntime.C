@@ -92,9 +92,8 @@ const uint8_t BITS_PER_BYTE = 8;
 
 const uint8_t HDAT_INVALID_NODE = 0xFF;
 // The upper limit of the hostboot reserved memory. Only applies to PHYP.
-// The lower limit is Hostboot HRMOR + 64MB; 4KB is the PHYP component's
-// secure header.
-const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE - 4*KILOBYTE;
+// The lower limit is Hostboot HRMOR + 64MB;
+const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE;
 
 // The lower limit of the hostboot reserved memory. Do not allow to reserve
 // any memory below this limit.
