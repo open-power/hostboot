@@ -727,6 +727,14 @@ namespace HTMGT
                         }
                         break;
 
+
+
+                    case PASSTHRU_WOF_RESET_REASONS:
+                        TMGT_INF("passThruCommand: Query WOF Reset Reasons");
+                        OccManager::getWOFResetReasons(o_rspLength, o_rspData);
+                        break;
+
+
                     case PASSTHRU_OCC_CFG_DATA:
                         if (i_cmdLength == 3)
                         {
