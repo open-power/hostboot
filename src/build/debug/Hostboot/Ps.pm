@@ -100,7 +100,7 @@ sub displayStackTrace
     my $vmmQuiet = 1;
 
     use constant FRAME_TO_LR_OFFSET => 16;
-    use constant MAX_STACK_FRAMES => 25;
+    use constant MAX_STACK_FRAMES => 35;
 
     # Read in the task struct, which mirrors struct task_t in Hostboot
     # d prefix means "display", i.e. "dstack_ptr" is the display version of
