@@ -377,7 +377,8 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == WOFDATA ||
                i_section == MEMD ||
                i_section == CAPP ||
-               i_section == TESTLOAD;
+               i_section == TESTLOAD ||
+               i_section == VERSION;
     #endif
 #else
     return false;

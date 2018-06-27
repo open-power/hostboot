@@ -48,6 +48,7 @@
 #include <errl/errludattribute.H>
 #include <errl/errludstate.H>
 #include <trace/interface.H>
+#include <config.h>
 
 #include "../trace/entry.H"
 #include <util/align.H>
@@ -667,16 +668,21 @@ void ErrlEntry::addHbBuildId()
 
 void ErrlEntry::addVersionInfo()
 {
+
+// Start of IPL only block; runtime does not support secure loading of
+// partitions
+#ifndef __HOSTBOOT_RUNTIME
+
     // Version section of PNOR is only available to OpenPOWER systems.
-    if (!INITSERVICE::spBaseServicesEnabled())
+    if (   !INITSERVICE::spBaseServicesEnabled()
+        && PNOR::isSectionAvailable(PNOR::VERSION))
     {
-        //TODO: CQ:SW416159 Uncomment when merged
-        // bool l_secureSectionLoaded = false;
-        errlHndl_t l_errl = nullptr/*, l_errl_loadSecureSection = nullptr*/;
+        bool l_secureSectionLoaded = false;
+        errlHndl_t l_errl = nullptr, l_errl_loadSecureSection = nullptr;
 
         do
         {
-/* TODO: CQ:SW416159 Uncomment when merged
+
 #ifdef CONFIG_SECUREBOOT
             l_errl_loadSecureSection = PNOR::loadSecureSection(PNOR::VERSION);
             if (l_errl_loadSecureSection)
@@ -698,7 +704,7 @@ void ErrlEntry::addVersionInfo()
                 l_secureSectionLoaded = true;
             }
 #endif
-*/
+
             // Get PNOR Version
             PNOR::SectionInfo_t l_pnorVersionInfo;
             l_errl = getSectionInfo(PNOR::VERSION, l_pnorVersionInfo);
@@ -737,7 +743,6 @@ void ErrlEntry::addVersionInfo()
             ErrlUserDetailsString(l_pVersionString).addToLog(this);
         } while(0);
 
-/* TODO: CQ:SW416159 Uncomment when merged
 #ifdef CONFIG_SECUREBOOT
         if (l_secureSectionLoaded)
         {
@@ -757,8 +762,10 @@ void ErrlEntry::addVersionInfo()
             }
         }
 #endif
-*/
+
     }
+
+#endif // End of IPL only block
 
 }
 

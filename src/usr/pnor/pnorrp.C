@@ -96,6 +96,14 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 }
 
 /**
+ * @brief Returns whether a given section is available or not
+ */
+bool PNOR::isSectionAvailable(const PNOR::SectionId i_section)
+{
+    return Singleton<PnorRP>::instance().isSectionAvailable(i_section);
+}
+
+/**
  * @brief  Clear pnor section
  */
 errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
@@ -392,6 +400,23 @@ errlHndl_t PnorRP::getSideInfo( PNOR::SideId i_side,
         }
     } while (0);
     return l_err;
+}
+
+/**
+ *  @brief Returns whether a given section is available or not
+ */
+bool PnorRP::isSectionAvailable(const PNOR::SectionId i_section)
+{
+    bool available = false;
+    uint64_t rc = 0;
+    if(   (!didStartupFail(rc))
+       && (i_section < PNOR::NUM_SECTIONS)
+       && (!isInhibitedSection(i_section))
+       && (iv_TOC[i_section].size != 0))
+    {
+        available = true;
+    }
+    return available;
 }
 
 /**
