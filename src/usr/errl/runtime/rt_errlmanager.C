@@ -36,6 +36,7 @@
 #include <targeting/common/targetservice.H>
 #include <pnor/pnorif.H>
 #include <hwas/common/deconfigGard.H>
+#include <initservice/initserviceif.H> // spBaseServiceEnabled()
 
 namespace ERRORLOG
 {
@@ -357,27 +358,33 @@ bool rt_processCallout(errlHndl_t &io_errl,
 
     }
 
-    if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
-        (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
+    // Gard callouts are handled by the HWSV if there is an FSP
+    // if we attempt to create a gard record it requires us to read
+    // PNOR which we cannot do on FSP based machines
+    if(!INITSERVICE::spBaseServicesEnabled())
     {
-            TARGETING::Target *pTarget = NULL;
-            uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
-            bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
+        if ((pCalloutUD->type == HWAS::HW_CALLOUT) &&
+            (pCalloutUD->gardErrorType != HWAS::GARD_NULL))
+        {
+                TARGETING::Target *pTarget = NULL;
+                uint8_t * l_uData = (uint8_t *)(pCalloutUD + 1);
+                bool l_err = HWAS::retrieveTarget(l_uData, pTarget, io_errl);
 
-            if (!l_err)
-            {
-                errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord
-                       (pTarget,
-                        io_errl->eid(),
-                        pCalloutUD->gardErrorType);
-                if (errl)
+                if (!l_err)
                 {
-                    TRACFCOMP( g_trac_errl, ERR_MRK
-                        "rt_processCallout: error from platCreateGardRecord");
-                    errlCommit(errl, HWAS_COMP_ID);
+                    errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord
+                        (pTarget,
+                            io_errl->eid(),
+                            pCalloutUD->gardErrorType);
+                    if (errl)
+                    {
+                        TRACFCOMP( g_trac_errl, ERR_MRK
+                            "rt_processCallout: error from platCreateGardRecord");
+                        errlCommit(errl, HWAS_COMP_ID);
+                    }
                 }
-            }
 
+        }
     }
     return true;
 }
