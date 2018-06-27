@@ -203,13 +203,33 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
              "Error getting ATTR_MSS_INTERLEAVE_ENABLE, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
+    // derate requested interleave options based on hardware workarounds/
+    // restrictions or mirroring requirements
+
+    // 1. Disallow 6-way/3-way interleave to prevent overflow of 512 GB
+    // footprint with 7 of 8 max-sized DIMMs present
     if (l_hw423589_option2)
     {
-        // Disallow 6-way/3-way interleave to prevent overflow of 512 GB
-        // footprint with 7 of 8 max-sized DIMMs present
         FAPI_INF("Groups of 6 & 3 are not allowed with HW423589 option2");
         iv_groupsAllowed &= ~GROUP_6;
         iv_groupsAllowed &= ~GROUP_3;
+    }
+
+    // 2. HW423110 - Disallow 6-way interleave if mirroring is desired
+    if (iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
+    {
+        FAPI_INF("Group of 6 is not allowed with Mirroring");
+        iv_groupsAllowed &= ~GROUP_6;
+    }
+
+    // 3. SW433435 - Disallow 3-way/1-way interleave if all channels are required
+    //    to be mirrored.  2-way cross port interleaving is also prohibited
+    //    in this case, but is handled in grouping_group2PortsPerGroup()
+    if (iv_hwMirrorEnabled == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
+    {
+        FAPI_INF("Groups of 3 & 1 are not allowed with Mirroring Required");
+        iv_groupsAllowed &= ~GROUP_3;
+        iv_groupsAllowed &= ~GROUP_1;
     }
 
     // Display attribute values
@@ -911,7 +931,7 @@ void EffGroupingBaseSizeData::setBaseSizeData(
     }
 
     // Process mirrored ranges
-    if (i_sysAttrs.iv_hwMirrorEnabled)
+    if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
     {
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
@@ -1334,7 +1354,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
              (uint64_t)fapi2::current_err);
 
     // Mirror mode attribute setting
-    if (i_sysAttrs.iv_hwMirrorEnabled)
+    if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
     {
 
         // Set ATTR_PROC_MIRROR_BASES
@@ -1395,7 +1415,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
              iv_occ_sandbox_base, iv_occ_sandbox_base >> 30);
 
     // Display mirror mode attribute values
-    if (i_sysAttrs.iv_hwMirrorEnabled)
+    if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
     {
         for (uint8_t ii = 0; ii < NUM_MIRROR_REGIONS; ii++)
         {
@@ -1469,7 +1489,7 @@ fapi2::ReturnCode grouping_checkValidAttributes(
     FAPI_DBG("Entering");
 
     // If mirror is disabled, then can not be in FLIPPED mode
-    if (!i_sysAttrs.iv_hwMirrorEnabled)
+    if (i_sysAttrs.iv_hwMirrorEnabled == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
     {
         FAPI_ASSERT(i_sysAttrs.iv_selectiveMode !=
                     fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED,
@@ -2307,11 +2327,14 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
 ///  - iv_portGrouped[<group>]
 ///  - iv_numGroups
 ///
-///  @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
-///  @param[out] o_groupData Reference to output data
+///  @param[in]  i_memInfo            Reference to EffGroupingMemInfo structure
+///  @param[out] o_groupData          Reference to output data
+///  @param[in]  i_disallow_cross_mcs Disallow grouping of ports which are not
+///                                   in the same MCS
 ///
 void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
-                                  EffGroupingData& o_groupData)
+                                  EffGroupingData& o_groupData,
+                                  const bool& i_disallow_cross_mcs)
 {
     FAPI_DBG("Entering");
     FAPI_INF("grouping_group2PortsPerGroup: Attempting to group 2 MC ports");
@@ -2321,6 +2344,12 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 
     // 1. Try to group 2 ports that are in the same MCS (highest priority)
     grouping_2ports_same_MCS(i_memInfo, o_groupData);
+
+    // do not permit cross-MCS grouping
+    if (i_disallow_cross_mcs)
+    {
+        goto fapi_try_exit;
+    }
 
     // 2. Try two groups of 2 on cross-MCS
     grouping_2groupsOf2_cross_MCS(i_memInfo, o_groupData);
@@ -2426,6 +2455,7 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
     }
 
+fapi_try_exit:
     FAPI_DBG("Exiting");
     return;
 }
@@ -2478,13 +2508,132 @@ void grouping_group1PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
     return;
 }
 
+/// @brief Callout DIMM attached to ungrouped port, appends
+/// MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM to input return code
+///
+/// Ensure any ungrouped DIMMs are called out for deconfiguration
+///
+/// @param[in] i_dimm_target   Target identifying DIMM attached to ungrouped port
+/// @param[in] i_port_target   Target identifying with ungrouped port
+/// @param[in] i_portIndex     Port number associated with target
+/// @param[in] i_portSize      Size associated with this port
+/// @param[in] o_rc            Return code object to be appended
+///
+/// @return void
+///
+template<fapi2::TargetType T>
+void calloutDIMM(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target,
+    const fapi2::Target<T>& i_port_target,
+    const uint8_t i_portIndex,
+    const uint64_t i_portSize,
+    fapi2::ReturnCode& o_rc)
+{
+    FAPI_DBG("Start");
+
+    char l_dimm_target_string[fapi2::MAX_ECMD_STRING_LEN];
+    char l_port_target_string[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString(i_dimm_target, l_dimm_target_string, fapi2::MAX_ECMD_STRING_LEN);
+    fapi2::toString(i_port_target, l_port_target_string, fapi2::MAX_ECMD_STRING_LEN);
+
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm_target = i_dimm_target;
+    fapi2::ffdc_t DIMM_TARGET;
+    fapi2::Target<T> l_port_target = i_port_target;
+    fapi2::ffdc_t PORT_TARGET;
+    uint8_t l_portIndex = i_portIndex;
+    fapi2::ffdc_t MC_PORT;
+    uint64_t l_portSize = i_portSize;
+    fapi2::ffdc_t MC_PORT_SIZE;
+
+    DIMM_TARGET.ptr() = static_cast<void*>(&l_dimm_target);
+    DIMM_TARGET.size() = sizeof(l_dimm_target);
+    PORT_TARGET.ptr() = static_cast<void*>(&l_port_target);
+    PORT_TARGET.size() = sizeof(l_port_target);
+    MC_PORT.ptr() = static_cast<void*>(&l_portIndex);
+    MC_PORT.size() = sizeof(l_portIndex);
+    MC_PORT_SIZE.ptr() = static_cast<void*>(&l_portSize);
+    MC_PORT_SIZE.size() = sizeof(l_portSize);
+
+    FAPI_ERR("Unable to group port %s, calling out DIMM: %s",
+             l_port_target_string, l_dimm_target_string);
+    FAPI_ADD_INFO_TO_HWP_ERROR(o_rc, RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM);
+    FAPI_DBG("End");
+    return;
+}
+
+/// @brief Determine set of DIMM targets attached to channel target
+///        (MCA/DMI)
+/// @tparam T template paramter, passed in target
+/// @param[in]  i_target          Channel target (of type T)
+/// @param[out] o_dimm_targets    Set of attached DIMM targets
+///
+/// @return void
+///
+template<fapi2::TargetType T>
+void getAttachedDimms(
+    const fapi2::Target<T>& i_target,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets);
+
+/// template specialization for MCA target type
+template <>
+void getAttachedDimms(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
+{
+    o_dimm_targets = i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+}
+
+/// template specialization for DMI target type
+template <>
+void getAttachedDimms(
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
+{
+    // determine attached Centaur chip
+    for (auto l_cen_target : i_target.template getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+    {
+        // get set of valid MBAs
+        for (auto l_mba_target : l_cen_target.template getChildren<fapi2::TARGET_TYPE_MBA>())
+        {
+            // DIMMs are children of MBAs
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets_on_this_mba;
+            l_dimm_targets_on_this_mba = l_mba_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+            o_dimm_targets.insert(o_dimm_targets.end(),
+                                  l_dimm_targets_on_this_mba.begin(),
+                                  l_dimm_targets_on_this_mba.end());
+        }
+    }
+}
+
+
+/// @brief Utility function to generate base return code for ungrouped port
+///        error reporting
+///
+/// @param[in[ i_maxRegionSize Maximum group/region size
+///
+/// @return MSS_EFF_GROUPING_UNABLE_TO_GROUP
+///
+fapi2::ReturnCode emitUnableToGroupError(
+    const uint64_t& i_region_size)
+{
+    FAPI_DBG("Start");
+
+    FAPI_ASSERT(false,
+                fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP()
+                .set_MAX_REGION_SIZE(i_region_size),
+                "Unable to group all ports on this chip");
+fapi_try_exit:
+    FAPI_DBG("Exiting");
+    return fapi2::current_err;
+}
+
+
 ///
 /// @brief Finds ungrouped ports
 ///
-/// If any are found then their associated Memory Controller (MCA/DMI)
-//  will be deconfigured
+/// If any are found then their associated DIMMs will be deconfigured
 ///
-/// @param[in] i_mcChiplets  Reference to MC targets (MCA or DMI)
+/// @param[in] i_target      Reference to processor chip target
 /// @param[in] i_memInfo     Reference to Memory Info
 /// @param[in] i_groupData   Reference to Group data
 ///
@@ -2492,24 +2641,24 @@ void grouping_group1PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 ///
 template<fapi2::TargetType T>
 fapi2::ReturnCode grouping_findUngroupedPorts(
-    const std::vector< fapi2::Target<T> >& i_mcTargets,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const EffGroupingMemInfo& i_memInfo,
     const EffGroupingData& i_groupData)
 {
     FAPI_DBG("Entering");
 
-    // std_pair<MC number, target>
-    std::map<uint8_t, fapi2::Target<T>> l_unGroupedPair;
+    std::vector<fapi2::Target<T>> l_mcTargets = i_target.getChildren<T>();
+    bool l_all_grouped = true;
 
-    // Mark the MCs that are not grouped
-    for (uint8_t ii = 0; ii < NUM_MC_PORTS_PER_PROC; ii++)
+    // determine if any ports are not grouped
+    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC) && l_all_grouped; ii++)
     {
-        if ( (i_memInfo.iv_portSize[ii] != 0) &&
-             (i_groupData.iv_portGrouped[ii] == false) )
+        if ((i_memInfo.iv_portSize[ii] != 0) &&
+            (i_groupData.iv_portGrouped[ii] == false))
         {
             FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
 
-            for (auto l_mc : i_mcTargets)
+            for (auto l_mc : l_mcTargets)
             {
                 // Get the MCA position
                 uint8_t l_unitPos = 0;
@@ -2517,27 +2666,58 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
                          "Error getting MCA ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
                          (uint64_t)fapi2::current_err);
 
+                // found an ungrouped port
                 if (l_unitPos == ii)
                 {
-                    l_unGroupedPair.insert(std::pair<uint8_t, fapi2::Target<T>>
-                                           (ii, l_mc));
+                    l_all_grouped = false;
                     break;
                 }
             }
         }
     }
 
-    // There are some ungrouped MC ports
-    if (l_unGroupedPair.size() > 0)
+    // assert if there are any ungrouped ports on this chip
+    if (!l_all_grouped)
     {
-        // Assert with first failed port as FFDC
-        uint8_t l_mcPortNum = l_unGroupedPair.begin()->first;
-        FAPI_ASSERT(false,
-                    fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC()
-                    .set_MC_PORT(l_mcPortNum)
-                    .set_MC_PORT_SIZE(i_memInfo.iv_portSize[l_mcPortNum])
-                    .set_MAX_REGION_SIZE(i_memInfo.iv_maxGroupMemSize),
-                    "grouping_findUngroupedPorts: Unable to group port %u", l_mcPortNum);
+        // create base HWP error
+        fapi2::ReturnCode l_rc;
+        l_rc = emitUnableToGroupError(i_memInfo.iv_maxGroupMemSize);
+
+        // rerun loop and append error for each DIMM which is associated with an
+        // ungrouped port
+        for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii++)
+        {
+            if ((i_memInfo.iv_portSize[ii] != 0) &&
+                (i_groupData.iv_portGrouped[ii] == false))
+            {
+                FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
+
+                for (auto l_mc : l_mcTargets)
+                {
+                    // Get the MCA position
+                    uint8_t l_unitPos = 0;
+                    (void) FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc, l_unitPos);
+
+                    // for each ungrouped port, commit an error for each downstream DIMM
+                    if (l_unitPos == ii)
+                    {
+                        std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets;
+                        getAttachedDimms(l_mc, l_dimm_targets);
+
+                        for (const auto& l_dimm_target : l_dimm_targets)
+                        {
+                            calloutDIMM(l_dimm_target,
+                                        l_mc,
+                                        ii,
+                                        i_memInfo.iv_portSize[ii],
+                                        l_rc);
+                        }
+                    }
+                }
+            }
+        }
+
+        fapi2::current_err = l_rc;
     }
 
 fapi_try_exit:
@@ -2687,7 +2867,7 @@ void grouping_sortGroups(EffGroupingData& io_groupData)
 ///
 ///        Mirror group is created when these conditions are all met:
 ///           - Processor is Cumulus
-///           - ATTR_MRW_HW_MIRRORING_ENABLE = true
+///           - ATTR_MRW_HW_MIRRORING_ENABLE != false
 ///           - Number of MC ports is 2, 4, 6, or 8 and 2 ports are in the same
 ///             MCS/MI port pair (see MCFGP(1:4) programming in MC workbook)
 ///
@@ -2708,7 +2888,8 @@ void setupMirrorGroup(
     auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
 
     // No mirroring if Nimbus or ATTR_MRW_HW_MIRRORING_ENABLE is off
-    if ( (l_miChiplets.size() == 0) || (!i_sysAttrs.iv_hwMirrorEnabled) )
+    if ( (l_miChiplets.size() == 0) ||
+         (i_sysAttrs.iv_hwMirrorEnabled == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE) )
     {
         FAPI_INF("setupMirrorGroup: No mirror group - Num MI chiplets %d, "
                  "ATTR_MRW_HW_MIRRORING_ENABLE = %d",
@@ -3104,7 +3285,7 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
     }
 
     // Display mirror groups
-    if (i_sysAttrs.iv_hwMirrorEnabled)
+    if (i_sysAttrs.iv_hwMirrorEnabled != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
     {
         for (uint8_t ii = 0; ii < i_groupData.iv_numGroups; ii++)
         {
@@ -3203,17 +3384,7 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_6)
     {
-        // HW423110 - If mirror (i.e. Cumulus and mirror is enabled)
-        // then do not allow Group of 6
-        if ( (l_memInfo.iv_nimbusProc == false) &&
-             (l_sysAttrs.iv_hwMirrorEnabled) )
-        {
-            FAPI_INF("Group of 6 is not allowed on Cumulus with Mirror enabled");
-        }
-        else
-        {
-            grouping_group6PortsPerGroup(l_memInfo, l_groupData);
-        }
+        grouping_group6PortsPerGroup(l_memInfo, l_groupData);
     }
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_4)
@@ -3228,7 +3399,10 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_2)
     {
-        grouping_group2PortsPerGroup(l_memInfo, l_groupData);
+        grouping_group2PortsPerGroup(
+            l_memInfo,
+            l_groupData,
+            (l_sysAttrs.iv_hwMirrorEnabled == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE));
     }
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_1)
@@ -3239,15 +3413,13 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     // Verify all ports are grouped, or error out
     if (l_memInfo.iv_nimbusProc == true)
     {
-        auto l_mcaChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
-        FAPI_TRY(grouping_findUngroupedPorts(l_mcaChiplets, l_memInfo, l_groupData),
+        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_MCA>(i_target, l_memInfo, l_groupData),
                  "grouping_findUngroupedPorts() returns an error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }
     else
     {
-        auto l_dmiChiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
-        FAPI_TRY(grouping_findUngroupedPorts(l_dmiChiplets, l_memInfo, l_groupData),
+        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_DMI>(i_target, l_memInfo, l_groupData),
                  "grouping_findUngroupedPorts() returns an error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }

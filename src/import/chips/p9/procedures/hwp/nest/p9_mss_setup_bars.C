@@ -1027,9 +1027,9 @@ fapi2::ReturnCode buildMCBarData(
             // ---------------------------------------------------------------
             // Set MC register values for mirror groups
             //   - Nimbus:  No mirror
-            //   - Cumulus: If ATTR_MRW_HW_MIRRORING_ENABLE = true
+            //   - Cumulus: If ATTR_MRW_HW_MIRRORING_ENABLE != false
             // ---------------------------------------------------------------
-            if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
+            if (l_mirror_ctl != fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE)
             {
                 FAPI_INF("ATTR_MRW_HW_MIRRORING_ENABLE is enabled: checking mirrored groups");
                 mcPortGroupInfo_t l_portInfoMirrored[MAX_MC_PORTS_PER_MCS];
