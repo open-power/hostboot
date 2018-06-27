@@ -84,6 +84,28 @@ bool getTarget (TARGETING::ATTR_MEMVPD_POS_type       i_memVpdPos,
    return l_rc;
 }
 
+// true if NIMBUS, false if CUMULUS
+bool isNimbusModel(void)
+{
+    FAPI_DBG("isNimbusModel enter");
+
+    bool isNimbus = false;
+    TARGETING::TargetHandleList l_chipList;
+    TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+
+    fapi2::Target<TARGET_TYPE_PROC_CHIP> l_fapi2_procTarget(l_chipList[0]);
+
+    if(TARGETING::MODEL_NIMBUS ==
+                    l_chipList[0]->getAttr<TARGETING::ATTR_MODEL>())
+    {
+        isNimbus = true;
+    }
+
+    FAPI_DBG("isNimbusModel exit");
+
+    return isNimbus;
+}
+
 //Common code for calling getVPD
 ReturnCode testGetVPD(
         fapi2::Target<fapi2::TARGET_TYPE_MCS>  i_fapiTarget,
@@ -190,6 +212,15 @@ void testDecode_MR(void)
 
     do
     {
+
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         // get a MCS fapi2 target for MEMVPD_POS 0
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 0;
 
@@ -197,10 +228,9 @@ void testDecode_MR(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testDecode_MR:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testDecode_MR:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
@@ -300,6 +330,14 @@ void testDecode_MT(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         // get a MCS fapi2 target for MEMVPD_POS 7
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 7;
 
@@ -307,10 +345,9 @@ void testDecode_MT(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testDecode_MT:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testDecode_MT:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
@@ -380,6 +417,14 @@ void testGetVPD_MR(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         // get a MCS fapi2 target for MEMVPD_POS 0
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 0;
 
@@ -387,10 +432,9 @@ void testGetVPD_MR(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testGetVPD_MR:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testGetVPD_MR:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
@@ -430,6 +474,14 @@ void testGetVPD_MT(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         // get a MCS fapi2 target for MEMVPD_POS 7
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 7;
 
@@ -437,10 +489,9 @@ void testGetVPD_MT(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testGetVPD_MT:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testGetVPD_MT:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
@@ -484,6 +535,14 @@ void testGetVPD_Override(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         // get a MCS fapi2 target for MEMVPD_POS 4
         numMTTests++;
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 4;
@@ -491,10 +550,9 @@ void testGetVPD_Override(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testGetVPD_Overrides:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numMTFails++;
+            TS_FAIL  ("testGetVPD_Overrides:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numMTFails++;
             break; //Target not found
         }
 
@@ -655,6 +713,14 @@ void testGetVPD_DQ(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         numTests++; // find MCS MEMVPD_POS
         // get a MCS fapi2 target for MEMVPD_POS 0
         TARGETING::ATTR_MEMVPD_POS_type l_memVpdPos = 0;
@@ -663,10 +729,9 @@ void testGetVPD_DQ(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
@@ -702,6 +767,14 @@ void testGetVPD_CK(void)
 
     do
     {
+        // Checking the model of the machine. If we're not on a nimbus machine,
+        // we don't want to run this test.
+        if(!isNimbusModel())
+        {
+            TS_INFO("testDecode_MR: Not on a nimbus machine, skipping test.");
+            break;
+        }
+
         numTests++;   // find MCS MEMVPD_POS
 
         // get a MCS fapi2 target for MEMVPD_POS 0
@@ -711,10 +784,9 @@ void testGetVPD_CK(void)
         TARGETING::Target * l_target;
         if(!getTarget(l_memVpdPos,l_target,l_fapiTarget))
         {
-            // @todo RTC 178802 Enable test cases turned off during bring up
-            //TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
-            //         l_memVpdPos);
-            //numFails++;
+            TS_FAIL  ("testGetVPD_DQ:: could not find MCS MEMVPD_POS=%d",
+                     l_memVpdPos);
+            numFails++;
             break; //Target not found
         }
 
