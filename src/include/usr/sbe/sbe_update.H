@@ -541,6 +541,18 @@ namespace SBE
                    const uint64_t i_boundary,
                    uint8_t* o_dst);
 
+    /**
+    * @brief Read the version of code found on each of the SBE's seeproms
+    *        and store values in sbeTargetState_t type
+    *
+    * @param[in]  io_sbeState Struct holding SBE related information
+    * @pre        it is expected that the member 'target' in the
+    *             sbeTargetState_t struct is set prior to calling this function
+    *
+    * @return errlHndl_t if error, nullptr if no error
+    */
+    errlHndl_t getSeepromVersions(sbeTargetState_t& io_sbeState);
+
 
     /**
      * @brief Removes ECC from a block of code or data.  Removes padding at

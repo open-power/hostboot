@@ -1861,6 +1861,168 @@ namespace SBE
         return  l_errl;
     }
 
+    errlHndl_t getSeepromVersions(sbeTargetState_t& io_sbeState)
+    {
+        errlHndl_t l_err = nullptr;
+        bool l_sbeSupportedSeepromReadOp = true;
+        bool l_errFoundDuringChipOp = false;
+
+        //Make sure that io_sbeState had valid information
+        assert(io_sbeState.target != NULL, "target member variable not set on io_sbeState");
+        do
+        {
+            //Get Current (boot) Side
+            sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
+            l_err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                          "determining which seeprom we booted on. Exiting function");
+                break;
+            }
+            bool l_sideZeroActive = (tmp_cur_side == SBE_SEEPROM0);
+            /*******************************************/
+            /*  Get SEEPROM 0 SBE Version Information  */
+            /*******************************************/
+
+            // If the current seeprom is side 0 then attempt read via chipOp
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
+            if (l_sideZeroActive &&
+                !Util::isSimicsRunning())
+            {
+                l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
+                                            io_sbeState.seeprom_0_ver,
+                                            l_sbeSupportedSeepromReadOp);
+
+                if(l_err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
+                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETPLID_SAFE(l_err));
+                    //Commit error as informational and attempt reading via i2c
+                    l_errFoundDuringChipOp = true;
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_err->collectTrace(SBE_COMP_NAME, 256);
+                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( l_err, SBEIO_COMP_ID );
+                }
+                else if(!l_sbeSupportedSeepromReadOp)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                    "getting SBE Information from SEEPROM 0 (Primary) via ChipOp. The "
+                    "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
+                }
+                else
+                {
+                    TRACDBIN(g_trac_sbe, "getSeepromVersions found via ChipOp -spA",
+                            &(io_sbeState.seeprom_0_ver),
+                            sizeof(sbeSeepromVersionInfo_t));
+                }
+            }
+
+            //If side 0 is not active or there was an error trying to read
+            //the primary via chipOp, then try reading via I2C
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
+            if(!l_sideZeroActive || !l_sbeSupportedSeepromReadOp ||
+                l_errFoundDuringChipOp || Util::isSimicsRunning())
+            {
+
+                l_err = getSeepromSideVersionViaI2c(io_sbeState.target,
+                                            EEPROM::SBE_PRIMARY,
+                                            io_sbeState.seeprom_0_ver,
+                                            io_sbeState.seeprom_0_ver_ECC_fail);
+
+                if(l_err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via I2C, "
+                            "RC=0x%X, PLID=0x%lX",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETPLID_SAFE(l_err));
+                    break;
+                }
+
+                TRACDBIN(g_trac_sbe, "getSeepromVersions found via I2C -spA",
+                        &(io_sbeState.seeprom_0_ver),
+                        sizeof(sbeSeepromVersionInfo_t));
+            }
+
+
+            /*******************************************/
+            /*  Get SEEPROM 1 SBE Version Information  */
+            /*******************************************/
+
+            //If side 1 is active, then attempt read via chipOp
+            //Note that there is no reason to attempt chipOp on backup if it failed
+            //on the primary.
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
+            if (!l_sideZeroActive && l_sbeSupportedSeepromReadOp &&
+                !l_errFoundDuringChipOp && !Util::isSimicsRunning() )
+            {
+                l_err = getSeepromSideVersionViaChipOp(io_sbeState.target,
+                                                    io_sbeState.seeprom_1_ver,
+                                                    l_sbeSupportedSeepromReadOp);
+
+                if(l_err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via Chipop, "
+                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETPLID_SAFE(l_err));
+                    //Commit error as informational and attempt reading via i2c
+                    l_errFoundDuringChipOp = true;
+                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_err->collectTrace(SBE_COMP_NAME, 256);
+                    l_err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( l_err, SBEIO_COMP_ID );
+                }
+                else if(!l_sbeSupportedSeepromReadOp)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                                "getting SBE Information from SEEPROM 1 (Backup) via ChipOp. The "
+                                "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
+                }
+                else
+                {
+                    TRACDBIN(g_trac_sbe, "getSeepromVersions found via Chipop -spB",
+                            &(io_sbeState.seeprom_1_ver),
+                            sizeof(sbeSeepromVersionInfo_t));
+                }
+            }
+
+            //If side 1 is not active, or there was an error trying to read
+            //the primary via chipOp, then try reading via I2C
+            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
+            if(l_sideZeroActive || !l_sbeSupportedSeepromReadOp ||
+                l_errFoundDuringChipOp || Util::isSimicsRunning() )
+            {
+                l_err = getSeepromSideVersionViaI2c(io_sbeState.target,
+                                            EEPROM::SBE_BACKUP,
+                                            io_sbeState.seeprom_1_ver,
+                                            io_sbeState.seeprom_1_ver_ECC_fail);
+
+                if(l_err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromVersions() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via I2C, "
+                            "RC=0x%X, PLID=0x%lX",
+                            ERRL_GETRC_SAFE(l_err),
+                            ERRL_GETPLID_SAFE(l_err));
+                    break;
+                }
+
+                TRACDBIN(g_trac_sbe, "getSeepromVersions-spB found via I2C",
+                        &(io_sbeState.seeprom_1_ver),
+                        sizeof(sbeSeepromVersionInfo_t));
+            }
+        }while(0);
+
+        return l_err;
+    }
+
     /////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState)
     {
@@ -1872,9 +2034,6 @@ namespace SBE
 
         errlHndl_t err = nullptr;
         void *sbeHbblImgPtr = nullptr;
-        bool l_sideZeroIsActive = true;
-        bool l_sbeSupportedSeepromReadOp = true;
-        bool l_errFoundDuringChipOp = false;
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -1909,7 +2068,6 @@ namespace SBE
             else if ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
             {
                 io_sbeState.alt_seeprom_side = SBE_SEEPROM0;
-                l_sideZeroIsActive = false;
             }
             else
             {
@@ -1946,144 +2104,20 @@ namespace SBE
             /************************************************************/
             io_sbeState.ec = io_sbeState.target->getAttr<TARGETING::ATTR_EC>();
 
-
             /*******************************************/
-            /*  Get SEEPROM 0 SBE Version Information  */
+            /*  Get SBE SEEPROM Version Information    */
             /*******************************************/
+            err = getSeepromVersions(io_sbeState);
 
-            // If the current seeprom is side 0 then attempt read via chipOp
-            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
-            if (l_sideZeroIsActive && !Util::isSimicsRunning())
+            if(err)
             {
-                err = getSeepromSideVersionViaChipOp(io_sbeState.target,
-                                            io_sbeState.seeprom_0_ver,
-                                            l_sbeSupportedSeepromReadOp);
-
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                            "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
-                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
-                            ERRL_GETRC_SAFE(err),
-                            ERRL_GETPLID_SAFE(err));
-                    //Commit error as informational and attempt reading via i2c
-                    l_errFoundDuringChipOp = true;
-                    err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    err->collectTrace(SBE_COMP_NAME, 256);
-                    err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( err, SBEIO_COMP_ID );
-                }
-                else if(!l_sbeSupportedSeepromReadOp)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                    "getting SBE Information from SEEPROM 0 (Primary) via ChipOp. The "
-                    "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
-                }
-                else
-                {
-                    TRACDBIN(g_trac_sbe, "getSbeInfoState found via ChipOp -spA",
-                            &(io_sbeState.seeprom_0_ver),
-                            sizeof(sbeSeepromVersionInfo_t));
-                }
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                "Error getting SBE Version from SEEPROMs, "
+                "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                           break;
             }
-
-            //If side 0 is not active or there was an error trying to read
-            //the primary via chipOp, then try reading via I2C
-            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
-            if(!l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
-                l_errFoundDuringChipOp || Util::isSimicsRunning())
-            {
-
-                err = getSeepromSideVersionViaI2c(io_sbeState.target,
-                                            EEPROM::SBE_PRIMARY,
-                                            io_sbeState.seeprom_0_ver,
-                                            io_sbeState.seeprom_0_ver_ECC_fail);
-
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                            "getting SBE Information from SEEPROM 0 (Primary) via I2C, "
-                            "RC=0x%X, PLID=0x%lX",
-                            ERRL_GETRC_SAFE(err),
-                            ERRL_GETPLID_SAFE(err));
-                    break;
-                }
-
-                TRACDBIN(g_trac_sbe, "getSbeInfoState found via I2C -spA",
-                        &(io_sbeState.seeprom_0_ver),
-                        sizeof(sbeSeepromVersionInfo_t));
-            }
-
-
-            /*******************************************/
-            /*  Get SEEPROM 1 SBE Version Information  */
-            /*******************************************/
-
-            //If side 1 is active, then attempt read via chipOp
-            //Note that there is no reason to attempt chipOp on backup if it failed
-            //on the primary.
-            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
-            if (!l_sideZeroIsActive && l_sbeSupportedSeepromReadOp &&
-                !l_errFoundDuringChipOp && !Util::isSimicsRunning() )
-            {
-                err = getSeepromSideVersionViaChipOp(io_sbeState.target,
-                                                  io_sbeState.seeprom_1_ver,
-                                                  l_sbeSupportedSeepromReadOp);
-
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                            "getting SBE Information from SEEPROM 1 (Backup) via Chipop, "
-                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
-                            ERRL_GETRC_SAFE(err),
-                            ERRL_GETPLID_SAFE(err));
-                    //Commit error as informational and attempt reading via i2c
-                    l_errFoundDuringChipOp = true;
-                    err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    err->collectTrace(SBE_COMP_NAME, 256);
-                    err->collectTrace(SBEIO_COMP_NAME, 256);
-                    errlCommit( err, SBEIO_COMP_ID );
-                }
-                else if(!l_sbeSupportedSeepromReadOp)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                                "getting SBE Information from SEEPROM 1 (Backup) via ChipOp. The "
-                                "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
-                }
-                else
-                {
-                    TRACDBIN(g_trac_sbe, "getSbeInfoState found via Chipop -spB",
-                            &(io_sbeState.seeprom_1_ver),
-                            sizeof(sbeSeepromVersionInfo_t));
-                }
-            }
-
-            //If side 1 is not active, or there was an error trying to read
-            //the primary via chipOp, then try reading via I2C
-            // TODO RTC:186269 Remove forced I2C path when simics issue is resolved
-            if(l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
-                l_errFoundDuringChipOp || Util::isSimicsRunning() )
-            {
-                err = getSeepromSideVersionViaI2c(io_sbeState.target,
-                                            EEPROM::SBE_BACKUP,
-                                            io_sbeState.seeprom_1_ver,
-                                            io_sbeState.seeprom_1_ver_ECC_fail);
-
-                if(err)
-                {
-                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                            "getting SBE Information from SEEPROM 1 (Backup) via I2C, "
-                            "RC=0x%X, PLID=0x%lX",
-                            ERRL_GETRC_SAFE(err),
-                            ERRL_GETPLID_SAFE(err));
-                    break;
-                }
-
-                TRACDBIN(g_trac_sbe, "getSbeInfoState-spB found via I2C",
-                        &(io_sbeState.seeprom_1_ver),
-                        sizeof(sbeSeepromVersionInfo_t));
-            }
-
 
             /*******************************************/
             /*  Get PNOR SBE Version Information       */
@@ -6193,6 +6227,67 @@ errlHndl_t updateKeyTransitionState(
 
     return pError;
 }
+
+
+errlHndl_t querySbeSeepromVersions()
+{
+    errlHndl_t l_errl = nullptr;
+    sbeTargetState_t l_sbeState;
+    TARGETING::TargetHandleList l_procList;
+    do {
+        // Query all of the functional processor targets
+        TARGETING::getAllChips(l_procList,
+                            TARGETING::TYPE_PROC,
+                            true); // true: return functional targets
+        assert( l_procList.size(), "querySbeSeepromVersions: no functional procs found!")
+
+        if(!Util::isSimicsRunning())
+        {
+            for(const auto & l_procTarget : l_procList)
+            {
+                memset(&l_sbeState, 0, sizeof(l_sbeState));
+                l_sbeState.target = l_procTarget;
+                // populate the SBE SEEPROM version info
+                l_errl = getSeepromVersions(l_sbeState);
+
+                if(l_errl)
+                {
+                    break;
+                }
+
+                // If the image_versions do not match then we must set the attribute to reflect that
+                if(memcmp(&l_sbeState.seeprom_0_ver.image_version,
+                        &l_sbeState.seeprom_1_ver.image_version,
+                        SBE_IMAGE_VERSION_SIZE) != 0)
+                {
+                    // ATTR_HB_SBE_SEEPROM_VERSION_MISMATCH is defaulted to be 0, so
+                    // we need to set the attribute to 1 if we find that the SEEPROM
+                    // sides do not have matching versions.
+                    l_procTarget->setAttr<ATTR_HB_SBE_SEEPROM_VERSION_MISMATCH>(1);
+                }
+            }
+
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_sbe,
+                          ERR_MRK "querySbeSeepromVersions: "
+                          "Error occured looking up seeprom versions. Returning early from function.");
+                break;
+            }
+        }
+        else
+        {
+            // If we are running simics it is safe to assume both sides of the seeprom are the same.
+            // We don't actually perform SEEPROM updates in simics do to time restrictions so the
+            // concept of updating the SBE SEEPROMs in simics is a little spoofed out so we need
+            // to do some fudging here. ATTR_HB_SBE_SEEPROM_VERSION_MATCH is defaulted to 1 so there
+            // is no need to set it.
+        }
+
+    } while(0);
+    return l_errl;
+}
+
 
 } //end SBE Namespace
 

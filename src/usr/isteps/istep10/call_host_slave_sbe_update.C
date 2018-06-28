@@ -305,6 +305,17 @@ void* call_host_slave_sbe_update (void *io_pArgs)
             }
         }
 
+
+        // Set SEEPROM_VERSIONS_MATCH attributes for each processor
+        // this will be used later on by the sbe_retry code to determine
+        // if it is safe to switch seeprom sides during recovery attempts
+        l_errl = SBE::querySbeSeepromVersions();
+        if(l_errl)
+        {
+            l_StepError.addErrorDetails( l_errl);
+            errlCommit( l_errl, HWPF_COMP_ID);
+        }
+
    } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
