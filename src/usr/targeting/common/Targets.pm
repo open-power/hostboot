@@ -1155,7 +1155,7 @@ sub setCommonAttrForChiplet
     $self->setAttribute($target, "AFFINITY_PATH",   $affinity_path);
     $self->setAttribute($target, "ORDINAL_ID",      $sys_offset);
     $self->setAttribute($target, "FAPI_POS",        $sys_offset);
-    $self->setAttribute($target, "REL_POS",         $pos);
+    $self->setAttribute($target, "REL_POS",         $unit_pos);
 
     my $pervasive_parent= getPervasiveForUnit("$tgt_type$pos");
     if ($pervasive_parent ne "")
@@ -1420,32 +1420,15 @@ sub processMcaDimms
             $self->setAttribute($dimm, "REL_POS", $port_num);
             $self->setAttribute($dimm, "LOCATION_CODE",$loc_code);
 
-            ## set all FAPI_POS
-            my $MCBIST_PER_CHIP = $self->{UNIT_COUNTS}->
-              {$proc_target}->{MCBIST};
-            my $MCS_PER_CHIP = $self->{UNIT_COUNTS}->
-              {$mcbist_target}->{MCS} * $MCBIST_PER_CHIP;
-            my $MCA_PER_CHIP = $self->{UNIT_COUNTS}->
-              {$mcs_target}->{MCA} * $MCS_PER_CHIP;
+            ## set FAPI_POS for dimm
             my $DIMM_PER_MCA = 2;
-            my $parent_proc_fapi_pos =
-                   $self->getAttribute($proc_target, "FAPI_POS");
-
-            my $mcbist_pos = ($parent_proc_fapi_pos * $MCBIST_PER_CHIP) +
-              $self->getAttribute($mcbist_target,"REL_POS");
-            my $mcs_pos = ($parent_proc_fapi_pos * $MCS_PER_CHIP) +
-              $self->getAttribute($mcs_target,"REL_POS");
-            my $mca_pos = ($parent_proc_fapi_pos * $MCA_PER_CHIP) +
-              $self->getAttribute($mca_target,"REL_POS");
+            my $mca_pos = $self->getAttribute($mca_target,"FAPI_POS");
             my $dimm_pos = ($mca_pos * $DIMM_PER_MCA) +
               $self->getAttribute($dimm,"REL_POS");
 
             $self->setAttribute($dimm,"FAPI_NAME",
                     $self->getFapiName($type, $node, $dimm_pos));
 
-            $self->setAttribute($mcbist_target, "FAPI_POS",  $mcbist_pos);
-            $self->setAttribute($mcs_target, "FAPI_POS",  $mcs_pos);
-            $self->setAttribute($mca_target, "FAPI_POS",  $mca_pos);
             $self->setAttribute($dimm, "FAPI_POS",  $dimm_pos);
 
             $self->{huid_idx}->{$type} = $dimm_pos;
