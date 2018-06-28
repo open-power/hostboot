@@ -202,6 +202,17 @@ enum CpuSprNames
  */
 uint64_t cpu_spr_value(CpuSprNames spr);
 
+
+/** @fn cpu_hrmor_nodal_base
+ *  @brief Provides the hrmor nodal base address
+ *
+ *  This is used, for instance, when determining multi-node
+ *  memory mirroring address calculations
+ *
+ *  @return The hrmor nodal base address
+ */
+uint64_t cpu_hrmor_nodal_base();
+
 /** @fn cpu_spr_set
  *  @brief Writes an SPR.
  *
