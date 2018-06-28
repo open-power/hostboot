@@ -43,7 +43,6 @@
 #include    <p9_misc_scom_addresses.H>
 #include    <p9_exit_cache_contained.H>
 
-
 #include <sys/mm.h>
 #include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
@@ -51,6 +50,8 @@
 #include <config.h>
 #include <util/misc.H>
 #include <hwas/common/hwas.H>
+#include <sys/misc.h>
+#include <vmmconst.h>
 
 #ifdef CONFIG_SECUREBOOT
 #include <secureboot/service.H>
@@ -211,22 +212,13 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
             {
-                uint64_t hrmor_base =
-                    l_sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
-
+                //First get the Base Memory Mirroring Address
                 l_mirrorBaseAddr =
                     l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
 
-                // For single-node systems, the non-master processors can be
-                // in a different logical (powerbus) group.
-                // Need to migrate task to master.
-                task_affinity_pin();
-                task_affinity_migrate_to_master();
-                uint64_t this_node = PIR_t(task_getcpuid()).groupId;
-                task_affinity_unpin();
-
-                l_mirrorBaseAddr += (this_node * hrmor_base);
-
+                //Add on the current HRMOR value being used
+                l_mirrorBaseAddr += (cpu_spr_value(CPU_SPR_HRMOR)
+                                                  - VMM_HRMOR_OFFSET);
             }
 
             // Verify there is memory at the mirrored location
