@@ -129,6 +129,7 @@ enum sbeioReasonCode
 
     // SBE Vital Attention error codes
     SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,
+    SBEIO_SEEPROM_VERSION_MISMATCH     = SBEIO_COMP_ID | 0x61,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
