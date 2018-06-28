@@ -73,6 +73,9 @@ const uint32_t MCI_CFG_CHANNEL_INIT_TIMEOUT_END_BIT   = 3;
 const uint32_t MCI_CFG_MCICFGQ_SPEC_MODE = 44;
 const uint32_t MCI_CFG_MCICFGQ_HOST_MODE = 45;
 
+// P9 MCI Configuration 1 Register field/bit definitions
+const uint32_t MCI_CFG1_DIS_TAG_OVERRUN_ERROR_BIT = 43;
+
 const uint8_t MCI_CFG_MANUAL_FRTL_FIELD_MASK = 0x7F;
 const uint32_t MCI_CFG_CHANNEL_INIT_TIMEOUT_FIELD_MASK = 0x3;
 
@@ -356,6 +359,24 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///------------------------------------------------------------------------------
+/// @brief      Utility subroutine to set the P9 MCI Config Register 1
+/// @param[in]  i_pu_target => P9 DMI chip unit target
+/// @param[in]  i_data      => Input data
+/// @param[in]  i_mask      => Input mask
+/// @return     FAPI_RC_SUCCESS if operation was successful, else error
+///------------------------------------------------------------------------------
+fapi2::ReturnCode p9_cen_framelock_set_pu_mci_cfg_reg_1(
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_pu_target,
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& i_mask)
+{
+    FAPI_TRY(fapi2::putScomUnderMask(i_pu_target, MCA_0_MBA_RRQ0Q, i_data, i_mask),
+             "PutScomUnderMask error (MCA_0_MBA_RRQ0Q 0x0701090E)");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///------------------------------------------------------------------------------
 /// @brief      utility subroutine to set the Centaur MBI FIR Mask Register
@@ -1562,71 +1583,155 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     // Set DATAPATH FIR ACTION0 & ACTION1
     // ----------------------------------
 
-    // UNIT_CS if a checkstop was received from Centaur (Bit 16)
-    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();
+    // Note: Spell out the bit settings of both action registers to make it clearer.
+    //       This could be improved in the future by defining a map of
+    //       bits vs action types to set the bits.
+
+    // UNIT_CS actions (1,1,0)
+    l_action0_data.setBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>();  // Bit 2
+    l_action1_data.setBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>();          // Bit 12
+    l_action1_data.setBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>();     // Bit 14
+    l_action1_data.setBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>();    // Bit 15
+    l_action1_data.setBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();    // Bit 16
     l_action1_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();
 
-    // HOST_ATTN if special attention was received from Centaur (Bit 20)
-    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>();
+    l_action0_data.setBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>();          // Bit 32
+    l_action1_data.setBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>();
 
-    // Recoverable errors
-    l_action1_data.setBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>()       // Bit 0
-    .setBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()             // Bit 1
-    .setBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>()         // Bit 2
-    .setBit<DATAPATH_FIR_DSRC_PERF_DEGRAD_BIT>()                 // Bit 3
-    .setBit<DATAPATH_FIR_CRC_ERR_BIT>()                          // Bit 8
-    .setBit<DATAPATH_FIR_REPLAY_BUFFER_CE_BIT>()                 // Bit 11
-    .setBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                 // Bit 12
-    .setBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>()           // Bit 15
-    .setBit<DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT>()         // Bit 19
-    .setBit<DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT>()          // Bit 31
-    .setBit<DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT>()       // Bit 33
-    .setBit<DATAPATH_FIR_RDATA_PERR_BIT>()                       // Bit 36
-    .setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>()     // Bit 40
-    .setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>()   // Bit 41
-    .setBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>()                   // Bit 42
-    .setBit<DATAPATH_FIR_RECOVERABLE_PERR_EICR_BIT>()            // Bit 43
-    .setBit<DATAPATH_FIR_FATAL_PERR_RECR_BIT>()                  // Bit 44
-    .setBit<DATAPATH_FIR_WRT_RMW_BUFFER_CE_BIT>()                // Bit 45
-    .setBit<DATAPATH_FIR_WRT_RMW_BUFFER_UE_BIT>()                // Bit 46
-    .setBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0>()                 // Bit 48
-    .setBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1>()                 // Bit 49
-    .setBit<DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT>()                 // Bit 50
-    .setBit<DATAPATH_FIR_WDF_SM_ERR_BIT>()                       // Bit 51
-    .setBit<DATAPATH_FIR_WDF_REG_PERR_BIT>()                     // Bit 52
-    .setBit<DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT>()                 // Bit 53
-    .setBit<DATAPATH_FIR_WRT_REG_PERR_BIT>()                     // Bit 54
-    .setBit<DATAPATH_FIR_READ_BUF_OVERRUN_BIT>()                 // Bit 56
-    .setBit<DATAPATH_FIR_WDF_ASYNC_ERR_BIT>()                    // Bit 57
-    .setBit<DATAPATH_FIR_READ_MCA_PERR_BIT>()                    // Bit 58
-    .setBit<DATAPATH_FIR_READ_MCA_SEQ_ERR_BIT>()                 // Bit 59
-    .setBit<DATAPATH_FIR_DBGWAT_PERR_BIT>()                      // Bit 60
-    .setBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                    // Bit 61
+    l_action0_data.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>();  // Bit 40
+    l_action1_data.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>();
 
-    // Checkstop errors
+    l_action0_data.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();  // Bit 41
+    l_action1_data.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>();  // Bit 42
+    l_action1_data.setBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>();
+
+    l_action0_data.setBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();  // Bit 61
+    l_action1_data.setBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();
+
+
+    // HOST_ATTN (1,0,0)
+    // Special attention was received from Centaur (Bit 20)
+    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>();  // Bit 20
+    l_action1_data.clearBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>();
+
+    // RECOVERABLE actions (0,1,0)
+    l_action0_data.clearBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>();             // Bit 0
+    l_action1_data.setBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_REPLAY_BUFFER_CE_BIT>();         // Bit 11
+    l_action1_data.setBit<DATAPATH_FIR_REPLAY_BUFFER_CE_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT>(); // Bit 19
+    l_action1_data.setBit<DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_RDATA_PERR_BIT>();                // Bit 36
+    l_action1_data.setBit<DATAPATH_FIR_RDATA_PERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_RECOVERABLE_PERR_EICR_BIT>();     // Bit 43
+    l_action1_data.setBit<DATAPATH_FIR_RECOVERABLE_PERR_EICR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WRT_RMW_BUFFER_CE_BIT>();     // Bit 45
+    l_action1_data.setBit<DATAPATH_FIR_WRT_RMW_BUFFER_CE_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WRT_RMW_BUFFER_UE_BIT>();     // Bit 46
+    l_action1_data.setBit<DATAPATH_FIR_WRT_RMW_BUFFER_UE_BIT>();
+
+    // CS actions (0,0,0)
+    l_action0_data.clearBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>();         // Bit 1
+    l_action1_data.clearBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT>();      // Bit 31
+    l_action1_data.clearBit<DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT>();   // Bit 33
+    l_action1_data.clearBit<DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_FATAL_PERR_RECR_BIT>();              // Bit 44
+    l_action1_data.clearBit<DATAPATH_FIR_FATAL_PERR_RECR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0>();             // Bit 48
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1>();             // Bit 49
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT>();            // Bit 50
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_SM_ERR_BIT>();                  // Bit 51
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_SM_ERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_REG_PERR_BIT>();                // Bit 52
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_REG_PERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT>();           // Bit 53
+    l_action1_data.clearBit<DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WRT_REG_PERR_BIT>();               // Bit 54
+    l_action1_data.clearBit<DATAPATH_FIR_WRT_REG_PERR_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_READ_BUF_OVERRUN_BIT>();           // Bit 56
+    l_action1_data.clearBit<DATAPATH_FIR_READ_BUF_OVERRUN_BIT>();
+
+    l_action0_data.clearBit<DATAPATH_FIR_WDF_ASYNC_ERR_BIT>();              // Bit 57
+    l_action1_data.clearBit<DATAPATH_FIR_WDF_ASYNC_ERR_BIT>();
+
     if (l_hw414700)
     {
-        l_action0_data.clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();  // Bit 16
+        l_action0_data.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>();   // Bit 2
+        l_action1_data.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>();
 
-        l_action1_data.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>() // Bit 2
-        .clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>()                       // Bit 4
-        .clearBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>()                   // Bit 5
-        .clearBit<DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT>()                 // Bit 6
-        .clearBit<DATAPATH_FIR_CRC_ERR_BIT>()                                // Bit 8
-        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                       // Bit 12
-        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>()                  // Bit 14
-        .clearBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>()                 // Bit 15
-        .clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>()                 // Bit 16
-        .clearBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>()                       // Bit 32
-        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>()           // Bit 40
-        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>()         // Bit 41
-        .clearBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>()                         // Bit 42
-        .clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                          // Bit 61
+        l_action0_data.clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>();           // Bit 4
+        l_action1_data.clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_CRC_ERR_BIT>();                    // Bit 8
+        l_action1_data.clearBit<DATAPATH_FIR_CRC_ERR_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>();           // Bit 12
+        l_action1_data.clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>();      // Bit 14
+        l_action1_data.clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>();     // Bit 15
+        l_action1_data.clearBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();     // Bit 16
+        l_action1_data.clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>();           // Bit 32
+        l_action1_data.clearBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>(); // Bit 40
+        l_action1_data.clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>(); // Bit 41
+        l_action1_data.clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>();                // Bit 42
+        l_action1_data.clearBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>();
+
+        l_action0_data.clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                  // Bit 61
+        l_action1_data.clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();
     }
 
     // ----------------------------------
     // Set P9 DATAPATH FIR Mask
     // ----------------------------------
+
+    // Set all mask bits to 1, then clear the bits based on action0/1
+    // values below
+    l_dataPathFirMask.flush<1>();
 
     // Any bit that is set in ACTION0 or ACTION1 reg means we want
     // recoverable/attention/unit_cs, so need to clear its mask.
@@ -1636,16 +1741,27 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     // (1,1,0) = UNIT_CS
     l_dataPathFirMask = ~(l_action0_data | l_action1_data);
 
-    // Any bit that is clear in both ACTION0 & ACTION1 reg, but
-    // we want to have a checkstop, we need to explicitly clear
-    // the mask bit.
+    // Any bit that is clear in both ACTION0 & ACTION1 reg (CS),
+    // we need to explicitly clear the mask bit.
     // (0,0,0) = Checkstop Error
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>();       // Bit 1
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT>();    // Bit 31
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT>(); // Bit 33
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_FATAL_PERR_RECR_BIT>();            // Bit 44
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0>();           // Bit 48
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1>();           // Bit 49
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT>();           // Bit 50
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_SM_ERR_BIT>();                 // Bit 51
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_REG_PERR_BIT>();               // Bit 52
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT>();           // Bit 53
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WRT_REG_PERR_BIT>();               // Bit 54
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_READ_BUF_OVERRUN_BIT>();           // Bit 56
+    l_dataPathFirMask.clearBit<DATAPATH_FIR_WDF_ASYNC_ERR_BIT>();              // Bit 57
+
     if (l_hw414700)
     {
         l_dataPathFirMask.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>() // Bit 2
         .clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>()                          // Bit 4
-        .clearBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>()                      // Bit 5
-        .clearBit<DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT>()                    // Bit 6
         .clearBit<DATAPATH_FIR_CRC_ERR_BIT>()                                   // Bit 8
         .clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                          // Bit 12
         .clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>()                     // Bit 14
@@ -1658,18 +1774,21 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
         .clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                             // Bit 61
     }
 
+    FAPI_INF("ACTION0 = 0x%.16llX, ACTION1 = 0x%.16llX, FIRMASK = 0x%.16llX",
+             l_action0_data, l_action1_data, l_dataPathFirMask);
+
+    // We want to write to all 64-bits, so set all bits in l_writeMask to 1
+    l_writeMask.flush<1>();
+
     // Write to ACTION0 reg
-    l_writeMask = l_action0_data;
     FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact0_reg(i_pu_target, l_action0_data, l_writeMask),
              "p9_cen_framelock: Error writing P9 DATAPATH FIR Action0 Register");
 
     // Write to ACTION1 reg
-    l_writeMask = l_action1_data;
     FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact1_reg(i_pu_target, l_action1_data, l_writeMask),
              "p9_cen_framelock: Error writing P9 DATAPATH FIR Action0 Register");
 
     // Write to DATAPATH FIR MASK reg
-    l_writeMask = (l_action0_data | l_action1_data);
     FAPI_TRY(p9_cen_framelock_set_pu_datapath_firmask_reg(i_pu_target, l_dataPathFirMask, l_writeMask),
              "p9_cen_framelock: Error writing P9 DATAPATH FIR Mask Register");
 
@@ -1679,12 +1798,21 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     // code to handle attn)
     // -----------------------------------------------
 #ifdef __HOSTBOOT_MODULE
+
+    // MCI Configuration Register (MCICFG)
     l_mci_data.flush<0>().setBit<MCI_CFG_MCICFGQ_SPEC_MODE>()
     .setBit<MCI_CFG_MCICFGQ_HOST_MODE>();
     l_writeMask = l_mci_data;
     l_mci_data.clearBit<MCI_CFG_MCICFGQ_SPEC_MODE>();
     FAPI_TRY(p9_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, l_mci_data, l_writeMask),
              "p9_cen_framelock: Error writing P9 MCI Configuration register to set CHI's FIRs mode.");
+
+    // MCI Configuration Register 1 (MCICFG1)
+    l_mci_data.flush<0>().setBit<MCI_CFG1_DIS_TAG_OVERRUN_ERROR_BIT>();
+    l_writeMask = l_mci_data;
+    FAPI_TRY(p9_cen_framelock_set_pu_mci_cfg_reg_1(i_pu_target, l_mci_data, l_writeMask),
+             "p9_cen_framelock: Error writing P9 MCI Configuration register 1.");
+
 #endif
 
     // Bit set For Centaur
