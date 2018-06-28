@@ -27,6 +27,7 @@
 #include <sys/misc.h>
 #include <sys/syscall.h>
 #include <sys/task.h>
+#include <usr/vmmconst.h>
 
 using namespace Systemcalls;
 
@@ -91,6 +92,11 @@ uint64_t cpu_spr_value(CpuSprNames spr)
 {
     return reinterpret_cast<uint64_t>(
         _syscall1(MISC_CPUSPRVALUE, reinterpret_cast<void*>(spr)));
+}
+
+uint64_t cpu_hrmor_nodal_base()
+{
+    return (cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET);
 }
 
 uint64_t cpu_spr_set(CpuSprNames spr, uint64_t newValue)
