@@ -136,6 +136,18 @@ namespace SBE
                                         SHA512_t o_hash,
                                         const void * i_image_ptr = nullptr);
 
+    /**
+     * @brief Loop through all active processor targets and compare both sides of
+     *        the processor's SBE's seeprom versions. Mark down in the attribute
+     *        ATTR_HB_SBE_SEEPROM_VERSION_MATCH whether or not the versions match.
+     *        This value is used later on to determine if it is safe to switch
+     *        seeprom sides in the event that we attempt to recover the SBE from
+     *        a failed state.
+     *
+     * @return errlHndl_t     Error log handle on failure; otherwise nullptr
+     */
+    errlHndl_t querySbeSeepromVersions();
+
 } //end namespace SBE
 
 #endif /* _SBEIF_H */

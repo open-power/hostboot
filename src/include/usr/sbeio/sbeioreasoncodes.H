@@ -129,13 +129,11 @@ enum sbeioReasonCode
     SBEIO_EXCEED_MAX_SIDE_BOOTS        = SBEIO_COMP_ID | 0x5D,
     SBEIO_SLAVE_FAILED_TO_BOOT         = SBEIO_COMP_ID | 0x5E,
     SBEIO_RECEIVED_UNEXPECTED_MSG      = SBEIO_COMP_ID | 0x5F,
-
-    // SBE Vital Attention error codes
+    // SBE Vital Attention error code
     SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,
-
     // Init error codes
     SBEIO_RC_KERNEL_REG_FAILED         = SBEIO_COMP_ID | 0x61,
-
+    SBEIO_SEEPROM_VERSION_MISMATCH     = SBEIO_COMP_ID | 0x62,
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,

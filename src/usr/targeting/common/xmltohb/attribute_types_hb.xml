@@ -1181,4 +1181,20 @@
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>HB_SBE_SEEPROM_VERSION_MISMATCH</id>
+    <description>
+        Describes if the processor's SBE's seeprom versions match or not
+        0x0 = MATCH
+        0x1 = MISMATCH
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

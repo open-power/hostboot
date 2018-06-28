@@ -98,6 +98,9 @@
     <attribute>
         <id>HBRT_HYP_ID</id>
     </attribute>
+    <attribute>
+        <id>HB_SBE_SEEPROM_VERSION_MISMATCH</id>
+    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

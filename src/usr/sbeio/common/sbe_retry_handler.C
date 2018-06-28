@@ -291,6 +291,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
             if(this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
+                SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
                 // There is no action possible. Gard and Callout the proc
                 /*@
                     * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -321,7 +322,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 
                 errlCommit(l_errl, SBEIO_COMP_ID);
                 this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
-                SBE_TRACF("main_sbe_handler(): We have concluded there are no further recovery actions to take, deconfiguring proc and exiting handler");
                 break;
             }
 
@@ -334,6 +334,48 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 this->iv_currentAction ==
                             P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
             {
+                // We cannot switch sides and perform an hreset if the seeprom's
+                // versions do not match. If this happens, log an error and stop
+                // trying to recover the SBE
+                if(this->iv_sbeRestartMethod == HRESET)
+                {
+                    TARGETING::ATTR_HB_SBE_SEEPROM_VERSION_MISMATCH_type l_versionsMismatch =
+                            i_target->getAttr<TARGETING::ATTR_HB_SBE_SEEPROM_VERSION_MISMATCH>();
+
+                    if(l_versionsMismatch)
+                    {
+                        SBE_TRACF("main_sbe_handler(): We cannot switch SEEPROM sides if their versions do not match, exiting handler");
+                        /*@
+                            * @errortype  ERRL_SEV_UNRECOVERABLE
+                            * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                            * @reasoncode SBEIO_SEEPROM_VERSION_MISMATCH
+                            * @userdata1  HUID of proc
+                            * @userdata2  unused
+                            * @devdesc    Attempted to swap seeprom sides and
+                            *             boot using hreset but version mismatched
+                            * @custdesc   Processor Error
+                            */
+                        l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    SBEIO_EXTRACT_RC_HANDLER,
+                                    SBEIO_SEEPROM_VERSION_MISMATCH,
+                                    TARGETING::get_huid(i_target),0);
+                        l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                        l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+                        l_errl->addHwCallout( i_target,
+                                                HWAS::SRCI_PRIORITY_HIGH,
+                                                HWAS::NO_DECONFIG,
+                                                HWAS::GARD_NULL );
+
+                        // Set the PLID of the error log to master PLID
+                        // if the master PLID is set
+                        updatePlids(l_errl);
+
+                        errlCommit(l_errl, SBEIO_COMP_ID);
+                        // break out of the retry loop
+                        break;
+                    }
+                }
                 if(this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT)
                 {
                     /*@
