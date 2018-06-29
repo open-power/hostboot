@@ -642,6 +642,28 @@ class SbePsu
                                     uint8_t             i_reqMsgs,
                                     uint8_t             i_rspMsgs);
 
+        /**
+         * @brief save information from an "early" error
+         *
+         * If an error occurs before the fapi2 library is loaded, this
+         * function will record the error state so it can be reported later.
+         *
+         *
+         * @param[in]  i_plid   Program log id for the error
+         * @param[in]  i_target Proc target for PSU Request that caused an error
+         */
+        void saveEarlyError(uint32_t i_plid,TARGETING::TargetHandle_t i_target);
+
+        /**
+         * @brief Did an error occur before the fapi2 library was loaded?
+         */
+        bool earlyError() {return iv_earlyErrorOccurred;}
+
+        /**
+         * @brief If an "early" error was detected, then record and process it.
+         */
+        errlHndl_t processEarlyError();
+
     protected:
 
         /**
@@ -674,6 +696,16 @@ class SbePsu
          * for each target's FFDC package.  Indexed by TARGETING
          */
         std::map<TARGETING::Target *, void *> iv_ffdcPackageBuffer;
+
+        /**
+         * @brief Variables needed to record an "early" error
+         *
+         * If an error occurs before the fapi2 library is loaded, then
+         * use these variables to record the error for later reporting.
+         */
+        bool                      iv_earlyErrorOccurred;
+        uint32_t                  iv_earlyErrorPlid;
+        TARGETING::TargetHandle_t iv_earlyErrorTarget;
 
         /**
          * @brief FFDC package needs to be 2 pages

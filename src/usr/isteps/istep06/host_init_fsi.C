@@ -45,6 +45,10 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
+// SBE
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbe_psudd.H>
+
 using namespace TARGETING;
 using namespace I2C;
 using namespace TRUSTEDBOOT;
@@ -116,6 +120,10 @@ void* host_init_fsi( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi entry" );
     do
     {
+        // process SBE PSU errors that might have occurred before fapi was
+        // initialized
+        SBEIO::SbePsu::getTheInstance().processEarlyError();
+
         l_err = FSI::initializeHardware( );
         if (l_err)
         {
