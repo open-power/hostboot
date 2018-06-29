@@ -167,7 +167,7 @@ errlHndl_t MailboxSp::_init()
         true); //true=Read-Write
     if (err)
     {
-        return err;
+        errlCommit(err,MBOX_COMP_ID);
     }
 
     if(mbxComm)

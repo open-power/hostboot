@@ -53,6 +53,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <errl/errludprintk.H>
+#include <vfs/vfs.H> // module_is_loaded
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -89,6 +90,7 @@ void * SbePsu::msg_handler(void *unused)
  **/
 SbePsu::SbePsu()
     :
+        iv_earlyErrorOccurred(false),
         iv_psuResponse(nullptr),
         iv_responseReady(false),
         iv_shutdownInProgress(false)
@@ -317,6 +319,55 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
     SBE_TRACD(EXIT_MRK "performPsuChipOp");
 
     return errl;
+}
+
+/**
+ * @brief record info from an "early" error so it can be reported later
+ *
+ * If an error occurs before the fapi2 library is loaded, this function
+ * can be used to record the details for later reporting.
+ *
+ * @param[in]  i_plid   Program log id for the error
+ * @param[in]  i_target Proc target for PSU Request that caused error
+ */
+void SbePsu::saveEarlyError(uint32_t i_plid, TARGETING::TargetHandle_t i_target)
+{
+    SBE_TRACD(ENTER_MRK "saveEarlyError");
+
+    iv_earlyErrorOccurred = true;
+    iv_earlyErrorPlid     = i_plid;
+    iv_earlyErrorTarget   = i_target;
+
+    SBE_TRACD(ENTER_MRK "saveEarlyError");
+}
+
+/**
+ * @brief If an "early" error was detected, then record and process it.
+ */
+errlHndl_t SbePsu::processEarlyError()
+{
+    errlHndl_t l_err = nullptr;
+
+    SBE_TRACD(ENTER_MRK "processEarlyError");
+
+    if (earlyError())
+    {
+        SBE_TRACF(ERR_MRK"processEarlyError: early error occurred"
+                  ", plid=0x%X, target huid=0x%X",
+                  iv_earlyErrorPlid, TARGETING::get_huid(iv_earlyErrorTarget));
+        SbeRetryHandler l_SBEobj = SbeRetryHandler(
+            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+            iv_earlyErrorPlid);
+
+        l_SBEobj.main_sbe_handler(iv_earlyErrorTarget);
+
+        iv_earlyErrorOccurred = false;
+        SBE_TRACF(ERR_MRK"processEarlyError: early error processed");
+    }
+
+    SBE_TRACD(EXIT_MRK "processEarlyError");
+
+    return l_err;
 }
 
 /**
@@ -770,17 +821,29 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                           HWAS::GARD_NULL );
                 }
 
-                // If the FFDC is empty, this error could be because the SBE
-                // isn't booted correctly. We need to check the state of the
-                // SBE.
-                // If we are on a FSP based system we expect this to result in a TI
-                // If we are on a BMC based system we expect to return from this fail
-                SbeRetryHandler l_SBEobj = SbeRetryHandler(
-                    SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
-                    l_errPlid);
+                if (!VFS::module_is_loaded("fapi2.so"))
+                {
+                    // If the fapi library hasn't been loaded, we need to save
+                    // the details of this error until it has, so the error can
+                    // be logged.
+                    SBE_TRACF("Timeout error saved until fapi is loaded.");
+                    saveEarlyError(l_errPlid, i_target);
+                }
+                else
+                {
+                    // If the FFDC is empty, this error could be because the SBE
+                    // isn't booted correctly. We need to check the state of the
+                    // SBE.
+                    // If we are on a FSP based system we expect this to result
+                    // in a TI
+                    // If we are on a BMC based system we expect to return from
+                    // this fail
+                    SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                     SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+                     l_errPlid);
 
-                l_SBEobj.main_sbe_handler(i_target);
-
+                    l_SBEobj.main_sbe_handler(i_target);
+                }
             }
             else
             {
