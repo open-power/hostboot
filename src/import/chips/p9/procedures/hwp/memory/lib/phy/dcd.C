@@ -37,7 +37,7 @@
 #include <lib/phy/dcd.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <lib/utils/conversions.H>
 #include <lib/workarounds/adr32s_workarounds.H>
 
