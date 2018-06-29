@@ -41,7 +41,7 @@
 #include <lib/ccs/ccs.H>
 #include <lib/dimm/rank.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 
 #include <mss_lab_tools.H>
 
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>

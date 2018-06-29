@@ -44,7 +44,7 @@
 #include <lib/mcbist/settings.H>
 #include <lib/mcbist/sim.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

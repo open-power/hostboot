@@ -37,7 +37,7 @@
 #include <p9_mss_memdiag.H>
 
 #include <lib/dimm/rank.H>
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/mcbist/address.H>

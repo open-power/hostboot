@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
 #include <lib/eff_config/timing.H>
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <lib/phy/read_cntrl.H>
 
 namespace mss
