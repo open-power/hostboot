@@ -585,13 +585,13 @@ int32_t __getPortAddr<TYPE_MBA>( ExtensibleChip * i_chip, MemAddr i_addr,
 
 template<TYPE T>
 void __getGrpPrms( ExtensibleChip * i_chip, uint8_t o_portPos,
-                   SCAN_COMM_REGISTER_CLASS * mcfgp,
-                   SCAN_COMM_REGISTER_CLASS * mcfgpm );
+                   SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
+                   SCAN_COMM_REGISTER_CLASS * &o_mcfgpm );
 
 template<>
 void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
-                             SCAN_COMM_REGISTER_CLASS * o_mcfgp,
-                             SCAN_COMM_REGISTER_CLASS * o_mcfgpm )
+                             SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
+                             SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
 {
     // Get the connected MCS chip and MCA target position.
     ExtensibleChip * mcs_chip = getConnectedParent( i_chip, TYPE_MCS );
@@ -604,8 +604,8 @@ void __getGrpPrms<TYPE_MCA>( ExtensibleChip * i_chip, uint8_t o_portPos,
 
 template<>
 void __getGrpPrms<TYPE_MBA>( ExtensibleChip * i_chip, uint8_t o_portPos,
-                             SCAN_COMM_REGISTER_CLASS * o_mcfgp,
-                             SCAN_COMM_REGISTER_CLASS * o_mcfgpm )
+                             SCAN_COMM_REGISTER_CLASS * &o_mcfgp,
+                             SCAN_COMM_REGISTER_CLASS * &o_mcfgpm )
 {
     // Get the connected MI chip and MBA target position.
     ExtensibleChip * mi_chip = getConnectedParent( i_chip, TYPE_MI );
