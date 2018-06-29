@@ -35,7 +35,7 @@
 
 #include <mss_lab_tools.H>
 
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/memdiags.H>
 #include <lib/mcbist/mcbist.H>
