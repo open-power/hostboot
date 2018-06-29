@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
-#include <lib/utils/poll.H>
+#include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/memory_size.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/bit_count.H>
