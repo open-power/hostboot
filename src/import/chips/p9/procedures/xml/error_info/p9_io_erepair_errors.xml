@@ -38,6 +38,7 @@
   </hwpError>
   <hwpError>
     <rc>RC_P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR</rc>
+    <ffdc>VAL_BUF_SIZE</ffdc>
     <ffdc>ERROR</ffdc>
     <description>Invalid MEM VPD size has been returned by platform.
     </description>
@@ -58,6 +59,7 @@
   </hwpError>
   <hwpError>
     <rc>RC_P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR</rc>
+    <ffdc>VAL_BUF_SIZE</ffdc>
     <ffdc>ERROR</ffdc>
     <description>Invalid Fabric VPD size has been returned by platform.
     </description>
@@ -68,7 +70,7 @@
   </hwpError>
   <hwpError>
     <rc>RC_P9_EREPAIR_CHILD_MBA_TARGETS_ERR</rc>
-    <ffdc>ERROR</ffdc>
+    <ffdc>VAL_CHIPLET</ffdc>
     <description>Error during get child MBA targets.
     </description>
     <callout>
@@ -89,7 +91,11 @@
   </hwpError>
   <hwpError>
     <rc>RC_P9_EREPAIR_MBVPD_FULL_ERR</rc>
-    <ffdc>ERROR</ffdc>
+    <ffdc>VAL_BYTE_PARSED</ffdc>
+    <ffdc>VAL_BUF_SIZE</ffdc>
+    <ffdc>VAL_REPAIR_CNT</ffdc>
+    <ffdc>VAL_OVERWRITE_FLAG</ffdc>
+    <ffdc>VAL_NUM_REPAIR</ffdc>
     <description>ERROR: eRepair data limit in the Memory Buffer FRU VPD has been reached.
     </description>
     <callout>
@@ -102,6 +108,7 @@
     <ffdc>VAL_BYTE_PARSED</ffdc>
     <ffdc>VAL_BUF_SIZE</ffdc>
     <ffdc>VAL_REPAIR_CNT</ffdc>
+    <ffdc>VAL_OVERWRITE_FLAG</ffdc>
     <ffdc>VAL_NUM_REPAIR</ffdc>
     <description>ERROR: eRepair data limit in the Processor Module VPD has been reached.
     </description>
@@ -112,7 +119,8 @@
   </hwpError>
   <hwpError>
     <rc>RC_P9_EREPAIR_INVALID_LANE_VALUE_ERR</rc>
-    <ffdc>ERROR</ffdc>
+    <ffdc>VAL_REPAIR_LANE</ffdc>
+    <ffdc>VAL_MAX_LANES</ffdc>
     <ffdc>TARGET</ffdc>
     <description>ERROR: Invalid erepair lane value
     </description>
