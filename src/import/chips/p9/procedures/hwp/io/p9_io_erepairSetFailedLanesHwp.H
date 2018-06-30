@@ -104,7 +104,8 @@ fapi2::ReturnCode gatherRepairLanes(
     // Make sure repair lane value passed is within valid range as per the target type
     FAPI_ASSERT(i_repairLane < maxBusLanes,
                 fapi2::P9_EREPAIR_INVALID_LANE_VALUE_ERR()
-                .set_ERROR(i_repairLane)
+                .set_VAL_REPAIR_LANE(i_repairLane)
+                .set_VAL_MAX_LANES(maxBusLanes)
                 .set_TARGET(i_target),
                 "ERROR: Invalid erepair lane value");
 
@@ -559,8 +560,9 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                             .set_VAL_BYTE_PARSED(l_bytesParsed)
                             .set_VAL_BUF_SIZE(i_bufSz)
                             .set_VAL_REPAIR_CNT(l_repairCnt)
+                            .set_VAL_OVERWRITE_FLAG(l_overWrite)
                             .set_VAL_NUM_REPAIR(l_numRepairs),
-                            "ERROR: from updateRepairLanesToBuf - MVPD full");
+                            "ERROR-1: from updateRepairLanesToBuf(Proc) - MVPD full");
             }
 
             // Add at the end
@@ -580,8 +582,9 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                                 .set_VAL_BYTE_PARSED(l_bytesParsed)
                                 .set_VAL_BUF_SIZE(i_bufSz)
                                 .set_VAL_REPAIR_CNT(l_repairCnt)
+                                .set_VAL_OVERWRITE_FLAG(l_overWrite)
                                 .set_VAL_NUM_REPAIR(l_numRepairs),
-                                "ERROR: from updateRepairLanesToBuf - MVPD full");
+                                "ERROR-2: from updateRepairLanesToBuf(Proc) - MVPD full");
 
                     eRepairPowerBus* l_fabricBus =
                         reinterpret_cast<eRepairPowerBus*>(l_vpdWritePtr);
@@ -1070,12 +1073,13 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                (l_repairCnt < l_numRepairs))
             {
                 FAPI_ASSERT(false,
-                            fapi2::P9_EREPAIR_MVPD_FULL_ERR()
+                            fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
                             .set_VAL_BYTE_PARSED(l_bytesParsed)
                             .set_VAL_BUF_SIZE(i_bufSz)
                             .set_VAL_REPAIR_CNT(l_repairCnt)
+                            .set_VAL_OVERWRITE_FLAG(l_overWrite)
                             .set_VAL_NUM_REPAIR(l_numRepairs),
-                            "ERROR: from updateRepairLanesToBuf - MVPD full");
+                            "ERROR-1: from updateRepairLanesToBuf(MemBuf) - MVPD full");
             }
 
             // Add at the end
@@ -1090,10 +1094,14 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                 {
                     // Make sure we are not writing more records than the size
                     // allocated in the VPD
-                    FAPI_ASSERT(l_bytesParsed == i_bufSz,
+                    FAPI_ASSERT(l_bytesParsed <= i_bufSz,
                                 fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
-                                .set_ERROR(l_bytesParsed),
-                                "ERROR: from updateRepairLanesToBuf - MBVPD full");
+                                .set_VAL_BYTE_PARSED(l_bytesParsed)
+                                .set_VAL_BUF_SIZE(i_bufSz)
+                                .set_VAL_REPAIR_CNT(l_repairCnt)
+                                .set_VAL_OVERWRITE_FLAG(l_overWrite)
+                                .set_VAL_NUM_REPAIR(l_numRepairs),
+                                "ERROR-2: from updateRepairLanesToBuf(MemBuf) - MBVPD full");
 
                     eRepairMemBus* l_memBus =
                         reinterpret_cast<eRepairMemBus*>(l_vpdWritePtr);
@@ -1588,12 +1596,13 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                (l_repairCnt < l_numRepairs))
             {
                 FAPI_ASSERT(false,
-                            fapi2::P9_EREPAIR_MVPD_FULL_ERR()
+                            fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
                             .set_VAL_BYTE_PARSED(l_bytesParsed)
                             .set_VAL_BUF_SIZE(i_bufSz)
                             .set_VAL_REPAIR_CNT(l_repairCnt)
+                            .set_VAL_OVERWRITE_FLAG(l_overWrite)
                             .set_VAL_NUM_REPAIR(l_numRepairs),
-                            "ERROR: from updateRepairLanesToBuf - MVPD full");
+                            "ERROR-1: from updateRepairLanesToBuf(DMI) - MVPD full");
             }
 
             // Add at the end
@@ -1608,10 +1617,14 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                 {
                     // Make sure we are not writing more records than the size
                     // allocated in the VPD
-                    FAPI_ASSERT(l_bytesParsed == i_bufSz,
+                    FAPI_ASSERT(l_bytesParsed <= i_bufSz,
                                 fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
-                                .set_ERROR(l_bytesParsed),
-                                "ERROR: from updateRepairLanesToBuf - MBVPD full");
+                                .set_VAL_BYTE_PARSED(l_bytesParsed)
+                                .set_VAL_BUF_SIZE(i_bufSz)
+                                .set_VAL_REPAIR_CNT(l_repairCnt)
+                                .set_VAL_OVERWRITE_FLAG(l_overWrite)
+                                .set_VAL_NUM_REPAIR(l_numRepairs),
+                                "ERROR-2: from updateRepairLanesToBuf(DMI) - MBVPD full");
 
                     eRepairMemBus* l_memBus =
                         reinterpret_cast<eRepairMemBus*>(l_vpdWritePtr);
@@ -1739,6 +1752,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
         {
             FAPI_ASSERT(false,
                         fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                        .set_VAL_BUF_SIZE(l_bufSize)
                         .set_ERROR(fapi2::current_err),
                         "ERROR: Invalid Fabric VPD size");
         }
@@ -1749,7 +1763,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
                     .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size");
+                    "ERROR: Failed to allocate fabric memory size");
 
         // Retrieve the Field eRepair data from the MVPD
         FAPI_TRY( getMvpdField(
@@ -1866,7 +1880,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
 
         FAPI_ASSERT( 0 != l_mbaChiplets.size(),
                      fapi2::P9_EREPAIR_CHILD_MBA_TARGETS_ERR()
-                     .set_ERROR(l_mbaChiplets),
+                     .set_VAL_CHIPLET(l_mbaChiplets),
                      "ERROR: During get child MBA targets");
 
         l_mbaTarget = l_mbaChiplets[0];
@@ -1896,6 +1910,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
             {
                 FAPI_ASSERT(false,
                             fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
+                            .set_VAL_BUF_SIZE(l_bufSize)
                             .set_ERROR(fapi2::current_err),
                             "ERROR: Invalid MEM VPD size");
             }
@@ -2026,8 +2041,9 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
         {
             FAPI_ASSERT(false,
                         fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                        .set_VAL_BUF_SIZE(l_bufSize)
                         .set_ERROR(fapi2::current_err),
-                        "ERROR: Invalid Fabric VPD size");
+                        "ERROR: Invalid Fabric VPD (DMI) size");
         }
 
         // Allocate memory for buffer
@@ -2036,7 +2052,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
                     .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size");
+                    "ERROR: Failed to allocate memory (DMI) size");
 
         // Retrieve the Field eRepair data from the MVPD
         FAPI_TRY( getMvpdField(
