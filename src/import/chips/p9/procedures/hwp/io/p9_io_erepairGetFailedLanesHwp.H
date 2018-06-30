@@ -74,7 +74,7 @@ fapi2::ReturnCode getDimmType(
 
     FAPI_ASSERT( 0 != l_mbaChiplets.size(),
                  fapi2::P9_EREPAIR_CHILD_MBA_TARGETS_ERR()
-                 .set_ERROR(l_mbaChiplets),
+                 .set_VAL_CHIPLET(l_mbaChiplets),
                  "ERROR: During get child MBA targets");
 
     l_mbaTarget = l_mbaChiplets[0];
@@ -651,6 +651,7 @@ fapi2::ReturnCode retrieveRepairDataProc(
         {
             FAPI_ASSERT(false,
                         fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                        .set_VAL_BUF_SIZE(l_bufSize)
                         .set_ERROR(fapi2::current_err),
                         "ERROR: Invalid Fabric VPD size");
         }
@@ -764,6 +765,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
             {
                 FAPI_ASSERT(false,
                             fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
+                            .set_VAL_BUF_SIZE(l_bufSize)
                             .set_ERROR(l_rc),
                             "ERROR: Invalid MEM VPD size");
             }
@@ -870,8 +872,9 @@ fapi2::ReturnCode retrieveRepairDataDMI(
         {
             FAPI_ASSERT(false,
                         fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                        .set_VAL_BUF_SIZE(l_bufSize)
                         .set_ERROR(fapi2::current_err),
-                        "ERROR: Invalid Fabric VPD size");
+                        "ERROR: Invalid Fabric VPD size (DMI)");
         }
 
         // Allocate memory for buffer
@@ -880,7 +883,7 @@ fapi2::ReturnCode retrieveRepairDataDMI(
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
                     .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size");
+                    "ERROR: Failed to allocate memory size (DMI)");
 
         // Retrieve the Field eRepair data from the PNOR
         FAPI_TRY( getMvpdField(
