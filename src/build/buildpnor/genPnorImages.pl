@@ -261,7 +261,7 @@ if ($secureboot)
 
 ### Open POWER signing
 my $OPEN_SIGN_REQUEST=
-    "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
+    "SB_KEEP_CACHE=true $SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
 # By default key transition container is unused
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
