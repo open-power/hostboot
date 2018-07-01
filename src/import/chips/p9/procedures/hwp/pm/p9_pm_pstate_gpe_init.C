@@ -312,6 +312,8 @@ fapi2::ReturnCode pstate_gpe_reset(
     uint32_t                l_timeout_in_MS = 100;
     std::vector<uint64_t> l_pgpe_base_addr;
     l_pgpe_base_addr.push_back( PGPE_BASE_ADDRESS );
+    fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz = 0;
+    fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_safe_mode_mv = 0;
 
 
     FAPI_IMP(">> pstate_gpe_reset...");
@@ -363,6 +365,14 @@ fapi2::ReturnCode pstate_gpe_reset(
     FAPI_INF("   Clear PGPE_ACTIVE in OCC Flag Register...");
     l_data64.flush<0>().clearBit<p9hcd::PGPE_ACTIVE>();
     FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_data64));
+
+
+    //Reset safe mode attributes
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                           i_target, l_safe_mode_freq_mhz));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                           i_target, l_safe_mode_mv));
+
 
 fapi_try_exit:
     FAPI_IMP("<< pstate_gpe_reset...");
