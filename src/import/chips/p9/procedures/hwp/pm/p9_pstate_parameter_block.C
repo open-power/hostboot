@@ -659,18 +659,40 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             l_localppb.ext_biases[i]  = l_vpdbias[i];
             l_localppb.int_biases[i]  = l_vpdbias[i];
         }
+        if (!attr.attr_pm_safe_voltage_mv &&
+            !attr.attr_pm_safe_frequency_mhz)
+        {
+            uint8_t l_ps_pstate = 0;
+            Safe_mode_parameters l_safe_mode_values;
+            uint32_t l_ps_freq_khz = 
+            l_operating_points[VPD_PT_SET_BIASED][POWERSAVE].frequency_mhz * 1000;
+            freq2pState(&l_globalppb, l_ps_freq_khz, &l_ps_pstate);
+            //Compute safe mode values
+            FAPI_TRY(p9_pstate_safe_mode_computation (
+                        i_target,
+                        l_operating_points,
+                        revle32(l_globalppb.reference_frequency_khz),
+                        revle32(l_globalppb.frequency_step_khz),
+                        l_ps_pstate,
+                        &l_safe_mode_values,
+                        l_poundw_data),
+                    "Error from p9_pstate_safe_mode_computation function");
 
-        // safe_voltage_mv
-        l_globalppb.safe_voltage_mv = revle32(attr.attr_pm_safe_voltage_mv);
+        }
+        else
+        {
+            // safe_voltage_mv
+            l_globalppb.safe_voltage_mv = revle32(attr.attr_pm_safe_voltage_mv);
 
-        // safe_frequency_khz
-        l_globalppb.safe_frequency_khz =
-                        revle32(attr.attr_pm_safe_frequency_mhz * 1000);
-        FAPI_INF("Safe Mode Frequency %d (0x%X) kHz;  Voltage %d (0x%X) mV",
-                 revle32(l_globalppb.safe_frequency_khz),
-                 revle32(l_globalppb.safe_frequency_khz),
-                 revle32(l_globalppb.safe_voltage_mv),
-                 revle32(l_globalppb.safe_voltage_mv));
+            // safe_frequency_khz
+            l_globalppb.safe_frequency_khz =
+                revle32(attr.attr_pm_safe_frequency_mhz * 1000);
+            FAPI_INF("Safe Mode Frequency %d (0x%X) kHz;  Voltage %d (0x%X) mV",
+                    revle32(l_globalppb.safe_frequency_khz),
+                    revle32(l_globalppb.safe_frequency_khz),
+                    revle32(l_globalppb.safe_voltage_mv),
+                    revle32(l_globalppb.safe_voltage_mv));
+        }
 
         // ----------------
         // get Resonant clocking attributes
