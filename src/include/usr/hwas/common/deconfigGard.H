@@ -187,6 +187,8 @@ public:
         DECONFIGURED_BY_NO_PARENT_MI,           // BASE | 0x1A
 
         DECONFIGURED_BY_NO_MATCHING_LINK_SET,   // BASE | 0x1B
+        //used when we deconfigure unused children of OBUS
+        DECONFIGURED_BY_OBUS_MODE,              // BASE | 0x1C
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
