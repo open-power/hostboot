@@ -27,6 +27,12 @@
 
 #include <errl/errlentry.H>
 
+
+/* Associated defines for sendPsuReadSeeprom() function below */
+#define CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES 128
+#define CHIPOP_READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES 8
+
+
 namespace SBEIO
 {
     enum KeyAddrStashKeys
@@ -310,11 +316,14 @@ namespace SBEIO
     * @brief Sends a PSU chipOp to request Seeprom read from SBE
     *
     * @param[in]  i_target         Target with SBE to send read request to
+    *                              Assert if i_target == nullptr
     * @param[in]  i_seepromOffset  Offset in the seeprom image where we want
     *                              to start copying from (ignores ECC)
     * @param[in]  i_readSize       Amount of bytes we want to copy (ignores ECC)
+    *                              Assert if i_readSize is not 128-byte-aligned
     * @param[in]  i_destAddr       Address that hostboot has prepared which the
     *                              sbe will write too
+    *                              Assert if i_destAddr is not 8-byte aligned
     * @param[out] o_opSupported    Bool which tells us if the sbe supports the
     *                              chipOp or not
     *

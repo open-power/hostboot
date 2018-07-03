@@ -26,7 +26,6 @@
 #define __SBE_SBE_UPDATE_H
 
 #include <sbe/sbe_common.H> // sbeSeepromVersionInfo_t
-#include <sbe/sbeif.H>      // sbe_image_version_t
 
 #include <stdint.h>                   // uint32_t, etc
 #include <errl/errlentry.H>           // errlHndl_t

@@ -571,6 +571,7 @@ void validateSecuritySettings()
     err = SBE::getHwKeyHashFromSbeImage(
                                      mProc,
                                      EEPROM::SBE_PRIMARY,
+                                     bootSide,
                                      l_masterHash);
 
     if (err)
@@ -610,6 +611,7 @@ void validateSecuritySettings()
     err = SBE::getHwKeyHashFromSbeImage(
                                       mProc,
                                       EEPROM::SBE_BACKUP,
+                                      bootSide,
                                       l_backupHash);
 
     if (err)
@@ -752,6 +754,7 @@ void validateSecuritySettings()
         err = SBE::getHwKeyHashFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_PRIMARY,
+                                         bootSide,
                                          l_slaveHashPri);
 
         if (err)
@@ -793,6 +796,7 @@ void validateSecuritySettings()
         err = SBE::getHwKeyHashFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_BACKUP,
+                                         bootSide,
                                          l_slaveHashBac);
         if (err)
         {

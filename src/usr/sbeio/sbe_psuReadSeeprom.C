@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,20 +41,17 @@ TRACDCOMP(g_trac_sbeio,"psuReadSeeprom: " printf_string,##args)
 #define SBE_TRACF(printf_string,args...) \
 TRACFCOMP(g_trac_sbeio,"psuReadSeeprom: " printf_string,##args)
 
+#define READ_SEEPROM_SIZE_ALIGNMENT_BYTES 128
+#define READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES 8
+
+
 namespace SBEIO
 {
 
     /**
     * @brief Sends a PSU chipOp to request Seeprom read from SBE
     *
-    * @param[in]  i_target         Target with SBE to send read request to
-    * @param[in]  i_seepromOffset  Offset in the seeprom image where we want
-    *                              to start copying from (ignores ECC)
-    * @param[in]  i_readSize       Amount of bytes we want to copy (ignores ECC)
-    * @param[in]  i_destAddr       Address that hostboot has prepared which the
-    *                              sbe will write too
-    * @param[out] o_opSupported    Bool which tells us if the sbe supports the
-    *                              chipOp or not
+    * @note - details in sbeioif.H
     *
     * @return errlHndl_t Error log handle on failure.
     *
@@ -68,6 +65,11 @@ namespace SBEIO
         errlHndl_t errl = nullptr;
 
         SBE_TRACD(ENTER_MRK "sending psu seeprom read request command from HB -> SBE");
+
+        // Verify input parameters meet restrictions
+        assert(i_target!=nullptr,"sendPsuReadSeeprom: i_target was nullptr");
+        assert((i_readSize % CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES) == 0,"sendPsuReadSeeprom: i_readSize 0x%X is not 128B aligned", i_readSize);
+        assert((i_destAddr % CHIPOP_READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES) == 0,"sendPsuReadSeeprom: i_destAddr 0x%X is not 8B aligned", i_destAddr);
 
         // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(
@@ -97,6 +99,10 @@ namespace SBEIO
             delete errl;
             errl = nullptr;
             o_opSupported = false;
+        }
+        else
+        {
+            o_opSupported = true;
         }
 
         SBE_TRACD(EXIT_MRK "sendPsuReadSeeprom");
