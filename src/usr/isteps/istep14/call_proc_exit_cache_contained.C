@@ -212,13 +212,68 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBaseAddr = 0;
             if(!is_sapphire_load())
             {
-                //First get the Base Memory Mirroring Address
-                l_mirrorBaseAddr =
-                    l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+                //Get all the proc chips
+                TARGETING::TargetHandleList l_cpuTargetList;
+                getAllChips(l_cpuTargetList, TYPE_PROC);
 
-                //Add on the current HRMOR value being used
-                l_mirrorBaseAddr += (cpu_spr_value(CPU_SPR_HRMOR)
-                                                  - VMM_HRMOR_OFFSET);
+                //Iterate through the proc chips, finding the smallest valid
+                // mirrored memory address
+                uint64_t l_mirrorSmallestAddr = 0;
+                for (const auto & l_cpu_target: l_cpuTargetList)
+                {
+                    //Get the acknowledged memory mirror sizes attribute
+                    //  If this is 0, we should not consider this mirror region
+                    uint64_t mirrorSizesAck[sizeof(fapi2::ATTR_PROC_MIRROR_SIZES_ACK_Type)/sizeof(uint64_t)];
+                    bool rc = (l_cpu_target)->
+                        tryGetAttr<TARGETING::ATTR_PROC_MIRROR_SIZES_ACK>(mirrorSizesAck);
+                    if(false == rc)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  "Failed to get ATTR_PROC_MIRROR_SIZES_ACK");
+                        assert(0);
+                    }
+
+                    //Get the acknowledged memory mirror bases attribute
+                    uint64_t mirrorBasesAck[sizeof(fapi2::ATTR_PROC_MIRROR_BASES_ACK_Type)/sizeof(uint64_t)];
+                    rc = (l_cpu_target)->
+                       tryGetAttr<TARGETING::ATTR_PROC_MIRROR_BASES_ACK>(mirrorBasesAck);
+                    if(false == rc)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                 "Failed to get ATTR_PROC_MIRROR_BASES_ACK");
+                        assert(0);
+                    }
+
+                    assert ((sizeof(fapi2::ATTR_PROC_MIRROR_SIZES_ACK_Type) ==
+                               sizeof(fapi2::ATTR_PROC_MIRROR_BASES_ACK_Type)),
+                             "sizeof(ATTRPROC_MIRROR_SIZES_ACK) != sizeof(ATTR_PROC_MIRROR_BASES_ACK)");
+
+                    //Loop through each mirror region looking for the lowest
+                    // valid memory value
+                    for (uint8_t i=0;
+                         i < sizeof(fapi2::ATTR_PROC_MIRROR_BASES_ACK_Type)/sizeof(uint64_t);
+                         i++)
+                    {
+                        if (mirrorSizesAck[i] == 0)
+                        {
+                            //Mirrored memory region has a size of 0, do not consider
+                            continue;
+                        }
+
+                        //Save the smallest address for later use
+                        if (l_mirrorSmallestAddr == 0)
+                        {
+                            l_mirrorSmallestAddr = mirrorBasesAck[i];
+                        }
+                        else if (mirrorBasesAck[i] < l_mirrorBaseAddr &&
+                              mirrorBasesAck[i] != 0)
+                        {
+                            l_mirrorSmallestAddr = mirrorBasesAck[i];
+                        }
+                    }
+                }
+                //Set the mirrored addr to the lowest valid memory value found
+                l_mirrorBaseAddr = l_mirrorSmallestAddr;
             }
 
             // Verify there is memory at the mirrored location
