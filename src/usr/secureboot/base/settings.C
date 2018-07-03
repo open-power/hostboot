@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,13 @@ namespace SECUREBOOT
             SB_INF("Booting in non-secure mode. "
                 "CBS Control/Status Register (0x50001) = 0x%016llX, "
                 "Security Switch Register (0x10005) = 0x%016llX.",
-                securitySwitchValue,cbsValue);
+                cbsValue, securitySwitchValue);
+        }
+        else
+        {
+            #ifdef CONFIG_CONSOLE
+            CONSOLE::displayf(SECURE_COMP_NAME, "Booting in secure mode.");
+            #endif
         }
         #endif
     }
