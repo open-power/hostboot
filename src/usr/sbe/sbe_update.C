@@ -2624,7 +2624,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
         //Set up the buffer which the SBE will copy the version info to
         //Add 127 bytes to the buffer length so we can guarantee a 128 byte aligned addr
-        //Note that the SBE_SEEPROM_VERSION_READ_SIZE is 3 * 128 Bytes to be cacheline aligned
+        //Note that the SBE_SEEPROM_VERSION_READ_SIZE is 2 * 128 Bytes to be cacheline aligned
         uint8_t * l_seepromReadBuffer = static_cast<uint8_t*>(
                                                malloc(SBE_SEEPROM_VERSION_READ_SIZE + 127 ));
 
