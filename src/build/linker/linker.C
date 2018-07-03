@@ -5,8 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Jan Hlavac                                                         */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -189,8 +190,8 @@ struct Object
         /**
          * CTOR default
          */
-        Object() : image(NULL), offset(0), base_addr(0), iv_output(NULL),
-                   text(), rodata(), data() {}
+        Object() : image(NULL), text(), rodata(), data(),
+                   offset(0), base_addr(0), iv_output(NULL) {}
 
         /**
          * CTOR
@@ -198,8 +199,8 @@ struct Object
          * @param[in] i_out : output FILE handle
          */
         Object(unsigned long i_baseAddr, FILE* i_out)
-            : image(NULL), offset(0), base_addr(i_baseAddr), iv_output(i_out),
-              text(), rodata(), data() {}
+            : image(NULL), text(), rodata(), data(),
+              offset(0), base_addr(i_baseAddr), iv_output(i_out) {}
 };
 
 inline bool Object::isELF()
@@ -458,7 +459,7 @@ int main(int argc, char** argv)
             bfd_putb64(count, temp64);
             fwrite(temp64, sizeof(uint64_t), 1, objects[0].iv_output);
 
-            for (int i = 0; i < all_relocations.size(); i++)
+            for (size_t i = 0; i < all_relocations.size(); i++)
             {
                 bfd_putb64(all_relocations[i], temp64);
                 fwrite(temp64, sizeof(uint64_t), 1, objects[0].iv_output);
@@ -613,6 +614,7 @@ bool Object::write_object()
     modinfo << &name[(name.find_last_of("/")+1)] << ",0x"
         << std::hex << offset + base_addr << endl;
 
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -824,6 +826,8 @@ bool Object::perform_local_relocations()
         cout << "\tRelocated " << i->addend << " at " << i->address << " to "
             << relocation << endl;
     }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -934,6 +938,8 @@ bool Object::perform_global_relocations()
             throw range_error(oss.str());
         }
     }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
