@@ -80,7 +80,7 @@ function buildrel-create-track {
     ### Compile and provide binaries
     setup
     if echo $FIPS_RELEASE | grep -q fips9; then
-        # First bulid the standalone
+        # First build the standalone
 
         echo -e "[$(date)]\n#####-> BUILD_MINIMAL=1 nice -+20 make -j16\n"
         BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
@@ -111,6 +111,17 @@ function buildrel-create-track {
             $CMVC_DIR/src/hbfw/cumulus || exit -1\n"
         cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus \
             || exit -1
+
+        if [ -f $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor ]; then
+            mkdir -p $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
+            echo -e "[$(date)]\n#####-> cp \
+                $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor \
+                $CMVC_DIR/src/hbfw/cumulus_cdimm\n"
+            cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus_cdimm.pnor $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
+            echo -e "[$(date)]\n#####-> cp $SANDBOXBASE/src/hbfw/simics.tar \
+                $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1\n"
+            cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus_cdimm || exit -1
+        fi
 
         echo -e "[$(date)]\n#####-> make clobber\n"
         #
