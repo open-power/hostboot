@@ -26,6 +26,7 @@
 #define _SBEIF_H
 
 #include <sbe/sbe_common.H>
+#include <sbe/sbe_update.H>
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
 #include <secureboot/service.H>
@@ -33,8 +34,6 @@
 
 namespace SBE
 {
-    typedef uint8_t sbe_image_version_t[SBE_IMAGE_VERSION_SIZE];
-
     /**
      * @brief Gets a pointer to the proper SBE image in PNOR
      *
@@ -115,6 +114,12 @@ namespace SBE
      *                        NOTE: Ignored if i_image_ptr specifies an image
      *                        (ie, != nullptr).
      *
+     *
+     * @param[in] i_bootSide  Designates which Seeprom the processor booted on.
+     *                        If i_bootSide and i_seeprom match then ChipOps
+     *                        will be used to read the Seeprom to avoid I2C
+     *                        collisions.
+     *
      * @param[out] o_hash     HW Key Hash returned from the Processor SEEPROM
      *
      * @param[in] i_image_ptr  Defaults to nullptr.
@@ -127,6 +132,7 @@ namespace SBE
      */
     errlHndl_t getHwKeyHashFromSbeImage(TARGETING::Target* i_target,
                                         EEPROM::eeprom_chip_types_t i_seeprom,
+                                        sbeSeepromSide_t i_bootSide,
                                         SHA512_t o_hash,
                                         const void * i_image_ptr = nullptr);
 

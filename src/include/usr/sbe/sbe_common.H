@@ -158,6 +158,7 @@ namespace SBE
     static_assert(0 == (sizeof(sbeSeepromVersionInfo_t) % 8),
                   "sbeSeepromVersionInfo_t is not 8-byte-aligned");
 
+    typedef uint8_t sbe_image_version_t[SBE_IMAGE_VERSION_SIZE];
 
     /**
      * @brief Struct of individual SBE entry in SBE

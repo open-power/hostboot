@@ -2330,6 +2330,7 @@ namespace SBE
             SHA512_t hash = {0};
             err = getHwKeyHashFromSbeImage(io_sbeState.target,  // ignored
                                            EEPROM::SBE_PRIMARY, // ignored
+                                           SBE_SEEPROM_INVALID, // ignored
                                            hash,
                                            pCustomizedBfr);
 
@@ -5578,18 +5579,35 @@ errlHndl_t sbeDoReboot( void )
 errlHndl_t getHwKeyHashFromSbeImage(
                            TARGETING::Target* const i_target,
                            const EEPROM::eeprom_chip_types_t i_seeprom,
+                           const sbeSeepromSide_t i_bootSide,
                            SHA512_t o_hash,
                            const void * i_image_ptr) // defaults to nullptr
 {
     errlHndl_t err = nullptr;
 
     // if i_image_ptr == nullptr, then read from SBE Seeprom;
+    //   if i_seepom matches i_bootSide then read from SEEPROM via ChipOp
+    //   else read from SEEPROM via I2C
     // if i_image_ptr != nullptr, then read from memory at i_image_ptr
+    // TODO RTC:186269 Remove check forcing down I2C path when simics issue
+    // is resolved
+    bool l_useChipOp = (((i_bootSide == SBE_SEEPROM0) &&
+                         (i_seeprom == EEPROM::SBE_PRIMARY)) ||
+                        ((i_bootSide == SBE_SEEPROM1) &&
+                        (i_seeprom == EEPROM::SBE_BACKUP)))
+                        && !Util::isSimicsRunning();
+
+    // reading via ChipOp should be supported, but this parameter is still used
+    // for the call
+    bool l_chipOpSupported = false;
+
     TRACFCOMP( g_trac_sbe, ENTER_MRK"getHwKeyHashFromSbeImage: "
                "i_target=0x%X, i_seeprom=%d, i_image_ptr=%p: "
                "reading from %s",
                get_huid(i_target), i_seeprom, i_image_ptr,
-               (i_image_ptr) ? "memory" : "seeprom");
+               (i_image_ptr) ? "memory" :
+                  (l_useChipOp) ? "seeprom via ChipOp" :
+                                  "seeprom via I2C");
 
     // Check Input Parameters
     if ( i_image_ptr == nullptr )
@@ -5617,17 +5635,34 @@ errlHndl_t getHwKeyHashFromSbeImage(
     // Create buffers for read operations and removing ECC
     const size_t max_buffer_size = PNOR::ECC::sizeWithEcc(
          (std::max(sizeof(P9XipHeader), sizeof(SHA512_t))));
-
     uint8_t tmp_data[max_buffer_size] = {0};
     uint8_t tmp_data_ECC[max_buffer_size] = {0};
 
 
+    // For reading via ChipOp we need buffer on a 128 byte boundary, so get
+    // the right size for that boundary and then add 127 bytes to the buffer
+    // length so we can guarantee a 128 byte aligned addr
+    const size_t max_buffer_size_chipOp =
+                   ALIGN_X(max_buffer_size,
+                           CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES);
+    uint8_t * l_chipOpBuffer = static_cast<uint8_t*>(
+                                      malloc(max_buffer_size_chipOp + 127 ));
+
+    uint64_t l_chipOpBufferAligned =
+                 ALIGN_X(reinterpret_cast<uint64_t>(l_chipOpBuffer),
+                         128);
+    // Clear Buffer
+    memset( reinterpret_cast<uint8_t*>(l_chipOpBufferAligned),
+            0,
+            max_buffer_size);
     do{
         // Get P9XipHeader, which is at the start of the SBE Image
         seeprom_offset = 0;
 
-        if ( i_image_ptr == nullptr )
+        if ( ( i_image_ptr == nullptr ) &&
+             ( l_useChipOp == false ) )
         {
+            // Read Seeprom via I2C
             // Calculate amount of data to read from SEEPROM
             size = PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader));
             expected_size = size;
@@ -5676,6 +5711,36 @@ errlHndl_t getHwKeyHashFromSbeImage(
                       "getHwKeyHashFromSbeImage: P9XipHeader with ECC",
                       tmp_data_ECC,
                       PNOR::ECC::sizeWithEcc(sizeof(P9XipHeader().iv_magic) ) );
+
+        }
+        else if ( ( i_image_ptr == nullptr ) &&
+                  ( l_useChipOp == true ) )
+        {
+            // Read Seeprom via ChipOp
+            err = SBEIO::sendPsuReadSeeprom(
+                           i_target,
+                           seeprom_offset,
+                           ALIGN_X(sizeof(P9XipHeader),
+                                   CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES),
+                           mm_virt_to_phys(reinterpret_cast
+                                           <void*>(l_chipOpBufferAligned)),
+                           l_chipOpSupported);
+
+            if(err || !l_chipOpSupported)
+            {
+              TRACFCOMP( g_trac_sbe,
+                          "getHwKeyHashFromSbeImage: Error reading P9XipHeader "
+                          "from seeprom via chipOp: either the Op is not "
+                          "supported by SBE (%d) or something else went wrong "
+                          "(err_rc=0x%X, err_plid=0x%X)",
+                          l_chipOpSupported, ERRL_GETRC_SAFE(err),
+                          ERRL_GETPLID_SAFE(err));
+               break;
+            }
+            // Copy P9XipHeader to local membuf
+            memcpy (tmp_data,
+                    reinterpret_cast<void*>(l_chipOpBufferAligned),
+                    sizeof(P9XipHeader));
 
         }
         else
@@ -5755,19 +5820,23 @@ errlHndl_t getHwKeyHashFromSbeImage(
         // Calculate Seeprom offset
         // -- Raw Image Offset -- HW Key Hash is at end of HBBL section
         seeprom_offset = l_xipSection.iv_offset + HBBL_HW_KEY_HASH_LOCATION;
-        if ( i_image_ptr == nullptr )
+        if ( ( i_image_ptr == nullptr ) &&
+             ( l_useChipOp == false ) )
         {
             // Math to convert Image offset to Seeprom(with ECC) Offset
+            // when reading Seeprom via I2C
             seeprom_offset = setECCSize(seeprom_offset);
         }
 
         TRACUCOMP( g_trac_sbe, "getHwKeyHashFromSbeImage: seeprom_offset "
                    "= 0x%X, size = 0x%X",
-                   seeprom_offset, size);
+                   seeprom_offset, l_xipSection.iv_size);
 
-        // Read HW Key Hash from SBE Image
-        if ( i_image_ptr == nullptr)
+        if ( ( i_image_ptr == nullptr ) &&
+            ( l_useChipOp == false ) )
         {
+            // Read HW Key Hash from SBE Image via I2C
+
             // Clear buffers and set size to SHA512_t+ECC
             memset( tmp_data_ECC, 0, max_buffer_size );
             memset( tmp_data, 0, max_buffer_size );
@@ -5828,6 +5897,37 @@ errlHndl_t getHwKeyHashFromSbeImage(
                        "found successfully from SBE Seeprom- setting o_hash");
             memcpy(o_hash, tmp_data, sizeof(SHA512_t));
         }
+        else if ( ( i_image_ptr == nullptr ) &&
+                  ( l_useChipOp == true ) )
+        {
+
+            // Read Seeprom via ChipOp
+            err = SBEIO::sendPsuReadSeeprom(
+                           i_target,
+                           seeprom_offset,
+                           ALIGN_X(sizeof(SHA512_t),
+                                   CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES),
+                           mm_virt_to_phys(reinterpret_cast
+                                           <void*>(l_chipOpBufferAligned)),
+                           l_chipOpSupported);
+
+            if(err || !l_chipOpSupported)
+            {
+               TRACFCOMP( g_trac_sbe,
+                          "getHwKeyHashFromSbeImage: Error reading Hash from "
+                          "seeprom via chipOp: either the Op is not supported "
+                          "by SBE (%d) or something else went wrong: (err_rc="
+                          "0x%X, err_plid=0x%X): offset=0x%X",
+                          l_chipOpSupported, ERRL_GETRC_SAFE(err),
+                          ERRL_GETPLID_SAFE(err), seeprom_offset);
+               break;
+            }
+            // Copy P9XipHeader to local membuf
+            memcpy (o_hash,
+                    reinterpret_cast<void*>(l_chipOpBufferAligned),
+                    sizeof(SHA512_t));
+
+        }
         else
         {
             // Copy HW Key Hash from system memory
@@ -5879,6 +5979,12 @@ errlHndl_t getHwKeyHashFromSbeImage(
         err->collectTrace(SBE_COMP_NAME);
     }
 
+    //Free up the buffer before returning no matter what
+    if (l_chipOpBuffer)
+    {
+        free(l_chipOpBuffer);
+        l_chipOpBuffer = nullptr;
+    }
 
     TRACFCOMP( g_trac_sbe, EXIT_MRK"getHwKeyHashFromSbeImage: "
                "err rc=0x%X, plid=0x%X, o_hash=0x%.8X",
