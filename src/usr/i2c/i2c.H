@@ -944,6 +944,23 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
 void setLogicalFsiEnginePort(size_t &io_logical_engine,
                                    size_t &io_logical_port);
 
+/**
+ * @brief This function handles adding hw callouts to error logs that may arise
+ *        during communications over the I2C bus. Within the i2c code, it is
+ *        preferable to use this function over adding hw callouts directly to
+ *        make sure all paths are handled correctly.
+ *
+ * @param[in] i_err - error log to add callouts to. Must not be nullptr.
+ * @param[in] i_target - I2C Master Target device. Must not be nullptr.
+ * @param[in] i_args - miscellaneous args struct containing the port, engine,
+ *            devAddr necessary to find associated I2c devices.
+ *
+ * @return void
+ */
+void addHwCalloutsI2c(errlHndl_t i_err,
+                      TARGETING::Target * i_target,
+                      const misc_args_t & i_args);
+
 }; // end I2C namespace
 
 #endif  // __I2C_H

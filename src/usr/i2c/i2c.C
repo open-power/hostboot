@@ -1473,14 +1473,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                                                        i_target),
                                                    I2C_SET_USER_DATA_2(i_args));
 
-                    // For now limited in what we can call out:
-                    // Could be an issue with Processor or its bus
-                    // -- both on the same FRU
-                    // @todo RTC 94872 - update this callout
-                    err->addHwCallout( i_target,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL );
+                    addHwCalloutsI2c(err, i_target, i_args);
 
                     // Or HB code failed to do the procedure correctly
                     err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1930,51 +1923,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                                                    i_target),
                                                I2C_SET_USER_DATA_2(i_args));
 
-                // Attempt to find a target representing the device that
-                // failed to respond, and call it out as the most likely
-                // problem. For now, we only support TPM reverse lookup;
-                // TODO RTC 94872 will implement generic support for other
-                // devices.
-
-                // Loop thru TPMs in the system and match physical path,
-                // engine, and port to the i2c master
-                auto l_devFound = false;
-                const auto l_physPath = i_target->getAttr<
-                                                 TARGETING::ATTR_PHYS_PATH>();
-                TARGETING::TargetHandleList allTpms;
-                TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
-                for(const auto &tpm: allTpms)
-                {
-                    const auto l_tpmInfo = tpm->getAttr<
-                                                  TARGETING::ATTR_TPM_INFO>();
-
-                    if (l_tpmInfo.i2cMasterPath == l_physPath &&
-                        l_tpmInfo.engine == i_args.engine &&
-                        l_tpmInfo.port == i_args.port)
-                    {
-                        TRACFCOMP(g_trac_i2c,
-                            "Unresponsive TPM found: "
-                            "Engine=%d, masterPort=%d "
-                            "huid for its i2c master is 0x%.8X",
-                            l_tpmInfo.engine,
-                            l_tpmInfo.port,
-                            TARGETING::get_huid(i_target));
-                        err->addHwCallout(tpm,
-                                          HWAS::SRCI_PRIORITY_HIGH,
-                                          HWAS::NO_DECONFIG,
-                                          HWAS::GARD_NULL);
-                        l_devFound = true;
-                        break;
-                    }
-                }
-
-                // Could also be an issue with Processor or its bus
-                // -- both on the same FRU
-                err->addHwCallout( i_target,
-                                   l_devFound? HWAS::SRCI_PRIORITY_MED:
-                                               HWAS::SRCI_PRIORITY_HIGH,
-                                   HWAS::NO_DECONFIG,
-                                   HWAS::GARD_NULL );
+                addHwCalloutsI2c(err, i_target, i_args);
 
                 // Or HB code failed to do the procedure correctly
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -2176,14 +2125,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
                                                i_target),
                                            I2C_SET_USER_DATA_2(i_args));
 
-            // For now limited in what we can call out:
-            // Could be an issue with Processor or its bus
-            // -- both on the same FRU
-            // @todo RTC 94872 - update this callout
-            err->addHwCallout( i_target,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::NO_DECONFIG,
-                               HWAS::GARD_NULL );
+            addHwCalloutsI2c(err, i_target, i_args);
 
             // Or HB code failed to do the procedure correctly
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -2225,14 +2167,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
                                                i_target),
                                            I2C_SET_USER_DATA_2(i_args));
 
-            // For now limited in what we can call out:
-            // Could be an issue with Processor or its bus
-            // -- both on the same FRU
-            // @todo RTC 94872 - update this callout
-            err->addHwCallout( i_target,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::NO_DECONFIG,
-                               HWAS::GARD_NULL );
+            addHwCalloutsI2c(err, i_target, i_args);
 
             // Or HB code failed to do the procedure correctly
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -2273,14 +2208,7 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
                                                i_target),
                                            I2C_SET_USER_DATA_2(i_args));
 
-            // For now limited in what we can call out:
-            // Could be an issue with Processor or its bus
-            // -- both on the same FRU
-            // @todo RTC 94872 - update this callout
-            err->addHwCallout( i_target,
-                               HWAS::SRCI_PRIORITY_HIGH,
-                               HWAS::NO_DECONFIG,
-                               HWAS::GARD_NULL );
+            addHwCalloutsI2c(err, i_target, i_args);
 
             // Or HB code failed to do the procedure correctly
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -2385,14 +2313,7 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
                                                    i_target),
                                                I2C_SET_USER_DATA_2(i_args));
 
-                // For now limited in what we can call out:
-                // Could be an issue with Processor or its bus
-                // -- both on the same FRU
-                // @todo RTC 94872 - update this callout
-                err->addHwCallout( i_target,
-                                   HWAS::SRCI_PRIORITY_HIGH,
-                                   HWAS::NO_DECONFIG,
-                                   HWAS::GARD_NULL );
+                addHwCalloutsI2c(err, i_target, i_args);
 
                 // Or HB code failed to do the procedure correctly
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -4460,6 +4381,62 @@ void setLogicalFsiEnginePort(size_t &io_logical_engine, size_t &io_logical_port)
             break;
         }
     }
+}
+
+void addHwCalloutsI2c(errlHndl_t i_err,
+                      TARGETING::Target * i_target,
+                      const misc_args_t & i_args)
+{
+    assert(i_err != nullptr, "Bug! The supplied error log is nullptr.");
+    assert(i_target != nullptr, "Bug! The supplied target is nullptr.");
+
+    // Attempt to find a target representing the device that
+    // failed to respond, and call it out as the most likely
+    // problem. For now, we only support TPM reverse lookup;
+    // TODO RTC 94872 will implement generic support for other
+    // devices.
+
+    // Loop thru TPMs in the system and match physical path,
+    // engine, and port to the i2c master
+    auto l_devFound = false;
+    const auto l_physPath = i_target->getAttr<
+                                     TARGETING::ATTR_PHYS_PATH>();
+    TARGETING::TargetHandleList allTpms;
+    TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
+    for(const auto &tpm: allTpms)
+    {
+        const auto l_tpmInfo = tpm->getAttr<
+                                      TARGETING::ATTR_TPM_INFO>();
+
+        if (l_tpmInfo.i2cMasterPath == l_physPath &&
+            l_tpmInfo.engine == i_args.engine &&
+            l_tpmInfo.port == i_args.port &&
+            l_tpmInfo.devAddrLocality0 == i_args.devAddr)
+        {
+            TRACFCOMP(g_trac_i2c,
+                "Unresponsive TPM found: "
+                "Engine=%d, masterPort=%d "
+                "huid for its i2c master is 0x%.8X",
+                l_tpmInfo.engine,
+                l_tpmInfo.port,
+                TARGETING::get_huid(i_target));
+            i_err->addHwCallout(tpm,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::NO_DECONFIG,
+                              HWAS::GARD_NULL);
+            l_devFound = true;
+            break;
+        }
+    }
+
+    // Could also be an issue with Processor or its bus
+    // -- both on the same FRU
+    i_err->addHwCallout( i_target,
+                       l_devFound? HWAS::SRCI_PRIORITY_MED:
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                       HWAS::NO_DECONFIG,
+                       HWAS::GARD_NULL );
+
 }
 
 }; // end namespace I2C
