@@ -206,4 +206,17 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_CEN_MSS_ROW_REPAIR_NOT_SUPPORTED</rc>
+    <description>An sPPR row repair operation was attempted on a DDR3 part, which doesn't support it.</description>
+    <ffdc>TARGET_MBA</ffdc>
+    <ffdc>PORT</ffdc>
+    <ffdc>MRANK</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

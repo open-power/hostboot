@@ -35,6 +35,7 @@
 #ifndef _MSS_DDR4_FUNCS_H
 #define _MSS_DDR4_FUNCS_H
 
+#include <p9c_mss_funcs.H>
 
 //----------------------------------------------------------------------
 // DDR4 FUNCS
@@ -211,6 +212,17 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                    const fapi2::variable_buffer& i_ddr_cal_enable_1,
                                    const fapi2::variable_buffer& i_ccs_end_1,
                                    uint32_t& io_ccs_inst_cnt);
+
+/// @brief Add an MRS command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for MRS
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert MRS command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const access_address i_addr,
+                                      const uint32_t i_delay,
+                                      uint32_t& io_instruction_number);
 
 #endif /* _MSS_DDR4_FUNCS_H */
 

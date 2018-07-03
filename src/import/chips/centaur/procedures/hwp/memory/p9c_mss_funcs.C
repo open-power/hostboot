@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <p9c_mss_funcs.H>
 #include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/bit_count.H>
 
@@ -2456,6 +2457,121 @@ fapi2::ReturnCode add_nop_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_
                                  cal_type_4,
                                  l_port));
 
+    // CCS Array 1 Setup
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
+    ++io_instruction_number;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add an MRS command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for MRS
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert MRS command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_mrs_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                 const access_address i_addr,
+                                 const uint32_t i_delay,
+                                 uint32_t& io_instruction_number)
+{
+    uint8_t l_is_sim = 0;
+    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
+    uint8_t l_stack_type_u8array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_addr.mrank - MAX_RANKS_PER_DIMM * l_dimm;
+
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+    uint32_t l_port = i_addr.port;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  l_stack_type_u8array));
+
+    // CCS Array 0 Setup
+
+    // Buffer conversions from inputs
+    FAPI_TRY(addr_16.insertFromRight(i_addr.row_addr, 0, 16));
+    FAPI_TRY(addr_16.extract(l_data_16));
+    l_data_16.reverse();
+    FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+    FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
+    FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
+    l_data_8.reverse();
+    FAPI_TRY(bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
+    FAPI_INF("%s add_MRS_to_ccs ADDR : 0x%04X  MR : 0x%X", mss::c_str(i_target_mba), i_addr.row_addr, i_addr.bank);
+
+    FAPI_TRY(cs_decode(i_target_mba, i_addr, l_stack_type_u8array[0][0], csn_8));
+
+    // Command structure setup
+    cke_4.flush<1>();
+    FAPI_TRY(rasn_1.clearBit(0));
+    FAPI_TRY(casn_1.clearBit(0));
+    FAPI_TRY(wen_1.clearBit(0));
+
+    FAPI_TRY(read_compare_1.clearBit(0));
+
+    // Final setup
+    odt_4.flush<0>();
+    cal_type_4.flush<0>();
+    FAPI_TRY(ddr4_activate_1.setBit(0));
+
+    if ((l_address_mirror_map[l_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
+    {
+        FAPI_TRY(mss_address_mirror_swizzle(i_target_mba, addr_16, bank_3));
+    }
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
 
     // CCS Array 1 Setup
     FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
@@ -2475,7 +2591,591 @@ fapi2::ReturnCode add_nop_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_
                                  rank_cal_4,
                                  cal_enable_1,
                                  ccs_end_1));
+    ++io_instruction_number;
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add an ACT command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_activate_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const access_address i_addr,
+                                      const uint32_t i_delay,
+                                      uint32_t& io_instruction_number)
+{
+    uint8_t l_is_sim = 0;
+    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
+    uint8_t l_stack_type_u8array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_addr.mrank - MAX_RANKS_PER_DIMM * l_dimm;
+
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+
+    uint8_t l_dram_type;
+    uint32_t l_port = i_addr.port;
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target_mba, l_dram_type));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  l_stack_type_u8array));
+
+    // CCS Array 0 Setup
+
+    // Buffer conversions from inputs
+    FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
+    FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
+    l_data_8.reverse();
+    FAPI_TRY(bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
+    csn_8.flush<1>();
+    cke_4.flush<1>();
+
+    FAPI_TRY(cs_decode(i_target_mba, i_addr, l_stack_type_u8array[0][0], csn_8));
+
+    // Command structure setup
+    // executes DDR4 commands if neccessary, otherwise executes DDR3 commands
+    if(l_dram_type == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+    {
+        FAPI_TRY(ddr4_activate_1.clearBit(0));
+
+        FAPI_TRY(wen_1.insert(i_addr.row_addr, 0 , 1 , 17));
+        FAPI_TRY(casn_1.insert(i_addr.row_addr, 0 , 1 , 16));
+        FAPI_TRY(rasn_1.insert(i_addr.row_addr, 0 , 1 , 15));
+
+        FAPI_TRY(addr_16.insertFromRight(i_addr.row_addr, 0, 16));
+        FAPI_TRY(addr_16.extract(l_data_16));
+        l_data_16.reverse();
+        FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+
+        FAPI_TRY(addr_16.insert(i_addr.row_addr, 14 , 1 , 14));
+        FAPI_TRY(addr_16.insert(i_addr.bank, 15 , 1 , 4));
+    }
+    else
+    {
+        FAPI_TRY(rasn_1.clearBit(0));
+        FAPI_TRY(casn_1.setBit(0));
+        FAPI_TRY(ddr4_activate_1.setBit(0));
+        FAPI_TRY(addr_16.insertFromRight(i_addr.row_addr, 0, 16));
+        FAPI_TRY(addr_16.extract(l_data_16));
+        l_data_16.reverse();
+        FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+    }
+
+    // Final setup
+    odt_4.flush<0>();
+    cal_type_4.flush<0>();
+
+    if ((l_address_mirror_map[l_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
+    {
+        FAPI_TRY(mss_address_mirror_swizzle(i_target_mba, addr_16, bank_3));
+    }
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
+
+    // CCS Array 1 Setup
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
+    ++io_instruction_number;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add a WR command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_write_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                   const access_address i_addr,
+                                   const uint32_t i_delay,
+                                   uint32_t& io_instruction_number)
+{
+    uint8_t l_is_sim = 0;
+    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
+    uint8_t l_stack_type_u8array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_addr.mrank - MAX_RANKS_PER_DIMM * l_dimm;
+
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+
+    uint8_t l_dram_type;
+    uint8_t l_odt[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM];
+    uint32_t l_port = i_addr.port;
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target_mba, l_dram_type));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target_mba,  l_odt));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  l_stack_type_u8array));
+
+    // Buffer conversions from inputs
+    FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
+    FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
+    l_data_8.reverse();
+    FAPI_TRY(bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
+
+    FAPI_TRY(cs_decode(i_target_mba, i_addr, l_stack_type_u8array[0][0], csn_8));
+
+    // Command structure setup
+    cke_4.flush<1>();
+    FAPI_TRY(rasn_1.setBit(0));
+    FAPI_TRY(casn_1.clearBit(0));
+    FAPI_TRY(wen_1.clearBit(0));
+
+    // Final setup
+    FAPI_TRY(odt_4.insert(l_odt[l_port][l_dimm][l_dimm_rank], 0, 4));
+    cal_type_4.flush<0>();
+    FAPI_TRY(ddr4_activate_1.setBit(0));
+
+    if(l_dram_type == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+    {
+        FAPI_TRY(addr_16.insertFromRight(i_addr.col_addr, 0, 16));
+        FAPI_TRY(addr_16.extract(l_data_16));
+        l_data_16.reverse();
+        FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+        FAPI_TRY(addr_16.setBit(12)); // burst length 8
+
+        FAPI_TRY(addr_16.insert(i_addr.bank, 15 , 1 , 4));
+
+    }
+    else
+    {
+        FAPI_TRY(addr_16.insertFromRight(i_addr.col_addr, 0, 16));
+        FAPI_TRY(addr_16.extract(l_data_16));
+        l_data_16.reverse();
+        FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+        FAPI_TRY(addr_16.setBit(12)); // burst length 8
+    }
+
+    if ((l_address_mirror_map[l_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
+    {
+        FAPI_TRY(mss_address_mirror_swizzle(i_target_mba, addr_16, bank_3));
+    }
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
+
+    // CCS Array 1 Setup
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
+    ++io_instruction_number;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add an ODT command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_repeat number of repeats to specify in this instruction
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_odt_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                 const access_address i_addr,
+                                 const uint32_t i_repeat,
+                                 const uint32_t i_delay,
+                                 uint32_t& io_instruction_number)
+{
+    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_addr.mrank % MAX_RANKS_PER_DIMM;
+
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+
+    uint8_t l_dram_type;
+    uint8_t l_odt[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM];
+    const uint32_t odt_cyc = 5;
+    uint32_t l_port = i_addr.port;
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target_mba, l_dram_type));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target_mba,  l_odt));
+
+    // Buffer conversions from inputs
+    addr_16.flush<0>();
+    bank_3.flush<0>();
+    csn_8.flush<1>();
+    FAPI_TRY(csn_8.clearBit(6));
+    FAPI_TRY(csn_8.clearBit(7));  //  need to have a unused cs_n for the valid data to write out on the bus.
+
+    // Command structure setup
+    cke_4.flush<1>();
+    FAPI_TRY(rasn_1.setBit(0));
+    FAPI_TRY(casn_1.setBit(0));
+    FAPI_TRY(wen_1.setBit(0));
+
+    // Final setup
+    FAPI_TRY(odt_4.insert(l_odt[l_port][l_dimm][l_dimm_rank], 0, 4));
+    cal_type_4.flush<0>();
+    FAPI_TRY(ddr4_activate_1.setBit(0));
+
+    if(l_dram_type == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+    {
+        FAPI_TRY(addr_16.setBit(12)); // burst length 8
+    }
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
+
+    // CCS Array 1 Setup
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    FAPI_TRY(repeat_16.insertFromRight((i_repeat + odt_cyc), 0, 16));
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
+    ++io_instruction_number;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add a precharge all command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in] i_odt_wr value of ATTR_CEN_VPD_ODT_WR
+/// @param[in] i_stack_type value of ATTR_CEN_EFF_STACK_TYPE
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_precharge_all_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        const access_address i_addr,
+        const uint32_t i_delay,
+        const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM],
+        const uint8_t (&i_stack_type)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT],
+        uint32_t& io_instruction_number)
+{
+    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
+    const uint8_t l_dimm_rank = i_addr.mrank % MAX_RANKS_PER_DIMM;
+
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+
+    uint32_t l_port = i_addr.port;
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+
+    // Buffer conversions from inputs
+    FAPI_TRY(addr_16.insertFromRight(i_addr.col_addr, 0, 16));
+    FAPI_TRY(addr_16.extract(l_data_16));
+    l_data_16.reverse();
+    FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+    FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
+    FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
+    l_data_8.reverse();
+    FAPI_TRY(bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
+
+    FAPI_TRY(cs_decode(i_target_mba, i_addr, i_stack_type[0][0], csn_8));
+
+    // Command structure setup
+    cke_4.flush<1>();
+    FAPI_TRY(rasn_1.clearBit(0));
+    FAPI_TRY(casn_1.setBit(0));
+    FAPI_TRY(wen_1.clearBit(0));
+    FAPI_TRY(addr_16.setBit(10));
+
+    // Final setup
+    FAPI_TRY(odt_4.insert(i_odt_wr[l_port][l_dimm][l_dimm_rank], 0, 4));
+    cal_type_4.flush<0>();
+    FAPI_TRY(ddr4_activate_1.setBit(0));
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
+
+    // CCS Array 1 Setup
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
+    ++io_instruction_number;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Add a DES command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_repeat number of repeats to specify in this instruction
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_des_with_repeat_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        const access_address i_addr,
+        const uint32_t i_repeat,
+        const uint32_t i_delay,
+        uint32_t& io_instruction_number)
+{
+    // CCS Array 0 buffers
+    fapi2::variable_buffer addr_16(16);
+    fapi2::variable_buffer bank_3(3);
+    fapi2::variable_buffer ddr4_activate_1(1);
+    fapi2::variable_buffer rasn_1(1);
+    fapi2::variable_buffer casn_1(1);
+    fapi2::variable_buffer wen_1(1);
+    fapi2::variable_buffer cke_4(4);
+    fapi2::variable_buffer csn_8(8);
+    fapi2::variable_buffer odt_4(4);
+    fapi2::variable_buffer cal_type_4(4);
+
+    // CCS Array 1 buffers
+    fapi2::variable_buffer idles_16(16);
+    fapi2::variable_buffer repeat_16(16);
+    fapi2::variable_buffer pattern_20(20);
+    fapi2::variable_buffer read_compare_1(1);
+    fapi2::variable_buffer rank_cal_4(4);
+    fapi2::variable_buffer cal_enable_1(1);
+    fapi2::variable_buffer ccs_end_1(1);
+    fapi2::buffer<uint8_t> l_data_8;
+    fapi2::buffer<uint16_t> l_data_16;
+    uint32_t l_port = i_addr.port;
+
+    // CCS Array 0 Setup
+
+    // Buffer conversions from inputs
+    FAPI_TRY(addr_16.insertFromRight(i_addr.row_addr, 0, 16));
+    FAPI_TRY(addr_16.extract(l_data_16));
+    l_data_16.reverse();
+    FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
+    FAPI_TRY(bank_3.insertFromRight(i_addr.bank, 0, 3));
+    FAPI_TRY(bank_3.extract(l_data_8, 0, 3));
+    l_data_8.reverse();
+    FAPI_TRY(bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
+    csn_8.flush<1>();
+
+    // Command structure setup
+    cke_4.flush<1>();
+    FAPI_TRY(rasn_1.setBit(0));
+    FAPI_TRY(casn_1.setBit(0));
+    FAPI_TRY(wen_1.setBit(0));
+
+    FAPI_TRY(read_compare_1.clearBit(0));
+
+    // Final setup
+    odt_4.flush<0>();
+    cal_type_4.flush<0>();
+    FAPI_TRY(ddr4_activate_1.setBit(0));
+
+    FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
+                                 io_instruction_number,
+                                 addr_16,
+                                 bank_3,
+                                 ddr4_activate_1,
+                                 rasn_1,
+                                 casn_1,
+                                 wen_1,
+                                 cke_4,
+                                 csn_8,
+                                 odt_4,
+                                 cal_type_4,
+                                 l_port));
+
+    // CCS Array 1 Setup
+    idles_16.flush<0>();
+    FAPI_TRY(idles_16.insertFromRight(i_delay, 0, 16));
+    repeat_16.flush<0>();
+    FAPI_TRY(repeat_16.insertFromRight(i_repeat, 0, 16));
+    pattern_20.flush<0>();
+    read_compare_1.flush<0>();
+    rank_cal_4.flush<0>();
+    cal_enable_1.flush<0>();
+    ccs_end_1.flush<0>();
+
+    FAPI_TRY(mss_ccs_inst_arry_1(i_target_mba,
+                                 io_instruction_number,
+                                 idles_16,
+                                 repeat_16,
+                                 pattern_20,
+                                 read_compare_1,
+                                 rank_cal_4,
+                                 cal_enable_1,
+                                 ccs_end_1));
     ++io_instruction_number;
 
 fapi_try_exit:
@@ -2501,8 +3201,8 @@ fapi2::ReturnCode cs_decode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_targe
 
     if(i_stack_type == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
     {
-        FAPI_TRY(mrank.insert(i_addr.rank, 4, 4 , 0));
-        FAPI_TRY(cid.insert(i_addr.rank, 4, 4, 4));
+        FAPI_TRY(mrank.insert(i_addr.mrank, 4, 4, 4));
+        FAPI_TRY(cid.insert(i_addr.srank, 4, 4, 4));
 
         uint8_t mrank_u8 = 0;
         mrank.extract(mrank_u8, 0, 8);
@@ -2513,6 +3213,7 @@ fapi2::ReturnCode cs_decode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_targe
                     fapi2::CEN_MSS_CCS_MRANK_OUT_OF_BOUNDS()
                     .set_INDEX_VALUE(mrank_u8),
                     "mrank value: 0x%02X not supported\n", mrank_u8);
+
         FAPI_ASSERT(cid_u8 < 8,
                     fapi2::CEN_MSS_CCS_SRANK_OUT_OF_BOUNDS()
                     .set_INDEX_VALUE(cid_u8),
@@ -2531,14 +3232,14 @@ fapi2::ReturnCode cs_decode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_targe
             FAPI_TRY(o_csn_8.insert(cid_u8, 3, 1, 6));
         }
 
-        FAPI_DBG("%s Row: 0x%04x, Col: 0x%04x, Mrank: %d, Srank: %d, Bank: %d, Port: %d\n",
+        FAPI_DBG("%s Row: %x, Col: %x, Mrank: %d, Srank: %d, Bank: %d, Port: %d\n",
                  mss::c_str(i_target_mba), i_addr.row_addr, i_addr.col_addr, mrank_u8, cid_u8, i_addr.bank, i_addr.port);
     }
     else
     {
-        FAPI_TRY(o_csn_8.clearBit(i_addr.rank));
-        FAPI_DBG("%s Row: 0x%04x, Col: 0x%04x, Rank: %d, Bank: %d, Port: %d\n",
-                 mss::c_str(i_target_mba), i_addr.row_addr, i_addr.col_addr, i_addr.rank, i_addr.bank, i_addr.port);
+        FAPI_TRY(o_csn_8.clearBit(i_addr.mrank));
+        FAPI_DBG("%s Row: %x, Col: %x, Rank: %d, Bank: %d, Port: %d\n",
+                 mss::c_str(i_target_mba), i_addr.row_addr, i_addr.col_addr, i_addr.mrank, i_addr.bank, i_addr.port);
     }
 
 fapi_try_exit:

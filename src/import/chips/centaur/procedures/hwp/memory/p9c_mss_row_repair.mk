@@ -22,3 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 00common.mk
+
+PROCEDURE=p9c_mss_row_repair
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
+$(call BUILD_PROCEDURE)

@@ -42,7 +42,8 @@ struct access_address
 {
     uint32_t row_addr;
     uint32_t col_addr;
-    uint8_t  rank;
+    uint8_t  mrank;
+    uint8_t  srank;
     uint8_t  bank;
     uint8_t  port;
 };
@@ -359,6 +360,80 @@ fapi2::ReturnCode add_nop_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_
                                  const access_address i_addr,
                                  const uint32_t i_delay,
                                  uint32_t& io_instruction_number);
+
+/// @brief Add an MRS command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for MRS
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_mrs_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                 const access_address i_addr,
+                                 const uint32_t i_delay,
+                                 uint32_t& io_instruction_number);
+
+/// @brief Add an ACT command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_activate_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const access_address i_addr,
+                                      const uint32_t i_delay,
+                                      uint32_t& io_instruction_number);
+
+/// @brief Add a WR command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_write_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                   const access_address i_addr,
+                                   const uint32_t i_delay,
+                                   uint32_t& io_instruction_number);
+
+/// @brief Add an ODT command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_repeat number of repeats to specify in this instruction
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_odt_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                 const access_address i_addr,
+                                 const uint32_t i_repeat,
+                                 const uint32_t i_delay,
+                                 uint32_t& io_instruction_number);
+
+/// @brief Add a precharge all command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in] i_odt_wr value of ATTR_CEN_VPD_ODT_WR
+/// @param[in] i_stack_type value of ATTR_CEN_EFF_STACK_TYPE
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_precharge_all_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        const access_address i_addr,
+        const uint32_t i_delay,
+        const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM],
+        const uint8_t (&i_stack_type)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT],
+        uint32_t& io_instruction_number);
+
+/// @brief Add a DES command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_repeat number of repeats to specify in this instruction
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_des_with_repeat_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        const access_address i_addr,
+        const uint32_t i_repeat,
+        const uint32_t i_delay,
+        uint32_t& io_instruction_number);
 
 /// @brief Get the CSN representation of a given address
 /// @param[in] i_target_mba mba target
