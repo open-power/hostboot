@@ -38,6 +38,19 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_CLOCK_PLL_MUX_TOD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Axone only - setup clock mux settings for TOD Refclk input
+     0b0 = 16 MHz I/O Filter PLL Output
+     0b1 = 32 MHz LPC reference clock
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <initToZero/>
+</attribute>
+
+<attribute>
   <id>ATTR_CLOCK_PLL_MUX</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>setup clock mux settings</description>
