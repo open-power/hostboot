@@ -108,6 +108,72 @@ typedef struct __attribute__((__packed__))  wofSectionTableEntry
 } wofSectionTableEntry_t;
 
 
+// Compared fields in each WOF table header entry
+// NOTE: struct must match errl/plugins/errludwofdata.H
+typedef struct __attribute__((__packed__)) wofTableCompareData
+{
+  uint8_t  core_count;
+  uint8_t  mode;
+  uint16_t socket_power_w;
+  uint16_t sort_power_freq_mhz;
+} wofTableCompareData_t;
+
+/**
+ *  @brief Adds WOF detail data to an error log
+ *
+ *         Format of WofData error buffer:
+ *         uint16_t - # of table entries (including search for table)
+ *         wofTableCompareData_t - Searched for this table
+ *         wofTableCompareData_t - last table rejected for possible match
+ *         ...
+ *         wofTableCompareData_t - 1st table rejected for possible match
+ *         NOTE: format must match errl plugin parser (errludwofdata.H)
+ *
+ *  @param  io_err        Error log to add data into
+ *  @param  i_match_data  Searched for table data
+ *  @param  i_headers     Table headers searched that did not match
+ */
+void addWofCompareDataToErrl( errlHndl_t &io_err,
+                              wofTableCompareData_t * i_match_data,
+                              std::vector<WofTablesHeader_t*> i_headers )
+{
+    uint16_t l_WOFentries = i_headers.size() + 1; // add searched entry too
+
+    // Allocate WofData error buffer
+    uint32_t l_data_len = sizeof(l_WOFentries) +
+                          l_WOFentries * sizeof(WofTablesHeader_t);
+    uint8_t * l_data = new uint8_t[l_data_len];
+
+    wofTableCompareData_t * l_tableDataPtr =
+        reinterpret_cast<wofTableCompareData_t*>(l_data + sizeof(l_WOFentries));
+
+    // first table entry is the data we tried to match
+    l_tableDataPtr[0] = *i_match_data;
+    l_tableDataPtr++;
+
+    // add all the non-matched WOF data header sections
+    while(i_headers.size())
+    {
+        WofTablesHeader_t * tmpHeader = i_headers.back();
+        l_tableDataPtr->core_count = tmpHeader->core_count;
+        l_tableDataPtr->mode = tmpHeader->mode;
+        l_tableDataPtr->socket_power_w = tmpHeader->socket_power_w;
+        l_tableDataPtr->sort_power_freq_mhz = tmpHeader->sort_power_freq_mhz;
+        l_tableDataPtr++;
+        i_headers.pop_back();
+    }
+
+    io_err->addFFDC(
+            ERRL_COMP_ID,
+            l_data,
+            l_data_len,
+            0,                           // version
+            ERRORLOG::ERRL_UDT_WOFDATA,  // WOF DATA parser
+            false );                     // merge
+
+    delete [] l_data;
+}
+
 fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
 {
     FAPI_DBG("Entering platParseWOFTables ....");
@@ -450,6 +516,8 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             {
                 // Found a match
                 FAPI_INF("Found a WOF table match");
+                FAPI_INF("core_count: %d, socket power w: %d, sort power freq MHz: %d, ver: %d, mode: %d",
+                    l_numCores, l_socketPower, l_sortFreq, l_ver, l_mode);
 
                 // Copy the WOF table to the output pointer
                 memcpy(o_wofData,
@@ -511,10 +579,10 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
             * @reasoncode        fapi2::RC_WOF_TABLE_NOT_FOUND
             * @userdata1[00:15]  Number of cores
-            * @userdata1[16:31]  WOF Power Mode (0=Nominal,1=Turbo)
+            * @userdata1[16:31]  WOF Power Mode (1=Nominal, 2=Turbo)
             * @userdata1[32:63]  Socket power
-            * @userdata2[00:31]  Nest frequency
-            * @userdata2[32:63]  Sort frequency
+            * @userdata2[00:31]  Sort frequency
+            * @userdata2[32:63]  Number of WOF tables checked
             * @devdesc           No WOF table match found
             * @custdesc          Firmware Error
             */
@@ -524,11 +592,11 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                             fapi2::RC_WOF_TABLE_NOT_FOUND,
                             TWO_UINT16_ONE_UINT32_TO_UINT64(
                                     l_numCores,
-                                    l_wofPowerLimit,
+                                    l_mode,
                                     l_socketPower),
                             TWO_UINT32_TO_UINT64(
-                                    l_nestFreq,
-                                    l_sortFreq),
+                                    l_sortFreq,
+                                    l_headers.size()),
                             true); //software callout
             l_errl->collectTrace(FAPI_TRACE_NAME);
 
@@ -537,17 +605,17 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                             l_sys,
                             TARGETING::ATTR_WOF_TABLE_LID_NUMBER)
                             .addToLog(l_errl);
-            while(l_headers.size())
-            {
-                l_errl->addFFDC(
-                        HWPF_COMP_ID,
-                        l_headers.back(),
-                        sizeof(WofTablesHeader_t),
-                        0,                           // version
-                        ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores data
-                        false );                     // merge
-                l_headers.pop_back();
-            }
+
+            // Add table data to error log as own section
+            // Add just the compare fields into the error log
+            // for each WofTable that did not match
+            wofTableCompareData_t l_match_data_fields;
+            l_match_data_fields.core_count = l_numCores;
+            l_match_data_fields.socket_power_w = l_socketPower;
+            l_match_data_fields.sort_power_freq_mhz = l_sortFreq;
+            l_match_data_fields.mode = l_mode;
+
+            addWofCompareDataToErrl(l_errl, &l_match_data_fields, l_headers);
 
             l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
             break;
