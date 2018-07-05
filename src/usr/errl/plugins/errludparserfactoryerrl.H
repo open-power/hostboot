@@ -40,6 +40,7 @@
 #include "errludsensor.H"
 #include "errludbuild.H"
 #include "errludstate.H"
+#include "errludwofdata.H"
 
 namespace ERRORLOG
 {
@@ -69,6 +70,7 @@ public:
         registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
         registerParser<ErrlUserDetailsParserBuild>(ERRL_UDT_BUILD);
         registerParser<ErrlUserDetailsParserSysState>(ERRL_UDT_SYSSTATE);
+        registerParser<ErrlUserDetailsParserWofData>(ERRL_UDT_WOFDATA);
    }
 
 private:
