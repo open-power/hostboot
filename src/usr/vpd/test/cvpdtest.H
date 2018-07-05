@@ -62,24 +62,47 @@ struct cvpdTestData
  *      NOTE: By reading this entire list, it also validates that the records
  *      and keywords that we expect to be there are actually there...
  */
-cvpdTestData cvpdData[] =
+cvpdTestData cvpdDataNimbus[] =
 {
     { CVPD::VEIR, CVPD::pdI },
     { CVPD::MER0, CVPD::pdI },
-    // @todo RTC 178802 Enable test cases turned off during bring up
-    //{ CVPD::VSPD, CVPD::pdI },
-    //{ CVPD::VSPD, CVPD::MT },
-    //{ CVPD::VSPD, CVPD::MR },
-    //{ CVPD::VSPD, CVPD::pdA },
-    //{ CVPD::VSPD, CVPD::EL },
-    //{ CVPD::VSPD, CVPD::LM },
-    //{ CVPD::VSPD, CVPD::MW },
-    //{ CVPD::VSPD, CVPD::MV },
-    //{ CVPD::VSPD, CVPD::AM },
+    { CVPD::VSPD, CVPD::pdI },
+    { CVPD::VSPD, CVPD::MT },
+    { CVPD::VSPD, CVPD::MR },
+    { CVPD::VSPD, CVPD::pdA },
+    { CVPD::VSPD, CVPD::EL },
+    { CVPD::VSPD, CVPD::LM },
+    { CVPD::VSPD, CVPD::MW },
+    { CVPD::VSPD, CVPD::MV },
+    { CVPD::VSPD, CVPD::AM },
     { CVPD::VINI, CVPD::VZ },
-    //{ CVPD::VSPD, CVPD::MX },
+    { CVPD::VSPD, CVPD::MX },
 
 };
+
+cvpdTestData cvpdDataCumulus[] =
+{
+    { CVPD::VEIR, CVPD::pdI },
+    { CVPD::MER0, CVPD::pdI },
+    { CVPD::VINI, CVPD::VZ },
+    { CVPD::VINI, CVPD::FN },
+    { CVPD::VINI, CVPD::PN },
+    { CVPD::VINI, CVPD::HE },
+    { CVPD::VINI, CVPD::CT },
+    { CVPD::OPFR, CVPD::VD },
+    { CVPD::OPFR, CVPD::DR },
+    { CVPD::OPFR, CVPD::VP },
+    { CVPD::VNDR, CVPD::VD },
+    { CVPD::SPDX, CVPD::VM },
+    { CVPD::SPDX, CVPD::M0 },
+    { CVPD::SPDX, CVPD::M5 },
+    { CVPD::SPDX, CVPD::DW },
+    { CVPD::SPDX, CVPD::MX },
+    { CVPD::SPDX, CVPD::Q0 },
+    { CVPD::SPDX, CVPD::K0 },
+
+};
+
 
 void getMembufTargets( TargetHandleList & o_membufList )
 {
@@ -103,6 +126,38 @@ void getMembufTargets( TargetHandleList & o_membufList )
                o_membufList.size() );
 
     return;
+}
+
+bool isNimbusModel(void)
+{
+    TRACDCOMP( g_trac_vpd, "isNimbusModel() - what model is running");
+
+    bool isNimbus = false;
+    TARGETING::TargetService & tS = TARGETING::targetService();
+    TARGETING::Target * sysTarget = NULL;
+    TargetHandleList l_chipList;
+    tS.getTopLevelTarget( sysTarget );
+    assert( sysTarget != NULL );
+
+
+    TARGETING::PredicateCTM predChip( TARGETING::CLASS_CHIP,
+                                      TARGETING::TYPE_PROC );
+
+    tS.getAssociated( l_chipList,
+                      sysTarget,
+                      TARGETING::TargetService::CHILD,
+                      TARGETING::TargetService::ALL,
+                      &predChip );
+
+    if(TARGETING::MODEL_NIMBUS ==
+                    l_chipList[0]->getAttr<TARGETING::ATTR_MODEL>())
+    {
+        isNimbus = true;
+    }
+
+    TRACDCOMP( g_trac_vpd, "isNimbusModel() exit");
+
+    return isNimbus;
 }
 
 TARGETING::Target* getFunctionalMembufTarget()
@@ -140,6 +195,7 @@ class CVPDTest: public CxxTest::TestSuite
 {
     public:
 
+
         /**
          * @brief This function will test CVPD reads.
          */
@@ -166,12 +222,32 @@ class CVPDTest: public CxxTest::TestSuite
 
                 uint8_t * theData = NULL;
                 size_t theSize = 0;
-                const uint32_t numCmds = sizeof(cvpdData)/sizeof(cvpdData[0]);
+                uint32_t numCmds;
+
+                bool isNimbus = isNimbusModel();
+
+                if(isNimbus)
+                {
+                    numCmds = sizeof(cvpdDataNimbus)/sizeof(cvpdDataNimbus[0]);
+                }else
+                {
+                    numCmds = sizeof(cvpdDataCumulus)/sizeof(
+                                    cvpdDataCumulus[0]);
+                }
+
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    theRecord = (uint64_t)cvpdData[curCmd].record;
-                    theKeyword = (uint64_t)cvpdData[curCmd].keyword;
+                    if(isNimbus)
+                    {
+                        theRecord = (uint64_t)cvpdDataNimbus[curCmd].record;
+                        theKeyword = (uint64_t)cvpdDataNimbus[curCmd].keyword;
+                    }else
+                    {
+                        theRecord = (uint64_t)cvpdDataCumulus[curCmd].record;
+                        theKeyword = (uint64_t)cvpdDataCumulus[curCmd].keyword;
+                    }
+
                     err = deviceRead( theTarget,
                                       NULL,
                                       theSize,
