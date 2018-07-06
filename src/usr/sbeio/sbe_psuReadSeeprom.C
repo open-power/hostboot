@@ -69,7 +69,7 @@ namespace SBEIO
         // Verify input parameters meet restrictions
         assert(i_target!=nullptr,"sendPsuReadSeeprom: i_target was nullptr");
         assert((i_readSize % CHIPOP_READ_SEEPROM_SIZE_ALIGNMENT_BYTES) == 0,"sendPsuReadSeeprom: i_readSize 0x%X is not 128B aligned", i_readSize);
-        assert((i_destAddr % CHIPOP_READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES) == 0,"sendPsuReadSeeprom: i_destAddr 0x%X is not 8B aligned", i_destAddr);
+        assert((i_destAddr % CHIPOP_READ_SEEPROM_DEST_ADDR_ALIGNMENT_BYTES) == 0,"sendPsuReadSeeprom: i_destAddr 0x%.16llX is not 8B aligned", i_destAddr);
 
         // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(

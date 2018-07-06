@@ -413,6 +413,81 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
 
 } // end of nodeCommMapAttn
 
+/**
+ *  @brief For OBUS OLL FIR Register (0x9010800) bit0 represents whether or
+ *         not link0 has been trained and bit1 represents whether or not
+ *         link1 has been trained
+ */
+enum link_trained_values : uint64_t
+{
+    // Register to read to find out which links on an OBUS are trained
+    OLL_FIR_REGISTER      = 0x0000000009010800,
+
+    // Bit Mask values
+    IS_LINK0_TRAINED_MASK = 0x8000000000000000,
+    IS_LINK1_TRAINED_MASK = 0x4000000000000000,
+};
+
+/**
+ *  @brief Return the status of whether or not the 2 links connected to the
+ *         OBUS Chiplet are trained
+ */
+errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
+                               bool & o_link0_trained,
+                               bool & o_link1_trained,
+                               uint64_t & o_fir_data)
+{
+    errlHndl_t err = nullptr;
+    o_link0_trained = false;
+    o_link1_trained = false;
+    o_fir_data = 0;
+    const uint64_t fir_addr = OLL_FIR_REGISTER;
+    const size_t expSize = sizeof(o_fir_data);
+
+    assert(i_pObus != nullptr, "getObusTrainedLinks: i_pObus == nullptr");
+
+    TRACUCOMP(g_trac_nc,ENTER_MRK
+              "getObusTrainedLinks: OBUS tgt=0x%X",
+              get_huid(i_pObus));
+
+    do
+    {
+    // Read the OBUS OLL FIR Register
+    auto reqSize = expSize;
+    err = DeviceFW::deviceRead(i_pObus,
+                               &o_fir_data,
+                               reqSize,
+                               DEVICE_SCOM_ADDRESS(fir_addr));
+
+    if(err)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"getObusTrainedLinks: Read Fail! "
+                  "tgt=0x%X, fir_addr=0x%.16llX, fir_data=0x%.16llX "
+                  TRACE_ERR_FMT,
+                  TARGETING::get_huid(i_pObus),
+                  fir_addr, o_fir_data,
+                  TRACE_ERR_ARGS(err));
+        break;
+    }
+    assert(reqSize==expSize,"getObusTrainedLinks: SCOM deviceRead didn't return expected data size of %d (it was %d)",
+           expSize,reqSize);
+
+    o_link0_trained = (o_fir_data & IS_LINK0_TRAINED_MASK) != 0;
+    o_link1_trained = (o_fir_data & IS_LINK1_TRAINED_MASK) != 0;
+
+
+    } while( 0 );
+
+    TRACFCOMP(g_trac_nc,EXIT_MRK"getObusTrainedLinks: OBUS tgt=0x%X: "
+              "o_link0_trained=%d, o_link1_trained=%d (fir_data=0x%.16llX) "
+              TRACE_ERR_FMT,
+              get_huid(i_pObus), o_link0_trained, o_link1_trained, o_fir_data,
+              TRACE_ERR_ARGS(err));
+
+    return err;
+
+} // end of getObusTrainedLinks
+
 
 /**
  * @brief Add FFDC for the target to an error log
@@ -526,7 +601,7 @@ void addNodeCommBusCallout(node_comm_modes_t i_mode,
     TargetHandleList l_busTargetList;
     TYPE l_type = (i_mode == NCDD_MODE_ABUS)
                    ? TYPE_OBUS : TYPE_XBUS;
-    getChildChiplets(l_busTargetList, i_pProc, l_type);
+    getChildChiplets(l_busTargetList, i_pProc, l_type, false);
 
     // Get BUS Instance
     // For each OBUS or XBUS instance there are 2 links and 2 mailboxes,
@@ -575,24 +650,90 @@ void addNodeCommBusCallout(node_comm_modes_t i_mode,
 
         if (l_bus_instance_ep1 == l_busTgt->getAttr<ATTR_REL_POS>())
         {
-            TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
-                      "Using i_pProc 0x%.08X BUS HUID 0x%.08X (%s) "
-                      "PEER_PATH %s as it had right instance %d for ep1",
-                      get_huid(i_pProc), get_huid(l_busTgt), l_ep1_path_str,
-                      l_ep2_path_str, l_bus_instance_ep1);
+            // If XBUS, make callout here:
+            if (i_mode == NCDD_MODE_XBUS)
+            {
+                TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                          "Using i_pProc 0x%.08X BUS HUID 0x%.08X (%s) "
+                          "PEER_PATH %s as it had right instance %d for ep1",
+                          get_huid(i_pProc), get_huid(l_busTgt), l_ep1_path_str,
+                          l_ep2_path_str, l_bus_instance_ep1);
 
-            found_peer_endpoint = true;
+                found_peer_endpoint = true;
 
-            // Add Bus Callout
-            io_log->addBusCallout(l_ep1,
-                                  l_ep2,
-                                  l_bus_type,
-                                  i_priority);
+                // Add Bus Callout
+                io_log->addBusCallout(l_ep1,
+                                      l_ep2,
+                                      l_bus_type,
+                                      i_priority);
+               break;
+            }
+            else
+            {
+                // Go to depth of TYPE_SMPGROUP, which is one level below OBUS
+                TargetHandleList l_smpGroupTargetList;
+                getChildAffinityTargets(l_smpGroupTargetList,
+                                        l_busTgt,
+                                        CLASS_UNIT,
+                                        TYPE_SMPGROUP,
+                                        false);
 
-           // @TODO RTC 184518 - Possibly go to depth of TYPE_SMPGROUP,
-           // which is one level below OBUS for ABUS/OBUS callouts
+                for (auto l_smpGroup : l_smpGroupTargetList)
+                {
+                    EntityPath l_smpGroup_ep =
+                                 l_smpGroup->getAttr<ATTR_PHYS_PATH>();
+                    EntityPath::PathElement l_smpGroup_ep_peSmpGroup =
+                                 l_smpGroup_ep.pathElementOfType(TYPE_SMPGROUP);
+                    if (l_ep1_path_str != nullptr)
+                    {
+                         free(l_ep1_path_str);
+                    }
+                    l_ep1_path_str = l_smpGroup_ep.toString();
 
-            break;
+                    EntityPath l_smpGroup_peer_ep =
+                                 l_smpGroup->getAttr<ATTR_PEER_PATH>();
+                    if (l_ep2_path_str != nullptr)
+                    {
+                        free(l_ep2_path_str);
+                    }
+                    l_ep2_path_str = l_smpGroup_peer_ep.toString();
+
+                    TRACUCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                              "SMPGROUP HUID: 0x%.08X (%s): rel_pos=%d, "
+                              "instance=%d: peer=%s",
+                              get_huid(l_smpGroup),
+                              l_ep1_path_str,
+                              l_smpGroup->getAttr<ATTR_REL_POS>(),
+                              l_smpGroup_ep_peSmpGroup.instance,
+                              l_ep2_path_str);
+
+                    // Find matching instance and relative link Id
+                    if ((l_smpGroup_ep_peSmpGroup.instance % 2) == 
+                        (i_linkId % 2))
+                    {
+                        found_peer_endpoint = true;
+
+                        TRACFCOMP(g_trac_nc,INFO_MRK"addNodeCommBusCallout: "
+                                  "Using SMPGROUP HUID: 0x%.08X (%s): "
+                                  "i_linkId=%d, rel_pos=%d, instance=%d: "
+                                  "peer=%s",
+                                  get_huid(l_smpGroup),
+                                  l_ep1_path_str,
+                                  i_linkId,
+                                  l_smpGroup->getAttr<ATTR_REL_POS>(),
+                                  l_smpGroup_ep_peSmpGroup.instance,
+                                  l_ep2_path_str);
+
+                        // Add Bus Callout
+                        io_log->addBusCallout(l_smpGroup_ep,
+                                              l_smpGroup_peer_ep,
+                                              l_bus_type,
+                                              i_priority);
+                        break;
+                    }
+                }  // for loop on SMPGROUP
+
+            }
         }
         else
         {
@@ -604,7 +745,12 @@ void addNodeCommBusCallout(node_comm_modes_t i_mode,
                       l_ep2_path_str, l_busTgt->getAttr<ATTR_ORDINAL_ID>(),
                       l_bus_instance_ep1, i_linkId);
         }
-    }
+
+        if (found_peer_endpoint == true)
+        {
+            break;
+        }
+    }  // for loop for OBUS
 
     if (found_peer_endpoint == false)
     {

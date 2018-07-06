@@ -133,20 +133,22 @@ inline uint64_t getLinkMboxReg(uint8_t i_linkId, uint8_t i_mboxId)
 /**
  *  @brief Calculate Secure LinkId and MailboxId based on OBUS Instance
  *
- *  @param[out] i_obusInstance - OBUS Instance of the operation
+ *  @param[in]  i_obusInstance - OBUS instance of the operation
+ *  @param[in]  i_obusRelLink  - Relative Link (0 or 1) of the OBUS instance
  *  @param[out] o_linkId       - Link Id of the OBUS instance
  *  @param[out] o_mboxId       - Mailbox Id of the OBUS instance
  *
  *  @return void
  */
-inline void getSecureLinkMboxFromObus(uint8_t i_obusInstance,
-                                      uint8_t & o_linkId,
-                                      uint8_t & o_mboxId)
+inline void getLinkMboxFromObusInstance(uint8_t i_obusInstance,
+                                        uint8_t i_obusRelLink,
+                                        uint8_t & o_linkId,
+                                        uint8_t & o_mboxId)
 {
     // For each OBUS instance there are 2 links and 2 mailboxes
     // and the Secure Link and Mailbox is always the relative 'L0M0'
     // of these 4 possibilities
-    o_linkId = (2*i_obusInstance);
+    o_linkId = (2*i_obusInstance) + i_obusRelLink;
     o_mboxId = 0;
 
     return;
@@ -218,12 +220,13 @@ errlHndl_t nodeCommAbusSendMessage(TARGETING::Target* i_pProc,
 /**
  *  @brief Map Attention Bits in XBUS/ABUS FIR Register to specific Link Mailbox
  *
- *  @param[in] i_pProc      Processor target to look for attentions on
- *                          Can't be nullptr
- *  @param[in] i_mode       Indicates to look for ABUS or XBUS attentions
- *  @param[in] o_attn_found Returns true if attention was found; otherwise false
- *  @param[in] o_linkId     Link Id attention was found on
- *  @param[in] o_mboxId     Mbox Id attention was found on
+ *  @param[in] i_pProc       Processor target to look for attentions on
+ *                           Can't be nullptr
+ *  @param[in] i_mode        Indicates to look for ABUS or XBUS attentions
+ *  @param[out] o_attn_found Returns true if attention was found;
+ *                           otherwise false
+ *  @param[out] o_linkId     Link Id attention was found on
+ *  @param[out] o_mboxId     Mbox Id attention was found on
  *  @note - o_linkId and o_mboxId are only set/valid if o_attn_found is true
  *
  *  @return errlHndl_t Error log handle
@@ -235,6 +238,24 @@ errlHndl_t nodeCommMapAttn(TARGETING::Target* i_pProc,
                            bool & o_attn_found,
                            uint8_t & o_linkId,
                            uint8_t & o_mboxId);
+/**
+ *  @brief Return the status of whether or not the 2 links connected to the
+ *         OBUS Chiplet are trained
+ *
+ *  @param[in] i_pObus           Target representing OBUS Chiplet
+ *                               Can't be nullptr
+ *  @param[out] o_link0_trained  True if link0 is trained; otherwise false
+ *  @param[out] o_link1_trained  True is link1 is trained; otherwise false
+ *  @param[out] o_fir_data       The SCOM data read from the FIR register
+ *
+ *  @return errlHndl_t Error log handle
+ *  @retval nullptr Operation was successful
+ *  @retval !nullptr Operation failed with valid error log
+ */
+errlHndl_t getObusTrainedLinks(TARGETING::Target* i_pObus,
+                               bool & o_link0_trained,
+                               bool & o_link1_trained,
+                               uint64_t & o_fir_data);
 
 /**
  * @brief Add FFDC for the target to an error log
