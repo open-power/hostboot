@@ -42,10 +42,18 @@
 #include <p9_build_smp_fbc_cd.H>
 #include <p9_misc_scom_addresses.H>
 
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+// DL FIR register field constants
+const uint8_t DL_FIR_LINK0_TRAINED_BIT = 0;
+const uint8_t DL_FIR_LINK1_TRAINED_BIT = 1;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-
 
 ///
 /// @brief Process single chip target into SMP chip data structure
@@ -392,6 +400,81 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Check validity of link DL/TL logic
+///
+/// @param[in] i_target   Processor chip target
+/// @param[in] i_link_ctl p9_fbc_link_ctl_t struct, defines link to check
+/// @param[in] i_link_en  ATTACHED_CHIP_CNFG attribute value, defines
+///                       active half-links
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode
+p9_build_smp_validate_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                           const p9_fbc_link_ctl_t& i_link_ctl,
+                           const uint8_t i_link_en)
+{
+    FAPI_DBG("Start");
+
+    fapi2::buffer<uint64_t> l_dl_fir_reg;
+    fapi2::buffer<uint64_t> l_tl_fir_reg;
+    fapi2::buffer<uint64_t> l_cplt_conf1_reg;
+    bool l_dl_trained = false;
+    bool l_tl_trained = false;
+    bool l_iovalid_set = false;
+
+    // read DL training state
+    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.dl_fir_addr, l_dl_fir_reg),
+             "Error from getScom (0x%.16llX)", i_link_ctl.dl_fir_addr);
+    // read TL training state
+    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.tl_fir_addr, l_tl_fir_reg),
+             "Error from getScom (0x%.16llX)", i_link_ctl.tl_fir_addr);
+    // read iovalid state
+    FAPI_TRY(fapi2::getScom(i_target, i_link_ctl.iovalid_or_addr & 0xFFFFFF0F, l_cplt_conf1_reg),
+             "Error from getScom (0x%.16llX)", i_link_ctl.iovalid_or_addr & 0xFFFFFF0F);
+
+    if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
+    {
+        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
+                        l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
+        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit) &&
+                        l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit + 1);
+        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit) &&
+                        l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit + 1);
+    }
+    else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY)
+    {
+        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>();
+        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit);
+        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit);
+    }
+    else if (i_link_en == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY)
+    {
+        l_dl_trained  = l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
+        l_tl_trained  = l_tl_fir_reg.getBit(i_link_ctl.tl_fir_trained_field_start_bit + 1);
+        l_iovalid_set = l_cplt_conf1_reg.getBit(i_link_ctl.iovalid_field_start_bit + 1);
+    }
+
+    // assert if expected state is not present
+    FAPI_ASSERT(l_dl_trained &&
+                l_tl_trained &&
+                l_iovalid_set,
+                fapi2::P9_BUILD_SMP_INVALID_LINK_STATE()
+                .set_TARGET(i_target)
+                .set_ENDP_TYPE(i_link_ctl.endp_type)
+                .set_ENDP_UNIT_ID(i_link_ctl.endp_unit_id)
+                .set_LINK_EN(i_link_en)
+                .set_DL_FIR_REG(l_dl_fir_reg)
+                .set_TL_FIR_REG(l_tl_fir_reg)
+                .set_CPLT_CONF1_REG(l_cplt_conf1_reg),
+                "Link DL/TL/iovalid are not in expected state");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Check validity of SMP topology
@@ -480,6 +563,12 @@ p9_build_smp_check_topology(const p9_build_smp_operation i_op,
             {
                 if (l_x_en[l_link_id])
                 {
+                    FAPI_TRY(p9_build_smp_validate_link(*(p_iter->second.target),
+                                                        P9_FBC_XBUS_LINK_CTL_ARR[l_link_id],
+                                                        l_x_en[l_link_id]),
+                             "Error from p9_build_smp_validate_link (g%d:p%d X%d)",
+                             g_iter->first, p_iter->first, l_link_id);
+
                     if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
                     {
                         FAPI_TRY(l_connected_chip_ids.setBit(l_x_rem_chip_id[l_link_id]),
@@ -491,7 +580,6 @@ p9_build_smp_check_topology(const p9_build_smp_operation i_op,
                                  "Error from setBit (l_connected_group_ids, X)");
                     }
                 }
-
             }
 
             // process A links, mark reachable group/chip IDs
@@ -506,6 +594,12 @@ p9_build_smp_check_topology(const p9_build_smp_operation i_op,
             {
                 if (l_a_en[l_link_id])
                 {
+                    FAPI_TRY(p9_build_smp_validate_link(*(p_iter->second.target),
+                                                        P9_FBC_ABUS_LINK_CTL_ARR[l_link_id],
+                                                        l_a_en[l_link_id]),
+                             "Error from p9_build_smp_validate_link (g%d:p%d A%d)",
+                             g_iter->first, p_iter->first, l_link_id);
+
                     FAPI_TRY(l_connected_group_ids.setBit(l_a_rem_group_id[l_link_id]),
                              "Error from setBit (l_connected_group_ids, A)");
                 }
