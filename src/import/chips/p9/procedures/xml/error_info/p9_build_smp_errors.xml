@@ -115,6 +115,25 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_P9_BUILD_SMP_INVALID_LINK_STATE</rc>
+    <description>
+      Link is marked active, but DL/TL/iovalid state do not support
+      functional operation
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ENDP_TYPE</ffdc>
+    <ffdc>ENDP_UNIT_ID</ffdc>
+    <ffdc>LINK_EN</ffdc>
+    <ffdc>DL_FIR_REG</ffdc>
+    <ffdc>TL_FIR_REG</ffdc>
+    <ffdc>CPLT_CONF1_REG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_P9_BUILD_SMP_INVALID_TOPOLOGY</rc>
     <description>
       Invalid fabric topology specified by input parameters.
