@@ -196,16 +196,14 @@ namespace Bootloader{
      *     respect to the first 8 bytes).
      *
      *  @param[in] i_pHeader Void pointer to start of the container's secure
-     *      header.  Must not be nullptr or function will assert.
+     *      header.  Must not be nullptr.
      *  @param[in] i_pComponentId Reference component ID to compare to.  Must
-     *      not be nullptr or function will assert.
+     *      not be nullptr.
      */
     void verifyComponentId(
         const void* const i_pHeader,
         const char* const i_pComponentId)
     {
-        assert(i_pHeader != nullptr);
-        assert(i_pComponentId != nullptr);
 
         const auto* const pHwPrefix =
             reinterpret_cast<const ROM_prefix_header_raw* const>(
@@ -444,8 +442,6 @@ namespace Bootloader{
                                      l_errCode,
                                      l_pnorStart);
 
-        BOOTLOADER_TRACE(BTLDR_TRC_MAIN_GETHBBSECTION_RTN );
-
         if(PNOR::NO_ERROR == l_errCode)
         {
             // get hbbFlashOffset
@@ -456,11 +452,42 @@ namespace Bootloader{
             bool l_hbbEcc =
                 ( g_blData->bl_hbbSection.integrity == FFS_INTEG_ECC_PROTECT);
 
+            uint32_t workingLength= (l_hbbEcc) ?
+                (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC : l_hbbLength;
+
+            // handleMMIO below always moves WORDSIZE chunks at a time, even
+            // if there is just one byte left, so subtract WORDSIZE from the
+            // limit to compensate
+            if(workingLength > (MEGABYTE-WORDSIZE))
+            {
+                BOOTLOADER_TRACE(BTLDR_TRC_BAD_WORK_LEN);
+                /*@
+                 * @errortype
+                 * @moduleid         Bootloader::MOD_BOOTLOADER_MAIN
+                 * @reasoncode       Bootloader::RC_BAD_WORK_LEN
+                 * @userdata1[0:15]  TI_WITH_SRC
+                 * @userdata1[16:31] TI_BOOTLOADER
+                 * @userdata1[32:63] Failing address = 0
+                 * @userdata2[0:31]  Length of data from TOC (bytes)
+                 * @userdata2[32:63] Working length (bytes)
+                 * @errorInfo[0:31]  Max space available (bytes)
+                 * @devdesc  Not enough memory to load boot firmware
+                 * @custdesc Failed to load boot firmware
+                 */
+                bl_terminate(
+                    MOD_BOOTLOADER_MAIN,
+                    RC_BAD_WORK_LEN,
+                    l_hbbLength,
+                    workingLength,
+                    true,
+                    0,
+                    (MEGABYTE-WORDSIZE));
+            }
+
             // Copy HB base code from PNOR to working location
             handleMMIO(l_pnorStart + l_hbbFlashOffset,
                        (l_hbbEcc) ? HBB_ECC_WORKING_ADDR : HBB_WORKING_ADDR,
-                       (l_hbbEcc) ? (l_hbbLength * LENGTH_W_ECC)/LENGTH_WO_ECC
-                                  : l_hbbLength,
+                       workingLength,
                        WORDSIZE);
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_WORKING_HANDLEMMIO_RTN);
 
