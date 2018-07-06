@@ -163,4 +163,32 @@
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_EVEN</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    This attribute provides an a way to stress the SMP Abus Even Lanes
+    in Manufacturing. By applying a phase rotator offset we can further
+    stress the phy.  This is a 6-bit 2's complement value that would be
+    right justified in the 8 bit UINT attribute value.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>i
+    This attribute provides an a way to stress the SMP Abus Odd Lanes
+    in Manufacturing. By applying a phase rotator offset we can further
+    stress the phy.  This is a 6-bit 2's complement value that would be
+    right justified in the 8 bit UINT attribute value.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
