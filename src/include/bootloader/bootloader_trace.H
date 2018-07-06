@@ -79,6 +79,9 @@ enum BootloaderTraces
     /** Bootloader main verifyComponentId failed */
     BTLDR_TRC_COMP_ID_VERIFY_FAILED          = 0x1B,
 
+    /** Bootloader main working length too big */
+    BTLDR_TRC_BAD_WORK_LEN                   = 0x1C,
+
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,
 

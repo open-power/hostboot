@@ -43,6 +43,7 @@ my %traceText = (
     "19" => "Main verify skip verification - SAB unset ",
     "1A" => "Main verify component ID succeeded",
     "1B" => "Main verify component ID failed",
+    "1C" => "Main working length too big",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",
