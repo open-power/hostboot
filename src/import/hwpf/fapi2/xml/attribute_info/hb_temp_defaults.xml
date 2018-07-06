@@ -164,7 +164,14 @@
         <id>ATTR_AUX_FUNC_INVOCATION_TIME_MS</id>
         <default>0x01</default>
     </attribute>
-
+    <attribute>
+        <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_EVEN</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD</id>
+        <default>0x00</default>
+    </attribute>
     <attribute>
         <id>ATTR_CME_CHTM_TRACE_ENABLE</id>
         <default>0x00</default>
