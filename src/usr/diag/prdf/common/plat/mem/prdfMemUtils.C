@@ -955,6 +955,22 @@ void cleanupChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits )
+{
+    uint64_t o_val = 0;
+
+    for ( uint64_t i = 0; i < i_numBits; i++ )
+    {
+        o_val <<= 1;
+        o_val |= i_val & 0x1;
+        i_val >>= 1;
+    }
+
+    return o_val;
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

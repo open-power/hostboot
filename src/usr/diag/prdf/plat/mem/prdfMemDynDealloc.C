@@ -33,6 +33,7 @@
 #include <prdfTrace.H>
 #include <prdfPlatServices.H>
 #include <prdfMemAddress.H>
+#include <prdfMemUtils.H>
 
 //------------------------------------------------------------------------------
 // Function Definitions
@@ -43,6 +44,7 @@ using namespace TARGETING;
 namespace PRDF
 {
 using namespace PlatServices;
+using namespace MemUtils;
 
 namespace MemDealloc
 {
@@ -109,20 +111,6 @@ int32_t __getAddrConfig( ExtensibleChip * i_mcaChip, uint8_t i_dslct,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-uint64_t __reverseBits( uint64_t i_val, uint64_t i_numBits )
-{
-    uint64_t o_val = 0;
-
-    for ( uint64_t i = 0; i < i_numBits; i++ )
-    {
-        o_val <<= 1;
-        o_val |= i_val & 0x1;
-        i_val >>= 1;
-    }
-
-    return o_val;
 }
 
 uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
@@ -396,8 +384,8 @@ int32_t __getPortAddr<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr,
     o_addr = 0;
 
     // Local vars for address fields
-    uint64_t col   = __reverseBits(i_addr.getCol(),  7); // C9 C8 C7 C6 C5 C4 C3
-    uint64_t row   = __reverseBits(i_addr.getRow(), 18); // R17 R16 R15 .. R1 R0
+    uint64_t col   = reverseBits(i_addr.getCol(),  7);   // C9 C8 C7 C6 C5 C4 C3
+    uint64_t row   = reverseBits(i_addr.getRow(), 18);   // R17 R16 R15 .. R1 R0
     uint64_t bnk   = i_addr.getBank();                   //     BG0 BG1 B0 B1 B2
     uint64_t srnk  = i_addr.getRank().getSlave();        //             S0 S1 S2
     uint64_t mrnk  = i_addr.getRank().getRankSlct();     //                M0 M1

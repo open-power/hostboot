@@ -1049,6 +1049,16 @@ uint8_t getDimmPort<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTrgt )
     return i_dimmTrgt->getAttr<ATTR_CEN_MBA_PORT>();
 }
 
+template<>
+uint8_t getDimmPort<TYPE_MCA>( TARGETING::TargetHandle_t i_dimmTrgt )
+{
+    PRDF_ASSERT( nullptr != i_dimmTrgt );
+    PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
+
+    // Only one port on MCA
+    return 0;
+}
+
 //------------------------------------------------------------------------------
 
 template<>
