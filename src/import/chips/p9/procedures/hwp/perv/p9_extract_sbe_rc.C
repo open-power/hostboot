@@ -414,7 +414,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_INF("p9_extract_sbe_rc : Rammed SBE Local FI2C Status   : %#018lX", l_data64_loc_fi2c_status);
         }
 
-        if(l_data32_srr0 != 0xDEADDEAD || l_data32_srr0 != 0x0)
+        if(l_data32_srr0 != 0xDEADDEAD && l_data32_srr0 != 0x0)
         {
             FAPI_INF("p9_extract_sbe_rc : Use SRR0 as IAR");
             l_data32_iar = l_data32_srr0;
