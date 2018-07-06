@@ -162,6 +162,15 @@ uint32_t handleChnlFail( ExtensibleChip * i_chip,
 template<TARGETING::TYPE T>
 void cleanupChnlFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
+/**
+ * @brief  Reverses the bit placement in the inputted bit string.
+ * @param  i_val     The bit string to be reversed.
+ * @param  i_numBits The number of bits in the bit string to reverse.
+ * @return The reversed bit string value.
+ */
+
+uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits );
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

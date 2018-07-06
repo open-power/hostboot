@@ -173,6 +173,14 @@ namespace DQ_BITMAP
 
 } // namespace DQ_BITMAP
 
+namespace ROW_REPAIR
+{
+    enum
+    {
+        ROW_REPAIR_SIZE = 4, // 4 byte (32 bit) repair
+    };
+} // namespace ROW_REPAIR
+
 namespace CEN_SYMBOL
 {
 
