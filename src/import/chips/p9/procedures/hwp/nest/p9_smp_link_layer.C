@@ -252,6 +252,69 @@ fapi_try_exit:
 
 
 ///
+/// @brief Apply an additional PHY Phase Rotator Offset if we are in MFG Mode.
+///
+/// @param[in] i_target Reference to processor chip target
+/// @param[in] i_phy_target Phy endpoint target
+/// @param[in] i_pr_offset Phase Rotator Offset
+/// @param[in] i_even True=process even half-link, False=process odd half-link
+///
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode
+p9_smp_phy_mfg_stress(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_phy_target,
+    const uint8_t i_pr_offset,
+    const bool i_even)
+{
+    FAPI_DBG("Start");
+
+    for (uint8_t l_lane = 0; l_lane < LANES_PER_HALF_LINK; l_lane++)
+    {
+        // set PHY TX lane address, start at:
+        // - PHY lane 0 for even (work up)
+        // - PHY lane 23 for odd (work down)
+        uint64_t l_phy_rx_bit_cntl3_eo_pl_addr = OBUS_RX0_RXPACKS0_SLICE0_RX_BIT_CNTL3_EO_PL;
+
+        if (i_even)
+        {
+            l_phy_rx_bit_cntl3_eo_pl_addr |= ((uint64_t) l_lane << 32);
+        }
+        else
+        {
+            l_phy_rx_bit_cntl3_eo_pl_addr |= ((uint64_t) (23 - l_lane) << 32);
+        }
+
+        FAPI_DBG("Adding PR Offset(%d) to lane %d", i_pr_offset, l_lane);
+        fapi2::buffer<uint64_t> l_phy_rx_bit_cntl3_eo_pl;
+        FAPI_TRY(fapi2::getScom(i_phy_target,
+                                l_phy_rx_bit_cntl3_eo_pl_addr,
+                                l_phy_rx_bit_cntl3_eo_pl),
+                 "Error from getScom (0x%08X)", l_phy_rx_bit_cntl3_eo_pl_addr);
+
+        l_phy_rx_bit_cntl3_eo_pl.insertFromRight <
+        OBUS_RX0_RXPACKS0_SLICE0_RX_BIT_CNTL3_EO_PL_PR_DATA_A_OFFSET,
+        OBUS_RX0_RXPACKS0_SLICE0_RX_BIT_CNTL3_EO_PL_PR_DATA_A_OFFSET_LEN
+        > (i_pr_offset);
+
+        l_phy_rx_bit_cntl3_eo_pl.insertFromRight <
+        OBUS_RX0_RXPACKS0_SLICE0_RX_BIT_CNTL3_EO_PL_PR_DATA_B_OFFSET,
+        OBUS_RX0_RXPACKS0_SLICE0_RX_BIT_CNTL3_EO_PL_PR_DATA_B_OFFSET_LEN
+        > (i_pr_offset);
+
+        FAPI_TRY(fapi2::putScom(i_phy_target,
+                                l_phy_rx_bit_cntl3_eo_pl_addr,
+                                l_phy_rx_bit_cntl3_eo_pl),
+                 "Error from putScom (0x%08X)", l_phy_rx_bit_cntl3_eo_pl_addr);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+///
 /// @brief Engage DLL/TL training for a single fabric link (X/A)
 ///        running on O PHY
 ///
@@ -435,6 +498,35 @@ p9_smp_link_layer_train_link_optical(
                      "Error from putScom (0x%08X, ENABLE)", l_addr);
         }
     }
+
+    // CQ: HW453889 :: MFG Abus Stress >>>
+    //
+    // Use rx_pr_data_a_offset to shift the offset by +1/2 or +2/4
+    {
+        uint8_t l_pr_offset_even = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_O_MFG_STRESS_PR_OFFSET_EVEN,
+                               i_target,
+                               l_pr_offset_even),
+                 "Error from FAPI_ATTR_GET (ATTR_IO_O_MFG_STRESS_OFFSET_EVEN)");
+
+        if (l_even && (l_pr_offset_even != 0))
+        {
+            FAPI_TRY(p9_smp_phy_mfg_stress(i_target, l_loc_target, l_pr_offset_even, true));
+        }
+
+        uint8_t l_pr_offset_odd = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_O_MFG_STRESS_PR_OFFSET_ODD,
+                               i_target,
+                               l_pr_offset_odd),
+                 "Error from FAPI_ATTR_GET (ATTR_IO_O_MFG_STRESS_OFFSET_ODD)");
+
+        if (l_odd && (l_pr_offset_odd != 0))
+        {
+            FAPI_TRY(p9_smp_phy_mfg_stress(i_target, l_loc_target, l_pr_offset_odd, false));
+        }
+    }
+    // CQ: HW453889 :: MFG Abus Stress <<<
+
 
 fapi_try_exit:
     FAPI_DBG("End");
