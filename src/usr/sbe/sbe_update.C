@@ -5639,7 +5639,7 @@ errlHndl_t getHwKeyHashFromSbeImage(
     uint8_t tmp_data_ECC[max_buffer_size] = {0};
 
 
-    // For reading via ChipOp we need buffer on a 128 byte boundary, so get
+    // For reading via ChipOp we need the buffer on a 128 byte boundary, so get
     // the right size for that boundary and then add 127 bytes to the buffer
     // length so we can guarantee a 128 byte aligned addr
     const size_t max_buffer_size_chipOp =

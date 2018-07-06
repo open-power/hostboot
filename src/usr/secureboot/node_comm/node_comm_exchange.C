@@ -86,6 +86,7 @@ struct master_proc_info_t
 struct obus_instances_t
 {
     uint8_t  myObusInstance = 0;
+    uint8_t  myObusRelLink  = 0;
 
     // Expect data to be received on the PEER_PATH instances
     uint8_t  peerNodeInstance = 0;
@@ -290,15 +291,18 @@ errlHndl_t nodeCommAbusExchangeMaster(const master_proc_info_t & i_mProcInfo,
     {
         uint8_t my_linkId = 0;
         uint8_t my_mboxId = 0;
-        getSecureLinkMboxFromObus(l_obus.myObusInstance,
-                                  my_linkId,
-                                  my_mboxId);
+        getLinkMboxFromObusInstance(l_obus.myObusInstance,
+                                    l_obus.myObusRelLink,
+                                    my_linkId,
+                                    my_mboxId);
 
         uint8_t expected_peer_linkId = 0;
         uint8_t expected_peer_mboxId = 0;
-        getSecureLinkMboxFromObus(l_obus.peerObusInstance,
-                                  expected_peer_linkId,
-                                  expected_peer_mboxId);
+        getLinkMboxFromObusInstance(l_obus.peerObusInstance,
+                                    // same relative link for peer path:
+                                    l_obus.myObusRelLink,
+                                    expected_peer_linkId,
+                                    expected_peer_mboxId);
 
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchangeMaster: "
                   "my: linkId=%d, mboxId=%d, ObusInstance=%d. "
@@ -494,9 +498,10 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         // Used for check that right node indicated itself as master
         uint8_t my_linkId = 0;
         uint8_t my_mboxId = 0;
-        getSecureLinkMboxFromObus(i_obus_instance.myObusInstance,
-                                  my_linkId,
-                                  my_mboxId);
+        getLinkMboxFromObusInstance(i_obus_instance.myObusInstance,
+                                    i_obus_instance.myObusRelLink,
+                                    my_linkId,
+                                    my_mboxId);
 
         // First Wait for Message From Master
         uint8_t actual_linkId = 0;
@@ -598,9 +603,11 @@ errlHndl_t nodeCommAbusExchangeSlave(const master_proc_info_t & i_mProcInfo,
         // Pass in expected peer linkId for nonce logging/extending purposes
         uint8_t peer_linkId = 0;
         uint8_t peer_mboxId = 0;
-        getSecureLinkMboxFromObus(i_obus_instance.peerObusInstance,
-                                  peer_linkId,
-                                  peer_mboxId);
+        getLinkMboxFromObusInstance(i_obus_instance.peerObusInstance,
+                                    // same relative link for peer path:
+                                    i_obus_instance.myObusRelLink,
+                                    peer_linkId,
+                                    peer_mboxId);
 
         // Get random number from TPM
         msg_data.value = 0;
@@ -857,6 +864,46 @@ errlHndl_t nodeCommAbusExchange(void)
                       get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
                       l_peer_path_str);
             continue;
+        }
+
+        bool link0_trained = false;
+        bool link1_trained = false;
+        uint64_t fir_data = 0;
+        err = getObusTrainedLinks(l_obusTgt,
+                                  link0_trained,
+                                  link1_trained,
+                                  fir_data);
+        if (err)
+        {
+            TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommAbusExchange: "
+                      "getObusTrainedLinks returned error so "
+                      "Skipping masterProc 0x%.08X OBUS HUID 0x%.08X. "
+                      TRACE_ERR_FMT,
+                      get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
+                      TRACE_ERR_ARGS(err));
+            break;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommAbusExchange: "
+                      "getObusTrainedLinks: link0=%d, link1=%d",
+                      link0_trained, link1_trained);
+
+            l_obusInstance.myObusRelLink = (link0_trained) ? 0 :
+                                             ((link1_trained) ? 1 :
+                                               NCDD_INVALID_LINK_MBOX);
+
+            if (l_obusInstance.myObusRelLink == NCDD_INVALID_LINK_MBOX)
+            {
+               TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommAbusExchange: "
+                         "Skipping masterProc 0x%.08X "
+                         "OBUS HUID 0x%.08X's because neither link has been "
+                         "trained: link0=%d, link1=%d (fir_data=0x%.16llX)",
+                         get_huid(mProcInfo.tgt), get_huid(l_obusTgt),
+                         link0_trained, link1_trained, fir_data);
+                continue;
+            }
+
         }
 
         // Using this OBUS instance so save it off
