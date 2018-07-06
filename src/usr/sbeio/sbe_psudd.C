@@ -59,7 +59,7 @@
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
 
-// used to uniquley identify the SBE PSU message queue
+// used to uniquely identify the SBE PSU message queue
 const char* SBE_PSU_MSG_Q = "sbepsuq";
 
 #define SBE_TRACF(printf_string,args...) \
@@ -332,12 +332,6 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
 
 /**
  * @brief record info from an "early" error so it can be reported later
- *
- * If an error occurs before the fapi2 library is loaded, this function
- * can be used to record the details for later reporting.
- *
- * @param[in]  i_plid   Program log id for the error
- * @param[in]  i_target Proc target for PSU Request that caused error
  */
 void SbePsu::saveEarlyError(uint32_t i_plid, TARGETING::TargetHandle_t i_target)
 {
@@ -347,7 +341,7 @@ void SbePsu::saveEarlyError(uint32_t i_plid, TARGETING::TargetHandle_t i_target)
     iv_earlyErrorPlid     = i_plid;
     iv_earlyErrorTarget   = i_target;
 
-    SBE_TRACD(ENTER_MRK "saveEarlyError");
+    SBE_TRACD(EXIT_MRK "saveEarlyError");
 }
 
 /**
