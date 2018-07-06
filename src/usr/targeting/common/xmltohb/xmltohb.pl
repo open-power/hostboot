@@ -1314,7 +1314,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
 
             if ($cfgFapiAttributesXmlFile eq "")
             {
-                if ($attribute->{id} ~~ @nonSyncAttributes)
+                if ($attribute->{id} ~~ @fspAccesCheck)
                 {
                     next;
                 }
