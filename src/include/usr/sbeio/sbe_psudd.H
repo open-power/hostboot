@@ -649,7 +649,7 @@ class SbePsu
          * function will record the error state so it can be reported later.
          *
          *
-         * @param[in]  i_plid   Program log id for the error
+         * @param[in]  i_plid   Platform log id for the error
          * @param[in]  i_target Proc target for PSU Request that caused an error
          */
         void saveEarlyError(uint32_t i_plid,TARGETING::TargetHandle_t i_target);
