@@ -79,6 +79,9 @@ const uint8_t CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_SMF_ENABLE = 0x8;
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE                  = 0x40000000000ULL; // 4_TB
 const uint64_t MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2 = 0x8000000000ULL;  // 512_GB
 
+// XSCOM BAR offset, with SMF enabled
+const uint64_t XSCOM_BAR_SMF_OFFSET = 0x0001000000000000ULL;
+
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
