@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -103,14 +103,18 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
     msg_t *msg = msg_allocate();
 #endif
     msg->type = MSG_SEND_ESEL;
-    msg->data[0] = i_eid;
+    auto * const pData = reinterpret_cast<send_esel_data_t*>
+        (msg->data);
+    pData->callhome=i_infoCallHome;
+    pData->eid=i_eid;
+
     eselInitData *eselData =
     new eselInitData(i_selEventList, i_eselData, i_dataSize);
 
     msg->extra_data = eselData;
 
 #ifdef __HOSTBOOT_RUNTIME
-    process_esel(msg, i_infoCallHome);
+    process_esel(msg);
 #else
     // one message queue to the SEL thread
     static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
@@ -130,11 +134,17 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 /*
  * @brief process esel msg
  */
-void process_esel(msg_t *i_msg, bool i_infoCallHome)
+void process_esel(msg_t *i_msg)
 {
     errlHndl_t l_err = NULL;
     IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
-    const uint32_t l_eid = i_msg->data[0];
+
+    assert(i_msg != nullptr,"i_msg was nullptr");
+    const auto * const pData = reinterpret_cast<const send_esel_data_t*>
+        (i_msg->data);
+    const auto callhome = pData->callhome;
+    const auto l_eid = pData->eid;
+
     eselInitData * l_data =
             (eselInitData*)(i_msg->extra_data);
     IPMI_TRAC(ENTER_MRK "process_esel");
@@ -181,7 +191,7 @@ void process_esel(msg_t *i_msg, bool i_infoCallHome)
             while (l_send_count > 0)
             {
                 // try to send the esel to the bmc
-                send_esel(l_data, l_err, l_cc, i_infoCallHome);
+                send_esel(l_data, l_err, l_cc, callhome);
 
                 // if no error but last completion code was:
                 if ((l_err == NULL) &&
@@ -555,7 +565,7 @@ void IpmiSEL::execute(void)
         switch(msg_type)
         {
             case IPMISEL::MSG_SEND_ESEL:
-                IPMISEL::process_esel(msg, false);
+                IPMISEL::process_esel(msg);
                 //done with msg
                 msg_free(msg);
                 break;
