@@ -2609,7 +2609,7 @@ void getAttachedDimms(
 /// @brief Utility function to generate base return code for ungrouped port
 ///        error reporting
 ///
-/// @param[in[ i_maxRegionSize Maximum group/region size
+/// @param[in] i_maxRegionSize Maximum group/region size
 ///
 /// @return MSS_EFF_GROUPING_UNABLE_TO_GROUP
 ///
