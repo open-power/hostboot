@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -50,6 +50,18 @@ namespace IPMISEL
         MSG_STATE_SHUTDOWN_SEL,
         MSG_LAST_TYPE = MSG_STATE_SHUTDOWN_SEL,
     };
+
+    /**
+     *  @brief data[0/1] format for the MSG_SEND_ESEL message
+     */
+    struct send_esel_data_t
+    {
+        uint8_t  callhome;     // Whether the ESEL is of callhome type or not
+        uint8_t  reserved1[3];
+        uint32_t eid;          // Error ID of the error being described
+        uint64_t reserved2;
+
+    } PACKED;
 
     typedef struct sel_info
     {
@@ -309,12 +321,12 @@ namespace IPMISEL
     };
 
     /**
-     * @brief parse the msg and call send_esel to send the esel (handles if
-     * the SEL reservation is lost)
-     * @param[in] i_msg
-     * @param[in] i_infoCallHome - informational call-home log
+     *  @brief Parse the message and call send_esel to send the eSEL (handles
+     *      if the SEL reservation is lost).
+     *
+     *  @param[in] i_msg Pointer to message to send.  Asserts if nullptr.
      */
-    void process_esel(msg_t *i_msg, bool i_infoCallHome);
+    void process_esel(msg_t *i_msg);
 
     /**
      * @brief do the actual ipmi calls to send the esel data to the bmc

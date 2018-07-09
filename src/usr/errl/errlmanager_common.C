@@ -702,6 +702,10 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                                          ERRL_COMP_ID, 1, ERRL_UDT_STRING );
             io_err->iv_SectionVector.insert(io_err->iv_SectionVector.begin(),
                                             l_ffdcSection);
+
+            // If this is an error from the previous boot, pass it off as a
+            // call home applicable log to get the eSEL propagated
+            l_callhome_type = true;
         }
 
         // flatten into buffer, truncate to max eSEL size
