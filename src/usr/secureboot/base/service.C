@@ -424,6 +424,15 @@ void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown,
 
     errlCommit(io_err, SECURE_COMP_ID);
 
+    // If background shutdown requested, flush the error logs to ensure that the
+    // security error is committed to PNOR.  Otherwise, it's possible for other
+    // fail paths to TI Hostboot before the shutdown completes, potentially
+    // leaving the security error uncommitted.
+    if(!i_waitForShutdown)
+    {
+        ErrlManager::callFlushErrorLogs();
+    }
+
     // Shutdown with Secureboot error status
     INITSERVICE::doShutdown(l_rc, !i_waitForShutdown);
 }
