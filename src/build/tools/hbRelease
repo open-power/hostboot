@@ -2159,20 +2159,6 @@ sub gerrit_query_commit
             }
         }
     }
-
-    #Temporary Hack to look for commit in master branch if not found in
-    # release-fips920
-    if (($project eq "hostboot") and $globals{"branch"} eq "release-fips920")
-    {
-        print "Cannot find $commit in $project/$globals{\"branch\"} \n" if $debug;
-        # Force next iteration to look for master branch
-        $globals{"branch"}="master";
-        gerrit_query_commit($commit);
-    }
-    else
-    {
-        die "Cannot find $commit in $project/$globals{\"branch\"}";
-    }
 }
 
 # sub gerrit_is_patch
