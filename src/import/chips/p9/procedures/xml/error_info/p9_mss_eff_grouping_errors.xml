@@ -62,9 +62,9 @@
     <description>
         p9_mss_eff_grouping is unable to group at least one
         MCA/DMI port on this chip, based on the specified
-	memory interleaving and mirroring rules.
+        memory interleaving and mirroring rules.
         This is a memory plugging error.
-	Refer to memory plugging rules.
+        Refer to memory plugging rules.
     </description>
     <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
