@@ -117,6 +117,8 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SKIP_WAKEUP, FAPI_SYSTEM, l_skip_wakeup),
              "fapiGetAttribute of ATTR_SKIP_WAKEUP failed");
 
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_ALERT_ENABLE, FAPI_SYSTEM, l_malfEnabled));
+
     //  ************************************************************************
     //  Put a mark on the wall that we are in the Reset Flow
     //  ************************************************************************
@@ -126,8 +128,6 @@ fapi2::ReturnCode p9_pm_reset(
     //  ************************************************************************
     //  Check if the PM Complex Reset came in due to a Malf Alert
     //  ************************************************************************
-    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_ALERT_ENABLE, FAPI_SYSTEM, l_malfEnabled));
-
     if (l_malfEnabled == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
     {
         FAPI_TRY(fapi2::getScom(i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM, l_data64),
@@ -138,6 +138,11 @@ fapi2::ReturnCode p9_pm_reset(
             l_malfAlert = true;
             FAPI_IMP("OCC FLAG2 Bit 28 [PM_CALLOUT_ACTIVE] Set: In Malf Path");
         }
+
+        // Disable a spurious malf alert from within PM Reset, as we go about
+        // halting the PPEs
+        l_data64.flush<0>().setBit<p9hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
     }
 
     //  ************************************************************************
