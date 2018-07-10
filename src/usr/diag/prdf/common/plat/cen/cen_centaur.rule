@@ -31,6 +31,9 @@ chip cen_centaur
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+#Import signatures
+.include "prdfP9ProcMbCommonExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
