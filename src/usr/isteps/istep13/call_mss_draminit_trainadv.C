@@ -33,6 +33,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
 #include "istep13consts.H"
+#include <util/misc.H>
 
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
@@ -91,7 +92,14 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                "SUCCESS :  p9_mss_draminit_trainingadv HWP( )" );
     }
 
-    if(l_stepError.getErrorHandle() == NULL)
+    // This step takes an obscene amount of time to run in Simics,
+    //  going to skip it for now
+    if( Util::isSimicsRunning() )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Skipping p9c_mss_draminit_training_advanced HWP in Simics");
+    }
+    else if(l_stepError.getErrorHandle() == NULL)
     {
         // Get all Centaur targets
         TARGETING::TargetHandleList l_membufTargetList;
@@ -118,7 +126,6 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                 //  Make a local copy of the target for ease of use
                 TARGETING::Target*  l_mbaTarget = *l_mba_iter;
 
-#if 0 //TODO CQ:SW430659 re-enable when VPD supports 
                 // Dump current run on target
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "Running p9c_mss_draminit_training_advanced HWP on "
@@ -128,11 +135,7 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
                 fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
 
                 FAPI_INVOKE_HWP(l_err, p9c_mss_draminit_training_advanced, l_fapi_mba_target);
-#else
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SKIPPING p9c_mss_draminit_training_advanced HWP on "
-                          "target HUID %.8X till VPD ready", TARGETING::get_huid(l_mbaTarget));
-#endif
+
                 //  process return code.
                 if ( l_err )
                 {
