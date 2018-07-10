@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,7 +116,24 @@ class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
         return *this;
     }
 
-    virtual uint32_t Read() const { return iv_child->Read();  }
+    virtual uint32_t Read() const
+    {
+        uint32_t rc = iv_child->Read();
+        if ( PRD_SCANCOM_FAILURE == rc )
+        {
+            // This is a bit unusual, but we are going to ignore SCOM failures.
+            // This takes care of a corner case where one of the summary
+            // registers in the list returns an error, but there is another
+            // summary register with an active attention, which would be ignored
+            // if we return a bad rc.
+            PRDF_INF( "[SummaryRegister::read] SCOM failure on register ID "
+                      "0x%04x, ignoring error", iv_child->GetId() );
+            rc = SUCCESS;
+            iv_child->clearAllBits(); // just in case
+        }
+        return rc;
+    }
+
     virtual uint32_t Write()      { return iv_child->Write(); }
 
     const BitString * GetBitString(
