@@ -187,8 +187,8 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
                       size_t & o_len)
 {
 #define PRDF_FUNC "[PlatServices::getSPDdata] "
-    uint32_t rc = SUCCESS;
-    fapi2::ReturnCode l_rc;
+    uint32_t o_rc = SUCCESS;
+    errlHndl_t l_errl = nullptr;
 
     o_len = 0;
 
@@ -196,39 +196,42 @@ uint32_t getSpdData(TARGETING::TargetHandle_t i_target,
 
     do {
       // SPD interface call with NULL blob to get size data
-      l_rc = fapi2::getSPD(l_fapi2_dimm, NULL, o_len);
+      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, NULL, o_len);
 
-      // Expect to return the size or non failure
-      if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+      // Check for a valid size returned without an error
+      if(nullptr != l_errl)
       {
-          PRDF_ERR( PRDF_FUNC "Failed to get SPD size from DIMM with HUID= 0x%x, rc: 0x%02X",
-            TARGETING::get_huid(i_target), uint32_t(l_rc) );
-          rc = FAIL;
+          PRDF_ERR( PRDF_FUNC "Failed to get SPD size from DIMM with HUID=0x%x",
+                    TARGETING::get_huid(i_target) );
+          PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+
+          o_rc = FAIL;
           break;
       }
       else if (o_len == 0)
       {
-         PRDF_ERR( PRDF_FUNC "Failed to get SPD size data of DIMM with HUID= 0x%x",
+         PRDF_ERR( PRDF_FUNC "SPD size data of DIMM with HUID=0x%x returned 0",
                     TARGETING::get_huid(i_target) );
-         rc = FAIL;
+         o_rc = FAIL;
          break;
       }
 
       //  allocate the blob data of mem size length to hold data
       o_data = reinterpret_cast<uint8_t *>(malloc(o_len));
-      memset(o_data,0 ,o_len);
+      memset(o_data, 0, o_len);
 
-      l_rc = fapi2::getSPD(l_fapi2_dimm, o_data, o_len);
-      if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
+      FAPI_INVOKE_HWP(l_errl, fapi2::getSPD, l_fapi2_dimm, o_data, o_len);
+      if ( nullptr != l_errl )
       {
           PRDF_ERR( PRDF_FUNC "Failed to read data from DIMM with HUID= 0x%x",
                     TARGETING::get_huid(i_target) );
-          rc = FAIL;
+          PRDF_COMMIT_ERRL( l_errl, ERRL_ACTION_REPORT );
+          o_rc = FAIL;
           break;
       }
     } while (0);
 
-    return rc;
+    return o_rc;
 #undef PRDF_FUNC
 }
 
