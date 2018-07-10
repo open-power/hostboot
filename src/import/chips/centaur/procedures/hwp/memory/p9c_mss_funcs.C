@@ -43,6 +43,43 @@
 #include <generic/memory/lib/utils/bit_count.H>
 
 ///
+/// @brief Disables all CID's
+/// @param[in] i_target - the MBA target on which to operate
+/// @param[in,out] io_csn - the CSN containing CID's
+/// @param[in,out] io_cke - the CKE containing CID's
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mss_disable_cid( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   fapi2::variable_buffer& io_csn,
+                                   fapi2::variable_buffer& io_cke)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
+
+    if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+    {
+        // CID 0/1 on DIMM0
+        FAPI_TRY(io_csn.clearBit(2, 2));
+
+        // CID 0/1 on DIMM1
+        FAPI_TRY(io_csn.clearBit(6, 2));
+
+        // CID2 hangs out in CKE1
+        FAPI_TRY(io_cke.clearBit(1));
+
+        // If we need to keep track of the CKE for both ports (8 CKE bits), hit CKE1 on port 1 as well
+        if(io_cke.getBitLength() == 8)
+        {
+            FAPI_TRY(io_cke.clearBit(5));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @function mss_ccs_set_end_bit
 /// @brief Setting the End location of the CCS array
 /// @param[in] i_target, Target<fapi2::TARGET_TYPE_MBA> = centaur.mba
@@ -982,12 +1019,7 @@ fapi2::ReturnCode mss_execute_zq_cal(
             l_csn_buffer_8.flush<1>();
             FAPI_TRY(l_csn_buffer_8.clearBit(l_current_rank));
 
-            if(l_stack_type[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_TRY(l_csn_buffer_8.clearBit(2, 2));
-                FAPI_TRY(l_csn_buffer_8.clearBit(6, 2));
-                FAPI_TRY(l_cke_buffer_4.clearBit(1));
-            }
+            FAPI_TRY(mss_disable_cid(i_target, l_csn_buffer_8, l_cke_buffer_4));
 
             //Issue execute.
             FAPI_INF( "+++++++++++++++ Execute CCS array on port: %d +++++++++++++++", i_port);

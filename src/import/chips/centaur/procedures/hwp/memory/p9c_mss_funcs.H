@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,17 @@
 #ifndef _MSS_FUNCS_H
 #define _MSS_FUNCS_H
 #include <dimmConsts.H>
+
+///
+/// @brief Disables all CID's
+/// @param[in] i_target - the MBA target on which to operate
+/// @param[in,out] io_csn - the CSN containing CID's
+/// @param[in,out] io_cke - the CKE containing CID's
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mss_disable_cid( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   fapi2::variable_buffer& io_csn,
+                                   fapi2::variable_buffer& io_cke);
 
 ///
 /// @brief Adding information to the CCS - 0 instruction array by index

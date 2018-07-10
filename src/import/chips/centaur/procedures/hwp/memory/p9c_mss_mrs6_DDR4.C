@@ -135,13 +135,7 @@ extern "C"
         l_csn_8.flush<1>();
         FAPI_TRY(l_csn_8.clearBit(i_rank), "add_activate_to_ccs: Error setting up buffers");
 
-        if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-        {
-            FAPI_DBG( "%s =============  Got in the 3DS stack loop CKE !!!!=====================", c_str(i_target_mba));
-            FAPI_TRY(l_csn_8.clearBit(2, 2));
-            FAPI_TRY(l_csn_8.clearBit(6, 2));
-            FAPI_TRY(l_cke_4.clearBit(1));
-        }
+        FAPI_TRY(mss_disable_cid(i_target_mba, l_csn_8, l_cke_4));
 
         //Command structure setup
         l_cke_4.flush<1>();
@@ -400,13 +394,7 @@ extern "C"
                     FAPI_TRY(l_csn_8.setBit(0, 8));
                     FAPI_TRY(l_csn_8.clearBit(l_rank_number + 4 * l_dimm_number));
 
-                    if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                    {
-                        FAPI_DBG( "%s =============  Got in the 3DS stack loop CKE !!!!=====================", c_str(i_target));
-                        FAPI_TRY(l_csn_8.clearBit(2, 2));
-                        FAPI_TRY(l_csn_8.clearBit(6, 2));
-                        FAPI_TRY(l_cke_4.clearBit(1));
-                    }
+                    FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
                     // Propogate through the 4 MRS cmds
                     // Copying the current MRS into address buffer matching the MRS_array order

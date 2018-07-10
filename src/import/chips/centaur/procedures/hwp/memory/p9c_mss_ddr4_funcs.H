@@ -55,6 +55,17 @@ fapi2::ReturnCode mss_mrs_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_MBA>
 /// @return ReturnCode
 fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 
+/// @brief Generates the RCD control word chip selects
+/// @param[in] i_target - MBA target on which to opearte
+/// @param[in] i_dimm - DIMM on which to operate
+/// @param[out] o_rcd_cs - chip selects for the RCD
+/// @param[in,out] io_cke - CKE's as this contains CID2
+/// @return ReturnCode
+fapi2::ReturnCode generate_rcd_cs( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   const uint32_t i_dimm,
+                                   fapi2::variable_buffer& o_rcd_cs,
+                                   fapi2::variable_buffer& io_cke);
+
 /// @brief Writes RCD control words for DDR4 register.
 /// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
 /// @param[in] i_port_number        MBA port number

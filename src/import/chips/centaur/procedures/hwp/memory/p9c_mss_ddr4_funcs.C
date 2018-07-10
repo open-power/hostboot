@@ -163,12 +163,7 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
                     FAPI_TRY(l_csn_8.setBit(0, 8));
                     FAPI_TRY(l_csn_8.clearBit(l_rank_number + 4 * l_dimm));
 
-                    if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                    {
-                        FAPI_INF( "=============  Got in the 3DS stack loop =====================\n");
-                        FAPI_TRY(l_csn_8.clearBit(2, 2)); // Clearing CKE caused issues here.
-                        FAPI_TRY(l_csn_8.clearBit(6, 2));
-                    }
+                    FAPI_TRY(mss_disable_cid(i_target_mba, l_csn_8, l_cke_4));
 
                     FAPI_TRY(l_address_16.clearBit(0, 16));
 
@@ -754,6 +749,32 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Generates the RCD control word chip selects
+/// @param[in] i_target - MBA target on which to opearte
+/// @param[in] i_dimm - DIMM on which to operate
+/// @param[out] o_rcd_cs - chip selects for the RCD
+/// @param[in,out] io_cke - CKE's as this contains CID2
+/// @return ReturnCode
+fapi2::ReturnCode generate_rcd_cs( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   const uint32_t i_dimm,
+                                   fapi2::variable_buffer& o_rcd_cs,
+                                   fapi2::variable_buffer& io_cke)
+{
+    // Enable the CS for the first rank on the DIMM
+    const uint64_t RANK = i_dimm == 0 ? 0 : 4;
+    fapi2::variable_buffer l_csn_8(8);
+
+    FAPI_TRY(l_csn_8.setBit(0, 8));
+    FAPI_TRY(l_csn_8.clearBit(RANK), "mss_rcd_load: Error setting up buffers"); //DCS0_n is LOW
+
+    FAPI_TRY(mss_disable_cid(i_target, l_csn_8, io_cke));
+
+    o_rcd_cs = l_csn_8;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief Writes RCD control words for DDR4 register.
 /// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
 /// @param[in] i_port_number        MBA port number
@@ -765,7 +786,6 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     uint32_t& io_ccs_inst_cnt
 )
 {
-    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     uint32_t l_dimm_number = 0;
     uint32_t l_rcd_number = 0;
     fapi2::variable_buffer l_rcd_cntl_wrd_4(8);
@@ -814,7 +834,6 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     FAPI_TRY(l_odt_4.clearBit(0, 4));
 
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target, l_num_ranks_array));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RCD_CNTL_WORD_0_15, i_target, l_rcd_array));
@@ -878,16 +897,7 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
             FAPI_INF( "RCD Control Word X: 0x%016llX", l_rcdx_array);
 
             // ALL active CS lines at a time.
-            FAPI_TRY(l_csn_8.setBit(0, 8), "mss_rcd_load: Error setting up buffers");
-            FAPI_TRY(l_csn_8.clearBit(0), "mss_rcd_load: Error setting up buffers"); //DCS0_n is LOW
-
-            if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
-                FAPI_TRY(l_csn_8.clearBit(2, 2));
-                FAPI_TRY(l_csn_8.clearBit(6, 2));
-                FAPI_TRY(l_cke_4.clearBit(1));
-            }
+            FAPI_TRY(generate_rcd_cs(i_target, l_dimm_number, l_csn_8, l_cke_4));
 
             // DBG1, DBG0, DBA1, DBA0 = 4`b0111
             FAPI_TRY(l_bank_3.setBit(0, 3), "mss_rcd_load: Error setting up buffers");
@@ -1222,17 +1232,6 @@ fapi2::ReturnCode mss_mrs_load_ddr4(
     FAPI_TRY(fapi2::putScom(i_target,  CEN_MBA_DDRPHY_WC_CONFIG3_P0, l_data_64));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
-
-
-    FAPI_INF( "Stack Type: %d\n", l_dram_stack[0][0]);
-
-    if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-    {
-        FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
-        FAPI_TRY(l_csn_8.clearBit(2, 2));
-        FAPI_TRY(l_csn_8.clearBit(6, 2));
-        FAPI_TRY(l_cke_4.clearBit(1));
-    }
 
     //MRS0
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_BL, i_target, l_dram_bl));
@@ -2089,12 +2088,7 @@ fapi2::ReturnCode mss_mrs_load_ddr4(
 
                 FAPI_INF( "Stack Type: %d\n", l_dram_stack[0][0]);
 
-                if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                {
-                    FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
-                    FAPI_TRY(l_csn_8.clearBit(2, 2)); // Clearing CKE caused issues here.
-                    FAPI_TRY(l_csn_8.clearBit(6, 2));
-                }
+                FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
                 // Propogate through the 4 MRS cmds
                 for ( l_mrs_number = 0; l_mrs_number < 7; l_mrs_number ++)
@@ -2463,6 +2457,8 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
     fapi2::variable_buffer l_address_16(16);
     fapi2::variable_buffer l_bank_3(3);
     fapi2::variable_buffer l_csn_8(8);
+    fapi2::variable_buffer l_cke_4(4);
+    l_cke_4 = i_cke_4;
     uint8_t l_dimm_type = 0;
     uint8_t l_is_sim = 0;
     uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
@@ -2505,11 +2501,7 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         FAPI_TRY(l_csn_8.setBit(0, 8));
         FAPI_TRY(l_csn_8.clearBit(i_rank));
 
-        if(l_dram_stack[i_port][l_dimm]  == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-        {
-            FAPI_TRY(l_csn_8.clearBit(2, 2));
-            FAPI_TRY(l_csn_8.clearBit(6, 2));
-        }
+        FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
         // Send out to the CCS array
         FAPI_TRY(mss_ccs_inst_arry_0( i_target,
@@ -2520,7 +2512,7 @@ fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                       i_rasn_1,
                                       i_casn_1,
                                       i_wen_1,
-                                      i_cke_4,
+                                      l_cke_4,
                                       l_csn_8,
                                       i_odt_4,
                                       i_ddr_cal_type_4,
@@ -2655,11 +2647,7 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
     FAPI_TRY(l_csn_8.setBit(0, 8));
     FAPI_TRY(l_csn_8.clearBit(i_rank));
 
-    if(l_dram_stack[l_port_number][l_dimm]  == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-    {
-        FAPI_TRY(l_csn_8.clearBit(2, 2));
-        FAPI_TRY(l_csn_8.clearBit(6, 2));
-    }
+    FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
     FAPI_TRY(l_bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7));
     FAPI_TRY(l_bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6));
@@ -2949,11 +2937,7 @@ fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(
     FAPI_TRY(l_csn_8.setBit(0, 8));
     FAPI_TRY(l_csn_8.clearBit(i_rank));
 
-    if(l_dram_stack[i_port_number][l_dimm]  == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-    {
-        FAPI_TRY(l_csn_8.clearBit(2, 2));
-        FAPI_TRY(l_csn_8.clearBit(6, 2));
-    }
+    FAPI_TRY(mss_disable_cid(i_target, l_csn_8, l_cke_4));
 
     // Send out to the CCS array
     FAPI_TRY(mss_ccs_inst_arry_0( i_target,

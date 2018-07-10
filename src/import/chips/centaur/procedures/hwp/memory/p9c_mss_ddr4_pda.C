@@ -750,11 +750,7 @@ extern "C" {
             FAPI_TRY(cke_4.setBit(0, 4));
             FAPI_TRY(csn_8.setBit(0, 8));
 
-            if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_TRY(csn_8.clearBit(2, 2));
-                FAPI_TRY(csn_8.clearBit(6, 2));
-            }
+            FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
             FAPI_TRY(address_16.clearBit(0, 16), "mss_ddr4_setup_pda: Error setting up buffers");
             FAPI_TRY(odt_4.clearBit(0, 4), "mss_ddr4_setup_pda: Error setting up buffers");
@@ -814,11 +810,7 @@ extern "C" {
             // Only corresponding CS to rank
             FAPI_TRY(csn_8.setBit(0, 8));
 
-            if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_TRY(csn_8.clearBit(2, 2));
-                FAPI_TRY(csn_8.clearBit(6, 2));
-            }
+            FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
             FAPI_TRY(csn_8.clearBit(rank_number + 4 * dimm_number));
 
@@ -879,11 +871,7 @@ extern "C" {
                 // Only corresponding CS to rank
                 FAPI_TRY(csn_8.setBit(0, 8));
 
-                if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                {
-                    FAPI_TRY(csn_8.clearBit(2, 2));
-                    FAPI_TRY(csn_8.clearBit(6, 2));
-                }
+                FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
                 FAPI_TRY(csn_8.clearBit(rank_number + 4 * dimm_number));
 
@@ -1355,11 +1343,7 @@ extern "C" {
                 FAPI_TRY(csn_8.setBit(0, 8));
                 FAPI_TRY(csn_8.clearBit(prev_rank + 4 * prev_dimm));
 
-                if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                {
-                    FAPI_TRY(csn_8.clearBit(2, 2));
-                    FAPI_TRY(csn_8.clearBit(6, 2));
-                }
+                FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
                 FAPI_TRY(odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
                 // Send out to the CCS array
@@ -1442,11 +1426,7 @@ extern "C" {
                     FAPI_TRY(csn_8.setBit(0, 8));
                     FAPI_TRY(csn_8.clearBit(prev_rank + 4 * prev_dimm));
 
-                    if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                    {
-                        FAPI_TRY(csn_8.clearBit(2, 2));
-                        FAPI_TRY(csn_8.clearBit(6, 2));
-                    }
+                    FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
                     FAPI_TRY(odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
 
@@ -1632,11 +1612,7 @@ extern "C" {
             // Only corresponding CS to rank
             FAPI_TRY(csn_8.setBit(0, 8));
 
-            if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_TRY(csn_8.clearBit(2, 2));
-                FAPI_TRY(csn_8.clearBit(6, 2));
-            }
+            FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
             FAPI_TRY(csn_8.clearBit(prev_rank + 4 * prev_dimm));
 
@@ -1718,11 +1694,7 @@ extern "C" {
                 // Only corresponding CS to rank
                 FAPI_TRY(csn_8.setBit(0, 8));
 
-                if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                {
-                    FAPI_TRY(csn_8.clearBit(2, 2));
-                    FAPI_TRY(csn_8.clearBit(6, 2));
-                }
+                FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
                 FAPI_TRY(csn_8.clearBit(prev_rank + 4 * prev_dimm));
 
@@ -2064,11 +2036,7 @@ extern "C" {
             // Only corresponding CS to rank
             FAPI_TRY(csn_8.setBit(0, 8), "mss_mrs_load: Error setting up buffers");
 
-            if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-            {
-                FAPI_TRY(csn_8.clearBit(2, 2), "mss_mrs_load: Error setting up buffers");
-                FAPI_TRY(csn_8.clearBit(6, 2), "mss_mrs_load: Error setting up buffers");
-            }
+            FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
             FAPI_TRY(csn_8.clearBit(rank_number + 4 * dimm_number));
             FAPI_TRY(bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7), "mss_mrs_load: Error setting up buffers");
@@ -2157,11 +2125,7 @@ extern "C" {
                 // Only corresponding CS to rank
                 FAPI_TRY(csn_8.setBit(0, 8), "mss_ddr4_setup_pda: Error setting up buffers");
 
-                if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-                {
-                    FAPI_TRY(csn_8.clearBit(2, 2), "mss_ddr4_setup_pda: Error setting up buffers");
-                    FAPI_TRY(csn_8.clearBit(6, 2), "mss_ddr4_setup_pda: Error setting up buffers");
-                }
+                FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
                 FAPI_TRY(csn_8.clearBit(rank_number + 4 * dimm_number));
 
