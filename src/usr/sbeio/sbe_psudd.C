@@ -821,7 +821,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                           HWAS::GARD_NULL );
                 }
 
-                if (!VFS::module_is_loaded("fapi2.so"))
+                if (!VFS::module_is_loaded("libfapi2.so"))
                 {
                     // If the fapi library hasn't been loaded, we need to save
                     // the details of this error until it has, so the error can
