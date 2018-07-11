@@ -2128,6 +2128,19 @@ void DeconfigGard::_deconfigureByAssoc(
             } // TYPE_NPU
             case TYPE_SMPGROUP:
             {
+                // Deconfigure peer SMPGROUP target
+                const Target * l_pDstTarget =
+                    i_target.getAttr<ATTR_PEER_TARGET>();
+
+                if (l_pDstTarget)
+                {
+                    HWAS_INF("_deconfigureByAssoc SMPGROUP Peer: 0x%.8X",
+                        get_huid(l_pDstTarget));
+                    _deconfigureTarget(
+                                const_cast<Target &>(*l_pDstTarget),
+                                i_errlEid, NULL, i_deconfigRule);
+                }
+
                 //OBUS with no good SMPGROUP should be de-configured
                 TargetHandleList pObusList;
                 getParentAffinityTargetsByState(pObusList,
