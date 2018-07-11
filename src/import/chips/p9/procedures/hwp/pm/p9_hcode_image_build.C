@@ -136,6 +136,8 @@ enum
     L2_EPS_DIVIDER              =   1,
     MAX_HOMER_HEADER            =   6,
     MAX_PM_REGION_HEADER        =   3,
+    MAX_EQ_SCOM_RESTORES        =   255,
+    SGPE_IMGAE_VERSION          =   0x003,  //Keeping in HWP to avoid hcode-HWP coreq
 };
 
 /**
@@ -1314,7 +1316,8 @@ void updateQpmrHeader( Homerlayout_t* i_pChipHomer, QpmrHeaderLayout_t& io_qpmrH
                                    SWIZZLE_4_BYTE(io_qpmrHdr.quadCommonRingLength) +
                                    SWIZZLE_4_BYTE(io_qpmrHdr.quadSpecRingLength);
 
-    io_qpmrHdr.maxQuadScomRestoreEntry  =   SWIZZLE_4_BYTE(QUAD_SCOM_RESTORE_REGS_PER_QUAD - 1);
+    io_qpmrHdr.maxQuadScomRestoreEntry  =   SWIZZLE_4_BYTE(MAX_EQ_SCOM_RESTORES);   //Keeping it all in HWP to avoid hcode-HWP coreq
+    io_qpmrHdr.buildVersion             =   SWIZZLE_4_BYTE(SGPE_IMGAE_VERSION);
 
     io_qpmrHdr.sgpeSramImageSize = SWIZZLE_4_BYTE(io_qpmrHdr.sgpeSramImageSize);
     memcpy( pQpmrHdr, &io_qpmrHdr, sizeof( QpmrHeaderLayout_t ) );
