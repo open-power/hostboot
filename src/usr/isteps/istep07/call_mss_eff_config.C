@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@
 #include    <p9c_mss_eff_config.H>
 #include    <p9c_mss_eff_mb_interleave.H>
 #include    <p9c_mss_eff_config_thermal.H>
+
+#include    <hbotcompid.H>
 
 namespace   ISTEP_07
 {
@@ -283,6 +285,8 @@ void*    call_mss_eff_config( void *io_pArgs )
 
             // Ensure istep error created and has same plid as this error
             ErrlUserDetailsTarget(l_mcs_target).addToLog(l_err);
+            l_err->collectTrace(EEPROM_COMP_NAME);
+            l_err->collectTrace(I2C_COMP_NAME);
             l_StepError.addErrorDetails(l_err);
             errlCommit(l_err, HWPF_COMP_ID);
             continue;
