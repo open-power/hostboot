@@ -29,9 +29,11 @@
 #define __prdfMemVcm_H
 
 // Platform includes
+#include <prdfErrlUtil.H>
 #include <prdfMemDbUtils.H>
 #include <prdfMemEccAnalysis.H>
 #include <prdfMemMark.H>
+#include <prdfMemRowRepair.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemTdFalseAlarm.H>
 #include <prdfMemTdQueue.H>
@@ -315,11 +317,20 @@ class VcmEvent : public TdEntry
      */
     uint32_t rowRepair( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
 
+    /**
+     * @brief  Do extra analysis needed for Row Repair once scrub has reached
+     *         the end of the rank.
+     * @param  io_sc  The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t rowRepairEndRank( STEP_CODE_DATA_STRUCT & io_sc );
+
   private: // instance variables
 
     const MemMark iv_mark; ///< The chip mark from hardware.
-
     const bool iv_rowRepairEnabled; ///< True if Row Repair is enabled.
+    uint8_t iv_mceCount = 0; ///< MCEs hit count, currently for Row Repair only.
+    MemAddr iv_rowRepairFailAddr; ///< Address stored to apply Row Repair on.
 };
 
 //------------------------------------------------------------------------------

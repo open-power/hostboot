@@ -127,6 +127,16 @@ class MemDqBitmap
     int32_t setDram( const MemSymbol & i_symbol, uint8_t i_pins = 0xff );
 
     /**
+     * @brief  Clears the specified DRAM.
+     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @param  i_symbol A symbol on the target DRAM.
+     * @param  i_pins   Optional 8-bit (x8 mode) or 4-bit (x4 mode) value of the
+     *                  DRAM's pins. The default is to clear all pins.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    uint32_t clearDram( const MemSymbol & i_symbol, uint8_t i_pins = 0xff );
+
+    /**
      * @brief Adds the bitmaps for both ports to the capture data.
      * @param o_cd Capture data struct.
      */
@@ -219,6 +229,16 @@ class MemDqBitmap
 template<TARGETING::TYPE T>
 uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
                        MemSymbol i_symbol );
+
+/**
+ * @brief  Clears the inputted dram in DRAM repairs VPD.
+ * @param  i_chip MBA or MCA chip.
+ * @param  i_rank Target rank.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                         MemSymbol i_symbol );
 
 } // end namespace PRDF
 
