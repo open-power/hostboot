@@ -1,0 +1,38 @@
+--- centaur_memory.act	2018-06-29 08:37:30.899467931 -0500
++++ centaur_memory.act.new	2018-06-29 08:37:01.321543963 -0500
+@@ -431,7 +431,7 @@
+  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[0] # if the start maintenance command is on
+  CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,OFF] BIT=[59] # ERR constant
+  CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[40] # PORT0 CAS inject
+-# CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[51] # Wait time
++ CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[51] # Wait time
+ 
+  EFFECT: TARGET=[REG(0x02011440)] OP=[BIT,ON] BIT=[45]  # Parity error on
+  # Then, disable all of our injects
+@@ -458,7 +458,7 @@
+  CAUSE: TARGET=[REG(0x0301060B)] OP=[BIT,ON] BIT=[0] # if the start maintenance command is on
+  CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,OFF] BIT=[59] # ERR constant
+  CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[42] # PORT1 CAS inject
+-# CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[51] # Wait time
++ CAUSE: TARGET=[REG(0x03010413)] OP=[BIT,ON] BIT=[51] # Wait time
+ 
+  EFFECT: TARGET=[REG(0x02011440)] OP=[BIT,ON] BIT=[45]  # Parity error on
+  # Then, disable all of our injects
+@@ -485,7 +485,7 @@
+  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[0] # if the start maintenance command is on
+  CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,OFF] BIT=[59] # ERR constant
+  CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[40] # PORT2 CAS inject
+- #CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[51] # Wait time
++ CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[51] # Wait time
+ 
+  EFFECT: TARGET=[REG(0x02011480)] OP=[BIT,ON] BIT=[45]  # Parity error on
+  # Then, disable all of our injects
+@@ -512,7 +512,7 @@
+  CAUSE: TARGET=[REG(0x03010E0B)] OP=[BIT,ON] BIT=[0] # if the start maintenance command is on
+  CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,OFF] BIT=[59] # ERR constant
+  CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[42] # PORT3 CAS inject
+-# CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[51] # Wait time
++ CAUSE: TARGET=[REG(0x03010C13)] OP=[BIT,ON] BIT=[51] # Wait time
+ 
+  EFFECT: TARGET=[REG(0x02011480)] OP=[BIT,ON] BIT=[45]  # Parity error on
+  # Then, disable all of our injects

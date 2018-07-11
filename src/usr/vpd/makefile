@@ -62,7 +62,7 @@ BINARY_FILES += $(IMGDIR)/dimmspd_cdimm.dat:21b0da9354a588bb1247f1408bfce3111fbc
 
 # ISDIMM Format - download 8k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd.dat:af41c35b5a10f309f2519a871204936a2129e5ea
-BINARY_FILES += $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
+BINARY_FILES += $(IMGDIR)/dimmspd.dat:3851074565e615dc2715ca15fc8f90bf246aa0c7
 
 #Direct memory vpd
 BINARY_FILES += $(IMGDIR)/dvpd.dat:9292032f653710f92bbeb56b39582b2d0e5296b7
