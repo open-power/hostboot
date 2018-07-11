@@ -47,6 +47,11 @@ PRDR_ERROR_SIGNATURE(MaintRETRY_CTE, 0xffff0016, "", "Maintenance RETRY CTE");
 PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarmTH, 0xffff0022, "", "VCM: false alarm threshold");
+PRDR_ERROR_SIGNATURE(VcmVerSameDram,  0xffff0023, "", "VCM: verified: previous PPR on same DRAM");
+PRDR_ERROR_SIGNATURE(VcmVerDiffDram,  0xffff0024, "", "VCM: verified: previous PPR on different DRAM");
+PRDR_ERROR_SIGNATURE(VcmVerFirstMce,  0xffff0025, "", "VCM: verified: first MCE");
+PRDR_ERROR_SIGNATURE(VcmVerSecMce,    0xffff0026, "", "VCM: verified: second MCE");
+PRDR_ERROR_SIGNATURE(VcmVerRowFail,   0xffff0027, "", "VCM: verified: common row fail");
 PRDR_ERROR_SIGNATURE(AllDramRepairs,  0xffff002F, "", "all DRAM repairs used");
 
 PRDR_ERROR_SIGNATURE(RdrInternalFail,  0xffff0040, "", "RDR: Internal failure");

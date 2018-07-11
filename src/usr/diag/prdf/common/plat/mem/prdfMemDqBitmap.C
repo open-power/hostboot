@@ -212,6 +212,45 @@ int32_t MemDqBitmap<T>::setDram( const MemSymbol & i_symbol, uint8_t i_pins )
 //------------------------------------------------------------------------------
 
 template <DIMMS_PER_RANK T>
+uint32_t MemDqBitmap<T>::clearDram( const MemSymbol & i_symbol, uint8_t i_pins )
+{
+    #define PRDF_FUNC "[MemDqBitmap::clearDram] "
+
+    int32_t o_rc = SUCCESS;
+
+    do
+    {
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
+            break;
+        }
+
+        if ( iv_x4Dram )
+        {
+            i_pins &= 0xf; // limit to 4 bits
+            uint32_t shift = (DQS_PER_BYTE-1) - bitIdx;
+            shift = (shift / DQS_PER_NIBBLE) * DQS_PER_NIBBLE; // 0,4
+            iv_data[portSlct][byteIdx] &= ~(i_pins << shift);
+        }
+        else
+        {
+            i_pins &= 0xff; // limit to 8 bits
+            iv_data[portSlct][byteIdx] &= ~(i_pins);
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <DIMMS_PER_RANK T>
 void MemDqBitmap<T>::getCaptureData( CaptureData & o_cd ) const
 {
     uint8_t rank   = iv_rank.getMaster();
@@ -654,26 +693,24 @@ template class MemDqBitmap<DIMMS_PER_RANK::MBA>;
 //                              Utility Functions
 //##############################################################################
 
-template<>
-uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
-                                            const MemRank & i_rank,
-                                            MemSymbol i_symbol )
+template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+uint32_t __setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                         MemSymbol i_symbol )
 {
-    #define PRDF_FUNC "[MemDqBitmap::setDramInVpd] "
+    #define PRDF_FUNC "[MemDqBitmap::__setDramInVpd] "
 
     uint32_t o_rc = SUCCESS;
 
     do
     {
+        TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
 
-        TARGETING::TargetHandle_t mcaTrgt = i_chip->getTrgt();
-
-        MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
-        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>( mcaTrgt, i_rank, dqBitmap );
+        MemDqBitmap<D> dqBitmap;
+        o_rc = getBadDqBitmap<D>( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>(0x%08x, "
-                    "0x%02x) failed.", getHuid(mcaTrgt), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(trgt), i_rank.getKey() );
             break;
         }
 
@@ -684,11 +721,11 @@ uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
             break;
         }
 
-        o_rc = setBadDqBitmap<DIMMS_PER_RANK::MCA>( mcaTrgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap<D>( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MCA>(0x%08x, "
-                    "0x%02x) failed.", getHuid(mcaTrgt), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(trgt), i_rank.getKey() );
             break;
         }
     }while(0);
@@ -698,43 +735,60 @@ uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-//------------------------------------------------------------------------------
 
 template<>
 uint32_t setDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
                                             const MemRank & i_rank,
                                             MemSymbol i_symbol )
 {
-    #define PRDF_FUNC "[MemDqBitmap::setDramInVpd] "
+    return __setDramInVpd<TARGETING::TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip,
+        i_rank, i_symbol);
+}
+
+template<>
+uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                            const MemRank & i_rank,
+                                            MemSymbol i_symbol )
+{
+    return __setDramInVpd<TARGETING::TYPE_MCA, DIMMS_PER_RANK::MCA>(i_chip,
+        i_rank, i_symbol);
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+uint32_t __clearDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                           MemSymbol i_symbol )
+{
+    #define PRDF_FUNC "[MemDqBitmap::__clearDramInVpd] "
 
     uint32_t o_rc = SUCCESS;
 
     do
     {
+        TARGETING::TargetHandle_t trgt = i_chip->getTrgt();
 
-        TARGETING::TargetHandle_t mbaTrgt = i_chip->getTrgt();
-
-        MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
-        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>( mbaTrgt, i_rank, dqBitmap );
+        MemDqBitmap<D> dqBitmap;
+        o_rc = getBadDqBitmap<D>( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MBA>(0x%08x, "
-                    "0x%02x) failed.", getHuid(mbaTrgt), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(trgt), i_rank.getKey() );
             break;
         }
 
-        o_rc = dqBitmap.setDram( i_symbol );
+        o_rc = dqBitmap.clearDram( i_symbol );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "setDram() failed." );
+            PRDF_ERR( PRDF_FUNC "clearDram() failed." );
             break;
         }
 
-        o_rc = setBadDqBitmap<DIMMS_PER_RANK::MBA>( mbaTrgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap<D>( trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MBA>(0x%08x, "
-                    "0x%02x) failed.", getHuid(mbaTrgt), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
+                      getHuid(trgt), i_rank.getKey() );
             break;
         }
     }while(0);
@@ -742,6 +796,24 @@ uint32_t setDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+template<>
+uint32_t clearDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                              const MemRank & i_rank,
+                                              MemSymbol i_symbol )
+{
+    return __clearDramInVpd<TARGETING::TYPE_MCA, DIMMS_PER_RANK::MCA>(i_chip,
+        i_rank, i_symbol);
+}
+
+template<>
+uint32_t clearDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                              const MemRank & i_rank,
+                                              MemSymbol i_symbol )
+{
+    return __clearDramInVpd<TARGETING::TYPE_MBA, DIMMS_PER_RANK::MBA>(i_chip,
+        i_rank, i_symbol);
 }
 
 //------------------------------------------------------------------------------
