@@ -297,13 +297,14 @@ uint32_t queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
 
 /**
  * @brief   get cfam data
- * @param   i_chip   Extensible chip
- * @param   i_addr   address
- * @param   o_data   returned data
+ * @param   i_chip     Extensible chip
+ * @param   i_wordAddr FSI word address. Note that Hostboot implementation will
+ *                     convert this to a byte address.
+ * @param   o_data     returned data
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 int32_t getCfam( ExtensibleChip * i_chip,
-                 const uint32_t i_addr,
+                 const uint16_t i_wordAddr,
                  uint32_t & o_data);
 
 /**

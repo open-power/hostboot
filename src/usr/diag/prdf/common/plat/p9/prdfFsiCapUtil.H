@@ -31,6 +31,9 @@
  * @brief   Captures FSI status register for FFDC.
  */
 
+// Platform includes
+#include <prdfTargetServices.H>
+
 namespace PRDF
 {
 
@@ -44,6 +47,7 @@ namespace PLL
  * @param   i_chip   Extensible chip
  * @param   i_sc     service data collector
  */
+template<TARGETING::TYPE T>
 void captureFsiStatusReg( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
 

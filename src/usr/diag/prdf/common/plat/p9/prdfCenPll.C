@@ -33,6 +33,8 @@
 #include <prdfFsiCapUtil.H>
 #include <prdfP9Pll.H>
 
+using namespace TARGETING;
+
 namespace PRDF
 {
 
@@ -203,7 +205,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[cen_centaur::capturePllFfdc] "
 
     // Add FSI status reg
-    captureFsiStatusReg( i_chip, io_sc );
+    captureFsiStatusReg<TYPE_MEMBUF>( i_chip, io_sc );
 
     return SUCCESS;
 

@@ -251,12 +251,14 @@ void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget)
 //##############################################################################
 
 int32_t getCfam( ExtensibleChip * i_chip,
-                 const uint32_t i_addr,
+                 const uint16_t i_wordAddr,
                  uint32_t & o_data)
 {
     #define PRDF_FUNC "[PlatServices::getCfam] "
 
     int32_t rc = SUCCESS;
+
+    uint16_t byteAddr = (i_wordAddr & 0xfe00) | ((i_wordAddr & 0x01ff) * 4);
 
     do
     {
@@ -280,12 +282,12 @@ int32_t getCfam( ExtensibleChip * i_chip,
         errlHndl_t errH = NULL;
         size_t l_size = sizeof(uint32_t);
         errH = deviceRead(l_procTgt, &o_data, l_size,
-                          DEVICE_FSI_ADDRESS((uint64_t) i_addr));
+                          DEVICE_FSI_ADDRESS((uint64_t) byteAddr));
         if (errH)
         {
             rc = FAIL;
-            PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam address: "
-                      "0x%X", i_chip->GetId(), i_addr );
+            PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam byte addr: "
+                      "0x%X", i_chip->GetId(), byteAddr );
             PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
             break;
         }
