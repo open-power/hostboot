@@ -177,10 +177,10 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_INT_WORKAROUND_ERR</rc>
+    <rc>RC_P9_INT_SCRUB_NOT_FINISHED_ERR</rc>
     <description>
       Procedure: p9_sbe_check_quiesce
-      If we hit an error in the INT unit workaround for DD1 part  
+      Cache scrub operation did not finish within programmed wait period
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
