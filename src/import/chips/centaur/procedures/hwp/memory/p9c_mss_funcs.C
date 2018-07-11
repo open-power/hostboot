@@ -65,6 +65,9 @@ fapi2::ReturnCode mss_disable_cid( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         // CID 0/1 on DIMM1
         FAPI_TRY(io_csn.clearBit(6, 2));
 
+        // Currently, CID2 is not needed.  If it is needed, we'll need to uncomment the below code
+        // We'll also need to fake out CCS to think that it has 16Gb memory so we can use CKE3/7 independently of other signals
+#if CID2_IS_NEEDED
         // CID2 hangs out in CKE1
         FAPI_TRY(io_cke.clearBit(1));
 
@@ -73,6 +76,8 @@ fapi2::ReturnCode mss_disable_cid( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         {
             FAPI_TRY(io_cke.clearBit(5));
         }
+
+#endif
     }
 
 fapi_try_exit:
@@ -91,13 +96,33 @@ fapi2::ReturnCode mss_ccs_set_end_bit(
     uint32_t i_instruction_number
 )
 {
+    fapi2::variable_buffer l_cke_4(4);
+    FAPI_TRY(l_cke_4.setBit(0, 4), "Error setting up buffers");
+    FAPI_TRY(mss_ccs_set_end_bit( i_target,
+                                  i_instruction_number,
+                                  l_cke_4 ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setting the End location of the CCS array
+/// @param[in] i_target - Target<fapi2::TARGET_TYPE_MBA> = centaur.mba
+/// @param[in] i_instruction_number - CCS instruction number
+/// @param[in] i_cke - CKE to pass into the NOP
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mss_ccs_set_end_bit( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                       uint32_t i_instruction_number,
+                                       const fapi2::variable_buffer& i_cke)
+{
     fapi2::variable_buffer l_address_16(16);
     fapi2::variable_buffer l_bank_3(3);
     fapi2::variable_buffer l_activate_1(1);
     fapi2::variable_buffer l_rasn_1(1);
     fapi2::variable_buffer l_casn_1(1);
     fapi2::variable_buffer l_wen_1(1);
-    fapi2::variable_buffer l_cke_4(4);
     fapi2::variable_buffer l_csn_8(8);
     fapi2::variable_buffer l_odt_4(4);
     fapi2::variable_buffer l_ddr_cal_type_4(4);
@@ -121,7 +146,6 @@ fapi2::ReturnCode mss_ccs_set_end_bit(
     FAPI_TRY(l_num_idles_16.clearBit(0, 16));
     FAPI_TRY(l_odt_4.clearBit(0, 4), "Error setting up buffers");
     FAPI_TRY(l_csn_8.setBit(0, 8), "Error setting up buffers");
-    FAPI_TRY(l_cke_4.setBit(0, 4), "Error setting up buffers");
     FAPI_TRY(l_wen_1.clearBit(0), "Error setting up buffers");
     FAPI_TRY(l_casn_1.clearBit(0), "Error setting up buffers");
     FAPI_TRY(l_rasn_1.clearBit(0), "Error setting up buffers");
@@ -136,7 +160,7 @@ fapi2::ReturnCode mss_ccs_set_end_bit(
                                   l_rasn_1,
                                   l_casn_1,
                                   l_wen_1,
-                                  l_cke_4,
+                                  i_cke,
                                   l_csn_8,
                                   l_odt_4,
                                   l_ddr_cal_type_4,
@@ -291,7 +315,7 @@ fapi2::ReturnCode mss_ccs_inst_arry_0(
         l_num_retry = 20;
         l_timer = DELAY_100US;
         FAPI_DBG("CCS: Set end bit.\n");
-        FAPI_TRY(mss_ccs_set_end_bit( i_target, 29));
+        FAPI_TRY(mss_ccs_set_end_bit( i_target, 29, i_cke ));
         FAPI_TRY(mss_execute_ccs_inst_array( i_target, l_num_retry, l_timer));
         io_instruction_number = 0;
     }
@@ -305,8 +329,20 @@ fapi2::ReturnCode mss_ccs_inst_arry_0(
     l_reg_address = io_instruction_number + CEN_MBA_CCS_INST_ARR0_0;
 
     l_data_buffer.flush<0>();
-    FAPI_TRY(l_data_buffer.insert(i_cke, 24, 4, 0), "insert failed");
-    FAPI_TRY(l_data_buffer.insert(i_cke, 28, 4, 0), "insert failed");
+
+    // If we have 8 CKE bits, then we want to control the CKE's individually on each port
+    // Just copy the CKE information directly
+    // Why 8 CKE bits? We have a total of 8 CKE bits in each CCS register
+    if(i_cke.getBitLength() == 8)
+    {
+        FAPI_TRY(l_data_buffer.insert(i_cke, 24, 8, 0), "insert failed");
+    }
+    // Otherwise, copy the CKE from one port to the other
+    else
+    {
+        FAPI_TRY(l_data_buffer.insert(i_cke, 24, 4, 0), "insert failed");
+        FAPI_TRY(l_data_buffer.insert(i_cke, 28, 4, 0), "insert failed");
+    }
 
     if (i_port == 0)
     {

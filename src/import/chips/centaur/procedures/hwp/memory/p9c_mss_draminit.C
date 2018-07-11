@@ -70,6 +70,10 @@ extern "C" {
         fapi2::variable_buffer mrs4(16);
         fapi2::variable_buffer mrs5(16);
         fapi2::variable_buffer mrs6(16);
+
+        // CKE need to be on or off by port and then maintained for the RCD load
+        fapi2::variable_buffer l_cke(8);
+
         uint8_t l_num_drops_per_port = 0;
         uint8_t l_primary_ranks_array[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {}; //primary_ranks_array[group][port]
         uint8_t l_secondary_ranks_array[NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {}; //secondary_ranks_array[group][port]
@@ -290,6 +294,8 @@ extern "C" {
         FAPI_TRY(fapi2::delay(DELAY_100US, DELAY_2000SIMCYCLES)); // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
         FAPI_TRY(mss_assert_resetn(i_target, 1 ), " assert_resetn Failed "); // de-assert a reset
 
+        FAPI_TRY(l_cke.clearBit(0, 8));
+
         // Cycle through Ports...
         // Ports 0-1
         for ( l_port_number = 0; l_port_number < MAX_PORTS_PER_MBA; l_port_number++)
@@ -300,7 +306,7 @@ extern "C" {
                 // Step three: Load RCD Control Words
                 if(l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
                 {
-                    FAPI_TRY(mss_rcd_load_ddr4(i_target, l_port_number, l_ccs_inst_cnt), " rcd_load Failed");
+                    FAPI_TRY(mss_rcd_load_ddr4(i_target, l_port_number, l_cke, l_ccs_inst_cnt), " rcd_load Failed");
                 }
                 else if(l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3)
                 {

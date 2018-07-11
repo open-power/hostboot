@@ -200,12 +200,22 @@ fapi2::ReturnCode mss_execute_ccs_inst_array( const fapi2::Target<fapi2::TARGET_
 
 ///
 /// @brief Setting the End location of the CCS array
-/// @param[in] Target<fapi2::TARGET_TYPE_MBA> = centaur.mba
-/// @param[in] CCS instruction number
+/// @param[in] i_target - Target<fapi2::TARGET_TYPE_MBA> = centaur.mba
+/// @param[in] i_instruction_number - CCS instruction number
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode mss_ccs_set_end_bit( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                        uint32_t i_instruction_number);
+///
+/// @brief Setting the End location of the CCS array
+/// @param[in] i_target - Target<fapi2::TARGET_TYPE_MBA> = centaur.mba
+/// @param[in] i_instruction_number - CCS instruction number
+/// @param[in] i_cke - CKE to pass into the NOP
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mss_ccs_set_end_bit( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                       uint32_t i_instruction_number,
+                                       const fapi2::variable_buffer& i_cke);
 
 
 ///

@@ -775,19 +775,221 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Writes the 4-bit RCD control words for DDR4 register.
+/// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
+/// @param[in] i_port_number        MBA port number
+/// @param[in] i_dimm               the DIMM number to issue the RCW to
+/// @param[in] i_cke                CKE bits to use
+/// @param[in] i_rcd_num            RCD control word number
+/// @param[in] i_rcd_data           RCD control word data
+/// @param[in] i_delay              number of idles
+/// @param[in, out] io_ccs_inst_cnt  CCS instruction count
+/// @return ReturnCode
+fapi2::ReturnCode mss_rcd_load_ddr4_4bit(
+    const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+    const uint32_t i_port_number,
+    const uint32_t i_dimm,
+    const fapi2::variable_buffer& i_cke,
+    const uint64_t i_rcd_num,
+    const uint64_t i_rcd_data,
+    const uint64_t i_delay,
+    uint32_t& io_ccs_inst_cnt)
+{
+
+    fapi2::variable_buffer l_address_16(16);
+    fapi2::variable_buffer l_bank_3(3);
+    fapi2::variable_buffer l_activate_1(1);
+    fapi2::variable_buffer l_rasn_1(1);
+    fapi2::variable_buffer l_casn_1(1);
+    fapi2::variable_buffer l_wen_1(1);
+    fapi2::variable_buffer l_odt_4(4);
+    fapi2::variable_buffer l_ddr_cal_type_4(4);
+    fapi2::variable_buffer l_num_idles_16(16);
+    fapi2::variable_buffer l_num_repeat_16(16);
+    fapi2::variable_buffer l_data_20(20);
+    fapi2::variable_buffer l_read_compare_1(1);
+    fapi2::variable_buffer l_rank_cal_4(4);
+    fapi2::variable_buffer l_ddr_cal_enable_1(1);
+    fapi2::variable_buffer l_ccs_end_1(1);
+    fapi2::variable_buffer l_csn_8(8);
+    auto l_cke = i_cke;
+
+    // ALL active CS lines at a time.
+    FAPI_TRY(generate_rcd_cs( i_target, i_dimm, l_csn_8, l_cke), "mss_4bit_load: Error setting up buffers %s",
+             mss::c_str(i_target));
+
+    // DBG1, DBG0, DBA1, DBA0 = 4`b0111
+    FAPI_TRY(l_bank_3.setBit(0, 3), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    // DACT_n is HIGH
+    FAPI_TRY(l_activate_1.setBit(0), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    // RAS_n/CAS_n/WE_n are LOW
+    FAPI_TRY(l_rasn_1.clearBit(0), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_casn_1.clearBit(0), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_wen_1.clearBit(0), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_odt_4.clearBit(0, 4));
+
+    //control word number code bits A[7:4]
+    // JEDEC vs CCS swizzle here
+    FAPI_TRY(l_address_16.clearBit(0, 16), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_num, 7, 1, 60), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_num, 6, 1, 61), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_num, 5, 1, 62), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_num, 4, 1, 63), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+
+    //control word values RCD0 = A0, RCD1 = A1, RCD2 = A2, RCD3 = A3
+    // JEDEC vs CCS swizzle here
+    FAPI_TRY(l_address_16.insert(i_rcd_data, 0, 1, 63), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_data, 1, 1, 62), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_data, 2, 1, 61), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_address_16.insert(i_rcd_data, 3, 1, 60), "mss_4bit_load: Error setting up buffers %s", mss::c_str(i_target));
+
+    // Insert the delays
+    FAPI_TRY(l_num_idles_16.insertFromRight(i_delay, 0, 16), "mss_4bit_load: Error setting up buffers %s",
+             mss::c_str(i_target));
+
+    // Send out to the CCS array
+    FAPI_TRY(mss_ccs_inst_arry_0( i_target,
+                                  io_ccs_inst_cnt,
+                                  l_address_16,
+                                  l_bank_3,
+                                  l_activate_1,
+                                  l_rasn_1,
+                                  l_casn_1,
+                                  l_wen_1,
+                                  l_cke,
+                                  l_csn_8,
+                                  l_odt_4,
+                                  l_ddr_cal_type_4,
+                                  i_port_number), "mss_4bit_load: Error setting up CCS array0 %s", mss::c_str(i_target));
+
+    FAPI_TRY(mss_ccs_inst_arry_1( i_target,
+                                  io_ccs_inst_cnt,
+                                  l_num_idles_16,
+                                  l_num_repeat_16,
+                                  l_data_20,
+                                  l_read_compare_1,
+                                  l_rank_cal_4,
+                                  l_ddr_cal_enable_1,
+                                  l_ccs_end_1), "mss_4bit_load: Error setting up CCS array1 %s", mss::c_str(i_target));
+
+    io_ccs_inst_cnt++;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Sends out RC09 and resets the DRAM
+/// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
+/// @param[in] i_port_number        MBA port number
+/// @param[in] i_dimm - DIMM on which to operate
+/// @param[in, out] io_cke          CKE bits to use
+/// @param[in, out] io_ccs_inst_cnt  CCS instruction count
+/// @return ReturnCode
+fapi2::ReturnCode mss_rcd_load_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint32_t i_port_number,
+        const uint32_t i_dimm,
+        fapi2::variable_buffer& io_cke,
+        uint32_t& io_ccs_inst_cnt)
+{
+    // Hit RC09 + enable the CKE's
+    {
+        constexpr uint64_t CKE_PER_DIMM = 2;
+        constexpr uint64_t CKE_PER_PORT = 4;
+
+        // Setup the RCD number
+        constexpr uint64_t RCD_NUM = 9;
+        // Delay taken from the above delays
+        constexpr uint64_t RCD_DELAY = 12;
+        uint64_t l_rcd_data = 0;
+        uint64_t l_rcd_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; //[port][dimm]
+        fapi2::buffer<uint64_t> l_rcd_cntl_wrd_64;
+
+        // Enable the CKE's for this DIMM
+        // 2 CKE per DIMM, 4 CKE per port (2 per DIMM and two DIMM per port)
+        const uint64_t l_cke_start = (i_dimm * CKE_PER_DIMM) + (i_port_number * CKE_PER_PORT);
+        FAPI_TRY(io_cke.setBit(l_cke_start, CKE_PER_DIMM), "failed to setup CKE %s", mss::c_str(i_target));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RCD_CNTL_WORD_0_15, i_target, l_rcd_array));
+        l_rcd_cntl_wrd_64 = l_rcd_array[i_port_number][i_dimm];
+
+        // Issue that command
+        l_rcd_cntl_wrd_64.extractToRight<RCD_NUM * 4, 4>(l_rcd_data);
+        FAPI_TRY(mss_rcd_load_ddr4_4bit( i_target,
+                                         i_port_number,
+                                         i_dimm,
+                                         io_cke,
+                                         RCD_NUM,
+                                         l_rcd_data,
+                                         RCD_DELAY,
+                                         io_ccs_inst_cnt), "mss_rcd_load: Failed to setup 4-bit CW %s", mss::c_str(i_target));
+    }
+
+    // Do the DRAM reset - toggle it on and toggle it off
+    {
+        constexpr uint64_t RESET_ON  = 0x02;
+        constexpr uint64_t RESET_CLEAR  = 0x03;
+        constexpr uint64_t RESET_RCW = 6;
+        // Taken emperically from Nimbus
+        constexpr uint64_t RCW_DELAY = 8000;
+
+        // Reset...
+        FAPI_TRY(mss_rcd_load_ddr4_4bit( i_target,
+                                         i_port_number,
+                                         i_dimm,
+                                         io_cke,
+                                         RESET_RCW,
+                                         RESET_ON,
+                                         RCW_DELAY,
+                                         io_ccs_inst_cnt), "mss_rcd_load: Failed to setup 4-bit CW %s", mss::c_str(i_target));
+        // ... Clear the reset
+        FAPI_TRY(mss_rcd_load_ddr4_4bit( i_target,
+                                         i_port_number,
+                                         i_dimm,
+                                         io_cke,
+                                         RESET_RCW,
+                                         RESET_CLEAR,
+                                         RCW_DELAY,
+                                         io_ccs_inst_cnt), "mss_rcd_load: Failed to setup 4-bit CW %s", mss::c_str(i_target));
+    }
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /// @brief Writes RCD control words for DDR4 register.
 /// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
 /// @param[in] i_port_number        MBA port number
+/// @param[in, out] io_cke          CKE bits to use
 /// @param[in, out] io_ccs_inst_cnt  CCS instruction count
 /// @return ReturnCode
 fapi2::ReturnCode mss_rcd_load_ddr4(
     const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
     const uint32_t i_port_number,
-    uint32_t& io_ccs_inst_cnt
-)
+    fapi2::variable_buffer& io_cke,
+    uint32_t& io_ccs_inst_cnt)
 {
+    // Vector of RCD commands and their delays
+    // First in the pair is the RCD number
+    static const std::vector<std::pair<uint64_t, uint64_t>> RCD_NUM_AND_DELAY =
+    {
+        {0, 12},
+        {1, 12},
+        {2, 4000},
+        {3, 12},
+        {4, 12},
+        {5, 12},
+        {6, 12},
+        {7, 12},
+        {8, 12},
+        // Note: 9 is missing this is intentional
+        // Per a supplier workaround, we need to set this guy last to clear out any corruption that could happen
+        {10, 4000},
+        {11, 12},
+        {12, 12},
+        {13, 12},
+        {14, 12},
+        {15, 12},
+    };
+
     uint32_t l_dimm_number = 0;
-    uint32_t l_rcd_number = 0;
     fapi2::variable_buffer l_rcd_cntl_wrd_4(8);
     fapi2::variable_buffer l_rcd_cntl_wrd_8(8);
     fapi2::variable_buffer l_rcd_cntl_wrd_64(64);
@@ -813,7 +1015,7 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     fapi2::variable_buffer l_rasn_1(1);
     fapi2::variable_buffer l_casn_1(1);
     fapi2::variable_buffer l_wen_1(1);
-    fapi2::variable_buffer l_cke_4(4);
+    fapi2::variable_buffer l_cke_8(8);
     fapi2::variable_buffer l_csn_8(8);
     fapi2::variable_buffer l_odt_4(4);
     fapi2::variable_buffer l_ddr_cal_type_4(4);
@@ -829,9 +1031,9 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     FAPI_TRY(l_rasn_1.setBit(0));
     FAPI_TRY(l_casn_1.setBit(0));
     FAPI_TRY(l_wen_1.setBit(0));
-    FAPI_TRY(l_cke_4.setBit(0, 4));
     FAPI_TRY(l_csn_8.setBit(0, 8));
     FAPI_TRY(l_odt_4.clearBit(0, 4));
+    FAPI_TRY(l_activate_1.setBit(0));
 
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
@@ -850,9 +1052,10 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_DDR4_RC_Bx, i_target, l_rcd_cntl_word_Bx));
 
 
-    // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
-    FAPI_TRY(l_address_16.clearBit(0, 16), "mss_rcd_load: Error setting up buffers");
-    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 400, 0, 16), "mss_rcd_load: Error setting up buffers");
+    // Keep CKE's at current levels, waiting min Reset CKE exit time (tXPR) - 400 cycles
+    FAPI_TRY(l_address_16.clearBit(0, 16), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
+    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 400, 0, 16), "mss_rcd_load: Error setting up buffers %s",
+             mss::c_str(i_target));
     FAPI_TRY(mss_ccs_inst_arry_0( i_target,
                                   io_ccs_inst_cnt,
                                   l_address_16,
@@ -861,11 +1064,11 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
                                   l_rasn_1,
                                   l_casn_1,
                                   l_wen_1,
-                                  l_cke_4,
+                                  io_cke,
                                   l_csn_8,
                                   l_odt_4,
                                   l_ddr_cal_type_4,
-                                  i_port_number));
+                                  i_port_number), "mss_rcd_load: Error setting up CCS array0 %s", mss::c_str(i_target));
 
     FAPI_TRY(mss_ccs_inst_arry_1( i_target,
                                   io_ccs_inst_cnt,
@@ -875,7 +1078,7 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
                                   l_read_compare_1,
                                   l_rank_cal_4,
                                   l_ddr_cal_enable_1,
-                                  l_ccs_end_1));
+                                  l_ccs_end_1), "mss_rcd_load: Error setting up CCS array1 %s", mss::c_str(i_target));
 
     io_ccs_inst_cnt++;
 
@@ -888,165 +1091,137 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
 
         if (l_num_ranks == 0)
         {
-            FAPI_INF( "PORT%d DIMM%d not configured. Num_ranks: %d", i_port_number, l_dimm_number, l_num_ranks);
+            FAPI_INF( "%s PORT%d DIMM%d not configured. Num_ranks: %d", mss::c_str(i_target), i_port_number, l_dimm_number,
+                      l_num_ranks);
         }
         else
         {
             FAPI_INF( "RCD SETTINGS FOR %s PORT%d DIMM%d ", mss::c_str(i_target), i_port_number, l_dimm_number);
-            FAPI_INF( "RCD Control Word: 0x%016llX", l_rcd_array[i_port_number][l_dimm_number]);
-            FAPI_INF( "RCD Control Word X: 0x%016llX", l_rcdx_array);
+            FAPI_INF( "RCD %s Control Word: 0x%016llX", mss::c_str(i_target), l_rcd_array[i_port_number][l_dimm_number]);
+            FAPI_INF( "RCD %s Control Word X: 0x%016llX", mss::c_str(i_target), l_rcdx_array);
 
             // ALL active CS lines at a time.
-            FAPI_TRY(generate_rcd_cs(i_target, l_dimm_number, l_csn_8, l_cke_4));
+            FAPI_TRY(generate_rcd_cs(i_target, l_dimm_number, l_csn_8, io_cke));
 
             // DBG1, DBG0, DBA1, DBA0 = 4`b0111
-            FAPI_TRY(l_bank_3.setBit(0, 3), "mss_rcd_load: Error setting up buffers");
+            FAPI_TRY(l_bank_3.setBit(0, 3), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
             // DACT_n is HIGH
-            FAPI_TRY(l_activate_1.setBit(0), "mss_rcd_load: Error setting up buffers");
+            FAPI_TRY(l_activate_1.setBit(0), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
             // RAS_n/CAS_n/WE_n are LOW
-            FAPI_TRY(l_rasn_1.clearBit(0), "mss_rcd_load: Error setting up buffers");
-            FAPI_TRY(l_casn_1.clearBit(0), "mss_rcd_load: Error setting up buffers");
-            FAPI_TRY(l_wen_1.clearBit(0), "mss_rcd_load: Error setting up buffers");
+            FAPI_TRY(l_rasn_1.clearBit(0), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
+            FAPI_TRY(l_casn_1.clearBit(0), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
+            FAPI_TRY(l_wen_1.clearBit(0), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
 
             // Propogate through the 16, 4-bit control words
-            for ( l_rcd_number = 0; l_rcd_number <= 15; l_rcd_number ++)
+            FAPI_TRY(l_rcd_cntl_wrd_64.insert(l_rcd_array[i_port_number][l_dimm_number]),
+                     "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
+
+            for ( const auto& l_rcd_pair : RCD_NUM_AND_DELAY )
             {
-                //FAPI_TRY(l_bank_3.clearBit(0, 3);
-                FAPI_TRY(l_address_16.clearBit(0, 16), "mss_rcd_load: Error setting up buffers");
-
-                FAPI_TRY(l_rcd_cntl_wrd_64.insert(l_rcd_array[i_port_number][l_dimm_number]), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_rcd_cntl_wrd_64.extract(l_rcd_cntl_wrd_4, 4 * l_rcd_number, 4), "mss_rcd_load: Error setting up buffers");
-
-                //control word number code bits A[7:4]
-                FAPI_TRY(l_address_16.insert(l_rcd_number, 7, 1, 28), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_number, 6, 1, 29), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_number, 5, 1, 30), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_number, 4, 1, 31), "mss_rcd_load: Error setting up buffers");
-
-                //control word values RCD0 = A0, RCD1 = A1, RCD2 = A2, RCD3 = A3
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_4, 0, 1, 3), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_4, 1, 1, 2), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_4, 2, 1, 1), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_4, 3, 1, 0), "mss_rcd_load: Error setting up buffers");
-
-                // Send out to the CCS array
-                //if ( dimm_type == ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM && (rcd_number == 2 || rcd_number == 10) )
-                if ( l_rcd_number == 2 || l_rcd_number == 10 )
-                {
-                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 4000, 0 , 16 ),
-                             "mss_rcd_load: Error setting up buffers"); // wait tStab for clock timing rcd words
-                }
-                else
-                {
-                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 12, 0, 16), "mss_rcd_load: Error setting up buffers");
-                }
-
-
-
-                FAPI_TRY(mss_ccs_inst_arry_0( i_target,
-                                              io_ccs_inst_cnt,
-                                              l_address_16,
-                                              l_bank_3,
-                                              l_activate_1,
-                                              l_rasn_1,
-                                              l_casn_1,
-                                              l_wen_1,
-                                              l_cke_4,
-                                              l_csn_8,
-                                              l_odt_4,
-                                              l_ddr_cal_type_4,
-                                              i_port_number));
-
-                FAPI_TRY(mss_ccs_inst_arry_1( i_target,
-                                              io_ccs_inst_cnt,
-                                              l_num_idles_16,
-                                              l_num_repeat_16,
-                                              l_data_20,
-                                              l_read_compare_1,
-                                              l_rank_cal_4,
-                                              l_ddr_cal_enable_1,
-                                              l_ccs_end_1));
-
-                io_ccs_inst_cnt++;
-
+                const auto l_rcd_number = l_rcd_pair.first;
+                const auto l_rcd_delay = l_rcd_pair.second;
+                uint64_t l_rcd_data = 0;
+                FAPI_TRY(l_rcd_cntl_wrd_64.extractToRight(l_rcd_data, 4 * l_rcd_number, 4), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(mss_rcd_load_ddr4_4bit( i_target,
+                                                 i_port_number,
+                                                 l_dimm_number,
+                                                 io_cke,
+                                                 l_rcd_number,
+                                                 l_rcd_data,
+                                                 l_rcd_delay,
+                                                 io_ccs_inst_cnt), "mss_rcd_load: Failed to setup 4-bit CW %s", mss::c_str(i_target));
             }
 
             // 8-bit Control words
-            for ( l_rcd_number = 0; l_rcd_number <= 7; l_rcd_number ++)
+            for ( uint8_t l_rcd_number = 0; l_rcd_number <= 7; l_rcd_number ++)
             {
                 //FAPI_TRY(l_bank_3.clearBit(0, 3);
-                FAPI_TRY(l_address_16.clearBit(0, 16), "mss_rcd_load: Error setting up buffers");
+                FAPI_TRY(l_address_16.clearBit(0, 16), "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
 
                 switch(l_cntlx_offset[l_rcd_number])
                 {
                     case 0x01:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_1x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x02:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_2x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x03:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_3x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x07:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_7x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x08:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_8x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x09:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_9x[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x0a:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_Ax[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
 
                     case 0x0b:
                     default:
                         FAPI_TRY(l_rcd_cntl_wrd_8.insert(l_rcd_cntl_word_Bx[i_port_number][l_dimm_number], 0, 8, 0),
-                                 "mss_rcd_load: Error setting up buffers");
+                                 "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target));
                         break;
                 }
 
                 //control word number code bits A[11:8]
-                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number], 11, 1, 28), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number], 10, 1, 29), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number],  9, 1, 30), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number],  8, 1, 31), "mss_rcd_load: Error setting up buffers");
+                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number], 11, 1, 28), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number], 10, 1, 29), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number],  9, 1, 30), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_cntlx_offset[l_rcd_number],  8, 1, 31), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
 
                 //control word values RCD0 = A0, RCD1 = A1, RCD2 = A2, RCD3 = A3, RCD4=A4, RCD5=A5, RCD6=A6, RCD7=A7
                 //
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 0, 1, 7), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 1, 1, 6), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 2, 1, 5), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 3, 1, 4), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 4, 1, 3), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 5, 1, 2), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 6, 1, 1), "mss_rcd_load: Error setting up buffers");
-                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 7, 1, 0), "mss_rcd_load: Error setting up buffers");
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 0, 1, 7), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 1, 1, 6), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 2, 1, 5), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 3, 1, 4), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 4, 1, 3), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 5, 1, 2), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 6, 1, 1), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
+                FAPI_TRY(l_address_16.insert(l_rcd_cntl_wrd_8, 7, 1, 0), "mss_rcd_load: Error setting up buffers %s",
+                         mss::c_str(i_target));
 
                 // Send out to the CCS array
                 if ( l_rcd_number == 2 ) // CW RC3x
                 {
                     FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 4000, 0 , 16 ),
-                             "mss_rcd_load: Error setting up buffers"); // wait tStab for clock timing rcd words
+                             "mss_rcd_load: Error setting up buffers %s", mss::c_str(i_target)); // wait tStab for clock timing rcd words
                 }
                 else
                 {
-                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 12, 0, 16), "mss_rcd_load: Error setting up buffers");
+                    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 12, 0, 16), "mss_rcd_load: Error setting up buffers %s",
+                             mss::c_str(i_target));
                 }
 
 
@@ -1058,7 +1233,7 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
                                               l_rasn_1,
                                               l_casn_1,
                                               l_wen_1,
-                                              l_cke_4,
+                                              io_cke,
                                               l_csn_8,
                                               l_odt_4,
                                               l_ddr_cal_type_4,
@@ -1077,13 +1252,23 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
                 io_ccs_inst_cnt++;
 
             }
+
+            // Does the RCD load workaround here
+            FAPI_TRY(mss_rcd_load_workaround( i_target,
+                                              i_port_number,
+                                              l_dimm_number,
+                                              io_cke,
+                                              io_ccs_inst_cnt), "mss_rcd_load: failed RCD workaround %s", mss::c_str(i_target));
         }
     }
 
-    FAPI_TRY(mss_ccs_set_end_bit( i_target, io_ccs_inst_cnt - 1), "CCS_SET_END_BIT FAILED FAPI_TRY");
+    // Note: preserving CKE's here - it's important to avoid DRAM corruption
+    FAPI_TRY(mss_ccs_set_end_bit( i_target, io_ccs_inst_cnt - 1, io_cke), "CCS_SET_END_BIT FAILED FAPI_TRY %s",
+             mss::c_str(i_target));
     io_ccs_inst_cnt = 0;
 
-    FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED FAPI_TRY");
+    FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED FAPI_TRY %s",
+             mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 }

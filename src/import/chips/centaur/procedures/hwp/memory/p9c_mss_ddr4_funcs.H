@@ -69,12 +69,47 @@ fapi2::ReturnCode generate_rcd_cs( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 /// @brief Writes RCD control words for DDR4 register.
 /// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
 /// @param[in] i_port_number        MBA port number
+/// @param[in, out] io_cke          CKE bits to use
 /// @param[in, out] io_ccs_inst_cnt  CCS instruction count
 /// @return ReturnCode
 fapi2::ReturnCode mss_rcd_load_ddr4(
     const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
     const uint32_t i_port_number,
+    fapi2::variable_buffer& io_cke,
     uint32_t& io_ccs_inst_cnt);
+
+/// @brief Writes the 4-bit RCD control words for DDR4 register.
+/// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
+/// @param[in] i_port_number        MBA port number
+/// @param[in] i_dimm               the DIMM number to issue the RCW to
+/// @param[in] i_cke                CKE bits to use
+/// @param[in] i_rcd_num            RCD control word number
+/// @param[in] i_rcd_data           RCD control word data
+/// @param[in] i_delay              number of idles
+/// @param[in, out] io_ccs_inst_cnt  CCS instruction count
+/// @return ReturnCode
+fapi2::ReturnCode mss_rcd_load_ddr4_4bit(
+    const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+    const uint32_t i_port_number,
+    const uint32_t i_dimm,
+    const fapi2::variable_buffer& i_cke,
+    const uint64_t i_rcd_num,
+    const uint64_t i_rcd_data,
+    const uint64_t i_delay,
+    uint32_t& io_ccs_inst_cnt);
+
+/// @brief Sends out RC09 and resets the DRAM
+/// @param[in] i_target             Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
+/// @param[in] i_port_number        MBA port number
+/// @param[in] i_dimm - DIMM on which to operate
+/// @param[in, out] io_cke          CKE bits to use
+/// @param[in, out] io_ccs_inst_cnt  CCS instruction count
+/// @return ReturnCode
+fapi2::ReturnCode mss_rcd_load_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint32_t i_port_number,
+        const uint32_t i_dimm,
+        fapi2::variable_buffer& io_cke,
+        uint32_t& io_ccs_inst_cnt);
 
 /// @brief Creates RCD_CNTRL_WORD attribute for DDR4 register
 /// @param[in] i_target_mba          Reference to MBA Target<fapi2::TARGET_TYPE_MBA>.
