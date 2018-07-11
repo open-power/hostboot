@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -509,7 +509,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[Proc::capturePllFfdc] "
 
     // Add FSI status reg
-    PLL::captureFsiStatusReg( i_chip, io_sc );
+    PLL::captureFsiStatusReg<TYPE_PROC>( i_chip, io_sc );
 
     // Add EX scom data
     TargetHandleList exList = getConnected(i_chip->getTrgt(), TYPE_CORE);

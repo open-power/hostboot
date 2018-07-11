@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
 #include <prdfFsiCapUtil.H>
+
+using namespace TARGETING;
 
 namespace PRDF
 {
@@ -177,7 +179,7 @@ int32_t capturePllFfdc( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[Membuf::capturePllFfdc] "
 
     // Add FSI status reg
-    captureFsiStatusReg( i_chip, io_sc );
+    captureFsiStatusReg<TYPE_MEMBUF>( i_chip, io_sc );
 
     return SUCCESS;
 

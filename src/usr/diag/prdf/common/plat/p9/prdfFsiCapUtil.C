@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,48 +40,62 @@ using namespace PlatServices;
 namespace PLL
 {
 
-void captureFsiStatusReg( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc )
+void __captureFsiReg( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                      uint16_t i_wordAddr, const char * i_regStr )
 {
-    // In hostboot runtime, PRD does not have access to drivers that read
-    // CFAM registers
+    uint32_t data = 0;
+
+    if ( SUCCESS == getCfam(i_chip, i_wordAddr, data) )
+    {
+        BitString bs { 32, (CPU_WORD *) &data };
+
+        uint16_t id = Util::hashString(i_regStr) ^ i_chip->getSignatureOffset();
+
+        io_sc.service_data->GetCaptureData().Add( i_chip->getTrgt(), id, bs );
+    }
+}
+
+template<>
+void captureFsiStatusReg<TYPE_PROC>( ExtensibleChip * i_chip,
+                                     STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_PROC == i_chip->getType() );
+
+    #if defined(__HOSTBOOT_RUNTIME)
+
+    // Do nothing. HBRT does not have any FSI access.
+
+    #elif defined(__HOSTBOOT_MODULE)
+
+    // Hostboot does not have FSI access to the master processor.
+    if ( getMasterProc() != i_chip->getTrgt() )
+    {
+        __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
+        __captureFsiReg( i_chip, io_sc, 0x2816, "CFAM_FSI_GP7"    );
+    }
+
+    #else
+
+    // FSP has full FSI access.
+    __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
+    __captureFsiReg( i_chip, io_sc, 0x2816, "CFAM_FSI_GP7"    );
+
+    #endif
+}
+
+template<>
+void captureFsiStatusReg<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                       STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
     #ifndef __HOSTBOOT_RUNTIME
 
-    #define PRDF_FUNC "[PLL::captureFsiStatusReg] "
+    __captureFsiReg( i_chip, io_sc, 0x1007, "CFAM_FSI_STATUS" );
 
-    uint32_t u32Data = 0;
-
-    int32_t rc = getCfam( i_chip, 0x00001007, u32Data );
-
-    if ( SUCCESS == rc )
-    {
-        BitString bs (32, (CPU_WORD *) &u32Data);
-
-        io_sc.service_data->GetCaptureData().Add(
-                            i_chip->getTrgt(),
-                            ( Util::hashString("CFAM_FSI_STATUS") ^
-                              i_chip->getSignatureOffset() ),
-                            bs);
-    }
-
-    if( TYPE_PROC == i_chip->getType() )
-    {
-        uint32_t fsiGp7 = 0;
-        rc = getCfam( i_chip, 0x2816, fsiGp7 );
-        if ( SUCCESS == rc )
-        {
-            BitString bs (32, (CPU_WORD *) &fsiGp7);
-
-            io_sc.service_data->GetCaptureData().Add(
-                                i_chip->getTrgt(),
-                                ( Util::hashString("CFAM_FSI_GP7") ^
-                                  i_chip->getSignatureOffset() ),
-                                bs);
-        }
-    }
-
-    #undef PRDF_FUNC
-    #endif  // not hostboot runtime
+    #endif
 }
 
 } // end namespace PLL
