@@ -331,6 +331,8 @@ fapi2::ReturnCode erepairSetFieldFailedLanes(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
+    FAPI_DBG(">> erepairSetFieldFailedLanes");
+
     // Execute the Accessor HWP to write the fail lanes to Field VPD
     FAPI_TRY( p9_io_erepairSetFailedLanesHwp(
                   i_endp_target,
@@ -375,6 +377,8 @@ fapi2::ReturnCode mnfgCheckFieldVPD(
 
     l_fieldVPDClear = true;
 
+    FAPI_DBG(">> mnfgCheckFieldVPD");
+
     /***** Read Field VPD *****/
 
     // During Mfg mode IPL, field VPD need to be clear.
@@ -394,7 +398,7 @@ fapi2::ReturnCode mnfgCheckFieldVPD(
        l_endp1_rxFaillanes.size())
     {
         l_fieldVPDClear = false;
-        FAPI_DBG("mnfgCheckFieldVPD: eRepair records found in Field VPD in Tx during Manufacturing mode IPL");
+        FAPI_INF("mnfgCheckFieldVPD: eRepair records found in Field VPD in Tx during Manufacturing mode IPL");
     }
 
     // Get failed lanes for endp2
@@ -412,7 +416,7 @@ fapi2::ReturnCode mnfgCheckFieldVPD(
        l_endp2_rxFaillanes.size())
     {
         l_fieldVPDClear = false;
-        FAPI_DBG("mnfgCheckFieldVPD: eRepair records found in Field VPD in Rx during Manufacturing mode IPL");
+        FAPI_INF("mnfgCheckFieldVPD: eRepair records found in Field VPD in Rx during Manufacturing mode IPL");
     }
 
     FAPI_ASSERT(l_fieldVPDClear == true,
@@ -488,6 +492,8 @@ fapi2::ReturnCode erepairSetMnfgFailedLanes(
     const std::vector<uint8_t>& i_rxFailLanes)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_DBG(">> erepairSetMnfgFailedLanes");
 
     // Execute the Accessor HWP to write the fail lanes to Mnfg VPD
     FAPI_TRY( p9_io_erepairSetFailedLanesHwp(
@@ -753,7 +759,7 @@ fapi2::ReturnCode erepairGetFailedLanes(
     std::vector<uint8_t>           l_rxFailLanes;
     std::vector<uint8_t>::iterator l_it;
 
-    FAPI_INF(">> erepairGetFailedLaness");
+    FAPI_DBG(">> erepairGetFailedLaness");
 
     // Get the erepair lanes from Field VPD
     FAPI_TRY( erepairGetFieldFailedLanes(
@@ -832,7 +838,12 @@ fapi2::ReturnCode erepairSetFailedLanes(
     std::vector<uint8_t> l_emptyVector;
     std::vector<uint8_t> l_throwAway;
 
-    FAPI_INF(">> erepairSetFailedLanes");
+    FAPI_INF(">> erepairSetFailedLanes:Fail lanes size:%d values are:", i_rxFailLanes.size());
+
+    for(uint8_t i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
+    {
+        FAPI_INF("%d ", i_rxFailLanes[i]);
+    }
 
     o_thresholdExceed = false;
 
@@ -1028,7 +1039,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
     fapi2::TargetType       l_endp1_tgtType = fapi2::TARGET_TYPE_NONE;
     fapi2::TargetType       l_endp2_tgtType = fapi2::TARGET_TYPE_NONE;
 
-    FAPI_INF(">>erepairGetRestoreLanes");
+    FAPI_DBG(">>erepairGetRestoreLanes");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
@@ -1116,7 +1127,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
 
         if(l_rc)
         {
-            FAPI_DBG("erepairGetRestoreLanes:Error from mnfgCheckFieldVPD");
+            FAPI_INF("erepairGetRestoreLanes:Error from mnfgCheckFieldVPD");
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
@@ -1208,7 +1219,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_thresholdExceed = true;
         l_numTxFailLanes = o_endp1_txFaillanes.size();
 
-        FAPI_DBG("erepairGetRestoreLanes: eRepair threshold exceed error"
+        FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
                  " seen in Tx of endp1 target. No.of lanes: %d", l_numTxFailLanes);
     }
 
@@ -1218,7 +1229,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_thresholdExceed = true;
         l_numRxFailLanes = o_endp1_rxFaillanes.size();
 
-        FAPI_DBG("erepairGetRestoreLanes: eRepair threshold exceed error"
+        FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
                  " seen in Rx of endp1 target. No.of lanes: %d", l_numRxFailLanes);
     }
 
@@ -1228,7 +1239,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_thresholdExceed = true;
         l_numTxFailLanes = o_endp2_txFaillanes.size();
 
-        FAPI_DBG("erepairGetRestoreLanes: eRepair threshold exceed error"
+        FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
                  " seen in Tx of endp2 target. No.of lanes: %d",
                  l_numTxFailLanes);
     }
@@ -1239,7 +1250,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_thresholdExceed = true;
         l_numRxFailLanes = o_endp2_rxFaillanes.size();
 
-        FAPI_DBG("erepairGetRestoreLanes: eRepair threshold exceed error"
+        FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
                  " seen in Rx of endp2 target. No.of lanes: %d",
                  l_numRxFailLanes);
     }
