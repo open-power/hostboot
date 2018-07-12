@@ -269,8 +269,14 @@ if ($secureboot)
 }
 
 ### Open POWER signing
+# In most cases this is desired, but do not override a value set by user
+if(!$ENV{'SB_KEEP_CACHE'})
+{
+    $ENV{'SB_KEEP_CACHE'} = "true";
+}
+
 my $OPEN_SIGN_REQUEST=
-    "SB_KEEP_CACHE=true $SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
+    "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
 # By default key transition container is unused
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
