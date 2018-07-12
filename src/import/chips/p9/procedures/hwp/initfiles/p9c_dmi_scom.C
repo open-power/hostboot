@@ -56,6 +56,7 @@ constexpr uint64_t literal_1200 = 1200;
 constexpr uint64_t literal_1400 = 1400;
 constexpr uint64_t literal_1500 = 1500;
 constexpr uint64_t literal_0b0 = 0b0;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_2 = 2;
 
 fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0,
@@ -341,6 +342,7 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             }
 
             l_scom_buffer.insert<4, 1, 63, uint64_t>(literal_0b0 );
+            l_scom_buffer.insert<47, 1, 63, uint64_t>(literal_0b1 );
             l_scom_buffer.insert<5, 1, 63, uint64_t>(literal_0b0 );
 
             if ((l_def_ENABLE_HWFM == literal_1))
