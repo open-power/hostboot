@@ -40,7 +40,10 @@
 #include <p9_io_obus_image_build.H>
 #include "p9_xip_image.h"
 
-//---------------------------------------------------------------------------
+#include "p9_obus_scom_addresses.H"
+#include "p9_obus_scom_addresses_fld.H"
+
+//--------------------------------------------------------------------------
 fapi2::ReturnCode extractPpeImgObus(void* const iImagePtr, const int iSectionId, uint8_t*& oObusImgPtr, uint32_t& oSize)
 {
     FAPI_IMP("Entering getObusImageFromHwImage.");
@@ -131,6 +134,12 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
         {
             FAPI_IMP("ABUS IMAGE LOAD.");
             loadImage = true;
+
+            // Enable the PPE to communicate with the PHY
+            fapi2::buffer<uint64_t> data64;
+            FAPI_TRY(fapi2::getScom(iTgt, OBUS_SCOM_MODE_PB, data64));
+            data64.setBit<OBUS_SCOM_MODE_PB_PPE_GCR>();
+            FAPI_TRY(fapi2::putScom(iTgt, OBUS_SCOM_MODE_PB, data64));
         }
     }
     else // fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI
