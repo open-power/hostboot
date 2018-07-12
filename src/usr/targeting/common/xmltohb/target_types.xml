@@ -1849,6 +1849,13 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
+    <attribute>
+      <id>PEER_TARGET</id>
+    </attribute>
+    <attribute>
+      <id>PEER_PATH</id>
+      <default>physical:na</default>
+    </attribute>
 </targetType>
 
 <!-- One NPU per proc -->
