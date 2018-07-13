@@ -372,8 +372,7 @@ sub checkSpaceConstraints
             if ($testRun && $eyeCatch eq "HBI")
             {
                 print "Adjusting HBI size - ran out of space for test cases\n";
-                my $hbbKey = findLayoutKeyByEyeCatch("HBB", \%$i_pnorLayoutRef);
-                adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize, $hbbKey);
+                adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize);
             }
             else
             {
@@ -387,11 +386,11 @@ sub checkSpaceConstraints
 
 ###############################################################################
 # adjustHbiPhysSize - Adjust HBI physical size when running test cases and fix
-#                     up physical offsets of partitions between HBI and HBB
+#                     up physical offsets of partitions after it
 ################################################################################
 sub adjustHbiPhysSize
 {
-    my ($i_sectionHashRef, $i_hbiKey, $i_filesize, $i_hbbKey) = @_;
+    my ($i_sectionHashRef, $i_hbiKey, $i_filesize) = @_;
 
     my %sectionHash = %$i_sectionHashRef;
 
@@ -407,20 +406,11 @@ sub adjustHbiPhysSize
     # Fix up physical offset affected by HBI size change
     foreach my $section (keys %sectionHash)
     {
-        # Only fix partitions after HBI and before HBB
-        if ( ( $sectionHash{$section}{physicalOffset} >
-               $sectionHash{$i_hbiKey}{physicalOffset} ) &&
-             ( $sectionHash{$section}{physicalOffset} <
-               $sectionHash{$i_hbbKey}{physicalOffset} )
-            )
+        # Only fix partitions after HBI
+        if ( $sectionHash{$section}{physicalOffset} >
+             $sectionHash{$i_hbiKey}{physicalOffset} )
         {
             $sectionHash{$section}{physicalOffset} += $hbi_move;
-            # Ensure section adjustment does not cause an overlap with HBB
-            if ($sectionHash{$section}{physicalOffset} >
-                $sectionHash{$i_hbbKey}{physicalOffset})
-            {
-                die "Error detected $sectionHash{$section}{eyeCatch}'s adjusted size overlaps HBB";
-            }
         }
     }
 }
