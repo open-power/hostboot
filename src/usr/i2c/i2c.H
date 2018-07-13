@@ -363,7 +363,7 @@ union status_reg_t
         uint64_t error_in : 1;
         uint64_t i2c_port_history_busy : 1;
         uint64_t scl_input_level : 1;
-        uint64_t sda_inupt_level : 1;
+        uint64_t sda_input_level : 1;
         uint64_t i2c_port_busy : 1;
         uint64_t i2c_interface_busy : 1;
         uint64_t fifo_entry_count : 8;
