@@ -371,7 +371,8 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 }
 
 
-void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
+void   obus_smpCallout_link( TargetHandle_t &i_smpTgt,
+                             TargetHandle_t &i_smpPeerTgt )
 {
     errlHndl_t l_mainElog = NULL;
     l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
@@ -393,7 +394,8 @@ void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
         errlHndl_t  l_err = NULL;
 
         // Call SVPD routine to add callouts
-        l_err = HWSV::SvrError::AddSMPCalloutAndFFDC(i_smpTgt, l_mainElog);
+        l_err = HWSV::SvrError::AddSMPCalloutAndFFDC(i_smpTgt, i_smpPeerTgt,
+                                                     l_mainElog);
 
         if (NULL != l_err)
         {
@@ -409,17 +411,21 @@ void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
     } // main elog is non-null
 
 
-} // end  obus_smpCallout_link - SMP target
+} // end  obus_smpCallout_link - two SMP targets
 
 
-/** Given the OBUS TARGET and SMP link number -- do the callout **/
-void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
+/** Given an OBUS TARGET and SMP link number -- get the SMP target **/
+void  obus_getSmpTarget( TargetHandle_t &i_obusTgt,
+                         uint32_t i_link,
+                         TargetHandle_t &o_smpTgt )
 {
     PredicateCTM           l_unitMatch(CLASS_UNIT, TYPE_SMPGROUP );
     TargetHandleList       l_smpTargetList;
     uint32_t               l_smpNum    = 0;
     TYPE                   l_targType = getTargetType(i_obusTgt);
 
+
+    o_smpTgt = nullptr;
 
     // Validate we have expected target
     if ( TYPE_OBUS != l_targType )
@@ -444,12 +450,38 @@ void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
 
         if (i_link == l_smpNum)
         {
-            // We found the right SMPGROUP to call out
-            obus_smpCallout_link( l_smp );
+            // We found the SMPGROUP
+            o_smpTgt = l_smp;
             break;
         } // end if right LINK
 
     } // end for on smp targets
+
+} // end obus_getSmpTarget
+
+
+/** Given the OBUS TARGET and SMP link number -- do the callout **/
+void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
+{
+    TargetHandle_t  l_smpTarg     = nullptr;
+    TargetHandle_t  l_smpPeerTarg = nullptr;
+
+
+    // Get the associated SMP target for this OBUS target
+    obus_getSmpTarget( i_obusTgt, i_link, l_smpTarg );
+    PRDF_ASSERT(nullptr != l_smpTarg);
+
+    // Need the other end of OBUS for the FSP callout
+    TargetHandle_t  peerObusTgt = getTxBusEndPt(i_obusTgt);
+    PRDF_ASSERT(nullptr != peerObusTgt);
+
+    // Get the SMP target on the other end
+    obus_getSmpTarget( peerObusTgt, i_link, l_smpPeerTarg );
+    PRDF_ASSERT(nullptr != l_smpPeerTarg);
+
+    // Callout both SMPGROUPS
+    obus_smpCallout_link( l_smpTarg, l_smpPeerTarg );
+
 
     return;
 } // end  obus_smpCallout_link -  smp link number
