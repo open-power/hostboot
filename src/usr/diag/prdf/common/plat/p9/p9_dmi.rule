@@ -54,6 +54,7 @@ chip p9_dmi
         reset       (&, 0x07010901);
         mask        (|, 0x07010905);
         capture     group default;
+        capture     group chnlFail;
     };
 
     register CHIFIR_MASK
@@ -61,6 +62,7 @@ chip p9_dmi
         name        "P9 DMI target CHIFIR MASK";
         scomaddr    0x07010903;
         capture     group default;
+        capture     group chnlFail;
     };
 
     register CHIFIR_ACT0
@@ -69,6 +71,7 @@ chip p9_dmi
         scomaddr    0x07010906;
         capture     group default;
         capture     req nonzero("CHIFIR");
+        capture     group chnlFail;
     };
 
     register CHIFIR_ACT1
@@ -77,6 +80,7 @@ chip p9_dmi
         scomaddr    0x07010907;
         capture     group default;
         capture     req nonzero("CHIFIR");
+        capture     group chnlFail;
     };
 
 # Include registers not defined by the xml

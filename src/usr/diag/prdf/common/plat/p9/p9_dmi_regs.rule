@@ -35,6 +35,14 @@
         access      write_only;
     };
 
+    register CHIFIR_OR
+    {
+        name        "P9 DMI target CHIFIR atomic OR";
+        scomaddr    0x07010902;
+        capture     group never;
+        access      write_only;
+    };
+
     register CHIFIR_MASK_OR
     {
         name        "P9 DMI target CHIFIR_MASK atomic OR";
@@ -48,6 +56,7 @@
         name        "MCI Configuration Register 0";
         scomaddr    0x0701090A;
         capture     group default;
+        capture     group chnlFail;
     };
 
     register MCISTAT
@@ -76,6 +85,7 @@
         name        "MCI Configuration Register 1";
         scomaddr    0x0701090E;
         capture     group default;
+        capture     group chnlFail;
     };
 
     register RECR

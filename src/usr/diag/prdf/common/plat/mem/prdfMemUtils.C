@@ -32,6 +32,7 @@
 // Framework includes
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
+#include <UtilHash.H>
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
@@ -482,6 +483,112 @@ void cleanupChnlAttns<TYPE_MEMBUF>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
+uint32_t __fwAssistChnlFailWorkaround( ExtensibleChip * i_chip );
+
+template<>
+uint32_t __fwAssistChnlFailWorkaround<TYPE_DMI>( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[MemUtils::__fwAssistChnlFailWorkaround] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    // On the Cumulus chip, channel failure attentions from the IOMCFIR are
+    // forwarded down to CHIFIR[4] for each of the channels. Unfortunately,
+    // there is a mapping bug in the hardware where the channel failures are
+    // forwarded to the wrong CHIFIR, which causes the wrong channel to fail.
+
+    // We considered making all of the channel fail attentions in the IOMCFIR
+    // recoverable, but the "too many bus errors" attentions are a DI risk. We
+    // also considered setting them to checkstop, but customers with mirroring
+    // would be really mad at us, because mirroring should have protected their
+    // system. So the compromise is to have firmware force the channel failure.
+
+    // The goal here is to make the workaround behave like the hardware as much
+    // as possible. CHIFIR[4] is no longer configured to trigger a channel
+    // failure because of the bug. So what we will do is query if this channel
+    // should have failed via the IOMCFIR. If so, configure CHIFIR[4] to trigger
+    // a channel failure and set CHIFIR[4]. This will not actually trigger the
+    // channel failure, but is necessary for the analysis to work. To actually
+    // trigger the channel failure, we must set MCICFG0[25].
+
+    // It is likely that the channel failure could cause a system checkstop or
+    // PHYP/Hostboot TI. Especially, if it occurred in memory that is not
+    // mirrored. This will end up killing the host and this analysis code, which
+    // is ok. We would experience the same behavior if the hardware actually
+    // worked the way it should. The analysis code on the FSP will pick up where
+    // we left off and callout/gard the bad channel.
+
+    SCAN_COMM_REGISTER_CLASS * chifir    = i_chip->getRegister( "CHIFIR" );
+    SCAN_COMM_REGISTER_CLASS * chifir_or = i_chip->getRegister( "CHIFIR_OR" );
+    SCAN_COMM_REGISTER_CLASS * mcicfg0   = i_chip->getRegister( "MCICFG0" );
+    SCAN_COMM_REGISTER_CLASS * mcicfg1   = i_chip->getRegister( "MCICFG1" );
+
+    ExtensibleChip * mcChip = getConnectedParent( i_chip, TYPE_MC );
+    uint32_t dmiPos = i_chip->getPos() % MAX_DMI_PER_MC;
+    uint32_t bitPos = 8 + dmiPos * 8;
+
+    SCAN_COMM_REGISTER_CLASS * iomcfir  = mcChip->getRegister( "IOMCFIR" );
+    SCAN_COMM_REGISTER_CLASS * iomc_cfg = mcChip->getRegister( "SCOM_MODE_PB" );
+
+    do
+    {
+        // First, check if there are any bits for this channel that are set in
+        // the IOMCFIR and configured to channel fail.
+        o_rc = iomcfir->Read() | iomc_cfg->Read();
+        if ( SUCCESS != o_rc ) break;
+
+        // For reference, SCOM_MODE_PB[15:22]: 0=enabled, 1=disabled.
+        if ( 0 == (  iomcfir->GetBitFieldJustified( bitPos,8) &
+                    ~iomc_cfg->GetBitFieldJustified(15,    8) ) )
+        {
+            break; // nothing more to do.
+        }
+
+        // The channel should fail.
+        o_rc = chifir->Read() | mcicfg0->Read() | mcicfg1->Read();
+        if ( SUCCESS != o_rc ) break;
+
+        // Configure CHIFIR[4] to channel fail via MCICFG1[47].
+        if ( mcicfg1->IsBitSet(47) ) // 0=enabled, 1=disabled
+        {
+            mcicfg1->ClearBit(47);
+            o_rc = mcicfg1->Write();
+            if ( SUCCESS != o_rc ) break;
+        }
+
+        // Set CHIFIR[4].
+        if ( !chifir->IsBitSet(4) )
+        {
+            chifir_or->SetBit(4);
+            o_rc = chifir_or->Write();
+            if ( SUCCESS != o_rc ) break;
+        }
+
+        // Force the channel failure via MCICFG0[25].
+        if ( !mcicfg0->IsBitSet(25) )
+        {
+            mcicfg0->SetBit(25);
+            o_rc = mcicfg0->Write();
+            if ( SUCCESS != o_rc ) break;
+        }
+
+    } while (0);
+
+    #endif // __HOSTBOOT_MODULE
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
 uint32_t __queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
 
 template<>
@@ -537,6 +644,13 @@ uint32_t __queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
 
     do
     {
+        // There is a hardware bug where channel failures from the IOMCFIRs
+        // doesn't report correctly. This workaround fixes the reporting and
+        // forces a channel failure if needed. It must be called before calling
+        // the query HWP in order for the hardware to be in the correct state.
+        o_rc = __fwAssistChnlFailWorkaround<TYPE_DMI>( i_chip );
+        if ( SUCCESS != o_rc ) break;
+
         // There is a HWP on the processor side that will query if this channel
         // has failed. Unfortunately, it does not check for an active channel
         // fail attention (i.e. not masked). That will need to be done
@@ -704,6 +818,13 @@ uint32_t handleChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
 
     for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
     {
+        // The MC target will get the IOMCFIR registers by default, but we
+        // will need to manually capture the channel failure registers on the
+        // DMI target just in case the rule code analysis never makes it to
+        // that target.
+        dmiChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                   Util::hashString( "chnlFail" ) );
+
         o_rc = handleChnlFail<TYPE_DMI>( dmiChip, io_sc );
         if ( SUCCESS != o_rc ) break;
     }
