@@ -37,6 +37,7 @@
 #include <UtilHash.H>
 #include <algorithm>
 #include <prdfPlatProcConst.H>
+#include <prdfCallouts.H>
 
 using namespace TARGETING;
 
@@ -765,17 +766,8 @@ int32_t todStepCheckFault( ExtensibleChip * i_chip,
 
             // Callout and gard TOD OSC
 #ifdef __HOSTBOOT_MODULE
-            errlHndl_t errl =
-                ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-            if ( NULL == errl )
-            {
-                PRDF_ERR( PRDF_FUNC "Failed to get the global error log" );
-                break;
-            }
-            errl->addClockCallout( mdmtList[i], HWAS::TODCLK_TYPE,
-                                   HWAS::SRCI_PRIORITY_HIGH,
-                                   HWAS::DECONFIG,
-                                   HWAS::GARD_Predictive );
+            i_stepcode.service_data->SetCallout(
+                PRDcallout( mdmtList[i], PRDcalloutData::TYPE_TODCLK ) );
 #else
             TargetHandle_t l_clockTarget = nullptr;
             l_clockTarget = getConnectedChild(  procOscTgtBl,
