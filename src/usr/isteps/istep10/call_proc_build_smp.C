@@ -22,23 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include    <errl/errlentry.H>
-#include    <errl/errludtarget.H>
-#include    <errl/errlmanager.H>
-#include    <isteps/hwpisteperror.H>
-#include    <initservice/isteps_trace.H>
-#include    <fsi/fsiif.H>
+#include <errl/errlentry.H>
+#include <errl/errludtarget.H>
+#include <errl/errlmanager.H>
+#include <isteps/hwpisteperror.H>
+#include <initservice/isteps_trace.H>
+#include <fsi/fsiif.H>
 
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
-#include    <targeting/common/target.H>
-#include    <pbusLinkSvc.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/common/target.H>
+#include <pbusLinkSvc.H>
 
-#include    <fapi2/target.H>
-#include    <fapi2/plat_hwp_invoker.H>
-#include    <intr/interrupt.H>
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <intr/interrupt.H>
+#include <p9_io_xbus_clear_firs.H>
 
 //@TODO RTC:150562 - Remove when BAR setting handled by INTRRP
 #include <devicefw/userif.H>
@@ -207,6 +208,39 @@ void* call_proc_build_smp (void *io_pArgs)
                     l_StepError.addErrorDetails(l_errl);
                     errlCommit(l_errl,HWPF_COMP_ID);
                     break;
+                }
+            }
+
+            // Clear XBUS FIR bits for bad lanes that existed prior to
+            // link training
+            TARGETING::TargetHandleList xbusTargets;
+            getChildChiplets(xbusTargets, *curproc, TYPE_XBUS);
+            for(auto pXbusTarget : xbusTargets)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "Calling p9_io_xbus_erepair_cleanup HWP for XBUS with "
+                          "HUID of 0x%08X",
+                          TARGETING::get_huid(pXbusTarget));
+
+                const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
+                    fapi2_xbus(pXbusTarget);
+
+                FAPI_INVOKE_HWP(l_errl,
+                                p9_io_xbus_erepair_cleanup,
+                                fapi2_xbus);
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                              "ERROR : Call to p9_io_xbus_erepair_cleanup HWP "
+                              "for XBUS with HUID of 0x%08X failed. "
+                              "PLID=0x%08X, EID=0x%08X, Reason=0x%04X",
+                              TARGETING::get_huid(pXbusTarget),
+                              l_errl->plid(),
+                              l_errl->eid(),
+                              l_errl->reasonCode());
+                    ErrlUserDetailsTarget(pXbusTarget).addToLog(l_errl);
+                    l_StepError.addErrorDetails(l_errl);
+                    errlCommit(l_errl,HWPF_COMP_ID);
                 }
             }
 
