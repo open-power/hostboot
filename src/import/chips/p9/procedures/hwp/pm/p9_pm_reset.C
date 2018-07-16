@@ -111,6 +111,9 @@ fapi2::ReturnCode p9_pm_reset(
     fapi2::ATTR_INITIATED_PM_RESET_Type l_pmResetActive =
         fapi2::ENUM_ATTR_INITIATED_PM_RESET_ACTIVE;
 
+    fapi2::ATTR_PM_MALF_CYCLE_Type l_pmMalfCycle =
+        fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+
     fapi2::buffer<uint64_t> l_data64;
     fapi2::ReturnCode l_rc;
     fapi2::ATTR_SKIP_WAKEUP_Type l_skip_wakeup;
@@ -214,6 +217,9 @@ fapi2::ReturnCode p9_pm_reset(
         }
         else
         {
+            // Put a mark that we are in a PM Reset as part of handling a PM Malf Alert
+            l_pmMalfCycle = fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE;
+            FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_MALF_CYCLE, i_target, l_pmMalfCycle));
             FAPI_TRY(p9_pm_glob_fir_trace(i_target, "Skip special wakeup in malf alert path"));
         }
 
@@ -227,8 +233,8 @@ fapi2::ReturnCode p9_pm_reset(
     }
     else
     {
-        FAPI_INF("Skipping enabling special wakup and setting"
-                 "auto-special wakeup because SKIP_WAKEUP attribute is set");
+        FAPI_INF("Skipping enabling special wakeup and auto-special wakeup"
+                 " because SKIP_WAKEUP attribute is set");
     }
 
     //  ************************************************************************
@@ -628,6 +634,8 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
         fapi2::buffer<uint64_t> l_gpmmr;
         fapi2::buffer<uint64_t> l_lmcr;
         uint32_t l_bit;
+        fapi2::ATTR_PM_MALF_CYCLE_Type l_malfAlertActive =
+            fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
 
         fapi2::ATTR_CHIP_UNIT_POS_Type l_ex_num;
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
@@ -657,11 +665,29 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
             }
             else
             {
-                FAPI_ASSERT (false,
-                             fapi2::PM_RESET_SPWKUP_DONE_ERROR()
-                             .set_CORE_TARGET(l_core)
-                             .set_GPMMR(l_gpmmr),
-                             "Core expected to be in special wake-up is not prior to setting auto special wake-up mode");
+                FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                                         l_malfAlertActive));
+
+                if (l_malfAlertActive == fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE)
+                {
+                    FAPI_ASSERT (false,
+                                 fapi2::PM_RESET_SPWKUP_DONE_ERROR()
+                                 .set_CORE_TARGET(l_core)
+                                 .set_GPMMR(l_gpmmr),
+                                 "Core expected to be in special wake-up is not "
+                                 "prior to setting auto special wake-up mode");
+                }
+                else
+                {
+                    // It is possible that special wakeup had failed as we are in PM MALF path
+                    // Log a info error and continue with the Reset flow
+                    FAPI_ASSERT_NOEXIT ( false,
+                                         fapi2::PM_RESET_SPWKUP_DONE_ERROR()
+                                         .set_CORE_TARGET(l_core)
+                                         .set_GPMMR(l_gpmmr),
+                                         "Core expected to be in special wake-up is not "
+                                         "prior to setting auto special wake-up mode" );
+                }
             }
         }
     }
