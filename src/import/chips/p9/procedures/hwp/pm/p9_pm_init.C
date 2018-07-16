@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,8 @@ fapi2::ReturnCode pm_init(
     FAPI_INF("Entering pm_init...");
 
     fapi2::ReturnCode l_rc;
+    fapi2::ATTR_PM_MALF_CYCLE_Type l_malfCycle =
+        fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
 
     //  ************************************************************************
     //  Initialize Cores and Quads
@@ -215,11 +217,26 @@ fapi2::ReturnCode pm_init(
     //  ************************************************************************
     //  Take all EX chiplets out of special wakeup
     //  ************************************************************************
-    FAPI_DBG("Disable special wakeup for all functional  EX targets.");
-    FAPI_TRY(special_wakeup_all(i_target,
-                                false),//Disable splwkup
-             "ERROR: Failed to remove EX chiplets from special wakeup");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX out of special wakeup"));
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                             l_malfCycle));
+
+    if (l_malfCycle == fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE)
+    {
+        FAPI_DBG("Disable special wakeup for all functional  EX targets.");
+        FAPI_TRY(special_wakeup_all(i_target,
+                                    false),//Disable splwkup
+                 "ERROR: Failed to remove EX chiplets from special wakeup");
+        FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After EX out of special wakeup"));
+    }
+    else
+    {
+        // Do not deassert wakeup's in Malf path, as we did not assert them in Reset
+        // as well and reset the attribute.
+        FAPI_INF("MALF Handling in progress! Skipped Disable Special Wakeup");
+        l_malfCycle = fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+        FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                                 l_malfCycle));
+    }
 
     //  ************************************************************************
     //  Start OCC PPC405

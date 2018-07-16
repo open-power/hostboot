@@ -546,4 +546,17 @@
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_MALF_CYCLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute is set in PM Reset and cleared in the immediate subsequent PM
+    Init, when handling a PM Malfunction related PM Complex reset/init cycle.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>INACTIVE = 0x00, ACTIVE = 0x01</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
