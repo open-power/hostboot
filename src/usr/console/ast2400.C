@@ -46,8 +46,6 @@ namespace CONSOLE
     const uint8_t LOW_LEVEL_TRIG    = 0x01;
     const uint8_t RISING_EDGE_TRIG  = 0x02;
     const uint8_t HIGH_LEVEL_TRIG   = 0x03;
-    // used to test config flags related to console output selection
-    const uint8_t CONFIG_MASK       = 0xC0;
 
     /** Overload the base class with Ast2400 specifics.
      *
@@ -57,6 +55,21 @@ namespace CONSOLE
     class Ast2400Uart : public Uart
     {
      public:
+        enum platFlagsMask_t
+        {
+            /**
+             * @brief ISOLATE_SP flag
+             *
+             * If the ISOLATE_SP flag is set, then the service processor must
+             * configure:
+             *
+             * 1. A UART device at 0x3f8, SIRQ 4, low polarity
+             * 2. The BT device at 0xe4, SIRQ 10, low polarity
+             */
+            ISOLATE_SP      = 0x01,
+            CONSOLE_FLAGS   = 0xc0,
+        };
+
         enum consoleConfig_t
         {
             NONE            = 0x00,  // No output selected
@@ -287,7 +300,7 @@ namespace CONSOLE
 
             errlHndl_t l_err = NULL;
             size_t l_len = sizeof(uint8_t);
-            uint8_t uart_config = 0x00;
+            uint8_t plat_config = 0x00;
 
             do
             {
@@ -316,16 +329,23 @@ namespace CONSOLE
                 {
                     l_err = deviceOp( DeviceFW::READ,
                                       TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                      &(uart_config),
+                                      &(plat_config),
                                       l_len,
                                       DEVICE_SIO_ADDRESS(SIO::SUART1, 0x2d));
                     if (l_err) { break; }
 
-                    // determine which config has been selected
-                    consoleConfig_t config =
-                        static_cast<consoleConfig_t>(uart_config & CONFIG_MASK);
+                    if (plat_config & ISOLATE_SP)
+                    {
+                        printk("ast2400: UART configured by BMC\n");
+                        Uart::initialize();
+                        break;
+                    }
 
-                    switch ( config )
+                    // determine which config has been selected
+                    consoleConfig_t uart_config =
+                        static_cast<consoleConfig_t>(plat_config & CONSOLE_FLAGS);
+
+                    switch ( uart_config )
                     {
                         case SELECT_SUART:
                             {
