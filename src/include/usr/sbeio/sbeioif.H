@@ -37,8 +37,13 @@ namespace SBEIO
 {
     enum KeyAddrStashKeys
     {
-        RSV_MEM_ATTR_ADDR  = 0x01,  //Start at non-zero
-        HYPERVISOR_HRMOR   = 0x02,
+        RSV_MEM_ATTR_ADDR  = 0x01,  // Start at non-zero
+        DEPRECATED_1       = 0x02,  // 0x2 was previously planned to be
+                                    // used to pass HRMOR but SBE did not
+                                    // implement it. There is old version
+                                    // of hostboot that look at this so
+                                    // reusing this could break backwards
+                                    // compatibility
         RELOC_PAYLOAD_ADDR = 0x03,
         //On SBE side struct is defaulted so that
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
