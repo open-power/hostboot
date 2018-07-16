@@ -55,6 +55,7 @@ enum MruType
     TYPE_PCICLK,
     TYPE_PCICLK0,
     TYPE_PCICLK1,
+    TYPE_TODCLK,
 };
 
 } // end namespace PRDcalloutData

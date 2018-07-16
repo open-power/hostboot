@@ -505,6 +505,15 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                    thisDeconfig,
                                    thisGard);
         }
+        else if(PRDcalloutData::TYPE_TODCLK == thiscallout.getType())
+        {
+            PRDF_ADD_CLOCK_CALLOUT(iv_errl,
+                                   thiscallout.getTarget(),
+                                   HWAS::TODCLK_TYPE,
+                                   thispriority,
+                                   thisDeconfig,
+                                   thisGard);
+        }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
             MemoryMru memMru (thiscallout.flatten());
