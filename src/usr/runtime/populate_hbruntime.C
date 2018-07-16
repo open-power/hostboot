@@ -556,14 +556,6 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
 
-    // Fill in HYPCOMM size
-    l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_HYPCOMM;
-    l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
-    l_hbTOC.entry[l_hbTOC.total_entries].size = sizeof(hbHypCommArea_t);
-    l_totalSectionSize +=
-        ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
-    l_hbTOC.total_entries++;
-
     // Fill in VPD_XXXX sizes (if there are any)
     VPD::OverrideRsvMemMap_t l_vpdOverrides;
     VPD::getListOfOverrideSections( l_vpdOverrides );
@@ -579,13 +571,21 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         l_hbTOC.total_entries++;
     }
 
-    // Fill in the TRACEBUF only for Master Node
+    // Fill in the TRACEBUF & HYPCOMM only for Master Node
     if(i_master_node == true )
     {
         // Fill in TRACEBUF size
         l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_TRACEBUF;
         l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
         l_hbTOC.entry[l_hbTOC.total_entries].size = Util::HBRT_RSVD_TRACEBUF_SIZE;
+        l_totalSectionSize +=
+            ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+        l_hbTOC.total_entries++;
+
+        // Fill in HYPCOMM size
+        l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_HYPCOMM;
+        l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+        l_hbTOC.entry[l_hbTOC.total_entries].size = sizeof(hbHypCommArea_t);
         l_totalSectionSize +=
             ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
         l_hbTOC.total_entries++;
