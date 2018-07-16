@@ -2215,8 +2215,8 @@
     </description>
     <valueType>uint8</valueType>
     <enum>FALSE = 0x00, TRUE = 0x01</enum>
-    <platInit/>
-    <default>FALSE</default>
+    <writeable/>
+    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2233,8 +2233,7 @@
     <valueType>uint8</valueType>
     <enum>FALSE = 0x00, TRUE = 0x01</enum>
     <writeable/>
-    <platInit/>
-    <default>FALSE</default>
+    <initToZero/>
   </attribute>
 
   <!-- ********************************************************************* -->
