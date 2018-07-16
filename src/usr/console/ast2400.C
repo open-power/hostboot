@@ -351,7 +351,7 @@ namespace CONSOLE
                             }
                         default:
                             {
-                               printk("ast2400: invalid config data"
+                                printk("ast2400: invalid config data"
                                        " default to SUART configuration\n");
                                 initializeSUART();
                             }
