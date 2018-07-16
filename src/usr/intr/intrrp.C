@@ -1063,7 +1063,7 @@ void IntrRp::msgHandler()
                                    " an invalid state. msg_queue_id = 0x%lx",
                                    KernelIpc::ipc_data_area.msg_queue_id);
                         /*@ errorlog tag
-                         * @errortype       ERRL_SEV_PREDICTIVE
+                         * @errortype       ERRL_SEV_INFORMATIONAL
                          * @moduleid        INTR::MOD_INTRRP_IPC
                          * @reasoncode      INTR::RC_IPC_DATA_INVALID
                          * @userdata1       IPC Data Area MSG Queue ID
@@ -1073,7 +1073,7 @@ void IntrRp::msgHandler()
                          */
                         l_err = new ERRORLOG::ErrlEntry
                             (
-                             ERRORLOG::ERRL_SEV_PREDICTIVE,    // severity
+                             ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
                              INTR::MOD_INTRRP_IPC,             // moduleid
                              INTR::RC_IPC_DATA_INVALID,        // reason code
                              KernelIpc::ipc_data_area.msg_queue_id,
