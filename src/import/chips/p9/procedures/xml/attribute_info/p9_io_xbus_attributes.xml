@@ -139,6 +139,30 @@
   <platInit/>
 </attribute> 
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_GRP0_PRE_BAD_LANE_DATA</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Pre-training bad lane data vector.  This data is persistant from previous
+    IPLs so that the interface does not need to re-discover bad lanes.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_GRP1_PRE_BAD_LANE_DATA</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Pre-training bad lane data vector.  This data is persistant from previous
+    IPLs so that the interface does not need to re-discover bad lanes.
+  </description>
+  <valueType>uint32</valueType>
+  <initToZero/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
 
 
 </attributes>

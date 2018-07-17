@@ -791,84 +791,46 @@ fapi_try_exit:
 }
 
 /**
- * @brief Reads bad lane vector data from the
- *   passed target and stores the data in the vector.
+ * @brief Reads and Sets bad lane vector data from the
+ *   passed target and stores the data in an attribute.
  * @param[in]  i_target     Fapi2 Target
  * @param[in]  i_group      Clock Group
- * @param[out] o_data       Data of bad lane vector data
  * @retval     ReturnCode
  */
-fapi2::ReturnCode get_bad_lane_data(
+fapi2::ReturnCode set_bad_lane_data(
     const XBUS_TGT i_tgt,
-    const uint8_t  i_grp,
-    uint32_t&      o_data )
+    const uint8_t  i_grp)
 {
     FAPI_IMP( "P9 I/O EDI+ Xbus Entering" );
-    const uint8_t LN0          = 0;
-    uint64_t      l_data       = 0;
+    const uint8_t LN0             = 0;
+    uint64_t      l_data          = 0;
+    uint32_t      l_bad_lane_data = 0;
 
     FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_0_15, i_tgt, i_grp, LN0, l_data ),
               "rmw to edip_rx_lane_bad_vec_0_15 failed." );
 
-    o_data = ( io::get( EDIP_RX_LANE_BAD_VEC_0_15, l_data ) << 8 ) & 0x00FFFF00;
+    l_bad_lane_data = ( io::get( EDIP_RX_LANE_BAD_VEC_0_15, l_data ) << 8 ) & 0x00FFFF00;
 
     FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_16_23, i_tgt, i_grp, LN0, l_data ),
               "rmw to edip_rx_lane_bad_vec_16_23 failed." );
 
-    o_data |= ( io::get( EDIP_RX_LANE_BAD_VEC_16_23, l_data ) & 0x000000FF );
+    l_bad_lane_data |= ( io::get( EDIP_RX_LANE_BAD_VEC_16_23, l_data ) & 0x000000FF );
 
-fapi_try_exit:
-    FAPI_IMP( "P9 I/O EDI+ Xbus Exiting" );
-    return fapi2::current_err;
-}
-
-/**
- * @brief Copmares the bad lane vector pre and post training.  If the data is
- *   the same, then we will want to clear the firs, since the firs have already
- *   been recorded.
- * @param[in]  i_tgt     Fapi2 Target
- * @param[in]  i_grp     Clock Group
- * @param[out] o_data    Data Vector of bad lane vector data
- * @retval     ReturnCode
- */
-fapi2::ReturnCode check_bad_lane_data(
-    const XBUS_TGT i_tgt,
-    const uint8_t  i_grp,
-    uint32_t       i_pre_bad_lane_data,
-    uint32_t       i_post_bad_lane_data )
-{
-    FAPI_IMP( "P9 I/O EDI+ Xbus Entering" );
-    const uint8_t LN0    = 0;
-    uint64_t      l_data = 0;
-
-    // If the bad lane vector matches pre to post training, then the same bad
-    //   lanes that were previously found, were found again.  These bad lanes have
-    //   already been reported.  So we will clear the first related to these bad
-    //   lanes
-    if( i_pre_bad_lane_data == i_post_bad_lane_data )
+    if (i_grp == 0)
     {
-        FAPI_DBG( "I/O EDI+ Xbus Pre/Post Bad Lane Data Match" );
-
-        // If the entire bad lane vector equals 0, then we don't need to clear
-        //   any firs.
-        if( i_pre_bad_lane_data != 0 )
-        {
-            FAPI_DBG( "I/O EDI+ Xbus Clearing Firs" );
-
-            FAPI_TRY( p9_io_xbus_clear_firs( i_tgt, i_grp ) );
-
-            // Clear BUS0_SPARE_DEPLOYED ( Bit 9 ).
-            FAPI_TRY( io::read( EDIP_SCOM_FIR_PB, i_tgt, i_grp, LN0, l_data ) );
-            l_data &= 0xFF7FFFFFFFFFFFFFull;
-            FAPI_TRY( io::write( EDIP_SCOM_FIR_PB, i_tgt, i_grp, LN0, l_data ) );
-        }
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_XBUS_GRP0_PRE_BAD_LANE_DATA,
+                               i_tgt, l_bad_lane_data));
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_XBUS_GRP1_PRE_BAD_LANE_DATA,
+                               i_tgt, l_bad_lane_data));
     }
 
 fapi_try_exit:
     FAPI_IMP( "P9 I/O EDI+ Xbus Exiting" );
     return fapi2::current_err;
 }
-
 
 /**
  * @brief A HWP that runs on every link of the XBUS(EDI+)
@@ -886,10 +848,6 @@ fapi2::ReturnCode p9_io_xbus_linktrain(
     FAPI_IMP( "p9_io_xbus_linktrain: P9 I/O EDI+ Xbus Entering" );
     XBUS_TGT l_mtgt;
     XBUS_TGT l_stgt;
-    uint32_t l_m_pre_bad_data  = 0;
-    uint32_t l_m_post_bad_data = 0;
-    uint32_t l_s_pre_bad_data   = 0;
-    uint32_t l_s_post_bad_data  = 0;
 
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
     char l_ctgt_str[fapi2::MAX_ECMD_STRING_LEN];
@@ -912,10 +870,12 @@ fapi2::ReturnCode p9_io_xbus_linktrain(
 
 
     // Record the Bad Lane Vectors Prior to link training.
-    FAPI_TRY( get_bad_lane_data( l_mtgt, i_grp, l_m_pre_bad_data ),
-              "Pre Training: Get Bad Lane Vector Failed on Master" );
-    FAPI_TRY( get_bad_lane_data( l_stgt, i_grp, l_s_pre_bad_data ),
-              "Pre Training: Get Bad Lane Vector Failed on Slave" );
+    FAPI_TRY(set_bad_lane_data(l_mtgt, i_grp),
+             "Pre Training: Get Bad Lane Vector Failed on Master");
+
+
+    FAPI_TRY(set_bad_lane_data(l_stgt, i_grp),
+             "Pre Training: Get Bad Lane Vector Failed on Slave");
 
 
     // Clock Serializer Init -- isn't strictly necessary but does line up the
@@ -941,21 +901,6 @@ fapi2::ReturnCode p9_io_xbus_linktrain(
     //FAPI_TRY( tx_serializer_sync_power_off( l_mtgt, l_stgt, i_grp ),
     //          "tx_serializer_sync_power_off Failed.");
     // << HW390103 -- Leave Tx Unload Clock Disable Off
-
-    // Record the Bad Lane Vectors after link training.
-    FAPI_TRY( get_bad_lane_data( l_mtgt, i_grp, l_m_post_bad_data ),
-              "Post Training: Get Bad Lane Vector Failed on Master" );
-    FAPI_TRY( get_bad_lane_data( l_stgt, i_grp, l_s_post_bad_data ),
-              "Post Training: Get Bad Lane Vector Failed on Master" );
-
-
-    // Check to see if the bad lanes match the bad lanes prior to link training.
-    //   If so, then that error has already been logged and we can clear the firs.
-    FAPI_TRY( check_bad_lane_data( l_mtgt, i_grp, l_m_pre_bad_data, l_m_post_bad_data ),
-              "Post Training: Evaluate Firs Failed on Master" );
-    FAPI_TRY( check_bad_lane_data( l_stgt, i_grp, l_s_pre_bad_data, l_s_post_bad_data ),
-              "Post Training: Evaluate Firs Failed on Slave" );
-
 
 fapi_try_exit:
     FAPI_IMP( "p9_io_xbus_linktrain: P9 I/O EDI+ Xbus Exiting" );
