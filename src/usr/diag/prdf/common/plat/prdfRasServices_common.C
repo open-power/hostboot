@@ -393,26 +393,34 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     //--------------------------------------------------------------------------
 
     HWAS::DeconfigEnum deconfigPolicy = HWAS::NO_DECONFIG;
-    bool               deferDeconfig  = false;
 
-    if ( HWAS::GARD_NULL != gardPolicy )
+    // NOTE: If gardPolicy is HWAS::GARD_Fatal don't deconfig. The system will
+    //       reboot and the garded part will be deconfigured early in the next
+    //       IPL. This avoids problems where a deconfig will make the part
+    //       unavailable for a dump.
+    // NOTE: No deconfigs (via hardware callouts) are allowed at runtime.
+
+    if ( HWAS::GARD_Predictive == gardPolicy )
     {
         #if !defined(__HOSTBOOT_MODULE) // FSP only
 
-        // Change the deconfig state based the gard type. This is only required
-        // to control what the FSP does during the reconfig loop.
-        deconfigPolicy = HWSV::SvrError::isInHwReconfLoop() ? HWAS::DECONFIG
-                                                            : HWAS::NO_DECONFIG;
+        // If we are within the reconfig loop, we can do a deconfig. Otherwise,
+        // treat it as if the error happened a runtime. Note that this must be
+        // a delayed deconfig to ensure we don't take an parts out from
+        // underneath us during analysis.
+        if ( HWSV::SvrError::isInHwReconfLoop() )
+            deconfigPolicy = HWAS::DELAYED_DECONFIG;
 
         #elif !defined(__HOSTBOOT_RUNTIME) // Hostboot only
 
-        // Deferred Deconfig should be used throughout all of Hostboot (both
-        // checkForIplAttns() and MDIA).
-        deconfigPolicy = HWAS::DECONFIG;
-        deferDeconfig  = true;
+        // Must do a delayed deconfig to trigger a reconfig loop at the end of
+        // the istep.
+        deconfigPolicy = HWAS::DELAYED_DECONFIG;
 
         #endif
     }
+
+    bool deferDeconfig = ( HWAS::DELAYED_DECONFIG == deconfigPolicy );
 
     //--------------------------------------------------------------------------
     // Get the HCDB diagnostics policy.

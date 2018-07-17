@@ -170,8 +170,7 @@
                             i_severity, i_diag_need)      \
   io_errl->addHwCallout(i_target,                                    \
                         (const HWAS::callOutPriority)i_priority,     \
-                        (i_deconfigState == HWAS::DECONFIG ?         \
-                        HWAS::DELAYED_DECONFIG : i_deconfigState),   \
+                        i_deconfigState,                             \
                         (const HWAS::GARD_ErrorType)i_gardErrType);  \
   (void)(i_diag_need)
 
@@ -183,8 +182,7 @@
     io_errl->addClockCallout(i_target,                          \
                              i_clockType,                       \
                 (const HWAS::callOutPriority)i_priority,        \
-                (i_deconfigState == HWAS::DECONFIG ?            \
-                   HWAS::DELAYED_DECONFIG : i_deconfigState),   \
+                i_deconfigState,                                \
                 i_gardErrType);
 
 /**
