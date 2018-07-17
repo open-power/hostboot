@@ -2449,7 +2449,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
 
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
+        reinterpret_cast<void *>(hrmorBase +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2570,7 +2570,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
     errlHndl_t err = NULL;
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
+        reinterpret_cast<void *>(hrmorBase +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2630,7 +2630,7 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
     errlHndl_t err = NULL;
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
+        reinterpret_cast<void *>(hrmorBase +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
