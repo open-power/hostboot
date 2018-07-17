@@ -33,13 +33,3 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
-### Update p9c.act and p9n.act for IOVALID HWP change in commit https://ralgit01.raleigh.ibm.com/gerrit1/#/c/59022/
-echo "+++ Updating p9c.act and p9n.act for IOVALID actions +++"
-mkdir $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p9c.act $sb/simu/data/cec-chip
-cp $BACKING_BUILD/src/simu/data/cec-chip/p9n.act $sb/simu/data/cec-chip
-patch -p0 $sb/simu/data/cec-chip/p9c.act $PROJECT_ROOT/src/build/citest/etc/patches/p9c.act.iovalid.patch
-patch -p0 $sb/simu/data/cec-chip/p9n.act $PROJECT_ROOT/src/build/citest/etc/patches/p9n.act.iovalid.patch
-
-# Pull in Centaur action file changes to support Centaur security
-sbex -t 1058651
