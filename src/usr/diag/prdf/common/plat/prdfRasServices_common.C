@@ -426,12 +426,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Get the HCDB diagnostics policy.
     //--------------------------------------------------------------------------
 
-    HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
-    if ( ERRL_ACTION_HIDDEN == errlAct )
-    {
-        // Diagnostics is not needed in the next IPL cycle for non-visible logs.
-        l_diagUpdate = HWSV::HWSV_DIAG_NOT_NEEDED;
-    }
+    // Diagnostics is only needed on the next IPL for visible logs.
+    bool l_diagUpdate = ( ERRL_ACTION_HIDDEN != errlAct );
 
     //--------------------------------------------------------------------------
     // Initialize the PFA data

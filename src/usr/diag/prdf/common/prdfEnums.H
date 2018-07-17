@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,27 +60,6 @@ enum MFG_THRES_SYNC_MSG_TYPE
         ERRL_ACTION_CALL_HOME,
         ERRL_ACTION_HIDDEN,
         ERRL_ACTION_DONT_TERMINATE
-    };
-
-    namespace HWSV
-    {
-        typedef uint32_t hwsvDiagUpdate;
-        typedef uint32_t hwsvTermEnum;
-        typedef uint32_t hwsvDeconfigSchedule;
-
-        enum
-        {
-            // hwsvTermEnum
-            HWSV_SYS_NO_TERMINATE = 0,
-
-            // hwsvDiagUpdate
-            HWSV_DIAG_NOT_NEEDED = 0,
-            HWSV_DIAG_NEEDED,
-
-            //hwsvDeconfigSchedule
-            HWSV_DECONFIG_IMMEDIATE = 0,
-            HWSV_DECONFIG_DEFER
-        };
     };
 
 #endif // __HOSTBOOT_MODULE
