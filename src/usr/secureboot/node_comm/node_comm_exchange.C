@@ -885,7 +885,7 @@ errlHndl_t nodeCommAbusExchange(void)
         }
         else
         {
-            TRACFCOMP(g_trac_nc, ERR_MRK"nodeCommAbusExchange: "
+            TRACFCOMP(g_trac_nc, INFO_MRK"nodeCommAbusExchange: "
                       "getObusTrainedLinks: link0=%d, link1=%d",
                       link0_trained, link1_trained);
 

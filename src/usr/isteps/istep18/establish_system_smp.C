@@ -668,14 +668,13 @@ void *host_sys_fab_iovalid_processing(void* io_ptr )
         errlHndl_t err = SECUREBOOT::NODECOMM::nodeCommAbusExchange();
         if (err)
         {
-            // @TODO RTC 184518 Determine how to handle error log, but
-            // delete error log for now
+            // Commit error here and the FSP will handle it
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
                 "host_sys_fab_iovalid_processing: nodeCommAbusExchange() "
                 "returned err: plid=0x%X. Deleting err and continuing",
                 err->plid());
-            delete err;
-            err = nullptr;
+            err->collectTrace("ISTEPS_TRACE");
+            errlCommit(err, SECURE_COMP_ID);
        }
 
         // Lock the secure ABUS Link Mailboxes now
