@@ -151,36 +151,66 @@ fapi2::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(const fapi2::Target<fapi2::TARGET
         const uint8_t i_mbaPosition,
         const uint32_t i_port_number, const uint8_t i_rank, const uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt,
         uint8_t& io_dram_rtt_nom_original);
+
 ///
 /// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
-/// @param[in] i_rank_pair_group rank pair group being calibrated
-/// @param[in] i_state 1 turn on (configure) 0 turn off (cleanup)
-/// @param[in,out] CCS instruction Number
+/// @param[in] i_rank rank pair group being calibrated
+/// @param[in] i_state 1 turn on (configure) or 0 turn off (cleanup)
+/// @param[in,out] io_ccs_inst_cnt CCS instruction Number
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-        const uint8_t i_port,
-        const uint32_t i_rank_pair_group,
-        const uint8_t i_state,
-        uint32_t& io_ccs_inst_cnt);
-
+fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                        const uint8_t i_port,
+                                        const uint32_t i_rank,
+                                        const uint8_t i_state,
+                                        uint32_t& io_ccs_inst_cnt);
 
 ///
-/// @brief Send mrs to non calibrating ranks to turn wr lvl mode on and qoff disabled during wr lvling
+/// @brief Setup CCS for B-side writes
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
-/// @param[in] i_rank_pair_group rank pair group being calibrated
-/// @param[in] i_state 1 turn on (confiugre) or 0 turn off (cleanup)
+/// @param[in] i_rank rank being calibrated
+/// @param[in] i_address_16 A-side DRAM address
+/// @param[in] i_bank_3 A-side bank address
+/// @param[in] i_activate_1 activate bit
+/// @param[in] i_rasn_1 rasn bit
+/// @param[in] i_casn_1 casn bit
+/// @param[in] i_wen_1 wen bit
+/// @param[in] i_cke_4 cke bits
+/// @param[in] i_odt_4 odt bits
+/// @param[in] i_ddr_cal_type_4 ddr cal type
+/// @param[in] i_num_idles_16 number of idles
+/// @param[in] i_num_repeat_16 number of repeats
+/// @param[in] i_data_20 ccs data
+/// @param[in] i_read_compare_1 read compare bit
+/// @param[in] i_rank_cal_4 rank cal bits
+/// @param[in] i_ddr_cal_enable_1 ddr cal enable bit
+/// @param[in] i_ccs_end_1 ccs end bit
 /// @param[in,out] CCS instruction Number
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                  const uint8_t i_port,
-                                  const uint32_t i_rank_pair_group,
-                                  const uint8_t i_state,
-                                  uint32_t& io_ccs_inst_cnt);
+fapi2::ReturnCode setup_b_side_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   const uint8_t i_port,
+                                   const uint32_t i_rank,
+                                   const fapi2::variable_buffer& i_address_16,
+                                   const fapi2::variable_buffer& i_bank_3,
+                                   const fapi2::variable_buffer& i_activate_1,
+                                   const fapi2::variable_buffer& i_rasn_1,
+                                   const fapi2::variable_buffer& i_casn_1,
+                                   const fapi2::variable_buffer& i_wen_1,
+                                   const fapi2::variable_buffer& i_cke_4,
+                                   const fapi2::variable_buffer& i_odt_4,
+                                   const fapi2::variable_buffer& i_ddr_cal_type_4,
+                                   const fapi2::variable_buffer& i_num_idles_16,
+                                   const fapi2::variable_buffer& i_num_repeat_16,
+                                   const fapi2::variable_buffer& i_data_20,
+                                   const fapi2::variable_buffer& i_read_compare_1,
+                                   const fapi2::variable_buffer& i_rank_cal_4,
+                                   const fapi2::variable_buffer& i_ddr_cal_enable_1,
+                                   const fapi2::variable_buffer& i_ccs_end_1,
+                                   uint32_t& io_ccs_inst_cnt);
 
 #endif /* _MSS_DDR4_FUNCS_H */
 

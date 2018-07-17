@@ -2519,82 +2519,6 @@ uint8_t convert_rtt_wr_to_rtt_nom(uint8_t i_rtt_wr, uint8_t& i_rtt_nom)
 }
 
 ///
-/// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
-/// @param[in] i_target mba target being calibrated
-/// @param[in] i_port port being calibrated
-/// @param[in] i_rank_pair_group rank pair group being calibrated
-/// @param[in] i_state 1 turn on (confiugre) or 0 turn off (cleanup)
-/// @param[in,out] CCS instruction Number
-/// @return FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-        const uint8_t i_port,
-        const uint32_t i_rank_pair_group,
-        const uint8_t i_state,
-        uint32_t& io_ccs_inst_cnt)
-{
-    uint8_t l_dram_gen = 0;
-    uint8_t l_ranks_array[MAX_RANKS_PER_RANK_GROUP][NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0};
-    uint8_t l_rank_to_cal = 0;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target, l_ranks_array[0][0]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP1, i_target, l_ranks_array[0][1]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_target, l_ranks_array[0][2]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_target, l_ranks_array[0][3]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP0, i_target, l_ranks_array[1][0]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP1, i_target, l_ranks_array[1][1]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP2, i_target, l_ranks_array[1][2]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP3, i_target, l_ranks_array[1][3]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP0, i_target, l_ranks_array[2][0]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP1, i_target, l_ranks_array[2][1]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP2, i_target, l_ranks_array[2][2]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP3, i_target, l_ranks_array[2][3]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP0, i_target, l_ranks_array[3][0]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP1, i_target, l_ranks_array[3][1]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP2, i_target, l_ranks_array[3][2]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP3, i_target, l_ranks_array[3][3]));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
-    l_rank_to_cal = l_ranks_array[0][i_rank_pair_group][i_port];
-
-    FAPI_DBG("Rank Group Under Cal:  %d   Rank: %d   on %s", i_rank_pair_group, l_rank_to_cal, mss::c_str(i_target));
-
-    for(uint8_t l_rankgroup = 0; l_rankgroup < NUM_RANK_GROUPS; l_rankgroup++)
-    {
-        FAPI_DBG("Checking rankgroup %d on %s port %d: rank: %d ", l_rankgroup, mss::c_str(i_target), i_port,
-                 l_ranks_array[0][l_rankgroup][i_port]);
-
-        // If rankgroup is valid and is not the rankgroup being calibrated, send MRS
-        if((l_ranks_array[0][l_rankgroup][i_port] != fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID)
-           && (l_rankgroup != i_rank_pair_group))
-        {
-            // Send MRS
-            FAPI_INF("Sending WRLVL MRS to rank group %d rank %d on target %s", l_rankgroup,
-                     l_ranks_array[0][l_rankgroup][i_port], mss::c_str(i_target));
-            FAPI_TRY(send_wr_lvl_mrs(i_target, i_port, l_ranks_array[0][l_rankgroup][i_port], i_state, io_ccs_inst_cnt),
-                     "Failed to send wr lvl mrs to non calibrating ranks on %s port %d rank %d", mss::c_str(i_target), i_port,
-                     l_ranks_array[0][l_rankgroup][i_port]);
-        }
-
-        // Disable any other valid ranks
-        for(uint8_t l_rank = 1; l_rank < MAX_RANKS_PER_RANK_GROUP; l_rank++)
-        {
-            if(l_ranks_array[l_rank][l_rankgroup][i_port] != fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID)
-            {
-                // Send MRS
-                FAPI_INF("Sending WRLVL MRS to rank group %d rank %d on target %s", l_rankgroup,
-                         l_ranks_array[l_rank][l_rankgroup][i_port], mss::c_str(i_target));
-                FAPI_TRY(send_wr_lvl_mrs(i_target, i_port, l_ranks_array[l_rank][l_rankgroup][i_port], i_state, io_ccs_inst_cnt),
-                         "Failed to send wr lvl mrs to non calibrating ranks on %s port %d rank %d", mss::c_str(i_target), i_port,
-                         l_ranks_array[l_rank][l_rankgroup][i_port]);
-            }
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Setup CCS for B-side writes
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
@@ -2724,19 +2648,17 @@ fapi_try_exit:
 /// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
 /// @param[in] i_target mba target being calibrated
 /// @param[in] i_port port being calibrated
-/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_rank rank pair group being calibrated
 /// @param[in] i_state 1 turn on (configure) or 0 turn off (cleanup)
-/// @param[in,out] CCS instruction Number
+/// @param[in,out] io_ccs_inst_cnt CCS instruction Number
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                                  const uint8_t i_port,
-                                  const uint32_t i_rank,
-                                  const uint8_t i_state,
-                                  uint32_t& io_ccs_inst_cnt)
-
+fapi2::ReturnCode setup_wr_lvl_mrs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                        const uint8_t i_port,
+                                        const uint32_t i_rank,
+                                        const uint8_t i_state,
+                                        uint32_t& io_ccs_inst_cnt)
 {
-    fapi2::buffer<uint16_t> l_data_16;
     fapi2::variable_buffer l_data_buffer_16(16);
     fapi2::variable_buffer l_bank_3(3);
     fapi2::variable_buffer l_activate_1(1);
@@ -2750,67 +2672,28 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
     fapi2::variable_buffer l_bank_3_backup(3);
     fapi2::variable_buffer l_odt_4(4);
     fapi2::variable_buffer l_num_idles_16(16);
-    fapi2::variable_buffer l_num_idles_16_vref_train(16);
     fapi2::variable_buffer l_num_repeat_16(16);
     fapi2::variable_buffer l_data_20(20);
     fapi2::variable_buffer l_read_compare_1(1);
     fapi2::variable_buffer l_rank_cal_4(4);
     fapi2::variable_buffer l_ddr_cal_enable_1(1);
     fapi2::variable_buffer l_ccs_end_1(1);
-    uint8_t l_dimm_type = 0;
     uint8_t l_is_sim = 0;
-    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
     uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
-    uint32_t l_port_number = i_port;
     // dimm 0, dimm_rank 0-3 = ranks 0-3; dimm 1, dimm_rank 0-3 = ranks 4-7
     const uint8_t l_dimm = (i_rank) / MAX_RANKS_PER_DIMM;
     const uint8_t l_dimm_rank = i_rank - MAX_RANKS_PER_DIMM * l_dimm;
+    access_address l_addr = {0, 0, 0, 0, 0};
+    uint32_t l_delay = 0;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target, l_address_mirror_map));
 
-    FAPI_TRY(l_activate_1.setBit(0));
-    FAPI_TRY(l_rasn_1.clearBit(0));
-    FAPI_TRY(l_casn_1.clearBit(0));
-    FAPI_TRY(l_wen_1.clearBit(0));
-    FAPI_TRY(l_cke_4.setBit(0, 4));
-    FAPI_TRY(l_csn_8.setBit(0, 8));
-    FAPI_TRY(l_odt_4.clearBit(0, 4));
-
     // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
-    FAPI_TRY(l_csn_8.setBit(0, 8));
-    FAPI_TRY(l_data_buffer_16.clearBit(0, 16));
-    FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 400, 0, 16));
-    FAPI_TRY(mss_ccs_inst_arry_0( i_target,
-                                  io_ccs_inst_cnt,
-                                  l_data_buffer_16,
-                                  l_bank_3,
-                                  l_activate_1,
-                                  l_rasn_1,
-                                  l_casn_1,
-                                  l_wen_1,
-                                  l_cke_4,
-                                  l_csn_8,
-                                  l_odt_4,
-                                  l_ddr_cal_type_4,
-                                  l_port_number), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
+    l_delay = 400;
+    FAPI_TRY(add_nop_to_ccs(i_target, l_addr, l_delay, io_ccs_inst_cnt));
 
-    FAPI_TRY(mss_ccs_inst_arry_1( i_target,
-                                  io_ccs_inst_cnt,
-                                  l_num_idles_16,
-                                  l_num_repeat_16,
-                                  l_data_20,
-                                  l_read_compare_1,
-                                  l_rank_cal_4,
-                                  l_ddr_cal_enable_1,
-                                  l_ccs_end_1), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
-
-    io_ccs_inst_cnt++;
-
-
-
+    // Load nominal MRS values for the MR1, which contains RTT_NOM
     FAPI_INF("Sending MRS to rank %d on %s", i_rank, mss::c_str(i_target));
     FAPI_TRY(l_num_idles_16.insertFromRight((uint32_t) 12, 0, 16));
     FAPI_TRY(l_activate_1.setBit(0));
@@ -2820,11 +2703,11 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
     FAPI_TRY(l_cke_4.setBit(0, 4));
     FAPI_TRY(l_csn_8.clearBit(0, 8));
     FAPI_TRY(l_odt_4.clearBit(0, 4));
-    //load nominal MRS values for the MR1, which contains RTT_NOM
+
     FAPI_TRY(mss_ddr4_load_nominal_mrs_pda(i_target, l_bank_3, l_data_buffer_16, MRS1_BA, i_port,  l_dimm,
                                            l_dimm_rank), "mss_ddr4_load_nominal_mrs_pda failed on %s", mss::c_str(i_target));
 
-    //insert on or off to wr lvl enable and qoff
+    // Insert on or off to wr lvl enable and qoff
     FAPI_TRY(l_data_buffer_16.insert(i_state, 7, 1, 0));
     FAPI_TRY(l_data_buffer_16.insert(i_state, 12, 1, 0));
 
@@ -2840,19 +2723,19 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
     FAPI_TRY(l_data_buffer_16_backup.insert(l_data_buffer_16, 0, 16, 0));
     FAPI_TRY(l_bank_3_backup.insert(l_bank_3, 0 , 3, 0));
 
-    //loads the previous DRAM
-    if (( l_address_mirror_map[l_port_number][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
+    // Do the mirror swizzle if needed
+    if (( l_address_mirror_map[i_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
     {
-        FAPI_INF("Doing address_mirroring_swizzle for %d %d %d %02x", l_port_number, l_dimm, l_dimm_rank,
-                 l_address_mirror_map[l_port_number][l_dimm] );
+        FAPI_INF("Doing address_mirroring_swizzle for %d %d %d %02x", i_port, l_dimm, l_dimm_rank,
+                 l_address_mirror_map[i_port][l_dimm] );
         FAPI_TRY(mss_address_mirror_swizzle(i_target, l_data_buffer_16, l_bank_3), "mss_address_mirror_swizzle failed on %s",
                  mss::c_str(i_target));
 
     }
     else
     {
-        FAPI_INF("No swizzle for address_mirroring_swizzle necessary for %d %d %d 0x%02x", l_port_number, l_dimm, l_dimm_rank,
-                 l_address_mirror_map[l_port_number][l_dimm] );
+        FAPI_INF("No swizzle for address_mirroring_swizzle necessary for %d %d %d 0x%02x", i_port, l_dimm, l_dimm_rank,
+                 l_address_mirror_map[i_port][l_dimm] );
     }
 
     FAPI_TRY(mss_ccs_inst_arry_0( i_target,
@@ -2867,7 +2750,7 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
                                   l_csn_8,
                                   l_odt_4,
                                   l_ddr_cal_type_4,
-                                  l_port_number), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
+                                  i_port), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
 
     FAPI_TRY(mss_ccs_inst_arry_1( i_target,
                                   io_ccs_inst_cnt,
@@ -2880,55 +2763,24 @@ fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i
                                   l_ccs_end_1), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
     io_ccs_inst_cnt++;
 
-    //do a B side MRS write if needed
-    FAPI_TRY( setup_b_side_ccs(i_target, l_port_number, i_rank, l_data_buffer_16_backup,
+    // Do a B side MRS write
+    FAPI_TRY( setup_b_side_ccs(i_target, i_port, i_rank, l_data_buffer_16_backup,
                                l_bank_3_backup, l_activate_1, l_rasn_1, l_casn_1, l_wen_1,
                                l_cke_4, l_odt_4, l_ddr_cal_type_4, l_num_idles_16, l_num_repeat_16,
                                l_data_20, l_read_compare_1, l_rank_cal_4, l_ddr_cal_enable_1,
                                l_ccs_end_1, io_ccs_inst_cnt) );
 
-    //sets a NOP as the last command
-    FAPI_TRY(l_cke_4.setBit(0, 4));
-    FAPI_TRY(l_csn_8.setBit(0, 8));
-    FAPI_TRY(l_data_buffer_16.clearBit(0, 16));
-    FAPI_TRY(l_rasn_1.setBit(0, 1));
-    FAPI_TRY(l_casn_1.setBit(0, 1));
-    FAPI_TRY(l_wen_1.setBit(0, 1));
+    // Set a NOP as the last command
+    l_addr.port = i_port;
+    l_delay = 12;
+    FAPI_TRY(add_nop_to_ccs(i_target, l_addr, l_delay, io_ccs_inst_cnt));
 
-    // Send out to the CCS array
-    FAPI_TRY(mss_ccs_inst_arry_0( i_target,
-                                  io_ccs_inst_cnt,
-                                  l_data_buffer_16,
-                                  l_bank_3,
-                                  l_activate_1,
-                                  l_rasn_1,
-                                  l_casn_1,
-                                  l_wen_1,
-                                  l_cke_4,
-                                  l_csn_8,
-                                  l_odt_4,
-                                  l_ddr_cal_type_4,
-                                  l_port_number), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
+    // Setup end bit for CCS
+    FAPI_TRY(mss_ccs_set_end_bit(i_target, io_ccs_inst_cnt - 1), "mss_ccs_set_end_bit failed on %s", mss::c_str(i_target));
 
-    FAPI_TRY(mss_ccs_inst_arry_1( i_target,
-                                  io_ccs_inst_cnt,
-                                  l_num_idles_16,
-                                  l_num_repeat_16,
-                                  l_data_20,
-                                  l_read_compare_1,
-                                  l_rank_cal_4,
-                                  l_ddr_cal_enable_1,
-                                  l_ccs_end_1), "ccs_inst_arry_0 failed on %s", mss::c_str(i_target));
-
-    io_ccs_inst_cnt++;
-
-    //Setup end bit for CCS
-    FAPI_TRY(mss_ccs_set_end_bit (i_target, io_ccs_inst_cnt - 1), "mss_ccs_set_end_bit failed on %s", mss::c_str(i_target));
-    FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED FAPI_TRY");
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 /// @brief Swaps RTT_NOM and RTT_WR
 /// @param[in]  target:  Reference to centaur.mba target,
@@ -3204,7 +3056,6 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
-
 
 /// @brief Modifies the passed in address_16 buffer based upon the given attribute and data
 /// @param[in]  target:  Reference to l_centaur.mba target,

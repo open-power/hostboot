@@ -271,7 +271,10 @@ extern "C" {
                                                                  l_primary_ranks_array[l_group][l_port],
                                                                  l_group,
                                                                  l_instruction_number,
-                                                                 l_dram_rtt_nom_original));
+                                                                 l_dram_rtt_nom_original), "mss_rtt_nom_rtt_wr_swap failed!");
+                                // Set non-calibrating ranks wr lvl == enable and qoff
+                                FAPI_TRY(configure_non_calibrating_ranks(i_target, l_port, l_group, CONFIGURE_QOFF_WRLVL_ON, l_instruction_number),
+                                         "Failed to configure non calibrating ranks with wr lvl settings on %s", mss::c_str(i_target));
                             }
 
                             //DDR4 RDIMM, do the swap of the RTT_WR to RTT_NOM
@@ -351,6 +354,9 @@ extern "C" {
                                                                  l_group,
                                                                  l_instruction_number,
                                                                  l_dram_rtt_nom_original));
+                                //cleanup non calibrating ranks wr_lvl enable and qoff
+                                FAPI_TRY(configure_non_calibrating_ranks(i_target, l_port, l_group, CLEANUP_QOFF_WRLVL_OFF, l_instruction_number),
+                                         "Failed to cleanup non calibrating ranks with wr lvl settings on %s", mss::c_str(i_target));
                             }
 
                             // Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
@@ -3218,4 +3224,115 @@ extern "C" {
     fapi_try_exit:
         return fapi2::current_err;
     }
+
+///
+/// @brief Setup CCS instructions for setting non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (confiugre) or 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_port,
+            const uint32_t i_rank_pair_group,
+            const uint8_t i_state,
+            uint32_t& io_ccs_inst_cnt)
+    {
+        uint8_t l_dram_gen = 0;
+        uint8_t l_ranks_array[MAX_RANKS_PER_RANK_GROUP][NUM_RANK_GROUPS][MAX_PORTS_PER_MBA] = {0};
+        uint8_t l_rank_to_cal = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target, l_ranks_array[0][0]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP1, i_target, l_ranks_array[0][1]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP2, i_target, l_ranks_array[0][2]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP3, i_target, l_ranks_array[0][3]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP0, i_target, l_ranks_array[1][0]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP1, i_target, l_ranks_array[1][1]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP2, i_target, l_ranks_array[1][2]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SECONDARY_RANK_GROUP3, i_target, l_ranks_array[1][3]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP0, i_target, l_ranks_array[2][0]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP1, i_target, l_ranks_array[2][1]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP2, i_target, l_ranks_array[2][2]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_TERTIARY_RANK_GROUP3, i_target, l_ranks_array[2][3]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP0, i_target, l_ranks_array[3][0]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP1, i_target, l_ranks_array[3][1]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP2, i_target, l_ranks_array[3][2]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_QUATERNARY_RANK_GROUP3, i_target, l_ranks_array[3][3]));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
+        l_rank_to_cal = l_ranks_array[0][i_rank_pair_group][i_port];
+
+        FAPI_DBG("Rank Group Under Cal:  %d   Rank: %d   on %s", i_rank_pair_group, l_rank_to_cal, mss::c_str(i_target));
+
+        for(uint8_t l_rankgroup = 0; l_rankgroup < NUM_RANK_GROUPS; l_rankgroup++)
+        {
+            FAPI_DBG("Checking rankgroup %d on %s port %d: rank: %d ", l_rankgroup, mss::c_str(i_target), i_port,
+                     l_ranks_array[0][l_rankgroup][i_port]);
+
+            // If rankgroup is valid and is not the rankgroup being calibrated, send MRS
+            if((l_ranks_array[0][l_rankgroup][i_port] != fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID)
+               && (l_rankgroup != i_rank_pair_group))
+            {
+                // Send MRS
+                FAPI_INF("Sending WRLVL MRS to rank group %d rank %d on target %s", l_rankgroup,
+                         l_ranks_array[0][l_rankgroup][i_port], mss::c_str(i_target));
+                FAPI_TRY(send_wr_lvl_mrs(i_target, i_port, l_ranks_array[0][l_rankgroup][i_port], i_state, io_ccs_inst_cnt),
+                         "Failed to send wr lvl mrs to non calibrating ranks on %s port %d rank %d", mss::c_str(i_target), i_port,
+                         l_ranks_array[0][l_rankgroup][i_port]);
+            }
+
+            // Disable any other valid ranks
+            for(uint8_t l_rank = 1; l_rank < MAX_RANKS_PER_RANK_GROUP; l_rank++)
+            {
+                if(l_ranks_array[l_rank][l_rankgroup][i_port] != fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID)
+                {
+                    // Send MRS
+                    FAPI_INF("Sending WRLVL MRS to rank group %d rank %d on target %s", l_rankgroup,
+                             l_ranks_array[l_rank][l_rankgroup][i_port], mss::c_str(i_target));
+                    FAPI_TRY(send_wr_lvl_mrs(i_target, i_port, l_ranks_array[l_rank][l_rankgroup][i_port], i_state, io_ccs_inst_cnt),
+                             "Failed to send wr lvl mrs to non calibrating ranks on %s port %d rank %d", mss::c_str(i_target), i_port,
+                             l_ranks_array[l_rank][l_rankgroup][i_port]);
+                }
+            }
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
+///
+/// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (configure) or 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                      const uint8_t i_port,
+                                      const uint32_t i_rank,
+                                      const uint8_t i_state,
+                                      uint32_t& io_ccs_inst_cnt)
+    {
+        uint8_t l_dram_gen = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
+
+        if (l_dram_gen == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+        {
+            FAPI_TRY(setup_wr_lvl_mrs_ddr4(i_target, i_port, i_rank, i_state, io_ccs_inst_cnt));
+        }
+        else
+        {
+            FAPI_TRY(setup_wr_lvl_mrs(i_target, i_port, i_rank, i_state, io_ccs_inst_cnt));
+        }
+
+        FAPI_TRY(mss_execute_ccs_inst_array(i_target, 10, 10), " EXECUTE_CCS_INST_ARRAY FAILED FAPI_TRY");
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
 } //end extern C

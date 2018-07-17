@@ -37,6 +37,16 @@
 #define _MSS_FUNCS_H
 #include <dimmConsts.H>
 
+/// @brief Struct to contain DRAM address bits
+struct access_address
+{
+    uint32_t row_addr;
+    uint32_t col_addr;
+    uint8_t  rank;
+    uint8_t  bank;
+    uint8_t  port;
+};
+
 ///
 /// @brief Disables all CID's
 /// @param[in] i_target - the MBA target on which to operate
@@ -47,6 +57,19 @@
 fapi2::ReturnCode mss_disable_cid( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
                                    fapi2::variable_buffer& io_csn,
                                    fapi2::variable_buffer& io_cke);
+
+///
+/// @brief Setup address CCS field for a nominal MRS for MR1
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank rank pair being calibrated
+/// @param[out] o_address_16 CCS address field
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mss_nominal_mrs1_address(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+        const uint8_t i_port,
+        const uint32_t i_rank,
+        fapi2::variable_buffer& o_address_16);
 
 ///
 /// @brief Adding information to the CCS - 0 instruction array by index
@@ -310,6 +333,43 @@ fapi2::ReturnCode mss_assert_resetn (const fapi2::Target<fapi2::TARGET_TYPE_MBA>
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode mss_assert_resetn_drive_mem_clks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+///
+/// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank rank pair group being calibrated
+/// @param[in] i_state 1 turn on (configure) or 0 turn off (cleanup)
+/// @param[in,out] io_ccs_inst_cnt CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode setup_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                   const uint8_t i_port,
+                                   const uint32_t i_rank,
+                                   const uint8_t i_state,
+                                   uint32_t& io_ccs_inst_cnt);
+
+/// @brief Add a NOP command to the CCS program
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for command
+/// @param[in] i_delay delay associated with this instruction
+/// @param[in,out] io_instruction_number position in CCS program in which to insert command (will be incremented)
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode add_nop_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                 const access_address i_addr,
+                                 const uint32_t i_delay,
+                                 uint32_t& io_instruction_number);
+
+/// @brief Get the CSN representation of a given address
+/// @param[in] i_target_mba mba target
+/// @param[in] i_addr address struct for MRS
+/// @param[in] i_stack_type value of ATTR_CEN_EFF_STACK_TYPE for given MBA
+/// @param[out] o_csn_8 CSN encoding
+/// @return FAPI2_RC_SUCCESS iff successful
+fapi2::ReturnCode cs_decode(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                            const access_address i_addr,
+                            const uint8_t i_stack_type,
+                            fapi2::variable_buffer& o_csn_8);
 
 #endif /* _MSS_FUNCS_H */
 

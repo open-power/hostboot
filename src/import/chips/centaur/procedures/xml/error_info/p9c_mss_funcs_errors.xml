@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -179,6 +179,26 @@
   <hwpError>
     <rc>RC_CEN_MSS_CCS_INDEX_OUT_OF_BOUNDS</rc>
     <description>An invalid CCS array index was passsed to the function.</description>
+    <ffdc>INDEX_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_MRANK_OUT_OF_BOUNDS</rc>
+    <description>An invalid mrank value was passsed to the function.</description>
+    <ffdc>INDEX_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_CCS_SRANK_OUT_OF_BOUNDS</rc>
+    <description>An invalid srank or cid value was passsed to the function.</description>
     <ffdc>INDEX_VALUE</ffdc>
     <callout>
       <procedure>CODE</procedure>

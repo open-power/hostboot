@@ -192,6 +192,35 @@ extern "C"
             const uint8_t l_cur_cal_step,
             const fapi2::buffer<uint8_t>& i_cal_steps);
 
+///
+/// @brief Setup CCS instructions for setting non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (confiugre) or 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            const uint8_t i_port,
+            const uint32_t i_rank_pair_group,
+            const uint8_t i_state,
+            uint32_t& io_ccs_inst_cnt);
+
+///
+/// @brief Set non calibrating ranks to wr lvl mode on and qoff disabled during wr lvling
+/// @param[in] i_target mba target being calibrated
+/// @param[in] i_port port being calibrated
+/// @param[in] i_rank_pair_group rank pair group being calibrated
+/// @param[in] i_state 1 turn on (configure) or 0 turn off (cleanup)
+/// @param[in,out] CCS instruction Number
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+    fapi2::ReturnCode send_wr_lvl_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                      const uint8_t i_port,
+                                      const uint32_t i_rank,
+                                      const uint8_t i_state,
+                                      uint32_t& io_ccs_inst_cnt);
 
 } // extern "C"
 
