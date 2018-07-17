@@ -48,6 +48,10 @@
 typedef fapi2::ReturnCode (*p9_io_xbus_clear_firs_FP_t)
 (const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&, const uint8_t&);
 
+typedef fapi2::ReturnCode (*p9_io_xbus_erepair_cleanup_FP_t)
+(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&);
+
+
 extern "C"
 {
 
@@ -60,7 +64,17 @@ extern "C"
      */
     fapi2::ReturnCode p9_io_xbus_clear_firs(
         const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-        const uint8_t& i_clock_group );
+        const uint8_t& i_clock_group);
+
+    /**
+     * @brief Clears PHY Rx/Tx FIRs on the XBUS(EDI+) specified target.  The FIRs
+     *   are cleared by toggling a rx & tx fir reset bit.
+     * @param[in] i_target         FAPI2 Target
+     * @retval ReturnCode
+     */
+    fapi2::ReturnCode p9_io_xbus_erepair_cleanup (
+        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target);
+
 
 } // extern "C"
 
