@@ -124,13 +124,10 @@ int KernelIpc::qryLocalIpcInfo(uint64_t * i_pONode, uint64_t * i_pOAddr)
     uint64_t l_localNode = getPIR()/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
 
     uint64_t l_localAddr = reinterpret_cast<uint64_t>(&ipc_data_area);
-    uint64_t l_hrmorOffset = (getHRMOR() -
-                              (l_localNode * (ipc_data_area.hrmor_base)));
-    uint64_t l_remoteHrmor =
-            ((ipc_data_area.hrmor_base * l_localNode) + l_hrmorOffset);
+    uint64_t l_hrmor = getHRMOR();
 
     uint64_t l_oAddr = (( l_localAddr +
-                          l_remoteHrmor ) |
+                          l_hrmor ) |
                           0x8000000000000000ul);
 
     *i_pONode = l_localNode;

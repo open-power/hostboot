@@ -153,16 +153,17 @@ namespace KernelMisc
                 uint64_t local_master_pir = 0xfffffffffffffffful;
 
                 // Find the start_payload_data_area on the master node
-                uint64_t hrmor_base = KernelIpc::ipc_data_area.hrmor_base;
+                // Use IPC address of master node to find the necessary
+                // Address
+                uint64_t master_node_IPC =
+                  reinterpret_cast<uint64_t>(
+                  KernelIpc::ipc_data_area.remote_ipc_data_addr[
+                                                    g_masterHBInstance]);
 
-                uint64_t this_hb_instance =
-                  l_lowestPIR/KERNEL_MAX_SUPPORTED_CPUS_PER_NODE;
+                uint64_t l_localAddrIPC =
+                  reinterpret_cast<uint64_t>(& KernelIpc::ipc_data_area);
 
-                uint64_t hrmor_offset =
-                    getHRMOR() - (this_hb_instance * hrmor_base);
-
-                uint64_t dest_hrmor =
-                    (g_masterHBInstance * hrmor_base) + hrmor_offset;
+                uint64_t dest_hrmor = master_node_IPC - l_localAddrIPC;
 
                 uint64_t start_payload_data_area_address =
                     reinterpret_cast<uint64_t>
