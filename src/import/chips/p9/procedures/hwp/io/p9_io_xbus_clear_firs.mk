@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_xbus_clear_firs
+OBJS+=p9_io_xbus_read_erepair.o
 $(call BUILD_PROCEDURE)
