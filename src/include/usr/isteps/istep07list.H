@@ -134,27 +134,27 @@ namespace   INITSERVICE
         {
                 ISTEPNAME(07,01,"mss_attr_cleanup"),
                 ISTEP_07::host_mss_attr_cleanup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,02,"mss_volt"),
                 ISTEP_07::call_mss_volt,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,03,"mss_freq"),
                 ISTEP_07::call_mss_freq,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,04,"mss_eff_config"),
                 ISTEP_07::call_mss_eff_config,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(07,05,"mss_attr_update"),
                 ISTEP_07::call_mss_attr_update,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 };
 
