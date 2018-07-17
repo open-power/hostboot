@@ -128,6 +128,12 @@
         <default>0xFFFF</default>
     </attribute>
 
+    <!-- This should be irrelevant but it affects what nest freq we run -->
+    <attribute>
+        <id>REQUIRED_SYNCH_MODE</id>
+        <default>1</default>
+    </attribute>
+
     <attribute>
         <id>O_EREPAIR_THRESHOLD_FIELD</id>
         <default>1</default>
@@ -6233,7 +6239,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -6459,7 +6465,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -6531,7 +6537,7 @@
     </attribute>
     <attribute>
         <id>CHIPLET_ID</id>
-        <default>0x07</default>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>

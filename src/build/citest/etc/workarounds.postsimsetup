@@ -38,3 +38,12 @@ cp $BACKING_BUILD/src/simu/data/cec-chip/centaur_memory.act $sb/simu/data/cec-ch
 chmod 777 $sb/simu/data/cec-chip/centaur_memory.act
 patch -p0 $sb/simu/data/cec-chip/centaur_memory.act $PROJECT_ROOT/src/build/citest/etc/patches/centaur_memory.act.patch
 
+
+##########################################################################
+echo "+++ SBE support for Cumulus DD1.3 +++"
+#Pull in the code
+sbex -t 1060757
+#Build sbei to create p9c_13.sbe_seeprom.hdr.bin
+mkdir -p $sb/sbei/sbfw/
+cd $sb/sbei/sbfw/
+mk
