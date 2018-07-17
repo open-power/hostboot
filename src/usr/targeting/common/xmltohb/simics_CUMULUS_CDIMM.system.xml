@@ -3307,6 +3307,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -3385,6 +3389,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -3466,6 +3474,10 @@
         <default>2</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -3545,6 +3557,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -3610,6 +3626,8 @@
         <default>DMI</default>
     </attribute>
 </targetInstance>
+
+
 <targetInstance>
     <id>sys0node0proc0mc1mi2dmi4</id>
     <type>unit-dmi-cumulus</type>
@@ -3622,6 +3640,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -3703,6 +3725,10 @@
         <default>5</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -3782,6 +3808,10 @@
         <default>6</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -3859,6 +3889,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -5352,6 +5386,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -6194,6 +6232,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -6272,6 +6314,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -6338,6 +6384,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x07</default>
     </attribute>
     <attribute>
         <id>CLASS</id>
@@ -6408,6 +6458,10 @@
         <default>2</default>
     </attribute>
     <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
+    </attribute>
+    <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
@@ -6474,6 +6528,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x08</default>
     </attribute>
     <attribute>
         <id>CLASS</id>

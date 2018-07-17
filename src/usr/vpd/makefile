@@ -47,14 +47,9 @@ BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb33
 BINARY_FILES += $(IMGDIR)/vpo_sysmvpd.dat:f83bbcdd56defb5d155399774c4d721de25a8e96
 BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 
-# Nimbus Module VPD
-# Copied from /afs/btv.ibm.com/u/sgrom/public/vpd_images/p9_dd10/module-p9-dd10-simics_v15_rs4v2.bin
-#   on 1/3/2017
-# Modified PG record to have proper XBUS data and only the first 4 cores
+# P9 Module VPD
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
-BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:d9299c4027c597c31337b46ed311edc131ec93bc
-
-#Update to Centaur DD2.0 for CCIN 31E8
+BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:939f91a9359b917c525dd7cd4ea80a03b1c08714
 
 # CDIMM Format - download 4k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd_cdimm.dat:b12431fbc14304edd31e74405cdcb27560a8e00b

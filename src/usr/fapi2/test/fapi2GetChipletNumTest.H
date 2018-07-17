@@ -98,7 +98,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyiPhbChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -153,7 +152,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyObusBrickChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -206,7 +204,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyPecChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -266,7 +263,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyCappChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -326,7 +322,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyMcbistChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -395,7 +390,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyMcsChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -455,7 +449,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyMcaChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -508,16 +501,15 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                 FAPI_DBG("testVerifyMcChipletNum HUID: %.8X, ChipletId: %.8X",
                     TARGETING::get_huid(l_Target), l_chiplet_id);
 
-                // MC 0,1 maps to pervasive ids 0x07
+                // MC 0,1 maps to pervasive ids 0x07,0x08
                 l_chip_unit = l_Target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-                l_exp_chiplet_id = l_chip_unit / 4 + START_MC_CHIPLET_NUM;
+                l_exp_chiplet_id = l_chip_unit + START_MC_CHIPLET_NUM;
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
                     TS_FAIL("testVerifyMcChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
 
@@ -572,15 +564,15 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TARGETING::get_huid(l_Target), l_chiplet_id);
 
                 // MI 0,1  maps to pervasive ids 0x07
+                // MI 2,3  maps to pervasive ids 0x08
                 l_chip_unit = l_Target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-                l_exp_chiplet_id = l_chip_unit / 4 + START_MI_CHIPLET_NUM;
+                l_exp_chiplet_id = l_chip_unit / 2 + START_MI_CHIPLET_NUM;
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
                     TS_FAIL("testVerifyMiChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
 
@@ -644,7 +636,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_INFO("testVerifyDmiChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
 
@@ -712,7 +703,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyObusChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -761,7 +751,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyXbusChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             START_XBUS_CHIPLET_NUM, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -812,7 +801,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyPervChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_chip_unit, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -866,7 +854,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyEQChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -928,7 +915,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyEXChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
@@ -983,7 +969,6 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TS_FAIL("testVerifyCoreChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
                             TARGETING::get_huid(l_Target),
                             l_exp_chiplet_id, l_chiplet_id);
-                    break;
                 }
             }
         } while(0);
