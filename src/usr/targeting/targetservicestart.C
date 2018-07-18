@@ -458,6 +458,10 @@ static void initializeAttributes(TargetService& i_targetService,
             l_pTopLevel->setAttr<ATTR_HB_RSV_MEM_NEXT_SECTION>(0);
             l_pTopLevel->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(1);
 
+            //Clear out PM MALF and FFDC enabled attributes
+            l_pTopLevel->setAttr<ATTR_PM_MALF_ALERT_ENABLE> (0x0);
+            l_pTopLevel->setAttr<ATTR_PM_RESET_FFDC_ENABLE> (0x0);
+
             //Assemble list of functional procs and zero out virtual address values
             //to ensure they get set again this IPL
             TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
