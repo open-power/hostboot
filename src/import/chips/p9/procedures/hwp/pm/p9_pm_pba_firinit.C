@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,10 +200,12 @@ fapi2::ReturnCode pm_pba_fir_init(
              "ERROR: Failed to clear PBA FIR");
     FAPI_TRY(l_pbaFir.clearAllRegBits(p9pmFIR::REG_ACTION1),
              "ERROR: Failed to clear PBA FIR");
+    FAPI_TRY(l_pbaFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
+             "ERROR: Faled to set the PBA FIR MASK");
 
     /*  Set the action and mask for the PBA LFIR bits */
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_APAR_ERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_APAR_ERR),
+             FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDADRERR_FW),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDDATATO_FW),
@@ -214,74 +216,74 @@ fapi2::ReturnCode pm_pba_fir_init(
              FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CE_FW),
              FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_SLAVE_INIT),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_WRPAR_ERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_SLAVE_INIT),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_WRPAR_ERR),
+             FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_SPARE),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_UNEXPCRESP),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_UNEXPDATA),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_PARITY_ERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_WRADRERR_FW),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_BADCRESP),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UNEXPCRESP),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UNEXPDATA),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_PARITY_ERR),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_WRADRERR_FW),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_BADCRESP),
+             FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_RD),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CRESPTO),
              FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_SETUP_ERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_SETUP_ERR),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_PB_ACK_DEAD),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_PB_ADRERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_OCI_DATERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_SETUP_ERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_PB_ADRERR),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_OCI_DATERR),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_SETUP_ERR),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_PB_ACK_DEAD),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_PB_ADRERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_RDDATATO_ERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_PB_ADRERR),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_RDDATATO_ERR),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_SUE_ERR),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_BCDE_UE_ERR),
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_UE_ERR),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_CE),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_OCI_DATERR),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_INTERNAL_ERR),
              FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_BCDE_CE),
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_ILLEGAL_CACHE_OP),
              FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_OCI_DATERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_INTERNAL_ERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_ILLEGAL_CACHE_OP),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_BAD_REG_ADDR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXPUSH_WRERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_OCI_BAD_REG_ADDR),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXPUSH_WRERR),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_ERR),
-             FIR_CHECKSTOP_ERROR);
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_TO),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_RSVDATA_TO),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXFLOW_ERR),
-             FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_AXSND_DHI_RTYTO),
-             FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_AXSND_DLO_RTYTO),
-             FIR_REC_ATTN_ERROR);
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_DHI_RTYTO),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_DLO_RTYTO),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_RSVTO),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXSND_RSVERR),
-             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_RSVERR),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_WR),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_41),
@@ -298,6 +300,8 @@ fapi2::ReturnCode pm_pba_fir_init(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
                            i_target, firinit_done_flag),
              "ERROR: Failed to fetch the entry status of FIRINIT");
+
+    FAPI_DBG("firinit_done_flag for PBA = %d", firinit_done_flag);
 
     if (firinit_done_flag)
     {
