@@ -187,6 +187,14 @@ public:
     void configureBootMode( uint8_t i_mode );
 
     /**
+     * @brief Process the pnor driver mode from the boot flags register.
+     *
+     * @param[i] i_driver - pnor driver as set in the boot flags reg.
+     *
+     */
+    void configurePnorDriver( uint8_t i_driver );
+
+    /**
      * @brief Process boot options from boot flags register
      *
      * @param[i] i_options - requested boot options as set in the boot flags

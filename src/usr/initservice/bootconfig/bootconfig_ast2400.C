@@ -171,21 +171,30 @@ void AST2400BootConfig::configureBootOptions(uint8_t i_bootOptions )
             errlCommit(errl,INITSVC_COMP_ID);
         }
     }
+}
 
 // configurePnorDriver()
 // ----------------------------------------------------------------------------
-void AST2400BootConfig::configurePnorDriver(enum pnorDriverOptions i_pnorDriver )
+void AST2400BootConfig::configurePnorDriver( uint8_t i_driver )
 {
-    switch (i_pnorDriver) {
+    switch (i_driver) {
     case MBOX:
         TRACFCOMP(g_bc_trace,
-                "configurePnorDriver() bmc supports mbox protocol"); }
+                "configurePnorDriver() bmc supports mbox protocol");
+
+#ifndef CONFIG_PNORDD_IS_BMCMBOX
 	/* fall through - no hostboot support for mbox */
         TRACFCOMP(g_bc_trace,
-                "configurePnorDriver() hb does not support mbox protocol"); }
+                  "configurePnorDriver() hb does not support mbox protocol");
+#else
+	TRACFCOMP(g_bc_trace,
+		  "configurePnorDriver() using mbox driver");
+	break;
+#endif
+
     case SFC:
         TRACFCOMP(g_bc_trace,
-                "configurePnorDriver() using sfc driver"); }
+                "configurePnorDriver() using sfc driver");
 	break;
     }
 }
