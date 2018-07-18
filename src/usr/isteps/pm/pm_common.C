@@ -826,6 +826,10 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
 
+        TARGETING::Target * l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != nullptr);
+
         //Get homer image buffer
         uint64_t l_homerPhysAddr = 0x0;
         l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
@@ -839,6 +843,11 @@ namespace HBPM
         do {
             // Init path
             // p9_pm_init.C enum: PM_INIT
+            if (TARGETING::is_phyp_load())
+            {
+                l_sys->setAttr <TARGETING::ATTR_PM_MALF_ALERT_ENABLE> (0x1);
+            }
+
             FAPI_INVOKE_HWP( l_errl,
                              p9_pm_init,
                              l_fapiTarg,

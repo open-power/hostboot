@@ -584,6 +584,13 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     do
     {
+        // Enable PM Complex Reset FFDC to HOMER
+        TARGETING::Target * sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget (sys);
+        assert (sys != nullptr,
+                "call_host_runtime_setup() system target is nullptr");
+        sys->trySetAttr <ATTR_PM_RESET_FFDC_ENABLE> (0x01);
+
         // Send the master node frequency attribute info
         // to slave nodes
         l_err = sendFreqAttrData();
