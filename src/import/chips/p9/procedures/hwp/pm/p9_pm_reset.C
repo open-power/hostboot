@@ -478,6 +478,8 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     uint8_t l_chipNum = 0xFF;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq_mhz;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_attr_safe_mode_mv;
+    fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_reset_safe_mode_freq_mhz = 0;
+    fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_attr_reset_safe_mode_mv = 0;
     fapi2::ATTR_VDD_AVSBUS_BUSNUM_Type l_vdd_bus_num;
     fapi2::ATTR_VDD_AVSBUS_RAIL_Type   l_vdd_bus_rail;
     fapi2::ATTR_VDD_BOOT_VOLTAGE_Type       l_vdd_voltage_mv;
@@ -496,6 +498,10 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV, i_target, l_uplift_mv));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXTERNAL_VRM_STEPSIZE, FAPI_SYSTEM, l_ext_vrm_step_size_mv));
     l_attr_safe_mode_mv += l_uplift_mv;
+
+    //Reset safe mode attributes
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_reset_safe_mode_freq_mhz));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_attr_reset_safe_mode_mv));
 
     do
     {
