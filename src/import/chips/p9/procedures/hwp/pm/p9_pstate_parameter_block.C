@@ -681,22 +681,23 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                         &l_safe_mode_values,
                         l_poundw_data),
                     "Error from p9_pstate_safe_mode_computation function");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                     i_target,attr.attr_pm_safe_frequency_mhz ));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                     i_target, attr.attr_pm_safe_voltage_mv));
 
         }
-        else
-        {
-            // safe_voltage_mv
-            l_globalppb.safe_voltage_mv = revle32(attr.attr_pm_safe_voltage_mv);
+        // safe_voltage_mv
+        l_globalppb.safe_voltage_mv = revle32(attr.attr_pm_safe_voltage_mv);
 
-            // safe_frequency_khz
-            l_globalppb.safe_frequency_khz =
+        // safe_frequency_khz
+        l_globalppb.safe_frequency_khz =
                 revle32(attr.attr_pm_safe_frequency_mhz * 1000);
-            FAPI_INF("Safe Mode Frequency %d (0x%X) kHz;  Voltage %d (0x%X) mV",
+        FAPI_INF("Safe Mode Frequency %d (0x%X) kHz;  Voltage %d (0x%X) mV",
                     revle32(l_globalppb.safe_frequency_khz),
                     revle32(l_globalppb.safe_frequency_khz),
                     revle32(l_globalppb.safe_voltage_mv),
                     revle32(l_globalppb.safe_voltage_mv));
-        }
 
         // ----------------
         // get Resonant clocking attributes
