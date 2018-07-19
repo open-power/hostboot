@@ -137,7 +137,7 @@ enum clockTypeEnum
     MEMCLK_TYPE     = 2,
     OSCREFCLK_TYPE  = 3,
     OSCPCICLK_TYPE  = 4,
-  
+
     // Specify a specific clock source for the case where the code can determine
     //  which of the redundant sources is actually at fault
     OSCPCICLK0_TYPE = 10, //Specifically clock 0
@@ -172,12 +172,13 @@ enum sensorTypeEnum
 };
 
 //
-const uint8_t HW_CALLOUT        = 0x01;
-const uint8_t PROCEDURE_CALLOUT = 0x02;
-const uint8_t BUS_CALLOUT       = 0x03;
-const uint8_t CLOCK_CALLOUT     = 0x04;
-const uint8_t PART_CALLOUT      = 0x05;
-const uint8_t SENSOR_CALLOUT    = 0x06;
+const uint8_t HW_CALLOUT         = 0x01;
+const uint8_t PROCEDURE_CALLOUT  = 0x02;
+const uint8_t BUS_CALLOUT        = 0x03;
+const uint8_t CLOCK_CALLOUT      = 0x04;
+const uint8_t PART_CALLOUT       = 0x05;
+const uint8_t SENSOR_CALLOUT     = 0x06;
+const uint8_t I2C_DEVICE_CALLOUT = 0x07;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
@@ -215,6 +216,12 @@ typedef struct callout_ud
         struct {  // type == SENSOR_CALLOUT
             uint32_t        sensorId;
             sensorTypeEnum  sensorType;
+        };
+        struct {  // type == I2C_DEVICE_CALLOUT
+            uint8_t        engine;
+            uint8_t        port;
+            uint8_t        address;
+            // one Target will follow
         };
     }; // union
 } callout_ud_t;
@@ -352,6 +359,28 @@ errlHndl_t platHandlePartCallout(
         errlHndl_t &io_errl,
         DeconfigEnum    i_deconfigState = DECONFIG,
         GARD_ErrorType  i_gardErrorType = GARD_Fatal);
+
+/**
+ * @brief platform specific code to handle a bus callout that has been
+ *  found in an errlog
+ *
+ * @param[in]  i_i2cMaster      I2c master target for the i2c device
+ * @param[in]  i_engine         I2c device engine
+ * @param[in]  i_port           I2c device port
+ * @param[in]  i_address        I2c device address
+ * @param[in]  i_priority       Enum indicating the priority of the callout
+ * @param[in]  io_errl          Reference to error log handle
+ *
+ * @return errlHndl_t       valid errlHndl_t handle if there was an error,
+ *                          nullptr if no errors;
+ */
+errlHndl_t platHandleI2cDeviceCallout(
+        TARGETING::Target *i_i2cMaster,
+        uint8_t i_engine,
+        uint8_t i_port,
+        uint8_t i_address,
+        callOutPriority i_priority,
+        errlHndl_t &io_errl);
 
 #endif // not PARSER
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,4 +227,39 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(const uint32_t i_sensorID,
     TRACDCOMP(g_trac_errl, "Sensor Callout exit");
 } // Sensor callout
 
-}
+//------------------------------------------------------------------------------
+// I2c Device Callout
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(
+                        const void *i_pTargData,
+                        const uint32_t i_targDataLen,
+                        const uint8_t i_engine,
+                        const uint8_t i_port,
+                        const uint8_t i_address,
+                        const HWAS::callOutPriority i_priority)
+{
+    TRACDCOMP(g_trac_errl, "I2c Device Callout");
+
+    assert(i_pTargData != nullptr, "Bug! I2c Device Callout added with null i2c master target");
+
+    // Set up ErrUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version =1;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    uint32_t pDataLength = sizeof(HWAS::callout_ud_t) + i_targDataLen;
+    HWAS::callout_ud_t *pData = reinterpret_cast<HWAS::callout_ud_t *>
+                                                   (reallocUsrBuf(pDataLength));
+
+    pData->type = HWAS::I2C_DEVICE_CALLOUT;
+    pData->engine = i_engine;
+    pData->port = i_port;
+    pData->address = i_address;
+    pData->priority = i_priority;
+
+    memcpy(pData + 1, i_pTargData, i_targDataLen);
+
+    TRACDCOMP(g_trac_errl, "I2c Device Callout exit");
+} // I2c Device Callout
+
+} // namespace ERRORRLOG
+

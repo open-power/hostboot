@@ -219,6 +219,18 @@ case HWAS::_type: i_parser.PrintString( "Bus Type", #_type); break;
 
                 break; // BUS_CALLOUT
             }
+            case HWAS::I2C_DEVICE_CALLOUT:
+            {
+                i_parser.PrintString( "Callout type", "I2c Device Callout");
+                i_parser.PrintNumber( "Engine","0x%.2x", pData->engine );
+                i_parser.PrintNumber( "Port","0x%.2x", pData->port );
+                i_parser.PrintNumber( "DevAddr","0x%.2x", pData->address );
+
+                uint8_t *l_ptr = reinterpret_cast<uint8_t *>(pData+1);
+                printEntityPath(l_ptr, i_parser, "Target");
+
+                break; // I2C_DEVICE_CALLOUT
+            }
             case HWAS::HW_CALLOUT:
             {
                 i_parser.PrintString( "Callout type", "Hardware Callout");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,28 @@ errlHndl_t platHandleBusCallout(
     errlHndl_t errl = NULL;
 
     // hostboot does not handle or do any action for bus callouts
+    return errl;
+}
+
+//******************************************************************************
+// platHandleI2cDeviceCallout
+//******************************************************************************
+errlHndl_t platHandleI2cDeviceCallout(
+        TARGETING::Target *i_i2cMaster,
+        uint8_t i_engine,
+        uint8_t i_port,
+        uint8_t i_address,
+        callOutPriority i_priority,
+        errlHndl_t &io_errl)
+{
+    // WARNING:
+    // this hostboot code should not change io_errl, unless the caller of the
+    //  processCallouts() function also changes, as today it (errlentry.C) calls
+    //  from the errlEntry object
+
+    errlHndl_t errl = nullptr;
+
+    // hostboot does not yet handle or do any action for i2c callouts
     return errl;
 }
 
