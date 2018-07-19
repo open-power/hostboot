@@ -38,7 +38,7 @@ fapi2::ReturnCode p9_core_checkstop_handler(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     //if true, save off the original action, and turn local xstops into system xstops.
-    if(i_override_restore)
+    if(i_override_restore == CORE_XSTOP_HNDLR__SAVE_AND_ESCALATE)
     {
         // Getting ACTION0
         FAPI_TRY(fapi2::getScom(i_target_core, C_CORE_ACTION0, l_action0),
