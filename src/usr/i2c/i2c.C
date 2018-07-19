@@ -56,6 +56,8 @@
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
 
+// TODO RTC 94872 Remove the following include in a future commit
+#include <initservice/initserviceif.H>
 
 // ----------------------------------------------
 // Globals
@@ -4441,6 +4443,22 @@ void addHwCalloutsI2c(errlHndl_t i_err,
             l_devFound = true;
             break;
         }
+    }
+    // For the FSP, non-TPM case add an I2c Device callout.
+    // TODO RTC 94872  In a future commit, we will want FSP to handle
+    // the TPM case also, but we won't add it here until FSP fully
+    // supports the new i2c callout type. The reasoning is that we still need
+    // TPMs to be called out as before in the interim. The other i2c devices
+    // (that were never called out to begin with) are the only ones being added
+    // as the new type, because FSP will treat the new type as unknown until
+    // support for the new type is added.
+    if (l_devFound == false && INITSERVICE::spBaseServicesEnabled())
+    {
+        i_err->addI2cDeviceCallout(i_target,
+                                   i_args.engine,
+                                   i_args.port,
+                                   i_args.devAddr,
+                                   HWAS::SRCI_PRIORITY_HIGH);
     }
 
     // Could also be an issue with Processor or its bus

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,28 @@ private:
                         const HWAS::sensorTypeEnum i_sensorType,
                         const HWAS::callOutPriority i_priority );
 
+
+    /**
+     *  @brief Construct an i2c device callout user detail
+     *
+     *  @param[in]  i_pTargData     The hardware target data or in other words
+     *                              the bytes in memory that comprise the
+     *                              entity path of the target
+     *  @param[in]  i_targDataLen   length of i_pTargData in bytes
+     *  @param[in]  i_engine        The i2c device engine
+     *  @param[in]  i_port          The i2c device port
+     *  @param[in]  i_address       The i2c device address
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    ErrlUserDetailsCallout(
+                        const void *i_pTargData,
+                        const uint32_t i_targDataLen,
+                        const uint8_t i_engine,
+                        const uint8_t i_port,
+                        const uint8_t i_address,
+                        const HWAS::callOutPriority i_priority);
 
 
     // Disabled

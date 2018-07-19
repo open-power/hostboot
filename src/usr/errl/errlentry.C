@@ -540,11 +540,11 @@ void ErrlEntry::addHwCallout(const TARGETING::Target *i_target,
         #ifdef CONFIG_ERRL_ENTRY_TRACE
         TRACFCOMP(g_trac_errl, ENTER_MRK
                 "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
-                i_target, i_priority, i_deconfigState, i_gardErrorType);
+                i_priority, i_deconfigState, i_gardErrorType);
         #else
         TRACDCOMP(g_trac_errl, ENTER_MRK
                 "addHwCallout(\"MASTER_PROC_SENTINEL\" 0x%x 0x%x 0x%x)",
-                i_target, i_priority, i_deconfigState, i_gardErrorType);
+                i_priority, i_deconfigState, i_gardErrorType);
         #endif
 
         //need to override deconfig value to avoid possible deadlocks
@@ -1059,6 +1059,14 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                     "mapping highest priority sensor type 0x%x "
                     "callout to determine SSID", pData->sensorType);
             iv_User.setSubSys(getSubSystem(pData->sensorType));
+        }
+        else if (pData->type == HWAS::I2C_DEVICE_CALLOUT)
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "setting subsystem for type 0x%x "
+                    "callout to I2C Device", pData->type);
+
+            iv_User.setSubSys(EPUB_CEC_HDW_I2C_DEVS);
         }
         else
         {
@@ -1809,6 +1817,57 @@ bool ErrlEntry::isSevVisible( void )
     return l_vis;
 }
 
+void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
+                                    const uint8_t i_engine,
+                                    const uint8_t i_port,
+                                    const uint8_t i_address,
+                                    const HWAS::callOutPriority i_priority)
+{
+    do {
+
+    if (i_i2cMaster == nullptr ||
+        i_i2cMaster == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+
+        TRACFCOMP(g_trac_errl, ERR_MRK
+                  "addI2cDeviceCallout mistakenly called with %s target. "
+                  "Adding high priority callout to the error log.",
+                  i_i2cMaster? "MASTER_SENTINEL": "nullptr");
+        addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+        collectTrace(ERRL_COMP_NAME);
+        break;
+    }
+
+    #ifdef CONFIG_ERRL_ENTRY_TRACE
+    TRACFCOMP(g_trac_errl, ENTER_MRK
+            "addI2cDeviceCallout(i2cm=0x%.8x e=0x%x p=0x%x devAddr=0x%x pri=0x%x)",
+            get_huid(i_i2cMaster), i_engine, i_port, i_address, i_priority);
+    #else
+    TRACDCOMP(g_trac_errl, ENTER_MRK
+            "addI2cDeviceCallout(i2cm=0x%.8x e=0x%x p=0x%x devAddr=0x%x pri=0x%x)",
+            get_huid(i_i2cMaster), i_engine, i_port, i_address, i_priority);
+    #endif
+
+    const void* pData = nullptr;
+    uint32_t size = 0;
+    TARGETING::EntityPath* ep = nullptr;
+    getTargData( i_i2cMaster, ep, pData, size );
+
+
+    ErrlUserDetailsCallout(pData, size,
+            i_engine, i_port, i_address, i_priority).addToLog(this);
+
+    if (ep)
+    {
+        delete ep;
+        ep = nullptr;
+    }
+
+    } while (0);
+
+
+} // addI2cDeviceCallout
 
 } // End namespace
 

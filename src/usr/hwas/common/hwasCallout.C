@@ -242,6 +242,35 @@ void processCallout(errlHndl_t &io_errl,
             }
             break;
         } // PART_CALLOUT
+        case (I2C_DEVICE_CALLOUT):
+        {
+            TARGETING::Target *i2cMaster = nullptr;
+
+            uint8_t * l_targetData = reinterpret_cast<uint8_t *>(pCalloutUD + 1);
+            bool wasErr = retrieveTarget(l_targetData, i2cMaster, io_errl);
+
+            if (!wasErr)
+            {
+                errlHndl_t errl = nullptr;
+
+                // TODO RTC 94872 - Uncomment this later after the FSP team
+                // implements it.
+                //
+                // errlHndl_t errl = platHandleI2cDeviceCallout(
+                //                        i2cMaster,
+                //                        pCalloutUD->engine,
+                //                        pCalloutUD->port,
+                //                        pCalloutUD->address,
+                //                        pCalloutUD->priority,
+                //                        io_errl);
+                if (errl)
+                {
+                    HWAS_ERR("processCallout: error from platHandleI2cDeviceCallout");
+                    errlCommit(errl, HWAS_COMP_ID);
+                }
+            }
+            break;
+        } // I2C_DEVICE_CALLOUT
 
         default:
         {

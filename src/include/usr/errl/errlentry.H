@@ -616,6 +616,25 @@ public:
                           const HWAS::sensorTypeEnum i_sensorType,
                           const HWAS::callOutPriority i_priority);
 
+    /**
+     *  @brief Add an i2c device callout. Use this callout type for i2c devices
+     *         that do not have target associated with them.
+     *
+     *  @param[in]  i_i2cMaster     The i2c master target. Cannot be nullptr.
+                                    Cannot be the master sentinel.
+     *  @param[in]  i_engine        The i2c device engine
+     *  @param[in]  i_port          The i2c device port
+     *  @param[in]  i_address       The i2c device address
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
+                             const uint8_t i_engine,
+                             const uint8_t i_port,
+                             const uint8_t i_address,
+                             const HWAS::callOutPriority i_priority);
+
 
     /**
      * @brief  Import flattened error log
