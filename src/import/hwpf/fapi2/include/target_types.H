@@ -79,6 +79,7 @@ enum TargetType
     TARGET_TYPE_OMIC          = 0x04000000, ///< OMIC type
     TARGET_TYPE_MCC           = 0x08000000, ///< MCC type
     TARGET_TYPE_OCMB_CHIP     = 0x10000000, ///< OCMB type
+    TARGET_TYPE_MEM_PORT      = 0x20000000, ///< MEM_PORT type
 
     TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
@@ -109,7 +110,8 @@ enum TargetType
                                 TARGET_TYPE_MC     |
                                 TARGET_TYPE_OMI    |
                                 TARGET_TYPE_OMIC   |
-                                TARGET_TYPE_MCC,
+                                TARGET_TYPE_MCC    |
+                                TARGET_TYPE_MEM_PORT,
 
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
