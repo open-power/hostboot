@@ -92,7 +92,7 @@ const uint8_t BITS_PER_BYTE = 8;
 
 const uint8_t HDAT_INVALID_NODE = 0xFF;
 // The upper limit of the hostboot reserved memory. Only applies to PHYP.
-// The lower limit is Hostboot HRMOR + 64MB;
+// The lower limit is Hostboot HRMOR + 64MB (if not mirroring)
 const uint64_t HB_RES_MEM_UPPER_LIMIT = 256*MEGABYTE;
 
 // The lower limit of the hostboot reserved memory. Do not allow to reserve
@@ -197,7 +197,7 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
 
         TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
-        assert(l_sys != nullptr);
+        assert(l_sys != nullptr,"getNextRhbAddrRange:top level target nullptr");
 
 
         uint32_t l_nextSection =
@@ -345,6 +345,34 @@ errlHndl_t checkHbResMemLimit(const uint64_t i_addr, const uint64_t i_size)
     uint64_t l_lowerLimit = HB_RES_MEM_LOWER_LIMIT + l_hbAddr;
     uint64_t l_upperLimit = HB_RES_MEM_UPPER_LIMIT + l_hbAddr;
 
+    // Update address limits for mirroring
+    if(TARGETING::is_phyp_load())
+    {
+        // Change address start to mirror address, if mirror enabled
+        TARGETING::Target* l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert( l_sys != nullptr,"checkHbResMemLimit:top level target nullptr");
+
+        auto l_mirrored =
+            l_sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
+        if (l_mirrored)
+        {
+            TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBase = 0;
+            l_mirrorBase =
+              l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+
+            TRACFCOMP( g_trac_runtime,
+                "checkHbResMemLimit> Adding mirror base %p so "
+                "new start address at %p",
+                reinterpret_cast<void*>(l_mirrorBase),
+                reinterpret_cast<void*>(l_lowerLimit + l_mirrorBase) );
+
+            // update address to new mirror address
+            l_lowerLimit += l_mirrorBase;
+            l_upperLimit += l_mirrorBase;
+        }
+    }
+
     TRACDCOMP(g_trac_runtime, "l_hbAddr 0x%.16llX, i_addr 0x%.16llX, l_lowerLimit 0x%.16llX",
               l_hbAddr, i_addr, l_lowerLimit);
     TRACDCOMP(g_trac_runtime, "i_size = 0x%.16llX, l_upperLimit = 0x%.16llX",
@@ -420,7 +448,7 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
     assert(l_rngPtr != nullptr, "getNextRhbAddrRange returned nullptr");
 
     // Determine starting address
-    // Logical OR staring adddress with enum FORCE_PHYS_ADDR to
+    // Logical OR starting address with enum FORCE_PHYS_ADDR to
     //        ignore the HRMOR bit
     uint64_t l_startAddr = i_startAddr | VmmManager::FORCE_PHYS_ADDR;
 
@@ -1090,11 +1118,37 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
                 TARGETING::TYPE_PROC,
                 true);
 
+        TARGETING::ATTR_MIRROR_BASE_ADDRESS_type l_mirrorBase = 0;
         if(TARGETING::is_phyp_load())
         {
             // First phyp entry is for the entire 256M HB space
-            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                - VMM_HRMOR_OFFSET;
+            uint64_t l_hbAddr = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
+
+            // If mirroring enabled,
+            // change address start to be at its mirrored address equivalent
+            TARGETING::Target* l_sys = nullptr;
+            TARGETING::targetService().getTopLevelTarget(l_sys);
+            assert( l_sys != nullptr,
+                    "populate_HbRsvMem: top level target nullptr" );
+
+            auto l_mirrored =
+                      l_sys->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
+            if (l_mirrored)
+            {
+                l_mirrorBase =
+                  l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
+
+                TRACFCOMP( g_trac_runtime,
+                    "populate_HbRsvMem> Adding mirror base %p so "
+                    "new start address at %p",
+                    reinterpret_cast<void*>(l_mirrorBase),
+                    reinterpret_cast<void*>(l_hbAddr + l_mirrorBase) );
+
+                // l_mirrorBase is basically a new floor/zero that we want to
+                // orient everything against. Therefore we just add it onto
+                // the address we would normally use.
+                l_hbAddr += l_mirrorBase;
+            }
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_PRIMARY,
                                           i_nodeId,
                                           l_hbAddr,
@@ -1210,7 +1264,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
             {
                 TARGETING::Target * l_sys = nullptr;
                 TARGETING::targetService().getTopLevelTarget( l_sys );
-                assert(l_sys != nullptr);
+                assert( l_sys != nullptr,
+                  "populate_HbRsvMem:CONFIG_START_OCC_DURING_BOOT - "
+                  "top level target nullptr" );
                 uint64_t l_occCommonAddr = l_sys->getAttr
                     <TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
@@ -1244,7 +1300,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId, bool i_master_node)
         if(TARGETING::is_phyp_load())
         {
             l_startAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                + VMM_HB_DATA_TOC_START_OFFSET;
+                + l_mirrorBase + VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
