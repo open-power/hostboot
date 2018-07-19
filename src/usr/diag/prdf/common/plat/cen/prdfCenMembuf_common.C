@@ -73,10 +73,110 @@ PRDF_PLUGIN_DEFINE( cen_centaur, Initialize );
 int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                      bool & o_analyzed )
 {
+    #define PRDF_FUNC "[cen_centaur::PreAnalysis] "
+
     o_analyzed = false;
 
-    // Check for a channel failure before analyzing this chip.
-    return MemUtils::handleChnlFail<TYPE_MEMBUF>( i_chip, io_sc );
+    SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
+    SCAN_COMM_REGISTER_CLASS * mask = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act1 = nullptr;
+
+    ATTENTION_TYPE secAttnType = io_sc.service_data->getSecondaryAttnType();
+
+    do
+    {
+        // There is nothing to do for HOST_ATTNs.
+        if ( HOST_ATTN == secAttnType ) break;
+
+        // Channel failure analysis is designed to only look for UNIT_CS
+        // attentions and not associate any recoverables as the root cause. Of
+        // course, now we have a special case. RCD parity errors are recoverable
+        // attentions that could cause unit CS attentions as a side effect.
+        // Therefore, we must analyze them first before doing any channel
+        // failure checking.
+        if ( RECOVERABLE == secAttnType )
+        {
+            for ( auto & mbaChip : getConnected(i_chip, TYPE_MBA) )
+            {
+                fir  = mbaChip->getRegister( "MBACALFIR"      );
+                mask = mbaChip->getRegister( "MBACALFIR_MASK" );
+
+                if ( SUCCESS != (fir->Read() | mask->Read()) )
+                {
+                    PRDF_ERR( PRDF_FUNC "Failed to read MBACALFIRs on 0x%08x",
+                              mbaChip->getHuid() );
+                    continue; // try the other MBA
+                }
+
+                if ( (fir->IsBitSet(4) && !mask->IsBitSet(4)) ||
+                     (fir->IsBitSet(7) && !mask->IsBitSet(7)) )
+                {
+                    PRDF_INF( PRDF_FUNC "RCD parity error found on 0x%08x",
+                              mbaChip->getHuid() );
+
+                    if ( SUCCESS == mbaChip->Analyze(io_sc, secAttnType) )
+                    {
+                        o_analyzed = true;
+                        break; // analysis complete
+                    }
+                }
+            }
+            if ( o_analyzed ) break; // nothing more to do
+        }
+
+        // Now, check for the presences of channel failures on the Centaur.
+        if ( SUCCESS != MemUtils::handleChnlFail<TYPE_MEMBUF>(i_chip, io_sc) )
+        {
+            PRDF_ERR( PRDF_FUNC "handleChnlFail(0x%08x) failed",
+                      i_chip->getHuid() );
+        }
+
+        // If there is a channel failure on the Centaur, it is possible that it
+        // may be a side-effect of a channel failure attention from the CHIFIR
+        // on the other side of the bus. Therefore, we must check for any active
+        // UNIT_CS attentions from the CHIFIR. If so, analyze the DMI target.
+        if ( io_sc.service_data->isMemChnlFail() )
+        {
+            ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
+
+            fir  = dmiChip->getRegister( "CHIFIR" );
+            mask = dmiChip->getRegister( "CHIFIR_MASK" );
+            act0 = dmiChip->getRegister( "CHIFIR_ACT0" );
+            act1 = dmiChip->getRegister( "CHIFIR_ACT1" );
+
+            if ( SUCCESS != (fir->Read()  | mask->Read() |
+                             act0->Read() | act1->Read()) )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to read CHIFIRs on 0x%08x",
+                          dmiChip->getHuid() );
+                break;
+            }
+
+            // Make sure to ignore CHIFIR[16:21], which simply say there is an
+            // attention on the Centaur. Otherwise, we will get stuck in a loop.
+            if ( 0 != (  fir->GetBitFieldJustified( 0,64) &
+                        ~mask->GetBitFieldJustified(0,64) &
+                         act0->GetBitFieldJustified(0,64) &
+                         act1->GetBitFieldJustified(0,64) &
+                         0xffff03ffffffffffull ) )
+            {
+                PRDF_INF( PRDF_FUNC "CHIFIR UNIT_CS attns present on 0x%08x",
+                          dmiChip->getHuid() );
+
+                if ( SUCCESS == dmiChip->Analyze(io_sc, secAttnType) )
+                {
+                    o_analyzed = true;
+                    break; // analysis complete
+                }
+            }
+        }
+
+    } while (0);
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( cen_centaur, PreAnalysis );
 
@@ -162,51 +262,6 @@ int32_t CheckForUnitCs( ExtensibleChip * i_chip, bool & o_hasAttns )
 //                                  MBSFIR
 //
 //##############################################################################
-
-/**
- * @brief  Calls analyze() on the connected DMI target if there is an active
- *         channel fail attention on the DMI side of the bus.
- * @param  i_mbChip MEMBUF chip.
- * @param  io_sc    Step code data struct
- * @return SUCCESS if the channel fail error was present and analyzed properly.
- *         Non-SUCCESS otherwise.
- */
-int32_t analyzeDmiChnlFail( ExtensibleChip * i_mbChip,
-                            STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[analyzeDmiChnlFail] "
-
-    int32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO; // default, nothing found
-
-    do
-    {
-        // Query the connected DMI for channel fail attentions.
-        ExtensibleChip * dmiChip = getConnectedParent( i_mbChip, TYPE_DMI );
-        bool dmiChnlFail = false;
-        if ( SUCCESS != queryChnlFail<TYPE_DMI>(dmiChip, dmiChnlFail) )
-        {
-            PRDF_ERR( PRDF_FUNC "queryChnlFail(0x%08x) failed",
-                      dmiChip->getHuid() );
-            break;
-        }
-
-        // If there is a channel fail attention on the other side of the bus,
-        // analyze the DMI target.
-        if ( dmiChnlFail )
-        {
-            o_rc = dmiChip->Analyze( io_sc,
-                                io_sc.service_data->getSecondaryAttnType() );
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( cen_centaur, analyzeDmiChnlFail );
-
-//------------------------------------------------------------------------------
 
 /**
  * @brief  Calls analyze() on the target MBA if there is an active RCD parity

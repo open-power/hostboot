@@ -125,18 +125,11 @@ actionclass tooManyBusErrors_dmibus_UERE
     SueSource; # channel failure
 };
 
-/** Callout the DMI bus, threshold 1. Also, clear secondary MBSFIR bits. */
-actionclass replayTimeoutCleanup
+/** Calls out the DMI bus (TH 1) and clears any secondary attentions. */
+actionclass replay_timeout_UERE
 {
     calloutBusInterface_dmibus_th1_UERE;
     funccall("ClearMbsSecondaryBits");
-};
-
-/** Handles channel failures on the DMI side of the bus, if present. Otherwise,
- *  calls out self (TH 1). */
-actionclass replay_timeout_UERE
-{
-    try ( funccall("analyzeDmiChnlFail"), replayTimeoutCleanup );
 };
 
 /** Handles RCD parity errors, if present. Otherwise, calls out self (TH 1). */

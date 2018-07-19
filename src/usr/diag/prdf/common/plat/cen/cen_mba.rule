@@ -228,6 +228,8 @@ rule rMBA
     summary( 4, rMBASPA );
 };
 
+# The MBACALFIR must be analyzed first so that the RCD parity errors are the
+# first to be analyzed.
 group gMBA attntype UNIT_CS, RECOVERABLE, HOST_ATTN filter singlebit
 {
     (rMBA, bit(0)) ? analyze(gMBACALFIR);
