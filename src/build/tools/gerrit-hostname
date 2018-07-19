@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ use strict;
 my $homeDir = $ENV{'HOME'};
 my $sshConfigFile = $homeDir."/.ssh/config";
 # If the server changes location these will change
+# Gerrit server was moved from RTP to RCHLAND on 19Jul2018
 my $gerritHostname = "rchgit01.rchland.ibm.com";
 my $gerritPort = "29418";
 
