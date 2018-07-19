@@ -162,6 +162,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         FAPI_TRY(fapi2::getScom(i_target, PERV_SB_CS_SCOM, l_data64),
                  "Error from getScom to PERV_SB_CS_SCOM");
 
+        // Disable HW i2c seeprom reset sequncer
+        FAPI_TRY(l_data64.setBit(PERV_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM));
         FAPI_TRY(l_data64.clearBit(PERV_SB_CS_START_RESTART_VECTOR0));
         FAPI_TRY(l_data64.clearBit(PERV_SB_CS_START_RESTART_VECTOR1));
         FAPI_TRY(fapi2::putScom(i_target, PERV_SB_CS_SCOM, l_data64),
@@ -190,6 +192,8 @@ fapi2::ReturnCode p9_sbe_hreset(
         // HRESET
         FAPI_TRY(fapi2::getCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
                  "Error from getCfamRegister to PERV_SB_CS_FSI");
+        // Disable HW i2c seeprom reset sequncer
+        FAPI_TRY(l_data32.setBit(PERV_SB_CS_BYPASSING_RESET_SEQUENCE_PIB_I2CM));
         FAPI_TRY(l_data32.clearBit(PERV_SB_CS_START_RESTART_VECTOR0));
         FAPI_TRY(l_data32.clearBit(PERV_SB_CS_START_RESTART_VECTOR1));
         FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_CS_FSI, l_data32),
