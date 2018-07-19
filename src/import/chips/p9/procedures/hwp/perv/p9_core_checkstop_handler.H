@@ -30,6 +30,10 @@
 typedef fapi2::ReturnCode (*p9_core_checkstop_handler_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>&, bool);
 
+constexpr bool CORE_XSTOP_HNDLR__SAVE_AND_ESCALATE = true;
+constexpr bool CORE_XSTOP_HNDLR__RESTORE_ORIG = false;
+
+
 // @brief Handles core checkstops for P9 when we want to switch between
 //        unit and system checkstops.
 //
