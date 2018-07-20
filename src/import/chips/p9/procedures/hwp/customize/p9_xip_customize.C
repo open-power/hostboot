@@ -1976,6 +1976,7 @@ ReturnCode p9_xip_customize (
     {
         fapi2::ATTR_MRW_FILTER_PLL_BUCKET_Type l_filterPllBucketMRW = 0;
         uint8_t l_filterPllBucket = 0;
+        uint8_t l_keywordVersion = 0;
         P9XipItem l_item;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_FILTER_PLL_BUCKET,
@@ -2022,8 +2023,14 @@ ReturnCode p9_xip_customize (
                       "getMvpdField(valid buffer) failed w/rc=0x%08x",
                       (uint64_t)fapi2::current_err );
 
-            // extract data
-            l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
+            // extract first byte (keyword version)
+            l_keywordVersion = (uint8_t)(*l_bufMvpdField);
+
+            if (l_keywordVersion == 2)
+            {
+                // extract data
+                l_filterPllBucket = (uint8_t)(*(l_bufMvpdField + 1));
+            }
         }
 
         FAPI_ASSERT( l_filterPllBucket <= MAX_FILTER_PLL_BUCKETS,
