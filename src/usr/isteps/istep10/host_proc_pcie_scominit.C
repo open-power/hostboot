@@ -99,61 +99,55 @@ LaneWidth _laneMaskToLaneWidth(const uint16_t i_laneMask)
 
 void _deconfigPhbsBasedOnPhbMask(
     TARGETING::ConstTargetHandle_t const       i_procTarget,
-    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type& i_phbActiveMask)
+    TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE_type& io_phbActiveMask)
 {
-    uint8_t phbNum = 0;
+    uint8_t l_phbNum = 0;
     errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
         ENTER_MRK "_deconfigPhbsBasedOnPhbMask: Proc target HUID = "
         "0x%08X, PHB active mask = 0x%02X.", i_procTarget ?
-        i_procTarget->getAttr<TARGETING::ATTR_HUID>() : 0, i_phbActiveMask);
+        i_procTarget->getAttr<TARGETING::ATTR_HUID>() : 0, io_phbActiveMask);
 
     // PHB mask bits start at the left most bit - so we must shift the bits
     // right in order to get the correct masks. This number below should
     // always be 7.
     const size_t bitsToRightShift =
-        ((sizeof(i_phbActiveMask)*BITS_PER_BYTE) - 1);
+        (sizeof(io_phbActiveMask) * BITS_PER_BYTE) - 1;
 
-    // Get every functional PEC under the Proc
-    TARGETING::TargetHandleList funcPecList;
+    // Get every PEC under the Proc
+    TARGETING::TargetHandleList l_pecList;
     (void)TARGETING::getChildChiplets(
-        funcPecList,i_procTarget,TARGETING::TYPE_PEC);
+        l_pecList, i_procTarget, TARGETING::TYPE_PEC, false);
 
-     for (TARGETING::TargetHandleList::const_iterator pecItr
-            = funcPecList.begin(); pecItr != funcPecList.end(); ++pecItr)
+    for (auto const & l_pec : l_pecList)
     {
-        TargetHandle_t l_pec = *pecItr;
-
-        // Get pec chip's functional PHB units
-        TARGETING::TargetHandleList funcPhbList;
+        // Get pec chip's PHB units
+        TARGETING::TargetHandleList l_phbList;
         (void)TARGETING::getChildChiplets(
-            funcPhbList,l_pec,TARGETING::TYPE_PHB);
+            l_phbList, l_pec, TARGETING::TYPE_PHB, false);
 
-        // i_phbActiveMask is a bitmask whose leftmost bit corresponds to
+        // io_phbActiveMask is a bitmask whose leftmost bit corresponds to
         // PHB0, followed by bits for PHB1, PHB2, PHB3, PHB4, and PBH5. The
         // remaining bits are ignored. We need to compare each PHB mask to
         // its respective PHB and deconfigure it if needed.
-        for (TARGETING::TargetHandleList::const_iterator phbItr
-                = funcPhbList.begin(); phbItr != funcPhbList.end(); ++phbItr)
+        for (auto const & l_phb : l_phbList)
         {
-            TargetHandle_t l_phb = *phbItr;
-
             // Get the PHB unit number
-            phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            l_phbNum = l_phb->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             // Subtract the PHB unit number from the constant bitsToRightShift
             // in order to get the correct amount of bits to shift right.
             // e.g. for PHB0, the unit number is 0, bitsToRightShift-0 = 7.
-            // We will shift i_phbActiveMask 7 bits right, which means we are
+            // We will shift io_phbActiveMask 7 bits right, which means we are
             // examining bit 0 of the PHB mask. If it is not set - deconfigure
             // the respective PHB
-            if (!((i_phbActiveMask >> (bitsToRightShift - phbNum)) & 1))
+            if (!((io_phbActiveMask >> (bitsToRightShift - l_phbNum)) & 1))
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "PHB %d on PEC %d has been found INACTIVE. Deconfiguring "
-                    "PHB %d.", phbNum,
-                    l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>(), phbNum);
+                    "PHB %d.", l_phbNum,
+                    l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>(), l_phbNum);
 
                 l_err = HWAS::theDeconfigGard().deconfigureTarget(
                      *l_phb, HWAS::DeconfigGard::DECONFIGURED_BY_PHB_DECONFIG);
@@ -162,7 +156,7 @@ void _deconfigPhbsBasedOnPhbMask(
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
                         "_deconfigPhbsBasedOnPhbMask: Error deconfiguring PHB "
-                        "%d  on PEC %d.", phbNum,
+                        "%d  on PEC %d.", l_phbNum,
                         l_pec->getAttr<TARGETING::ATTR_HUID>());
 
                     ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
@@ -172,12 +166,21 @@ void _deconfigPhbsBasedOnPhbMask(
                     l_err = NULL;
                 }
             }
-        }//PHB loop
-    }//PEC loop
+            else
+            {
+                // PHB is marked active, check if it is non-functional.
+                // if so, then mark it inactive in the phbActiveMask.
+                if (!l_phb->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    io_phbActiveMask &= ~(1 >> (bitsToRightShift - l_phbNum));
+                }
+            }
+        } // PHB loop
+    } // PEC loop
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        EXIT_MRK "_deconfigPhbsBasedOnPhbMask: i_phbActiveMask = 0x%02X",
-        i_phbActiveMask);
+        EXIT_MRK "_deconfigPhbsBasedOnPhbMask: io_phbActiveMask = 0x%02X",
+        io_phbActiveMask);
 
     return;
 }
@@ -340,6 +343,11 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
     // then matches that config to one of the rows in the table.  Once a match
     // is discovered, the PEC config value is  pulled from the matching row and
     // set in the attributes.
+    //
+    // Each PEC can control up to 16 lanes:
+    // - PEC0 can give 16 lanes to PHB0
+    // - PEC1 can split 16 lanes between PHB1 & PHB2
+    // - PEC2 can split 16 lanes between PHB3, PHB4 & PHB5
     const laneConfigRow pec0_laneConfigTable[] =
         {{{LANE_WIDTH_NC,
            LANE_WIDTH_NC,
@@ -451,29 +459,23 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
            || (targetPresent)),"computeProcPcieConfigs - input either not a "
             "processor chip or not present");
 
-        // Set up vector of PECs under this processor
-        PredicateCTM predPec(CLASS_UNIT, TYPE_PEC);
+        // Set up vector of functional PECs under this processor
         TargetHandleList l_pecList;
-        targetService().getAssociated(l_pecList,
-                                      i_pProcChipTarget,
-                                      TargetService::CHILD,
-                                      TargetService::ALL,
-                                      &predPec);
+        (void)TARGETING::getChildChiplets(
+                             l_pecList, i_pProcChipTarget, TARGETING::TYPE_PEC);
 
         // Even if the list is empty we still want to go to the bottom of the
-        // fucntion and set PROC_PHB_ACTIVE_MASK
+        // function and set PROC_PHB_ACTIVE_MASK
 
         // Iterate over every PEC to find its config, swap, reversal and
         // bifurcation attributes
-        for(TargetHandleList::iterator l_pPecIt = l_pecList.begin();
-               l_pPecIt != l_pecList.end(); ++l_pPecIt)
+        for(auto l_pec : l_pecList)
         {
-            TargetHandle_t l_pec = *l_pPecIt;
             // Get the PEC id
             uint8_t l_pecID = l_pec->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             // Select the correct PEC config table
-            if(l_pecID == 0)
+            if      (l_pecID == 0)
             {
                 pLaneConfigTableBegin = pec0_laneConfigTable;
                 pLaneConfigTableEnd = pec0_end;
@@ -540,17 +542,17 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
             TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
               effectiveLaneSwap = 0;
 
-            //Only attempt to determine the lane config on FSPless systems
-            //On FSP based systems it has already been determined
+            // Only attempt to determine the lane config on FSPless systems
+            // On FSP based systems it has already been determined
             if (!INITSERVICE::spBaseServicesEnabled())
             {
 #ifdef DYNAMIC_BIFURCATION
                 // Figure out which IOPs need bifurcation, and as a
                 // result, which PHBs to disable
-                BifurcatedIopsContainer iopList;
+                BifurcatedIopsContainer l_iopList;
                 pError = _queryIopsToBifurcateAndPhbsToDisable(
                                                                l_pec,
-                                                               iopList,
+                                                               l_iopList,
                                                                disabledPhbs);
                 if(pError!=NULL)
                 {
@@ -571,7 +573,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                          TARGETING::ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED>(
                          laneMaskNonBifurcated),"Failed to get "
                          "ATTR_PEC_PCIE_LANE_MASK_NON_BIFURCATED attribute");
-
 
                 memcpy(effectiveLaneMask,laneMaskNonBifurcated,
                        sizeof(effectiveLaneMask));
@@ -599,20 +600,17 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                        "ATTR_PEC_PCIE_IOP_SWAP_BIFURCATED attribute");
 
                 // Apply any IOP bifurcation settings
-                for(BifurcatedIopsContainer::const_iterator iopItr =
-                    iopList.begin(); iopItr != iopList.end();
-                    ++iopItr)
+                for(auto const & l_iop : l_iopList)
                 {
-                    BifurcatedIopsContainer::const_reference iop = *iopItr;
                     memcpy(
                            &effectiveLaneReversal[0],
                            &laneReversalBifurcated[0],
-                           sizeof(effectiveLaneReversal)/1);
+                           sizeof(effectiveLaneReversal));
 
                     memcpy(
                            &effectiveLaneMask[0],
                            &laneMaskBifurcated[0],
-                           sizeof(effectiveLaneMask)/1);
+                           sizeof(effectiveLaneMask));
 
                     // For every lane group of a PEC we need to see if
                     // the lane swap bit has been set. If the lane is
@@ -643,14 +641,12 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
                 l_pec->setAttr<
                   TARGETING::ATTR_PEC_PCIE_IOP_REVERSAL>(effectiveLaneReversal);
-
 #endif
 
                 l_pec->setAttr<
                   TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask);
-
             }
-            else
+            else // FSP based
             {
                 assert(l_pec->tryGetAttr<
                        TARGETING::ATTR_PROC_PCIE_LANE_MASK>(effectiveLaneMask),
@@ -675,17 +671,17 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
             laneConfigRow effectiveConfig =
                   {{LANE_WIDTH_NC,
-                   LANE_WIDTH_NC,
-                   LANE_WIDTH_NC,
-                   LANE_WIDTH_NC},
+                    LANE_WIDTH_NC,
+                    LANE_WIDTH_NC,
+                    LANE_WIDTH_NC},
                     0x00,PHB_MASK_NA,
                     PHB_X16_MAC_MAP,
-                   };
+                  };
 
             // Transform effective config to match lane config table format
             for(size_t laneGroup = 0;
                 laneGroup < MAX_LANE_GROUPS_PER_PEC;
-                 ++laneGroup)
+                ++laneGroup)
             {
                 effectiveConfig.laneSet[laneGroup].width
                     = _laneMaskToLaneWidth(effectiveLaneMask[laneGroup]);
@@ -716,9 +712,6 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
 
                 // Disable applicable PHBs
                 pecPhbActiveMask &= (~disabledPhbs);
-                // Add the PEC phb mask to the overall Proc PHB mask
-                procPhbActiveMask |= pecPhbActiveMask;
-
             }
             else
             {
@@ -778,30 +771,31 @@ errlHndl_t computeProcPcieConfigAttrs(TARGETING::Target * i_pProcChipTarget)
                 errlCommit(pError, ISTEP_COMP_ID);
             }
 
+            // Add the PEC phb mask to the overall Proc PHB mask
             procPhbActiveMask |= pecPhbActiveMask;
+
             l_pec->setAttr<
                 TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>(iopConfig);
             l_pec->setAttr<
                   TARGETING::ATTR_PROC_PCIE_REFCLOCK_ENABLE>(refEnable);
             l_pec->setAttr<
                   TARGETING::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL>(macCntl);
+        } // PEC loop
 
-        }// PEC loop
+        // Deconfigure the PHBs once we have the phbActiveMask attribute
+        // set up for the whole processor.  Also, update the phbActiveMask
+        // attribute to include gard'd PHBs.
+        (void)_deconfigPhbsBasedOnPhbMask(
+             i_pProcChipTarget,
+             procPhbActiveMask);
 
         // Set the procPhbActiveMask
         i_pProcChipTarget->setAttr<
             TARGETING::ATTR_PROC_PCIE_PHB_ACTIVE>(procPhbActiveMask);
 
-        // Only deconfigure the PHB's once we have the phbActiveMask attribute
-        // set up for the whole processor
-        (void)_deconfigPhbsBasedOnPhbMask(
-             i_pProcChipTarget,
-             procPhbActiveMask);
-
         // setup ATTR_PROC_PCIE_IOVALID_ENABLE for this processor
         // This has to be done after the PHB's are disabled
         setup_pcie_iovalid_enable(i_pProcChipTarget);
-
     } while(0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
