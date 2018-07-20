@@ -1335,6 +1335,7 @@ void IntrRp::msgHandler()
                 {
                     // Run the functions that dump out
                     // interrupt info to slow buffer
+                    printTimaInfo();
                     printEsbStates();
                     printLSIInfo();
                     printPSIHBInfo();
@@ -3497,6 +3498,35 @@ void INTR::IntrRp::printLSIInfo() const
     }
 }
 
+void INTR::IntrRp::printTimaInfo() const
+{
+    TRACFCOMP(g_trac_intr, "---Thread Interrupt Management Area Info---");
+
+    volatile XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
+    reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
+
+    TRACFCOMP(g_trac_intr, "iv_xiveTmBar1Address:  0x%lx", iv_xiveTmBar1Address);
+    TRACFCOMP(g_trac_intr, "    qw0_0     = 0x%lx", this_ivpe_ptr->qw0_0);
+    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw0_1);
+    TRACFCOMP(g_trac_intr, "    qw1_0     = 0x%lx", this_ivpe_ptr->qw1_0);
+    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw1_1);
+    TRACFCOMP(g_trac_intr, "    qw2_0     = 0x%lx", this_ivpe_ptr->qw2_0);
+    TRACFCOMP(g_trac_intr, "    qw0_1     = 0x%lx", this_ivpe_ptr->qw2_1);
+
+    TRACFCOMP(g_trac_intr, "    nsr       = 0x%lx", this_ivpe_ptr->nsr);
+    TRACFCOMP(g_trac_intr, "    cppr      = 0x%lx", this_ivpe_ptr->cppr);
+    TRACFCOMP(g_trac_intr, "    ipb       = 0x%lx", this_ivpe_ptr->ipb);
+    TRACFCOMP(g_trac_intr, "    lsmfb     = 0x%lx", this_ivpe_ptr->lsmfb);
+    TRACFCOMP(g_trac_intr, "    ack       = 0x%lx", this_ivpe_ptr->ack);
+    TRACFCOMP(g_trac_intr, "    inc       = 0x%lx", this_ivpe_ptr->inc);
+    TRACFCOMP(g_trac_intr, "    age       = 0x%lx", this_ivpe_ptr->age);
+    TRACFCOMP(g_trac_intr, "    pipr      = 0x%lx", this_ivpe_ptr->pipr);
+    TRACFCOMP(g_trac_intr, "    cams_vt   = 0x%lx", this_ivpe_ptr->cams_vt);
+    TRACFCOMP(g_trac_intr, "    cams_rsv  = 0x%lx", this_ivpe_ptr->cams_rsv);
+    TRACFCOMP(g_trac_intr, "    cams_rsv1 = 0x%lx", this_ivpe_ptr->cams_rsv1);
+    TRACFCOMP(g_trac_intr, "    cams_prio = 0x%lx", this_ivpe_ptr->cams_prio);
+}
+
 void INTR::IntrRp::printPSIHBInfo() const
 {
     TRACFCOMP(g_trac_intr, "---PSIHB Info---");
@@ -3530,6 +3560,14 @@ void INTR::IntrRp::printPSIHBInfo() const
 void INTR::IntrRp::printEsbStates() const
 {
     TRACFCOMP(g_trac_intr, "---ESB States---");
+
+    //LSI ESB Internal to the IVPE of the Master Proc
+    volatile uint64_t * l_lsiEsbQuery = iv_masterHdlr->xiveIcBarAddr;
+    l_lsiEsbQuery += XIVE_IC_LSI_EOI_OFFSET;
+    l_lsiEsbQuery += (ESB_QUERY_OFFSET / sizeof(uint64_t));
+    uint64_t l_intPending = *l_lsiEsbQuery;
+    TRACFCOMP(g_trac_intr, "IC LSI ESB  = 0x%016lx", l_intPending);
+
     for(auto targ_itr = iv_chipList.begin();
     targ_itr != iv_chipList.end(); ++targ_itr)
     {

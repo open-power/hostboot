@@ -206,7 +206,8 @@ namespace INTR
                 XIVE_IVPE_TM_BAR1_SCOM_ADDR = 0x05013012,
                 XIVE_IVPE_TM_BAR1_MMIO_OFFSET = 0x0006020000000000ULL,
                 XIVE_IVPE_TM_BAR1_VALIDATE = 0x8000000000000000ULL,
-                XIVE_IVPE_QW3_OFFSET = 0x38,
+                XIVE_IVPE_QW3_NSR_OFFSET = 0x30,
+                XIVE_IVPE_QW3_VT_OFFSET = 0x38,
                 XIVE_IVPE_QW3_LSI_ENABLE = 0x81,  //bit 0 is VT, bit 7 is le
 
                 PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR =    0x0501290E,
@@ -908,6 +909,13 @@ namespace INTR
             * @return void
             */
             void printLSIInfo() const;
+
+            /**
+            * Print out the Thread Interrupt Management Area (TIMA) info
+            *
+            * @return void
+            */
+            void printTimaInfo() const;
 
     };
 }; // INTR namespace
