@@ -38,8 +38,10 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
+#include <targeting/attrsync.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/commontargeting.H>
 #include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
@@ -66,7 +68,6 @@
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 #include <p9_update_security_ctrl.H>
-#include <targeting/common/commontargeting.H>
 #include <algorithm>
 #include <util/misc.H>
 #include <hwas/common/hwasCommon.H>
@@ -1276,6 +1277,22 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                                       HWAS::GARD_NULL);
                 }
                 errlCommit(err, TRBOOT_COMP_ID);
+
+                // Sync the attributes to FSP if applicable.
+                // This will allow for FSP to attempt to perform
+                // TPM alignment check.
+                if(INITSERVICE::spBaseServicesEnabled())
+                {
+                    err = TARGETING::syncAllAttributesToFsp();
+                    if(err)
+                    {
+                        TRACFCOMP(g_trac_trustedboot, ERR_MRK"Could not sync"
+                                  " attributes to FSP; errl EID 0x%08X",
+                                  err->eid());
+                        errlCommit(err, TRBOOT_COMP_ID);
+                    }
+                }
+
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
                 INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
