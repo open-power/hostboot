@@ -220,15 +220,35 @@ bool neighborHasRealCoreCS( ExtensibleChip * i_chip )
     return neighborHasRealCs;
 }
 
-int32_t neighborCoreCS( ExtensibleChip * i_chip )
-{
-    return neighborHasRealCoreCS(i_chip) ? SUCCESS : FAIL;
-} PRDF_PLUGIN_DEFINE(p9_ec, neighborCoreCS);
 
-int32_t notNeighborCoreCS( ExtensibleChip * i_chip )
+/*
+ Core checkstop is only supported on PHYP systems. PHYP only supports
+ fused-cores. When a normal core checkstops, its fused-core neighbor will
+ checkstop along with it. Both cores will end up reporting core checkstop
+ attentions. This plugin checks if this core's fused-core neighbor has the
+ original core checkstop that we should be analyzing.
+*/
+int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                     bool & o_analyzed )
 {
-    return neighborHasRealCoreCS(i_chip) ? FAIL : SUCCESS;
-} PRDF_PLUGIN_DEFINE(p9_ec, notNeighborCoreCS);
+    o_analyzed = false;
+
+    if (neighborHasRealCoreCS( i_chip ))
+    {
+        // Get neighbor core
+        ExtensibleChip * n_chip = getNeighborCore( i_chip );
+        if (n_chip != nullptr)
+        {
+            if ( SUCCESS == n_chip->Analyze(io_sc,
+                                io_sc.service_data->getSecondaryAttnType()) )
+            {
+                o_analyzed = true;
+            }
+        }
+    }
+
+    return SUCCESS;
+} PRDF_PLUGIN_DEFINE(p9_ec, PreAnalysis);
 
 
 void checkCoreRePresent( ExtensibleChip * i_chip,
@@ -380,13 +400,6 @@ int32_t CheckCoreCheckstop( ExtensibleChip * i_chip,
     return SUCCESS;
     #undef PRDF_FUNC
 } PRDF_PLUGIN_DEFINE(p9_ec, CheckCoreCheckstop);
-
-int32_t ReturnFailure( ExtensibleChip * i_chip )
-{
-    PRDF_TRAC("[EC::ReturnFailure] return failure so that we can analyze "
-              "neighbor core");
-    return PRD_SCAN_COMM_REGISTER_ZERO;
-} PRDF_PLUGIN_DEFINE(p9_ec, ReturnFailure);
 
 } // end namespace p9_ec
 } // end namespace PRDF

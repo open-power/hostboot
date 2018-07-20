@@ -32,26 +32,8 @@ actionclass self_level2_th_5perHour
 ###############################################################################
 # Core checkstop action classes
 ###############################################################################
-actionclass analyzeThisCore
+actionclass analyzeCOREFIR
 {
     funccall("CheckCoreCheckstop");
     analyze(gCOREFIR);
 };
-
-actionclass returnFailure
-{
-    funccall("ReturnFailure");
-};
-
-# Core checkstop is only supported on PHYP systems. PHYP only supports
-# fused-cores. When a normal core checkstops, its fused-core neighbor will
-# checkstop along with it. Both cores will end up reporting core checkstop
-# attentions. This actionclass checks if this core's fused-core neighbor has the
-# real Core checkstop that we should be analyzing. If so, we will return a
-# failing RC so that the analysis will continue to the next chip at attention
-actionclass analyzeCOREFIR
-{
-    try( funccall("neighborCoreCS"), analyzeThisCore );
-    try( funccall("notNeighborCoreCS"), returnFailure );
-};
-
