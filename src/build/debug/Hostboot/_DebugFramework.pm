@@ -502,12 +502,13 @@ sub findPointer
     my $size;
 
     my $symsmode = ::getSymsMode();
-    if( ($symsmode =~ "") || ($symsmode =~ "usemem") )
+
+    if( ($symsmode =~ "default") || ($symsmode =~ "usemem") )
     {
         ($addr, $size ) = findDebugPointer( $dbgptrstr );
     }
 
-    if( (($symsmode =~ "") && (not defined $addr))
+    if( (($symsmode =~ "default") && (not defined $addr))
         || ($symsmode =~ "usefile") )
     {
         #::userDisplay( "*Using Symbol File*\n" );
