@@ -347,7 +347,7 @@ namespace KernelMisc
                 // NOTE: The deferred work container verifies master core
                 // threads 1-3 wake up so a direct doorbell can be sent. For
                 // threads on other cores send_doorbell_wakeup() is used.
-                doorbell_send(l_pir + i);
+                send_doorbell_restore_tb(l_pir + i, iv_timebase);
             }
         }
 
@@ -357,7 +357,6 @@ namespace KernelMisc
         {
             cpu->scheduler->setNextRunnable();
         }
-
     }
 
     void WinkleCore::masterPostWork()
@@ -464,7 +463,6 @@ namespace KernelMisc
         {
             cpu->scheduler->setNextRunnable();
         }
-
     }
 
     void WinkleAll::masterPostWork()

@@ -56,6 +56,13 @@ void send_doorbell_wakeup(uint64_t i_pir);
  */
 void send_doorbell_ipc(uint64_t i_pir);
 
+/** Send a doorbell and also restore the thread's timebase
+ *
+ * @param i_pir - PIR to send doorbell to wakeup
+ * @param i_tb  - Timebase value to restore during wakeup
+ */
+void send_doorbell_restore_tb(uint64_t i_pir, uint64_t i_tb);
+
 enum
 {
     _DOORBELL_MSG_TYPE = 0x0000000028000000, /// Comes from the ISA.
