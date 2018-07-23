@@ -176,7 +176,7 @@ errlHndl_t MailboxSp::_init()
         // Register to get interrupts for mailbox
         err = INTR::registerMsgQ(iv_msgQ,
                                  MSG_INTR,
-                                 INTR::LSI_FSIMBOX);
+                                 INTR::FSP_MAILBOX);
 
         if (err)
         {

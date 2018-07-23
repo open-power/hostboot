@@ -38,6 +38,9 @@ namespace INTR
     typedef uint32_t ext_intr_t;
 
     // Interrupt Source Number (ISN) Definition
+    // NOTE: It is assumed that LSI sources interrupts in
+    //       this list have values that match the LSI source
+    //       values listed in the LSIvalue_t enum
     enum ISNvalue_t
     {
         ISN_PSI         = 0,
@@ -47,6 +50,7 @@ namespace INTR
         ISN_LPC         = 3,
         ISN_LCL_ERR     = 4,
         ISN_HOST        = 5,
+        ISN_PSU         = 13,
         ISN_INTERPROC   = 0xF0, // Interproc (IPC) Message Type
         SHUT_DOWN = 0x01000000, //!< INTR presenter sends this when shutting down
     };
@@ -55,20 +59,21 @@ namespace INTR
     // on the PSIHB. These should only be changed if the spec changes.
     enum LSIvalue_t
     {
-        LSI_PSI         = 0,
-        LSI_OCC         = 1,
-        LSI_FSIMBOX     = 2,
-        LSI_LPC         = 3,
-        LSI_LCL_FIR     = 4,
-        LSI_GLOBAL      = 5,
-        LSI_TPM         = 6,
-        LSI_LPC_SERIAL0 = 7,
-        LSI_LPC_SERIAL1 = 8,
-        LSI_LPC_SERIAL2 = 9,
-        LSI_LPC_SERIAL3 = 10,
-        LSI_SBE_OR_I2C  = 11,
-        LSI_DIO         = 12,
-        LSI_PSU         = 13,
+        LSI_FIRST_SOURCE = 0,
+        LSI_PSI          = LSI_FIRST_SOURCE,
+        LSI_OCC          = 1,
+        LSI_FSIMBOX      = 2,
+        LSI_LPC          = 3,
+        LSI_LCL_FIR      = 4,
+        LSI_GLOBAL       = 5,
+        LSI_TPM          = 6,
+        LSI_LPC_SERIAL0  = 7,
+        LSI_LPC_SERIAL1  = 8,
+        LSI_LPC_SERIAL2  = 9,
+        LSI_LPC_SERIAL3  = 10,
+        LSI_SBE_OR_I2C   = 11,
+        LSI_DIO          = 12,
+        LSI_PSU          = 13,
         LSI_LAST_SOURCE,
     };
 
