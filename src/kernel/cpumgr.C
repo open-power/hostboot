@@ -253,6 +253,7 @@ void CpuManager::startCPU(ssize_t i)
         cpu->idle_task = TaskManager::createIdleTask();
         cpu->idle_task->cpu = cpu;
         cpu->periodic_count = 0;
+        cpu->cpu_restore_tb = 0;
 
         // Call TimeManager setup for a CPU.
         TimeManager::init_cpu(cpu);

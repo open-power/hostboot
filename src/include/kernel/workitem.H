@@ -53,6 +53,18 @@ class CpuWakeupDoorbellWorkItem : public KernelWorkItem
         ~CpuWakeupDoorbellWorkItem() = default;
 };
 
+//A work item to be created/executed during a Master CPU
+// wakeup scenario, it will also restore the timebase
+// on the threads being woken up
+class CpuTbRestoreDoorbellWorkItem : public KernelWorkItem
+{
+    public:
+        //Implement operator() function
+        void operator() (void);
+
+        //No data to clean up, use default destructor
+        ~CpuTbRestoreDoorbellWorkItem() = default;
+};
 
 #endif
 
