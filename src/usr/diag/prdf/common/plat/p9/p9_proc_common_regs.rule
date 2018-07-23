@@ -27,6 +27,16 @@
 # Additional registers for nimbus chip, not defined in XML
 ################################################################################
 
+    # This register helps us determine where in the IPL the attention occurred.
+    # Possible values for this register (in ASCII): hostboot, bootload, shutdown
+
+    register CORE_SCRATCH_REG_3
+    {
+        name        "Core scratch register 3";
+        scomaddr    0x41010A89;
+        capture     group default;
+    };
+
     ############################################################################
     # N3 Chiplet PBEXTFIR
     ############################################################################
