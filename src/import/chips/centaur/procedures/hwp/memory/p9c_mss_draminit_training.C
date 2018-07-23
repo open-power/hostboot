@@ -2027,15 +2027,15 @@ extern "C" {
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     continue;
                 }
 
                 if ( l_prg[l_prank][l_port] == 0)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 0, 0, l_db_reg_rank0, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 0, 0);
@@ -2044,8 +2044,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 1)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 0, 1, l_db_reg_rank1, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 0, 1);
@@ -2054,8 +2054,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 2)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 0, 2, l_db_reg_rank2, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 0, 2);
@@ -2064,8 +2064,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 3)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 0, 3, l_db_reg_rank3, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 0, 3);
@@ -2074,8 +2074,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 4)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 1, 0, l_db_reg_rank4, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 1, 0);
@@ -2084,8 +2084,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 5)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 1, 1, l_db_reg_rank5, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 1, 1);;
@@ -2094,8 +2094,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 6)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 1, 2, l_db_reg_rank6, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 1, 2);;
@@ -2104,8 +2104,8 @@ extern "C" {
 
                 if ( l_prg[l_prank][l_port] == 7)
                 {
-                    FAPI_DBG("BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
-                             l_prank, l_port, l_prg[l_prank][l_port]);
+                    FAPI_DBG("%s BYTE DISABLE WORKAROUND  Primary rank group (prank) %i port %d rank value: %d Not INVALID, Marking and continuing...",
+                             mss::c_str(i_mba_target), l_prank, l_port, l_prg[l_prank][l_port]);
                     FAPI_TRY(getC4dq2reg(i_mba_target, l_port, 1, 3, l_db_reg_rank7, l_is_clean),
                              "Error from getting register bitmap port=%i: "
                              "dimm=%i, rank=%i", l_port, 1, 3);;
@@ -2114,7 +2114,7 @@ extern "C" {
             }
 
             // loop through primary ranks [0:3]
-            for (uint8_t prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
+            for (l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
                 l_dimm = l_prg[l_prank][l_port] >> 2;
                 l_rank = l_prg[l_prank][l_port] & 0x03;
@@ -2122,8 +2122,8 @@ extern "C" {
 
                 if (l_prg[l_prank][l_port] == l_rg_invalid[l_prank])  // invalid rank
                 {
-                    FAPI_DBG("Primary rank group %i: INVALID, continuing...",
-                             prank);
+                    FAPI_DBG("%s Primary rank group %i: INVALID, continuing...",
+                             mss::c_str(i_mba_target), l_prank);
                     continue;
                 }
 
@@ -2152,6 +2152,8 @@ extern "C" {
                     FAPI_TRY(l_db_reg_rank5.extract(l_data_rank5, i * 16, 16));
                     FAPI_TRY(l_db_reg_rank6.extract(l_data_rank6, i * 16, 16));
                     FAPI_TRY(l_db_reg_rank7.extract(l_data_rank7, i * 16, 16));
+                    FAPI_INF("%s port%u rank0 DP%u l_data_rank0:0x%04x data:0x%04x", mss::c_str(i_mba_target), l_port, i, l_data_rank0,
+                             l_data);
 
                     if (l_data == 0)
                     {
