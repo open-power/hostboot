@@ -27,6 +27,7 @@
 #include <kernel/workitem.H>
 #include <kernel/console.H>
 #include <kernel/intmsghandler.H>
+#include <kernel/cpumgr.H>
 
 //Define the desired behavior for a CPU core/thread
 // wakeup scenario
@@ -38,5 +39,19 @@ void CpuWakeupDoorbellWorkItem::operator() (void)
     // There is a task associated with the intrrp that monitors that the proper
     // cores/threads have woken up
     InterruptMsgHdlr::sendThreadWakeupMsg(pir);
+    return;
+}
+
+void CpuTbRestoreDoorbellWorkItem::operator() (void)
+{
+    size_t pir = getPIR();
+    cpu_t *l_cpu = CpuManager::getCpu(pir);
+
+    uint64_t l_restore_tb = l_cpu->cpu_restore_tb;
+    printkd("pir:%ld tb:0x%0x\n", pir, l_restore_tb);
+    if (l_restore_tb > getTB())
+    {
+        setTB(l_restore_tb);
+    }
     return;
 }

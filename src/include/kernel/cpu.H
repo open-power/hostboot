@@ -104,6 +104,9 @@ struct cpu_t
     /** Sequence ID of CPU initialization. */
     uint64_t cpu_start_seqid;
 
+    /** Timebase Restore Value (used during core wakeup) */
+    uint64_t cpu_restore_tb;
+
     /** Stack of WorkItems to be executed during doorbell wakeup */
     Util::Lockfree::Stack<KernelWorkItem> doorbell_actions;
 };

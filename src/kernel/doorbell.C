@@ -79,6 +79,20 @@ void send_doorbell_wakeup(uint64_t i_pir)
     doorbell_send(i_pir);
 }
 
+void send_doorbell_restore_tb(uint64_t i_pir, uint64_t i_tb)
+{
+    cpu_t *l_cpu = CpuManager::getCpu(i_pir);
+    l_cpu->cpu_restore_tb = i_tb;
+
+    printkd("send_doorbell_restore_tb to pir: %lx\n", i_pir);
+    //Create WorkItem and put on the stack to be executed during doorbell
+    // execution
+    KernelWorkItem* l_work = new CpuTbRestoreDoorbellWorkItem();
+    l_cpu->doorbell_actions.push(l_work);
+    //Send doorbell to wakeup core/thread
+    doorbell_send(i_pir);
+}
+
 void send_doorbell_ipc(uint64_t i_pir)
 {
     printk("send_doorbell_ipc to pir: %lx\n", i_pir);
