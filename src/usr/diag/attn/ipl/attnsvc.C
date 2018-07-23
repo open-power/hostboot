@@ -306,7 +306,6 @@ errlHndl_t Service::processCheckstop()
     assert(!Singleton<Service>::instance().running());
     TargetHandleList list;
 
-    MemOps & memOps = getMemOps();
     ProcOps & procOps = getProcOps();
     attentions.clear();
 
