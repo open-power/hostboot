@@ -550,7 +550,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         cmd1 = "sbe-trace %d"%(proc_num)
         print "cmd1", cmd1
         # copy the file somewhere safe
-        cmd2 = "shell \"echo '==HB Collecting Traces (iar=%X,rc=%X,sbe=%d)==' >> sbetrace.hb.txt; cat sbe_%d_tracMERG >> sbetrace.hb.txt\""%(cpu.iar,rc,proc_num,proc_num)
+        # Ignore any issues with generating tracMERG via || true on cat, best to
+        # continue running and gather other FFDC to debug why SBE tracMERG can not be
+        # retrieved then cause SIMICS to fail with a "file not found" exception
+        cmd2 = "shell \"echo '==HB Collecting Traces (iar=%X,rc=%X,sbe=%d)==' >> sbetrace.hb.txt; ( cat sbe_%d_tracMERG || true ) >> sbetrace.hb.txt\""%(cpu.iar,rc,proc_num,proc_num)
         print "cmd2", cmd2
 
         saveCommand = "%s; %s"%(cmd1,cmd2)
