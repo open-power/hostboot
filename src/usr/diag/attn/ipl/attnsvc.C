@@ -67,7 +67,7 @@ errlHndl_t Service::configureInterrupts(
         {
             err = INTR::registerMsgQ(i_q,
                                      ATTENTION,
-                                     INTR::LSI_LCL_FIR);
+                                     INTR::ISN_LCL_ERR);
         }
 
         if(err)

@@ -239,10 +239,6 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             }
         }
 
-        //Clear out the mask list because pq state buffer gets cleared after
-        //resetting the XIVE Interrupt unit
-        iv_maskList.clear();
-
     }while(0);
 
     return err;
@@ -469,6 +465,14 @@ errlHndl_t IntrRp::_init()
                 TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
                 break;
             }
+        }
+
+        // Build up list of unregistered LSI sources, at this point no sourced
+        // have registered message qs (NOTE: it's more useful to know what is NOT
+        // registered rather than what is)
+        for(uint8_t i = LSI_FIRST_SOURCE; i < LSI_LAST_SOURCE; i++)
+        {
+            iv_unregisterdLsiSources.push_back(i);
         }
 
         // Create the kernel msg queue for external interrupts
@@ -1126,8 +1130,7 @@ void IntrRp::msgHandler()
 
                     msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
                     uint64_t l_type = msg->data[1];
-                    LSIvalue_t l_intr_type = static_cast<LSIvalue_t>
-                      (l_type & LSI_SOURCE_MASK);
+                    ext_intr_t l_intr_type = static_cast<ext_intr_t>(l_type & SOURCE_MASK);
 
                     errlHndl_t err = registerInterruptXISR(l_msgQ, l_type >> 32,
                                                                    l_intr_type);
@@ -1138,8 +1141,14 @@ void IntrRp::msgHandler()
                             "registering handler for interrupt type: %lx",
                             l_intr_type);
                     }
-                    else
+                    // Only worry about masking if it is an LSI source
+                    else if( l_intr_type >= LSI_FIRST_SOURCE &&
+                             l_intr_type < LSI_LAST_SOURCE )
                     {
+                        // Source is now registered so remove it from list
+                        // NOTE: registerInterruptXISR check above will ensure
+                        //  that it has not been registered before.
+                        iv_unregisterdLsiSources.remove(l_intr_type);
                         //Enable (aka unmask) Interrupts for the source being
                         // registered for
                         for(ChipList_t::iterator targ_itr = iv_chipList.begin();
@@ -1166,21 +1175,64 @@ void IntrRp::msgHandler()
                     TRACFCOMP(g_trac_intr,
                            "INTR remove registration of interrupt type = 0x%lx",
                             msg->data[0]);
-
+                    errlHndl_t err;
                     ext_intr_t l_type = static_cast<ext_intr_t>(msg->data[0]);
-                    ext_intr_t l_intr_type = static_cast<ext_intr_t>
-                      (l_type & LSI_SOURCE_MASK);
+                    ext_intr_t l_intr_type = static_cast<ext_intr_t>(l_type & SOURCE_MASK);
 
-                    if (l_type != ISN_INTERPROC)
+
+                    if (l_type >= LSI_FIRST_SOURCE &&
+                        l_type < LSI_LAST_SOURCE)
                     {
+                        if(std::find(iv_unregisterdLsiSources.begin(),
+                                    iv_unregisterdLsiSources.end(),
+                                    l_intr_type) == iv_unregisterdLsiSources.end())
+                        {
+                            // Source is now unregistered so add it to list
+                            iv_unregisterdLsiSources.push_back(l_intr_type);
+                        }
+                        else
+                        {
+                            TRACFCOMP(g_trac_intr,
+                                      "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ"
+                                      " Attempted to unregisted source %d but is was not registered",
+                                      l_intr_type);
+                            // Print unregistered sources
+                            for (const auto& l_lsi_source : iv_unregisterdLsiSources)
+                            {
+                                TRACFCOMP(g_trac_intr,
+                                          "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ"
+                                          " This LSI source is not registered : %d",
+                                          l_lsi_source);
+                            }
+                            /*@ errorlog tag
+                            * @errortype       ERRL_SEV_INFORMATIONAL
+                            * @moduleid        INTR::MOD_INTRRP_UNREGISTERINTERRUPT
+                            * @reasoncode      INTR::RC_SOURCE_NOT_REGISTERED
+                            * @userdata1       LSI Interrupt Source to Unregister
+                            * @userdata2       Number of unregistered LSI sources
+                            * @devdesc         Attempted to unregsister a source that
+                            *                  is not registered
+                            * @custdesc        Error hanlding processor interupts
+                            */
+                            err = new ERRORLOG::ErrlEntry
+                                    (
+                                    ERRORLOG::ERRL_SEV_INFORMATIONAL,        // severity
+                                    INTR::MOD_INTRRP_UNREGISTERINTERRUPT, // moduleid
+                                    INTR::RC_SOURCE_NOT_REGISTERED,       // reason code
+                                    l_intr_type,
+                                    iv_unregisterdLsiSources.size(),
+                                    true); // sw callout
+                            errlCommit(err,INTR_COMP_ID);
+                        }
+
                         // Mask the interrupt source prior to unregistering
-                        errlHndl_t err = maskInterruptSource(l_intr_type);
+                        err = maskInterruptSource(l_intr_type);
                         if(err)
                         {
                             TRACFCOMP(g_trac_intr,
-                                 "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ"
-                                 " error masking interrupt type: %lx",
-                                 l_intr_type);
+                                "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ"
+                                " error masking interrupt type: %lx",
+                                l_intr_type);
                             errlCommit(err,INTR_COMP_ID);
                         }
                     }
@@ -1642,6 +1694,9 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
                                        intr_hdlr_t *i_chip)
 {
     errlHndl_t l_err = NULL;
+    // Perform read on ESB_OFF_OFFSET to transition the
+    // ESB for this source to the OFF state which
+    // masks the sources off
     uint64_t * l_psiHbEsbptr = i_chip->psiHbEsbBaseAddr;
     l_psiHbEsbptr +=
            (((i_intr_source*PAGE_SIZE)+ESB_OFF_OFFSET)
@@ -1679,33 +1734,17 @@ errlHndl_t IntrRp::maskInterruptSource(uint8_t i_intr_source,
 
 errlHndl_t IntrRp::maskInterruptSource(uint8_t l_intr_source)
 {
-    bool l_masked = false;
     errlHndl_t l_err = NULL;
-    for(MaskList_t::iterator mask_itr = iv_maskList.begin();
-                mask_itr != iv_maskList.end(); ++mask_itr)
-    {
-        if ((*mask_itr) == l_intr_source)
-        {
-            TRACFCOMP(g_trac_intr, "IntrRp::maskInterruptSource()"
-                      " Interrupt source: %x already masked - ignoring",
-                      l_intr_source);
-            l_masked = true;
-        }
-    }
 
-    if(l_masked == false)
+    for(ChipList_t::iterator targ_itr = iv_chipList.begin();
+            targ_itr != iv_chipList.end(); ++targ_itr)
     {
-        iv_maskList.push_back(l_intr_source);
-        for(ChipList_t::iterator targ_itr = iv_chipList.begin();
-                targ_itr != iv_chipList.end(); ++targ_itr)
-        {
-            l_err = maskInterruptSource(l_intr_source,
-                                        *targ_itr);
+        l_err = maskInterruptSource(l_intr_source,
+                                    *targ_itr);
 
-            if (l_err)
-            {
-                break;
-            }
+        if (l_err)
+        {
+            break;
         }
     }
 
@@ -1716,68 +1755,77 @@ errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source,
                                          intr_hdlr_t *i_proc,
                                          bool i_force_unmask)
 {
-    bool l_masked = false;
     errlHndl_t l_err = NULL;
-    for(MaskList_t::iterator mask_itr = iv_maskList.begin();
-                mask_itr != iv_maskList.end(); ++mask_itr)
+    uint64_t * l_psiHbEsbptr = nullptr;
+    volatile uint64_t l_esbRead = 0;
+
+    if(!i_force_unmask)
     {
-        if ((*mask_itr) == l_intr_source)
-        {
-            TRACFCOMP(g_trac_intr, "IntrRp::unmaskInterruptSource()"
-                      " Interrupt source: %x masked - will unmask",
-                      l_intr_source);
-            l_masked = true;
-            iv_maskList.erase(mask_itr);
-            break;
-        }
+        //Perform read to verify in OFF state using query offset
+        l_psiHbEsbptr = i_proc->psiHbEsbBaseAddr +
+                    (((l_intr_source*PAGE_SIZE)+ESB_QUERY_OFFSET)
+                    /sizeof(uint64_t));
+
+        l_esbRead = *l_psiHbEsbptr;
+        eieio();
     }
 
-    if (l_masked == true || i_force_unmask == true)
+    // If ESB source is indeed masked (OFF) on this processor
+    // then go ahead w/ unmask
+    if(i_force_unmask  || l_esbRead == ESB_STATE_OFF)
     {
-        for(ChipList_t::iterator targ_itr = iv_chipList.begin();
-                targ_itr != iv_chipList.end(); ++targ_itr)
+        // Perform read to EOI offset which will put the ESB for this source
+        // into the RESET state
+        l_psiHbEsbptr = i_proc->psiHbEsbBaseAddr +
+                (((l_intr_source*PAGE_SIZE)+ESB_RESET_OFFSET)
+                            /sizeof(uint64_t));
+
+        l_esbRead = *l_psiHbEsbptr;
+        eieio();
+
+        // Perform 2nd read on query offset to verify in we are
+        // no longer in the OFF state
+        l_psiHbEsbptr = i_proc->psiHbEsbBaseAddr +
+                    (((l_intr_source*PAGE_SIZE)+ESB_QUERY_OFFSET)
+                    /sizeof(uint64_t));
+
+        l_esbRead = *l_psiHbEsbptr;
+        eieio();
+
+        // Make sure the ESB is no longer in OFF state for this source
+        // NOTE: we dont check for RESET state because ESB could immediately
+        //       go to pending if the LSI source was active
+        if (l_esbRead == ESB_STATE_OFF)
         {
-            uint64_t * l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr;
-            l_psiHbEsbptr +=
-                 (((l_intr_source*PAGE_SIZE)+ESB_RESET_OFFSET)
-                                /sizeof(uint64_t));
+            TRACFCOMP(g_trac_intr, "Error unmasking interrupt source: %x."
+                            " ESB state is: %lx.",
+                            l_intr_source, l_esbRead);
 
-            //MMIO Read to this address transitions the ESB to the RESET state
-            volatile uint64_t l_unmaskRead = *l_psiHbEsbptr;
-            eieio();
-
-            //Perform 2nd read to verify in RESET state using query offset
-            l_psiHbEsbptr = (*targ_itr)->psiHbEsbBaseAddr +
-                      (((l_intr_source*PAGE_SIZE)+ESB_QUERY_OFFSET)
-                      /sizeof(uint64_t));
-
-            l_unmaskRead = *l_psiHbEsbptr;
-
-            if (l_unmaskRead == ESB_STATE_OFF)
-            {
-                TRACFCOMP(g_trac_intr, "Error unmasking interrupt source: %x."
-                              " ESB state is: %lx.",
-                              l_intr_source, l_unmaskRead);
-
-                /*@ errorlog tag
-                  * @errortype       ERRL_SEV_INFORMATIONAL
-                  * @moduleid        INTR::MOD_INTRRP_UNMASKINTERRUPT
-                  * @reasoncode      INTR::RC_XIVE_ESB_WRONG_STATE
-                  * @userdata1       Interrupt Source Number
-                  * @userdata12      MMIO Read Value for unmasking
-                  * @devdesc         Error unmasking interrupt source
-                  */
-                l_err = new ERRORLOG::ErrlEntry
-                (
-                   ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
-                   INTR::MOD_INTRRP_UNMASKINTERRUPT,  // moduleid
-                   INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
-                   l_intr_source,
-                   l_unmaskRead
-                );
-                break;
-            }
+            /*@ errorlog tag
+                * @errortype         ERRL_SEV_INFORMATIONAL
+                * @moduleid          INTR::MOD_INTRRP_UNMASKINTERRUPT
+                * @reasoncode        INTR::RC_XIVE_ESB_WRONG_STATE
+                * @userdata1[0:31]   Huid of processor
+                * @userdata1[32:63]  Interrupt Source Number
+                * @userdata2       MMIO Read Value for unmasking
+                * @devdesc         Error unmasking interrupt source
+                */
+            l_err = new ERRORLOG::ErrlEntry
+            (
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
+                INTR::MOD_INTRRP_UNMASKINTERRUPT,  // moduleid
+                INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
+                TWO_UINT32_TO_UINT64(
+                    TO_UINT32( TARGETING::get_huid( i_proc->proc )),
+                    TO_UINT32( l_intr_source )),
+                l_esbRead
+            );
         }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_intr, "Requested Unmask of SRC 0x%x for target 0x%lx and source was not masked",
+                  l_intr_source, l_esbRead);
     }
 
     return l_err;
@@ -3392,13 +3440,10 @@ errlHndl_t INTR::IntrRp::enableSlaveProcInterrupts(TARGETING::Target * i_target)
             break;
         }
 
-        //Apply the masking of the interrupt sources from the master chip to
-        // the slave chip to block unwanted spurious interrupts that there is
-        // no handler for
-        for(MaskList_t::iterator mask_itr = iv_maskList.begin();
-                mask_itr != iv_maskList.end(); ++mask_itr)
+        // Mask all unregistered LSI sources
+        for (const auto& l_lsi_source : iv_unregisterdLsiSources)
         {
-            l_err = maskInterruptSource(*mask_itr,
+            l_err = maskInterruptSource(l_lsi_source,
                                         l_procIntrHdlr);
             if (l_err)
             {
@@ -3590,7 +3635,7 @@ void INTR::IntrRp::printEsbStates() const
     targ_itr != iv_chipList.end(); ++targ_itr)
     {
         TRACFCOMP(g_trac_intr, "Processor 0x%lx", get_huid((*targ_itr)->proc));
-        for (uint8_t i = 0; i < LSI_LAST_SOURCE; i++)
+        for (uint8_t i = LSI_FIRST_SOURCE; i < LSI_LAST_SOURCE; i++)
         {
             // Ready from the ESB_QUERY_OFFSET to ensure the read doesn't
             // affect the state

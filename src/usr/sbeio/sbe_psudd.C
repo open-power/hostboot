@@ -141,7 +141,7 @@ SbePsu::SbePsu()
         //   detected
         l_err = INTR::registerMsgQ(iv_msgQ,
                                    MSG_INTR,
-                                   INTR::LSI_PSU);
+                                   INTR::ISN_PSU);
     }
 
     if (l_err)

@@ -36,6 +36,7 @@
 #include <sys/internode.h>
 #include <intr/interrupt.H>
 #include <map>
+#include <list>
 #include <algorithm>
 #include <arch/pirformat.H>
 
@@ -169,7 +170,7 @@ namespace INTR
 
                 IPI_USR_PRIO        = 0x2,   //<! IPI priority from USR space
 
-                LSI_SOURCE_MASK = 0xFFFF,
+                SOURCE_MASK     = 0xFFFF,
                 LSI_INTERRUPT   = 0xC000,
 
                 //PSI Host Bridge Constants
@@ -366,7 +367,7 @@ namespace INTR
             typedef std::vector<PIR_t> CpuList_t;
             typedef std::vector<intr_hdlr_t *> ChipList_t;
             typedef std::vector<ISNvalue_t> ISNList_t;
-            typedef std::vector<uint8_t> MaskList_t;
+            typedef std::list<ext_intr_t> UnregisteredSourceList_t;
             typedef std::vector< std::pair<PIR_t,ext_intr_t> >PendingIntrList_t;
 
             msg_q_t     iv_msgQ;        //!< Kernel Interrupt message queue
@@ -380,10 +381,9 @@ namespace INTR
             CpuList_t   iv_cpuList;     //!< Other CPU chips
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
-            MaskList_t  iv_maskList;    //!< List of interrupt sources which
-                                        //   are masked
             PendingIntrList_t iv_pendingIntr; //!< List of pending interrupts
                                               // That haven't been EOI'ed
+            UnregisteredSourceList_t iv_unregisterdLsiSources;
 
             typedef std::pair<uint64_t, msg_t*> IPI_Info_t;
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
