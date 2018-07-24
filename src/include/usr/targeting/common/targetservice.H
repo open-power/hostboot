@@ -129,6 +129,35 @@ namespace TARGETING
      */
     TARGETING::TargetService& targetService();
 
+#ifdef __HOSTBOOT_MODULE
+    /**
+     *  @brief Maps a system target to its node target and node ID
+    */
+    struct SysToNode
+    {
+        Target*  pNodeTarget; ///< Node target handle (do not delete)
+        Target*  pSysTarget;  ///< System target handle (do not delete)
+        NODE_ID  nodeId;      ///< Ordinal ID of node
+
+        SysToNode(
+                  Target* const i_pNodeTarget,
+                  Target* const i_pSysTarget,
+                  const NODE_ID       i_nodeId)
+                  : pNodeTarget(i_pNodeTarget),
+                  pSysTarget(i_pSysTarget),
+                  nodeId(i_nodeId)
+        {
+        }
+    };
+
+/**
+ *  @brief Aliases related to system->node associations
+ */
+typedef std::vector< SysToNode >SysToNodeContainer;
+typedef SysToNodeContainer::iterator SysToNodeContainerIt;
+typedef SysToNodeContainer::const_iterator SysToNodeContainerConstIt;
+#endif
+
 /**
  *  @brief Sentinel representing the master processor chip target early in
  *      host boot prior to initialization of the target service.  Needed by the
@@ -857,7 +886,31 @@ class TargetService
          *  @return number of mutex attributes reset
          */
         uint32_t resetMutexAttributes( const Target* i_pTarget);
+
+       /**
+        *  @brief Returns container which maps each system target to the ordinal
+        *      ID/target of node associated with it.
+        *
+        *  @par Detailed Description:
+        *      Returns container which maps each system target to the ordinal
+        *      ID/target of node associated with it.  Each node in PNOR
+        *      contains one copy of the system target, but targeting usually
+        *      only exposes one copy of it to applets and services.
+        *      This facility provides convenient access to the
+        *      list of those normally hidden system targets, and their
+        *      corresponding node targets.  Optionally, it also reports on
+        *      control nodes.
+        *
+        *  @param[in] i_anyNodeType
+        *      When false (default), only look up compute nodes.  When true,
+        *      look up any node type (compute + control nodes).
+        *
+        *  @return Container which maps each system target to the ordinal
+        *          ID/target of node associated with it
+        */
+        SysToNodeContainer getSysToNodeAssociations(const bool i_anyNodeType);
 #endif
+
     private:
 
         /**

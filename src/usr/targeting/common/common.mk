@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ ITERATORS_OBJS += rangefilter.o
 TARGET_OBJS += target.o
 TARGET_OBJS += targetservice.o
 TARGET_OBJS += entitypath.o
+TARGET_OBJS += associationmanager.o
 
 TARGUTILBASE ?= targutilbase.o # only set UTILBASE if not already defined
 OTHER_OBJS += ${TARGUTILBASE}
