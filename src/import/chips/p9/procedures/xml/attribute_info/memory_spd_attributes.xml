@@ -720,8 +720,7 @@
         <valueType>uint8</valueType>
         <enum>SUPPORTED = 1, UNSUPPORTED = 0</enum>
         <platInit/>
-        <default>0</default>
-        <writeable/>
+        <default>UNSUPPORTED</default>
     </attribute>
 
 </attributes>
