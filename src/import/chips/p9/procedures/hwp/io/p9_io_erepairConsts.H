@@ -54,7 +54,7 @@ const uint8_t XBUS_2_ACTIVE_LANE_END     = 15;
 
 const uint8_t XBUS_SPARE_DEPLOY_LANE_1   = 0;
 const uint8_t XBUS_MAXSPARES_IN_HW       = 1;
-const uint8_t XBUS_MAX_LANE_WIDTH        = 16;
+const uint8_t XBUS_MAX_LANE_WIDTH        = 17;
 
 // O-Bus is 12+2 lanes wide.
 // Data lanes numbering: 0 - 11
@@ -65,9 +65,9 @@ const uint8_t OBUS_ACTIVE_LANE_END       = 11;
 const uint8_t OBUS_SPARE_DEPLOY_LANE_1   = 0;
 const uint8_t OBUS_SPARE_DEPLOY_LANE_2   = 1;
 const uint8_t OBUS_MAXSPARES_IN_HW       = 2;
-const uint8_t OBUS_MAX_LANE_WIDTH        = 12;
+const uint8_t OBUS_MAX_LANE_WIDTH        = 13;
 
-// UpStream DMI-Bus is 21+2 lanes wide.
+// UpStream DMI-Bus is 21+2+1(calibration) lanes wide.
 // Data lanes numbering:  0 - 20
 // Spare lanes numbering: 21, 22
 const uint8_t DMIBUS_UPSTREAM_ACTIVE_LANE_START   = 0;
@@ -82,8 +82,8 @@ const uint8_t DMIBUS_DOWNSTREAM_ACTIVE_LANE_END   = 13;
 const uint8_t DMIBUS_SPARE_DEPLOY_LANE_1          = 0;
 const uint8_t DMIBUS_SPARE_DEPLOY_LANE_2          = 1;
 const uint8_t DMIBUS_MAXSPARES_IN_HW              = 2;
-const uint8_t DMIBUS_UPSTREAM_MAX_LANE_WIDTH      = 21;
-const uint8_t DMIBUS_DNSTREAM_MAX_LANE_WIDTH      = 14;
+const uint8_t DMIBUS_UPSTREAM_MAX_LANE_WIDTH      = 24;
+const uint8_t DMIBUS_DNSTREAM_MAX_LANE_WIDTH      = 17;
 
 const uint32_t EREPAIR_P9_MODULE_VPD_FIELD_SIZE       = 0x10E; // 270 bytes
 const uint32_t EREPAIR_P9_MODULE_VPD_MNFG_SIZE        = 0x10E; // 270 bytes
