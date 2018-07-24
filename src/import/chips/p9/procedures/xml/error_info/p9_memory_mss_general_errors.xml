@@ -141,4 +141,28 @@
     </callout>
   </hwpError>
 
+
+  <hwpError>
+    <rc>RC_MSS_FAILED_DATA_INTEGRITY_CHECK</rc>
+    <description>
+        Bad data received.
+        Settings are incorrect for received data.
+        This could be code problem (decoding) or bad data.
+    </description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>BYTE</ffdc>
+    <ffdc>FFDC_CODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

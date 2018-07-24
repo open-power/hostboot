@@ -49,7 +49,9 @@
 #include <generic/memory/lib/spd/common/dimm_module_decoder.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <generic/memory/lib/spd/common/spd_decoder_base.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/spd/spd_checker.H>
+#include <generic/memory/lib/utils/mss_buffer_utils.H>
 
 namespace mss
 {
@@ -155,11 +157,12 @@ static fapi2::ReturnCode nibble_map_helper( const fapi2::Target<fapi2::TARGET_TY
     const bool VALID_LOWER_NIBBLE = (i_bit_order >= LOW_BIT_ORDER_MIN) && (i_bit_order <= LOW_BIT_ORDER_MAX);
     const bool VALID_UPPER_NIBBLE = (i_bit_order >= UP_BIT_ORDER_MIN) && (i_bit_order <= UP_BIT_ORDER_MAX);
 
-    FAPI_TRY(check::fail_for_invalid_value(i_target,
-                                           (VALID_LOWER_NIBBLE || VALID_UPPER_NIBBLE),
-                                           i_byte,
-                                           i_bit_order,
-                                           "Failed check on the NIBBLE_MAP field") );
+    FAPI_TRY(mss::check::invalid_value(i_target,
+                                       (VALID_LOWER_NIBBLE || VALID_UPPER_NIBBLE),
+                                       i_byte,
+                                       i_bit_order,
+                                       mss::BAD_SPD_DATA,
+                                       "Failed check on the NIBBLE_MAP field") );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -177,11 +180,12 @@ static fapi2::ReturnCode package_rank_map_helper( const fapi2::Target<fapi2::TAR
 {
     // Taken from the SPD JEDEC spec, only valid encoding, the rest are reserved
     constexpr uint64_t VALID_VALUE = 0;
-    FAPI_TRY(check::fail_for_invalid_value(i_target,
-                                           (i_pkg_rank_map == VALID_VALUE),
-                                           i_byte,
-                                           i_pkg_rank_map,
-                                           "Failed check on Package Rank Map") );
+    FAPI_TRY(mss::check::invalid_value(i_target,
+                                       (i_pkg_rank_map == VALID_VALUE),
+                                       i_byte,
+                                       i_pkg_rank_map,
+                                       mss::BAD_SPD_DATA,
+                                       "Failed check on Package Rank Map") );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -486,7 +490,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
                 {
                     fapi2::buffer<int64_t> l_buffer;
-                    rightAlignedInsert(l_buffer, l_twrmin_msn, l_twrmin_lsb);
+                    right_aligned_insert(l_buffer, l_twrmin_msn, l_twrmin_lsb);
 
                     // Update output only after check passes
                     FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWRMIN));
@@ -519,7 +523,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
                 {
                     fapi2::buffer<int64_t> l_buffer;
-                    rightAlignedInsert(l_buffer, l_twtr_lmin_msn, l_twtr_lmin_lsb);
+                    right_aligned_insert(l_buffer, l_twtr_lmin_msn, l_twtr_lmin_lsb);
 
                     // Update output only after check passes
                     FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_L_MIN));
@@ -553,7 +557,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
                 {
                     fapi2::buffer<int64_t> l_buffer;
-                    rightAlignedInsert(l_buffer, l_twtr_smin_msn, l_twtr_smin_lsb);
+                    right_aligned_insert(l_buffer, l_twtr_smin_msn, l_twtr_smin_lsb);
 
                     // Update output only after check passes
                     FAPI_TRY( check::max_timing_range<BITS12>(i_target, l_buffer, TWTR_S_MIN));
@@ -1182,17 +1186,18 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
                 // Buffers used for bit manipulation
                 // Combine Bytes to create bitmap - right aligned
                 fapi2::buffer<uint64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_fourth_raw_byte, l_third_raw_byte, l_sec_raw_byte, l_first_raw_byte);
+                right_aligned_insert(l_buffer, l_fourth_raw_byte, l_third_raw_byte, l_sec_raw_byte, l_first_raw_byte);
 
                 // According to the JEDEC spec:
                 // Byte 22 (Bits 7~0) and Byte 23 are reserved and thus not supported
                 // Check for a valid value
                 constexpr size_t MAX_VALID_VAL = 0x3FFFF;
-                FAPI_TRY( check::fail_for_invalid_value(iv_target,
-                                                        l_buffer <= MAX_VALID_VAL,
-                                                        23,
-                                                        l_buffer,
-                                                        "Failed check on CAS latencies supported") );
+                FAPI_TRY( mss::check::invalid_value(iv_target,
+                                                    l_buffer <= MAX_VALID_VAL,
+                                                    23,
+                                                    l_buffer,
+                                                    mss::BAD_SPD_DATA,
+                                                    "Failed check on CAS latencies supported") );
 
                 // Update output value only if range check passes
                 o_value = int64_t(l_buffer);
@@ -1259,7 +1264,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
             {
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_tRASmin_msn, l_tRASmin_lsb);
+                right_aligned_insert(l_buffer, l_tRASmin_msn, l_tRASmin_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRASMIN));
@@ -1289,7 +1294,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_trcmin_msn, l_trcmin_lsb);
+                right_aligned_insert(l_buffer, l_trcmin_msn, l_trcmin_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TRCMIN));
@@ -1320,7 +1325,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_trfc1min_msb, l_trfc1min_lsb);
+                right_aligned_insert(l_buffer, l_trfc1min_msb, l_trfc1min_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC1MIN));
@@ -1350,7 +1355,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_trfc2min_msb, l_trfc2min_lsb);
+                right_aligned_insert(l_buffer, l_trfc2min_msb, l_trfc2min_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC2MIN));
@@ -1380,7 +1385,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_trfc4min_msb, l_trfc4min_lsb);
+                right_aligned_insert(l_buffer, l_trfc4min_msb, l_trfc4min_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS16>(iv_target, l_buffer, TRFC4MIN));
@@ -1410,7 +1415,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<int64_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_tfawmin_msn, l_tfawmin_lsb);
+                right_aligned_insert(l_buffer, l_tfawmin_msn, l_tfawmin_lsb);
 
                 // Update output only after check passes
                 FAPI_TRY( check::max_timing_range<BITS12>(iv_target, l_buffer, TFAWMIN));
@@ -1689,7 +1694,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
             {
                 // Combining bits to create timing value (in a buffer)
                 fapi2::buffer<uint16_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_crc_msb, l_crc_lsb);
+                right_aligned_insert(l_buffer, l_crc_msb, l_crc_lsb);
 
                 // This value isn't bounded in the SPD document
                 o_value = l_buffer;
@@ -1718,7 +1723,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
             {
                 fapi2::buffer<uint16_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_last_nonzero_byte, l_cont_codes);
+                right_aligned_insert(l_buffer, l_last_nonzero_byte, l_cont_codes);
 
                 o_value = l_buffer;
 
@@ -1758,7 +1763,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
             {
                 fapi2::buffer<uint16_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_date_msb, l_date_lsb);
+                right_aligned_insert(l_buffer, l_date_msb, l_date_lsb);
 
                 o_value = l_buffer;
 
@@ -1790,7 +1795,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
             {
                 fapi2::buffer<uint32_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_sn_byte_3, l_sn_byte_2, l_sn_byte_1, l_sn_byte_0);
+                right_aligned_insert(l_buffer, l_sn_byte_3, l_sn_byte_2, l_sn_byte_1, l_sn_byte_0);
 
                 o_value = l_buffer;
 
@@ -1831,7 +1836,7 @@ class decoder<DDR4, BASE_CNFG, R> : public base_cnfg_decoder
 
             {
                 fapi2::buffer<uint16_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_mfgid_msb, l_mfgid_lsb);
+                right_aligned_insert(l_buffer, l_mfgid_msb, l_mfgid_lsb);
 
                 o_value = l_buffer;
 

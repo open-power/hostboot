@@ -937,6 +937,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::primary_stack_type()
 {
+    constexpr size_t BYTE = 6;
     uint8_t l_stack_type = 0;
     uint8_t l_package_type = 0;
 
@@ -952,22 +953,26 @@ fapi2::ReturnCode eff_dimm::primary_stack_type()
             // JEDEC standard says if the SPD says monolithic in A[7],
             // stack type must be 00 or "SDP" which is what our enum is set to
             FAPI_ASSERT( (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP),
-                         fapi2::MSS_BAD_SPD()
-                         .set_VALUE(l_stack_type)
-                         .set_BYTE(6)
-                         .set_DIMM_TARGET(iv_dimm),
-                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE");
+                         fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
+                         set_VALUE(l_stack_type).
+                         set_BYTE(BYTE).
+                         set_TARGET(iv_dimm).
+                         set_FFDC_CODE(PRIMARY_STACK_TYPE),
+                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE for %s",
+                         mss::c_str(iv_dimm) );
 
             break;
 
         case mss::spd::NON_MONOLITHIC:
             FAPI_ASSERT( (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP) ||
                          (l_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS),
-                         fapi2::MSS_BAD_SPD()
-                         .set_VALUE(l_stack_type)
-                         .set_BYTE(6)
-                         .set_DIMM_TARGET(iv_dimm),
-                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE");
+                         fapi2::MSS_FAILED_DATA_INTEGRITY_CHECK().
+                         set_VALUE(l_stack_type).
+                         set_BYTE(BYTE).
+                         set_TARGET(iv_dimm).
+                         set_FFDC_CODE(PRIMARY_STACK_TYPE),
+                         "Invalid SPD for calculating ATTR_EFF_PRIM_STACK_TYPE for %s",
+                         mss::c_str(iv_dimm) );
             break;
 
         default:

@@ -41,6 +41,7 @@
 #include <generic/memory/lib/spd/spd_decoder_def.H>
 #include <generic/memory/lib/spd/spd_traits_ddr4.H>
 #include <generic/memory/lib/spd/spd_reader.H>
+#include <generic/memory/lib/utils/mss_buffer_utils.H>
 
 namespace mss
 {
@@ -285,7 +286,7 @@ class decoder<DDR4, RDIMM_MODULE, R > : public dimm_module_decoder
 
             {
                 fapi2::buffer<uint16_t> l_buffer;
-                rightAlignedInsert(l_buffer, l_last_nonzero_byte, l_cont_codes);
+                right_aligned_insert(l_buffer, l_last_nonzero_byte, l_cont_codes);
 
                 o_output = l_buffer;
 
