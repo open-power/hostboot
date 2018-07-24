@@ -122,9 +122,9 @@ fapi2::ReturnCode decodeFailedLanes(
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     uint8_t           loop;
     uint8_t           maxBusLanes       = 0;
-    uint32_t          checkBitPosition  = (0x80000000);
+    uint32_t          checkBitPosition  = (0x00800000); // fail bits[0:23] maps to bits[8:31]
 
-    FAPI_INF(">> decodeFailedLanes - IF:0x%x FailBit:%d ", i_busInterface, i_failBit);
+    FAPI_INF(">> decodeFailedLanes - IF:0x%x FailBit:0x%x ", i_busInterface, i_failBit);
 
     // Check for target type and corresponding sub interface
     // to get max lanes supported per interface
@@ -142,12 +142,12 @@ fapi2::ReturnCode decodeFailedLanes(
         if( (i_busInterface == EREPAIR::DMI_MCS_RECEIVE) ||
             (i_busInterface == EREPAIR::DMI_MEMBUF_DRIVE) )
         {
-            maxBusLanes = EREPAIR::DMIBUS_DNSTREAM_MAX_LANE_WIDTH;
+            maxBusLanes = EREPAIR::DMIBUS_UPSTREAM_MAX_LANE_WIDTH;
         }
         else if( (i_busInterface == EREPAIR::DMI_MCS_DRIVE) ||
                  (i_busInterface == EREPAIR::DMI_MEMBUF_RECEIVE) )
         {
-            maxBusLanes = EREPAIR::DMIBUS_UPSTREAM_MAX_LANE_WIDTH;
+            maxBusLanes = EREPAIR::DMIBUS_DNSTREAM_MAX_LANE_WIDTH;
         }
     }
 
@@ -313,7 +313,7 @@ fapi2::ReturnCode determineRepairLanesProc(
         } // end of for loop
     } // end of if(l_tgtType is XBus or OBus)
 
-    FAPI_INF("<< No.of Fail Lanes: tx: %zd, rx: %zd",
+    FAPI_INF("<< No.of Fail Lanes: tx: %llu, rx: %llu",
              o_txFailLanes.size(), o_rxFailLanes.size());
 
 fapi_try_exit:
@@ -452,22 +452,21 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
 
             // Copy the fail lane numbers in the vectors
             FAPI_INF("Decode:IF:0x%x FailBit:%d ", l_memBus->interface, l_memBus->failBit);
+
+            if(l_memBus->interface == EREPAIR::DMI_MEMBUF_DRIVE)
             {
-                if(l_memBus->interface == EREPAIR::DMI_MEMBUF_DRIVE)
-                {
-                    decodeFailedLanes(i_target, l_memBus->interface,
-                                      l_memBus->failBit, o_txFailLanes);
-                }
-                else if(l_memBus->interface == EREPAIR::DMI_MEMBUF_RECEIVE)
-                {
-                    decodeFailedLanes(i_target, l_memBus->interface,
-                                      l_memBus->failBit, o_rxFailLanes);
-                }
+                decodeFailedLanes(i_target, l_memBus->interface,
+                                  l_memBus->failBit, o_txFailLanes);
+            }
+            else if(l_memBus->interface == EREPAIR::DMI_MEMBUF_RECEIVE)
+            {
+                decodeFailedLanes(i_target, l_memBus->interface,
+                                  l_memBus->failBit, o_rxFailLanes);
             }
         } // end of for loop
     } // end of if(l_tgtType is DMI)
 
-    FAPI_INF("<< No.of Fail Lanes: tx: %zd, rx: %zd",
+    FAPI_INF("<< No.of Fail Lanes: tx: %llu, rx: %llu",
              o_txFailLanes.size(), o_rxFailLanes.size());
 
 fapi_try_exit:
@@ -606,7 +605,7 @@ fapi2::ReturnCode determineRepairLanesDMI(
         } // end of for loop
     } // end of if(l_tgtType is DMI)
 
-    FAPI_INF("<< No.of Fail Lanes: tx: %zd, rx: %zd",
+    FAPI_INF("<< No.of Fail Lanes: tx: %llu, rx: %llu",
              o_txFailLanes.size(), o_rxFailLanes.size());
 
 fapi_try_exit:
@@ -650,116 +649,114 @@ fapi2::ReturnCode retrieveRepairDataProc(
 
     FAPI_DBG(">> retrieveRepairDataProc");
 
+    // Determine the Processor target
+    l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    fapi2::MvpdRecord l_vpdRecord = fapi2::MVPD_RECORD_VWML;
+
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
     {
-        // Determine the Processor target
-        l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        l_vpdRecord = fapi2::MVPD_RECORD_MER0;
+    }
 
-        fapi2::MvpdRecord l_vpdRecord = fapi2::MVPD_RECORD_VWML;
+    // Determine the serial number to uniquely identify the proc
+    FAPI_TRY( getMvpdField(
+                  fapi2::MVPD_RECORD_VINI,
+                  fapi2::MVPD_KEYWORD_SN,
+                  l_procTarget,
+                  NULL,
+                  l_serialNum),
+              "Serial number size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
-        if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
-        {
-            l_vpdRecord = fapi2::MVPD_RECORD_MER0;
-        }
+    FAPI_INF("Serial number size:0x%08x ", l_serialNum);
 
-        // Determine the serial number to uniquely identify the proc
+    if( l_serialNum )
+    {
+        // Allocate memory for buffer
+        l_serialBuf = new uint8_t[l_serialNum]();
+
+        // Retrieve the serial number data from the MVPD
         FAPI_TRY( getMvpdField(
                       fapi2::MVPD_RECORD_VINI,
                       fapi2::MVPD_KEYWORD_SN,
                       l_procTarget,
-                      NULL,
+                      l_serialBuf,
                       l_serialNum),
-                  "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  "Serial number read failed w/rc=0x%x",
+                  static_cast<uint64_t>(fapi2::current_err) );
 
-        FAPI_INF("Serial number size:0x%08x ", l_serialNum);
+        FAPI_INF("Serial Number: ");
 
-        if( l_serialNum )
+        for(uint32_t i = 0; i < l_serialNum; i++)
         {
-            // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
-
-            // Retrieve the serial number data from the MVPD
-            FAPI_TRY( getMvpdField(
-                          fapi2::MVPD_RECORD_VINI,
-                          fapi2::MVPD_KEYWORD_SN,
-                          l_procTarget,
-                          l_serialBuf,
-                          l_serialNum),
-                      "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
-
-            FAPI_INF("Serial Number: ");
-
-            for(uint32_t i = 0; i < l_serialNum; i++)
-            {
-                FAPI_INF("%02x ", *(l_serialBuf + i));
-            }
+            FAPI_INF("%02x ", *(l_serialBuf + i));
         }
-
-
-        // Determine the size of the eRepair data in the VPD
-        FAPI_TRY( getMvpdField(
-                      l_vpdRecord,
-                      fapi2::MVPD_KEYWORD_PDI,
-                      l_procTarget,
-                      NULL,
-                      l_bufSize),
-                  "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        FAPI_INF("retrieveRepairDataProc:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
-
-        if((l_bufSize == 0) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
-            (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_FIELD_SIZE)) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
-            (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_MNFG_SIZE)))
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
-                        .set_VAL_BUF_SIZE(l_bufSize)
-                        .set_ERROR(fapi2::current_err),
-                        "ERROR: Invalid Fabric VPD size");
-        }
-
-        // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_bufSize];
-
-        FAPI_ASSERT(l_retBuf != NULL,
-                    fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
-                    .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size");
-
-        // Retrieve the Field eRepair data from the PNOR
-        FAPI_TRY( getMvpdField(
-                      l_vpdRecord,
-                      fapi2::MVPD_KEYWORD_PDI,
-                      l_procTarget,
-                      l_retBuf,
-                      l_bufSize),
-                  "VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        // Parse the buffer to determine eRepair lanes and copy the
-        // fail lane numbers to the return vector
-        FAPI_TRY( determineRepairLanesProc(
-                      i_target,
-                      l_retBuf,
-                      l_bufSize,
-                      i_clkGroup,
-                      o_txFailLanes,
-                      o_rxFailLanes),
-                  "Call to determineRepairLanesProc failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
     }
 
-    // Delete the buffer which has Field eRepair data
-    delete[] l_retBuf;
-    delete[] l_serialBuf;
+
+    // Determine the size of the eRepair data in the VPD
+    FAPI_TRY( getMvpdField(
+                  l_vpdRecord,
+                  fapi2::MVPD_KEYWORD_PDI,
+                  l_procTarget,
+                  NULL,
+                  l_bufSize),
+              "VPD size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    FAPI_INF("retrieveRepairDataProc:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
+
+    if((l_bufSize == 0) ||
+       ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
+        (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_FIELD_SIZE)) ||
+       ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
+        (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_MNFG_SIZE)))
+    {
+        FAPI_ASSERT(false,
+                    fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                    .set_VAL_BUF_SIZE(l_bufSize)
+                    .set_ERROR(fapi2::current_err),
+                    "ERROR: Invalid Fabric VPD size");
+    }
+
+    // Allocate memory for buffer
+    l_retBuf = new uint8_t[l_bufSize]();
+
+    FAPI_ASSERT(l_retBuf != NULL,
+                fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
+                .set_BUF_SIZE(l_bufSize),
+                "ERROR: Failed to allocate memory size");
+
+    // Retrieve the Field eRepair data from the PNOR
+    FAPI_TRY( getMvpdField(
+                  l_vpdRecord,
+                  fapi2::MVPD_KEYWORD_PDI,
+                  l_procTarget,
+                  l_retBuf,
+                  l_bufSize),
+              "VPD read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    // Parse the buffer to determine eRepair lanes and copy the
+    // fail lane numbers to the return vector
+    FAPI_TRY( determineRepairLanesProc(
+                  i_target,
+                  l_retBuf,
+                  l_bufSize,
+                  i_clkGroup,
+                  o_txFailLanes,
+                  o_rxFailLanes),
+              "Call to determineRepairLanesProc failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
     FAPI_DBG("<< retrieveRepairDataProc");
 
 fapi_try_exit:
+    // Delete the buffer which has Field eRepair data
+    delete[] l_retBuf;
+    delete[] l_serialBuf;
+
     return fapi2::current_err;
 }
 
@@ -798,122 +795,120 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
 
     FAPI_DBG(">> retrieveRepairDataMemBuf");
 
+    fapi2::MBvpdRecord l_vpdRecord = fapi2::MBVPD_RECORD_VEIR;
+
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
     {
-        fapi2::MBvpdRecord l_vpdRecord = fapi2::MBVPD_RECORD_VEIR;
+        l_vpdRecord = fapi2::MBVPD_RECORD_MER0;
+    }
 
-        if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
-        {
-            l_vpdRecord = fapi2::MBVPD_RECORD_MER0;
-        }
+    // Determine the serial number to uniquely identify centaur vpd
+    FAPI_TRY( getMBvpdField(
+                  fapi2::MBVPD_RECORD_VINI,
+                  fapi2::MBVPD_KEYWORD_SN,
+                  i_target,
+                  NULL,
+                  l_serialNum),
+              "Serial number size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
-        // Determine the serial number to uniquely identify centaur vpd
+    FAPI_INF("Serial number size:0x%08x ", l_serialNum);
+
+    if( l_serialNum )
+    {
+        // Allocate memory for buffer
+        l_serialBuf = new uint8_t[l_serialNum]();
+
+        // Retrieve the serial number data from the MVPD
         FAPI_TRY( getMBvpdField(
                       fapi2::MBVPD_RECORD_VINI,
                       fapi2::MBVPD_KEYWORD_SN,
                       i_target,
-                      NULL,
+                      l_serialBuf,
                       l_serialNum),
-                  "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  "Serial number read failed w/rc=0x%x",
+                  static_cast<uint64_t>(fapi2::current_err) );
 
-        FAPI_INF("Serial number size:0x%08x ", l_serialNum);
+        FAPI_INF("Serial Number: ");
 
-        if( l_serialNum )
+        for(size_t i = 0; i < l_serialNum; i++)
         {
-            // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
-
-            // Retrieve the serial number data from the MVPD
-            FAPI_TRY( getMBvpdField(
-                          fapi2::MBVPD_RECORD_VINI,
-                          fapi2::MBVPD_KEYWORD_SN,
-                          i_target,
-                          l_serialBuf,
-                          l_serialNum),
-                      "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
-
-            FAPI_INF("Serial Number: ");
-
-            for(size_t i = 0; i < l_serialNum; i++)
-            {
-                FAPI_INF("%02x ", *(l_serialBuf + i));
-            }
+            FAPI_INF("%02x ", *(l_serialBuf + i));
         }
-
-        // Determine the size of the eRepair data in the VPD
-        FAPI_TRY( getMBvpdField(
-                      l_vpdRecord,
-                      fapi2::MBVPD_KEYWORD_PDI,
-                      i_target,
-                      NULL,
-                      l_bufSize),
-                  "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        FAPI_INF("retrieveRepairDataMemBuf:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_bufSize);
-
-        // Check whether we have Memory on a CDIMM
-        l_rc = getDimmType(i_target, l_customDimm);
-
-        FAPI_ASSERT((uint64_t)l_rc == 0x0,
-                    fapi2::P9_EREPAIR_DIMM_TYPE_CHECK_ERR()
-                    .set_ERROR(l_rc),
-                    "ERROR: DIMM type check");
-
-        if( (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES) || (l_bufSize == 0) )
-        {
-            if((l_bufSize == 0) ||
-               ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
-                (l_bufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
-               ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
-                (l_bufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
-            {
-                FAPI_ASSERT(false,
-                            fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
-                            .set_VAL_BUF_SIZE(l_bufSize)
-                            .set_ERROR(l_rc),
-                            "ERROR: Invalid MEM VPD size");
-            }
-        }
-
-        // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_bufSize];
-
-        FAPI_ASSERT(l_retBuf != NULL,
-                    fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
-                    .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size");
-
-        // Retrieve the Field eRepair data from the PNOR
-        FAPI_TRY( getMBvpdField(
-                      l_vpdRecord,
-                      fapi2::MBVPD_KEYWORD_PDI,
-                      i_target,
-                      l_retBuf,
-                      l_bufSize),
-                  "VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        // Parse the buffer to determine eRepair lanes and copy the
-        // fail lane numbers to the return vector
-        FAPI_TRY( determineRepairLanesMemBuf(
-                      i_target,
-                      l_retBuf,
-                      l_bufSize,
-                      o_txFailLanes,
-                      o_rxFailLanes),
-                  "Call to determineRepairLanesMemBuf failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
     }
 
-    // Delete the buffer which has Field eRepair data
-    delete[] l_retBuf;
-    delete[] l_serialBuf;
+    // Determine the size of the eRepair data in the VPD
+    FAPI_TRY( getMBvpdField(
+                  l_vpdRecord,
+                  fapi2::MBVPD_KEYWORD_PDI,
+                  i_target,
+                  NULL,
+                  l_bufSize),
+              "VPD size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    FAPI_INF("retrieveRepairDataMemBuf:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_bufSize);
+
+    // Check whether we have Memory on a CDIMM
+    l_rc = getDimmType(i_target, l_customDimm);
+
+    FAPI_ASSERT((uint64_t)l_rc == 0x0,
+                fapi2::P9_EREPAIR_DIMM_TYPE_CHECK_ERR()
+                .set_ERROR(l_rc),
+                "ERROR: DIMM type check");
+
+    if( (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES) || (l_bufSize == 0) )
+    {
+        if((l_bufSize == 0) ||
+           ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
+            (l_bufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
+           ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
+            (l_bufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
+        {
+            FAPI_ASSERT(false,
+                        fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
+                        .set_VAL_BUF_SIZE(l_bufSize)
+                        .set_ERROR(l_rc),
+                        "ERROR: Invalid MEM VPD size");
+        }
+    }
+
+    // Allocate memory for buffer
+    l_retBuf = new uint8_t[l_bufSize]();
+
+    FAPI_ASSERT(l_retBuf != NULL,
+                fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
+                .set_BUF_SIZE(l_bufSize),
+                "ERROR: Failed to allocate memory size");
+
+    // Retrieve the Field eRepair data from the PNOR
+    FAPI_TRY( getMBvpdField(
+                  l_vpdRecord,
+                  fapi2::MBVPD_KEYWORD_PDI,
+                  i_target,
+                  l_retBuf,
+                  l_bufSize),
+              "VPD read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    // Parse the buffer to determine eRepair lanes and copy the
+    // fail lane numbers to the return vector
+    FAPI_TRY( determineRepairLanesMemBuf(
+                  i_target,
+                  l_retBuf,
+                  l_bufSize,
+                  o_txFailLanes,
+                  o_rxFailLanes),
+              "Call to determineRepairLanesMemBuf failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
     FAPI_DBG("<< retrieveRepairDataMemBuf");
 
 fapi_try_exit:
+    // Delete the buffer which has Field eRepair data
+    delete[] l_retBuf;
+    delete[] l_serialBuf;
+
     return fapi2::current_err;
 }
 
@@ -952,114 +947,112 @@ fapi2::ReturnCode retrieveRepairDataDMI(
 
     FAPI_DBG(">> retrieveRepairDataDMI");
 
+    // Determine the Processor target
+    l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    fapi2::MvpdRecord l_vpdRecord = fapi2::MVPD_RECORD_VWML;
+
+    if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
     {
-        // Determine the Processor target
-        l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        l_vpdRecord = fapi2::MVPD_RECORD_MER0;
+    }
 
-        fapi2::MvpdRecord l_vpdRecord = fapi2::MVPD_RECORD_VWML;
+    // Determine the serial number to uniquely identify the proc
+    FAPI_TRY( getMvpdField(
+                  fapi2::MVPD_RECORD_VINI,
+                  fapi2::MVPD_KEYWORD_SN,
+                  l_procTarget,
+                  NULL,
+                  l_serialNum),
+              "Serial number size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
-        if(i_vpdType == EREPAIR::EREPAIR_VPD_MNFG)
-        {
-            l_vpdRecord = fapi2::MVPD_RECORD_MER0;
-        }
+    FAPI_INF("Serial number size:0x%08x ", l_serialNum);
 
-        // Determine the serial number to uniquely identify the proc
+    if( l_serialNum )
+    {
+        // Allocate memory for buffer
+        l_serialBuf = new uint8_t[l_serialNum]();
+
+        // Retrieve the serial number data from the MVPD
         FAPI_TRY( getMvpdField(
                       fapi2::MVPD_RECORD_VINI,
                       fapi2::MVPD_KEYWORD_SN,
                       l_procTarget,
-                      NULL,
+                      l_serialBuf,
                       l_serialNum),
-                  "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  "Serial number read failed w/rc=0x%x",
+                  static_cast<uint64_t>(fapi2::current_err) );
 
-        FAPI_INF("Serial number size:0x%08x ", l_serialNum);
+        FAPI_INF("Serial Number: ");
 
-        if( l_serialNum )
+        for(uint32_t i = 0; i < l_serialNum; i++)
         {
-            // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
-
-            // Retrieve the serial number data from the MVPD
-            FAPI_TRY( getMvpdField(
-                          fapi2::MVPD_RECORD_VINI,
-                          fapi2::MVPD_KEYWORD_SN,
-                          l_procTarget,
-                          l_serialBuf,
-                          l_serialNum),
-                      "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
-
-            FAPI_INF("Serial Number: ");
-
-            for(uint32_t i = 0; i < l_serialNum; i++)
-            {
-                FAPI_INF("%02x ", *(l_serialBuf + i));
-            }
+            FAPI_INF("%02x ", *(l_serialBuf + i));
         }
-
-        // Determine the size of the eRepair data in the VPD
-        FAPI_TRY( getMvpdField(
-                      l_vpdRecord,
-                      fapi2::MVPD_KEYWORD_PDI,
-                      l_procTarget,
-                      NULL,
-                      l_bufSize),
-                  "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        FAPI_INF("retrieveRepairDataDMI:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
-
-        if((l_bufSize == 0) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
-            (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_FIELD_SIZE)) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
-            (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_MNFG_SIZE)))
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
-                        .set_VAL_BUF_SIZE(l_bufSize)
-                        .set_ERROR(fapi2::current_err),
-                        "ERROR: Invalid Fabric VPD size (DMI)");
-        }
-
-        // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_bufSize];
-
-        FAPI_ASSERT(l_retBuf != NULL,
-                    fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
-                    .set_BUF_SIZE(l_bufSize),
-                    "ERROR: Failed to allocate memory size (DMI)");
-
-        // Retrieve the Field eRepair data from the PNOR
-        FAPI_TRY( getMvpdField(
-                      l_vpdRecord,
-                      fapi2::MVPD_KEYWORD_PDI,
-                      l_procTarget,
-                      l_retBuf,
-                      l_bufSize),
-                  "VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-
-        // Parse the buffer to determine eRepair lanes and copy the
-        // fail lane numbers to the return vector
-        FAPI_TRY( determineRepairLanesDMI(
-                      i_target,
-                      l_retBuf,
-                      l_bufSize,
-                      o_txFailLanes,
-                      o_rxFailLanes),
-                  "Call to determineRepairLanesDMI failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
     }
 
-    // Delete the buffer which has Field eRepair data
-    delete[] l_retBuf;
-    delete[] l_serialBuf;
+    // Determine the size of the eRepair data in the VPD
+    FAPI_TRY( getMvpdField(
+                  l_vpdRecord,
+                  fapi2::MVPD_KEYWORD_PDI,
+                  l_procTarget,
+                  NULL,
+                  l_bufSize),
+              "VPD size read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    FAPI_INF("retrieveRepairDataDMI:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
+
+    if((l_bufSize == 0) ||
+       ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
+        (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_FIELD_SIZE)) ||
+       ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
+        (l_bufSize > EREPAIR::EREPAIR_P9_MODULE_VPD_MNFG_SIZE)))
+    {
+        FAPI_ASSERT(false,
+                    fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR()
+                    .set_VAL_BUF_SIZE(l_bufSize)
+                    .set_ERROR(fapi2::current_err),
+                    "ERROR: Invalid Fabric VPD size (DMI)");
+    }
+
+    // Allocate memory for buffer
+    l_retBuf = new uint8_t[l_bufSize]();
+
+    FAPI_ASSERT(l_retBuf != NULL,
+                fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
+                .set_BUF_SIZE(l_bufSize),
+                "ERROR: Failed to allocate memory size (DMI)");
+
+    // Retrieve the Field eRepair data from the PNOR
+    FAPI_TRY( getMvpdField(
+                  l_vpdRecord,
+                  fapi2::MVPD_KEYWORD_PDI,
+                  l_procTarget,
+                  l_retBuf,
+                  l_bufSize),
+              "VPD read failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
+
+    // Parse the buffer to determine eRepair lanes and copy the
+    // fail lane numbers to the return vector
+    FAPI_TRY( determineRepairLanesDMI(
+                  i_target,
+                  l_retBuf,
+                  l_bufSize,
+                  o_txFailLanes,
+                  o_rxFailLanes),
+              "Call to determineRepairLanesDMI failed w/rc=0x%x",
+              static_cast<uint64_t>(fapi2::current_err) );
 
     FAPI_DBG("<< retrieveRepairDataDMI");
 
 fapi_try_exit:
+    // Delete the buffer which has Field eRepair data
+    delete[] l_retBuf;
+    delete[] l_serialBuf;
+
     return fapi2::current_err;
 }
 
