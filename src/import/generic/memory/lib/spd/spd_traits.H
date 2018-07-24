@@ -46,23 +46,6 @@ namespace spd
 {
 
 ///
-/// @brief Checks SPD input field against a custom conditional
-/// @tparam T SPD field input type
-/// @tparam F Callable object type
-/// @param[in] i_spd_field Extracted SPD field
-/// @param[in] i_comparison_val value we are comparing against
-/// @param[in] i_op comparison operator function object
-/// @return boolean true or false
-///
-template < typename T, typename F >
-bool conditional(const T i_spd_field,
-                 const size_t i_comparison_val,
-                 const F i_op)
-{
-    return i_op(i_spd_field, i_comparison_val);
-}
-
-///
 /// @class readerTraits
 /// @brief trait structure to hold static SPD information
 /// @tparam F holds SPD field info
