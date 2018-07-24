@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 namespace mss
 {
@@ -122,40 +123,6 @@ fapi2::ReturnCode max_timing_range(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Checks conditional passes and implements traces & exits if it fails
-/// @tparam T input data of any size
-/// @param[in] i_target fapi2 dimm target
-/// @param[in] i_conditional conditional that we are testing against
-/// @param[in] i_spd_byte_index current SPD byte
-/// @param[in] i_spd_data debug data
-/// @param[in] i_err_str error string to print out when conditional fails
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-template< typename T >
-inline fapi2::ReturnCode fail_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const bool i_conditional,
-        const size_t i_spd_byte_index,
-        const T i_spd_data,
-        const char* i_err_str = "")
-{
-    FAPI_ASSERT(i_conditional,
-                fapi2::MSS_BAD_SPD().
-                set_VALUE(i_spd_data).
-                set_BYTE(i_spd_byte_index).
-                set_DIMM_TARGET(i_target),
-                "%s %s Byte %d, data 0x%02x, extracted value: 0x%02x.",
-                spd::c_str(i_target),
-                i_err_str,
-                i_spd_byte_index,
-                i_spd_data);
-
-    return fapi2::FAPI2_RC_SUCCESS;
-fapi_try_exit:
-    return fapi2::current_err;
-
-} // fail_for_invalid_value
 
 ///
 /// @brief Helper function to test if a DRAM generation is valid
