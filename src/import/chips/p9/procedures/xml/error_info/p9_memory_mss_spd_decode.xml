@@ -97,28 +97,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_BAD_SPD</rc>
-    <description>
-        Bad SPD data received.
-        Settings are incorrect within SPD.
-        This could be code problem (decoding) or bad SPD
-    </description>
-    <ffdc>VALUE</ffdc>
-    <ffdc>BYTE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_DRAM_GEN</rc>
     <description>
       Received a DRAM gen unsupported by the SPD decoder factory
