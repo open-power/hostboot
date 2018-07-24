@@ -1826,6 +1826,8 @@ extern "C"
 
                 FAPI_TRY(dimmGetBadDqBitmap(i_target_mba, l_port, l_dimm, l_rnk, l_dqBitmap));
 
+                l_index_sp = 0; // reset for the next time through the loop
+
                 for (l_index0 = 0; l_index0 < DIMM_DQ_RANK_BITMAP_SIZE; l_index0++)
                 {
                     if (l_index0 < DATA_BYTES_PER_PORT)
