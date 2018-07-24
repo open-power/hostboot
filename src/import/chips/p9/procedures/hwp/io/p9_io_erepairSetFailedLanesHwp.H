@@ -43,6 +43,7 @@
 #include <mvpd_access.H>
 #include <fapi2_mbvpd_access.H>
 
+#define RECORD_LENGTH_BYTES 7
 
 /******************************************************************************
  * Accessor HWP
@@ -72,7 +73,7 @@ fapi2::ReturnCode gatherRepairLanes(
 {
     fapi2::ReturnCode l_rc;
     uint8_t           maxBusLanes       = 0;
-    uint32_t          setBitPosition    = (0x80000000);
+    uint32_t          setBitPosition    = (0x00800000); // fail bits[0:23] maps to bits[8:31]
 
     FAPI_INF(">> setRepairLanes - IF:%d repairLane:%d ", i_busInterface, i_repairLane);
 
@@ -89,15 +90,17 @@ fapi2::ReturnCode gatherRepairLanes(
     else if((i_target.getType() == fapi2::TARGET_TYPE_MEMBUF_CHIP) ||
             (i_target.getType() == fapi2::TARGET_TYPE_DMI))
     {
+        // DMI <-- Centaur - Upstream
         if( (i_busInterface == EREPAIR::DMI_MCS_RECEIVE) ||
             (i_busInterface == EREPAIR::DMI_MEMBUF_DRIVE) )
         {
-            maxBusLanes = EREPAIR::DMIBUS_DNSTREAM_MAX_LANE_WIDTH;
+            maxBusLanes = EREPAIR::DMIBUS_UPSTREAM_MAX_LANE_WIDTH;
         }
+        // DMI --> Centaur - Downstream
         else if( (i_busInterface == EREPAIR::DMI_MCS_DRIVE) ||
                  (i_busInterface == EREPAIR::DMI_MEMBUF_RECEIVE) )
         {
-            maxBusLanes = EREPAIR::DMIBUS_UPSTREAM_MAX_LANE_WIDTH;
+            maxBusLanes = EREPAIR::DMIBUS_DNSTREAM_MAX_LANE_WIDTH;
         }
     }
 
@@ -113,7 +116,7 @@ fapi2::ReturnCode gatherRepairLanes(
     *o_failBit |= (setBitPosition >> i_repairLane);
 
     // Get the failed lanes
-    FAPI_INF("Updated Fail Lanes:%x", *o_failBit);
+    FAPI_INF("Updated Fail Lanes:0x%x", *o_failBit);
 
     FAPI_DBG("<< setRepairLanes");
 
@@ -169,9 +172,9 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
     FAPI_INF(">> updateRepairLanesToBuf(XBUS), interface: %s",
              i_interface == EREPAIR::DRIVE ? "Drive" : "Receive");
 
-    for(uint8_t i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
     {
-        FAPI_INF("(%d):%d ", i, i_failLanes[i]);
+        FAPI_INF("(%lu):%llu ", i, i_failLanes[i]);
     }
 
     {
@@ -538,15 +541,16 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                             {
                                 uint32_t temp  = (uint32_t)(l_overWritePtr->failBit);
                                 uint32_t* tptr = &temp;
+                                FAPI_INF("Status(after):Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                                 FAPI_TRY( gatherRepairLanes(
                                               i_target,
                                               l_overWritePtr->interface,
                                               l_repairLane,
                                               tptr),
                                           "gatherRepairLanes() failed w/rc=0x%x",
-                                          (uint64_t)fapi2::current_err );
-                                FAPI_INF("FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+                                          static_cast<uint64_t>(fapi2::current_err) );
                                 l_overWritePtr->failBit = temp;
+                                FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                             }
 
                             // Increment the count of parsed bytes
@@ -558,7 +562,7 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                             // Get the record updated
                             FAPI_INF("Record updated: ");
 
-                            for(uint8_t i = 0; i < 6; i++)
+                            for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                             {
                                 FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                             }
@@ -641,15 +645,16 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                     {
                         uint32_t temp = (uint32_t)(l_fabricBus->failBit);
                         uint32_t* tptr = &temp;
+                        FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_fabricBus->failBit, temp);
                         FAPI_TRY( gatherRepairLanes(
                                       i_target,
                                       l_fabricBus->interface,
                                       l_repairLane,
                                       tptr),
                                   "gatherRepairLanes() failed w/rc=0x%x",
-                                  (uint64_t)fapi2::current_err );
-                        FAPI_INF("FailBit:0x%x temp:0x%x ", l_fabricBus->failBit, temp);
+                                  static_cast<uint64_t>(fapi2::current_err) );
                         l_fabricBus->failBit = temp;
+                        FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_fabricBus->failBit, temp);
                     }
 
                     FAPI_INF("Fabric Bus(after update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d FailBit:0x%x ",
@@ -659,7 +664,7 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                     // Get the record added
                     FAPI_INF("Record Added: ");
 
-                    for(uint8_t i = 0; i < 6; i++)
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                     {
                         FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                     }
@@ -735,9 +740,9 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
     FAPI_INF(">> updateRepairLanesToBuf(MemBuf), interface: %s",
              i_interface == EREPAIR::DRIVE ? "Drive" : "Receive");
 
-    for(uint8_t i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
     {
-        FAPI_INF("(%d):%d ", i, i_failLanes[i]);
+        FAPI_INF("(%lu):%llu ", i, i_failLanes[i]);
     }
 
     {
@@ -1098,15 +1103,16 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                             {
                                 uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
                                 uint32_t* tptr = &temp;
+                                FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                                 FAPI_TRY( gatherRepairLanes(
                                               i_target,
                                               l_overWritePtr->interface,
                                               l_repairLane,
                                               tptr),
                                           "gatherRepairLanes() failed w/rc=0x%x",
-                                          (uint64_t)fapi2::current_err );
-                                FAPI_INF("FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+                                          static_cast<uint64_t>(fapi2::current_err) );
                                 l_overWritePtr->failBit = temp;
+                                FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                             }
 
                             // Increment the count of parsed bytes
@@ -1118,7 +1124,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                             // Get the record updated
                             FAPI_INF("Record updated: ");
 
-                            for(uint8_t i = 0; i < 6; i++)
+                            for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                             {
                                 FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                             }
@@ -1207,15 +1213,16 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                     {
                         uint32_t temp = (uint32_t)(l_memBus->failBit);
                         uint32_t* tptr = &temp;
+                        FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
                         FAPI_TRY( gatherRepairLanes(
                                       i_target,
                                       l_memBus->interface,
                                       l_repairLane,
                                       tptr),
                                   "gatherRepairLanes() failed w/rc=0x%x",
-                                  (uint64_t)fapi2::current_err );
-                        FAPI_INF("FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
+                                  static_cast<uint64_t>(fapi2::current_err) );
                         l_memBus->failBit = temp;
+                        FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
                     }
 
                     FAPI_INF("Memory Bus(after update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d FailBit:0x%x ",
@@ -1225,7 +1232,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                     // Get the record added
                     FAPI_INF("Record added: ");
 
-                    for(uint8_t i = 0; i < 6; i++)
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                     {
                         FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                     }
@@ -1301,9 +1308,9 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
     FAPI_INF(">> updateRepairLanesToBuf(DMI), interface: %s",
              i_interface == EREPAIR::DRIVE ? "Drive" : "Receive");
 
-    for(uint8_t i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
     {
-        FAPI_INF("(%d):%d ", i, i_failLanes[i]);
+        FAPI_INF("(%lu):%llu ", i, i_failLanes[i]);
     }
 
     {
@@ -1664,15 +1671,16 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                             {
                                 uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
                                 uint32_t* tptr = &temp;
+                                FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                                 FAPI_TRY( gatherRepairLanes(
                                               i_target,
                                               l_overWritePtr->interface,
                                               l_repairLane,
                                               tptr),
                                           "gatherRepairLanes() failed w/rc=0x%x",
-                                          (uint64_t)fapi2::current_err );
-                                FAPI_INF("FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+                                          static_cast<uint64_t>(fapi2::current_err) );
                                 l_overWritePtr->failBit = temp;
+                                FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                             }
 
                             // Increment the count of parsed bytes
@@ -1684,7 +1692,7 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                             // Get the record updated
                             FAPI_INF("Record updated: ");
 
-                            for(uint8_t i = 0; i < 6; i++)
+                            for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                             {
                                 FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                             }
@@ -1773,15 +1781,16 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                     {
                         uint32_t temp = (uint32_t)(l_memBus->failBit);
                         uint32_t* tptr = &temp;
+                        FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
                         FAPI_TRY( gatherRepairLanes(
                                       i_target,
                                       l_memBus->interface,
                                       l_repairLane,
                                       tptr),
                                   "gatherRepairLanes() failed w/rc=0x%x",
-                                  (uint64_t)fapi2::current_err );
-                        FAPI_INF("FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
+                                  static_cast<uint64_t>(fapi2::current_err) );
                         l_memBus->failBit = temp;
+                        FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
                     }
 
                     FAPI_INF("DMI Bus(after update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d FailBit:0x%x ", l_memBus->device.proc_centaur_id,
@@ -1790,7 +1799,7 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                     // Get the record added
                     FAPI_INF("Record added: ");
 
-                    for(uint8_t i = 0; i < 6; i++)
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                     {
                         FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                     }
@@ -1849,7 +1858,8 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
     uint32_t l_bufSize   = 0;
     uint32_t l_serialNum = 0;
     uint8_t* l_serialBuf = NULL;
-    FAPI_INF(">> writeRepairDataToVPD - Proc - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(), i_txFailLanes.size());
+    FAPI_INF(">> writeRepairDataToVPD - Proc - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
+             i_txFailLanes.size());
 
     {
         // Determine the Processor target
@@ -1872,14 +1882,14 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                       NULL,
                       l_serialNum),
                   "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("Serial number size:0x%08x ", l_serialNum);
 
         if( l_serialNum )
         {
             // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
+            l_serialBuf = new uint8_t[l_serialNum]();
 
             // Retrieve the serial number data from the MVPD
             FAPI_TRY( getMvpdField(
@@ -1889,7 +1899,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                           l_serialBuf,
                           l_serialNum),
                       "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
 
             FAPI_INF("Serial Number: ");
 
@@ -1907,7 +1917,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                       NULL,
                       l_bufSize),
                   "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
 
@@ -1925,7 +1935,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
         }
 
         // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_bufSize];
+        l_retBuf = new uint8_t[l_bufSize]();
 
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
@@ -1940,7 +1950,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                       l_retBuf,
                       l_bufSize),
                   "VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         if(i_txFailLanes.size())
         {
@@ -1953,7 +1963,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                           i_txFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufProc(DRIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         if(i_rxFailLanes.size())
@@ -1967,7 +1977,7 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                           i_rxFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufProc(RECEIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
@@ -1979,14 +1989,14 @@ fapi2::ReturnCode writeRepairDataToVPDProc(
                       l_retBuf,
                       l_bufSize),
                   "setMvpdField()-Update erepair data to VPD failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
     }
 
+fapi_try_exit:
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
     delete[] l_serialBuf;
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -2022,7 +2032,8 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
     uint8_t* l_serialBuf = NULL;
     size_t   l_serialNum = 0;
     uint8_t    l_customDimm;
-    FAPI_INF(">> writeRepairDataToVPD - MemBuf - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(), i_txFailLanes.size());
+    FAPI_INF(">> writeRepairDataToVPD - MemBuf - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
+             i_txFailLanes.size());
 
     {
         fapi2::MBvpdRecord l_vpdRecord = fapi2::MBVPD_RECORD_VEIR;
@@ -2042,14 +2053,14 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                       NULL,
                       l_serialNum),
                   "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("Serial number size:0x%08x ", l_serialNum);
 
         if( l_serialNum )
         {
             // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
+            l_serialBuf = new uint8_t[l_serialNum]();
 
             // Retrieve the serial number data from the MVPD
             FAPI_TRY( getMBvpdField(
@@ -2059,7 +2070,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                           l_serialBuf,
                           l_serialNum),
                       "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
 
             FAPI_INF("Serial Number: ");
 
@@ -2077,7 +2088,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                       NULL,
                       l_mBufSize),
                   "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_mBufSize);
 
@@ -2124,7 +2135,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
         }
 
         // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_mBufSize];
+        l_retBuf = new uint8_t[l_mBufSize]();
 
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
@@ -2139,7 +2150,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                       l_retBuf,
                       l_mBufSize),
                   "Centaur FRU VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         if(i_txFailLanes.size())
         {
@@ -2152,7 +2163,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                           i_txFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufMemBuf(DRIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         if(i_rxFailLanes.size())
@@ -2166,7 +2177,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                           i_rxFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufMemBuf(RECEIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_mBufSize);
@@ -2178,14 +2189,14 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                       l_retBuf,
                       l_mBufSize),
                   "Update erepair data to VPD failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
-    } // end of(targetType == MEMBUF)
+                  static_cast<uint64_t>(fapi2::current_err) );
+    }
 
+fapi_try_exit:
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
     delete[] l_serialBuf;
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -2219,7 +2230,8 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
     uint32_t l_bufSize   = 0;
     uint8_t* l_serialBuf = NULL;
     uint32_t l_serialNum = 0;
-    FAPI_INF(">> writeRepairDataToVPD - DMI - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(), i_txFailLanes.size());
+    FAPI_INF(">> writeRepairDataToVPD - DMI - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
+             i_txFailLanes.size());
 
     {
         // Determine the Processor target
@@ -2242,14 +2254,14 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                       NULL,
                       l_serialNum),
                   "Serial number size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("Serial number size:0x%08x ", l_serialNum);
 
         if( l_serialNum )
         {
             // Allocate memory for buffer
-            l_serialBuf = new uint8_t[l_serialNum];
+            l_serialBuf = new uint8_t[l_serialNum]();
 
             // Retrieve the serial number data from the MVPD
             FAPI_TRY( getMvpdField(
@@ -2259,7 +2271,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                           l_serialBuf,
                           l_serialNum),
                       "Serial number read failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
 
             FAPI_INF("Serial Number: ");
 
@@ -2277,7 +2289,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                       NULL,
                       l_bufSize),
                   "VPD size read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         FAPI_INF("VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
 
@@ -2295,7 +2307,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
         }
 
         // Allocate memory for buffer
-        l_retBuf = new uint8_t[l_bufSize];
+        l_retBuf = new uint8_t[l_bufSize]();
 
         FAPI_ASSERT(l_retBuf != NULL,
                     fapi2::P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR()
@@ -2310,7 +2322,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                       l_retBuf,
                       l_bufSize),
                   "VPD read failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
 
         if(i_txFailLanes.size())
         {
@@ -2323,7 +2335,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                           i_txFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufDMI(DRIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         if(i_rxFailLanes.size())
@@ -2337,7 +2349,7 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                           i_rxFailLanes,
                           l_retBuf),
                       "updateRepairLanesToBufDMI(RECEIVE) failed w/rc=0x%x",
-                      (uint64_t)fapi2::current_err );
+                      static_cast<uint64_t>(fapi2::current_err) );
         }
 
         FAPI_INF("Set VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MVPD_KEYWORD_PDI, l_bufSize);
@@ -2349,14 +2361,14 @@ fapi2::ReturnCode writeRepairDataToVPDDMI(
                       l_retBuf,
                       l_bufSize),
                   "setMvpdField()-Update erepair data to VPD failed w/rc=0x%x",
-                  (uint64_t)fapi2::current_err );
+                  static_cast<uint64_t>(fapi2::current_err) );
     }
 
+fapi_try_exit:
     // Delete the buffer which has Field eRepair data
     delete[] l_retBuf;
     delete[] l_serialBuf;
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -2382,18 +2394,18 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(">> erepairSetFailedLanesHwp for XBUS - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(),
+    FAPI_INF(">> erepairSetFailedLanesHwp for XBUS - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
              i_txFailLanes.size());
     FAPI_INF("VPD Type:%d ", i_vpdType);
 
-    for(uint8_t i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Rx(%d):%d ", i, i_rxFailLanes[i]);
+        FAPI_INF("Rx(%lu):%llu ", i, i_rxFailLanes[i]);
     }
 
-    for(uint8_t i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%d):%d ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
     }
 
 
@@ -2409,7 +2421,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
                   i_txFailLanes,
                   i_rxFailLanes),
               "writeRepairDataToVPDProc() failed w/rc=0x%x",
-              (uint64_t)fapi2::current_err );
+              static_cast<uint64_t>(fapi2::current_err) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2437,18 +2449,18 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(">> erepairSetFailedLanesHwp for MemBuf - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(),
+    FAPI_INF(">> erepairSetFailedLanesHwp for MemBuf - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
              i_txFailLanes.size());
     FAPI_INF("VPD Type:%d ", i_vpdType);
 
-    for(uint8_t i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Rx(%d):%d ", i, i_rxFailLanes[i]);
+        FAPI_INF("Rx(%lu):%llu ", i, i_rxFailLanes[i]);
     }
 
-    for(uint8_t i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%d):%d ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
     }
 
 
@@ -2464,7 +2476,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
                   i_txFailLanes,
                   i_rxFailLanes),
               "writeRepairDataToVPDMemBuf() failed w/rc=0x%x",
-              (uint64_t)fapi2::current_err );
+              static_cast<uint64_t>(fapi2::current_err) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2492,18 +2504,18 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(">> erepairSetFailedLanesHwp for DMI - RxLaneSize:%d TxLaneSize:%d ", i_rxFailLanes.size(),
+    FAPI_INF(">> erepairSetFailedLanesHwp for DMI - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
              i_txFailLanes.size());
     FAPI_INF("VPD Type:%d ", i_vpdType);
 
-    for(uint8_t i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Rx(%d):%d ", i, i_rxFailLanes[i]);
+        FAPI_INF("Rx(%lu):%llu ", i, i_rxFailLanes[i]);
     }
 
-    for(uint8_t i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%d):%d ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
     }
 
     FAPI_ASSERT(( (i_txFailLanes.size() != 0) || (i_rxFailLanes.size() != 0) ),
@@ -2518,7 +2530,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
                   i_txFailLanes,
                   i_rxFailLanes),
               "writeRepairDataToVPDDMI() failed w/rc=0x%x",
-              (uint64_t)fapi2::current_err );
+              static_cast<uint64_t>(fapi2::current_err) );
 
 fapi_try_exit:
     return fapi2::current_err;
