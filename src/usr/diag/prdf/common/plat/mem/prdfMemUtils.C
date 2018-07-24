@@ -891,6 +891,12 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
         reg->Write();
     }
 
+    // To ensure FSP ATTN doesn't think there is an active attention on this
+    // Centaur, manually clear the interrupt status register.
+    reg = i_membChip->getRegister( "INTER_STATUS_REG" );
+    reg->clearAllBits(); // Blindly clear everything
+    reg->Write();
+
     // For all attached MBAs:
     //   During runtime, send a dynamic memory deallocation message.
     //   During Memory Diagnostics, tell MDIA to stop pattern tests.
