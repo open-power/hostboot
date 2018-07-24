@@ -212,6 +212,9 @@ enum ffdc_function_codes
     FREQ_SCOREBOARD_MAX_SUPPORTED_FREQ = 113,
     FREQ_SCOREBOARD_SUPPORTED_FREQS = 114,
     LIMIT_FREQ_BY_VPD = 115,
+
+    // eff_dimm.C
+    PRIMARY_STACK_TYPE = 116,
 };
 
 enum states
