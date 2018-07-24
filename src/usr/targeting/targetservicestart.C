@@ -46,6 +46,7 @@
 #include <sys/sync.h>
 #include <targeting/common/trace.H>
 #include <targeting/adapters/assertadapter.H>
+#include <targeting/adapters/types.H>
 #include <initservice/taskargs.H>
 #include <util/utilmbox_scratch.H>
 #include <util/align.H>
@@ -76,6 +77,8 @@
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
 #endif
+
+#include <targeting/common/associationmanager.H>
 
 using namespace INITSERVICE::SPLESS;
 //******************************************************************************
@@ -191,14 +194,35 @@ static void initTargeting(errlHndl_t& io_pError)
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();
 
+        if(l_isMpipl)
+        {
+            // Open the permissions to be able to reset the links between
+            // sys <-> nodeN established during runtime.
+            io_pError = l_targetService.modifyReadOnlyPagePermissions(true);
+            if(io_pError)
+            {
+                auto l_plid = io_pError->plid();
+                errlCommit(io_pError, TARG_COMP_ID);
+                INITSERVICE::doShutdown(l_plid, true);
+            }
+
+            io_pError = TARGETING::AssociationManager::
+                                                    reconnectSyAndNodeTargets();
+            if(io_pError)
+            {
+                auto l_plid = io_pError->plid();
+                errlCommit(io_pError, TARG_COMP_ID);
+                INITSERVICE::doShutdown(l_plid,  true);
+            }
+        }
+
         initializeAttributes(l_targetService, l_isMpipl, l_isIstepMode, l_scratch);
         //Ensure all mutex attributes are reset on MPIPL
         if(l_isMpipl)
         {
             // updatePeerTargets will write to read-only attribute pages
             // to get around vmm fails we need to allow writes to readonly
-            // memory for the duration of this loop
-            l_targetService.modifyReadOnlyPagePermissions(true);
+            // memory for the duration of this loop (unlocking is done above)
             uint32_t l_peerTargetsAdjusted = 0;
             uint32_t l_numberMutexAttrsReset = 0;
             for( auto targ_iter = l_targetService.begin();

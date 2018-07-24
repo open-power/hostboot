@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/associationmanager.H>
 #include <targeting/attrrp.H>
 #include <util/misc.H>
 #include <targeting/common/trace.H>
@@ -48,12 +49,25 @@ namespace RT_TARG
         }
 
         TargetService& l_targetService = targetService();
-        l_targetService.init(Singleton<AttrRP>::instance().getNodeCount());
+        size_t l_numNodes = Singleton<AttrRP>::instance().getNodeCount();
+        l_targetService.init(l_numNodes);
 
         adjustTargetingForRuntime();
 
         // set global that TARG is ready
         Util::setIsTargetingLoaded();
+
+        if(l_numNodes > 1)
+        {
+            l_errl = TARGETING::AssociationManager::reconnectSyAndNodeTargets();
+            if(l_errl)
+            {
+                TRACFCOMP(g_trac_targeting, "initTargeting: could not"
+                          " reconnectSyAndNodeTargets");
+                errlCommit(l_errl, TARG_COMP_ID);
+                assert(false, "Could not reconnect system and node targets");
+            }
+        }
     }
 
     // Make any adjustments needed to targeting for runtime

@@ -39,6 +39,9 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
+
+    const uint64_t MASK_OFF_UPPER_BYTE = 0x00FFFFFFFFFFFFFFULL;
+
     errlHndl_t AttrRP::checkHbExistingImage(TargetingHeader* i_header,
                                             uint8_t i_instance,
                                             NODE_ID &io_maxNodeId)
@@ -580,7 +583,9 @@ namespace TARGETING
     void* AttrRP::translateAddr(void* i_pAddress,
                                 const TARGETING::NODE_ID i_nodeId)
     {
-        void* l_address = i_pAddress;
+        void* l_address = reinterpret_cast<void*>(
+                           reinterpret_cast<uint64_t>(i_pAddress) &
+                           MASK_OFF_UPPER_BYTE);
         do
         {
             if (i_nodeId >= AttrRP::INVALID_NODE_ID)
@@ -594,12 +599,12 @@ namespace TARGETING
             {
                 if ((iv_nodeContainer[i_nodeId].pSections[i].vmmAddress +
                      iv_nodeContainer[i_nodeId].pSections[i].size) >=
-                    reinterpret_cast<uint64_t>(i_pAddress))
+                     reinterpret_cast<uint64_t>(l_address))
                 {
                     l_address = reinterpret_cast<void*>(
-                            iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
-                            reinterpret_cast<uint64_t>(i_pAddress) -
-                            iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
+                           iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
+                           reinterpret_cast<uint64_t>(l_address) -
+                           iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
                     break;
                 }
             }
@@ -610,4 +615,72 @@ namespace TARGETING
 
         return l_address;
     }
+
+    #ifdef __HOSTBOOT_RUNTIME
+    errlHndl_t AttrRP::convertPlatTargAddrToCommonAddr(
+        const Target* const i_pTarget,
+            uint64_t&     o_rawAddr) const
+    {
+        errlHndl_t pError = nullptr;
+        AbstractPointer<void> rawAddr;
+        rawAddr.raw = 0;
+
+        NODE_ID nodeId = TARGETING::INVALID_NODE;
+        getNodeId(i_pTarget,nodeId);
+        if(nodeId != TARGETING::INVALID_NODE)
+        {
+            AttrRP_Section* l_pSection = iv_nodeContainer[nodeId].pSections;
+            for(size_t l_sectionCnt = 0;
+                l_sectionCnt < iv_nodeContainer[nodeId].sectionCount;
+                ++l_sectionCnt, ++l_pSection)
+            {
+                if(l_pSection->type == SECTION_TYPE_PNOR_RO)
+                {
+                    TargetingHeader* l_pHeader = static_cast<TargetingHeader*>(
+                                   iv_nodeContainer[nodeId].pTargetMap);
+                    uint64_t l_addr = reinterpret_cast<uint64_t>(i_pTarget) -
+                                        l_pSection->pnorAddress +
+                                        l_pHeader->vmmBaseAddress.raw;
+                    o_rawAddr = l_addr;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            TARG_ERR("Invalid node ID of nodeId = 0x%02X when "
+                    "trying to convert platform target address of %p to a "
+                    "common address",
+                    nodeId,
+                    i_pTarget);
+           /*@
+            *   @errortype
+            *   @moduleid           TARG_MOD_ATTRRP_TO_COMMON_ADDR
+            *   @reasoncode         TARG_RC_INVALID_NODE
+            *   @userdata1          Target's HUID
+            *   @userdata2          Node ID
+            *
+            *   @devdesc            Invalid Node ID was returned for the passed
+            *                       target
+            *   @custdesc           A problem occurred during the IPL of the
+            *                       system.
+            */
+            pError = new ErrlEntry(
+                ERRL_SEV_UNRECOVERABLE,
+                TARG_MOD_ATTRRP_TO_COMMON_ADDR,
+                TARG_RC_INVALID_NODE,
+                TARGETING::get_huid(i_pTarget),
+                nodeId
+                );
+        }
+
+        rawAddr.raw = o_rawAddr;
+        // Node count starts with 1, so increment the node ID here.
+        rawAddr.TranslationEncoded.nodeId = ++nodeId;
+        // Update the address with the node ID.
+        o_rawAddr = rawAddr.raw;
+
+        return pError;
+    }
+    #endif
 }

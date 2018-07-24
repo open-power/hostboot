@@ -165,6 +165,43 @@ class AttrRP
          *  @return Address of targeting image as a void*
          */
         void* getTargetMapPtr(const NODE_ID i_nodeId);
+
+       /**
+        *  @brief Converts target's platform address to a common address
+        *
+        *  @par Detailed Description:
+        *      Takes a platform target address, and converts it to a
+        *      common address by looking up the node/section holding the
+        *      address and adding the previously stripped out VMM offset
+        *      back in
+        *
+        *  @param[in] i_pTarget
+        *      Pointer to target. Must not be nullptr (decode error otherwise)
+        *  @param[out] o_rawAddr
+        *      Target's platform address converted to common address.  On
+        *      failure, returns 0.  May include node ID in leftmost byte.
+        *
+        *  @return Error log handle indicating the status of the request
+        *
+        *  @retval nullptr Translated the platform address into a common
+        *      address and returned result in o_rawAddr
+        *  @retval !nullptr Failed to translate the platform address into a
+        *      common address and set o_rawAddr to 0
+        *
+        *      Error log handle points to a valid error log object whose
+        *      primary SRC reason code (pError->getSRC()->reasonCode())
+        *      indicates the type of error.  This API may return one
+        *      of the following "special" reason codes:
+        *          N/A
+        *
+        *  @note It is up to the caller to change the severity of the
+        *      returned error based on what it decides to do with it.  By
+        *      default any returned error created by this function will
+        *      be a non-reported tracing event error log.
+        */
+        errlHndl_t convertPlatTargAddrToCommonAddr(
+                   const Target* const i_pTarget,
+                   uint64_t&     o_rawAddr) const;
 #endif
 
         /**

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -108,7 +110,6 @@ class _TargetRawIterator : public _TargetIterator<T>
          *
          *  @return The reference to the same iterator after advancing it
          */
-        ALWAYS_INLINE
         _TargetRawIterator& operator++();
 
         /**

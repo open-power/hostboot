@@ -62,6 +62,10 @@ enum PlatTargetingModuleId
     TARG_RT_VALIDATEDATA                          = 0x86,
     TARG_RT_SAVERESTOREATTRS                      = 0x87,
     TARG_SVC_RESET_MUTEX                          = 0x88,
+    TARG_MOD_ATTRRP_TO_COMMON_ADDR                = 0x89,
+    TARG_MOD_CLR_ASSOCS_FROM_SYS_OR_NODE_TARGET   = 0x8A,
+    TARG_MOD_ADD_ASSOC_TO_SYS_OR_NODE_TARGET      = 0x8B,
+    TARG_MOD_RECONNECT_SYS_AND_NODE_TARGETS       = 0x8C,
 };
 
 /**
@@ -83,6 +87,8 @@ enum PlatTargetingReasonCode
     TARG_RT_BAD_ATTR_SIZES         = TARG_COMP_ID | 0x88,
     TARG_SVC_MISSING_ATTR          = TARG_COMP_ID | 0x89,
     TARG_RT_NODE_NOT_IN_IMAGE      = TARG_COMP_ID | 0x8A,
+    TARG_RC_FAILED_TO_XLATE_ADDR   = TARG_COMP_ID | 0x8B,
+    TARG_RC_EXCEEDED_ENTRY_LIMIT   = TARG_COMP_ID | 0x8C,
 };
 
 } // End TARGETING namespace

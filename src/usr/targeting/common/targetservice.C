@@ -1833,6 +1833,108 @@ uint32_t TargetService::resetMutexAttributes(const Target* i_pTarget)
     #undef TARG_FN
     return l_numberMutexAttrsReset;
 }
+
+//******************************************************************************
+// getSysToNodeAssociations
+//******************************************************************************
+SysToNodeContainer TargetService::getSysToNodeAssociations(
+    const bool i_anyNodeType)
+{
+    TARGETING::TYPE nodeType = TARGETING::TYPE_NODE;
+    if(i_anyNodeType)
+    {
+        nodeType = TARGETING::TYPE_NA;
+    }
+
+    PredicateCTM isaSystemTarget(CLASS_SYS, TYPE_SYS);
+    PredicateCTM isaNodeTarget(CLASS_ENC, nodeType);
+    SysToNodeContainer nodeContainer;
+    SysToNodeContainer sysContainer;
+
+    NODE_ID l_node = targetService().getNumInitializedNodes();
+
+    TargetRawIterator pRawTarget = targetService().raw_begin();
+    for(;
+        pRawTarget != targetService().raw_end();
+        ++pRawTarget)
+    {
+        if(isaSystemTarget(*pRawTarget))
+        {
+            // Get node ID only in non-IPL case
+            #if defined(__HOSTBOOT_RUNTIME) || !defined(__HOSTBOOT_MODULE)
+            TARG_GET_SINGLETON(TARGETING::theAttrRP).getNodeId(
+                *pRawTarget,l_node);
+            #else
+            l_node = 0;
+            #endif
+            SysToNode sysOnly(NULL, *pRawTarget, l_node);
+            sysContainer.push_back(sysOnly);
+        }
+        else if(isaNodeTarget(*pRawTarget))
+        {
+            // Get node ID only in non-IPL case
+            #if defined(__HOSTBOOT_RUNTIME) || !defined(__HOSTBOOT_MODULE)
+            TARG_GET_SINGLETON(TARGETING::theAttrRP).getNodeId(
+                *pRawTarget,l_node);
+            #else
+            l_node = 0;
+            #endif
+            SysToNode nodeOnly(*pRawTarget, NULL, l_node);
+            nodeContainer.push_back(nodeOnly);
+        }
+    }
+
+    typedef SysToNodeContainerIt nodeIterator;
+    typedef SysToNodeContainerIt sysIterator;
+
+    for(nodeIterator pNodeTarget = nodeContainer.begin();
+        pNodeTarget != nodeContainer.end();
+        ++pNodeTarget)
+    {
+        for(sysIterator pSysTarget = sysContainer.begin();
+            pSysTarget != sysContainer.end();
+            ++pSysTarget)
+        {
+            if(pNodeTarget->nodeId == pSysTarget->nodeId)
+            {
+                pNodeTarget->pSysTarget = pSysTarget->pSysTarget;
+                break;
+            }
+        }
+    }
+
+    return nodeContainer;
+}
+#endif
+
+#ifdef __HOSTBOOT_RUNTIME
+bool isThisMasterNodeTarget(const Target* const i_pTarget)
+{
+    bool l_masterFound = false;
+
+    TARG_ASSERT(i_pTarget != nullptr,
+        "Passed Node Target as nullptr");
+
+    // Check if node Target
+    PredicateCTM l_nodePredicate(CLASS_ENC, TYPE_NODE);
+    if(l_nodePredicate(i_pTarget))
+    {
+        Target* l_masterNode = nullptr;
+        TARGETING::UTIL::getMasterNodeTarget(l_masterNode);
+        if(i_pTarget == l_masterNode)
+        {
+            l_masterFound = true;
+        }
+    }
+    else
+    {
+        TARG_INF("Passed Target is not a Node Target, HUID [0x%08X]",
+            i_pTarget->getAttr<ATTR_HUID>());
+    }
+
+    return l_masterFound;
+}
+
 #endif
 
 #undef TARG_CLASS
