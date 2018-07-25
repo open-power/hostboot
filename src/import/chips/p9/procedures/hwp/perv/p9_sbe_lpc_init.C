@@ -47,6 +47,16 @@
 const bool LPC_UTILS_TIMEOUT_FFDC = true;
 #include "p9_lpc_utils.H"
 
+static fapi2::ReturnCode switch_lpc_clock_mux(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    bool use_nest_clock)
+{
+    fapi2::buffer<uint64_t> l_data64;
+    l_data64.flush<0>();
+    l_data64.setBit<1>();
+    return fapi2::putScom(i_target_chip, use_nest_clock ? PERV_N3_CPLT_CTRL0_OR : PERV_N3_CPLT_CTRL0_CLEAR, l_data64);
+}
+
 static fapi2::ReturnCode reset_lpc_master(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
@@ -56,18 +66,6 @@ static fapi2::ReturnCode reset_lpc_master(
     //Setting registers to do an LPC functional reset
     l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
     FAPI_TRY(fapi2::putScom(i_target_chip, PERV_N3_CPLT_CONF1_OR, l_data64));
-
-    // set LPC clock mux select to internal clock
-    //Setting CPLT_CTRL0 register value
-    l_data64.flush<0>();
-    l_data64.setBit<1>();  //PERV.CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 1
-    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_TP_CPLT_CTRL0_OR, l_data64));
-
-    // set LPC clock mux select to external clock
-    //Setting CPLT_CTRL0 register value
-    l_data64.flush<0>();
-    l_data64.setBit<1>();  //PERV.CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 0
-    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_TP_CPLT_CTRL0_CLEAR, l_data64));
 
     //Turn off the LPC functional reset
     l_data64.flush<0>().setBit<CPLT_CONF1_TC_LP_RESET>();
@@ -144,6 +142,9 @@ fapi2::ReturnCode p9_sbe_lpc_init(
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SP_MODE, i_target_chip, l_is_fsp), "Error getting ATTR_IS_SP_MODE");
 
+    /* The next two steps have to take place with the nest clock muxed into the LPC clock so all the logic sees its resets */
+    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, true));
+
     //------------------------------------------------------------------------------------------
     //--- STEP 1: Functional reset of LPC Master
     //------------------------------------------------------------------------------------------
@@ -161,6 +162,9 @@ fapi2::ReturnCode p9_sbe_lpc_init(
     {
         FAPI_TRY(reset_lpc_bus_via_gpio(i_target_chip));
     }
+
+    /* We can flip the LPC clock back to the external clock input now */
+    FAPI_TRY(switch_lpc_clock_mux(i_target_chip, false));
 
     //------------------------------------------------------------------------------------------
     //--- STEP 3: Program settings in LPC Master and FPGA
