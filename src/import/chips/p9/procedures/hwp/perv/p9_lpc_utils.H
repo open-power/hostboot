@@ -30,7 +30,7 @@
 #define P9_LPC_UTILS_H_
 
 const uint32_t LPC_CMD_TIMEOUT_DELAY_NS = 1000000;
-const uint32_t LPC_CMD_TIMEOUT_DELAY_CYCLE = 80000000;
+const uint32_t LPC_CMD_TIMEOUT_DELAY_CYCLE = 1000000;
 const uint32_t LPC_CMD_TIMEOUT_COUNT = 20;
 
 static fapi2::ReturnCode lpc_rw(
