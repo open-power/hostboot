@@ -821,13 +821,6 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 l_state.specdeconfig = 0;
                 (*l_sdIter)->setAttr<ATTR_HWAS_STATE>(l_state);
 
-                l_pErr = platLogEvent(*l_sdIter, RESOURCE_RECOVERED);
-                if (l_pErr)
-                {
-                    HWAS_ERR("platLogEvent returned an error");
-                    break;
-                }
-
                 //Mark parent node as resource recovered
                 PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
                 PredicateHwas predFunctional;
@@ -846,6 +839,23 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                     l_state.deconfiguredByEid =
                             CONFIGURED_BY_RESOURCE_RECOVERY;
                     pNodeList[0]->setAttr<ATTR_HWAS_STATE>(l_state);
+                }
+            } // for
+
+            //After recovery go through all recovered gard records and
+            //log an event.
+            for (GardRecordsCItr_t l_itr = l_specDeconfigVector.begin();
+                 l_itr != l_specDeconfigVector.end();
+                 ++l_itr)
+            {
+                Target * l_pTarget =
+                   targetService().toTarget((*l_itr).iv_targetId);
+
+                l_pErr = platLogEvent(l_pTarget, RESOURCE_RECOVERED);
+                if (l_pErr)
+                {
+                    HWAS_ERR("platLogEvent returned an error");
+                    break;
                 }
             } // for
         }
