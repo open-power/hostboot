@@ -1871,6 +1871,13 @@ ReturnCode __rowRepairTranslateDramPos(
             uint8_t l_dramPos = (l_dramPosAndSrank >> 3) & 0x1f;
             uint8_t l_srank = l_dramPosAndSrank & 0x07;
 
+            // The last bit of the row repair stores the validity bit
+            bool l_valid = io_translatedData[rank][mss::ROW_REPAIR_BYTE_COUNT-1]
+                           & 0x01;
+
+            // If the row repair isn't valid, no need to translate anything
+            if ( !l_valid ) continue;
+
             uint8_t l_dq = 0;
             l_rc = __dramToDq( i_fapiDimm, l_dramPos, l_dq );
             if ( l_rc )
