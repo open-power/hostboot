@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,7 +116,7 @@ fapi2::ReturnCode rx_pdwn_lanes(
     const std::vector< uint8_t >&                   i_bad_lanes)
 {
     const uint8_t GRP0 = 0;
-    FAPI_DBG("rx_pdwn_lanes: Enter Size(%d)", i_bad_lanes.size());
+    FAPI_IMP("rx_pdwn_lanes: Enter Size(%d)", i_bad_lanes.size());
     char target_string[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_target, target_string, fapi2::MAX_ECMD_STRING_LEN);
 
@@ -131,11 +131,13 @@ fapi2::ReturnCode rx_pdwn_lanes(
                      GRP0,
                      i_bad_lanes[index]);
 
-            FAPI_TRY(io::rmw(EDIP_RX_LANE_DIG_PDWN, i_target, GRP0, i_bad_lanes[index], 1),
-                     "Failed rmw rx dig pdwn reg");
+            FAPI_TRY(io::rmw(EDI_RX_LANE_PDWN, i_target, GRP0, i_bad_lanes[index], 1),
+                     "Failed rmw rx pdwn reg");
 
-            FAPI_TRY(io::rmw(EDIP_RX_LANE_ANA_PDWN, i_target, GRP0, i_bad_lanes[index], 1),
-                     "Failed rmw rx ana pdwn reg");
+            // Set rx_wt_lane_disabled for this lane; see SW244284, SW280992
+            FAPI_TRY(io::rmw(EDI_RX_WT_LANE_DISABLED, i_target, GRP0, i_bad_lanes[index], 1),
+                     "Failed rmw rx wt lane disabled reg");
+
 
         }
     }
@@ -170,15 +172,15 @@ fapi2::ReturnCode tx_pdwn_lanes(
 
     if(!i_bad_lanes.empty())
     {
-        FAPI_TRY(io::read(EDIP_TX_MSBSWAP, i_target, GRP0, LN0, l_data),
-                 "Failed read edip_tx_msbswap");
-        l_msbswap = io::get(EDIP_TX_MSBSWAP, l_data);
+        FAPI_TRY(io::read(EDI_TX_MSBSWAP, i_target, GRP0, LN0, l_data),
+                 "Failed read edi_tx_msbswap");
+        l_msbswap = io::get(EDI_TX_MSBSWAP, l_data);
 
         if(l_msbswap == 0x1)
         {
-            FAPI_TRY(io::read(EDIP_TX_END_LANE_ID, i_target, GRP0, LN0, l_data));
-            l_end_lane = io::get(EDIP_TX_END_LANE_ID, l_data);
-            FAPI_DBG("edip_tx_msbswap: tx_end_lane_id(%d).", l_end_lane);
+            FAPI_TRY(io::read(EDI_TX_END_LANE_ID, i_target, GRP0, LN0, l_data));
+            l_end_lane = io::get(EDI_TX_END_LANE_ID, l_data);
+            FAPI_DBG("edi_tx_msbswap: tx_end_lane_id(%d).", l_end_lane);
         }
 
         for(uint8_t index = 0; index < i_bad_lanes.size(); ++index)
@@ -188,7 +190,7 @@ fapi2::ReturnCode tx_pdwn_lanes(
             if(l_msbswap == 0x1)
             {
                 l_lane = l_end_lane - i_bad_lanes[index];
-                FAPI_DBG("edip_tx_msbswap: tx_end_lane_id(%d) lane(%d -> %d).",
+                FAPI_DBG("edi_tx_msbswap: tx_end_lane_id(%d) lane(%d -> %d).",
                          l_end_lane, i_bad_lanes[index], l_lane);
             }
 
@@ -199,7 +201,7 @@ fapi2::ReturnCode tx_pdwn_lanes(
                      GRP0,
                      l_lane);
 
-            FAPI_TRY(io::rmw(EDIP_TX_LANE_PDWN, i_target, GRP0, l_lane, 1));
+            FAPI_TRY(io::rmw(EDI_TX_LANE_PDWN, i_target, GRP0, l_lane, 1));
 
         }
     }

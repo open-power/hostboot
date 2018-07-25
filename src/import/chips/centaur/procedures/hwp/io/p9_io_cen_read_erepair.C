@@ -83,26 +83,25 @@ fapi2::ReturnCode p9_io_cen_read_erepair(
 
     o_bad_lanes.clear();
 
-    // TODO CHANGE TO EDI REGISTERS
-    FAPI_TRY(io::read(EDIP_RX_GLBSM_STAT9_E_PG, i_target, GRP0, LN0, l_data),
+    FAPI_TRY(io::read(EDI_RX_BAD_LANE_ENC_GCRMSG_PG, i_target, GRP0, LN0, l_data),
              "Reading Bad Lane Code Failed.");
 
-    FAPI_DBG("Bad Lane Code: %d", io::get(EDIP_RX_BAD_LANE_CODE, l_data));
+    FAPI_DBG("Bad Lane Code: %d", io::get(EDI_RX_BAD_LANE_CODE_GCRMSG, l_data));
 
-    switch(io::get(EDIP_RX_BAD_LANE_CODE, l_data))
+    switch(io::get(EDI_RX_BAD_LANE_CODE_GCRMSG, l_data))
     {
         case BAD_LANES_3PLUS:
             FAPI_DBG("Bad Lane: Three or more bad lanes found.");
 
         // We will intentionally fall through to collect bad lane 1 & 2.
         case BAD_LANES_2:
-            FAPI_DBG("Bad Lane 2: %d", io::get(EDIP_RX_BAD_LANE2, l_data));
-            o_bad_lanes.push_back((uint8_t)io::get(EDIP_RX_BAD_LANE2, l_data));
+            FAPI_DBG("Bad Lane 2: %d", io::get(EDI_RX_BAD_LANE2_GCRMSG, l_data));
+            o_bad_lanes.push_back((uint8_t)io::get(EDI_RX_BAD_LANE2_GCRMSG, l_data));
 
         // We will intentionally fall through to collect bad lane 1.
         case BAD_LANES_1:
-            FAPI_DBG("Bad Lane 1: %d", io::get(EDIP_RX_BAD_LANE1, l_data));
-            o_bad_lanes.push_back((uint8_t)io::get(EDIP_RX_BAD_LANE1, l_data));
+            FAPI_DBG("Bad Lane 1: %d", io::get(EDI_RX_BAD_LANE1_GCRMSG, l_data));
+            o_bad_lanes.push_back((uint8_t)io::get(EDI_RX_BAD_LANE1_GCRMSG, l_data));
             break;
 
         case BAD_LANES_0:

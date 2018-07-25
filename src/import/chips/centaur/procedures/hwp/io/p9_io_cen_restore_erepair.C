@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,17 +136,17 @@ fapi2::ReturnCode set_rx_bad_lane_vectors(
         //   to GCR registers only being 16 bits wide.
         if(i_bad_lanes[index] < IO_GCR_REG_WIDTH)
         {
-            FAPI_TRY(io::read(EDIP_RX_LANE_BAD_VEC_0_15, i_target, GRP0, LN0, l_data));
+            FAPI_TRY(io::read(EDI_RX_LANE_BAD_VEC_0_15, i_target, GRP0, LN0, l_data));
             l_data |= (0x8000 >> bad_lane);
-            FAPI_TRY(io::write(EDIP_RX_LANE_BAD_VEC_0_15, i_target, GRP0, LN0, l_data));
+            FAPI_TRY(io::write(EDI_RX_LANE_BAD_VEC_0_15, i_target, GRP0, LN0, l_data));
         }
         else
         {
             bad_lane -= IO_GCR_REG_WIDTH;
 
-            FAPI_TRY(io::read(EDIP_RX_LANE_BAD_VEC_16_23, i_target, GRP0, LN0, l_data));
+            FAPI_TRY(io::read(EDI_RX_LANE_BAD_VEC_16_31, i_target, GRP0, LN0, l_data));
             l_data |= (0x8000 >> bad_lane);
-            FAPI_TRY(io::write(EDIP_RX_LANE_BAD_VEC_16_23, i_target, GRP0, LN0, l_data));
+            FAPI_TRY(io::write(EDI_RX_LANE_BAD_VEC_16_31, i_target, GRP0, LN0, l_data));
         }
 
     }
