@@ -72,6 +72,7 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
 #include <p9n2_misc_scom_addresses.H>
+#include <p9n2_misc_scom_addresses_fld.H>
 
 // ----------------------------------------------------------------------
 // Constants
@@ -299,6 +300,15 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
                             (uint32_t)l_data64);
             }
         }
+
+        //First mask bit 7 in OIMR and then clear bit 7 in OISR
+        l_data64.flush<0>().setBit<P9N2_PU_OCB_OCI_OISR0_GPE2_ERROR>();
+
+        //mask bit 7
+        FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OIMR0_SCOM2, l_data64));
+        //clear bit 7
+        FAPI_TRY(fapi2::putScom(i_target, P9N2_PU_OCB_OCI_OISR0_SCOM1, l_data64));
+
 
         // Setup the SGPE Timer Selects
         // These hardcoded values are assumed by the SGPE Hcode for setting up
