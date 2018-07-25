@@ -161,7 +161,7 @@ int32_t l2LineDelete(TARGETING::TargetHandle_t i_exTgt,
  */
 int32_t pmCallout( TARGETING::TargetHandle_t i_tgt,
                    RasAction& o_ra,
-                   uint32_t o_deadCores,
+                   uint32_t &o_deadCores,
                    std::vector < StopErrLogSectn >& o_ffdcList );
 
 
