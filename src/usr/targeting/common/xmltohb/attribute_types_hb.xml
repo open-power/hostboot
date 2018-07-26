@@ -1211,4 +1211,38 @@
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>HB_INITIATED_PM_RESET</id>
+    <description>
+        Indicates that a chip has already been put into reset elsewhere
+        such that the next reset request will be skipped.
+    </description>
+    <simpleType>
+       <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+  <id>HB_INITIATED_PM_RESET</id>
+  <description>Enum for HB_INITIATED_PM_RESET</description>
+  <enumerator>
+    <!-- Default state, no extra reset has been performed -->
+    <name>INACTIVE</name>
+    <value>0</value>
+  </enumerator>
+  <enumerator>
+    <!-- Currently in the middle of doing an extra reset -->
+    <name>IN_PROGRESS</name>
+    <value>1</value>
+  </enumerator>
+  <enumerator>
+    <!-- Chip has already been reset -->
+    <name>COMPLETE</name>
+    <value>2</value>
+  </enumerator>
+</enumerationType>
+
 </attributes>

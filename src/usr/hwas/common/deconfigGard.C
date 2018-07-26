@@ -1640,8 +1640,14 @@ void DeconfigGard::_deconfigureByAssoc(
         _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
     } // for CHILD
 
-    if ((i_deconfigRule == NOT_AT_RUNTIME)||
-            (i_deconfigRule == SPEC_DECONFIG))
+    // Retrieve the target type from the given target
+    TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
+
+    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
+        (i_deconfigRule == SPEC_DECONFIG)  ||
+        (l_targetType == TYPE_EQ)          ||
+        (l_targetType == TYPE_EX)          ||
+        (l_targetType == TYPE_CORE))
     {
         // if the rule is NOT_AT_RUNTIME and we got here, then we are
         // not at runtime.
@@ -1649,6 +1655,9 @@ void DeconfigGard::_deconfigureByAssoc(
         // reason is, we're not really deconfigureing anything, we're just
         // marking them as non-functional. we only want to do that for the
         // desired target and it's CHILD
+        // Except for target EQ, EX, CORE.  Deconfigure these regardless of the
+        // runtime status
+
 
         // find all CHILD_BY_AFFINITY targets and deconfigure them
         targetService().getAssociated(pChildList, &i_target,
@@ -1673,7 +1682,7 @@ void DeconfigGard::_deconfigureByAssoc(
         // chip  (TYPE_EQ, TYPE_EX, TYPE_CORE)
         // deconfigureByAssociation rules
 
-        switch (i_target.getAttr<ATTR_TYPE>())
+        switch (l_targetType)
         {
             case TYPE_CORE:
             {
@@ -3069,7 +3078,7 @@ bool DeconfigGard::anyChildFCO (Target & i_parent)
 // deconfigureTargetAtRuntime
 /******************************************************************************/
 errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
-        TARGETING::ConstTargetHandle_t const i_pTarget,
+        TARGETING::TargetHandle_t i_pTarget,
         const DeconfigGard::DeconfigureFlags i_deconfigureAction,
         const errlHndl_t i_deconfigErrl)
 
