@@ -57,6 +57,7 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
+#include <util/align.H>
 #include <errl/errludprintk.H>
 
 using namespace INTR;
@@ -2486,9 +2487,26 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
             }
             else if(this_node_info->exist[node])
             {
+                // Read the remote ipc address for this node and store it as an integer
+                uint64_t l_remote_ipc_addr =
+                    reinterpret_cast<uint64_t>(KernelIpc::ipc_data_area.remote_ipc_data_addr[node]);
+
+                // perform a block map to get a page aligned vaddr that contains the info we want
+                void* l_pageAlignedPtr = mm_block_map(reinterpret_cast<void *>(ALIGN_PAGE_DOWN(l_remote_ipc_addr)),
+                                                        ALIGN_PAGE(sizeof(KernelIpc::ipc_data_area_t) + PAGE_SIZE));
+
+                KernelIpc::ipc_data_area_t * l_node_ipc_data_area =
+                    reinterpret_cast<KernelIpc::ipc_data_area_t *>(
+                        reinterpret_cast<uint64_t>(l_pageAlignedPtr) +
+                        (l_remote_ipc_addr % PAGE_SIZE) );
+
+                hrmorBase = l_node_ipc_data_area->hrmor_base;
+
+                mm_block_unmap(reinterpret_cast<void *>(ALIGN_PAGE_DOWN(l_remote_ipc_addr)));
+
                 node_info_ptr =
                     reinterpret_cast<void *>
-                    ((node*hrmorBase)+VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
+                    ((hrmorBase)+VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
                 internode_info_t * node_info =
                     reinterpret_cast<internode_info_t *>
