@@ -488,7 +488,7 @@ public:
      *
      * NOTE: Currently only core targets are supported
      *
-     * @param[in]  i_pTarget   const pointer to the core target to deconfigure
+     * @param[in]  i_pTarget   pointer to the target to deconfigure
      * @param[in]  i_deconfigureAction Deconfigure options -
      *                                              FULLY_AT_RUNTIME
      * @param[in]  i_deconfigErrl - error log assocated with this deconfig
@@ -500,7 +500,7 @@ public:
      * @return errlHndl_t. Error log handle.
      */
     errlHndl_t deconfigureTargetAtRuntime(
-            TARGETING::ConstTargetHandle_t const i_pTarget,
+            TARGETING::TargetHandle_t i_pTarget,
             const DeconfigureFlags i_deconfigureAction,
             const errlHndl_t i_deconfigErrl);
 
@@ -515,7 +515,7 @@ public:
      * child targets. Any errors deconfiguring targets are committed and
      * the function continues. The only errors returned are usage errors.
      *
-     * @param[in]  i_pTarget   const pointer to Target to deconfigure.
+     * @param[in]  i_pTarget   pointer to Target to deconfigure.
      * @param[in]  i_deconfigureAction Deconfigure options -
      *                                              FULLY_AT_RUNTIME
      * @param[in]  i_deconfigErrl - error log assocated with this deconfig
@@ -529,7 +529,7 @@ public:
 
 #ifdef __HOSTBOOT_RUNTIME
     errlHndl_t platDeconfigureTargetAtRuntime(
-            TARGETING::ConstTargetHandle_t const i_pTarget,
+            TARGETING::TargetHandle_t i_pTarget,
             const DeconfigureFlags i_deconfigureAction,
             const errlHndl_t i_deconfigErrl);
 #endif

@@ -102,6 +102,9 @@
     <attribute>
         <id>HB_SBE_SEEPROM_VERSION_MISMATCH</id>
     </attribute>
+    <attribute>
+        <id>HB_INITIATED_PM_RESET</id>
+    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

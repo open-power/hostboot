@@ -46,6 +46,7 @@
 #include <initservice/initserviceif.H>
 
 #include <pnor/pnorif.H>
+#include <pm/pm_common.H>                  // HBPM::resetPMComplex
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>             // g_hostInterfaces
@@ -733,7 +734,7 @@ errlHndl_t hwasError(const uint8_t i_sev,
 // platDeconfigureTargetAtRuntime
 /******************************************************************************/
 errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
-        TARGETING::ConstTargetHandle_t const i_pTarget,
+        TARGETING::TargetHandle_t i_pTarget,
         const DeconfigureFlags i_deconfigureAction,
         const errlHndl_t i_deconfigErrl)
 {
@@ -762,16 +763,23 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
             break;
         }
 
-        if(i_pTarget->getAttr<TARGETING::ATTR_TYPE>() !=
-                TARGETING::TYPE_CORE)
+        // Retrieve the target type from the given target
+        TYPE l_targetType = i_pTarget->getAttr<ATTR_TYPE>();
+
+        // Make sure we are only working with the following types
+        if( (l_targetType != TYPE_EQ) &&
+            (l_targetType != TYPE_EX) &&
+            (l_targetType != TYPE_CORE) )
         {
+            HWAS_ERR("Caller passed invalid type: 0x%08X", l_targetType);
+
             // only supporting cores
             /*@
              * @errortype
              * @moduleid     MOD_RUNTIME_DECONFIG
              * @reasoncode   RC_INVALID_TARGET
-             * @devdesc      Target is not a TYPE_CORE
-             * userdata1     target huid
+             * @devdesc      Target is neiter TYPE_EQ, TYPE_EX nor TYPE_CORE
+             * @userdata1    target huid
              * @custdesc     Host Firmware encountered an internal
              *               error
              */
@@ -786,7 +794,7 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
         {
             case DeconfigGard::FULLY_AT_RUNTIME:
 
-                HWAS_INF(" Deconfig action FULLY_AT_RUNTIME :0x%08X",
+                HWAS_INF("Deconfig action FULLY_AT_RUNTIME :0x%08X",
                         DeconfigGard::FULLY_AT_RUNTIME);
 
                 break;
@@ -813,10 +821,12 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 break;
         }
 
-    }while(0);
+        // If an error then exit while loop
+        if (l_errl)
+        {
+           break;
+        }
 
-    if(l_errl == nullptr)
-    {
         uint32_t  l_deconfigReason =  (i_deconfigErrl) ? i_deconfigErrl->eid() :
             DeconfigGard::DECONFIGURED_BY_PRD;
 
@@ -825,7 +835,6 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                 " 0x%08X deconfigReason:0x%08X",
                 get_huid(i_pTarget),i_deconfigureAction,
                 l_deconfigReason);
-
 
         bool l_isTargetDeconfigured = false;
         // deconfigureTarget() checks for targets that can be deconfigured at
@@ -836,38 +845,90 @@ errlHndl_t DeconfigGard::platDeconfigureTargetAtRuntime(
                                     &l_isTargetDeconfigured,
                                     i_deconfigureAction);
 
-        if(l_errl == nullptr && l_isTargetDeconfigured)
+        // If there was an error OR the target was not deconfigured, then
+        // do not continue and exit
+        if (l_errl || !l_isTargetDeconfigured)
         {
-            HWAS_INF("platDeconfigureTargetAtRuntime() - "
-                    "deconfigure successful");
+            HWAS_INF("platDeconfigureTargetAtRuntime() - deconfigure failed");
+            break;
+        }
 
-            TARGETING::TYPE  l_type = TARGETING::TYPE_PROC;
-            const TARGETING::Target * l_parent =
-                                TARGETING::getParent(i_pTarget,l_type);
-            // get the parent proc and call the hwp to alert
-            // pm not to attempt to manage this core anymore
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_proc(const_cast<TARGETING::Target *>(l_parent));
+        HWAS_INF("platDeconfigureTargetAtRuntime() - "
+                 "deconfigure successful");
 
-            HWAS_INF("platDeconfigureTargetAtRuntime() - "
-                    "calling p9_update_ec_eq_state");
-            FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,l_proc);
+        TARGETING::TYPE  l_type = TARGETING::TYPE_PROC;
+        TARGETING::Target * l_parent =
+                            TARGETING::getParent(i_pTarget,l_type);
+
+        // There might be a recursion possible with PRD and PM Reset so
+        //  don't call into reset twice
+        auto l_pmResetInProgress =
+          l_parent->getAttr<ATTR_HB_INITIATED_PM_RESET>();
+        if( HB_INITIATED_PM_RESET_IN_PROGRESS != l_pmResetInProgress )
+        {
+            // set ATTR_HB_INITIATED_PM_RESET to IN_PROGRESS to allow
+            //  special handling for PRD
+            l_parent->setAttr<ATTR_HB_INITIATED_PM_RESET>
+              (HB_INITIATED_PM_RESET_IN_PROGRESS);
+
+            HWAS_INF("platDeconfigureTargetAtRuntime() - Calling resetPMComplex");
+            l_errl = HBPM::resetPMComplex(l_parent);
 
             if(l_errl)
             {
-                HWAS_ERR("platDeconfigureTargetAtRuntime() - "
-                        "call to p9_update_ec_eq_state() failed on proc "
-                        "with HUID : %d",TARGETING::get_huid(l_proc));
-                ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_errl);
-            }
+                HWAS_ERR("Failed call to HBPM::resetPMComplex on target "
+                         "with HUID : %d",TARGETING::get_huid(l_parent));
+                ERRORLOG::ErrlUserDetailsTarget(l_parent).addToLog(l_errl);
 
+                // set ATTR_HB_INITIATED_PM_RESET back to INACTIVE to allow
+                //  future recoveries to completely run
+                l_parent->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                  (HB_INITIATED_PM_RESET_INACTIVE);
+
+                // If an error then exit while loop
+                break;
+            }
+            else
+            {
+                HWAS_INF("Successful call to HBPM::resetPMComplex on target"
+                         " with HUID : %.8X, setting ATTR_HB_INITIATED_PM_RESET to"
+                         " COMPLETE(%d)",
+                         TARGETING::get_huid(l_parent),
+                         HB_INITIATED_PM_RESET_COMPLETE);
+                // set ATTR_HB_INITIATED_PM_RESET to ACTIVE (reset IS in progress)
+                // and continue
+                l_parent->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                  (HB_INITIATED_PM_RESET_COMPLETE);
+            }
         }
         else
         {
-            HWAS_INF("platDeconfigureTargetAtRuntime() - deconfigure failed");
+            HWAS_INF("platDeconfigureTargetAtRuntime() - skippign call to resetPMComplex - ATTR_HB_INITIATED_PM_RESET=%d", l_pmResetInProgress );
         }
-    }
-    HWAS_INF(">>>platDeconfigureTargetAtRuntime()" );
+
+        // get the parent proc and call the hwp to alert
+        // pm not to attempt to manage this core anymore
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_proc(l_parent);
+
+        HWAS_INF("platDeconfigureTargetAtRuntime() - "
+                "calling p9_update_ec_eq_state");
+        FAPI_INVOKE_HWP( l_errl,p9_update_ec_eq_state,
+                         l_proc,true/*skip qssr*/);
+
+        if(l_errl)
+        {
+            HWAS_ERR("platDeconfigureTargetAtRuntime() - "
+                    "call to p9_update_ec_eq_state() failed on proc "
+                    "with HUID : %d",TARGETING::get_huid(l_proc));
+            ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_errl);
+
+            // If an error then exit while loop
+            break;
+        }
+    }while(0);
+
+    HWAS_INF("<<<platDeconfigureTargetAtRuntime()" );
 
     return l_errl ;
 }

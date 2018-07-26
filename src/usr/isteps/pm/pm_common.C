@@ -890,14 +890,16 @@ namespace HBPM
     errlHndl_t resetPMComplex(TARGETING::Target * i_target)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"resetPMComplex");
+                   ENTER_MRK" resetPMComplex");
 
         errlHndl_t l_errl = nullptr;
 
         //Get homer image buffer
         uint64_t l_homerPhysAddr = 0x0;
-        l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-        void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+        l_homerPhysAddr =
+                       i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+        void* l_homerVAddr =
+                           convertHomerPhysToVirt(i_target,l_homerPhysAddr);
 
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
@@ -906,6 +908,25 @@ namespace HBPM
 
         do
         {
+            // If this target was already reset previously by the runtime
+            //  deconfig logic, then skip it.
+            // ATTR_HB_INITIATED_PM_RESET set to COMPLETE signifies that this
+            //  chip has already been reset
+            ATTR_HB_INITIATED_PM_RESET_type l_chipResetState =
+                     i_target->getAttr<TARGETING::ATTR_HB_INITIATED_PM_RESET>();
+            if (HB_INITIATED_PM_RESET_COMPLETE == l_chipResetState)
+            {
+                // set ATTR_HB_INITIATED_PM_RESET to INACTIVE (reset the reset)
+                i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                                (HB_INITIATED_PM_RESET_INACTIVE);
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK"resetPMComplex: reset skipped target huid=0x%X",
+                    get_huid(i_target) );
+
+                break;
+            }
+
             // Reset path
             // p9_pm_init.C enum: PM_RESET
             FAPI_INVOKE_HWP( l_errl,
@@ -925,6 +946,34 @@ namespace HBPM
                 break;
             }
 
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "resetPMComplex: p9_pm_init(PM_RESET) succeeded "
+                       "HUID=0x%08X", get_huid(i_target) );
+
+            // Explicitly call ATTN before exiting to ensure PRD handles
+            // LFIR before TMGT triggers PM Complex Init, but only if
+            // we aren't already in the middle of handling a core checkstop
+            if( HB_INITIATED_PM_RESET_IN_PROGRESS != l_chipResetState )
+            {               
+                // set ATTR_HB_INITIATED_PM_RESET to IN_PROGRESS to avoid recursion
+                i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                                (HB_INITIATED_PM_RESET_IN_PROGRESS);
+
+                l_errl = Singleton<ATTN::Service>::instance().
+                  handleAttentions( i_target );
+
+                // set ATTR_HB_INITIATED_PM_RESET back to the original value
+                i_target->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                  (l_chipResetState);
+
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"resetPmComplex: service::handleAttentions "
+                              "returned error for RtProc: 0x%08X", get_huid(i_target));
+                    break;
+                }
+            }
         } while(0);
 
         if ((TARGETING::is_phyp_load()) && (nullptr != l_homerVAddr))
@@ -932,30 +981,16 @@ namespace HBPM
             int lRc = HBPM_UNMAP(l_homerVAddr);
             uint64_t lZeroAddr = 0;
             i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(
-                                        reinterpret_cast<uint64_t>(lZeroAddr));
+                                     reinterpret_cast<uint64_t>(lZeroAddr));
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "resetPMComplex:" "unmap, RC=0x%X" ,
                            lRc );
         }
-
-        if (!l_errl)
-        {
-            // Explicitly call ATTN before exiting to ensure PRD handles
-            // LFIR before TMGT triggers PM Complex Init
-            l_errl = Singleton<ATTN::Service>::instance().
-                        handleAttentions( i_target );
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    ERR_MRK"resetPmComplex: service::handleAttentions "
-                   "returned error for RtProc: 0x%08X", get_huid(i_target));
-            }
-
-        }
-
+        
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    EXIT_MRK"resetPMComplex: RC=0x%X, PLID=0x%lX",
                    ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl) );
+
         return l_errl;
     } // resetPMComplex
 

@@ -67,7 +67,6 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     // Get the Global Errorlog PLID and EID
     errlHndl_t globalErrl =
         ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-    uint32_t eid  = globalErrl->eid();
     uint32_t plid = globalErrl->plid();
 
     // Runtime deconfig lost cores
@@ -86,8 +85,10 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
             // Call Deconfig
             errlHndl_t errl = nullptr;
-            errl = HWAS::theDeconfigGard().deconfigureTarget( *coreTgt, eid,
-                                 NULL, HWAS::DeconfigGard::FULLY_AT_RUNTIME );
+            errl = HWAS::theDeconfigGard().deconfigureTargetAtRuntime(
+                       coreTgt,
+                       HWAS::DeconfigGard::FULLY_AT_RUNTIME,
+                       globalErrl );
 
             if (errl)
             {

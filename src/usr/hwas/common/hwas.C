@@ -1500,8 +1500,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS_BRICK)
     {
         auto obusType = TARGETING::TYPE_OBUS;
-        TARGETING::Target* l_obus_ptr = const_cast<TARGETING::Target*>(
-                                            getParent(i_desc, obusType));
+        TARGETING::Target* l_obus_ptr = getParent(i_desc, obusType);
 
         //If NPU is bad and OBUS is non-SMP, then mark them bad
         // Bit does not matter unless not in SMP mode
@@ -1590,8 +1589,7 @@ void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
     auto exType = TARGETING::TYPE_EX;
     auto eqType = TARGETING::TYPE_EQ;
 
-    TARGETING::Target* l_ex = const_cast<TARGETING::Target*>(
-                                    getParent(i_core, exType));
+    TARGETING::Target* l_ex = getParent(i_core, exType);
     getChildChiplets(pECList, l_ex, TYPE_CORE, true);
     if(pECList.size() == 0)
     {
@@ -1600,8 +1598,7 @@ void forceEcExEqDeconfig(const TARGETING::TargetHandle_t i_core,
                  l_ex->getAttr<ATTR_HUID>(), i_present ? "" : "NOT ");
 
         //Now get the parent EQ and check to see if it should be deconfigured
-        TARGETING::Target* l_eq = const_cast<TARGETING::Target*>(
-                                         getParent(l_ex, eqType));
+        TARGETING::Target* l_eq = getParent(l_ex, eqType);
         getChildChiplets(pEXList, l_eq, TYPE_EX, true);
         if(pEXList.size() == 0)
         {

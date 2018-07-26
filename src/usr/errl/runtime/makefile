@@ -37,6 +37,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
+##      support for pm_common
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 
 # need find the source for this hwp in runtime env
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm

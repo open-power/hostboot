@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -455,9 +455,9 @@ const Target * getParentChip( const Target * i_pChiplet )
     return l_pChip;
 }
 
-const Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType)
+Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType)
 {
-    const Target * l_parent = NULL;
+    Target * l_parent = NULL;
     TARGETING::PredicateCTM l_predicate;
 
     l_predicate.setType(i_pType);

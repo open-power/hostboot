@@ -485,6 +485,9 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
+                l_chip->setAttr<ATTR_HB_INITIATED_PM_RESET>
+                  (HB_INITIATED_PM_RESET_INACTIVE);
+
                 if (l_chip == l_pMasterProcChip)
                 {
                     // Need to set PROC_MASTER_TYPE to reflect the

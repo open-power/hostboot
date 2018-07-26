@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1660,9 +1660,7 @@ public:
 
                             // get parent OBUS and check OPTICS_CONFIG_MODE
                             auto obusType = TARGETING::TYPE_OBUS;
-                            TARGETING::Target* l_obus_ptr =
-                                const_cast<TARGETING::Target*>(
-                                            getParent(pDesc, obusType));
+                            TARGETING::Target* l_obus_ptr = getParent(pDesc, obusType);
                             ATTR_OPTICS_CONFIG_MODE_type config_mode =
                                 l_obus_ptr->getAttr<ATTR_OPTICS_CONFIG_MODE>();
 
