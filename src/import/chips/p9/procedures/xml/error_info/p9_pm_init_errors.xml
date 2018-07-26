@@ -96,8 +96,8 @@
     auto special wake-up mode
     </description>
     <ffdc>CORE_TARGET</ffdc>
-    <ffdc>DPLL_FREQ</ffdc>
     <ffdc>GPMMR</ffdc>
+    <ffdc>MALF_ALERT_ACTIVE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
