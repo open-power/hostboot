@@ -56,6 +56,10 @@
 const uint8_t DL_FIR_LINK0_TRAINED_BIT = 0;
 const uint8_t DL_FIR_LINK1_TRAINED_BIT = 1;
 
+// DL RX Control register field constants
+const uint32_t OFFSET_FROM_DL_CONTROL_TO_RX_EVEN_LANE_CONTROL = 7;
+const uint32_t OFFSET_FROM_DL_CONTROL_TO_RX_ODD_LANE_CONTROL  = 8;
+
 // DL register FFDC address offset constants
 const uint64_t DL_CONFIG_REG_OFFSET = 0x0A;
 const uint64_t DL_CONTROL_REG_OFFSET = 0x0B;
@@ -450,6 +454,127 @@ fapi_try_exit:
 }
 
 
+/// @brief Helper function to count half-link per-lane train/fail bit indications
+///
+/// @param[in]  i_lane_info       Lane information data
+/// @param[in]  o_lane_count      Number of bits set in lane information input
+///
+/// @return void
+void p9_fab_iovalid_count_ones(
+    const uint16_t i_lane_info,
+    uint8_t& o_lane_count)
+{
+    uint16_t l_lane_info = i_lane_info;
+    o_lane_count = 0;
+
+    for (auto ii = 0; ii < 11; ++ii)
+    {
+        if (l_lane_info & 1)
+        {
+            o_lane_count++;
+        }
+
+        l_lane_info = l_lane_info >> 1;
+    }
+}
+
+
+/// @brief Signal lane sparing FIR if link trains but reports a failed lane
+///        (OBUS DL only)
+///
+/// @param[in]  i_target        Processor chip target
+/// @param[in]  i_loc_link_ctl  X/A link control structure for link local end
+/// @param[in]  i_even_not_odd  Indicate link half to check (true=even, false=odd)
+/// @param[out] o_bus_failed    Mark bus failed based on lane status
+///
+/// @return fapi2::ReturnCode.  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p9_fab_iovalid_lane_validate(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p9_fbc_link_ctl_t& i_loc_link_ctl,
+    const bool i_even_not_odd,
+    bool& o_bus_failed)
+{
+    FAPI_DBG("Start");
+
+    uint64_t l_dl_rx_control_addr;
+    fapi2::buffer<uint64_t> l_dl_rx_control;
+    fapi2::buffer<uint64_t> l_dl_fir;
+    uint16_t l_lane_failed = 0x7FF, l_lane_not_locked = 0x7FF;
+    uint8_t l_lane_failed_count = 11, l_lane_not_locked_count = 11;
+
+    FAPI_DBG("Checking for fail on %s lanes" ,
+             ((i_even_not_odd) ? ("even") : ("odd")));
+
+    o_bus_failed = false;
+
+    l_dl_rx_control_addr = i_loc_link_ctl.dl_control_addr +
+                           ((i_even_not_odd) ?
+                            (OFFSET_FROM_DL_CONTROL_TO_RX_EVEN_LANE_CONTROL) :
+                            (OFFSET_FROM_DL_CONTROL_TO_RX_ODD_LANE_CONTROL));
+
+    FAPI_TRY(fapi2::getScom(i_target,
+                            l_dl_rx_control_addr,
+                            l_dl_rx_control),
+             "Error from getScom (0x%08X)", l_dl_rx_control_addr);
+
+    if (i_even_not_odd)
+    {
+        l_dl_rx_control.extractToRight < OBUS_LL0_IOOL_LINK0_RX_LANE_CONTROL_FAILED,
+                                       OBUS_LL0_IOOL_LINK0_RX_LANE_CONTROL_FAILED_LEN - 1 > (l_lane_failed);
+        l_dl_rx_control.invert();
+        l_dl_rx_control.extractToRight < OBUS_LL0_IOOL_LINK0_RX_LANE_CONTROL_LOCKED,
+                                       OBUS_LL0_IOOL_LINK0_RX_LANE_CONTROL_LOCKED_LEN - 1 > (l_lane_not_locked);
+    }
+    else
+    {
+        l_dl_rx_control.extractToRight < OBUS_LL0_IOOL_LINK1_RX_LANE_CONTROL_FAILED,
+                                       OBUS_LL0_IOOL_LINK1_RX_LANE_CONTROL_FAILED_LEN - 1 > (l_lane_failed);
+        l_dl_rx_control.invert();
+        l_dl_rx_control.extractToRight < OBUS_LL0_IOOL_LINK1_RX_LANE_CONTROL_LOCKED,
+                                       OBUS_LL0_IOOL_LINK1_RX_LANE_CONTROL_LOCKED_LEN - 1 > (l_lane_not_locked);
+    }
+
+    p9_fab_iovalid_count_ones(l_lane_failed, l_lane_failed_count);
+    p9_fab_iovalid_count_ones(l_lane_not_locked, l_lane_not_locked_count);
+
+    if ((l_lane_failed_count == 0) && (l_lane_not_locked_count == 0))
+    {
+        goto fapi_try_exit;
+    }
+    else
+    {
+        FAPI_DBG("Non zero lane fail/not locked count: %d %d",
+                 l_lane_failed_count, l_lane_not_locked_count);
+
+        if ((l_lane_failed_count == 1) && (l_lane_not_locked_count == 1))
+        {
+            if (i_even_not_odd)
+            {
+                l_dl_fir.setBit<OBUS_LL0_LL0_LL0_PB_IOOL_FIR_REG_LINK0_SPARE_DONE>();
+            }
+            else
+            {
+                l_dl_fir.setBit<OBUS_LL0_LL0_LL0_PB_IOOL_FIR_REG_LINK1_SPARE_DONE>();
+            }
+
+            FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                             i_loc_link_ctl.dl_fir_addr,
+                                             l_dl_fir,
+                                             l_dl_fir),
+                     "Error from putScom (0x%.16llX)", i_loc_link_ctl.dl_fir_addr);
+        }
+        else
+        {
+            o_bus_failed = true;
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in]  i_target          Processor chip target
@@ -467,6 +592,7 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     fapi2::buffer<uint64_t> l_dl_fir_reg;
     fapi2::buffer<uint64_t> l_tl_fir_reg;
     fapi2::buffer<uint64_t> l_dl_status_reg;
+    fapi2::buffer<uint64_t> l_dl_rx_control;
     fapi2::Target<T> l_loc_endp_target;
     fapi2::Target<T> l_rem_endp_target;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_chip_target;
@@ -521,8 +647,11 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
             l_dl_trained   = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
                              l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
 
-            l_dl_fail_even = !((l_dl_status_even == 0x8) && ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE)));
-            l_dl_fail_odd  = !((l_dl_status_odd  == 0x8) && ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE)));
+            if (!l_dl_trained)
+            {
+                l_dl_fail_even = !((l_dl_status_even == 0x8) && ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE)));
+                l_dl_fail_odd  = !((l_dl_status_odd  == 0x8) && ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE)));
+            }
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
         {
@@ -546,6 +675,55 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     }
     while (l_poll_loops > 0 && !l_dl_trained);
 
+    // OBUS DL reported trained, need to validate that no lane sparing occurred
+    // in some cases, a spare may occur but not report in the FIR
+    //
+    // as we are not persisting bad lane information, we don't want to fail the
+    // IPL directly if a single spare occurs, but can raise a FIR to indicate that the
+    // spare has been consumed (MFG may choose to fail based on this criteria)
+    //
+    // if more than one spare is detected, mark the link as failed
+    if (T == fapi2::TARGET_TYPE_OBUS)
+    {
+        bool l_dl_fail_by_lane_status = false;
+        FAPI_DBG("OBUS - Checking for DL lane failures");
+
+        if (!l_dl_fail_even)
+        {
+            FAPI_TRY(p9_fab_iovalid_lane_validate(i_target,
+                                                  i_loc_link_ctl,
+                                                  true,
+                                                  l_dl_fail_by_lane_status),
+                     "Error from p9_fab_iovalid_lane_validate");
+
+            if (l_dl_fail_by_lane_status)
+            {
+                l_dl_trained = false;
+                l_dl_fail_even = true;
+            }
+        }
+
+        if (!l_dl_fail_odd)
+        {
+            FAPI_TRY(p9_fab_iovalid_lane_validate(i_target,
+                                                  i_loc_link_ctl,
+                                                  false,
+                                                  l_dl_fail_by_lane_status),
+                     "Error from p9_fab_iovalid_lane_validate");
+
+            if (l_dl_fail_by_lane_status)
+            {
+                l_dl_trained = false;
+                l_dl_fail_odd = true;
+            }
+        }
+    }
+    else
+    {
+        FAPI_DBG("XBUS - Skipping check for DL lane failures");
+    }
+
+    // control reconfig loop behavior
     if (!l_dl_trained)
     {
         FAPI_ERR("Error in DL training for %s (ATTR_LINK_TRAIN: 0x%x, DL training failed: %d / %d)",
@@ -614,6 +792,7 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     }
 
     // validate TL training state
+    FAPI_DBG("Validating TL training state...");
     FAPI_TRY(fapi2::getScom(i_target, i_loc_link_ctl.tl_fir_addr, l_tl_fir_reg),
              "Error from getScom (0x%.16llX)", i_loc_link_ctl.tl_fir_addr);
 
