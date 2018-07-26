@@ -498,7 +498,6 @@ p9_pm_reset_psafe_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV, i_target, l_uplift_mv));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXTERNAL_VRM_STEPSIZE, FAPI_SYSTEM, l_ext_vrm_step_size_mv));
     l_attr_safe_mode_mv += l_uplift_mv;
-
     //Reset safe mode attributes
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_reset_safe_mode_freq_mhz));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_attr_reset_safe_mode_mv));
@@ -632,6 +631,18 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 
     FAPI_INF(">> p9_set_auto_spwkup");
 
+    fapi2::buffer <uint64_t> l_deadCoreVector;
+    uint8_t l_malfAlertActive = fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                             l_malfAlertActive));
+
+    if (l_malfAlertActive == fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE)
+    {
+        FAPI_TRY( getScom (i_target, P9N2_PU_OCB_OCI_OCCFLG2_SCOM,
+                           l_deadCoreVector),
+                  "Failed to Read OCC Flag2 Register for PM Malf Dead Core Vector" );
+    }
+
     // For each EX target
     for (auto& l_ex_chplt : i_target.getChildren<fapi2::TARGET_TYPE_EX>
          (fapi2::TARGET_STATE_FUNCTIONAL))
@@ -640,8 +651,6 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
         fapi2::buffer<uint64_t> l_gpmmr;
         fapi2::buffer<uint64_t> l_lmcr;
         uint32_t l_bit;
-        fapi2::ATTR_PM_MALF_CYCLE_Type l_malfAlertActive =
-            fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
 
         fapi2::ATTR_CHIP_UNIT_POS_Type l_ex_num;
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
@@ -661,38 +670,49 @@ p9_pm_set_auto_spwkup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
             FAPI_TRY(fapi2::getScom(l_core, C_PPM_GPMMR_SCOM,  l_gpmmr),
                      "GetScom of GPMMR failed");
 
+            if (l_deadCoreVector.getBit(l_core_num))
+            {
+                // HYP could not spl. wkup. this core on a PM Malf HMI.
+                // Leave it that way and do not enable auto spl. wkup. on it
+                FAPI_INF ("==> Skip auto spl wkup enabled on HYP dead core %d", l_core_num);
+                continue; // move on to the next core
+            }
+
             if (l_gpmmr.getBit<EQ_PPM_GPMMR_SPECIAL_WKUP_DONE>())
             {
-                // Clear the auto special wake-up disable (eg enable it) for the core
+                // Clear the auto special wake-up disable (eg enable it) for the core.
                 l_bit = EQ_CME_SCOM_LMCR_C0_AUTO_SPECIAL_WAKEUP_DISABLE + (l_core_num % 2);
                 l_lmcr.flush<0>().setBit(l_bit);
                 FAPI_TRY(fapi2::putScom(l_ex_chplt, EX_CME_SCOM_LMCR_SCOM1,  l_lmcr),
-                         "PutScom of LMCR failed");
+                         "PutScom of LMCR failed: core %d", l_core_num);
+                FAPI_INF ("==> Auto spl wakeup enabled for core %d", l_core_num);
             }
             else
             {
-                FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
-                                         l_malfAlertActive));
-
                 if (l_malfAlertActive == fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE)
                 {
                     FAPI_ASSERT (false,
-                                 fapi2::PM_RESET_SPWKUP_DONE_ERROR()
+                                 fapi2::PM_RESET_SPWKUP_DONE_ERROR ()
                                  .set_CORE_TARGET(l_core)
-                                 .set_GPMMR(l_gpmmr),
+                                 .set_GPMMR(l_gpmmr)
+                                 .set_MALF_ALERT_ACTIVE(l_malfAlertActive),
                                  "Core expected to be in special wake-up is not "
                                  "prior to setting auto special wake-up mode");
                 }
                 else
                 {
-                    // It is possible that special wakeup had failed as we are in PM MALF path
-                    // Log a info error and continue with the Reset flow
+                    // In Malf Path, it is possible that special wakeup failed
+                    // on cores above a bad CME. These cores should come in as
+                    // bad via the PHYP bad core vector & PM Init is expected to
+                    // come up without them (the CME catering to these).
+                    // So, do not break the PM Reset/Recvoery flow in this case
                     FAPI_ASSERT_NOEXIT ( false,
-                                         fapi2::PM_RESET_SPWKUP_DONE_ERROR()
+                                         fapi2::PM_RESET_SPWKUP_DONE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                          .set_CORE_TARGET(l_core)
-                                         .set_GPMMR(l_gpmmr),
-                                         "Core expected to be in special wake-up is not "
-                                         "prior to setting auto special wake-up mode" );
+                                         .set_GPMMR(l_gpmmr)
+                                         .set_MALF_ALERT_ACTIVE(l_malfAlertActive),
+                                         "Core expected to be in special wake-up is not prior to setting"
+                                         " auto special wake-up mode. Ignored in PM recovery Path!");
                 }
             }
         }
