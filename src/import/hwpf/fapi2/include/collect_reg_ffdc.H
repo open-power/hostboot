@@ -403,6 +403,7 @@ ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reade
     FAPI_DBG("collectRegisterAndAddressData -> address count: 0x%lx", i_addresses.size());
 
     T l_data = 0;
+    uint32_t l_addr = 0;
 
     ReturnCode l_rc = FAPI2_RC_SUCCESS;
 
@@ -423,14 +424,14 @@ ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reade
             l_data = l_buf();
         }
 
-        l_address = htobe32(l_address);
+        l_address = htobe64(l_address);
         l_data = htobe64(l_data);
+        l_addr = l_address;
 
-        memcpy(o_pData, &l_address, sizeof(uint32_t));
+        memcpy(o_pData, &l_addr, sizeof(uint32_t));
         o_pData += sizeof(uint32_t);
 
         memcpy(o_pData, &l_data, sizeof(T));
-
         o_pData += sizeof(T);
 
     }

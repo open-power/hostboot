@@ -220,8 +220,8 @@ fapi2::ReturnCode CoreAction::updateCoreAndQuadConfigState()
 
     l_ccsrData &= l_clearMask;
 
-    FAPI_DBG( "Clear Mask 0x%016llx  CCSR 0x%016lx",
-              l_clearMask, l_ccsrData );
+    FAPI_DBG ( "Clear Mask 0x%016llx  CCSR 0x%016lx",
+               l_clearMask, l_ccsrData );
 
     FAPI_TRY( putScom( iv_procChipTgt, PU_OCB_OCI_CCSR_SCOM, l_ccsrData ),
               "Failed To Write CCSR Register" );
@@ -262,7 +262,7 @@ fapi2::ReturnCode CoreAction :: init( )
               "Failed To Read OCC Flag2 Register" );
     l_scomData.extract<0, 32>( iv_deadCoreVect );
 
-    FAPI_DBG( "Phyp Dead Core Vector 0x%08lx", iv_deadCoreVect );
+    FAPI_DBG ( "Phyp Dead Core Vector 0x%08lx", iv_deadCoreVect );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -329,6 +329,7 @@ extern "C"
                   "Failed To Clear PCB Interrupts" );
 
         l_coreActn.getDeadCoreVector( o_deadCores ); //retrieve Phyp generated dead core vector
+        FAPI_INF("Dead cores from PHYP: 0x%08x", o_deadCores);
 
         for( uint8_t l_ffdcSecId = 0; l_ffdcSecId < MAX_FFDC_SUMMARY_SECTN_CNT;
              l_ffdcSecId++ )
@@ -410,7 +411,7 @@ extern "C"
             o_rasAction     =   PROC_CHIP_CALLOUT;
         }
 
-        FAPI_DBG( "FFDC Summary Sectn Count 0x%08x", o_ffdcList.size() );
+        FAPI_INF( "FFDC Summary Sectn Count 0x%08x", o_ffdcList.size() );
 
     fapi_try_exit:
 

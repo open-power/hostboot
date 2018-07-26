@@ -61,6 +61,10 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_init.H>
+#include <p9n2_misc_scom_addresses.H>
+
+static const uint64_t PU_OCB_OCI_OCCFLG2_CLEAR = P9N2_PU_OCB_OCI_OCCFLG2_SCOM1;
+static const uint64_t PU_OCB_OCI_OCCFLG2_SET   = P9N2_PU_OCB_OCI_OCCFLG2_SCOM2;
 
 // -----------------------------------------------------------------------------
 // Function prototypes
@@ -123,6 +127,10 @@ fapi2::ReturnCode pm_init(
     fapi2::ReturnCode l_rc;
     fapi2::ATTR_PM_MALF_CYCLE_Type l_malfCycle =
         fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type malfAlertEnable =
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
+    fapi2::buffer<uint64_t> l_data64       = 0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     //  ************************************************************************
     //  Initialize Cores and Quads
@@ -250,10 +258,27 @@ fapi2::ReturnCode pm_init(
     FAPI_TRY(l_rc, "ERROR: Failed to initialize OCC PPC405");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_MALF_ALERT_ENABLE,
+                           FAPI_SYSTEM,
+                           malfAlertEnable),
+             "Error from FAPI_ATTR_GET for attribute ATTR_PM_MALF_ALERT_ENABLE");
+    // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
+    l_data64.flush<0>().setBit<p9hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+
+    if (malfAlertEnable == fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_SET, l_data64));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG2_CLEAR, l_data64));
+    }
+
+    FAPI_IMP ("Malf Alert Policy Enabled: %d", malfAlertEnable);
+
 fapi_try_exit:
 
     return fapi2::current_err;
-
 }
 
 fapi2::ReturnCode clear_occ_special_wakeups(
@@ -276,10 +301,10 @@ fapi2::ReturnCode clear_occ_special_wakeups(
                                 l_ex_num));
 
         FAPI_DBG("Clear OCC special wakeup on ex chiplet 0x%08X", l_ex_num);
-        FAPI_TRY(fapi2::getScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
+        FAPI_TRY(fapi2::getScom(l_ex_chplt, EX_PPM_SPWKUP_OCC, l_data64),
                  "ERROR: Failed to read OCC Spl wkup on EX 0x%08X", l_ex_num);
         l_data64.clearBit<0>();
-        FAPI_TRY(fapi2::putScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
+        FAPI_TRY(fapi2::putScom(l_ex_chplt, EX_PPM_SPWKUP_OCC, l_data64),
                  "ERROR: Failed to clear OCC Spl wkup on EX 0x%08X", l_ex_num);
     }
 
