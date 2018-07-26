@@ -159,8 +159,8 @@ void* call_dmi_erepair (void *io_pArgs)
             FAPI_INVOKE_HWP(l_errPtr,
                             p9_io_dmi_restore_erepair,
                             l_fapi_endp1_target,
-                            l_endp1_txFaillanes,
-                            l_endp1_rxFaillanes);
+                            l_endp1_rxFaillanes,
+                            l_endp1_txFaillanes);
             if(l_errPtr)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -209,8 +209,8 @@ void* call_dmi_erepair (void *io_pArgs)
             FAPI_INVOKE_HWP(l_errPtr,
                             p9_io_cen_restore_erepair,
                             l_fapi_endp2_target,
-                            l_endp2_txFaillanes,
-                            l_endp2_rxFaillanes);
+                            l_endp2_rxFaillanes,
+                            l_endp2_txFaillanes);
             if (l_errPtr)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
