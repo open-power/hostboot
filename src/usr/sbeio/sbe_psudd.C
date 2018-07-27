@@ -749,6 +749,17 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
         // time out if wait too long
         if (l_elapsed_time_ns > i_timeout )
         {
+            l_errl = INTR::printInterruptInfo();
+
+            // If there was an error dumping interrupt state info just commit
+            // errorlog and continue with the failure path.
+            if(l_errl)
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->collectTrace(SBEIO_COMP_NAME);
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
+
             //read the response registers for FFDC
             uint64_t l_respRegs[4];
             ERRORLOG::ErrlUserDetailsLogRegister l_respRegsFFDC(i_target);
