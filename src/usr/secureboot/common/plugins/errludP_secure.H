@@ -377,7 +377,6 @@ class UdParserNodeCommInfo : public ERRORLOG::ErrlUserDetailsParser
         // 1 byte   : MboxId
 
         char* l_databuf = static_cast<char*>(i_pBuffer);
-        bool l_parseError = false;
 
         do
         {

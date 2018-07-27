@@ -170,6 +170,9 @@ enum errlSectionId_t
  *
  * Refer to this ErrlEntry setter:
  * void ErrlEntry::setSev(const errlSeverity_t i_sev)
+ *
+ * NOTE: If any values are added, please update std::map errl_sev_str_map
+ *       in errlentry.C
  */
 enum errlSeverity_t
 {
