@@ -67,6 +67,19 @@
 #include <p9_io_regs.H>
 #include <p9_io_common.H>
 
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint64_t DMI_FIR_REG     = 0x07011000;
+const uint64_t DMI_FIR_REG_AND = 0x07011001;
+const uint64_t DMI_FIR_REG_OR  = 0x07011002;
+
+const uint64_t CN_FIR_REG     = 0x02010400;
+const uint64_t CN_FIR_REG_AND = 0x02010401;
+const uint64_t CN_FIR_REG_OR  = 0x02010402;
+
+
+
 //-----------------------------------------------------------------------------
 //  Definitions
 //-----------------------------------------------------------------------------
@@ -748,9 +761,6 @@ fapi2::ReturnCode check_dmi_cn_bad_lane_data(
     uint32_t       i_post_bad_lane_data)
 {
     FAPI_IMP("P9 I/O EDI DMI Centaur Entering");
-    const uint8_t GRP0   = 0;
-    const uint8_t LN0    = 0;
-    uint64_t      l_data = 0;
 
     // If the bad lane vector matches pre to post training, then the same bad
     //   lanes that were previously found, were found again.  These bad lanes have
@@ -769,9 +779,14 @@ fapi2::ReturnCode check_dmi_cn_bad_lane_data(
             FAPI_TRY(p9_io_dmi_cn_clear_firs(i_tgt));
 
             // Clear BUS0_SPARE_DEPLOYED (Bit 9).
-            FAPI_TRY(io::read(EDI_SCOM_FIR_PB, i_tgt, GRP0, LN0, l_data));
-            l_data &= 0xFF7FFFFFFFFFFFFFull;
-            FAPI_TRY(io::write(EDI_SCOM_FIR_PB, i_tgt, GRP0, LN0, l_data));
+            {
+                fapi2::buffer<uint64_t> l_data = 0;
+                l_data.flush<1>();
+                FAPI_DBG("Centaur DMI Clearing spare deployed bit at pos 9");
+                l_data.clearBit<9>();
+
+                FAPI_TRY(putScom(i_tgt, CN_FIR_REG_AND, l_data));
+            }
         }
     }
 
@@ -795,9 +810,6 @@ fapi2::ReturnCode check_dmi_proc_bad_lane_data(
     uint32_t       i_post_bad_lane_data)
 {
     FAPI_IMP("P9 I/O EDI+ DMI Proc Entering");
-    const uint8_t GRP3   = 3;
-    const uint8_t LN0    = 0;
-    uint64_t      l_data = 0;
 
     // If the bad lane vector matches pre to post training, then the same bad
     //   lanes that were previously found, were found again.  These bad lanes have
@@ -816,9 +828,21 @@ fapi2::ReturnCode check_dmi_proc_bad_lane_data(
             FAPI_TRY(p9_io_dmi_proc_clear_firs(i_tgt));
 
             // Clear BUS0_SPARE_DEPLOYED (Bit 9).
-            FAPI_TRY(io::read(EDIP_SCOM_FIR_PB, i_tgt, GRP3, LN0, l_data));
-            l_data &= 0xFF7FFFFFFFFFFFFFull;
-            FAPI_TRY(io::write(EDIP_SCOM_FIR_PB, i_tgt, GRP3, LN0, l_data));
+            {
+                fapi2::buffer<uint64_t> l_data = 0;
+                uint8_t l_chipunitnum = 0;
+
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_tgt, l_chipunitnum)
+                         , "Attribute Get of Chip Unit Pos Failed.");
+                l_chipunitnum = l_chipunitnum % 4;
+
+                l_data.flush<1>();
+                FAPI_DBG("Proc DMI Clearing spare deployed bit at pos %d",
+                         (8 * (l_chipunitnum + 1) + 1) );
+                FAPI_TRY(l_data.clearBit(8 * (l_chipunitnum + 1) + 1));
+
+                FAPI_TRY(putScom(i_tgt, DMI_FIR_REG_AND, l_data));
+            }
         }
     }
 
@@ -840,10 +864,13 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     FAPI_IMP("p9_io_dmi_linktrain: P9 I/O EDI+/EDI DMI Entering");
 
 
-    uint32_t l_m_pre_bad_data  = 0;
-    uint32_t l_m_post_bad_data = 0;
-    uint32_t l_s_pre_bad_data   = 0;
-    uint32_t l_s_post_bad_data  = 0;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DMI> > l_m_bad_data_tgts;
+    std::vector<uint32_t> l_m_pre_bad_data;
+
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> > l_s_bad_data_tgts;
+    std::vector<uint32_t> l_s_pre_bad_data;
+
+    uint32_t l_post_bad_data = 0;
 
     char l_mtgt_str[fapi2::MAX_ECMD_STRING_LEN];
     char l_stgt_str[fapi2::MAX_ECMD_STRING_LEN];
@@ -865,10 +892,17 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
 
             // Record the Bad Lane Vectors Prior to link training.
-            FAPI_TRY(get_dmi_proc_bad_lane_data(l_mtgt, l_m_pre_bad_data),
+            uint32_t l_pre_bad_data  = 0;
+            FAPI_TRY(get_dmi_proc_bad_lane_data(l_mtgt, l_pre_bad_data),
                      "Pre Training: Get Bad Lane Vector Failed on Master");
-            FAPI_TRY(get_dmi_cn_bad_lane_data(l_stgt, l_s_pre_bad_data),
+            l_m_bad_data_tgts.push_back(l_mtgt);
+            l_m_pre_bad_data.push_back(l_pre_bad_data);
+
+            FAPI_TRY(get_dmi_cn_bad_lane_data(l_stgt, l_pre_bad_data),
                      "Pre Training: Get Bad Lane Vector Failed on Slave");
+            l_s_bad_data_tgts.push_back(l_stgt);
+            l_s_pre_bad_data.push_back(l_pre_bad_data);
+
 
 
             // Clock Serializer Init -- isn't strictly necessary but does line up the
@@ -876,6 +910,7 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             FAPI_TRY(tx_serializer_sync_power_on(l_mtgt), "tx_serializer_sync_power_on Failed.");
 
             // TODO : For Centaur Only, Scan in pll settings with PFD360->1
+            // - May not be needed when talking with P9?
 
             // Start Slave/Master Target Link Training
             FAPI_TRY(linktrain_dmi_cn_start(l_stgt, State::WIRETEST), "P9 I/O DMI CN Start W Failed.");
@@ -894,6 +929,8 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     }
 
     // TODO : For Centaur Only, Scan in pll settings with PFD360->0
+    // - May not be needed when talking with P9?
+
     for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
     {
         //There should only be one centaur child
@@ -943,26 +980,35 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     //FAPI_TRY(tx_serializer_sync_power_off(l_mtgt, l_stgt, GRP0),
     //          "tx_serializer_sync_power_off Failed.");
     // << HW390103 -- Leave Tx Unload Clock Disable Off
-    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+
+    for (size_t i = 0; i < l_m_bad_data_tgts.size(); ++i)
     {
-        //There should only be one centaur child
-        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
-        {
+        // Record the Bad Lane Vectors after link training.
+        FAPI_TRY(get_dmi_proc_bad_lane_data(l_m_bad_data_tgts[i], l_post_bad_data),
+                 "Post Training: Get Bad Lane Vector Failed on Master");
 
-            // Record the Bad Lane Vectors after link training.
-            FAPI_TRY(get_dmi_proc_bad_lane_data(l_mtgt, l_m_post_bad_data),
-                     "Post Training: Get Bad Lane Vector Failed on Master");
-            FAPI_TRY(get_dmi_cn_bad_lane_data(l_stgt, l_s_post_bad_data),
-                     "Post Training: Get Bad Lane Vector Failed on Master");
+        // Check to see if the bad lanes match the bad lanes prior to link training.
+        //   If so, then that error has already been logged and we can clear the firs.
+        FAPI_TRY(check_dmi_proc_bad_lane_data(
+                     l_m_bad_data_tgts[i],
+                     l_m_pre_bad_data[i],
+                     l_post_bad_data),
+                 "Post Training: Evaluate Firs Failed on Master");
+    }
 
+    for (size_t i = 0; i < l_s_bad_data_tgts.size(); ++i)
+    {
+        // Record the Bad Lane Vectors after link training.
+        FAPI_TRY(get_dmi_cn_bad_lane_data(l_s_bad_data_tgts[i], l_post_bad_data),
+                 "Post Training: Get Bad Lane Vector Failed on Slave");
 
-            // Check to see if the bad lanes match the bad lanes prior to link training.
-            //   If so, then that error has already been logged and we can clear the firs.
-            FAPI_TRY(check_dmi_proc_bad_lane_data(l_mtgt, l_m_pre_bad_data, l_m_post_bad_data),
-                     "Post Training: Evaluate Firs Failed on Master");
-            FAPI_TRY(check_dmi_cn_bad_lane_data(l_stgt, l_s_pre_bad_data, l_s_post_bad_data),
-                     "Post Training: Evaluate Firs Failed on Slave");
-        }
+        // Check to see if the bad lanes match the bad lanes prior to link training.
+        //   If so, then that error has already been logged and we can clear the firs.
+        FAPI_TRY(check_dmi_cn_bad_lane_data(
+                     l_s_bad_data_tgts[i],
+                     l_s_pre_bad_data[i],
+                     l_post_bad_data),
+                 "Post Training: Evaluate Firs Failed on Slave");
     }
 
 fapi_try_exit:
