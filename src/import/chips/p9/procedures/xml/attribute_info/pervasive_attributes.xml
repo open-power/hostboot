@@ -165,6 +165,20 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_FORCE_SYNC_SS_PLL_SPREAD</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Use TOD to synchronize SS filter PLL spreading across system,
+    overriding ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD
+  </description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+  <overrideOnly/>
+</attribute>
+
+<attribute>
   <id>ATTR_OB0_PLL_BUCKET</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS0 pll setting from one of the supported frequencies</description>

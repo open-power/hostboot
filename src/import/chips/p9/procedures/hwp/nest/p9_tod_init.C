@@ -43,6 +43,18 @@
 #include <p9_tod_init.H>
 
 //------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+// in TOD counts; needs to account for SCOM latency and number of chips to be
+// started in sync
+const uint64_t  C_SSCG_START_DELAY      = 0x100000;
+// 31.25 rounded up
+const uint64_t  C_SSCG_NS_PER_TOD_COUNT = 32;
+const uint32_t  C_SSCG_START_POLL_DELAY = C_SSCG_START_DELAY * C_SSCG_NS_PER_TOD_COUNT;
+const uint32_t  C_SSCG_START_POLL_COUNT = 10;
+
+//------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
@@ -78,6 +90,135 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/// @brief Retrieves targets in the TOD topology
+/// @param[in] i_tod_node Reference to TOD topology
+/// @param[in] i_depth Current depth into TOD topology network
+/// @param[in] o_targets Vector of targets, to be appended
+/// @return void
+void get_targets(
+    const tod_topology_node* i_tod_node,
+    const uint32_t i_depth,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>>& o_targets)
+{
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+
+    if (i_tod_node == NULL || i_tod_node->i_target == NULL)
+    {
+        FAPI_INF("NULL tod_node or target parameter!");
+        goto fapi_try_exit;
+    }
+
+    fapi2::toString(i_tod_node->i_target,
+                    l_targetStr,
+                    fapi2::MAX_ECMD_STRING_LEN);
+
+    FAPI_INF("%s (Depth = %d)",
+             l_targetStr, i_depth);
+
+    o_targets.push_back(*(i_tod_node->i_target));
+
+    for (auto& l_child : i_tod_node->i_children)
+    {
+        get_targets(l_child, i_depth + 1, o_targets);
+    }
+
+fapi_try_exit:
+    return;
+}
+
+/// @brief Distribute synchronization signal to SS PLL using
+///        TOD network
+/// @param[in] i_tod_node Reference to TOD topology
+/// @return FAPI_RC_SUCCESS if TOD sync is succesful else error
+fapi2::ReturnCode sync_spread(
+    const tod_topology_node* i_tod_node)
+{
+    FAPI_DBG("Start");
+
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_targets;
+    get_targets(i_tod_node, 0, l_targets);
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_master_chip;
+    fapi2::buffer<uint64_t> l_tod_value_data;
+    fapi2::buffer<uint64_t> l_tod_timer_data;
+    uint8_t l_sync_spread = 0;
+
+    FAPI_ASSERT(l_targets.size(),
+                fapi2::P9_TOD_SETUP_NULL_NODE(),
+                "Null node or target passed into function!");
+    l_master_chip = l_targets.front();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FORCE_SYNC_SS_PLL_SPREAD,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_sync_spread),
+             "Error from FAPI_ATTR_GET (ATTR_FORCE_SYNC_SS_PLL_SPREAD)");
+
+    if (!l_sync_spread)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD,
+                               l_master_chip,
+                               l_sync_spread),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD)");
+    }
+
+    if (!l_sync_spread)
+    {
+        goto fapi_try_exit;
+    }
+
+    // Read tod_value from TOD Value Register
+    FAPI_TRY(fapi2::getScom(l_master_chip,
+                            PERV_TOD_VALUE_REG,
+                            l_tod_value_data),
+             "Error reading TOD_VALUE_REG");
+
+    l_tod_timer_data = (l_tod_value_data + (C_SSCG_START_DELAY << 4)) &
+                       0xFFFFFFFFFFFFFFF0ULL;
+
+    // Write value > tod_value to TOD Timer Register
+    for (auto l_chip : l_targets)
+    {
+        FAPI_TRY(fapi2::putScom(l_chip,
+                                PERV_TOD_TIMER_REG,
+                                l_tod_timer_data),
+                 "Error writing to TOD_TIMER_REG");
+    }
+
+    // Wait for SSCG start signal
+    for (uint32_t i = 0;
+         (i < C_SSCG_START_POLL_COUNT) && !l_targets.empty();
+         i++)
+    {
+        fapi2::delay(C_SSCG_START_POLL_DELAY, C_SSCG_START_POLL_DELAY);
+
+        for (auto l_chip_it = l_targets.begin();
+             l_chip_it != l_targets.end();
+            )
+        {
+            FAPI_TRY(fapi2::getScom(*l_chip_it,
+                                    PERV_TOD_TIMER_REG,
+                                    l_tod_timer_data),
+                     "Error polling TOD_TIMER_REG");
+
+            if (l_tod_timer_data.getBit<PERV_TOD_TIMER_REG_STATUS>())
+            {
+                l_chip_it = l_targets.erase(l_chip_it);
+            }
+            else
+            {
+                l_chip_it++;
+            }
+        }
+    }
+
+    FAPI_ASSERT(l_targets.empty(),
+                fapi2::P9_TOD_TIMER_START_SIGNAL_ERROR().
+                set_TARGET(l_targets.front()),
+                "Spread spectrum operation did not start on all processors; the SMP fabric might be dead now!");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
 
 /// @brief Helper function for p9_tod_init
 /// @param[in] i_tod_node Pointer to TOD topology (including FAPI targets)
@@ -276,6 +417,10 @@ fapi2::ReturnCode p9_tod_init(
     // Start configuring each node; (init_tod_node will recurse on each child)
     FAPI_TRY(init_tod_node(i_tod_node, o_failingTodProc),
              "Error from init_tod_node!");
+
+    // sync spread across chips in topology
+    FAPI_TRY(sync_spread(i_tod_node),
+             "Error from sync_spread!");
 
 fapi_try_exit:
     FAPI_DBG("Exiting...");

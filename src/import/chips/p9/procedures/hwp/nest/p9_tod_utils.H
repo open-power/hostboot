@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -269,8 +269,7 @@ extern "C" {
         TOD_CLEANUP,
         TOD_CHECK_OSC,
         TOD_MOVE_TOD_TO_TB,
-        TOD_SAVE_CONFIG,
-        SS_PLL_SYNC
+        TOD_SAVE_CONFIG
     };
 
     // Input which determines the master oscillator to use
