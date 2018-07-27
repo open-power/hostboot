@@ -62,6 +62,7 @@ namespace ISTEP
         MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
         MOD_REDISCOVER_I2C_TARGETS                        = 0x20,
         MOD_FREQ_ATTR_DATA                                = 0x21,
+        MOD_SMP_WRAP_PROC_IOVALID                         = 0x22,
     };
 
     /**
@@ -129,6 +130,7 @@ namespace ISTEP
         RC_NO_VALID_MEM_CONFIG                   = ISTEP_COMP_ID | 0x47,
         RC_MASTER_GET_SBE_BOOT_SEEPROM_FAIL      = ISTEP_COMP_ID | 0x48,
         RC_SLAVE_GET_SBE_BOOT_SEEPROM_FAIL       = ISTEP_COMP_ID | 0x49,
+        RC_LINK_TRAIN_ERRORS_FROM_HWP            = ISTEP_COMP_ID | 0x4A,
     };
 
 };
