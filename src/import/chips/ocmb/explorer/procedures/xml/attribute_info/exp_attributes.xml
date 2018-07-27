@@ -37,5 +37,69 @@
 
 
 <attributes>
+    <attribute>
+        <id>ATTR_MSS_OCMB_ENTERPRISE_MODE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Indicates whether the OCMB can support enterprise mode or
+            if it has been fused to only support non-enterprise mode.
+            Note: needs to be setup by the get ECID functionality
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>
+            NON_ENTERPRISE = 0,
+            ENTERPRISE = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            An override to allow an enterprise capable DIMM to be run in non-enterprise mode.
+            Defaults to NO_OVERRIDE
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>
+            NO_OVERRIDE = 0,
+            OVERRIDE_NON_ENTERPRISE = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Indicates whether the OCMB should be run in half DIMM mode or not
+            Note: needs to be setup by the get ECID functionality
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>
+            FULL_DIMM = 0,
+            HALF_DIMM = 1
+        </enum>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            An override that allows the user to control full or half DIMM mode
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>
+            NO_OVERRIDE = 0,
+            OVERRIDE_FULL_DIMM = 1,
+            OVERRIDE_HALF_DIMM = 2
+        </enum>
+        <writeable/>
+    </attribute>
 
 </attributes>
