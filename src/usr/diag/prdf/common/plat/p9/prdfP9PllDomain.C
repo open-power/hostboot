@@ -130,17 +130,18 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         ExtensibleChip * l_chip = LookUp(index);
 
+        if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
+        {
+            // The chip is now non-functional.
+            nfchips.push_back( l_chip );
+            continue;
+        }
+
         // Check if this chip has a clock error
         ExtensibleChipFunction * l_query =
             l_chip->getExtensibleFunction("CheckErrorType");
         rc |= (*l_query)(l_chip,
             PluginDef::bindParm<uint32_t &> (l_errType));
-
-        if ( !PlatServices::isFunctional(l_chip->getTrgt()) )
-        {
-            // The chip is now non-functional.
-            nfchips.push_back( l_chip );
-        }
 
         // Continue if no clock errors reported on this chip
         if ( 0 == l_errType )
@@ -173,8 +174,8 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         // Update error lists
         if (l_errType & SYS_PLL_UNLOCK  ) sysRefList.push_back(   l_chip );
         if (l_errType & PCI_PLL_UNLOCK  ) pciList.push_back(      l_chip );
-        if (l_errType & SYS_OSC_FAILOVER) mfFoList.push_back(     l_chip );
-        if (l_errType & PCI_OSC_FAILOVER) sysRefFoList.push_back( l_chip );
+        if (l_errType & PCI_OSC_FAILOVER) mfFoList.push_back(     l_chip );
+        if (l_errType & SYS_OSC_FAILOVER) sysRefFoList.push_back( l_chip );
 
     } // end for each chip in domain
 
@@ -302,7 +303,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // Set Signature
         serviceData.service_data->GetErrorSignature()->
-            setChipId(pciList[0]->getHuid());
+            setChipId(mfFoList[0]->getHuid());
         serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
     }
     if (sysRefFoList.size() > 0)
@@ -311,7 +312,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         // Set Signature
         serviceData.service_data->GetErrorSignature()->
-            setChipId(pciList[0]->getHuid());
+            setChipId(sysRefFoList[0]->getHuid());
         serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
     }
 
