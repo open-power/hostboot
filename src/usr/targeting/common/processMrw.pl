@@ -1100,13 +1100,13 @@ sub processProcessor
 
         if    ($huid eq 0x50000)
         {
-            $grp_id  = 1;
-            $chip_id = 1;
+            $grp_id  = 0;
+            $chip_id = 0;
         }
         elsif ($huid eq 0x50001)
         {
             $grp_id  = 1;
-            $chip_id = 0;
+            $chip_id = 1;
         }
         elsif ($huid eq 0x50002)
         {
@@ -1115,7 +1115,7 @@ sub processProcessor
         }
         elsif ($huid eq 0x50003)
         {
-            $grp_id  = 0;
+            $grp_id  = 1;
             $chip_id = 0;
         }
         else
