@@ -24,4 +24,19 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
 
+  <hwpError>
+    <rc>RC_MSS_EXP_ENTERPRISE_SETUP_ERROR</rc>
+    <description>The enterprise mode bit is in the incorrect state</description>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>REGISTER_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
