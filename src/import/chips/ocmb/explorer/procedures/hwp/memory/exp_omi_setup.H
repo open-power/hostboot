@@ -22,3 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_omi_setup.H
+/// @brief Contains the explorer OMI setup
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: Memory
+#ifndef EXP_OMI_SETUP_H_
+#define EXP_OMI_SETUP_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_omi_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Setup the OCMB for enterprise and half-DIMM modes as desired
+    /// @param[in] i_target the OCMB target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+}
+
+#endif
