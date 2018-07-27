@@ -7741,4 +7741,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SYNC_SS_PLL_SPREAD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Use TOD to synchronize SS filter PLL spreading across system
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
