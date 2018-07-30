@@ -47,7 +47,7 @@ actionclass l3_dir_ce
 
 actionclass l3_lru_parity_error
 {
-    self_th_1;
+    threshold32pday;
     funccall("cacheCeWorkaround");
 };
 
