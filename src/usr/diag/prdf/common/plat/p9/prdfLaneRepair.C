@@ -37,7 +37,7 @@
 #include <prdfExtensibleChip.H>
 #include <UtilHash.H>
 
-#include <prdfP9ProcMbCommonExtraSig.H>
+#include <prdfLaneRepairExtraSig.H>
 #include <hwas/common/hwasCallout.H>
 
 #ifndef __HOSTBOOT_MODULE

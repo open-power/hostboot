@@ -31,6 +31,8 @@ chip p9_mc
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
+.include "prdfLaneRepairExtraSig.H";
+
  #############################################################################
  #                                                                           #
  #  ######                                                                   #
