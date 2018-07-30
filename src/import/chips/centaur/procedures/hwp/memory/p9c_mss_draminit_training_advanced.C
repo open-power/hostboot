@@ -190,6 +190,12 @@ fapi2::ReturnCode p9c_mss_draminit_training_advanced(const fapi2::Target<fapi2::
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_VREF_CAL_CNTL, l_target_centaur, vref_cal_control));
     FAPI_INF("%s +++++++++++ - DDR4 - CAL Control - %d ++++++++++++++++++++", mss::c_str(i_target_mba), vref_cal_control);
 
+    // Skips training advanced completely if VREF cal control is disable
+    if(vref_cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_DISABLE)
+    {
+        FAPI_INF("%s has training advanced disabled, skipping it.", mss::c_str(i_target_mba));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     //const fapi::Target is centaur.mba
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target_mba, l_num_ranks_per_dimm));

@@ -122,11 +122,11 @@ Set by: PLL settings written by Dave Cadigan</description>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=P8_DRAM - Enable V-Ref Train DRAM Level (P8 algorithm); 0x02=P8_RANK Level Training (P8 algorithm); 0x03=Box shmoo; 0x04=Ternary shmoo
-         Default Value = 0x03 for box shmoo on all platforms
+         Default Value = 0x00 for disabling training advanced on all platforms
 </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, P8_DRAM = 1, P8_RANK = 2, BOX = 3, TERNARY = 4</enum>
-    <default>3</default>
+    <default>0</default>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
