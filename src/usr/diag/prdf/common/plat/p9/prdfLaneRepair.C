@@ -73,7 +73,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
     int32_t l_rc = SUCCESS;
     TargetHandle_t rxBusTgt = i_chip->getTrgt();
-    TargetHandle_t txBusTgt = nullptr;
+//    TargetHandle_t txBusTgt = nullptr;
     TYPE busType = getTargetType(rxBusTgt);
 
     // RTC 174485
@@ -96,23 +96,23 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         return SUCCESS;
     }
 
-    bool thrExceeded;
+//    bool thrExceeded;
     // Number of clock groups on this interface. (2 for xbus, 1 for all others)
     uint8_t clkGrps = (busType == TYPE_XBUS) ? 2 : 1;
     std::vector<uint8_t> rx_lanes[2];    // Failing lanes on clock group 0/1
     // RX-side, previously failed laned lanes stored in VPD for each clk grp
-    std::vector<uint8_t> rx_vpdLanes[2];
+//    std::vector<uint8_t> rx_vpdLanes[2];
     // TX-side, previously failed laned lanes stored in VPD for each clk grp
-    std::vector<uint8_t> tx_vpdLanes[2];
+//    std::vector<uint8_t> tx_vpdLanes[2];
     BitStringBuffer l_newLaneMap0to63(64); // FFDC Bitmap of newly failed lanes
     BitStringBuffer l_newLaneMap64to127(64);
-    BitStringBuffer l_vpdLaneMap0to63(64); // FFDC Bitmap of VPD failed lanes
-    BitStringBuffer l_vpdLaneMap64to127(64);
+//    BitStringBuffer l_vpdLaneMap0to63(64); // FFDC Bitmap of VPD failed lanes
+//    BitStringBuffer l_vpdLaneMap64to127(64);
 
     do
     {
         // Get the TX target
-        txBusTgt = getTxBusEndPt(rxBusTgt);
+//        txBusTgt = getTxBusEndPt(rxBusTgt);
 
         // Call io_read_erepair for each group
         for (uint8_t i=0; i<clkGrps; ++i)
@@ -152,6 +152,10 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
 
+// TODO: reading/writing the VPD has been disabled due to the overwhelming
+//       number of bugs in the Lane Repair HWPs. This code can be re-enabled
+//       once the bugs have been fixed.
+#if 0
         // Don't read/write VPD in mfg mode if erepair is disabled
         // TODO RTC: 174485 - Add support for OBUS/DMI
         if ( (TYPE_XBUS == busType) && (!isFabeRepairDisabled()) )
@@ -250,6 +254,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 
             }
         }
+#endif
     } while (0);
 
     // Clear FIRs
