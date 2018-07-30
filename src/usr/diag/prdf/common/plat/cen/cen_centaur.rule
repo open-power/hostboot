@@ -33,6 +33,7 @@ chip cen_centaur
 
 #Import signatures
 .include "prdfP9ProcMbCommonExtraSig.H";
+.include "prdfLaneRepairExtraSig.H";
 
  #############################################################################
  #                                                                           #

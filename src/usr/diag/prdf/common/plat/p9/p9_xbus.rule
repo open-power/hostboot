@@ -32,7 +32,7 @@ chip p9_xbus
     scomlen     64;
 
 #Import signatures
-.include "prdfP9ProcMbCommonExtraSig.H";
+.include "prdfLaneRepairExtraSig.H";
 
  #############################################################################
  #                                                                           #

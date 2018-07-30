@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9ProcMbCommonExtraSig.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfLaneRepairExtraSig.H $   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,14 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9ProcMbCommonExtraSig_H
-#define __prdfP9ProcMbCommonExtraSig_H
+#ifndef __prdfLaneRepairExtraSig_H
+#define __prdfLaneRepairExtraSig_H
 
 #include <prdrSignatures.H>
 
-/* PLL Extra signatures */
-PRDR_ERROR_SIGNATURE( PLL_ERROR, 0x00ed0000, "","PLL error" );
-PRDR_ERROR_SIGNATURE( MF_REF_FAILOVER, 0x00ed0001, "", "MF Ref Clk failover" );
-PRDR_ERROR_SIGNATURE( SYS_REF_FAILOVER, 0x00ed0002, "",
-                      "Sys Ref Clk failover" );
-#endif // __prdfP9ProcMbCommonExtraSig_H
+/* Lane Repair extra signatures */
+PRDR_ERROR_SIGNATURE( ERepair_ERROR, 0xffff0000, "","ERepair Internal error" );
+PRDR_ERROR_SIGNATURE( ERepair_FWThrExceeded, 0xffff0001, "",
+                      "ERepair FW threshold exceeded" );
+
+#endif // __prdfLaneRepairExtraSig_H
