@@ -2750,7 +2750,7 @@ ReturnCode platGetMBvpdSlopeInterceptData(
                 l_val = MASTER_TOTAL_POWER_INTERCEPT;
                 break;
             case ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE:
-                l_val = MASTER_TOTAL_POWER_INTERCEPT;
+                l_val = MASTER_TOTAL_POWER_SLOPE;
                 break;
             case ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT:
                 l_val = SUPPLIER_POWER_INTERCEPT;
