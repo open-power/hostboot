@@ -38,10 +38,10 @@ extern "C"
         uint8_t l_curDs = 0;
 
         // get port slct for our current target
-        FAPI_TRY( FAPI_ATTR_GET( ATTR_CEN_MBA_PORT, i_target, l_curPs ) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, i_target, l_curPs) );
 
         // get dimm slct for our current target
-        FAPI_TRY( FAPI_ATTR_GET( ATTR_CEN_MBA_DIMM, i_target, l_curDs ) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, i_target, l_curDs) );
 
         // get parent mba
         l_mba = i_target.getParent<TARGET_TYPE_MBA>();
@@ -53,13 +53,14 @@ extern "C"
         for ( auto const& dimm : l_dimms )
         {
             uint8_t l_tmpPs = 0;
-            FAPI_TRY( FAPI_ATTR_GET( ATTR_CEN_MBA_PORT, dimm, l_tmpPs ) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, dimm, l_tmpPs) );
 
             // DIMM on same port slct
             if ( l_tmpPs == l_curPs )
             {
                 uint8_t l_tmpDs = 0;
-                FAPI_TRY( FAPI_ATTR_GET( ATTR_CEN_MBA_DIMM, dimm, l_tmpDs ) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, dimm,
+                                        l_tmpDs) );
 
                 // different DIMM from the current one
                 if ( l_tmpDs != l_curDs )
@@ -80,12 +81,12 @@ extern "C"
         bool& o_spprSupported )
     {
         ATTR_ROW_REPAIR_SUPPORTED_MRW_Type l_rr1;
-        FAPI_TRY ( FAPI_ATTR_GET( ATTR_ROW_REPAIR_SUPPORTED_MRW,
+        FAPI_TRY ( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SUPPORTED_MRW,
                                   Target<TARGET_TYPE_SYSTEM>(), l_rr1 ) );
 
         ATTR_ROW_REPAIR_SPPR_SUPPORTED_Type l_rr2;
-        FAPI_TRY( FAPI_ATTR_GET( ATTR_ROW_REPAIR_SPPR_SUPPORTED, i_target,
-                                 l_rr2 ) );
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED,
+                                 i_target, l_rr2 ) );
 
         o_spprSupported = false;
 
@@ -97,7 +98,7 @@ extern "C"
             FAPI_TRY( __getPairedDimm( i_target, l_pairedDimm ) );
 
             ATTR_ROW_REPAIR_SPPR_SUPPORTED_Type l_rr3;
-            FAPI_TRY( FAPI_ATTR_GET( ATTR_ROW_REPAIR_SPPR_SUPPORTED,
+            FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ROW_REPAIR_SPPR_SUPPORTED,
                                      l_pairedDimm, l_rr3 ) );
 
             if ( ENUM_ATTR_ROW_REPAIR_SPPR_SUPPORTED_SUPPORTED == l_rr3 )
