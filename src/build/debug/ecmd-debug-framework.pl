@@ -178,15 +178,11 @@ sub getHRMOR
     {
         # read Core Scratch 1 (multicast to all cores)
         my $scratch1 = readScom( 0x41010A87, 8 );
-        # Bits 4:51 are the current HRMOR in MB (see memstate.H)
+        # Bits 4:51 are the current HRMOR in Bytes (see memstate.H)
         my $hrmor = ($scratch1 & 0x0FFFFFFFFFFFF000)>>12;
         if( $hrmor == 0 )
         {
             $hrmor = DEFAULT_HRMOR + ($node * PER_NODE_OFFSET);
-        }
-        else
-        {
-            $hrmor = $hrmor*1024; #value is in MB
         }
 
         return $hrmor;
