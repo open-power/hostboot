@@ -62,7 +62,7 @@ namespace KernelMemState
                 uint64_t location:4;    /**< Indicator of memory mode HostBoot
                                              contained in L3 or mainstore  */
                 // 04:51 - Current HRMOR
-                uint64_t hrmor:48;      /**< Current HRMOR in MB */
+                uint64_t hrmor:48;      /**< Current HRMOR in bytes **/
                 // 52:63 - Size of active Hostboot memory
                 uint64_t size:12;       /**< Size of the memory in MB */
             };
