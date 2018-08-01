@@ -43,6 +43,7 @@ include common/plat/cen/prdf_plat_cen.mk
 include common/plat/mem/prdf_plat_mem.mk
 include plat/cen/prdf_plat_cen_hb_only.mk
 include plat/mem/prdf_plat_mem_hb_only.mk
+include plat/p9/prdf_plat_p9_hb_only.mk
 
 VPATH += ${prd_vpath}
 
