@@ -35,13 +35,15 @@ constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_28 = 28;
-constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_0b01010 = 0b01010;
-constexpr uint64_t literal_0b11111 = 0b11111;
-constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0x1 = 0x1;
-constexpr uint64_t literal_0x3 = 0x3;
+constexpr uint64_t literal_0x0 = 0x0;
+constexpr uint64_t literal_0b01010 = 0b01010;
 constexpr uint64_t literal_0x5 = 0x5;
+constexpr uint64_t literal_0x4 = 0x4;
+constexpr uint64_t literal_0b11111 = 0b11111;
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_0x7 = 0x7;
 constexpr uint64_t literal_0b0000000000000000111111111 = 0b0000000000000000111111111;
 constexpr uint64_t literal_0b1100111111111111111111111 = 0b1100111111111111111111111;
@@ -70,6 +72,8 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT3, l_chip_ec));
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
         uint64_t l_def_ENABLE_AMO_CLEAN_LINES = literal_1;
+        fapi2::ATTR_RISK_LEVEL_Type l_TGT1_ATTR_RISK_LEVEL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT1, l_TGT1_ATTR_RISK_LEVEL));
         fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13_Type l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13, TGT3,
                                l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13));
@@ -132,11 +136,14 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             l_scom_buffer.insert<18, 1, 63, uint64_t>(l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF );
             l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_28 );
 
-            if ((l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 == literal_0))
+            if (((( ! l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13)
+                  || (l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 && (l_TGT1_ATTR_RISK_LEVEL == literal_0x0)))
+                 || (l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 && (l_TGT1_ATTR_RISK_LEVEL == literal_0x1))))
             {
                 l_scom_buffer.insert<55, 5, 59, uint64_t>(literal_0b01010 );
             }
-            else if ((l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 == literal_1))
+            else if (((l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 && (l_TGT1_ATTR_RISK_LEVEL == literal_0x4))
+                      || (l_TGT3_ATTR_CHIP_EC_FEATURE_HW439321_FIXED_IN_P9UDD13 && (l_TGT1_ATTR_RISK_LEVEL == literal_0x5))))
             {
                 l_scom_buffer.insert<55, 5, 59, uint64_t>(literal_0b11111 );
             }
