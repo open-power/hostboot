@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,25 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_mss_attr_cleanup entry");
     // errlHndl_t l_err = NULL;
+
+    // Replicate HB memory mirroring policy into HWP policy
+    // Default to non mirror (so if tryGet fails just keep going)
+    Target* l_pTopLevel = NULL;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirror = 0x0;
+    l_pTopLevel->tryGetAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>
+      (l_mirror);
+
+    if(l_mirror)
+    {
+        l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
+          (fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE);
+    }
+    else
+    {
+        l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
+          (fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_FALSE);
+    }
 
     TargetHandleList l_funcDimmList;
     // Get all the functional Dimms
