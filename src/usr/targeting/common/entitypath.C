@@ -471,7 +471,12 @@ const char* EntityPath::pathElementTypeAsString(
             return "FANCTLR";
         case TYPE_SMPGROUP:
             return "SMPGROUP";
-
+        case TYPE_OMI:
+            return "OMI";
+        case TYPE_OMIC:
+            return "OMIC";
+        case TYPE_MCC:
+            return "MCC";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

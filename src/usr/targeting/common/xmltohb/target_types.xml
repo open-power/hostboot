@@ -1512,7 +1512,8 @@
 
 <!-- MC
      Nimbus : None
-     Cumulus: 2 per chip  -->
+     Cumulus: 2 per chip
+     Axone  : 2 per chip -->
 <targetType>
   <id>unit-mc-power9</id>
   <parent>unit</parent>
@@ -1541,9 +1542,19 @@
   </attribute>
 </targetType>
 
+<targetType>
+  <id>unit-mc-axone</id>
+  <parent>unit-mc-power9</parent>
+  <attribute>
+    <id>MODEL</id>
+    <default>AXONE</default>
+  </attribute>
+</targetType>
+
 <!-- MI
      Nimbus : None
-     Cumulus: total of 4 per chip -->
+     Cumulus: 4 total per chip (2 per MC)
+     Axone  : 4 total per chip (2 per MC)-->
 <targetType>
   <id>unit-mi-power9</id>
   <parent>unit</parent>
@@ -1573,6 +1584,89 @@
   <parent>unit-mi-power9</parent>
   <attribute>
     <default>CUMULUS</default>
+    <id>MODEL</id>
+  </attribute>
+</targetType>
+
+<targetType>
+  <id>unit-mi-axone</id>
+  <parent>unit-mi-power9</parent>
+  <attribute>
+    <default>AXONE</default>
+    <id>MODEL</id>
+  </attribute>
+</targetType>
+
+<!-- OMIC
+     Nimbus : None
+     Cumulus: None
+     Axone  : 6 total per chip (3 per MC)-->
+<targetType>
+  <id>unit-omic-power9</id>
+  <parent>unit</parent>
+  <attribute>
+    <default>OMIC</default>
+    <id>TYPE</id>
+  </attribute>
+  <attribute>
+    <default>1</default>
+    <id>DECONFIG_GARDABLE</id>
+  </attribute>
+  <attribute>
+    <default>0x00000033</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
+    <id>PARENT_PERVASIVE</id>
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
+</targetType>
+
+<targetType>
+  <id>unit-omic-axone</id>
+  <parent>unit-omic-power9</parent>
+  <attribute>
+    <default>AXONE</default>
+    <id>MODEL</id>
+  </attribute>
+</targetType>
+
+<!-- MCC
+     Nimbus : None
+     Cumulus: None
+     Axone  : 8 total per chip (2 per MI) -->
+<targetType>
+  <id>unit-mcc-power9</id>
+  <parent>unit</parent>
+  <attribute>
+    <default>MCC</default>
+    <id>TYPE</id>
+  </attribute>
+  <attribute>
+    <default>1</default>
+    <id>DECONFIG_GARDABLE</id>
+  </attribute>
+  <attribute>
+    <default>0x00000033</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
+    <id>PARENT_PERVASIVE</id>
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
+</targetType>
+
+<targetType>
+  <id>unit-mcc-axone</id>
+  <parent>unit-mcc-power9</parent>
+  <attribute>
+    <default>AXONE</default>
     <id>MODEL</id>
   </attribute>
 </targetType>
@@ -1609,6 +1703,45 @@
   <parent>unit-dmi-power9</parent>
   <attribute>
     <default>CUMULUS</default>
+    <id>MODEL</id>
+  </attribute>
+</targetType>
+
+<!-- OMI (Special has two parents)
+     Nimbus : None
+     Cumulus: None
+     Axone: 4 per MI (total of 16 per chip)
+             3 on OMIC0,1,3,4
+             2 on OMIC2,5     (still total 16) -->
+<targetType>
+  <id>unit-omi-power9</id>
+  <parent>unit</parent>
+  <attribute>
+    <default>OMI</default>
+    <id>TYPE</id>
+  </attribute>
+  <attribute>
+    <default>1</default>
+    <id>DECONFIG_GARDABLE</id>
+  </attribute>
+  <attribute>
+    <default>0x00000033</default>
+    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+  </attribute>
+  <attribute>
+    <id>PARENT_PERVASIVE</id>
+  </attribute>
+  <attribute>
+    <id>CDM_DOMAIN</id>
+    <default>MEM</default>
+  </attribute>
+</targetType>
+
+<targetType>
+  <id>unit-omi-axone</id>
+  <parent>unit-omi-power9</parent>
+  <attribute>
+    <default>AXONE</default>
     <id>MODEL</id>
   </attribute>
 </targetType>

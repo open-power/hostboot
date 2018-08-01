@@ -5078,8 +5078,20 @@
         <value>71</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>OMI</name>
         <value>72</value>
+    </enumerator>
+    <enumerator>
+        <name>MCC</name>
+        <value>73</value>
+    </enumerator>
+    <enumerator>
+        <name>OMIC</name>
+        <value>74</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>75</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>
@@ -5109,6 +5121,9 @@
     </enumerator>
     <enumerator>
       <name>CUMULUS</name>
+    </enumerator>
+    <enumerator>
+      <name>AXONE</name>
     </enumerator>
     <enumerator>
       <name>CENTAUR</name>

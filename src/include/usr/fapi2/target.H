@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -238,6 +238,15 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
         case fapi2::TARGET_TYPE_MC:
             o_targetingType = TARGETING::TYPE_MC;
             break;
+        case fapi2::TARGET_TYPE_OMI:
+            o_targetingType = TARGETING::TYPE_OMI;
+            break;
+        case fapi2::TARGET_TYPE_OMIC:
+            o_targetingType = TARGETING::TYPE_OMIC;
+            break;
+        case fapi2::TARGET_TYPE_MCC:
+            o_targetingType = TARGETING::TYPE_MCC;
+            break;
         default:
             FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!", i_T);
             assert(false);
@@ -338,6 +347,15 @@ inline fapi2::TargetType  convertTargetingTypeToFapi2(TARGETING::TYPE i_T)
         case TARGETING::TYPE_MC:
             o_targetingType = fapi2::TARGET_TYPE_MC;
             break;
+        case TARGETING::TYPE_OMI:
+            o_targetingType = fapi2::TARGET_TYPE_OMI;
+            break;
+        case TARGETING::TYPE_OMIC:
+            o_targetingType = fapi2::TARGET_TYPE_OMIC;
+            break;
+        case TARGETING::TYPE_MCC:
+            o_targetingType = fapi2::TARGET_TYPE_MCC;
+            break;
         default:
             o_targetingType = fapi2::TARGET_TYPE_NONE;
             break;
@@ -372,6 +390,9 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
             fapi2::TARGET_TYPE_MCBIST |
             fapi2::TARGET_TYPE_MC |
             fapi2::TARGET_TYPE_MI |
+            fapi2::TARGET_TYPE_OMI |
+            fapi2::TARGET_TYPE_MCC |
+            fapi2::TARGET_TYPE_OMIC |
             fapi2::TARGET_TYPE_CAPP |
             fapi2::TARGET_TYPE_DMI |
             fapi2::TARGET_TYPE_OBUS |
@@ -399,7 +420,10 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
             fapi2::TARGET_TYPE_MC |
             fapi2::TARGET_TYPE_DMI |
             fapi2::TARGET_TYPE_PEC |
-            fapi2::TARGET_TYPE_PHB;
+            fapi2::TARGET_TYPE_PHB |
+            fapi2::TARGET_TYPE_OMI |
+            fapi2::TARGET_TYPE_OMIC |
+            fapi2::TARGET_TYPE_MCC;
 
     static_assert( !((K_PARENT == fapi2::TARGET_TYPE_PERV) &&
        ((T_SELF & TARGET_TYPE_PERV_CHIPLETS) == fapi2::TARGET_TYPE_NONE)),
@@ -516,6 +540,44 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
                     (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
                     (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_MI");
+
+    // valid parents for MCC
+    // MCC -> PERV
+    // MCC -> MI
+    // MCC -> MC
+    // MCC -> PROC
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_MCC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MI) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MI");
+
+    // valid parents for OMI
+    // OMI -> PERV
+    // OMI -> MCC
+    // OMI -> MI
+    // OMI -> MC
+    // OMI -> OMIC
+    // OMI -> PROC
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_OMI) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MCC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MI) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_OMIC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MI");
+
+    // valid parents for OMIC
+    // OMIC -> PERV
+    // OMIC -> MC
+    // OMIC -> PROC
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_OMIC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_OMIC");
 
     // valid parents for DMI
     // DMI -> MI
@@ -674,7 +736,7 @@ inline std::vector<Target<K_CHILD, V> >
     // PERV -> XBUS
     // PERV -> OBUS
     // PERV -> CAPP
-    // PERV -> NV
+    // PERV -> OBUS_BRICK
     // PERV -> MCBIST
     // PERV -> MCS
     // PERV -> MCA
@@ -682,6 +744,9 @@ inline std::vector<Target<K_CHILD, V> >
     // PERV -> PHB
     // PERV -> MC
     // PERV -> MI
+    // PERV -> MCC
+    // PERV -> OMIC
+    // PERV -> OMI
     // PERV -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_PERV) &&
                     (K_CHILD != fapi2::TARGET_TYPE_EQ) &&
@@ -697,6 +762,9 @@ inline std::vector<Target<K_CHILD, V> >
                     (K_CHILD != fapi2::TARGET_TYPE_PHB) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MC) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MI) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_MCC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMIC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMI) &&
                     (K_CHILD != fapi2::TARGET_TYPE_DMI)),
                   "improper child of fapi2::TARGET_TYPE_PERV");
 
@@ -755,17 +823,41 @@ inline std::vector<Target<K_CHILD, V> >
     // Cumulus Memory
     // valid children for MC
     // MC -> MI
+    // MC -> MCC
+    // MC -> OMIC
+    // MC -> OMI
     // MC -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MC) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MI) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_MCC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMIC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMI) &&
                     (K_CHILD != fapi2::TARGET_TYPE_DMI)),
                   "improper child of fapi2::TARGET_TYPE_MC");
 
     // valid children for MI
+    // MI -> MCC
+    // MI -> OMI
     // MI -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MI) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_MCC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMI) &&
                     (K_CHILD != fapi2::TARGET_TYPE_DMI)),
                   "improper child of fapi2::TARGET_TYPE_MI");
+
+    // valid children for MCC
+    // MCC -> OMI
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_MCC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMI)),
+                  "improper child of fapi2::TARGET_TYPE_MCC");
+
+    // valid children for OMIC
+    // OMIC -> OMI
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_OMIC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OMI)),
+                  "improper child of fapi2::TARGET_TYPE_OMIC");
+
+    // TODO RTC:172970 When OCMB is added we need to add getchild support for OMI targets
 
     // valid children for DMI
     // DMI -> MEMBUF
