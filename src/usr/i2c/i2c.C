@@ -2864,7 +2864,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                 continue;
             }
 
-            // Look for clock line (SCL) and data line (SDA) to be high
+            // Look for clock line (SCL) to be high
             // such that the 'stop' command will work
             status_reg.value = 0x0ull;
             size_t delay_ns = 0;
@@ -2885,8 +2885,7 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
                     break;
                 }
 
-                if (   (status_reg.scl_input_level != 0)
-                    && (status_reg.sda_input_level != 0) )
+                if (status_reg.scl_input_level != 0)
                 {
                     break;
                 }
@@ -2906,20 +2905,19 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
 
             if ( delay_ns > I2C_RESET_POLL_DELAY_TOTAL_NS )
             {
-                // We don't see both clock and data lines high; in this case
+                // We don't see clock line high; in this case
                 // it's not likely for a slave stop command to work.  One
                 // possible nasty side-effect of attempting slave stop is the
                 // I2C master can become indefinitely busy and prevent writes
                 // to the mode register from completing. Just continue to the
                 // next port.
                 TRACFCOMP( g_trac_i2c, ERR_MRK"i2cSendSlaveStop(): "
-                           "Not seeing both SCL (%d) and SDA (%d) high "
+                           "Not seeing SCL (%d) high "
                            "after %d ns of polling (max=%d). "
                            "Full status register = 0x%.16llX. "
                            "Inhibiting sending slave stop to e%/p% for "
                            "HUID 0x%08X.",
                            status_reg.scl_input_level,
-                           status_reg.sda_input_level,
                            delay_ns,
                            I2C_RESET_POLL_DELAY_TOTAL_NS,
                            status_reg.value,
