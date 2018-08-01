@@ -666,6 +666,13 @@ void addNodeCommBusCallout(node_comm_modes_t i_mode,
                                       l_ep2,
                                       l_bus_type,
                                       i_priority);
+
+                // Add HW Callout to deconfigure this XBUS
+                io_log->addHwCallout(l_busTgt,
+                                     i_priority,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL);
+
                break;
             }
             else
@@ -729,6 +736,14 @@ void addNodeCommBusCallout(node_comm_modes_t i_mode,
                                               l_smpGroup_peer_ep,
                                               l_bus_type,
                                               i_priority);
+
+                        // Add HW Callout to deconfigure this SMPGROUP
+                        // NOTE:  GARD is not supported at SMPGORUP level
+                        io_log->addHwCallout(l_smpGroup,
+                                             i_priority,
+                                             HWAS::DECONFIG,
+                                             HWAS::GARD_NULL);
+
                         break;
                     }
                 }  // for loop on SMPGROUP
