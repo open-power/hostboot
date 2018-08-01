@@ -98,4 +98,43 @@
     <platInit/>
   </attribute>
   <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_REL_POS</id>
+    <targetType>
+      TARGET_TYPE_CORE, TARGET_TYPE_EX, TARGET_TYPE_EQ,
+      TARGET_TYPE_MCS, TARGET_TYPE_MCA, TARGET_TYPE_MCBIST, TARGET_TYPE_MI, TARGET_TYPE_DMI,
+      TARGET_TYPE_MC, TARGET_TYPE_OMI, TARGET_TYPE_OMIC, TARGET_TYPE_MCC,
+      TARGET_TYPE_XBUS, TARGET_TYPE_OBUS,
+      TARGET_TYPE_OBUS_BRICK,
+      TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
+      TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
+      TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4,
+      TARGET_TYPE_MEM_PORT,
+      TARGET_TYPE_DIMM
+    </targetType>
+    <description>
+      A target's position relative to its immediate parent target.
+
+      PROC - EQ - EX - CORE
+      PROC - XBUS
+      PROC - OBUS - OBUS_BRICK
+      PROC - SBE
+      PROC - PPE
+      PROC - PERV
+      PROC - PEC - PHB
+      PROC - CAPP
+      PROC - MCBIST - MCS - MCA/MEM_PORT - DIMM
+      PROC - MC - MI - DMI
+      PROC - MC - MI - MCC - OMI
+        (OMIC - OMI is not supported)
+      MEMBUF - MBA - DIMM
+      MEMBUF - L4
+      OCMB - MEM_PORT - DIMM
+
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
+  </attribute>
+  <!-- ******************************************************************************** -->
 </attributes>
