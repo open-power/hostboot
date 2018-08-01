@@ -680,20 +680,32 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
             o_type = TARGETING::TYPE_PERV;
             break;
         case fapi2::TARGET_TYPE_PEC:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_PEC;
-        break;
-    case fapi2::TARGET_TYPE_PHB:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_PHB;
-        break;
-    case fapi2::TARGET_TYPE_MC:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MC;
-        break;
-    default:
-        o_class = TARGETING::CLASS_NA;
-        o_type = TARGETING::TYPE_NA;
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_PEC;
+            break;
+        case fapi2::TARGET_TYPE_PHB:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_PHB;
+            break;
+        case fapi2::TARGET_TYPE_MC:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MC;
+            break;
+        case fapi2::TARGET_TYPE_OMI:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_OMI;
+            break;
+        case fapi2::TARGET_TYPE_OMIC:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_OMIC;
+            break;
+        case fapi2::TARGET_TYPE_MCC:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MCC;
+            break;
+        default:
+            o_class = TARGETING::CLASS_NA;
+            o_type = TARGETING::TYPE_NA;
     }
 }
 
@@ -717,6 +729,9 @@ bool isPhysParentChild(const TargetType i_parentType,
                              TARGET_TYPE_MCA    |
                              TARGET_TYPE_MCBIST |
                              TARGET_TYPE_MC     |
+                             TARGET_TYPE_MCC    |
+                             TARGET_TYPE_OMIC   |
+                             TARGET_TYPE_OMI    |
                              TARGET_TYPE_MI     |
                              TARGET_TYPE_CAPP   |
                              TARGET_TYPE_DMI    |

@@ -207,6 +207,15 @@ void directOverride()
             case fapi2::TARGET_TYPE_PHB:
                 l_targetType = TARGETING::TYPE_PHB;
                 break;
+            case fapi2::TARGET_TYPE_OMI:
+                l_targetType = TARGETING::TYPE_OMI;
+                break;
+            case fapi2::TARGET_TYPE_OMIC:
+                l_targetType = TARGETING::TYPE_OMIC;
+                break;
+            case fapi2::TARGET_TYPE_MCC:
+                l_targetType = TARGETING::TYPE_MCC;
+                break;
             default:
                 l_targetType = TARGETING::TYPE_NA;
         }

@@ -130,6 +130,9 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"mba"      , fapi2::TARGET_TYPE_MBA        , TARGETING::TYPE_MBA},
     {"dmi"      , fapi2::TARGET_TYPE_DMI        , TARGETING::TYPE_DMI},
     {"mi"       , fapi2::TARGET_TYPE_MI         , TARGETING::TYPE_MI},
+    {"omi"      , fapi2::TARGET_TYPE_OMI        , TARGETING::TYPE_OMI},
+    {"omic"     , fapi2::TARGET_TYPE_OMIC       , TARGETING::TYPE_OMIC},
+    {"mcc"      , fapi2::TARGET_TYPE_MCC        , TARGETING::TYPE_MCC},
     {"LAST"     , 0                             , 0}
 };
 
