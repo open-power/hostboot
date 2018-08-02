@@ -116,6 +116,8 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/centaur/procedures/xml/error_info/*.xml)
+FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/generic/xml/error_info/*.xml)
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \
