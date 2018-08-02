@@ -120,15 +120,6 @@ enum sizes
 
 enum times
 {
-    DELAY_1NS               = 1,
-    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
-    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
-    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
-    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
-    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
-    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
-
-    // Not *exactly* a time but go with it.
     BG_SCRUB_IN_HOURS       = 12,
 
     CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap
