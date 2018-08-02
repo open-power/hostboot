@@ -104,12 +104,13 @@ extern "C"
                 mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
 
                 FAPI_TRY(l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d));
-                FAPI_TRY(mss::set_pre_init_attrs(d, l_spd_decoder));
+                FAPI_TRY(mss::set_pre_init_attrs(d, l_spd_decoder), "%s failed to set pre init attrs", mss::c_str(d) );
             }
         }
 
         // Get supported freqs for this MCBIST
-        FAPI_TRY( mss::supported_freqs(l_mcbist, l_supported_freqs) );
+        FAPI_TRY( mss::supported_freqs(l_mcbist, l_supported_freqs), "%s failed to get supported frequencies",
+                  mss::c_str(i_target) );
 
         for (const auto& l_mcs : mss::find_targets<TARGET_TYPE_MCS>(l_mcbist))
         {
@@ -151,7 +152,7 @@ extern "C"
                     uint64_t l_tCKmin = 0;
 
                     // Find CAS latency using JEDEC algorithm
-                    FAPI_TRY( l_cas_latency.find_cl(l_desired_cl, l_tCKmin) );
+                    FAPI_TRY( l_cas_latency.find_cl(l_desired_cl, l_tCKmin), "%s failed to find a cas latency", mss::c_str(i_target) );
 
                     FAPI_INF("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
                              mss::c_str(l_mca), l_desired_cl, l_tCKmin);
