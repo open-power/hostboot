@@ -37,7 +37,7 @@
 #include <p9_mc_scom_addresses.H>
 
 #include <generic/memory/lib/utils/c_str.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/eff_config/timing.H>
 #include <lib/ccs/ccs.H>
 #include <lib/dimm/bcw_load_ddr4.H>
