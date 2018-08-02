@@ -215,6 +215,84 @@ public:
     bool unregisterShutdownEvent(msg_q_t i_msgQ);
 
     /**
+     * @brief Save Istep Step and Substep for use by error logging
+     * @param[in] i_step, Istep Step
+     * @param[in] i_subStep, Istep subStep
+     * @return none
+     */
+    void ShadowIstepData( uint8_t i_step,
+                          uint8_t i_subStep );
+
+    /**
+     * @brief Extract Istep Step and Substep
+     * @param[out] o_step, Istep Step
+     * @param[out] o_subStep, Istep subStep
+     * @return none
+     */
+    void GetIstepData( uint8_t & o_step,
+                       uint8_t & o_subStep );
+
+    /**
+     *  @brief Shut down Hostboot in a controlled way
+     *
+     *  @note: See the API documentation @
+     *      src/include/usr/initservice/initserviceif.H
+     */
+    static void doShutdown (
+                     uint64_t i_status,
+                     bool     i_inBackground = false,
+                     uint64_t i_payload_base = 0,
+                     uint64_t i_payload_entry = 0,
+                     uint64_t i_payload_data = 0,
+                     uint64_t i_masterHBInstance = THIS_NODE_NO_PAYLOAD,
+                     uint32_t i_error_info = 0);
+
+protected:
+
+    /**
+     * @brief Constructor for the InitService object.
+     */
+    InitService();
+
+    /**
+     * @brief Destructor for the InitService object.
+     */
+    ~InitService();
+
+private:
+    /**
+     *  Disable copy constructor and assignment operator
+     */
+    InitService(const InitService& i_right);
+    InitService& operator=(const InitService& i_right);
+
+    /**
+     * @brief Atomically sets the shutdown status and TI data associated with
+     *     a shutdown request
+     *
+     * @par Detailed Description
+     *     Atomically sets the shutdown status and TI data associated with
+     *     a shutdown request.  Any number of callers may initiate parallel
+     *     shutdown requests, however this interface ensures that the first
+     *     caller atomically updates the initial TI area and shutdown status.
+     *     Subsequent callers will only be able to lock in a new status (TI
+     *     area remains untouched) if it is a non-success reason code and the
+     *     initial status was a PLID.
+     *
+     * @warning Should only be called by INITSERVICE::doShutdown
+     *
+     * @param[in] i_status     Shutdown status to be passed to primary shutdown
+     *     handler
+     * @param[in] i_error_info Additional error data to be included in TI data
+     *
+     * @return bool Boolean indicating whether this was the first shutdown
+     *     to be requested
+     */
+    bool _setShutdownStatus(
+        uint64_t i_status,
+        uint32_t i_error_info);
+
+    /**
      * @brief Perform necessary shut down steps.
      *
      * @param[in] i_status - Shutdown status to be passed along on shutdown
@@ -233,52 +311,12 @@ public:
      * @note This calls registered services to notify them of shutdown and it
      * flushes the virtual memory.
      */
-    void doShutdown ( uint64_t i_status,
+    void _doShutdown (uint64_t i_status,
                       uint64_t i_payload_base = 0,
                       uint64_t i_payload_entry = 0,
                       uint64_t i_payload_data = 0,
                       uint64_t i_masterHBInstance = 0xffffffffffffffffull,
                       uint32_t i_error_info = 0);
-
-    /**
-     * @brief Save Istep Step and Substep for use by error logging
-     * @param[in] i_step, Istep Step
-     * @param[in] i_subStep, Istep subStep
-     * @return none
-     */
-    void ShadowIstepData( uint8_t i_step,
-                          uint8_t i_subStep );
-
-    /**
-     * @brief Extract Istep Step and Substep
-     * @param[out] o_step, Istep Step
-     * @param[out] o_subStep, Istep subStep
-     * @return none
-     */
-    void GetIstepData( uint8_t & o_step,
-                       uint8_t & o_subStep );
-
-
-protected:
-
-    /**
-     * @brief Constructor for the InitService object.
-     */
-    InitService();
-
-    /**
-     * @brief Destructor for the InitService object.
-     */
-    ~InitService();
-
-
-private:
-    /**
-     *  Disable copy constructor and assignment operator
-     */
-    InitService(const InitService& i_right);
-    InitService& operator=(const InitService& i_right);
-
 
     /**
      * Check and load module associated with this task or function
@@ -324,6 +362,9 @@ private:
 
     mutex_t iv_registryMutex;
     bool iv_shutdownInProgress;
+
+    // Worst shutdown status accumulated during shutdown processing
+    uint64_t iv_worst_status;
 
     uint8_t iv_iStep;     // shadow of current istep / substep
     uint8_t iv_iSubStep;  //  for error logs
