@@ -37,9 +37,10 @@
 
 #include <cstdint>
 #include <fapi2.H>
+#include <lib/mss_attribute_accessors.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 
 namespace mss
 {
@@ -352,7 +353,7 @@ template< fapi2::TargetType T >
 inline uint64_t tmod( const fapi2::Target<T>& i_target )
 {
     // Per DDR4 Full spec update (79-4A) - timing requirements
-    return mss::max_ck_ns( i_target, 24, 15 );
+    return mss::max_ck_ns<T>( i_target, 24, 15 );
 }
 
 ///
@@ -410,7 +411,7 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
     constexpr uint64_t l_dq_ck = 1;
     constexpr uint64_t l_dqs_ck = 1;
     uint8_t l_wlo_ck = 0;
-    uint64_t l_wloe_ck = mss::ns_to_cycles(i_target, 2);
+    uint64_t l_wloe_ck = mss::ns_to_cycles<T>(i_target, 2);
     uint64_t l_twlo_twloe = 0;
     uint8_t l_twldqsen = 0;
 
@@ -1151,7 +1152,7 @@ inline uint64_t tvrefdqe( const fapi2::Target<T>& i_target )
 {
     // JEDEC tVREFDQE in ns
     constexpr uint64_t tVREFDQE = 150;
-    return ns_to_cycles(i_target, tVREFDQE);
+    return ns_to_cycles<T>(i_target, tVREFDQE);
 }
 
 ///
@@ -1165,7 +1166,7 @@ inline uint64_t tvrefdqx( const fapi2::Target<T>& i_target )
 {
     // JEDEC tVREFDQX in ns
     constexpr uint64_t tVREFDQX = 150;
-    return ns_to_cycles(i_target, tVREFDQX);
+    return ns_to_cycles<T>(i_target, tVREFDQX);
 }
 
 ///
