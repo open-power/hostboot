@@ -299,10 +299,12 @@ inline fapi2::ReturnCode encode ( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     //used to hold result from vector pair lookup
     OT l_encoding = 0;
 
-    //Returns true if found, so need to negate for FAPI_TRY
     //Failing out if we don't find an encoding. All suported types should be encoded above
-    FAPI_TRY( !mss::find_value_from_key (i_map, i_attr, l_encoding),
-              "Couldn't find encoding for power thermal encode for value: %x target: %s", i_attr, mss::c_str(i_target));
+    FAPI_ASSERT( mss::find_value_from_key (i_map, i_attr, l_encoding),
+                 fapi2::MSS_POWER_THERMAL_ENCODE_ERROR()
+                 .set_ATTR(i_attr)
+                 .set_DIMM_TARGET(i_target),
+                 "Couldn't find encoding for power thermal encode for value: %x target: %s", i_attr, mss::c_str(i_target));
     o_buf.insertFromRight<S, L>(l_encoding);
 
 fapi_try_exit:
@@ -330,9 +332,13 @@ inline fapi2::ReturnCode decode ( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
     //used to hold result from vector pair lookup
     OT l_encoding = 0;
     i_buf.extractToRight<S, L>(l_encoding);
-    //Find_key_from_value returns fapi2 error
-    FAPI_TRY( mss::find_key_from_value (i_map, l_encoding, o_attr),
-              "Couldn't find encoding for power thermal decode for target: %s", mss::c_str(i_target));
+
+    //Failing out if we don't find an decoding. All suported types should be encoded above
+    FAPI_ASSERT( mss::find_key_from_value (i_map, l_encoding, o_attr),
+                 fapi2::MSS_POWER_THERMAL_DECODE_ERROR()
+                 .set_ATTR(l_encoding)
+                 .set_DIMM_TARGET(i_target),
+                 "Couldn't find encoding for power thermal decode for target: %s", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 }
