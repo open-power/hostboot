@@ -535,7 +535,8 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     // Did you find it? Let me know.
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_key != l_value_iterator->first) )
     {
-        FAPI_INF("Did not find a mapping value to key: %d", i_key);
+        // Static cast ensures that the below print will not fail at compile time
+        FAPI_INF("Did not find a mapping value to key: %d", static_cast<uint64_t>(i_key));
         return false;
     }
 
@@ -551,12 +552,12 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
 /// @param[in] i_vector_of_pairs the input vector of pairs
 /// @param[in] i_value the "map" value, the second entry in the pairs
 /// @param[out] o_key the first entry in the pair
-/// @return fapi2 ReturnCode fapi2::RC_SUCCESS if value found
+/// @return true if value is found, false otherwise
 ///
 template<typename T, typename OT>
-fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
-                                      const OT& i_value,
-                                      T& o_key)
+bool find_key_from_value(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
+                         const OT& i_value,
+                         T& o_key)
 {
     // Comparator lambda expression
     const auto compare = [&i_value](const std::pair<T, OT>& i_lhs)
@@ -572,12 +573,13 @@ fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_ve
     // Did you find it? Let me know.
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_value != l_value_iterator->second) )
     {
-        FAPI_ERR("Did not find a mapping key to value: %d", i_value);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
+        // Static cast ensures that the below print will not fail at compile time
+        FAPI_INF("Did not find a mapping key to value: %d", static_cast<uint64_t>(i_value));
+        return false;
     }
 
     o_key = l_value_iterator->first;
-    return fapi2::FAPI2_RC_SUCCESS;
+    return true;
 
 }// find_value_from_key
 
@@ -589,13 +591,13 @@ fapi2::ReturnCode find_key_from_value(const std::vector<std::pair<T, OT> >& i_ve
 /// @param[in] i_array the input array of pairs
 /// @param[in] i_key the "map" key
 /// @param[in] o_value the value found from given key
-/// @return fapi2 ReturnCode fapi2::RC_SUCCESS if key found
+/// @return true if value is found, false otherwise
 /// @note To use on short arrays. O(N), simple search
 ///
 template<typename T, typename OT, size_t N>
-fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N],
-                                       const T& i_key,
-                                       OT& o_value)
+bool find_value_from_key( const std::pair<T, OT> (&i_array)[N],
+                          const T& i_key,
+                          OT& o_value)
 {
     // TK Use sort and binary search for larger arrays
     for (size_t i = 0; i < N; i++)
@@ -603,12 +605,12 @@ fapi2::ReturnCode find_value_from_key( const std::pair<T, OT> (&i_array)[N],
         if (i_array[i].first == i_key)
         {
             o_value = i_array[i].second;
-            return fapi2::FAPI2_RC_SUCCESS;
+            return true;
         }
     }
 
     FAPI_ERR ("No match found for find_value_from_key");
-    return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    return false;
 }
 
 ///
