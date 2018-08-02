@@ -447,7 +447,7 @@ fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
 
     // Get cached decoder
     std::vector< mss::spd::facade > l_spd_facades;
-    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades) );
+    FAPI_TRY( get_spd_decoder_list(i_target, l_spd_facades), "%s get decoder - spd", mss::c_str(i_target) );
 
     // Looking for the biggest application period on an MC.
     // This will further reduce supported frequencies the system can run on.
@@ -470,7 +470,7 @@ fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
         l_largest_tck = std::max(l_largest_tck, l_tck_min_in_ps);
         l_largest_tck = std::min(l_largest_tck, l_tckmax_in_ps);
 
-        FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq) );
+        FAPI_TRY( mss::ps_to_freq(l_largest_tck, l_dimm_freq), "%s ps to freq %lu", mss::c_str(i_target), l_largest_tck );
         FAPI_INF("Biggest freq supported from SPD %d MT/s for %s",
                  l_dimm_freq, mss::c_str(l_dimm));
 
@@ -503,9 +503,9 @@ fapi2::ReturnCode supported_freqs(const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     std::vector<uint8_t> l_deconfigured = {0};
 
     // Retrieve system MRW, SPD, and VPD constraints
-    FAPI_TRY( mss::max_allowed_dimm_freq(l_max_freqs.data()) );
-    FAPI_TRY( spd_supported_freq(i_target, l_spd_supported_freq) );
-    FAPI_TRY( vpd_supported_freqs(i_target, l_vpd_supported_freqs) );
+    FAPI_TRY( mss::max_allowed_dimm_freq(l_max_freqs.data()), "%s max_allowed_dimm_freq", mss::c_str(i_target) );
+    FAPI_TRY( spd_supported_freq(i_target, l_spd_supported_freq), "%s spd supported freqs", mss::c_str(i_target) );
+    FAPI_TRY( vpd_supported_freqs(i_target, l_vpd_supported_freqs), "%s vpd supported freqs", mss::c_str(i_target) );
 
     // Limit frequency scoreboard according to MRW constraints
     FAPI_TRY( limit_freq_by_mrw(i_target, l_max_freqs, l_scoreboard) );
