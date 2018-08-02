@@ -207,6 +207,12 @@ sub createAttrFromFapi(\%)
         $targattr->{persistency} = "volatile-zeroed";
     }
 
+    #mrwHide:  convert to no_export to hide from ServerWiz
+    if( exists $fapiattr->{mrwHide} )
+    {
+        $targattr->{no_export} = {};
+    }
+
     #mssUnits: ignore
     #mssAccessorName: ignore
     #odmVisible: ignore
