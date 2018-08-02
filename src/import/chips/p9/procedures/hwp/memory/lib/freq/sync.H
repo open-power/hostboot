@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
