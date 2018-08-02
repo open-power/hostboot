@@ -321,8 +321,9 @@ uint64_t dqs_align::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA
     // This step runs for approximately 6 x 600 x 4 DRAM clocks per rank pair.
     const uint64_t l_dqs_align_cycles = 6 * 600 * 4;
 
-    FAPI_DBG("%s dqs_align_cycles: %llu(%lluns)", mss::c_str(i_target), l_dqs_align_cycles, mss::cycles_to_ns(i_target,
-             l_dqs_align_cycles));
+    FAPI_DBG("%s dqs_align_cycles: %llu(%lluns)", mss::c_str(i_target), l_dqs_align_cycles,
+             mss::cycles_to_ns(i_target,
+                               l_dqs_align_cycles));
     return l_dqs_align_cycles;
 }
 
