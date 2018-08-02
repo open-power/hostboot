@@ -41,7 +41,7 @@
 #include <lib/eff_config/timing.H>
 #include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/rank.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/dimm/mrs_load.H>
@@ -2627,21 +2627,29 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     // Using an if branch because a ternary conditional wasn't working with params for find_value_from_key
     if (l_preamble == 0)
     {
-        FAPI_TRY( mss::find_value_from_key( CWL_TABLE_1,
-                                            iv_freq,
-                                            l_cwl),
-                  "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
-                  iv_freq,
-                  l_preamble);
+        FAPI_ASSERT( mss::find_value_from_key( CWL_TABLE_1,
+                                               iv_freq,
+                                               l_cwl),
+                     fapi2::MSS_DRAM_CWL_ERROR()
+                     .set_TARGET(iv_mca)
+                     .set_FREQ(iv_freq)
+                     .set_PREAMBLE(l_preamble),
+                     "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
+                     iv_freq,
+                     l_preamble);
     }
     else
     {
-        FAPI_TRY( mss::find_value_from_key( CWL_TABLE_2,
-                                            iv_freq,
-                                            l_cwl),
-                  "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
-                  iv_freq,
-                  l_preamble);
+        FAPI_ASSERT( mss::find_value_from_key( CWL_TABLE_2,
+                                               iv_freq,
+                                               l_cwl),
+                     fapi2::MSS_DRAM_CWL_ERROR()
+                     .set_TARGET(iv_mca)
+                     .set_FREQ(iv_freq)
+                     .set_PREAMBLE(l_preamble),
+                     "Failed finding CAS Write Latency (cwl), freq: %d, preamble %d",
+                     iv_freq,
+                     l_preamble);
 
     }
 
