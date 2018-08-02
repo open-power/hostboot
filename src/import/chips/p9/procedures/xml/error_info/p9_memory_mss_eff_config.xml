@@ -538,4 +538,18 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_DRAM_CWL_ERROR</rc>
+    <description>
+      The DRAM's CWL could not be found based upon the inputted DIMM frequency
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FREQ</ffdc>
+    <ffdc>PREAMBLE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
