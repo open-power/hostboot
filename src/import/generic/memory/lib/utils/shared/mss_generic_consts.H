@@ -43,20 +43,6 @@ namespace mss
 {
 
 ///
-/// @brief Common conversions
-///
-enum conversions
-{
-    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
-    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
-    MHZ_TO_KHZ              = 1000,
-    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
-    NIBBLES_PER_BYTE = 2,
-    BITS_PER_NIBBLE = 4,
-    BITS_PER_BYTE = 8,
-};
-
-///
 /// @brief FFDC generic codes
 ///
 enum generic_ffdc_codes
@@ -93,8 +79,8 @@ enum generic_ffdc_codes
     TWTR_L_MIN = 0x101A,
     DEVICE_TYPE = 0x101B,
     BASE_MODULE_TYPE = 0x101C,
-    BAD_SPD_DATA = 0x101C,
-    SET_FIELD = 0x101D,
+    BAD_SPD_DATA = 0x101D,
+    SET_FIELD = 0x101E,
 };
 
 ///
@@ -107,10 +93,22 @@ enum proc_type
 };
 
 ///
-/// @brief JEDEC supported DDR4 speeds
+/// @brief Supported memory controller types
 ///
-enum ddr4_dimm_speeds
+enum class mc_type
 {
+    NIMBUS,
+    CENTAUR,
+    EXPLORER,
+};
+
+///
+/// @brief JEDEC supported DDR speeds
+/// @note Includes DDR4 and DDR5 only
+///
+enum ddr_dimm_speeds
+{
+    // Supported frequencies
     DIMM_SPEED_1600 = 1600,
     DIMM_SPEED_1866 = 1866,
     DIMM_SPEED_2133 = 2133,
@@ -118,6 +116,16 @@ enum ddr4_dimm_speeds
     DIMM_SPEED_2666 = 2666,
     DIMM_SPEED_2933 = 2933,
     DIMM_SPEED_3200 = 3200,
+    DIMM_SPEED_3600 = 3600,
+    DIMM_SPEED_4000 = 4000,
+    DIMM_SPEED_4400 = 4400,
+    DIMM_SPEED_4800 = 4800,
+
+    // Max/Mins for specific generations here
+    DDR4_MIN_SPEED = 1600,
+    DDR4_MAX_SPEED = 3200,
+    DDR5_MIN_SPEED = 3200,
+    DDR5_MAX_SPEED = 4800,
 };
 
 namespace spd
@@ -182,6 +190,28 @@ enum guard_band : uint16_t
 };
 
 }// spd
+
+enum conversions
+{
+    NIBBLES_PER_BYTE = 2,
+    BITS_PER_NIBBLE = 4,
+    BITS_PER_BYTE = 8,
+
+    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
+    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
+
+    DELAY_1NS               = 1,
+    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
+    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
+    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
+    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
+    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
+    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
+
+    MHZ_TO_KHZ              = 1000,
+    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
+};
+
 }// mss
 
 #endif
