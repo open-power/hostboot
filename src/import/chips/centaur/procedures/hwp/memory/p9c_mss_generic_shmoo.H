@@ -67,7 +67,7 @@ class generic_shmoo
                 } P[MAX_PORT];          // Max Port 2
             } MBA;
             shmoo_knob_config_t static_knob; // Static info regarding the knob
-        } SHMOO[MAX_SHMOO]; // Denote max shmoo scenarios we have; Have 2; so that one for WR/RD and other Clock.
+        } SHMOO;
 
         //! Result Data
         shmoo_algorithm_t iv_algorithm;
@@ -90,6 +90,9 @@ class generic_shmoo
         uint16_t iv_binary_diff;
         uint32_t iv_vref_mul;
         uint8_t iv_valid_rank[MAX_PORT][MAX_RANK];
+        uint16_t iv_dqs_rb_regval[MAX_PORT][MAX_RANK][MAX_DQ];
+        uint16_t iv_dqs_lb_regval[MAX_PORT][MAX_RANK][MAX_DQ];
+        uint16_t iv_dqs_nom_val[MAX_PORT][MAX_RANK][MAX_DQ];
 
     public:
 
@@ -245,32 +248,37 @@ class generic_shmoo
         fapi2::ReturnCode print_report_dqs2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
 
         ///
-        /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
+        /// @brief This function is used to get margins for setup and hold in Ps by using frequency
         /// @param[in] i_target Centaur input MBA
+        /// @param[in,out] io_right_margin_val array reference of hold margins
+        /// @param[in,out] io_left_margin_val array reference of setup margins
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
-        fapi2::ReturnCode get_margin(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+        fapi2::ReturnCode get_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                      uint16_t (&io_right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+                                      uint16_t (&io_left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ]);
 
         ///
-        /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
+        /// @brief This function is used to get DQS margins for setup and hold in Ps by using frequency for x4 DIMM
         /// @param[in] i_target Centaur input MBA
+        /// @param[in,out] io_right_margin_val array reference of right-side margins
+        /// @param[in,out] io_left_margin_val array reference of left-side margins
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
-        fapi2::ReturnCode get_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+        fapi2::ReturnCode get_margin_dqs_by4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                             uint16_t (&right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+                                             uint16_t (&left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ]);
 
         ///
-        /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
+        /// @brief This function is used to get DQS margins for setup and hold in Ps by using frequency for x8 DIMM
         /// @param[in] i_target Centaur input MBA
+        /// @param[in,out] io_right_margin_val array reference of right-side margins
+        /// @param[in,out] io_left_margin_val array reference of left-side margins
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
-        fapi2::ReturnCode get_margin_dqs_by8(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
-
-        ///
-        /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
-        /// @param[in] i_target Centaur input MBA
-        /// @return FAPI2_RC_SUCCESS iff successful
-        ///
-        fapi2::ReturnCode get_margin_dqs_by4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+        fapi2::ReturnCode get_margin_dqs_by8(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                             uint16_t (&right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+                                             uint16_t (&left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ]);
 
         ///
         /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
@@ -286,9 +294,9 @@ class generic_shmoo
         /// @param[in] i_target Centaur input MBA
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
-        void get_min_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
-                             uint32_t* o_right_min_margin,
-                             uint32_t* o_left_min_margin);
+        fapi2::ReturnCode get_min_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+                                          uint32_t* o_right_min_margin,
+                                          uint32_t* o_left_min_margin);
 
         ///
         /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
@@ -438,6 +446,15 @@ class generic_shmoo
         /// @return FAPI2_RC_SUCCESS iff successful
         ///
         fapi2::ReturnCode print_report2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
+
+        ///
+        /// @brief Calculate the absolute value of the difference between two values
+        /// @param[in] i_val1 first value
+        /// @param[in] i_val2 second value
+        /// @return absolute value of the difference between i_val1 and i_val2
+        ///
+        uint16_t absolute_difference(const uint16_t i_val1,
+                                     const uint16_t i_val2);
 
 };
 

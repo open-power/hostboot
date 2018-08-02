@@ -110,19 +110,19 @@ extern "C"
 
         if(iv_DQS_ON == 1)
         {
-            for (uint8_t k = 0; k < MAX_SHMOO; k++)
+            for (uint8_t i = 0; i < MAX_PORT; i++)
             {
-                for (uint8_t i = 0; i < MAX_PORT; i++)
+                for (uint8_t j = 0; j < iv_MAX_RANKS[i]; j++)
                 {
-                    for (uint8_t j = 0; j < iv_MAX_RANKS[i]; j++)
-                    {
-                        init_multi_array(250, SHMOO[k].MBA.P[i].S[j].K.nom_val);
-                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.lb_regval);
-                        init_multi_array(512, SHMOO[k].MBA.P[i].S[j].K.rb_regval);
-                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.last_pass);
-                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.last_fail);
-                        init_multi_array(0, SHMOO[k].MBA.P[i].S[j].K.curr_val);
-                    }
+                    init_multi_array(250, SHMOO.MBA.P[i].S[j].K.nom_val);
+                    init_multi_array(0, SHMOO.MBA.P[i].S[j].K.lb_regval);
+                    init_multi_array(512, SHMOO.MBA.P[i].S[j].K.rb_regval);
+                    init_multi_array(0, SHMOO.MBA.P[i].S[j].K.last_pass);
+                    init_multi_array(0, SHMOO.MBA.P[i].S[j].K.last_fail);
+                    init_multi_array(0, SHMOO.MBA.P[i].S[j].K.curr_val);
+                    init_multi_array(250, iv_dqs_rb_regval[i][j]);
+                    init_multi_array(250, iv_dqs_lb_regval[i][j]);
+                    init_multi_array(250, iv_dqs_nom_val[i][j]);
                 }
             }
         }
@@ -363,15 +363,6 @@ extern "C"
             FAPI_TRY(find_bound(i_target, LEFT));
             iv_shmoo_type = 4;
 
-            if (l_dram_width == 4)
-            {
-                FAPI_TRY(get_margin_dqs_by4(i_target));
-            }
-            else
-            {
-                FAPI_TRY(get_margin_dqs_by8(i_target));
-            }
-
             FAPI_TRY(print_report_dqs(i_target));
 
             FAPI_TRY(get_min_margin_dqs(i_target, o_right_min_margin, o_left_min_margin));
@@ -401,20 +392,17 @@ extern "C"
             //Find LEFT BOUND OR HOLD BOUND
             FAPI_TRY(find_bound(i_target, LEFT));
 
-            //Find the margins in Ps i.e setup margin ,hold margin,Eye width
-            FAPI_TRY(get_margin2(i_target));
-
             //It is used to find the lowest of setup and hold margin
             if(iv_shmoo_param == 6)
             {
-                get_min_margin2(i_target, o_right_min_margin, o_left_min_margin);
+                FAPI_TRY(get_min_margin2(i_target, o_right_min_margin, o_left_min_margin));
                 FAPI_TRY(print_report2(i_target));
                 FAPI_INF("%s:Minimum hold margin=%d ps and setup margin=%d ps", mss::c_str(i_target), *o_left_min_margin,
                          *o_right_min_margin);
             }
             else
             {
-                get_min_margin2(i_target, o_right_min_margin, o_left_min_margin);
+                FAPI_TRY(get_min_margin2(i_target, o_right_min_margin, o_left_min_margin));
                 FAPI_TRY(print_report2(i_target));
                 FAPI_INF("%s:Minimum hold margin=%d ps and setup margin=%d ps", mss::c_str(i_target), *o_left_min_margin,
                          *o_right_min_margin);
@@ -963,32 +951,32 @@ extern "C"
                         for(l_bit = 0; l_bit < MAX_BITS; l_bit++)
                         {
                             l_dq = (BITS_PER_BYTE * l_byte) + (BITS_PER_NIBBLE * l_nibble) + l_bit;
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq];
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq];
+                            SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq];
+                            SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq];
 
                             if(bound == RIGHT)
                             {
-                                if((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] + l_max_offset) > l_max)
+                                if((SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] + l_max_offset) > l_max)
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = l_max;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = l_max;
                                 }
                                 else
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                             l_max_offset;
                                 }
                             }
 
                             else
                             {
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] > 64)
+                                if(SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] > 64)
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                             l_max_offset;
                                 }
                                 else
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = 0;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = 0;
                                 }
                             }
                         } // bit loop
@@ -1048,9 +1036,9 @@ extern "C"
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
                             FAPI_INF("Before access call");
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, i_rnk, l_input_type_e, l_dq, 1, val));
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rnk].K.nom_val[l_dq] = val;
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rnk].K.rb_regval[l_dq] = val;
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rnk].K.lb_regval[l_dq] = val;
+                            SHMOO.MBA.P[l_p].S[i_rnk].K.nom_val[l_dq] = val;
+                            SHMOO.MBA.P[l_p].S[i_rnk].K.rb_regval[l_dq] = val;
+                            SHMOO.MBA.P[l_p].S[i_rnk].K.lb_regval[l_dq] = val;
 
                         }
                     }
@@ -1098,7 +1086,7 @@ extern "C"
                 for (l_n = 0; l_n < l_max_nibble; l_n++)
                 {
                     FAPI_TRY(mss_access_delay_reg(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_n, 0, val));
-                    SHMOO[1].MBA.P[l_p].S[rank].K.nom_val[l_n] = val;
+                    iv_dqs_nom_val[l_p][rank][l_n] = val;
                 }
             }
         }
@@ -1195,11 +1183,11 @@ extern "C"
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 1,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
 
                             }
 
@@ -1232,7 +1220,7 @@ extern "C"
                                 }
                             }
 
-                            if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
+                            if(SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -1266,7 +1254,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 1,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                         l_dq = l_dq + 4;
                     }
                 }
@@ -1294,10 +1282,10 @@ extern "C"
 
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
                             FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
@@ -1323,7 +1311,7 @@ extern "C"
                                 }
                             }
 
-                            if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
+                            if(SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -1357,7 +1345,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                         l_dq = l_dq + 4;
                     }
                 }
@@ -1502,69 +1490,53 @@ extern "C"
 
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
+                                SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq];
+                                SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] +
+                                        SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq]));
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
-                                }
-                                else
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq];
-                                }
+                                auto l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq],
+                                                                       SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]);
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
+                                if(l_curr_diff <= 1)
                                 {
                                     iv_binary_done_map[l_p][rank][l_n] = 1;
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
+                                    SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq];
                                 }
                             }
                             else
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
+                                SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq];
+                                SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] +
+                                        SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq]));
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
-                                }
-                                else
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq];
-                                }
+                                uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq],
+                                                       SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]);
 
                                 if(l_p == 0)
                                 {
                                     if(l_flag_p0 == 1)
                                     {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = 1;
+                                        l_curr_diff = 1;
                                     }
                                 }
                                 else
                                 {
                                     if(l_flag_p1 == 1)
                                     {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = 1;
+                                        l_curr_diff = 1;
                                     }
                                 }
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
+                                if(l_curr_diff <= 1)
                                 {
                                     iv_binary_done_map[l_p][rank][l_n] = 1;
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
+                                    SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
                             }
@@ -1593,7 +1565,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                         l_dq = l_dq + 4;
                     }
                 }
@@ -1663,72 +1635,55 @@ extern "C"
 
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
+                                SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq];
+                                SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] +
+                                        SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq]));
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
-                                }
-                                else
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq];
-                                }
+                                uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq],
+                                                       SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]);
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
+                                if(l_curr_diff <= 1)
                                 {
                                     iv_binary_done_map[l_p][rank][l_n] = 1;
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
+                                    SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
                             }
                             else
                             {
 
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq];
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] +
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
+                                SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq];
+                                SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq] = (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq] +
+                                        SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]) / 2;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq]));
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
-                                }
-                                else
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq];
-                                }
-
+                                uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq],
+                                                       SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq]);
 
                                 if(l_p == 0)
                                 {
                                     if(l_flag_p0 == 1)
                                     {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = 1;
+                                        l_curr_diff = 1;
                                     }
                                 }
                                 else
                                 {
                                     if(l_flag_p1 == 1)
                                     {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] = 1;
+                                        l_curr_diff = 1;
                                     }
                                 }
 
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq] <= 1)
+                                if(l_curr_diff <= 1)
                                 {
                                     iv_binary_done_map[l_p][rank][l_n] = 1;
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq];
+                                    SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq];
 
                                 }
                             }
@@ -1756,7 +1711,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                         l_dq = l_dq + 4;
                     }
                 }
@@ -1791,7 +1746,6 @@ extern "C"
         uint8_t l_dq = 0;
         access_type_t l_access_type_e = WRITE;
         uint8_t l_n = 0;
-        uint8_t l_dqs = 1;
         uint8_t l_p = 0;
         uint8_t l_i = 0;
         uint16_t l_delay = 0;
@@ -1876,36 +1830,36 @@ extern "C"
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
-                                SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] + l_delay;
+                                iv_dqs_rb_regval[l_p][rank][l_n] = iv_dqs_nom_val[l_p][rank][l_n] + l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                                     SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                                                     iv_dqs_rb_regval[l_p][rank][l_n]));
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                             }
 
-                            if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
+                            if(iv_dqs_rb_regval[l_p][rank][l_dq] > l_max_limit)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -1936,7 +1890,7 @@ extern "C"
                     {
 
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
 
                     }
                 }
@@ -1955,7 +1909,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     }
@@ -2016,35 +1970,35 @@ extern "C"
 
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
-                                SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] - l_delay;
+                                iv_dqs_lb_regval[l_p][rank][l_n] = iv_dqs_nom_val[l_p][rank][l_n] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                                     SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                                                     iv_dqs_lb_regval[l_p][rank][l_n]));
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] == 0)
+                            if(iv_dqs_lb_regval[l_p][rank][l_n] == 0)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -2070,7 +2024,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
                     }
                 }
             }
@@ -2087,7 +2041,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     }
@@ -2125,7 +2079,6 @@ extern "C"
         uint8_t l_dq = 0;
         access_type_t l_access_type_e = WRITE;
         uint8_t l_n = 0;
-        uint8_t l_dqs = 1;
         uint8_t l_my_dqs = 0;
         uint8_t l_CDarray0[80] = {0};
         uint8_t l_CDarray1[80] = {0};
@@ -2180,36 +2133,36 @@ extern "C"
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
 
-                                SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs] + l_delay;
+                                iv_dqs_rb_regval[l_p][rank][l_my_dqs] = iv_dqs_nom_val[l_p][rank][l_my_dqs] + l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_my_dqs, 0,
-                                                                     SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_my_dqs]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                                                     iv_dqs_rb_regval[l_p][rank][l_my_dqs]));
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                             }
 
-                            if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
+                            if(iv_dqs_rb_regval[l_p][rank][l_dq] > l_max_limit)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -2235,7 +2188,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
                     }
                 }
             }
@@ -2252,7 +2205,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     } //end of rank
@@ -2284,35 +2237,35 @@ extern "C"
 
                             if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                             {
-                                SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_my_dqs] = SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_my_dqs] - l_delay;
+                                iv_dqs_lb_regval[l_p][rank][l_my_dqs] = iv_dqs_nom_val[l_p][rank][l_my_dqs] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_my_dqs, 0,
-                                                                     SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_my_dqs]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                                                     iv_dqs_lb_regval[l_p][rank][l_my_dqs]));
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            if(SHMOO[l_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
+                            if(iv_dqs_lb_regval[l_p][rank][l_dq] == 0)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                             }
@@ -2339,7 +2292,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
                     }
                 }
             }
@@ -2356,7 +2309,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         } //end of nibble
                     } //end of rank
@@ -2397,7 +2350,6 @@ extern "C"
         uint8_t l_dqs = 0;
         access_type_t l_access_type_e = WRITE;
         uint8_t l_n = 0;
-        uint8_t l_scen_dqs = 1;
         uint8_t l_CDarray0[80] = {0};
         uint8_t l_CDarray1[80] = {0};
         uint8_t l_p = 0;
@@ -2452,63 +2404,63 @@ extern "C"
                             if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
                                 //Increase delay of DQS
-                                SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] + l_delay;
+                                iv_dqs_rb_regval[l_p][rank][l_n] = iv_dqs_nom_val[l_p][rank][l_n] + l_delay;
                                 //Write it to register DQS delay
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                                     SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_n]));
+                                                                     iv_dqs_rb_regval[l_p][rank][l_n]));
 
                                 //Increase Delay of DQ
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
 
                                 l_dq = l_dq + 1;
 
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
 
                             }
 
-                            if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
+                            if(SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] > l_max_limit)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                 iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
@@ -2550,7 +2502,7 @@ extern "C"
                     {
 
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
 
                     } //end of nib
                 } //end of rank
@@ -2568,7 +2520,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         } //end of nib
                     } //end of rank
@@ -2602,59 +2554,59 @@ extern "C"
 
                             if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
-                                SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n] - l_delay;
+                                iv_dqs_lb_regval[l_p][rank][l_n] = iv_dqs_nom_val[l_p][rank][l_n] - l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                                     SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_n]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                                                     iv_dqs_lb_regval[l_p][rank][l_n]));
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
+                            if(SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] == 0)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                 iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
@@ -2695,7 +2647,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
 
                     }
                 }
@@ -2713,7 +2665,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     }
@@ -2754,7 +2706,6 @@ extern "C"
         uint8_t l_dqs = 0;
         access_type_t l_access_type_e = WRITE;
         uint8_t l_n = 0;
-        uint8_t l_scen_dqs = 1;
         uint8_t l_CDarray0[80] = {0};
         uint8_t l_CDarray1[80] = {0};
         uint8_t l_p = 0;
@@ -2812,62 +2763,62 @@ extern "C"
                             if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
 
-                                SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dqs] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_dqs] +
-                                        l_delay;
+                                iv_dqs_rb_regval[l_p][rank][l_dqs] = iv_dqs_nom_val[l_p][rank][l_dqs] +
+                                                                     l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_dqs, 0,
-                                                                     SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dqs]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                                                     iv_dqs_rb_regval[l_p][rank][l_dqs]));
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] +
+                                SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
 
                             }
 
-                            if(SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.rb_regval[l_dqs] > l_max_limit)
+                            if(iv_dqs_rb_regval[l_p][rank][l_dqs] > l_max_limit)
                             {
 
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
@@ -2910,7 +2861,7 @@ extern "C"
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
                     }
                 }
             }
@@ -2927,7 +2878,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     }
@@ -2961,60 +2912,60 @@ extern "C"
 
                             if((iv_shmoo_error_map[l_p][rank][l_n] == 0) && (iv_shmoo_error_map[l_p][rank][l_n + 1] == 0))
                             {
-                                SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dqs] = SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_dqs] -
-                                        l_delay;
+                                iv_dqs_lb_regval[l_p][rank][l_dqs] = iv_dqs_nom_val[l_p][rank][l_dqs] -
+                                                                     l_delay;
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_dqs, 0,
-                                                                     SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dqs]));
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                                                     iv_dqs_lb_regval[l_p][rank][l_dqs]));
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                                 l_dq = l_dq + 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq] -
+                                SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] -
                                         l_delay;
 
                                 FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                     SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
+                                                                     SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            if(SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.lb_regval[l_dqs] == 0)
+                            if(iv_dqs_lb_regval[l_p][rank][l_dqs] == 0)
                             {
                                 iv_shmoo_error_map[l_p][rank][l_n] = 1;
                                 iv_shmoo_error_map[l_p][rank][l_n + 1] = 1;
@@ -3055,7 +3006,7 @@ extern "C"
                     {
 
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e_dqs, l_n, 0,
-                                                             SHMOO[l_scen_dqs].MBA.P[l_p].S[rank].K.nom_val[l_n]));
+                                                             iv_dqs_nom_val[l_p][rank][l_n]));
 
                     }
                 }
@@ -3074,7 +3025,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                             l_dq = l_dq + 4;
                         }
                     } //rank loop
@@ -3188,6 +3139,8 @@ extern "C"
         uint8_t l_attr_eff_dimm_type_u8 = 0;
         uint8_t l_attr_eff_num_drops_per_port_u8 = 0;
         uint8_t l_attr_eff_dram_width_u8 = 0;
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
 
         const auto l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_FREQ, l_target_centaur, l_attr_mss_freq_u32));
@@ -3226,6 +3179,8 @@ extern "C"
                      mss::c_str(i_target));
         }
 
+        FAPI_TRY(get_margin2(i_target, l_right_margin_val, l_left_margin_val));
+
         for (l_p = 0; l_p < 2; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -3241,24 +3196,27 @@ extern "C"
                         {
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
 
+                            uint16_t l_total_margin = l_right_margin_val[l_p][i_rank][l_dq] +
+                                                      l_left_margin_val[l_p][i_rank][l_dq];
+
                             if(iv_shmoo_type == 2)
                             {
                                 FAPI_INF("%s:WR_EYE %d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n ", mss::c_str(i_target),
-                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit, SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq], SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_dq], l_attr_mss_freq_u32, iv_vref_mul);
+                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit, SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                         SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq], SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                         l_right_margin_val[l_p][i_rank][l_dq],
+                                         l_left_margin_val[l_p][i_rank][l_dq],
+                                         l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
                             }
 
                             if(iv_shmoo_type == 8)
                             {
                                 FAPI_INF("%s:RD_EYE %d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n ", mss::c_str(i_target),
-                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit, SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq], SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_dq], l_attr_mss_freq_u32, iv_vref_mul);
+                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit, SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                         SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq], SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
+                                         l_left_margin_val[l_p][i_rank][l_dq],
+                                         l_right_margin_val[l_p][i_rank][l_dq],
+                                         l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
                             }
                         }
                     }
@@ -3291,6 +3249,8 @@ extern "C"
         uint8_t l_by8_dqs = 0;
         char* l_pMike = new char[128];
         char* l_str = new char[128];
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
 
         uint8_t l_i = 0;
         uint8_t l_dq = 0;
@@ -3356,6 +3316,15 @@ extern "C"
         FAPI_INF("%s", l_pMike);
         delete[] l_pMike;
 
+        if (l_attr_eff_dram_width_u8 == 4)
+        {
+            FAPI_TRY(get_margin_dqs_by4(i_target, l_right_margin_val, l_left_margin_val));
+        }
+        else
+        {
+            FAPI_TRY(get_margin_dqs_by8(i_target, l_right_margin_val, l_left_margin_val));
+        }
+
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -3408,16 +3377,15 @@ extern "C"
                         continue;
                     }
 
-                    l_total_margin
-                        = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble]
-                          + SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble];
+                    l_total_margin = l_left_margin_val[l_p][i_rank][l_nibble]
+                                     + l_right_margin_val[l_p][i_rank][l_nibble];
                     sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
                             l_mbapos, l_p, i_rank, l_nibble,
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.curr_val[l_nibble],
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble],
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble],
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble],
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble],
+                            SHMOO.MBA.P[l_p].S[i_rank].K.curr_val[l_nibble],
+                            SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble],
+                            SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble],
+                            l_left_margin_val[l_p][i_rank][l_nibble],
+                            l_right_margin_val[l_p][i_rank][l_nibble],
                             l_total_margin, l_attr_mss_freq_u32);
 
                     FAPI_INF("WR_DQS %s", l_str);
@@ -3456,6 +3424,8 @@ extern "C"
         uint8_t l_attr_eff_dram_width_u8 = 0;
         uint8_t l_SCHMOO_NIBBLES = 20;
         uint8_t l_by8_dqs = 0;
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
 
         if(iv_dmm_type == 1)
         {
@@ -3504,6 +3474,15 @@ extern "C"
 
         iv_shmoo_type = 4;
 
+        if (l_attr_eff_dram_width_u8 == 4)
+        {
+            FAPI_TRY(get_margin_dqs_by4(i_target, l_right_margin_val, l_left_margin_val));
+        }
+        else
+        {
+            FAPI_TRY(get_margin_dqs_by8(i_target, l_right_margin_val, l_left_margin_val));
+        }
+
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -3522,13 +3501,15 @@ extern "C"
                         }
                     }
 
+                    uint16_t l_total_margin = l_right_margin_val[l_p][i_rank][l_nibble] +
+                                              l_left_margin_val[l_p][i_rank][l_nibble];
                     FAPI_INF("%s:WR_DQS %d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n ", mss::c_str(i_target), l_mbapos, l_p,
-                             i_rank, l_nibble, SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_nibble],
-                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble],
-                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble],
-                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble],
-                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble],
-                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_nibble], l_attr_mss_freq_u32);
+                             i_rank, l_nibble, SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_nibble],
+                             SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble],
+                             SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble],
+                             l_left_margin_val[l_p][i_rank][l_nibble],
+                             l_right_margin_val[l_p][i_rank][l_nibble],
+                             l_total_margin, l_attr_mss_freq_u32);
 
                     if(iv_dmm_type == 0)
                     {
@@ -3548,105 +3529,15 @@ extern "C"
     }
 
     ///
-    /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
+    /// @brief This function is used to get margins for setup and hold in Ps by using frequency
     /// @param[in] i_target Centaur input MBA
+    /// @param[in,out] io_right_margin_val array reference of hold margins
+    /// @param[in,out] io_left_margin_val array reference of setup margins
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
-    fapi2::ReturnCode generic_shmoo::get_margin(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
-    {
-        uint8_t l_rnk, l_byte, l_nibble, l_bit;
-        uint32_t l_attr_mss_freq_margin_u32 = 0;
-        uint32_t l_freq = 0;
-        uint64_t l_cyc = 1000000000000000ULL;
-        uint8_t l_dq = 0;
-        uint8_t l_p = 0;
-        uint8_t i_rank = 0;
-        uint64_t l_factor = 0;
-        uint64_t l_factor_ps = 1000000000;
-        const auto l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_FREQ, l_target_centaur,
-                               l_attr_mss_freq_margin_u32));
-        l_freq = l_attr_mss_freq_margin_u32 / 2;
-        l_cyc = l_cyc / l_freq;// converting to zepto to get more accurate data
-        l_factor = l_cyc / 128;
-
-        for (l_p = 0; l_p < MAX_PORT; l_p++)
-        {
-            for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
-            {
-                ////
-
-                i_rank = iv_valid_rank[l_p][l_rnk];
-
-                //
-                for (l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
-                {
-                    //Nibble loop
-                    for (l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
-                    {
-                        for (l_bit = 0; l_bit < MAX_BITS; l_bit++)
-                        {
-                            l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
-
-                            if (iv_shmoo_type == 1)
-                            {
-                                if (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] == 0)
-                                {
-
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = 0;
-
-
-                                }
-                            }
-
-                            if (iv_shmoo_param == 4)
-                            {
-                                if (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]
-                                    > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]
-                                        = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] - 1;
-                                }
-
-                                if (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]
-                                    < SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
-                                {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]
-                                        = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] + 1;
-                                }
-                            }
-                            else
-                            {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]
-                                    = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] - 1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]
-                                    = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] + 1;
-                            }
-
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq]
-                                = ((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq]
-                                    - SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
-                                   * l_factor) / l_factor_ps;
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq]
-                                = ((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq]
-                                    - SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq])
-                                   * l_factor) / l_factor_ps;
-                        }
-                    }
-                }
-            }
-        }
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-
-    ///
-    /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
-    /// @param[in] i_target Centaur input MBA
-    /// @return FAPI2_RC_SUCCESS iff successful
-    ///
-    fapi2::ReturnCode generic_shmoo::get_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+    fapi2::ReturnCode generic_shmoo::get_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            uint16_t (&io_right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+            uint16_t (&io_left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ])
     {
         uint8_t l_rnk, l_byte, l_nibble, l_bit = 0;
         uint32_t l_attr_mss_freq_margin_u32 = 0;
@@ -3679,43 +3570,40 @@ extern "C"
                         {
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
 
-                            if((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]) <= 0 && (iv_shmoo_type == 8))
+                            if((SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]) <= 0 && (iv_shmoo_type == 8))
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = 0;
+                                SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = 0;
                             }
 
                             if((iv_shmoo_param == 4) || (iv_shmoo_param == 6))
                             {
-                                if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] > SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
+                                if(SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] > SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] -
+                                    SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] -
                                             1;
                                 }
 
-                                if((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] < SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
-                                   && (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] != 0))
+                                if((SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] < SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq])
+                                   && (SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] != 0))
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] +
+                                    SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] +
                                             1;
                                 }
                             }
                             else
                             {
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] -
+                                SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] -
                                         1;
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] +
+                                SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] = SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq] +
                                         1;
                             }
 
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq] = ((
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] - SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq]) *
+                            io_right_margin_val[l_p][i_rank][l_dq] = ((SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq] -
+                                    SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq]) *
                                     l_factor) / l_factor_ps;
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq] = ((
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq] - SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]) *
-                                    l_factor) / l_factor_ps; //((1/uint32_t_freq*1000000)/128);
-                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_dq] =
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq] +
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq];
+                            io_left_margin_val[l_p][i_rank][l_dq] = ((SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq] -
+                                                                    SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq]) *
+                                                                    l_factor) / l_factor_ps; //((1/uint32_t_freq*1000000)/128);
                         } // for bit
                     } // for nibble
                 } //for byte
@@ -3755,6 +3643,9 @@ extern "C"
         uint8_t vrefdq_train_range[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         uint32_t l_attr_rd_vred_vpd_value[2] = {0};
         const auto l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_RANGE, i_target, vrefdq_train_range));
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, i_target, vrefdq_train_value));
@@ -3833,6 +3724,8 @@ extern "C"
         FAPI_INF("%s", l_pMike);
         delete[] l_pMike;
 
+        FAPI_TRY(get_margin2(i_target, l_right_margin_val, l_left_margin_val));
+
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -3847,30 +3740,29 @@ extern "C"
                         for (l_bit = 0; l_bit < MAX_BITS; l_bit++)
                         {
                             l_dq = (BITS_PER_BYTE * l_byte) + (BITS_PER_NIBBLE * l_nibble) + l_bit;
-                            l_total_margin
-                                = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq]
-                                  + SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq];
+                            l_total_margin = l_left_margin_val[l_p][i_rank][l_dq]
+                                             + l_right_margin_val[l_p][i_rank][l_dq];
 
                             if(l_dram_gen == 2)
                             {
                                 sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
+                                        l_left_margin_val[l_p][i_rank][l_dq],
+                                        l_right_margin_val[l_p][i_rank][l_dq],
                                         l_total_margin, l_attr_mss_freq_u32, vref_val_print);
                             }
                             else
                             {
                                 sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
                                         l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                        SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
+                                        l_left_margin_val[l_p][i_rank][l_dq],
+                                        l_right_margin_val[l_p][i_rank][l_dq],
                                         l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
                             }
 
@@ -3896,7 +3788,16 @@ extern "C"
         return fapi2::current_err;
     }
 
-    fapi2::ReturnCode generic_shmoo::get_margin_dqs_by4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+    ///
+    /// @brief This function is used to get DQS margins for setup and hold in Ps by using frequency for x4 DIMM
+    /// @param[in] i_target Centaur input MBA
+    /// @param[in,out] io_right_margin_val array reference of right-side margins
+    /// @param[in,out] io_left_margin_val array reference of left-side margins
+    /// @return FAPI2_RC_SUCCESS iff successful
+    ///
+    fapi2::ReturnCode generic_shmoo::get_margin_dqs_by4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            uint16_t (&io_right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+            uint16_t (&io_left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ])
     {
         uint8_t l_rnk = 0;
         uint32_t l_attr_mss_freq_margin_u32 = 0;
@@ -3930,21 +3831,17 @@ extern "C"
 
                 for(l_nibble = 0; l_nibble < l_SCHMOO_NIBBLES; l_nibble++)
                 {
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] - 1;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] + 1;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble] = ((
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] -
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_nibble]) * l_factor) / l_factor_ps;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble] = ((
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_nibble] -
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble]) * l_factor) /
-                            l_factor_ps; //((1/uint32_t_freq*1000000)/128);
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble] +
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble];
+                    SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] =
+                        SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] - 1;
+                    SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] =
+                        SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] + 1;
 
+                    io_right_margin_val[l_p][i_rank][l_nibble] = ((SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] -
+                            SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_nibble]) *
+                            l_factor) / l_factor_ps;
+                    io_left_margin_val[l_p][i_rank][l_nibble] = ((SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_nibble] -
+                            SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble]) *
+                            l_factor) / l_factor_ps; //((1/uint32_t_freq*1000000)/128);
                 }
             }
         }
@@ -3954,11 +3851,15 @@ extern "C"
     }
 
     ///
-    /// @brief This function is used to get margin for setup,hold and total eye width in Ps by using frequency
+    /// @brief This function is used to get DQS margins for setup and hold in Ps by using frequency for x8 DIMM
     /// @param[in] i_target Centaur input MBA
+    /// @param[in,out] io_right_margin_val array reference of right-side margins
+    /// @param[in,out] io_left_margin_val array reference of left-side margins
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
-    fapi2::ReturnCode generic_shmoo::get_margin_dqs_by8(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+    fapi2::ReturnCode generic_shmoo::get_margin_dqs_by8(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            uint16_t (&io_right_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ],
+            uint16_t (&io_left_margin_val)[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ])
     {
         uint8_t l_rnk = 0;
         uint32_t l_attr_mss_freq_margin_u32 = 0;
@@ -3998,20 +3899,17 @@ extern "C"
                         }
                     }
 
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] - 1;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] + 1;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble] = ((
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] -
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_nibble]) * l_factor) / l_factor_ps;
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble] = ((
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_nibble] -
-                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble]) * l_factor) /
-                            l_factor_ps; //((1/uint32_t_freq*1000000)/128);
-                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_nibble] =
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble] +
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble];
+                    SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] =
+                        SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] - 1;
+                    SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] =
+                        SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble] + 1;
+
+                    io_right_margin_val[l_p][i_rank][l_nibble] = ((SHMOO.MBA.P[l_p].S[i_rank].K.rb_regval[l_nibble] -
+                            SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_nibble]) *
+                            l_factor) / l_factor_ps;
+                    io_left_margin_val[l_p][i_rank][l_nibble] = ((SHMOO.MBA.P[l_p].S[i_rank].K.nom_val[l_nibble] -
+                            SHMOO.MBA.P[l_p].S[i_rank].K.lb_regval[l_nibble]) *
+                            l_factor) / l_factor_ps; //((1/uint32_t_freq*1000000)/128);
                 }
             }
         }
@@ -4144,82 +4042,60 @@ extern "C"
 
                                 if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
-                                        (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
+                                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
+                                    SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
+                                        (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
+                                         SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
 
                                     FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
+                                                                         SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] >
-                                       SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4])
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
-                                    }
-                                    else
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4];
-                                    }
+                                    uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4],
+                                                           SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]);
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
+                                    if(l_curr_diff <= 1)
                                     {
                                         iv_binary_done_map[l_p][rank][l_n] = 1;
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
+                                        SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
+                                            SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
                                         // printf("\n the right bound for port=%d rank=%d dq=%d is %d \n",l_p,rank,l_dq+l_n*4,FAPI_INF.MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
                                     }
                                 }
                                 else
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] =
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
-                                        (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] =
+                                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
+                                    SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
+                                        (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
+                                         SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
 
                                     FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
+                                                                         SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] >
-                                       SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4])
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
-                                    }
-                                    else
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4];
-                                    }
+                                    uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4],
+                                                           SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]);
 
                                     if(l_p == 0)
                                     {
                                         if(l_flag_p0 == 1)
                                         {
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] = 1;
+                                            l_curr_diff = 1;
                                         }
                                     }
                                     else
                                     {
                                         if(l_flag_p1 == 1)
                                         {
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] = 1;
+                                            l_curr_diff = 1;
                                         }
                                     }
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
+                                    if(l_curr_diff <= 1)
                                     {
                                         iv_binary_done_map[l_p][rank][l_n] = 1;
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
+                                        SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq + l_n * 4] =
+                                            SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
                                     }
                                 } // end else (iv_shmoo_error_map[l_p][rank][l_n] != 0)
@@ -4249,7 +4125,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * 4]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * 4]));
                         }
                     }
                 }
@@ -4314,84 +4190,61 @@ extern "C"
 
                                 if(iv_shmoo_error_map[l_p][rank][l_n] == 0)
                                 {
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
-                                        (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] =
+                                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
+                                    SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
+                                        (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
+                                         SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
 
                                     FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
+                                                                         SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] >
-                                       SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4])
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
-                                    }
-                                    else
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4];
-                                    }
+                                    uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4],
+                                                           SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]);
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
+                                    if(l_curr_diff <= 1)
                                     {
                                         iv_binary_done_map[l_p][rank][l_n] = 1;
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
+                                        SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
+                                            SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
                                     }
                                 }
                                 else
                                 {
 
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] =
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
-                                    SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
-                                        (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
-                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
+                                    SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] =
+                                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4];
+                                    SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4] =
+                                        (SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] +
+                                         SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]) / 2;
 
                                     FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                         SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
+                                                                         SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * 4]));
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] >
-                                       SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4])
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
-                                    }
-                                    else
-                                    {
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4] -
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4];
-                                    }
-
+                                    uint16_t l_curr_diff = absolute_difference(SHMOO.MBA.P[l_p].S[rank].K.last_pass[l_dq + l_n * 4],
+                                                           SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4]);
 
                                     if(l_p == 0)
                                     {
                                         if(l_flag_p0 == 1)
                                         {
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] = 1;
+                                            l_curr_diff = 1;
                                         }
                                     }
                                     else
                                     {
                                         if(l_flag_p1 == 1)
                                         {
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] = 1;
+                                            l_curr_diff = 1;
                                         }
                                     }
 
-                                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_diff[l_dq + l_n * 4] <= 1)
+                                    if(l_curr_diff <= 1)
                                     {
                                         iv_binary_done_map[l_p][rank][l_n] = 1;
-                                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
-                                            SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
+                                        SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq + l_n * 4] =
+                                            SHMOO.MBA.P[l_p].S[rank].K.last_fail[l_dq + l_n * 4];
 
                                     }
                                 }
@@ -4417,7 +4270,7 @@ extern "C"
                         for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                         {
                             FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * 4, 0,
-                                                                 SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * 4]));
+                                                                 SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * 4]));
                         }
                     }
                 }
@@ -4438,9 +4291,13 @@ extern "C"
     fapi2::ReturnCode generic_shmoo::get_nibble_pda(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
             uint32_t (&pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
     {
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
         uint8_t l_dimm = 0;
         uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, num_ranks_per_dimm));
+
+        FAPI_TRY(get_margin2(i_target, l_right_margin_val, l_left_margin_val));
 
         for(uint8_t l_p = 0; l_p < MAX_PORTS_PER_MBA; l_p++)
         {
@@ -4456,11 +4313,15 @@ extern "C"
 
                             if(l_dimm == 0)
                             {
-                                pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = SHMOO[iv_DQS_ON].MBA.P[l_p].S[l_rnk].K.total_margin[l_dq + l_n * 4];
+                                uint16_t l_total_margin = l_left_margin_val[l_p][l_rnk][l_dq + l_n * 4]
+                                                          + l_right_margin_val[l_p][l_rnk][l_dq + l_n * 4];
+                                pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = l_total_margin;
                             }
                             else
                             {
-                                pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = SHMOO[iv_DQS_ON].MBA.P[l_p].S[l_rnk + 4].K.total_margin[l_dq + l_n * 4];
+                                uint16_t l_total_margin = l_left_margin_val[l_p][l_rnk + 4][l_dq + l_n * 4]
+                                                          + l_right_margin_val[l_p][l_rnk + 4][l_dq + l_n * 4];
+                                pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = l_total_margin;
                             }
                         }
                     }
@@ -4479,15 +4340,20 @@ extern "C"
     /// @param[out] o_left_min_margin Minimum setup margin
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
-    void generic_shmoo::get_min_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target, uint32_t* o_right_min_margin,
-                                        uint32_t* o_left_min_margin)
+    fapi2::ReturnCode generic_shmoo::get_min_margin2(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+            uint32_t* o_right_min_margin,
+            uint32_t* o_left_min_margin)
     {
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
         uint8_t l_rnk, l_byte, l_nibble, l_bit, i_rank = 0;
         uint16_t l_temp_right = 4800;
         uint16_t l_temp_left = 4800;
         uint8_t l_dq = 0;
         uint8_t l_p = 0;
         FAPI_INF("In GET_MIN_MARGIN - iv_shmoo_type = %d", iv_shmoo_type);
+
+        FAPI_TRY(get_margin2(i_target, l_right_margin_val, l_left_margin_val));
 
         for (l_p = 0; l_p < 2; l_p++)
         {
@@ -4506,18 +4372,16 @@ extern "C"
                         {
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
 
-                            if ((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq]
-                                 < l_temp_right) && (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq] != 0 ))
+                            if ((l_right_margin_val[l_p][i_rank][l_dq]
+                                 < l_temp_right) && (l_right_margin_val[l_p][i_rank][l_dq] != 0 ))
                             {
-                                l_temp_right
-                                    = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq];
+                                l_temp_right = l_right_margin_val[l_p][i_rank][l_dq];
                             }
 
-                            if ((SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq]
-                                 < l_temp_left) && (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq] != 0))
+                            if ((l_left_margin_val[l_p][i_rank][l_dq]
+                                 < l_temp_left) && (l_left_margin_val[l_p][i_rank][l_dq] != 0))
                             {
-                                l_temp_left
-                                    = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq];
+                                l_temp_left = l_left_margin_val[l_p][i_rank][l_dq];
                             }
                         }
                     }
@@ -4535,6 +4399,9 @@ extern "C"
             *o_right_min_margin = l_temp_right;
             *o_left_min_margin = l_temp_left;
         }
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 
     ///
@@ -4547,6 +4414,8 @@ extern "C"
     fapi2::ReturnCode generic_shmoo::get_min_margin_dqs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
             uint32_t* o_right_min_margin, uint32_t* o_left_min_margin)
     {
+        uint16_t l_right_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
+        uint16_t l_left_margin_val[MAX_PORTS_PER_MBA][MAX_RANK][MAX_DQ] = {0};
         uint8_t l_rnk, l_nibble, i_rank = 0;
         uint16_t l_temp_right = 4800;
         uint16_t l_temp_left = 4800;
@@ -4574,6 +4443,15 @@ extern "C"
 
         iv_shmoo_type = 4;
 
+        if (l_attr_eff_dram_width_u8 == 4)
+        {
+            FAPI_TRY(get_margin_dqs_by4(i_target, l_right_margin_val, l_left_margin_val));
+        }
+        else
+        {
+            FAPI_TRY(get_margin_dqs_by8(i_target, l_right_margin_val, l_left_margin_val));
+        }
+
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
             for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -4592,14 +4470,14 @@ extern "C"
                         }
                     }
 
-                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble] < l_temp_right)
+                    if(l_right_margin_val[l_p][i_rank][l_nibble] < l_temp_right)
                     {
-                        l_temp_right = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_nibble];
+                        l_temp_right = l_right_margin_val[l_p][i_rank][l_nibble];
                     }
 
-                    if(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble] < l_temp_left)
+                    if(l_left_margin_val[l_p][i_rank][l_nibble] < l_temp_left)
                     {
-                        l_temp_left = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_nibble];
+                        l_temp_left = l_left_margin_val[l_p][i_rank][l_nibble];
                     }
 
                     if(iv_dmm_type == 0)
@@ -4612,7 +4490,6 @@ extern "C"
                 } // for nibble
             } // for rank
         } // for port
-
 
         // hacked for now till schmoo is running
         if(iv_shmoo_type == 8)
@@ -4745,12 +4622,12 @@ extern "C"
                 {
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
-                            (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq
-                                    + l_n * 4] + delay_train_step_size);
+                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
+                            (SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq
+                                                                + l_n * 4] + delay_train_step_size);
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
                                                              0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
                     }
                 }
             }
@@ -4786,13 +4663,13 @@ extern "C"
                 {
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
-                        SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
-                            (SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq
-                                    + l_n * 4] - delay_train_step_size);
+                        SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE] =
+                            (SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq
+                                                                + l_n * 4] - delay_train_step_size);
 
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
                                                              0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.curr_val[l_dq + l_n * BITS_PER_NIBBLE]));
                     }
                 }
             }
@@ -4830,7 +4707,7 @@ extern "C"
                     {
                         FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq + l_n * BITS_PER_NIBBLE,
                                                              0,
-                                                             SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * BITS_PER_NIBBLE]));
+                                                             SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq + l_n * BITS_PER_NIBBLE]));
                     }
                 }
             }
@@ -4838,6 +4715,18 @@ extern "C"
 
     fapi_try_exit:
         return fapi2::current_err;
+    }
+
+    ///
+    /// @brief Calculate the absolute value of the difference between two values
+    /// @param[in] i_val1 first value
+    /// @param[in] i_val2 second value
+    /// @return absolute value of the difference between i_val1 and i_val2
+    ///
+    uint16_t generic_shmoo::absolute_difference(const uint16_t i_val1,
+            const uint16_t i_val2)
+    {
+        return (i_val1 > i_val2) ? (i_val1 - i_val2) : (i_val2 - i_val1);
     }
 
 }//Extern C

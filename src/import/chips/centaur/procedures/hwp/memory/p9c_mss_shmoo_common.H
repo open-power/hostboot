@@ -97,11 +97,7 @@ struct shmoo_knob_data_t
     uint16_t rb_regval[MAX_DQ];// Right Bound register/Hex value
     uint16_t nom_val[MAX_DQ]; // nominal value of this instance of the knob
     uint16_t last_pass[MAX_DQ];
-    uint16_t total_margin[MAX_DQ];
-    uint16_t curr_diff[MAX_DQ];
     uint16_t last_fail[MAX_DQ];
     uint16_t curr_val[MAX_DQ];
-    uint16_t right_margin_val[MAX_DQ];
-    uint16_t left_margin_val[MAX_DQ];
 };
 #endif
