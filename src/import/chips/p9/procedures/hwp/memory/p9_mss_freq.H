@@ -38,7 +38,7 @@
 #include <utility>
 #include <fapi2.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 
 namespace mss
 {

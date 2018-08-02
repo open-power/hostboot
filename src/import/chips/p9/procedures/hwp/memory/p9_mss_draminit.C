@@ -38,7 +38,7 @@
 
 #include <p9_mss_draminit.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/dimm/bcw_load.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 

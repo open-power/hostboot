@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/conversions.H $ */
+/* $Source: src/import/generic/memory/lib/utils/conversions.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -38,8 +38,7 @@
 
 #include <vector>
 #include <fapi2.H>
-#include <lib/mss_attribute_accessors.H>
-#include <lib/shared/mss_const.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
 
 ///
@@ -80,6 +79,26 @@ static const uint64_t SIM_CYCLES_PER_CYCLE = 8;
 namespace mss
 {
 
+namespace dram_freq
+{
+//
+// DRAM clock and frequency information
+//
+static const std::vector<std::pair<uint64_t, uint64_t>> FREQ_TO_CLOCK_PERIOD =
+{
+    {DIMM_SPEED_1600, 1250}, // DDR4
+    {DIMM_SPEED_1866, 1071}, // DDR4
+    {DIMM_SPEED_2133,  937}, // DDR4
+    {DIMM_SPEED_2400,  833}, // DDR4
+    {DIMM_SPEED_2666,  750}, // DDR4
+    {DIMM_SPEED_2933,  682}, // DDR4
+    {DIMM_SPEED_3200,  625}, // DDR4/5
+    {DIMM_SPEED_3600,  555}, // DDR5
+    {DIMM_SPEED_4000,  500}, // DDR5
+    {DIMM_SPEED_4400,  454}, // DDR5
+    {DIMM_SPEED_4800,  416}, // DDR5
+};
+}
 
 ///
 /// @brief Return the number of picoseconds
@@ -92,36 +111,27 @@ namespace mss
 template<typename T, typename OT>
 inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
 {
-    switch(i_speed_grade)
-    {
-        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
-            o_tCK_in_ps = 1071;
-            break;
+    // We need to have at least two bytes of data, due to the sizes of the frequencies and clock periods
+    constexpr size_t MIN_BYTE_SIZE = 2;
+    static_assert(sizeof(T) >= MIN_BYTE_SIZE && sizeof(OT) >= MIN_BYTE_SIZE,
+                  "Input and output must be at least 2 bytes in length");
 
-        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
-            o_tCK_in_ps = 937;
-            break;
+    // Temporary variables to help with the conversion
+    const uint64_t l_input = static_cast<uint64_t>(i_speed_grade);
+    uint64_t l_output = 0;
 
-        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
-            o_tCK_in_ps = 833;
-            break;
+    FAPI_ASSERT(find_value_from_key(dram_freq::FREQ_TO_CLOCK_PERIOD, l_input, l_output),
+                fapi2::MSS_INVALID_FREQUENCY()
+                .set_FREQ(l_input),
+                "Frequency %u does not have an associated clock period", l_input);
 
-        // Default 2933 to 2666
-        // TODO:RTC192461
-        case fapi2::ENUM_ATTR_MSS_FREQ_MT2933:
-            FAPI_INF("2933 speed grade detected. Setting o_tCK_in_ps to match 2666");
-
-        case fapi2::ENUM_ATTR_MSS_FREQ_MT2666:
-            o_tCK_in_ps = 750;
-            break;
-
-        default:
-            FAPI_ERR("Invalid dimm speed grade (MT/s) - %d - provided", i_speed_grade);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
-            break;
-    }
+    // Cast the output type
+    o_tCK_in_ps = static_cast<OT>(l_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -135,36 +145,27 @@ inline fapi2::ReturnCode freq_to_ps(const T i_speed_grade, OT& o_tCK_in_ps )
 template<typename T, typename OT>
 fapi2::ReturnCode ps_to_freq(const T i_time_in_ps, OT& o_speed_grade)
 {
-    switch(i_time_in_ps)
-    {
-        // Default 682ps (2933MT/s) to 750ps (2666MT/s)
-        // TODO:RTC192461
-        case 682:
-            FAPI_INF("682ps detected (2933 speed bin). Setting o_speed_grade to match 2666.");
+    // We need to have at least two bytes of data, due to the sizes of the frequencies and clock periods
+    constexpr size_t MIN_BYTE_SIZE = 2;
+    static_assert(sizeof(T) >= MIN_BYTE_SIZE && sizeof(OT) >= MIN_BYTE_SIZE,
+                  "Input and output must be at least 2 bytes in length");
 
-        case 750:
-            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
-            break;
+    // Temporary variables to help with the conversion
+    const uint64_t l_input = static_cast<uint64_t>(i_time_in_ps);
+    uint64_t l_output = 0;
 
-        case 833:
-            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2400;
-            break;
+    FAPI_ASSERT(find_key_from_value(dram_freq::FREQ_TO_CLOCK_PERIOD, l_input, l_output),
+                fapi2::MSS_INVALID_CLOCK_PERIOD()
+                .set_CLOCK_PERIOD(l_input),
+                "Clock period %u does not have an associated frequency", l_input);
 
-        case 937:
-            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT2133;
-            break;
-
-        case 1071:
-            o_speed_grade = fapi2::ENUM_ATTR_MSS_FREQ_MT1866;
-            break;
-
-        default:
-            FAPI_ERR("Invalid clock period (tCK) - %d - provided", i_time_in_ps);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
-            break;
-    }
+    // Cast the output type
+    o_speed_grade = static_cast<OT>(l_output);
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 
 }
 
@@ -181,120 +182,80 @@ inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
 
 ///
 /// @brief Return the number of cycles contained in a count of picoseconds
-/// @tparam T the target type from which to get the mt/s
+/// @tparam T clock period input type
 /// @tparam OT the output type, derrived from the parameters
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period clock period in PS
 /// @param[in] i_ps the number of picoseconds to convert
-/// @return uint64_t, the number of cycles
+/// @return the number of cycles
 ///
-template< fapi2::TargetType T, typename OT >
-inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps)
+template< typename T, typename OT >
+inline OT ps_to_cycles(const T i_clock_period, const OT i_ps)
 {
-    // The frequency in MT/s
-    uint64_t l_freq = 0;
-    OT l_divisor = 0;
-    OT l_quotient = 0;
-    OT l_remainder = 0;
-    OT l_rounder = (i_ps < 0) ? -1 : 1;
+    // Casts the clock period to be in OT type to avoid any weird math issues
+    const auto l_divisor = static_cast<OT>(i_clock_period);
 
-    FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
+    const OT l_rounder = (i_ps < 0) ? -1 : 1;
 
-    // No time if MT/s is 0 (well, infinite really but shut up)
-    if (l_freq == 0)
-    {
-        return 0;
-    }
-
-    // Hoping the compiler figures out how to do these together.
-    FAPI_TRY( freq_to_ps(l_freq, l_divisor) );
-    l_quotient = i_ps / ((l_divisor == 0) ? l_rounder : l_divisor);
-    l_remainder = i_ps % l_divisor;
+    // Ensure we don't divide by 0
+    const OT l_quotient = i_ps / ((i_clock_period == 0) ? l_rounder : l_divisor);
+    const OT l_remainder = i_ps % ((i_clock_period == 0) ? 1 : l_divisor);
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
     FAPI_INF("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
 
     return l_quotient + (l_remainder == 0 ? 0 : l_rounder);
-
-fapi_try_exit:
-    // We simply can't work if we can't get the frequency or
-    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
-    // ...so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
-    fapi2::Assert(false);
-
-    // Keeps compiler happy
-    return 0;
 }
 
 ///
 /// @brief Return the number of ps contained in a count of cycles
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period
 /// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of picoseconds
 ///
-template< fapi2::TargetType T >
-inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_ps(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
-    // The frequency in mHZ
-    uint64_t l_freq = 0;
-    uint64_t l_clock_period = 0;
-
-    FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
-    FAPI_TRY( freq_to_ps(l_freq, l_clock_period) );
-    FAPI_INF("converting %llu cycles to %llups", i_cycles, i_cycles * l_clock_period );
-    return i_cycles * l_clock_period;
-
-fapi_try_exit:
-
-    // We simply can't work if we can't get the frequency or
-    // if we get an unsupported value that can't be converted to a valid tCK (clock period)
-    // ...so this should be ok
-    FAPI_ERR("Can't get MSS_FREQ or obtained an invalid MSS_FREQ (%d) - stopping", l_freq);
-    fapi2::Assert(false);
-
-    // Keeps compiler happy
-    return 0;
+    const auto l_ps = i_cycles * i_clock_period;
+    FAPI_INF("converting %llu cycles to %llups", i_cycles, l_ps );
+    return l_ps;
 }
 
 ///
 /// @brief Return the number of cycles contained in a count of microseconds
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_us the number of microseconds to convert
 /// @return uint64_t, the number of cycles
 ///
-template< fapi2::TargetType T >
-inline uint64_t us_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_us)
+inline uint64_t us_to_cycles(const uint64_t i_clock_period,  const uint64_t i_us)
 {
-    return ps_to_cycles(i_target, i_us * CONVERT_PS_IN_A_US);
+    return ps_to_cycles(i_clock_period, i_us * CONVERT_PS_IN_A_US);
 }
 
 ///
 /// @brief Return the number of cycles contained in a count of nanoseconds
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_ps the number of nanoseconds to convert
 /// @return uint64_t, the number of cycles
 ///
-template< fapi2::TargetType T >
-inline uint64_t ns_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_ns)
+inline uint64_t ns_to_cycles(const uint64_t i_clock_period,  const uint64_t i_ns)
 {
-    return ps_to_cycles(i_target, i_ns * CONVERT_PS_IN_A_NS);
+    return ps_to_cycles(i_clock_period, i_ns * CONVERT_PS_IN_A_NS);
 }
 
 ///
 /// @brief Return the number of microseconds contained in a count of cycles
-/// @tparam T the target type
 /// @tparam D the time conversion (NS_IN_PS, etc)
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of microseconds
 ///
-template< fapi2::TargetType T, uint64_t D >
-inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+template< uint64_t D >
+inline uint64_t cycles_to_time(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
     // Hoping the compiler figures out how to do these together.
-    uint64_t l_dividend = cycles_to_ps(i_target, i_cycles);
-    uint64_t l_quotient = l_dividend / ((D == 0) ? 1 : D);
-    uint64_t l_remainder = l_dividend % D;
+    const auto l_dividend = cycles_to_ps(i_clock_period, i_cycles);
+    constexpr uint64_t DIVISOR = ((D == 0) ? 1 : D);
+    const uint64_t l_quotient = l_dividend / DIVISOR;
+    const uint64_t l_remainder = l_dividend % DIVISOR;
 
     // Make sure we add time if there wasn't an even number of cycles
     return  l_quotient + (l_remainder == 0 ? 0 : 1);
@@ -302,14 +263,15 @@ inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t 
 
 ///
 /// @brief Return the number of nanoseconds contained in a count of cycles
-/// @param[in] i_target target for the frequency attribute
+/// @tparam T the target type
+/// @tparam MC memory controller type
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of nanoseconds
 ///
-template< fapi2::TargetType T >
-inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_ns(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
-    uint64_t l_ns = cycles_to_time<T, CONVERT_PS_IN_A_NS>(i_target, i_cycles);
+    const uint64_t l_ns = cycles_to_time<CONVERT_PS_IN_A_NS>(i_clock_period, i_cycles);
     FAPI_INF("converting %llu cycles to %lluns", i_cycles, l_ns);
 
     return l_ns;
@@ -317,14 +279,13 @@ inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_
 
 ///
 /// @brief Return the number of microseconds contained in a count of cycles
-/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of microseconds
 ///
-template< fapi2::TargetType T >
-inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
+inline uint64_t cycles_to_us(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
-    uint64_t l_us = cycles_to_time<T, CONVERT_PS_IN_A_US>(i_target, i_cycles);
+    const uint64_t l_us = cycles_to_time<CONVERT_PS_IN_A_US>(i_clock_period, i_cycles);
     FAPI_INF("converting %llu cycles to %lluus", i_cycles, l_us);
 
     return l_us;
@@ -361,41 +322,16 @@ inline T ps_to_ns(const T i_time_in_ps)
 
 ///
 /// @brief Return the maximum of two values *in clocks*, the first in clocks the second in ns
-/// @tparam T the fapi2::TargetType of a type from which we can get MT/s
+/// @param[in] i_clock_period the clock period in PS
 /// @param[in] i_clocks a value in clocks
 /// @param[in] i_time a value in nanoseconds
 /// @return max( iclocks nCK, i_time ) in clocks
 ///
-template< fapi2::TargetType T >
-inline uint64_t max_ck_ns(const fapi2::Target<T>& i_target, const uint64_t i_clocks, const uint64_t i_time)
+inline uint64_t max_ck_ns(const uint64_t i_clock_period, const uint64_t i_clocks, const uint64_t i_time)
 {
-    return std::max( i_clocks, ns_to_cycles(i_target, i_time) );
+    return std::max( i_clocks, ns_to_cycles(i_clock_period, i_time) );
 }
 
-///
-/// @brief Return and estimated time an MCBIST subtest will take to complete
-/// Useful for initial polling delays, probably isn't accurate for much else
-/// as it doesn't take refresh in to account (which will necessarily slow down
-/// the program.)
-/// @param[in] i_target the target from which to gather memory frequency
-/// @param[in] i_bytes number of *bytes* in the address range
-/// @param[in] i_64B_per mss::YES if the command is 64B, mss::NO if it's 128B. Defaults to mss::YES
-/// @return the initial polling delay for this program in ns
-///
-template< fapi2::TargetType T >
-inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
-                                        const uint64_t i_bytes,
-                                        const bool i_64B_per = mss::YES)
-{
-    // TODO RTC: 164104 Update MCBIST delay calculator. As we learn more about what
-    // the lab really needs, we can probably make this function better.
-    const uint64_t l_bytes_per_cmd = (i_64B_per == mss::YES) ? 64 : 128;
-
-    // Best case is a command takes 4 cycles. Given the number of commands and address space size
-    // we can get some idea of how long to wait before we start polling.
-    return cycles_to_ns(i_target, (i_bytes / l_bytes_per_cmd) * mss::CYCLES_PER_CMD);
-}
-
-};// mss namespace
+} // mss namespace
 
 #endif

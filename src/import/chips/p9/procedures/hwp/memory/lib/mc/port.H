@@ -41,7 +41,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <lib/mss_attribute_accessors.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/dimm/rank.H>

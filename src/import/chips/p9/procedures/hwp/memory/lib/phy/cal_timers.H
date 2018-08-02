@@ -62,17 +62,9 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     // i.e. DQS_ALIGN + INITIAL_PAT_WR = 3 polls, so this should be 2
     constexpr uint64_t MINIMUM_POLL_COUNT = 2;
 
-    // Sometimes when running in sim, particularly Mesa, it is helpful to not delay a bunch
-    // when training starts - makes it simpler to get an AET for, say, write leveling. So
-    // this is here to allow the simple removal of the initial delay for those situations.
-#ifdef THRASH_CCS_IP_IN_SIM
-    io_poll.iv_initial_delay = mss::cycles_to_ns(i_target, 1);
-    io_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(1);
-#else
     // We don't want to wait too long for the initial check, just some hueristics here
     io_poll.iv_initial_delay = mss::cycles_to_ns(i_target, i_total_cycles / 8);
     io_poll.iv_initial_sim_delay = mss::cycles_to_simcycles(i_total_cycles / 8);
-#endif
 
     // Delay 10us between polls, and setup the poll count so
     // iv_initial_delay + (iv_delay * iv_poll_count) == i_total_cycles + some fudge;

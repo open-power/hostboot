@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/fir/fir.H>
 #include <lib/workarounds/adr32s_workarounds.H>
 #include <lib/phy/ddr_phy.H>

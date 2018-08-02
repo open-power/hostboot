@@ -30,11 +30,35 @@
 
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com> -->
-<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
 <hwpErrors>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_FREQUENCY</rc>
+  <description>
+    An invalid frequency was passed to frequency to clock period
+  </description>
+  <ffdc>FREQ</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
+  <description>
+    An invalid clock period was passed to clock period to frequency
+  </description>
+  <ffdc>CLOCK_PERIOD</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
 </hwpErrors>

@@ -56,6 +56,32 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_ENCODE_ERROR</rc>
+    <description>
+      There was no match or value found in encoding the power thermal attributes
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>ATTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_POWER_THERMAL_DECODE_ERROR</rc>
+    <description>
+      There was no match or value found in decoding the power thermal attributes
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>ATTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_POWER_INTERCEPT_NOT_SET</rc>
     <description>
       The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0

@@ -51,9 +51,10 @@
 #include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_raw_cards.H>
 #include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/spd/spd_utils.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/eff_config/timing.H>
+#include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;

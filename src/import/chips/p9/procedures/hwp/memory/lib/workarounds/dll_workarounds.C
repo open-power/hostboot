@@ -39,7 +39,7 @@
 #include <lib/fir/fir.H>
 #include <lib/phy/phy_cntrl.H>
 #include <lib/shared/mss_const.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 
 namespace mss
 {

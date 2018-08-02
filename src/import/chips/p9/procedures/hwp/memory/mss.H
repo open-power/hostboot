@@ -51,7 +51,7 @@
 
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/swizzle.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <lib/utils/checker.H>

@@ -46,7 +46,7 @@
 
 // mss lib
 #include <generic/memory/lib/spd/spd_facade.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/freq/sync.H>
 
 namespace mss
