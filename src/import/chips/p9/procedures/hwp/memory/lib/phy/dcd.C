@@ -38,7 +38,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/poll.H>
-#include <lib/utils/conversions.H>
+#include <lib/utils/mss_nimbus_conversions.H>
 #include <lib/workarounds/adr32s_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCA;
