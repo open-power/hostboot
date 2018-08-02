@@ -51,6 +51,7 @@
 #include <devicefw/userif.H>
 #include <iipMopRegisterAccess.h>
 #include <ibscomreasoncodes.H>
+#include <scom/scomreasoncodes.H>
 #include <p9_proc_gettracearray.H>
 #include <fapi2_spd_access.H>
 #include <p9c_mss_maint_cmds.H>
@@ -99,27 +100,56 @@ bool isSpConfigFsp()
 uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
                    uint64_t i_address)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
     uint32_t rc = SUCCESS;
     size_t bsize = (io_bs.getBitLen()+7)/8;
     CPU_WORD* buffer = io_bs.getBufAddr();
 
     errl = deviceRead(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
 
-    if(( NULL != errl ) && ( IBSCOM::IBSCOM_BUS_FAILURE == errl->reasonCode() ))
+    if ( nullptr != errl )
     {
-        PRDF_SET_ERRL_SEV(errl, ERRL_SEV_INFORMATIONAL);
-        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_HIDDEN);
-        PRDF_INF( "Register access failed with reason code IBSCOM_BUS_FAILURE."
-                  " Trying again, Target HUID:0x%08X Register 0x%016X Op:%u",
-                  PlatServices::getHuid( i_target), i_address,
-                  MopRegisterAccess::READ );
+        bool doRetry = false;
 
-        errl = deviceRead(i_target, buffer, bsize,
-                          DEVICE_SCOM_ADDRESS(i_address));
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // We don't have a good mechanism at this time to determine if the SCOM
+        // failed because of a channel failure. So we will just assume any SCOM
+        // error on the Centaur means there is a channel failure and that we
+        // will need to retry.
+        if ( SCOM::SCOM_RUNTIME_HYP_ERR == errl->reasonCode() &&
+             ( (TYPE_MEMBUF == getTargetType(i_target)) ||
+               (TYPE_MBA    == getTargetType(i_target)) ) )
+        {
+            doRetry = true;
+        }
+
+        #else
+
+        // An inband SCOM failure likely means the memory channel has failed.
+        // Hostboot will have switched over to FSI SCOMs. So retry.
+        if ( IBSCOM::IBSCOM_BUS_FAILURE == errl->reasonCode() )
+        {
+            doRetry = true;
+        }
+
+        #endif
+
+        if ( doRetry )
+        {
+            PRDF_INF( "deviceRead(0x%08x,0x%016x) failed with reason code "
+                      "0x%04x, retrying...", PlatServices::getHuid(i_target),
+                      i_address, errl->reasonCode() );
+
+            PRDF_SET_ERRL_SEV( errl, ERRL_SEV_INFORMATIONAL );
+            PRDF_COMMIT_ERRL(  errl, ERRL_ACTION_HIDDEN     );
+
+            errl = deviceRead( i_target, buffer, bsize,
+                               DEVICE_SCOM_ADDRESS(i_address) );
+        }
     }
 
-    if( NULL != errl )
+    if ( nullptr != errl )
     {
         PRDF_ERR( "getScom() failed on i_target=0x%08x i_address=0x%016llx",
                   getHuid(i_target), i_address );
@@ -137,7 +167,7 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
         else
         {
             delete errl;
-            errl = NULL;
+            errl = nullptr;
         }
     }
 
