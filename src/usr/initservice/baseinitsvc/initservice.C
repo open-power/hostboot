@@ -615,6 +615,7 @@ InitService& InitService::getTheInstance( )
 
 InitService::InitService( ) :
     iv_shutdownInProgress(false),
+    iv_worst_status(false),
     iv_iStep( 0 ),
     iv_iSubStep( 0 )
 {
@@ -661,6 +662,49 @@ void InitService::registerBlock(void* i_vaddr, uint64_t i_size,
     mutex_unlock(&iv_registryMutex);
 }
 
+bool InitService::_setShutdownStatus(
+    const uint64_t i_status,
+    const uint32_t i_error_info)
+{
+    TRACFCOMP(g_trac_initsvc, "_setShutdownStatus(i_status=0x%016llX)",
+        i_status);
+
+    // Hostboot PLIDs always start with 0x9 (32-bit)
+    static const uint64_t PLID_MASK = 0x0000000090000000;
+    bool first=false;
+
+    // Ensure no one is manpulating the registry lists
+    mutex_lock(&iv_registryMutex);
+
+    // This already takes care of accepting only the first TI code, so
+    // just always call this
+    termWriteSRC(TI_SHUTDOWN,
+                 i_status,
+                 reinterpret_cast<uint64_t>(linkRegister()),
+                 i_error_info);
+
+    if (iv_shutdownInProgress)
+    {
+        // switch the failing status if an RC comes in after
+        //  a plid fail because we'd rather have the RC
+        if( ((iv_worst_status & 0x00000000F0000000) == PLID_MASK)
+            && ((i_status & 0x00000000F0000000) != PLID_MASK)
+            && (i_status > SHUTDOWN_STATUS_GOOD) )
+        {
+            iv_worst_status = i_status;
+        }
+    }
+    else
+    {
+        first=true;
+        iv_worst_status = i_status;
+        iv_shutdownInProgress = true;
+    }
+
+    mutex_unlock(&iv_registryMutex);
+
+    return first;
+}
 
 void doShutdown(uint64_t i_status,
                 bool i_inBackground,
@@ -670,11 +714,27 @@ void doShutdown(uint64_t i_status,
                 uint64_t i_masterHBInstance,
                 uint32_t i_error_info)
 {
-    termWriteSRC(TI_SHUTDOWN,
-                 i_status,
-                 reinterpret_cast<uint64_t>(linkRegister()),
-                 i_error_info);
+    (void)InitService::doShutdown(
+                           i_status,
+                           i_inBackground,
+                           i_payload_base,
+                           i_payload_entry,
+                           i_payload_data,
+                           i_masterHBInstance,
+                           i_error_info);
+}
 
+void InitService::doShutdown(
+                      uint64_t i_status,
+                      bool     i_inBackground,
+                      uint64_t i_payload_base,
+                      uint64_t i_payload_entry,
+                      uint64_t i_payload_data,
+                      uint64_t i_masterHBInstance,
+                      uint32_t i_error_info)
+{
+    bool first = Singleton<InitService>::instance()._setShutdownStatus(
+                                                        i_status,i_error_info);
     class ShutdownExecute
     {
         public:
@@ -694,7 +754,7 @@ void doShutdown(uint64_t i_status,
 
             void execute()
             {
-                Singleton<InitService>::instance().doShutdown(status,
+                Singleton<InitService>::instance()._doShutdown(status,
                                                               payload_base,
                                                               payload_entry,
                                                               payload_data,
@@ -730,15 +790,30 @@ void doShutdown(uint64_t i_status,
     ShutdownExecute* s = new ShutdownExecute(i_status, i_payload_base,
                                              i_payload_entry, i_payload_data,
                                              i_masterHBInstance, i_error_info);
-
-    if (i_inBackground)
+    if(first)
     {
-        s->startThread();
+        if (i_inBackground)
+        {
+            s->startThread();
+        }
+        else
+        {
+            s->execute();
+            while(1)
+            {
+                nanosleep(1,0);
+            }
+        }
     }
     else
     {
-        s->execute();
-        while(1) nanosleep(1,0);
+        if(!i_inBackground)
+        {
+            while(1)
+            {
+                nanosleep(1,0);
+            }
+        }
     }
 }
 
@@ -760,18 +835,17 @@ class isPriority
         uint32_t iv_priority;
 };
 
-void InitService::doShutdown(uint64_t i_status,
-                             uint64_t i_payload_base,
-                             uint64_t i_payload_entry,
-                             uint64_t i_payload_data,
-                             uint64_t i_masterHBInstance,
-                             uint32_t i_error_info)
+void InitService::_doShutdown(uint64_t i_status,
+                              uint64_t i_payload_base,
+                              uint64_t i_payload_entry,
+                              uint64_t i_payload_data,
+                              uint64_t i_masterHBInstance,
+                              uint32_t i_error_info)
 {
     int l_rc = 0;
     errlHndl_t l_err = NULL;
-    static volatile uint64_t worst_status = 0;
 
-    TRACFCOMP(g_trac_initsvc, "doShutdown(i_status=%.16X)",i_status);
+    TRACFCOMP(g_trac_initsvc, "_doShutdown(i_status=%.16X)",i_status);
 #ifdef CONFIG_CONSOLE
     // check if console msg not needed or already displayed by caller
     if ((SHUTDOWN_STATUS_GOOD != i_status) &&
@@ -788,31 +862,7 @@ void InitService::doShutdown(uint64_t i_status,
     }
 #endif
 
-    // Hostboot PLIDs always start with 0x9 (32-bit)
-    static const uint64_t PLID_MASK = 0x0000000090000000;
-
-    // Ensure no one is manpulating the registry lists and that only one
-    // thread actually executes the shutdown path.
-    mutex_lock(&iv_registryMutex);
-
-    if (iv_shutdownInProgress)
-    {
-        // switch the failing status if an RC comes in after
-        //  a plid fail because we'd rather have the RC
-        if( ((worst_status & 0x00000000F0000000) == PLID_MASK)
-            && ((i_status & 0x00000000F0000000) != PLID_MASK)
-            && (i_status > SHUTDOWN_STATUS_GOOD) )
-        {
-            worst_status = i_status;
-        }
-        mutex_unlock(&iv_registryMutex);
-        return;
-    }
-    worst_status = i_status; //first thread in is the default
-    iv_shutdownInProgress = true;
-    mutex_unlock(&iv_registryMutex);
-
-    TRACFCOMP(g_trac_initsvc, "doShutdown> status=%.16X",worst_status);
+    TRACFCOMP(g_trac_initsvc, "_doShutdown> status=%.16X",iv_worst_status);
 
     // sort the queue by priority before sending..
     std::sort( iv_regMsgQ.begin(), iv_regMsgQ.end());
@@ -828,7 +878,7 @@ void InitService::doShutdown(uint64_t i_status,
     {
             TRACFCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
             l_msg->type = i->msgType;
-            l_msg->data[0] = worst_status;
+            l_msg->data[0] = iv_worst_status;
             (void)msg_sendrecv(i->msgQ,l_msg);
     }
 
@@ -878,7 +928,7 @@ void InitService::doShutdown(uint64_t i_status,
     {
             TRACDCOMP(g_trac_initsvc,"notify priority=0x%x, queue=0x%x", i->msgPriority, i->msgQ );
             l_msg->type = i->msgType;
-            l_msg->data[0] = worst_status;
+            l_msg->data[0] = iv_worst_status;
             (void)msg_sendrecv(i->msgQ,l_msg);
     }
     msg_free(l_msg);
@@ -891,17 +941,17 @@ void InitService::doShutdown(uint64_t i_status,
     task_yield();
     nanosleep(0,TEN_CTX_SWITCHES_NS);
 
-    TRACFCOMP(g_trac_initsvc, "doShutdown> Final status=%.16X",worst_status);
+    TRACFCOMP(g_trac_initsvc, "_doShutdown> Final status=%.16X",iv_worst_status);
     MAGIC_INST_PRINT_ISTEP(21,4);
 
     // Update the HB TI area with the worst status.
     termWriteSRC(TI_SHUTDOWN,
-                 worst_status,
+                 iv_worst_status,
                  reinterpret_cast<uint64_t>(linkRegister()),
                  i_error_info,
                  true); // Force write
 
-    shutdown(worst_status,
+    shutdown(iv_worst_status,
              i_payload_base,
              i_payload_entry,
              i_payload_data,
