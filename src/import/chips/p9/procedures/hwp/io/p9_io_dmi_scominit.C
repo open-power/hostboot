@@ -100,6 +100,7 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
     // mark HWP entry
     FAPI_INF("p9_io_dmi_scominit: Entering ...");
     const uint8_t GRP_03  = 3;
+    const uint8_t GRP_00  = 0;
     const uint8_t LANE_00 = 0;
     fapi2::ReturnCode rc  = fapi2::FAPI2_RC_SUCCESS;
 
@@ -132,10 +133,15 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         fapi2::current_err = rc;
     }
 
-    // configure FIR
+    // Configure Channel Fail Mask & FIR
     {
         fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_tgt =
             i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
+
+        // Set the Channel Fail Mask.  Unmasking will trigger a channel fail.
+        // Bit 2 : Max Spares Exceeded Unmasked
+        // Bit 4 : Too Many Bus Errors Unmasked
+        FAPI_TRY(io::rmw(EDIP_CHAN_FAIL_MASK, l_mc_tgt, GRP_00, LANE_00, 0xD7));
 
         // mask(1) action0(X) action1(X) : Masked
         // mask(0) action0(0) action1(0) : System Checkstop
@@ -163,8 +169,9 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         // 9    Rx Bus 0 Spare Lane Deployed             recoverable
         l_fir_mask.clearBit<9>();
         l_fir_action1.setBit<9>();
-        // 10   Rx Bus 0 Max Spares Exceeded             recoverable
+        // 10   Rx Bus 0 Max Spares Exceeded             unit_cs
         l_fir_mask.clearBit<10>();
+        l_fir_action0.setBit<10>();
         l_fir_action1.setBit<10>();
         // 11   Rx Bus 0 Recal or Dynamic Repair Error   recoverable
         l_fir_mask.clearBit<11>();
@@ -178,8 +185,9 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         // 17   Rx Bus 1 Spare Lane Deployed             recoverable
         l_fir_mask.clearBit<17>();
         l_fir_action1.setBit<17>();
-        // 18   Rx Bus 1 Max Spares Exceeded             recoverable
+        // 18   Rx Bus 1 Max Spares Exceeded             unit_cs
         l_fir_mask.clearBit<18>();
+        l_fir_action0.setBit<18>();
         l_fir_action1.setBit<18>();
         // 19   Rx Bus 1 Recal or Dynamic Repair Error   recoverable
         l_fir_mask.clearBit<19>();
@@ -193,8 +201,9 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         // 25   Rx Bus 2 Spare Lane Deployed             recoverable
         l_fir_mask.clearBit<25>();
         l_fir_action1.setBit<25>();
-        // 26   Rx Bus 2 Max Spares Exceeded             recoverable
+        // 26   Rx Bus 2 Max Spares Exceeded             unit_cs
         l_fir_mask.clearBit<26>();
+        l_fir_action0.setBit<26>();
         l_fir_action1.setBit<26>();
         // 27   Rx Bus 2 Recal or Dynamic Repair Error   recoverable
         l_fir_mask.clearBit<27>();
@@ -208,8 +217,9 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
         // 33   Rx Bus 3 Spare Lane Deployed             recoverable
         l_fir_mask.clearBit<33>();
         l_fir_action1.setBit<33>();
-        // 34   Rx Bus 3 Max Spares Exceeded             recoverable
+        // 34   Rx Bus 3 Max Spares Exceeded             unit_cs
         l_fir_mask.clearBit<34>();
+        l_fir_action0.setBit<34>();
         l_fir_action1.setBit<34>();
         // 35   Rx Bus 3 Recal or Dynamic Repair Error   recoverable
         l_fir_mask.clearBit<35>();
