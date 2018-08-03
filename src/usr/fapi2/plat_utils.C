@@ -703,6 +703,14 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
             o_class = TARGETING::CLASS_UNIT;
             o_type = TARGETING::TYPE_MCC;
             break;
+        case fapi2::TARGET_TYPE_OCMB_CHIP:
+            o_class = TARGETING::CLASS_CHIP;
+            o_type = TARGETING::TYPE_OCMB_CHIP;
+            break;
+        case fapi2::TARGET_TYPE_MEM_PORT:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MEM_PORT;
+            break;
         default:
             o_class = TARGETING::CLASS_NA;
             o_type = TARGETING::TYPE_NA;
@@ -748,6 +756,13 @@ bool isPhysParentChild(const TargetType i_parentType,
     else if (i_parentType == TARGET_TYPE_MEMBUF_CHIP)
     {
         if ( (i_childType & (TARGET_TYPE_MBA | TARGET_TYPE_L4)) != 0 )
+        {
+            l_result = true;
+        }
+    }
+    else if (i_parentType == TARGET_TYPE_OCMB_CHIP)
+    {
+        if ( (i_childType & (TARGET_TYPE_MEM_PORT)) != 0 )
         {
             l_result = true;
         }

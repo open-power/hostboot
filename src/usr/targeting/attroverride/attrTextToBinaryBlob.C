@@ -133,6 +133,8 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"omi"      , fapi2::TARGET_TYPE_OMI        , TARGETING::TYPE_OMI},
     {"omic"     , fapi2::TARGET_TYPE_OMIC       , TARGETING::TYPE_OMIC},
     {"mcc"      , fapi2::TARGET_TYPE_MCC        , TARGETING::TYPE_MCC},
+    {"ocmb"     , fapi2::TARGET_TYPE_OCMB_CHIP  , TARGETING::TYPE_OCMB_CHIP},
+    {"memport"  , fapi2::TARGET_TYPE_MEM_PORT   , TARGETING::TYPE_MEM_PORT},
     {"LAST"     , 0                             , 0}
 };
 
