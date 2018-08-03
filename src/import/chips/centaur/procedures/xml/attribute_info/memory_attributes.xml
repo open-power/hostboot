@@ -2992,6 +2992,7 @@ Eff config should set this up</description>
     <targetType>TARGET_TYPE_MBA</targetType>
     <description>LRDIMM rank multiplication mode.
 Will be set at an MBA level with one policy to be used</description>
+    <initToZero></initToZero>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, 2X_MULT = 2, 4X_MULT = 4</enum>
     <writeable/>
