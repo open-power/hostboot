@@ -271,6 +271,11 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_PEC           => "unit-pec-power9",
     TARGET_TYPE_PHB           => "unit-phb-power9",
     TARGET_TYPE_MC            => "unit-mc-power9",
+    TARGET_TYPE_OMI           => "unit-omi-power9",
+    TARGET_TYPE_OMIC          => "unit-omic-power9",
+    TARGET_TYPE_MCC           => "unit-mcc-power9",
+    TARGET_TYPE_OCMB_CHIP     => "chip-ocmb",
+    TARGET_TYPE_MEM_PORT      => "unit-mem_port"
     };
 
     # Loop through all of the targets that this attribute

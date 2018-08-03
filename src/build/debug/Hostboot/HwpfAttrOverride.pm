@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -68,6 +68,11 @@ use constant TARGET_TYPE_PERV => 0x00200000;
 use constant TARGET_TYPE_PEC => 0x00400000;
 use constant TARGET_TYPE_PHB => 0x00800000;
 use constant TARGET_TYPE_L4 =>  0x00000200;
+use constant TARGET_TYPE_MC => 0x01000000;
+use constant TARGET_TYPE_MCC => 0x08000000;
+use constant TARGET_TYPE_OMI => 0x02000000;
+use constant TARGET_TYPE_OCMB => 0x10000000;
+use constant TARGET_TYPE_MEM_PORT =>  0x20000000;
 
 # From attributeTank.H
 use constant ATTR_POS_NA => 0xffff;
@@ -678,6 +683,36 @@ sub main
             {
                 $targType = TARGET_TYPE_L4;
                 $targ =~ s/^.*memb.l4//;
+            }
+            elsif ($targ =~ /pu.mc/)
+            {
+                $targType = TARGET_TYPE_MC;
+                $targ =~ s/^.*pu.mc//;
+            }
+            elsif ($targ =~ /pc.mcc/)
+            {
+                $targType = TARGET_TYPE_MCC;
+                $targ =~ s/^.*pu.mcc//;
+            }
+            elsif ($targ =~ /pu.omi/)
+            {
+                $targType = TARGET_TYPE_OMI;
+                $targ =~ s/^.*pu.omi//;
+            }
+            elsif ($targ =~ /memb.omic/)
+            {
+                $targType = TARGET_TYPE_OMIC;
+                $targ =~ s/^.*memb.omic//;
+            }
+            elsif ($targ =~ /ocmb/)
+            {
+                $targType = TARGET_TYPE_OCMB;
+                $targ =~ s/^.*ocmb//;
+            }
+            elsif ($targ =~ /ocmb.memport/)
+            {
+                $targType = TARGET_TYPE_MEM_PORT;
+                $targ =~ s/^.*ocmb.memport//;
             }
 
             # Figure out the position
