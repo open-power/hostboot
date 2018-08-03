@@ -427,7 +427,13 @@ sub cronusTargetStr()
                  "00100000" => "p9n.ppe",
                  "00200000" => "p9n.perv",
                  "00400000" => "p9n.pec",
-                 "00800000" => "p9n.phb"
+                 "00800000" => "p9n.phb",
+                 "01000000" => "p9n.mc",
+                 "02000000" => "p9n.omi",
+                 "04000000" => "p9n.omic",
+                 "08000000" => "p9n.mcc",
+                 "10000000" => "ocmb"
+                 "20000000" => "ocmb.memport"
                  );
 
     my $cro_type = $types{$targetType_hexstr};
