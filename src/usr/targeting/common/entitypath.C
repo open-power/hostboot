@@ -477,6 +477,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "OMIC";
         case TYPE_MCC:
             return "MCC";
+        case TYPE_OCMB_CHIP:
+            return "OCBM_CHIP";
+        case TYPE_MEM_PORT:
+            return "MEM_PORT";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

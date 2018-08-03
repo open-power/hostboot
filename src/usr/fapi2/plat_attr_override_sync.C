@@ -216,6 +216,12 @@ void directOverride()
             case fapi2::TARGET_TYPE_MCC:
                 l_targetType = TARGETING::TYPE_MCC;
                 break;
+            case fapi2::TARGET_TYPE_OCMB_CHIP:
+                l_targetType = TARGETING::TYPE_OCMB_CHIP;
+                break;
+            case fapi2::TARGET_TYPE_MEM_PORT:
+                l_targetType = TARGETING::TYPE_MEM_PORT;
+                break;
             default:
                 l_targetType = TARGETING::TYPE_NA;
         }
