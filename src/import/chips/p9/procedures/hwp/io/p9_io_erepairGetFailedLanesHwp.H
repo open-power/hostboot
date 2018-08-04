@@ -153,7 +153,7 @@ fapi2::ReturnCode decodeFailedLanes(
 
     //Check for all the failed bit SET in the bit stream and update the vector
     //And print the failed lanes
-    FAPI_INF("decodeFailedLanes: No. of Failed Lanes:");
+    FAPI_INF("decodeFailedLanes: Failed Lane(s):");
 
     for( loop = 0;
          loop < maxBusLanes;
@@ -451,7 +451,7 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
             }
 
             // Copy the fail lane numbers in the vectors
-            FAPI_INF("Decode:IF:0x%x FailBit:%d ", l_memBus->interface, l_memBus->failBit);
+            FAPI_INF("Decode:IF:0x%x FailBit:0x%x ", l_memBus->interface, l_memBus->failBit);
 
             if(l_memBus->interface == EREPAIR::DMI_MEMBUF_DRIVE)
             {
