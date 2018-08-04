@@ -810,8 +810,8 @@ fapi_try_exit:
  *                               Target. This is the target on which the
  *                               badlanes were found
  * @param[in]  i_clkGroup        Specifies clock group 0:[XOA, X1A,..] 1:[X0B, X1B,..]
- * @param[in]  i_rxFailLanes     Vector that will contain the fail lanes
- *                               to be written to VPD for Receive side
+ * @param[in]  i_failLanes       Vector that will contain the fail lanes
+ *                               to be written to VPD for both Rx & Tx sides
  * @param[out] o_thresholdExceed If TRUE, indicates that the eRepair threshold
  *                               has exceeded, FALSE otherwise.
  *
@@ -821,8 +821,8 @@ template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode erepairSetFailedLanes(
     const fapi2::Target < K >&          i_txEndp_target,
     const fapi2::Target < J >&          i_rxEndp_target,
-    const uint8_t                     i_clkGroup,
-    const std::vector<uint8_t>& i_rxFailLanes,
+    const uint8_t                       i_clkGroup,
+    const std::vector<uint8_t>&         i_failLanes,
     bool&                       o_thresholdExceed)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -838,11 +838,11 @@ fapi2::ReturnCode erepairSetFailedLanes(
     std::vector<uint8_t> l_emptyVector;
     std::vector<uint8_t> l_throwAway;
 
-    FAPI_INF(">> erepairSetFailedLanes:Fail lanes size:%d values are:", i_rxFailLanes.size());
+    FAPI_INF(">> erepairSetFailedLanes:Fail lanes size:%llu values are:", i_failLanes.size());
 
-    for(uint8_t i = 0; (i < i_rxFailLanes.size() && i_rxFailLanes.size() != 0); i++)
+    for(unsigned long i = 0; (i < i_failLanes.size() && i_failLanes.size() != 0); i++)
     {
-        FAPI_INF("%d ", i_rxFailLanes[i]);
+        FAPI_INF("%llu ", i_failLanes[i]);
     }
 
     o_thresholdExceed = false;
@@ -884,8 +884,10 @@ fapi2::ReturnCode erepairSetFailedLanes(
               "geteRepairThreshold() from Accessor HWP failed w/rc=0x%x",
               (uint64_t)fapi2::current_err );
 
+    FAPI_INF("Threshold:%d ModeIPL:%d \n", l_threshold, l_mnfgModeIPL);
+
     // Check if the new fails have crossed the threshold
-    if(i_rxFailLanes.size() > l_threshold)
+    if(i_failLanes.size() > l_threshold)
     {
         o_thresholdExceed = true;
         goto fapi_try_exit;
@@ -911,8 +913,8 @@ fapi2::ReturnCode erepairSetFailedLanes(
 
     // Lets combine the new and old fail lanes of Rx side
     l_rxFaillanes.insert(l_rxFaillanes.end(),
-                         i_rxFailLanes.begin(),
-                         i_rxFailLanes.end());
+                         i_failLanes.begin(),
+                         i_failLanes.end());
 
     // Remove duplicate lanes if any on the Rx side
     std::sort(l_rxFaillanes.begin(), l_rxFaillanes.end());
@@ -923,8 +925,8 @@ fapi2::ReturnCode erepairSetFailedLanes(
 
     // Lets combine the new and old fail lanes of Tx side
     l_txFaillanes.insert(l_txFaillanes.end(),
-                         i_rxFailLanes.begin(),
-                         i_rxFailLanes.end());
+                         i_failLanes.begin(),
+                         i_failLanes.end());
 
     // Remove duplicate lanes if any on the Tx side
     std::sort(l_txFaillanes.begin(), l_txFaillanes.end());
@@ -934,13 +936,16 @@ fapi2::ReturnCode erepairSetFailedLanes(
                         l_txFaillanes.end());
 
     // Check if the sum of old and new fail lanes have crossed the threshold
+    FAPI_INF("TxSize:%llu RxSize:%llu Threshold:%d \n",
+             l_txFaillanes.size(), l_rxFaillanes.size(), l_threshold);
+
     if((l_txFaillanes.size() > l_threshold) ||
        (l_rxFaillanes.size() > l_threshold))
     {
         o_thresholdExceed = true;
-        goto fapi_try_exit;
     }
 
+fapi_try_exit:
     /*** Update the VPD ***/
 
     // Lets write the VPD of endpoint1 with faillanes on Rx side
@@ -961,7 +966,6 @@ fapi2::ReturnCode erepairSetFailedLanes(
               "tx l_setLanes() from Accessor HWP failed w/rc=0x%x",
               (uint64_t)fapi2::current_err );
 
-fapi_try_exit:
     FAPI_INF("<< erepairSetFailedLanes");
     return fapi2::current_err;
 }
@@ -1220,7 +1224,8 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_numTxFailLanes = o_endp1_txFaillanes.size();
 
         FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
-                 " seen in Tx of endp1 target. No.of lanes: %d", l_numTxFailLanes);
+                 " seen in Tx of endp1 target. No.of lanes: %llu",
+                 o_endp1_txFaillanes.size());
     }
 
     // Check if the eRepair threshold has exceeded for Rx side of endp1
@@ -1230,7 +1235,8 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_numRxFailLanes = o_endp1_rxFaillanes.size();
 
         FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
-                 " seen in Rx of endp1 target. No.of lanes: %d", l_numRxFailLanes);
+                 " seen in Rx of endp1 target. No.of lanes: %llu",
+                 o_endp1_rxFaillanes.size());
     }
 
     // Check if the eRepair threshold has exceeded for Tx side of endp2
@@ -1240,8 +1246,8 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_numTxFailLanes = o_endp2_txFaillanes.size();
 
         FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
-                 " seen in Tx of endp2 target. No.of lanes: %d",
-                 l_numTxFailLanes);
+                 " seen in Tx of endp2 target. No.of lanes: %llu",
+                 o_endp2_txFaillanes.size());
     }
 
     // Check if the eRepair threshold has exceeded for Rx side of endp2
@@ -1251,14 +1257,14 @@ fapi2::ReturnCode erepairGetRestoreLanes(
         l_numRxFailLanes = o_endp2_rxFaillanes.size();
 
         FAPI_INF("erepairGetRestoreLanes: eRepair threshold exceed error"
-                 " seen in Rx of endp2 target. No.of lanes: %d",
-                 l_numRxFailLanes);
+                 " seen in Rx of endp2 target. No.of lanes: %llu",
+                 o_endp2_rxFaillanes.size());
     }
 
     FAPI_ASSERT(l_thresholdExceed == false,
                 fapi2::P9_EREPAIR_THRESHOLD_EXCEED()
                 .set_TX_NUM_LANES(l_numTxFailLanes)
-                .set_RX_NUM_LANES(l_numTxFailLanes)
+                .set_RX_NUM_LANES(l_numRxFailLanes)
                 .set_THRESHOLD(l_threshold),
                 "ERROR:The threshold limit for eRepair has been crossed");
 
