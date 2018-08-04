@@ -651,7 +651,6 @@
     <attribute><id>ATTR_CEN_VPD_DRV_IMP_CLK</id><default>0x28,0x28</default></attribute>
     <attribute><id>ATTR_CEN_VPD_SLEW_RATE_SPCKE</id><default>0x03,0x03</default></attribute>
     <attribute><id>ATTR_CEN_VPD_DRV_IMP_SPCKE</id><default>0x28,0x28</default></attribute>
-    <attribute><id>ATTR_CEN_MSS_VREF_CAL_CNTL</id><default>0x3</default></attribute>
     <attribute>
         <id>ATTR_CEN_MCBIST_USER_BANK</id>
         <default>0x2</default>
