@@ -338,6 +338,7 @@ foreach my $target (@targets)
     elsif ($type eq "MEMBUF")
     {
         processMembuf($targetObj, $target);
+        $targetObj->deleteAttribute($target,"CEN_MSS_VREF_CAL_CNTL");
     }
     elsif ($type eq "PHB")
     {
