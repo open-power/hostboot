@@ -127,7 +127,7 @@ enum erepairVpdType
  *****************************************************************************/
 
 // eRepair Header
-struct eRepairHeader
+struct __attribute__ ((packed)) eRepairHeader
 {
     struct
     {
@@ -149,7 +149,7 @@ struct eRepairProcDevInfo
 };
 
 // eRepair structure for failing lanes on Power Bus
-struct eRepairPowerBus
+struct __attribute__ ((packed)) eRepairPowerBus
 {
     eRepairProcDevInfo device;     // Device info of P9
     uint8_t type      : 4;         // Range:0x0-0xF. Value:PROCESSOR_EDIP
@@ -166,7 +166,7 @@ struct eRepairMemDevInfo
 };
 
 // eRepair structure of failing lanes on Memory Channel
-struct eRepairMemBus
+struct __attribute__ ((packed)) eRepairMemBus
 {
     eRepairMemDevInfo device;          // Device info of P9 and Centaur
     uint8_t             type      : 4; // Range:0x0-0xF. Value:MEMORY_EDIP
