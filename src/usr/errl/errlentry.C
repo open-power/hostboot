@@ -422,7 +422,8 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
 void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
                         const TARGETING::Target *i_target_endp2,
                         const HWAS::busTypeEnum i_busType,
-                        const HWAS::callOutPriority i_priority)
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::CalloutFlag_t i_flag)
 {
     TRACFCOMP(g_trac_errl, ENTER_MRK"addBusCallout(%p, %p, %d, 0x%x)",
                 i_target_endp1, i_target_endp2, i_busType, i_priority);
@@ -439,7 +440,7 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
 
 
     ErrlUserDetailsCallout( pData1, size1, pData2, size2, i_busType,
-                            i_priority).addToLog(this);
+                            i_priority, i_flag).addToLog(this);
 
     if( ep1 )
     {
@@ -456,7 +457,8 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
 void ErrlEntry::addBusCallout(const TARGETING::EntityPath & i_target_endp1,
                               const TARGETING::EntityPath & i_target_endp2,
                               const HWAS::busTypeEnum i_busType,
-                              const HWAS::callOutPriority i_priority)
+                              const HWAS::callOutPriority i_priority,
+                              const HWAS::CalloutFlag_t i_flag)
 {
     char * l_target_endp1_path_str = nullptr;
     char * l_target_endp2_path_str = nullptr;
@@ -491,7 +493,8 @@ void ErrlEntry::addBusCallout(const TARGETING::EntityPath & i_target_endp1,
                                &i_target_endp2,
                                size2,
                                i_busType,
-                               i_priority).addToLog(this);
+                               i_priority,
+                               i_flag).addToLog(this);
 
     }
     else
