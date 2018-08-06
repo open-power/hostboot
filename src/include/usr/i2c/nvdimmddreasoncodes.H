@@ -55,6 +55,24 @@ enum nvdimmModuleId
     NVDIMM_READATTRIBUTES                   = 0x05,
     NVDIMM_GETI2CMASTERTARGET               = 0x06,
     NVDIMM_CROSSESNVDIMMPAGEBOUNDARY        = 0x07,
+    NVDIMM_POLL_BACKUP                      = 0x08,
+    NVDIMM_POLL_RESTORE                     = 0x09,
+    NVDIMM_POLL_ERASE                       = 0x0A,
+    NVDIMM_POLL_ARM                         = 0x0B,
+    NVDIMM_POLL_CHARGE                      = 0x0C,
+    NVDIMM_CHECK_RESTORE                    = 0x0D,
+    NVDIMM_CHECK_IMAGE                      = 0x0E,
+    NVDIMM_SET_ES                           = 0x0F,
+    NVDIMM_SET_ARM                          = 0x10,
+    NVDIMM_SET_PAGE                         = 0x11,
+    NVDIMM_GET_TIMEOUT                      = 0x12,
+    NVDIMM_RESTORE                          = 0x13,
+    NVDIMM_OPEN_PAGE                        = 0x14,
+    NVDIMM_POLL_STATUS                      = 0x15,
+    NVDIMM_CHECK_ERASE                      = 0x16,
+    NVDIMM_ARM_ERASE                        = 0x17,
+    NVDIMM_CHECK_READY                      = 0x18,
+
 };
 
 /**
@@ -76,6 +94,24 @@ enum nvdimmReasonCode
     NVDIMM_OVERFLOW_ERROR                   = NVDIMM_COMP_ID | 0x08,
     NVDIMM_I2C_WRITE_PAGE_SIZE_ZERO         = NVDIMM_COMP_ID | 0x09,
     NVDIMM_INVALID_OFFSET                   = NVDIMM_COMP_ID | 0x0A,
+    NVDIMM_READ_FAILURE                     = NVDIMM_COMP_ID | 0x0B,   // NV Controller read failure
+    NVDIMM_WRITE_FAILURE                    = NVDIMM_COMP_ID | 0x0C,   // NV Controller write failure
+    NVDIMM_BACKUP_TIMEOUT                   = NVDIMM_COMP_ID | 0x0D,   // Backup/save timeout
+    NVDIMM_RESTORE_TIMEOUT                  = NVDIMM_COMP_ID | 0x0E,   // Restore timeout
+    NVDIMM_ERASE_TIMEOUT                    = NVDIMM_COMP_ID | 0x0F,   // Erase timeout
+    NVDIMM_CHARGE_TIMEOUT                   = NVDIMM_COMP_ID | 0x10,   // Battery charging timeout
+    NVDIMM_ARM_TIMEOUT                      = NVDIMM_COMP_ID | 0x11,   // Arming timeout
+    NVDIMM_SET_ES_ERROR                     = NVDIMM_COMP_ID | 0x12,   // Failure to set the ES policy
+    NVDIMM_MSS_STR_ENTRY_ERROR              = NVDIMM_COMP_ID | 0x13,   // Failure to enter STR
+    NVDIMM_MSS_STR_EXIT_ERROR               = NVDIMM_COMP_ID | 0x14,   // Failure to exit STR
+    NVDIMM_MSS_POST_RSTR_ERROR              = NVDIMM_COMP_ID | 0x15,   // Failure to perform post restore work
+    NVDIMM_OPEN_PAGE_TIMEOUT                = NVDIMM_COMP_ID | 0x16,   // Open page timeout
+    NVDIMM_STATUS_TIMEOUT                   = NVDIMM_COMP_ID | 0x17,   // Status timeout
+    NVDIMM_ARM_FAILED                       = NVDIMM_COMP_ID | 0x18,   // Failure to arm reset_n
+    NVDIMM_ERASE_FAILED                     = NVDIMM_COMP_ID | 0x19,   // Failure to erase
+    NVDIMM_RESTORE_FAILED                   = NVDIMM_COMP_ID | 0x1A,   // Failure to restore
+    NVDIMM_NOT_READY                        = NVDIMM_COMP_ID | 0x1B,   // NVDIMM not ready for host to access
+
 };
 
 enum UserDetailsTypes

@@ -46,6 +46,7 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
 EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory
 EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
+EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -99,3 +100,4 @@ VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
 VPATH    += ${CEN_PROC_PATH}/hwp/memory/
+VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/ddr4/

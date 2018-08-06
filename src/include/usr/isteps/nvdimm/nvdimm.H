@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/i2c/nvdimmif.H $                              */
+/* $Source: src/include/usr/isteps/nvdimm/nvdimm.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,36 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __NVDIMMIF_H
-#define __NVDIMMIF_H
+#ifndef NVDIMM_H__
+#define NVDIMM_H__
 
-#include <list>
-#include "eepromif.H"
+#include <targeting/common/util.H>
 
 namespace NVDIMM
 {
-//TODO: move isNVDIMM() to targeting/common/util.C
-/**
- * @brief Determine if the given dimm target is an NVDIMM
- *
- * @param[in] i_target : dimm target to check
- *
- * @return bool - True if the given target is an NVDIMM
- */
-bool isNVDIMM( TARGETING::Target * i_target );
 
 /**
- * @brief Return a set of information related to every unique
- *        NVDIMM in the system
+ * @brief Entry function to NVDIMM management
+ *        - Restore image from NVDIMM NAND flash to DRAM
+ *        - Arms the backup trigger to ddr_reset_n once the restore
+ *          is completed
+ *        - Erase image
  *
- * @param[out] o_info - list of NVDIMM Information
+ * @param[in] i_nvdimmList - list of nvdimm targets
  *
- * @return errlHndl_t - Null if successful, otherwise a pointer to
- *      the error log.
- */
-void getNVDIMMs( std::list<EEPROM::EepromInfo_t>& o_info );
+ **/
+void nvdimm_restore(TARGETING::TargetHandleList &i_nvdimmList);
 
-};  // end namespace NVDIMM
+}
 
-#endif  // end __NVDIMMIF_H
+#endif  // NVDIMM_H__
 
