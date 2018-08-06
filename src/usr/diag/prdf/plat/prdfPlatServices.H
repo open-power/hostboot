@@ -158,6 +158,15 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip,
                           VT & o_startAddr, VT & o_endAddr,
                           uint8_t i_dimmSlct = MAX_DIMM_PER_PORT );
 
+/**
+ * @brief  Queries if Row Repair is enabled.
+ * @param  i_chip An MCA or MBA.
+ * @param  i_rank Any rank on the target DIMMs.
+ * @return True if Row Repair is enabled on the DIMMs containing this rank.
+ *         False otherwise.
+ */
+template<TARGETING::TYPE T>
+bool isRowRepairEnabled( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers

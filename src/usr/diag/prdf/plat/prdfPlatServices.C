@@ -57,6 +57,7 @@
 #include <fapi2_spd_access.H>
 #include <p9c_mss_maint_cmds.H>
 #include <prdfParserUtils.H>
+#include <p9c_mss_rowRepairFuncs.H>
 
 using namespace TARGETING;
 
@@ -564,6 +565,60 @@ template
 uint32_t getMemAddrRange<TYPE_MCA>( ExtensibleChip * i_chip,
                                     MemAddr & o_startAddr, MemAddr & o_endAddr,
                                     uint8_t i_dimmSlct );
+
+//------------------------------------------------------------------------------
+
+template<>
+bool isRowRepairEnabled<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    #define PRDF_FUNC "[PlatServices::isRowRepairEnabled<TYPE_MBA>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    bool o_isEnabled = false;
+
+    do
+    {
+        // Don't do row repair if DRAM repairs is disabled.
+        if ( areDramRepairsDisabled() ) break;
+
+        // The HWP will check both DIMMs on rank pair. So we could can use
+        // either one.
+        TargetHandleList list = getConnectedDimms( i_chip->getTrgt(), i_rank );
+        PRDF_ASSERT( !list.empty() );
+
+        TargetHandle_t dimm = list.front();
+
+        errlHndl_t errl = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> fapiDimm(dimm);
+        FAPI_INVOKE_HWP( errl, is_sPPR_supported, fapiDimm, o_isEnabled );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "is_sPPR_supported(0x%08x) failed",
+                      getHuid(dimm) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_isEnabled = false; // just in case
+            break;
+        }
+
+    } while (0);
+
+    return o_isEnabled;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+bool isRowRepairEnabled<TYPE_MCA>( ExtensibleChip * i_chip,
+                                   const MemRank & i_rank )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    return false; // Not supported at this time.
+}
 
 //##############################################################################
 //##                    Nimbus Maintenance Command wrappers

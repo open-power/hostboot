@@ -107,6 +107,26 @@ uint32_t VcmEvent<TYPE_MCA>::handlePhaseComplete( const uint32_t & i_eccAttns,
 //##############################################################################
 
 template<>
+uint32_t VcmEvent<TYPE_MBA>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
+                                        bool & o_done )
+{
+    #define PRDF_FUNC "[VcmEvent::rowRepair] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t VcmEvent<TYPE_MBA>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 {
     uint32_t signature = 0;
@@ -176,16 +196,28 @@ uint32_t VcmEvent<TYPE_MBA>::handlePhaseComplete( const uint32_t & i_eccAttns,
         {
             if ( i_eccAttns & MAINT_MCE )
             {
-                // The chip mark has been verified.
-                o_rc = verified( io_sc );
-                if ( SUCCESS != o_rc )
+                if ( iv_rowRepairEnabled )
                 {
-                    PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
-                              iv_chip->getHuid() );
-                    break;
+                    o_rc = rowRepair( io_sc, o_done );
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC "rowRepair() failed on 0x%08x",
+                                  iv_chip->getHuid() );
+                        break;
+                    }
                 }
+                else
+                {
+                    o_rc = verified( io_sc );
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR( PRDF_FUNC "verified() failed on 0x%08x",
+                                  iv_chip->getHuid() );
+                        break;
+                    }
 
-                o_done = true; // Procedure is complete.
+                    o_done = true; // Procedure is complete.
+                }
             }
             else if ( !iv_canResumeScrub )
             {
