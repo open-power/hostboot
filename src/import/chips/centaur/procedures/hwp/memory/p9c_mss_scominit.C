@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,9 @@ extern "C" {
         // Get a vector of the functional MBA targets
         const auto l_mba_targets = i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
         const auto l_l4_targets = i_target.getChildren<fapi2::TARGET_TYPE_L4>(fapi2::TARGET_STATE_PRESENT);
+        const auto l_proc_target = i_target.
+                                   getParent<fapi2::TARGET_TYPE_DMI>().
+                                   getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
         FAPI_ASSERT(l_l4_targets.size() > 0,
                     fapi2::CEN_MSS_SCOMINIT_NUM_L4_ERROR().
@@ -91,7 +94,7 @@ extern "C" {
         for (const auto& mba : l_mba_targets)
         {
             FAPI_DBG("Running MBS scom initfile\n");
-            FAPI_EXEC_HWP(l_rc, centaur_mbs_scom, i_target, mba, l_l4_targets[0], FAPI_SYSTEM);
+            FAPI_EXEC_HWP(l_rc, centaur_mbs_scom, i_target, mba, l_l4_targets[0], FAPI_SYSTEM, l_proc_target);
 
             if (l_rc)
             {

@@ -33,14 +33,14 @@
 
 typedef fapi2::ReturnCode (*centaur_mbs_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>&,
         const fapi2::Target<fapi2::TARGET_TYPE_MBA>&, const fapi2::Target<fapi2::TARGET_TYPE_L4>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode centaur_mbs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& TGT0,
                                        const fapi2::Target<fapi2::TARGET_TYPE_MBA>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_L4>& TGT2,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3);
+                                       const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT4);
 
 }
 

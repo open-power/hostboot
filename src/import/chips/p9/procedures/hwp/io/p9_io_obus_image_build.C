@@ -108,7 +108,7 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     uint8_t configMode = 0;
     int xipSectionId = 0;
     bool loadImage = false;
-    fapi2::ATTR_CHIP_EC_FEATURE_HW446279_Type l_ATTR_CHIP_EC_FEATURE_HW446279;
+    fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY_Type l_p9c;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, iTgt, configMode),
              "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
@@ -128,9 +128,11 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
         FAPI_IMP("ABUS IMAGE.");
         xipSectionId = P9_XIP_SECTION_IOPPE_IOO_ABUS;
         auto l_chip = iTgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW446279, l_chip, l_ATTR_CHIP_EC_FEATURE_HW446279));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY,
+                               l_chip,
+                               l_p9c));
 
-        if(l_ATTR_CHIP_EC_FEATURE_HW446279)
+        if(l_p9c)
         {
             FAPI_IMP("ABUS IMAGE LOAD.");
             loadImage = true;

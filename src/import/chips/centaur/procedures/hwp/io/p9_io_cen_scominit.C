@@ -75,8 +75,13 @@ fapi2::ReturnCode p9_io_cen_scominit(const CEN_TGT& i_tgt)
     // Get system target
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> sys_tgt;
 
+    // Get attached processor target
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> proc_tgt = i_tgt.
+            getParent<fapi2::TARGET_TYPE_DMI>().
+            getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
     FAPI_INF("Invoke FAPI procedure core: input_target");
-    FAPI_EXEC_HWP(rc, centaur_dmi_scom, i_tgt, sys_tgt);
+    FAPI_EXEC_HWP(rc, centaur_dmi_scom, i_tgt, sys_tgt, proc_tgt);
 
     if(rc)
     {
