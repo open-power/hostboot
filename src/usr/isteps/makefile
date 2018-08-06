@@ -50,6 +50,7 @@ SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
 SUBDIRS+=io.d
+SUBDIRS+=nvdimm.d
 
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/

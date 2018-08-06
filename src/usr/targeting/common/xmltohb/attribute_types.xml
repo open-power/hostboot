@@ -4987,19 +4987,19 @@
     <id>NV_STATUS_FLAG</id>
     <description>
         NVDIMM status flag. This is used to record the status and
-        later report to OPAL. Possible values:
+        later report to OPAL/PHYP. Possible values:
 
-        0x0080 - memory valid, contents not preserved (genesis)
-        0x0040 - memory contents preserved
-        0x0020 - memory failed to preserve contents
-        0x0010 - memory unable to preserve future contents
+        0x08 - contents not preserved (genesis)
+        0x04 - contents preserved
+        0x02 - failed to preserve contents
+        0x01 - unable to preserve future contents
     </description>
     <simpleType>
-      <uint16_t>
-        <default>0x0000</default>
-      </uint16_t>
+      <uint8_t>
+        <default>0x08</default>
+      </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
   </attribute>

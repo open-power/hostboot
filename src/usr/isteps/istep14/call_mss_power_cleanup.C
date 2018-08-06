@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,11 @@
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_mss_power_cleanup.H>
 #include    <p9c_mss_power_cleanup.H>
+
+#ifdef CONFIG_NVDIMM
+// NVDIMM support
+#include    <isteps/nvdimm/nvdimm.H>
+#endif
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -94,6 +99,66 @@ void* call_mss_power_cleanup (void *io_pArgs)
                        "SUCCESS :  mss_power_cleanup HWP( )" );
         }
     }
+
+#ifdef CONFIG_NVDIMM
+    TARGETING::TargetHandleList l_procList;
+    getAllChips(l_procList, TARGETING::TYPE_PROC, false);
+    TARGETING::ATTR_MODEL_type l_chipModel =
+            l_procList[0]->getAttr<TARGETING::ATTR_MODEL>();
+
+    if(l_chipModel == TARGETING::MODEL_NIMBUS)
+    {
+        // Check for any NVDIMMs after the mss_power_cleanup
+        TARGETING::TargetHandleList l_dimmTargetList;
+        TARGETING::TargetHandleList l_nvdimmTargetList;
+        getAllLogicalCards(l_dimmTargetList, TYPE_DIMM);
+
+        // Walk the dimm list and collect all the nvdimm targets
+        for (auto const l_dimm : l_dimmTargetList)
+        {
+            //@TODO replace this with isNVDIMM()
+            // Not the most elegant way of doing it but the hybrid attributes
+            // are at the MCS level. Need to find my way up to MCS and check
+            // if the dimm is hybrid
+            TARGETING::TargetHandleList l_mcaList;
+            getParentAffinityTargets(l_mcaList, l_dimm, TARGETING::CLASS_UNIT, TARGETING::TYPE_MCA);
+
+            if (l_mcaList.size())
+            {
+                TARGETING::TargetHandleList l_mcsList;
+                getParentAffinityTargets(l_mcsList, l_mcaList[0], TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS);
+
+                if(l_mcsList.size())
+                {
+                    // 2-D array. [MCA][DIMM]
+                    TARGETING::ATTR_EFF_HYBRID_type l_hybrid;
+                    TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE_type l_hybrid_type;
+
+                    if( l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID>(l_hybrid) &&
+                        l_mcsList[0]->tryGetAttr<TARGETING::ATTR_EFF_HYBRID_MEMORY_TYPE>(l_hybrid_type) )
+                    {
+                        //Using huid to lookup the hybrid attribute for the current dimm
+                        const auto l_dimm_huid = TARGETING::get_huid(l_dimm);
+                        const auto l_mca_huid = TARGETING::get_huid(l_mcaList[0]);
+                        const uint8_t MCA_PER_MCS = 2;
+                        const uint8_t DIMM_PER_MCA = 2;
+
+                        if (l_hybrid[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_IS_HYBRID &&
+                            l_hybrid_type[l_mca_huid%MCA_PER_MCS][l_dimm_huid%DIMM_PER_MCA] == TARGETING::EFF_HYBRID_MEMORY_TYPE_NVDIMM )
+                        {
+                            l_nvdimmTargetList.push_back(l_dimm);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Run the nvdimm management function if the list is not empty
+        if (!l_nvdimmTargetList.empty()){
+            NVDIMM::nvdimm_restore(l_nvdimmTargetList);
+        }
+    }
+#endif
 
     // -- Cumulus only
     // Get a list of all present Centaurs

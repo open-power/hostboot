@@ -32,6 +32,6 @@ config PCA95X_16BIT
         Set the PCA95X support to a 16 bit chip.
 
 config PRINT_SYSTEM_INFO
-    defaults n
+    default n
     help
         Enables code that prints out the HWAS information for each target found during discovery
