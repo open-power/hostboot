@@ -115,6 +115,7 @@ private:
      *  @param[in]  i_target2DataLength    length of i_pTarget2Data
      *  @param[in]  i_busType       bus type Enum
      *  @param[in]  i_priority      Priority of the callout
+     *  @param[in]  i_flag          Extra flag for callout structure
      *
      *  @return void
      */
@@ -124,7 +125,8 @@ private:
                         const void *i_pTarget2Data,
                         uint32_t i_target2DataLength,
                         const HWAS::busTypeEnum i_busType,
-                        const HWAS::callOutPriority i_priority);
+                        const HWAS::callOutPriority i_priority,
+                        const HWAS::CalloutFlag_t i_flag );
 
     /**
      *  @brief Construct a hardware callout user detail

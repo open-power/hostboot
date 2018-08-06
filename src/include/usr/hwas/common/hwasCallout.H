@@ -171,7 +171,15 @@ enum sensorTypeEnum
     GPU_MEMORY_TEMP_SENSOR          = 3,
 };
 
-//
+//-- Flags
+typedef uint8_t CalloutFlag_t;
+// No extra flags are present
+const uint8_t FLAG_NONE             = 0;
+// SMP link is down, therefore its pair cannot be repaired
+const uint8_t FLAG_LINK_DOWN        = 1;
+
+//-- Callout types
+typedef uint8_t CalloutType_t;
 const uint8_t HW_CALLOUT         = 0x01;
 const uint8_t PROCEDURE_CALLOUT  = 0x02;
 const uint8_t BUS_CALLOUT        = 0x03;
@@ -182,12 +190,20 @@ const uint8_t I2C_DEVICE_CALLOUT = 0x07;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
+/**
+ * @brief  Defines the data layout that is passed around the code as part
+ *         of en error log to specify a callout.  Note that this structure
+ *         is used in messages between Hostboot and FSP, and it is saved
+ *         to persistent storage inside error logs.  This means that the
+ *         size cannot change and the fields cannot be reordered.
+ */
 typedef struct callout_ud
 {
-    uint8_t             type;
-    uint8_t             pad[3];
+    CalloutType_t       type; //uint8_t
+    CalloutFlag_t       flag; //uint8_t
+    uint8_t             pad[2];
     callOutPriority     priority;           // uint32_t
-    union {
+    union { // 3 x uint32
         struct {    // type == HW_CALLOUT
             DeconfigEnum    deconfigState;  // uint32_t
             GARD_ErrorType  gardErrorType;  // uint32_t
@@ -196,9 +212,13 @@ typedef struct callout_ud
         };
         struct {    // type == PROCEDURE_CALLOUT
             epubProcedureID procedure;      // uint32_t
+            // uint32 - unused
+            // uint32 - unused
         };
         struct {    // type == BUS_CALLOUT
             busTypeEnum     busType;        // uint32_t
+            // uint32 - unused
+            // uint32 - unused
             // two Targets will follow
         };
         struct {    // type == CLOCK_CALLOUT
@@ -216,6 +236,8 @@ typedef struct callout_ud
         struct {  // type == SENSOR_CALLOUT
             uint32_t        sensorId;
             sensorTypeEnum  sensorType;
+            // uint32 - unused
+            // zero Targets will follow
         };
         struct {  // type == I2C_DEVICE_CALLOUT
             uint8_t        engine;
@@ -224,7 +246,8 @@ typedef struct callout_ud
             // one Target will follow
         };
     }; // union
-} callout_ud_t;
+} __attribute__ ((packed)) callout_ud_t;
+
 
 #ifndef PARSER
 

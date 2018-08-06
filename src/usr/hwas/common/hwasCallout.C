@@ -60,6 +60,9 @@ bool retrieveTarget(uint8_t * & io_uData,
 {
     bool l_err = false;
 
+    static_assert( sizeof(callout_ud_t) == 20,
+                   "callout_ud_t is the wrong size" );
+
     // data is either a token indicating it's the
     // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
     // or it's the EntityPath - getAttr<TARGETING::ATTR_PHYS_PATH>()

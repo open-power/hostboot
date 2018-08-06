@@ -362,6 +362,17 @@ case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
             break;
         } // switch priority
 #undef case_PRIORITY
+
+        switch (pData->flag)
+        {
+#define case_FLAG(_type) \
+            case HWAS::_type: i_parser.PrintString( "Flag", #_type); break;
+                case_FLAG(FLAG_LINK_DOWN)
+                case(HWAS::FLAG_NONE): break; //do not print anything                    
+                default:
+                      i_parser.PrintNumber( "Flag", "UNKNOWN: 0x%X",
+                                            ntohl(pData->flag) );
+        } // switch partType
     } // parse
 
     friend class ErrlUserDetailsParserSensor;

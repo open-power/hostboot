@@ -112,7 +112,8 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
         const void *i_pTarget2Data,
         uint32_t i_target2DataLength,
         const HWAS::busTypeEnum i_busType,
-        const HWAS::callOutPriority i_priority)
+        const HWAS::callOutPriority i_priority,
+        const HWAS::CalloutFlag_t i_flag)
 {
     TRACDCOMP(g_trac_errl, "BusCallout entry");
 
@@ -127,6 +128,7 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     pData = reinterpret_cast<HWAS::callout_ud_t *>
                 (reallocUsrBuf(pDataLength));
     pData->type = HWAS::BUS_CALLOUT;
+    pData->flag = i_flag;
     pData->busType = i_busType;
     pData->priority = i_priority;
     char * l_ptr = (char *)(++pData);
