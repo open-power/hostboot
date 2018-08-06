@@ -170,6 +170,13 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
 
     uint32_t stopCond = mss_MaintCmd::NO_STOP_CONDITIONS;
 
+    // Ensure we stop on each MCE if Row Repair is enabled.
+    if ( iv_rowRepairEnabled && (TD_PHASE_2 == iv_phase) )
+    {
+        stopCond |= mss_MaintCmd::STOP_ON_MCE;
+        stopCond |= mss_MaintCmd::STOP_IMMEDIATE;
+    }
+
     switch ( iv_phase )
     {
         case TD_PHASE_1:

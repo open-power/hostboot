@@ -211,6 +211,11 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
 
     if ( TD_PHASE_2 == iv_phase ) stopCond |= mss_MaintCmd::STOP_ON_MCE;
 
+    // If Row Repair is enabled, we should stop immediately on error if there is
+    // an MCE during phase 2. This is already done because of the Centaur
+    // workarounds. This comment is just pointing out what should be done if for
+    // some reason the hardware is fixed.
+
     if ( iv_canResumeScrub )
     {
         // Resume the command from the next address to the end of this master

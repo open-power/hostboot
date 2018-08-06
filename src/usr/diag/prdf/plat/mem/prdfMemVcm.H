@@ -55,7 +55,8 @@ class VcmEvent : public TdEntry
      */
     VcmEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
                  const MemMark & i_mark ) :
-        TdEntry(VCM_EVENT, i_chip, i_rank), iv_mark(i_mark)
+        TdEntry(VCM_EVENT, i_chip, i_rank), iv_mark(i_mark),
+        iv_rowRepairEnabled(PlatServices::isRowRepairEnabled<T>(i_chip,i_rank))
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -306,9 +307,19 @@ class VcmEvent : public TdEntry
      */
     uint32_t falseAlarm( STEP_CODE_DATA_STRUCT & io_sc );
 
+    /**
+     * @brief  Do extra analysis needed for Row Repair.
+     * @param  io_sc  The step code data struct.
+     * @param  o_done True if the procedure is complete or has aborted.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t rowRepair( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
   private: // instance variables
 
     const MemMark iv_mark; ///< The chip mark from hardware.
+
+    const bool iv_rowRepairEnabled; ///< True if Row Repair is enabled.
 };
 
 //------------------------------------------------------------------------------
