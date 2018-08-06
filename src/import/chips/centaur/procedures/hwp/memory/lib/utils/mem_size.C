@@ -74,6 +74,41 @@ bool is_dimm_functional(const uint8_t i_valid_dimm_bitmap,
     return fapi2::buffer<uint8_t>(i_valid_dimm_bitmap).getBit(VALID_DIMM_POS[i_port][i_dimm]);
 }
 
+
+///
+/// @brief Return the total memory size behind an MBA
+/// @param[in] i_target the MBA target
+/// @param[out] o_size the size of memory in GB behind the target
+/// @return FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target, uint64_t& o_size )
+{
+    o_size = 0;
+    uint8_t l_sizes[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_func_dimms_bitmap = 0;
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, i_target,  l_func_dimms_bitmap),
+              "Failed to access attribute ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR for %s", mss::c_str(i_target) );
+
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_SIZE, i_target, l_sizes),
+              "Failed to access attribute ATTR_CEN_EFF_DIMM_SIZE for %s", mss::c_str(i_target) );
+
+    for( size_t p = 0; p < MAX_PORTS_PER_MBA; ++p)
+    {
+        for( size_t d = 0; d < MAX_DIMM_PER_PORT; ++d)
+        {
+            if( is_dimm_functional(l_func_dimms_bitmap, p, d) )
+            {
+                o_size += l_sizes[p][d];
+            }
+        }// dimm
+    }// port
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Return the total memory size behind a DMI
 /// @param[in] i_target the DMI target
@@ -87,25 +122,10 @@ fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& 
 
     for (const auto& mba : mss::find_targets<fapi2::TARGET_TYPE_MBA>(i_target))
     {
-        uint8_t l_sizes[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {};
-        uint8_t l_func_dimms_bitmap = 0;
-
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR, mba,  l_func_dimms_bitmap),
-                  "Failed to access attribute ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR for %s", mss::c_str(mba) );
-
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_SIZE, mba, l_sizes),
-                  "Failed to access attribute ATTR_CEN_EFF_DIMM_SIZE for %s", mss::c_str(mba) );
-
-        for( size_t p = 0; p < MAX_PORTS_PER_MBA; ++p)
-        {
-            for( size_t d = 0; d < MAX_DIMM_PER_PORT; ++d)
-            {
-                if( is_dimm_functional(l_func_dimms_bitmap, p, d) )
-                {
-                    o_size += l_sizes[p][d];
-                }
-            }// dimm
-        }// port
+        uint64_t l_mba_size;
+        FAPI_TRY(eff_memory_size(mba, l_mba_size),
+                 "Error from eff_memory_size (mba: %s)", mss::c_str(mba));
+        o_size += l_mba_size;
     }// mba
 
 fapi_try_exit:

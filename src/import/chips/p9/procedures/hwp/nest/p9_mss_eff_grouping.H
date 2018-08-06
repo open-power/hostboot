@@ -86,6 +86,9 @@ const uint8_t NUM_MCS_PER_PROC = 4;
 const uint8_t NUM_MC_PORTS_PER_PROC = 8;
 const uint8_t NUM_DIMMS_PER_DRAM_PORT = 2; // 2 DIMMs per DRAM port
 
+const uint8_t NUM_PORTS_PER_PAIR = 2;
+const uint8_t NUM_MBA_PER_MEMBUF = 2;
+
 /// Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_mss_eff_grouping_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);

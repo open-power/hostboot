@@ -89,6 +89,57 @@ enum GroupAllowed
                  GROUP_8,
 };
 
+// matrix for port-pair based deconfiguration combinations
+const uint8_t MAX_MBA_PERMUTATIONS = 9;
+const uint8_t MBA_PERMUTATIONS[MAX_MBA_PERMUTATIONS][NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF] =
+{
+    {
+        // case 0
+        {0, 0},    //   port 0 - MBA0 x MBA1 x
+        {0, 0}     //   port 1 - MAX0 x MBA1 x
+    },
+    {
+        // case 1
+        {1, 0},    //   port 0 - MBA0 + MBA1 x
+        {1, 0}     //   port 1 - MAX0 + MBA1 x
+    },
+    {
+        // case 2
+        {0, 1},    //   port 0 - MBA0 x MBA1 +
+        {0, 1}     //   port 1 - MAX0 x MBA1 +
+    },
+    {
+        // case 3
+        {1, 0},    //   port 0 - MBA0 + MBA1 x
+        {0, 1}     //   port 1 - MAX0 x MBA1 +
+    },
+    {
+        // case 4
+        {0, 1},    //   port 0 - MBA0 x MBA1 +
+        {1, 0}     //   port 1 - MAX0 + MBA1 x
+    },
+    {
+        // case 5
+        {0, 1},    //   port 0 - MBA0 x MBA1 +
+        {1, 1}     //   port 1 - MAX0 + MBA1 +
+    },
+    {
+        // case 6
+        {1, 0},    //   port 0 - MBA0 + MBA1 x
+        {1, 1}     //   port 1 - MAX0 + MBA1 +
+    },
+    {
+        // case 7
+        {1, 1},    //   port 0 - MBA0 + MBA1 +
+        {1, 0}     //   port 1 - MAX0 + MBA1 x
+    },
+    {
+        // case 8
+        {1, 1},    //   port 0 - MBA0 + MBA1 +
+        {0, 1}     //   port 1 - MAX0 x MBA1 +
+    }
+};
+
 ///----------------------------------------------------------------------------
 /// struct EffGroupingSysAttrs
 ///----------------------------------------------------------------------------
@@ -2758,11 +2809,13 @@ void grouping_group1PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
     return;
 }
 
+///
 /// @brief Callout DIMM attached to ungrouped port, appends
 /// MSS_EFF_GROUPING_UNABLE_TO_GROUP_DIMM to input return code
 ///
 /// Ensure any ungrouped DIMMs are called out for deconfiguration
 ///
+/// @tparam    T               Template paramter, passed in port target type
 /// @param[in] i_dimm_target   Target identifying DIMM attached to ungrouped port
 /// @param[in] i_port_target   Target identifying with ungrouped port
 /// @param[in] i_portIndex     Port number associated with target
@@ -2811,12 +2864,15 @@ void calloutDIMM(
     return;
 }
 
-/// @brief Determine set of DIMM targets attached to channel target
-///        (MCA/DMI)
-/// @tparam T template paramter, passed in target
-/// @param[in]  i_target          Channel target (of type T)
-/// @param[out] o_dimm_targets    Set of attached DIMM targets
 ///
+/// @brief Determine set of DIMM targets attached to target
+///        (MCA/DMI/MBA)
+///
+/// @tparam     T                 Template paramter, passed in target
+///
+/// @param[in]  i_target          Target (of type T)
+/// @param[out] o_dimm_targets    Vector of DIMM targets, attached
+///                               DIMMs will be appended at end
 /// @return void
 ///
 template<fapi2::TargetType T>
@@ -2830,7 +2886,30 @@ void getAttachedDimms(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
 {
-    o_dimm_targets = i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+    FAPI_DBG("Start");
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets =
+                i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+
+    o_dimm_targets.insert(o_dimm_targets.end(),
+                          l_dimm_targets.begin(),
+                          l_dimm_targets.end());
+    FAPI_DBG("End");
+}
+
+/// template specialization for MBA target type
+template <>
+void getAttachedDimms(
+    const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
+{
+    FAPI_DBG("Start");
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets =
+                i_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
+
+    o_dimm_targets.insert(o_dimm_targets.end(),
+                          l_dimm_targets.begin(),
+                          l_dimm_targets.end());
+    FAPI_DBG("End");
 }
 
 /// template specialization for DMI target type
@@ -2839,23 +2918,22 @@ void getAttachedDimms(
     const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
 {
+    FAPI_DBG("Start");
+
     // determine attached Centaur chip
     for (auto l_cen_target : i_target.template getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
     {
         // get set of valid MBAs
         for (auto l_mba_target : l_cen_target.template getChildren<fapi2::TARGET_TYPE_MBA>())
         {
-            // DIMMs are children of MBAs
-            std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets_on_this_mba;
-            l_dimm_targets_on_this_mba = l_mba_target.template getChildren<fapi2::TARGET_TYPE_DIMM>();
-            o_dimm_targets.insert(o_dimm_targets.end(),
-                                  l_dimm_targets_on_this_mba.begin(),
-                                  l_dimm_targets_on_this_mba.end());
+            getAttachedDimms<fapi2::TARGET_TYPE_MBA>(l_mba_target, o_dimm_targets);
         }
     }
+
+    FAPI_DBG("End");
 }
 
-
+///
 /// @brief Utility function to generate base return code for ungrouped port
 ///        error reporting
 ///
@@ -2879,13 +2957,385 @@ fapi_try_exit:
 
 
 ///
+/// @brief Determine if port pair is groupable given MBA sizes
+///        and proposed configuration
+///
+/// @param[in] i_mba_size   Array of per-MBA sizes
+/// @param[in] i_mba_config Array of proposed per-MBA configuration
+/// @param[out] o_size      Resultant aggregate size
+///
+/// @return bool indicating if configuration produces groupable
+///              port pair
+bool portPairIsGroupable(
+    const uint64_t i_mba_size[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF],
+    const uint8_t i_mba_config[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF],
+    uint64_t& o_size)
+{
+    uint64_t l_mba_size[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF];
+    uint64_t l_port_size[NUM_PORTS_PER_PAIR];
+    uint64_t l_common_size = 0;
+
+    o_size = 0;
+
+    for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+    {
+        l_port_size[ii] = 0;
+    }
+
+    for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+    {
+        for (uint8_t jj = 0; jj < NUM_MBA_PER_MEMBUF; jj++)
+        {
+            l_mba_size[ii][jj] = (i_mba_config[ii][jj]) ?
+                                 (i_mba_size[ii][jj]) :
+                                 (0);
+            l_port_size[ii] += l_mba_size[ii][jj];
+            o_size += l_mba_size[ii][jj];
+        }
+
+        if (ii == 0)
+        {
+            l_common_size = l_port_size[ii];
+        }
+
+        if (l_common_size != l_port_size[ii])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+///
+/// @brief Find minset of DIMMs to remove to make DMI port pair groupable
+///
+/// @param[in] i_targetA_func      TargetA functional?
+/// @param[in] i_targetA           TargetA
+/// @param[in] i_targetA_ungrouped Target A has memory and is ungrouped?
+/// @param[in] i_targetB_func      TargetB functional?
+/// @param[in] i_targetB           TargetB
+/// @param[in] i_targetB_ungrouped Target B has memory and is ungrouped?
+/// @param[in] o_dimm_targets      Vector of DIMM targets to deconfigure
+///
+/// @return ReturnCode
+//
+fapi2::ReturnCode findMinDeconfigForPortPair(
+    const bool i_targetA_func,
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI> i_targetA,
+    const bool i_targetA_ungrouped,
+    const bool i_targetB_func,
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI> i_targetB,
+    const bool i_targetB_ungrouped,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets)
+{
+    FAPI_DBG("Start");
+
+    // if only one port is functional, all of its DIMMs must be called out
+    if ((!i_targetA_func || !i_targetA_ungrouped) &&
+        ( i_targetB_func &&  i_targetB_ungrouped))
+    {
+        FAPI_DBG("Calling out all DIMMs on port B");
+        getAttachedDimms(i_targetB, o_dimm_targets);
+    }
+    else if ((i_targetA_func  &&  i_targetA_ungrouped) &&
+             (!i_targetB_func || !i_targetB_ungrouped))
+    {
+        FAPI_DBG("Calling out all DIMMs on port A");
+        getAttachedDimms(i_targetA, o_dimm_targets);
+    }
+    // do nothing if neither is functional, else look across both
+    // members of port pair to perform deconfigurations
+    else if (i_targetA_func && i_targetA_ungrouped &&
+             i_targetB_func && i_targetB_ungrouped)
+    {
+        FAPI_DBG("A and B are functional, calling out based on minset MBA configuation");
+        char l_targetA_string[fapi2::MAX_ECMD_STRING_LEN];
+        char l_targetB_string[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(i_targetA, l_targetA_string, fapi2::MAX_ECMD_STRING_LEN);
+        fapi2::toString(i_targetB, l_targetB_string, fapi2::MAX_ECMD_STRING_LEN);
+
+        // get targets
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MBA>> l_mba_targets[NUM_PORTS_PER_PAIR];
+        l_mba_targets[0] = i_targetA.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>()
+                           .front()
+                           .getChildren<fapi2::TARGET_TYPE_MBA>();
+        l_mba_targets[1] = i_targetB.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>()
+                           .front()
+                           .getChildren<fapi2::TARGET_TYPE_MBA>();
+
+        FAPI_DBG("Retrieving MBA children:3");
+        FAPI_DBG("  DMI target A = %s, %d MBA children", l_targetA_string, l_mba_targets[0].size());
+        FAPI_DBG("  DMI target B = %s, %d MBA children", l_targetB_string, l_mba_targets[1].size());
+
+        uint8_t l_mba_functional[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF];
+        uint8_t l_mba_tgt_index[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF];
+        uint64_t l_mba_size[NUM_PORTS_PER_PAIR][NUM_MBA_PER_MEMBUF];
+
+        uint64_t l_max_size = 0;
+        uint8_t l_max_size_idx = 0;
+
+        // initialize array storage
+        for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+        {
+            for (uint8_t jj = 0; (jj < NUM_MBA_PER_MEMBUF); jj++)
+            {
+                l_mba_functional[ii][jj] = 0;
+                l_mba_tgt_index[ii][jj] = 0;
+                l_mba_size[ii][jj] = 0;
+            }
+        }
+
+        // mark functional MBAs & associated targets
+        for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+        {
+            for (uint8_t jj = 0; jj < l_mba_targets[ii].size(); jj++)
+            {
+                uint8_t l_unit_pos = 0;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       l_mba_targets[ii][jj],
+                                       l_unit_pos),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+                l_mba_functional[ii][l_unit_pos] = 1;
+                l_mba_tgt_index[ii][l_unit_pos] = jj;
+            }
+        }
+
+        // retrieve per-MBA sizes
+        for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+        {
+            for (uint8_t jj = 0; jj < NUM_MBA_PER_MEMBUF; jj++)
+            {
+                if (l_mba_functional[ii][jj])
+                {
+                    FAPI_TRY(mss::eff_memory_size(l_mba_targets[ii][l_mba_tgt_index[ii][jj]],
+                                                  l_mba_size[ii][jj]),
+                             "Error from eff_memory_size");
+                    FAPI_DBG("Set MBA size[%d][%d] = %d",
+                             ii, jj, l_mba_size[ii][jj]);
+                }
+            }
+        }
+
+        // walk all permutations of MBA configurations, select
+        // the combination which leaves us the largest amount
+        // of memory
+        for (uint8_t ll = 0; ll < MAX_MBA_PERMUTATIONS; ll++)
+        {
+            uint64_t l_size;
+
+            if (portPairIsGroupable(l_mba_size,
+                                    MBA_PERMUTATIONS[ll],
+                                    l_size))
+            {
+                if (l_size > l_max_size)
+                {
+                    l_max_size = l_size;
+                    l_max_size_idx = ll;
+                }
+            }
+        }
+
+        FAPI_ERR("Selected permutation index = %d, size = %lld",
+                 l_max_size_idx, l_max_size);
+
+        // best option selected, deconfigure based on combination of
+        // selected permutation and current functional state
+        for (uint8_t ii = 0; ii < NUM_PORTS_PER_PAIR; ii++)
+        {
+            for (uint8_t jj = 0; jj < NUM_MBA_PER_MEMBUF; jj++)
+            {
+                if (l_mba_functional[ii][jj] &&
+                    !MBA_PERMUTATIONS[l_max_size_idx][ii][jj])
+                {
+                    FAPI_ERR("Deconfiguring MBA[%d][%d]",
+                             ii, jj);
+                    getAttachedDimms(l_mba_targets[ii][l_mba_tgt_index[ii][jj]],
+                                     o_dimm_targets);
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Generate DIMM callouts based on ports which are ungrouped
+///
+/// @tparam    T                  Template paramter, passed in port target
+///
+/// @param[in] i_ports_functional Per-port functional status
+/// @param[in] i_ports_ungrouped  Per-port grouping status
+/// @param[in] i_ports_tgt_index  Per-port target vector index
+/// @param[in] i_ports_targets    Set of port targets
+/// @param[in] i_memInfo          Reference to Memory Info
+/// @param[in] i_hwMirrorEnabled  Mirroring policy
+/// @param[in] o_dimm_targets     Vector of DIMM targets to append deconfigurations
+/// @param[in] o_rc               Return code object to append deconfigurations
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode calloutDimmsForUngroupedPorts(
+    const uint8_t i_ports_functional[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_ungrouped[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_tgt_index[NUM_MC_PORTS_PER_PROC],
+    const std::vector<fapi2::Target<T>>& i_port_targets,
+    const EffGroupingMemInfo& i_memInfo,
+    const uint8_t i_hwMirrorEnabled,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets,
+    fapi2::ReturnCode& o_rc);
+
+/// template specialization for DMI target type
+template<>
+fapi2::ReturnCode calloutDimmsForUngroupedPorts(
+    const uint8_t i_ports_functional[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_ungrouped[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_tgt_index[NUM_MC_PORTS_PER_PROC],
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DMI>>& i_port_targets,
+    const EffGroupingMemInfo& i_memInfo,
+    const uint8_t i_hwMirrorEnabled,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets,
+    fapi2::ReturnCode& o_rc)
+{
+    FAPI_DBG("Start");
+
+    // o_rc contains the error we're going to append to
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // if mirroring is required, calculate deconfiguration across
+    // port pairs -- try to maintain ability to mirror with minimal
+    // loss of DIMMs
+    if (i_hwMirrorEnabled == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
+    {
+        for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii += 2)
+        {
+            if ((i_ports_functional[ii]   && i_ports_ungrouped[ii]) ||
+                (i_ports_functional[ii + 1] && i_ports_ungrouped[ii + 1]))
+            {
+                FAPI_TRY(findMinDeconfigForPortPair(i_ports_functional[ii],
+                                                    i_port_targets[i_ports_tgt_index[ii]],
+                                                    i_ports_ungrouped[ii],
+                                                    i_ports_functional[ii + 1],
+                                                    i_port_targets[i_ports_tgt_index[ii + 1]],
+                                                    i_ports_ungrouped[ii + 1],
+                                                    o_dimm_targets),
+                         "Error from FindMinDeconfigForPortPair");
+            }
+        }
+    }
+    // if mirroring is disabled or requested, callout each DIMM which is
+    // associated with each ungrouped port
+    else
+    {
+        for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii += 1)
+        {
+            if (i_ports_functional[ii] && i_ports_ungrouped[ii])
+            {
+                getAttachedDimms(i_port_targets[i_ports_tgt_index[ii]],
+                                 o_dimm_targets);
+            }
+        }
+    }
+
+    FAPI_ERR("Calling out %d DIMMs",
+             o_dimm_targets.size());
+
+    // add DIMM callouts
+    for (const auto& l_dimm_target : o_dimm_targets)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_DMI> l_port_target = l_dimm_target
+                .getParent<fapi2::TARGET_TYPE_MBA>()
+                .getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>()
+                .getParent<fapi2::TARGET_TYPE_DMI>();
+        uint8_t l_port_index = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_port_target,
+                               l_port_index),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        calloutDIMM(l_dimm_target,
+                    l_port_target,
+                    l_port_index,
+                    i_memInfo.iv_portSize[l_port_index],
+                    o_rc);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+/// template specialization for MCA target type
+template<>
+fapi2::ReturnCode calloutDimmsForUngroupedPorts(
+    const uint8_t i_ports_functional[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_ungrouped[NUM_MC_PORTS_PER_PROC],
+    const uint8_t i_ports_tgt_index[NUM_MC_PORTS_PER_PROC],
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>& i_port_targets,
+    const EffGroupingMemInfo& i_memInfo,
+    const uint8_t i_hwMirrorEnabled,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& o_dimm_targets,
+    fapi2::ReturnCode& o_rc)
+{
+    FAPI_DBG("Start");
+
+    // o_rc contains the error we're going to append to
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // callout each DIMM which is associated with each ungrouped port
+    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii += 1)
+    {
+        if (i_ports_functional[ii] && i_ports_ungrouped[ii])
+        {
+            getAttachedDimms(i_port_targets[i_ports_tgt_index[ii]],
+                             o_dimm_targets);
+        }
+    }
+
+    // add DIMM callouts
+    for (const auto& l_dimm_target : o_dimm_targets)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MCA> l_port_target = l_dimm_target
+                .getParent<fapi2::TARGET_TYPE_MCA>();
+        uint8_t l_port_index = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_port_target,
+                               l_port_index),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        calloutDIMM(l_dimm_target,
+                    l_port_target,
+                    l_port_index,
+                    i_memInfo.iv_portSize[l_port_index],
+                    o_rc);
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Finds ungrouped ports
 ///
-/// If any are found then their associated DIMMs will be deconfigured
+/// If any are found then DIMMs will be deconfigured to attempt to satisfy
+/// grouping rules
 ///
-/// @param[in] i_target      Reference to processor chip target
-/// @param[in] i_memInfo     Reference to Memory Info
-/// @param[in] i_groupData   Reference to Group data
+/// @tparam    T                  Template paramter, port target type
+///
+/// @param[in] i_target           Reference to processor chip target
+/// @param[in] i_memInfo          Reference to Memory Info
+/// @param[in] i_groupData        Reference to Group data
+/// @param[in] i_hwMirrorEnabled  Mirroring policy
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -2893,86 +3343,94 @@ template<fapi2::TargetType T>
 fapi2::ReturnCode grouping_findUngroupedPorts(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const EffGroupingMemInfo& i_memInfo,
-    const EffGroupingData& i_groupData)
+    const EffGroupingData& i_groupData,
+    const uint8_t i_hwMirrorEnabled)
 {
     FAPI_DBG("Entering");
 
-    std::vector<fapi2::Target<T>> l_mcTargets = i_target.getChildren<T>();
+    // get vector of functional port targets
+    std::vector<fapi2::Target<T>> l_port_targets = i_target.getChildren<T>();
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    // build per-port vectors tracking:
+    // - functional status
+    // - grouped state
+    // - index for associated target
+    uint8_t l_ports_functional[NUM_MC_PORTS_PER_PROC];
+    uint8_t l_ports_ungrouped[NUM_MC_PORTS_PER_PROC];
+    uint8_t l_ports_tgt_index[NUM_MC_PORTS_PER_PROC];
     bool l_all_grouped = true;
 
+    // initialize array storage
+    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii++)
+    {
+        l_ports_functional[ii] = 0;
+        l_ports_ungrouped[ii] = 0;
+        l_ports_tgt_index[ii] = 0;
+    }
+
+    // mark functional ports & associated targets
+    for (uint8_t jj = 0; (jj < l_port_targets.size()); jj++)
+    {
+        uint8_t l_unit_pos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_port_targets[jj], l_unit_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+        l_ports_functional[l_unit_pos] = 1;
+        l_ports_tgt_index[l_unit_pos] = jj;
+    }
+
     // determine if any ports are not grouped
-    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC) && l_all_grouped; ii++)
+    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii++)
     {
         if ((i_memInfo.iv_portSize[ii] != 0) &&
             (i_groupData.iv_portGrouped[ii] == false))
         {
-            FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
-
-            for (auto l_mc : l_mcTargets)
-            {
-                // Get the MCA position
-                uint8_t l_unitPos = 0;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc, l_unitPos),
-                         "Error getting MCA ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-                         (uint64_t)fapi2::current_err);
-
-                // found an ungrouped port
-                if (l_unitPos == ii)
-                {
-                    l_all_grouped = false;
-                    break;
-                }
-            }
+            FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u",
+                     ii);
+            l_ports_ungrouped[ii] = 1;
+            l_all_grouped = false;
         }
+    }
+
+    // initialize array storage
+    for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii++)
+    {
+        FAPI_DBG("Port %d", ii);
+        FAPI_DBG("   functional: %d", l_ports_functional[ii]);
+        FAPI_DBG("   ungrouped: %d",  l_ports_ungrouped[ii]);
+        FAPI_DBG("   tgt_index: %d", l_ports_tgt_index[ii]);
     }
 
     // assert if there are any ungrouped ports on this chip
     if (!l_all_grouped)
     {
+        // DIMMs to be called out
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets;
+
         // create base HWP error
-        fapi2::ReturnCode l_rc;
         l_rc = emitUnableToGroupError(i_memInfo.iv_maxGroupMemSize);
 
-        // rerun loop and append error for each DIMM which is associated with an
-        // ungrouped port
-        for (uint8_t ii = 0; (ii < NUM_MC_PORTS_PER_PROC); ii++)
-        {
-            if ((i_memInfo.iv_portSize[ii] != 0) &&
-                (i_groupData.iv_portGrouped[ii] == false))
-            {
-                FAPI_ERR("grouping_findUngroupedPorts: Unable to group port %u", ii);
-
-                for (auto l_mc : l_mcTargets)
-                {
-                    // Get the MCA position
-                    uint8_t l_unitPos = 0;
-                    (void) FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc, l_unitPos);
-
-                    // for each ungrouped port, commit an error for each downstream DIMM
-                    if (l_unitPos == ii)
-                    {
-                        std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>> l_dimm_targets;
-                        getAttachedDimms(l_mc, l_dimm_targets);
-
-                        for (const auto& l_dimm_target : l_dimm_targets)
-                        {
-                            calloutDIMM(l_dimm_target,
-                                        l_mc,
-                                        ii,
-                                        i_memInfo.iv_portSize[ii],
-                                        l_rc);
-                        }
-                    }
-                }
-            }
-        }
-
-        fapi2::current_err = l_rc;
+        // append all DIMM callouts
+        calloutDimmsForUngroupedPorts(l_ports_functional,
+                                      l_ports_ungrouped,
+                                      l_ports_tgt_index,
+                                      l_port_targets,
+                                      i_memInfo,
+                                      i_hwMirrorEnabled,
+                                      l_dimm_targets,
+                                      l_rc);
     }
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
-    return fapi2::current_err;
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return l_rc;
+    }
+    else
+    {
+        return fapi2::current_err;
+    }
 }
 
 ///
@@ -3663,13 +4121,19 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     // Verify all ports are grouped, or error out
     if (l_memInfo.iv_nimbusProc == true)
     {
-        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_MCA>(i_target, l_memInfo, l_groupData),
+        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_MCA>(i_target,
+                 l_memInfo,
+                 l_groupData,
+                 l_sysAttrs.iv_hwMirrorEnabled),
                  "grouping_findUngroupedPorts() returns an error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }
     else
     {
-        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_DMI>(i_target, l_memInfo, l_groupData),
+        FAPI_TRY(grouping_findUngroupedPorts<fapi2::TARGET_TYPE_DMI>(i_target,
+                 l_memInfo,
+                 l_groupData,
+                 l_sysAttrs.iv_hwMirrorEnabled),
                  "grouping_findUngroupedPorts() returns an error, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
     }
