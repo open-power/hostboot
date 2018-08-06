@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1171,6 +1171,37 @@ public:
         {
             TS_FAIL( "Recovered log incorrectly caused deconfig" );
         }
+    }
+
+    /**
+     * @brief Verify subsystem mapping
+     *
+     * Simple test for now that targets test for TYPE_MC related defect
+     * Can be expanded on later if time permits
+     */
+    void testErrl_verifySubsystem(void)
+    {
+        errlHndl_t l_err = nullptr;
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        ERRORLOG::ERRL_TEST_MOD_ID,
+                                        ERRORLOG::ERRL_TEST_REASON_CODE,
+                                        0x494E464F, //INFO
+                                        0);
+        // Simple test for now to verify correct subsys comes back
+        // for MC target type
+        epubSubSystem_t l_subsys = l_err->getSubSystem(TARGETING::TYPE_MC);
+        if(l_subsys != EPUB_MEMORY_SUBSYS)
+        {
+            TS_FAIL( "Incorrect subsystem type returned for TYPE_MC" );
+        }
+        else
+        {
+            TS_INFO( "Correct subsystem type returned for TYPE_MC!" );
+        }
+        // Delete the log
+        delete l_err;
+        l_err = NULL;
     }
 
 
