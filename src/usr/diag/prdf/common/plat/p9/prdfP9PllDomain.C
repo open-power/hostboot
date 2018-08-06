@@ -305,6 +305,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         serviceData.service_data->GetErrorSignature()->
             setChipId(mfFoList[0]->getHuid());
         serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
+
+        // Make the error log predictive on first occurrence.
+        serviceData.service_data->SetThresholdMaskId(0);
     }
     if (sysRefFoList.size() > 0)
     {
@@ -314,6 +317,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         serviceData.service_data->GetErrorSignature()->
             setChipId(sysRefFoList[0]->getHuid());
         serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
+
+        // Make the error log predictive on first occurrence.
+        serviceData.service_data->SetThresholdMaskId(0);
     }
 
     if (serviceData.service_data->IsAtThreshold())
