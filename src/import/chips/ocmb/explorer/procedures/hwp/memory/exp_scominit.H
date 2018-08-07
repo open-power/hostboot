@@ -22,3 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_scominit.H
+/// @brief SCOM inits for explorer
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 3
+// *HWP Consumed by: FSP:HB
+
+#ifndef __EXP_SCOMINIT__
+#define __EXP_SCOMINIT__
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_scominit_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief Scominit for Explorer
+    /// @param[in] i_target the OCMB target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+}
+
+#endif
