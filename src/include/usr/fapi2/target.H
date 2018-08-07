@@ -886,7 +886,7 @@ inline std::vector<Target<K_CHILD, V> >
                     (K_CHILD != fapi2::TARGET_TYPE_MCS)),
                   "improper child of fapi2::TARGET_TYPE_MCBIST");
 
-    // Cumulus Memory
+    // Cumulus/Axone Memory
     // valid children for MC
     // MC -> MI
     // MC -> MCC
