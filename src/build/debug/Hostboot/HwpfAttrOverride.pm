@@ -709,10 +709,10 @@ sub main
                 $targType = TARGET_TYPE_OCMB;
                 $targ =~ s/^.*ocmb//;
             }
-            elsif ($targ =~ /ocmb.memport/)
+            elsif ($targ =~ /ocmb.mp/)
             {
                 $targType = TARGET_TYPE_MEM_PORT;
-                $targ =~ s/^.*ocmb.memport//;
+                $targ =~ s/^.*ocmb.mp//;
             }
 
             # Figure out the position

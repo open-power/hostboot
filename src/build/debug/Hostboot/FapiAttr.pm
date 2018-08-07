@@ -406,40 +406,40 @@ sub cronusTargetStr()
                  "00000000" => "none",
                  "00000001" => "sys",
                  "00000002" => "dimm",
-                 "00000004" => "p9n",
+                 "00000004" => "pu",
                  "00000008" => "memb",
-                 "00000010" => "p9n.ex",
-                 "00000020" => "cen.mba",
-                 "00000040" => "p9n.mcs",
-                 "00000080" => "p9n.xbus",
-                 "00000100" => "p9n.abus",
-                 "00000200" => "cen.l4",
-                 "00000400" => "p9n.c",
-                 "00000800" => "p9n.eq",
-                 "00001000" => "p9n.mca",
-                 "00002000" => "p9n.mcbist",
-                 "00004000" => "p9n.mi",
-                 "00008000" => "p9n.capp",
-                 "00010000" => "p9n.dmi",
-                 "00020000" => "p9n.obus",
-                 "00040000" => "p9n.nv",
-                 "00080000" => "p9n.sbe",
-                 "00100000" => "p9n.ppe",
-                 "00200000" => "p9n.perv",
-                 "00400000" => "p9n.pec",
-                 "00800000" => "p9n.phb",
-                 "01000000" => "p9n.mc",
-                 "02000000" => "p9n.omi",
-                 "04000000" => "p9n.omic",
-                 "08000000" => "p9n.mcc",
+                 "00000010" => "pu.ex",
+                 "00000020" => "memb.mba",
+                 "00000040" => "pu.mcs",
+                 "00000080" => "pu.xbus",
+                 "00000100" => "pu.abus",
+                 "00000200" => "memb.l4",
+                 "00000400" => "pu.c",
+                 "00000800" => "pu.eq",
+                 "00001000" => "pu.mca",
+                 "00002000" => "pu.mcbist",
+                 "00004000" => "pu.mi",
+                 "00008000" => "pu.capp",
+                 "00010000" => "pu.dmi",
+                 "00020000" => "pu.obus",
+                 "00040000" => "pu.nv",
+                 "00080000" => "pu.sbe",
+                 "00100000" => "pu.ppe",
+                 "00200000" => "pu.perv",
+                 "00400000" => "pu.pec",
+                 "00800000" => "pu.phb",
+                 "01000000" => "pu.mc",
+                 "02000000" => "pu.omi",
+                 "04000000" => "pu.omic",
+                 "08000000" => "pu.mcc",
                  "10000000" => "ocmb"
-                 "20000000" => "ocmb.memport"
+                 "20000000" => "ocmb.mp"
                  );
 
     my $cro_type = $types{$targetType_hexstr};
     my  $cronusTargetStr;
 
-    # System, dimm, p9 and memb have different string
+    # System, dimm, pu and memb have different string
     if($cro_type eq "sys")
     {
         $cronusTargetStr = "target = k0\n";
