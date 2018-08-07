@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,8 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9n2_quad_scom_addresses.H>
+#include <p9n2_quad_scom_addresses_fld.H>
 
 
 
