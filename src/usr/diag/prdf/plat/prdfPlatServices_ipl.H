@@ -145,6 +145,17 @@ uint32_t startTdSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
                         AddrRangeType i_rangeType, VT i_stopCond );
 
 /**
+ * @brief  Resumes TD super fast read after it has paused on error.
+ * @param  i_chip      MBA chip.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename SCT>
+uint32_t resumeTdSfRead( ExtensibleChip * i_chip, AddrRangeType i_rangeType,
+                         SCT i_stopCond );
+
+/**
  * @brief  Starts a steer cleanup scrub command on the target rank.
  * @param  i_chip      MBA chip.
  * @param  i_rank      Target rank.
@@ -155,6 +166,18 @@ uint32_t startTdSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
 template<TARGETING::TYPE TT, typename VT>
 uint32_t startTdSteerCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
                               AddrRangeType i_rangeType, VT i_stopCond );
+
+/**
+ * @brief  Resumes TD steer cleanup after it has paused on error.
+ * @param  i_chip      MBA chip.
+ * @param  i_rangeType See enum AddrRangeType.
+ * @param  i_stopCond  The stop conditions for the targeted scrub.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T, typename SCT>
+uint32_t resumeTdSteerCleanup( ExtensibleChip * i_chip,
+                               AddrRangeType i_rangeType,
+                               SCT i_stopCond );
 
 } // end namespace PlatServices
 

@@ -34,7 +34,6 @@
 // Framework includes
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
-#include <prdfRegisterCache.H>
 
 // Platform includes
 #include <prdfCenMbaDataBundle.H>
@@ -290,83 +289,22 @@ uint32_t __resumeScrub<TYPE_MBA>( ExtensibleChip * i_chip,
 
     do
     {
-        // Manually clear the CE counters based on the error type and clear the
-        // maintenance FIRs. Note that we only want to clear counters that are
-        // at attention to allow the other CE types the opportunity to reach
-        // threshold, if possible.
-        o_rc = conditionallyClearEccCounters<TYPE_MBA>( i_chip );
+        // Increment the address that is currently in hardware. Note that the CE
+        // counters will be conditionally cleared. Also, all of the appropriate
+        // attentions will be cleared as well.
+        MemAddr memSaddr;
+        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "conditionallyClearEccCounters(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "incMaintAddr(0x%08x) failed",
                       i_chip->getHuid() );
             break;
         }
-
-        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Increment the current maintenance address.
-        mss_IncrementAddress incCmd { fapiTrgt };
-        FAPI_INVOKE_HWP( errl, incCmd.setupAndExecuteCmd );
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "mss_IncrementAddress setupAndExecuteCmd() on "
-                      "0x%08x failed", i_chip->getHuid() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL;
-            break;
-        }
-
-        // Clear the maintenance FIRs again. This time do not clear the CE
-        // counters.
-        o_rc = clearEccFirs<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearEccFirs(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        o_rc = clearCmdCompleteAttn<TYPE_MBA>( i_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "clearCmdCompleteAttn(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // The address register has been updated so we need to clear our cache
-        // to ensure we can do a new read.
-        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( "MBMACA" );
-        RegDataCache::getCachedRegisters().flush( i_chip, reg );
-
-        // Read the new start address from hardware.
-        MemAddr addr;
-        o_rc = getMemMaintAddr<TYPE_MBA>( i_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-        fapi2::buffer<uint64_t> saddr = addr.toMaintAddr<TYPE_MBA>();
+        fapi2::buffer<uint64_t> saddr = memSaddr.toMaintAddr<TYPE_MBA>();
 
         // Get the end address of the current rank.
         fapi2::buffer<uint64_t> eaddr, junk;
-        MemRank rank = addr.getRank();
+        MemRank rank = memSaddr.getRank();
         o_rc = getMemAddrRange<TYPE_MBA>( i_chip, rank, junk, eaddr,
                                           i_rangeType );
         if ( SUCCESS != o_rc )
