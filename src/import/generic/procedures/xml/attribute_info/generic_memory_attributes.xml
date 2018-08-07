@@ -23,4 +23,369 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+
+    <attribute>
+        <id>ATTR_MEM_FREQ</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+             Frequency of this memory channel in MT/s (Mega Transfers per second)
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint64</valueType>
+        <writeable/>
+        <mssAccessorName>freq</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DIMM_TYPE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Base Module Type.
+            Decodes SPD Byte 3 (bits 3~0).
+            Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDEC standard.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dimm_type</mssAccessorName>
+        <array>2</array>
+        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_CL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+              CAS Latency.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_cl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_CWL</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+              CAS Write Latency.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_cwl</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TCCD_L</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum CAS to CAS Delay Time, same bank group
+            in nck (number of clock cycles).
+            Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
+            This is for DDR4 MRS6.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_tccd_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TFAW</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Four Activate Window Delay Time
+            in nck (number of clock cycles).
+            Decodes SPD byte 36 (bits 3~0) and byte 37 (bits 7~0).
+            For 3DS, tFAW time to the same logical rank is defined as
+            tFAW_slr_x4 or tFAW_slr_x8 (for x4 and x8 devices only) and
+            specificed as the value as for a monolithic DDR4 SDRAM
+            equivalent density.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_tfaw</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRAS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Active to Precharge Delay Time
+            in nck (number of clock cycles).
+            Decodes SPD byte 27 (bits 3~0) and byte 28 (7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_tras</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRCD</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum RAS to CAS Delay Time
+            in nck (number of clock cyles).
+            Decodes SPD byte 25 (7~0) and byte 112 (7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trcd</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TREFI</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Average Refresh Interval (tREFI)
+            in nck (number of clock cycles).
+            This depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+            From DDR4 spec (79-4A).
+            For 3DS, the tREFI time to the same logical rank is defined as
+            tREFI_slr1, tREFI_slr2, or tREFI_slr4.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trefi</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRFC</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DDR4 Spec defined as Refresh Cycle Time (tRFC).
+            SPD Spec refers it to the Minimum Refresh Recovery Delay Time.
+            In nck (number of clock cyles).
+            Decodes SPD byte 31 (bits 15~8) and byte 30 (bits 7~0) for tRFC1.
+            Decodes SPD byte 33 (bits 15~8) and byte 32 (bits 7~0) for tRFC2.
+            Decodes SPD byte 35 (bits 15~8) and byte 34 (bits 7~0) for tRFC4.
+            Selected tRFC value depends on MRW attribute that selects refresh mode.
+            For 3DS, The tRFC time to the same logical rank is defined as tRFC_slr and is
+            specificed as the value as for a monolithic DDR4 SDRAM of equivalent density.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trfc</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRFC_DLR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Refresh Recovery Delay Time (different logical ranks)
+            in nck (number of clock cyles).
+            Selected tRFC value (tRFC_dlr1, tRFC_dlr2, or tRFC_dlr4)
+            depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+            For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trfc_dlr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRP</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            SDRAM Row Precharge Delay Time
+            in nck (number of clock cycles).
+            Decodes SPD byte 26 (bits 7~0) and byte 121 (bits 7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trp</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRRD_L</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Activate to Activate Delay Time, same bank group
+            in nck (number of clock cycles).
+            Decodes SPD byte 39 (bits 7~0).
+            For 3DS, The tRRD_L time to the same bank group in the
+            same logical rank is defined as tRRD_L_slr and is
+            specificed as the value as for a monolithic
+            DDR4 SDRAM of equivalent density.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trrd_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRRD_S</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Activate to Activate Delay Time, different bank group
+            in nck (number of clock cycles).
+            Decodes SPD byte 38 (bits 7~0).
+            For 3DS, The tRRD_S time to a different bank group in the
+            same logical rank is defined as tRRD_slr and is
+            specificed as the value as for a monolithic
+            DDR4 SDRAM of equivalent density.
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trrd_s</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TRTP</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Internal Read to Precharge Delay.
+            From the DDR4 spec (79-4A).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_trtp</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TWR</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+              Minimum Write Recovery Time.
+              Decodes SPD byte 41 (bits 3~0) and byte 42 (bits 7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_twr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TWTR_L</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Write to Read Time, same bank group
+            in nck (number of clock cycles).
+            Decodes byte 43 (7~4) and byte 45 (bits 7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_twtr_l</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DRAM_TWTR_S</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Minimum Write to Read Time, different bank group
+            in nck (number of clock cycles).
+            Decodes SPD byte 43 (3~0) and byte 44 (bits 7~0).
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_dram_twtr_s</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Specifies the number of master ranks per DIMM.
+            Represents the number of physical ranks on a DIMM.
+            From SPD spec JEDEC Standard No. 21-C: Page 4.1.2.L-4.
+            Byte 12 (Bits 5~3) Number of package ranks per DIMM.
+            Package ranks per DIMM refers to the collections of devices
+            on the module sharing common chip select signals.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_num_master_ranks_per_dimm</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_NUM_RANKS_PER_DIMM</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Total number of ranks in each DIMM.
+            For monolithic and multi-load stack modules (SDP/DDP) this is the same as
+            the number of package ranks per DIMM (SPD Byte 12 bits 5~3).
+            For single load stack (3DS) modules this value represents the number
+            of logical ranks per DIMM.
+            Logical rank refers the individually addressable die in a 3DS stack
+            and has no meaning for monolithic or multi-load stacked SDRAMs.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_RDIMM_BUFFER_DELAY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Delay due to the presence of a buffer, in number of clocks
+        </description>
+        <mssUnits> nck </mssUnits>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>dimm_buffer_delay</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_REORDER_QUEUE_SETTING</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Contains the settings for write/read reorder queue
+        </description>
+        <enum>REORDER = 0, FIFO = 1</enum>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>reorder_queue_setting</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_2N_MODE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Default value for 2N Mode from Signal Integrity.
+            0x0 = Invalid Mode, 0x01 = 1N Mode , 0x02 = 2N Mode
+            If value is set to 0x0 this indicate value was never
+            initialized correctly.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>mem_2n_mode</mssAccessorName>
+    </attribute>
+
 </attributes>
