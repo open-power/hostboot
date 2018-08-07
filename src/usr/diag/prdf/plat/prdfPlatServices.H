@@ -186,6 +186,15 @@ template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
                        AddrRangeType i_rangeType, SCT i_stopCond );
 
+/**
+ * @brief  Increment the current maintenance address.
+ * @param  i_chip      MBA chip.
+ * @param  o_newAddr   The new address from the maintenance address register.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t incMaintAddr( ExtensibleChip * i_chip, MemAddr & o_newAddr );
+
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################

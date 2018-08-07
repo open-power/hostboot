@@ -558,6 +558,83 @@ uint32_t startTdSfRead<TYPE_MBA>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t resumeTdSfRead<TYPE_MBA>( ExtensibleChip * i_chip,
+                                   AddrRangeType i_rangeType,
+                                   uint32_t i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdSfRead<TYPE_MBA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Make sure there is a command complete attention when the command stops.
+    i_stopCond |= mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Make sure the command stops on the end address if there are no errors.
+    i_stopCond |= mss_MaintCmd::STOP_ON_END_ADDRESS;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        // Increment the address that is currently in hardware. Note that the CE
+        // counters will be conditionally cleared. Also, all of the appropriate
+        // attentions will be cleared as well.
+        MemAddr memSaddr;
+        o_rc = incMaintAddr<TYPE_MBA>( i_chip, memSaddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "incMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+        fapi2::buffer<uint64_t> saddr = memSaddr.toMaintAddr<TYPE_MBA>();
+
+        // Get the address range of the given rank.
+        fapi2::buffer<uint64_t> junk, eaddr;
+        MemRank rank = memSaddr.getRank();
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, rank, junk, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // Create the new command. Store a pointer to the command in the MBA
+        // data bundle so that we can call the cleanup function after the
+        // command has completed.
+        MbaDataBundle * db = getMbaDataBundle( i_chip );
+        PRDF_ASSERT( nullptr == db->iv_sfCmd ); // Code bug.
+        db->iv_sfCmd = new mss_SuperFastRead { fapiTrgt, saddr, eaddr,
+                                               i_stopCond, false };
+
+        // Start the super fast read command.
+        FAPI_INVOKE_HWP( errl, db->iv_sfCmd->setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t startTdSteerCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank,
                                         AddrRangeType i_rangeType,
@@ -616,7 +693,7 @@ uint32_t startTdSteerCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
         // Get the MBA fapi target.
         fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
 
-        // Start the background scrub command.
+        // Start the steer cleanup command.
         mss_TimeBaseSteerCleanup cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
                                        i_stopCond, false };
         errlHndl_t errl = nullptr;
@@ -625,6 +702,90 @@ uint32_t startTdSteerCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
         {
             PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
                       i_chip->getHuid(), i_rank.getKey() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t resumeTdSteerCleanup<TYPE_MBA>( ExtensibleChip * i_chip,
+                                         AddrRangeType i_rangeType,
+                                         uint32_t i_stopCond )
+{
+    #define PRDF_FUNC "[PlatServices::startTdSteerCleanup<TYPE_MBA>] "
+
+    PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    // Make sure there is a command complete attention when the command stops.
+    i_stopCond |= mss_MaintCmd::ENABLE_CMD_COMPLETE_ATTENTION;
+
+    // Make sure the command stops on the end address if there are no errors.
+    i_stopCond |= mss_MaintCmd::STOP_ON_END_ADDRESS;
+
+    // Default speed is to run as fast as possible.
+    mss_MaintCmd::TimeBaseSpeed cmdSpeed = mss_MaintCmd::FAST_MAX_BW_IMPACT;
+
+    // IUEs (reported via RCE ETE) are reported as UEs during read operations.
+    // Therefore, we will treat IUEs like UEs for scrub operations simply to
+    // maintain consistency during all of Memory Diagnostics. Note that since we
+    // set the stop on RCE ETE flag, this requires a threshold in the MBSTR.
+    // Fortunately, MDIA sets the threshold to 1 when it starts the first
+    // command on this MBA and that threshold should never change throughout all
+    // of Memory Diagnostics.
+
+    i_stopCond |= mss_MaintCmd::STOP_ON_RETRY_CE_ETE;
+
+    fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt ( i_chip->getTrgt() );
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        // Increment the address that is currently in hardware. Note that the CE
+        // counters will be conditionally cleared. Also, all of the appropriate
+        // attentions will be cleared as well.
+        MemAddr newAddr;
+        o_rc = incMaintAddr<TYPE_MBA>( i_chip, newAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "incMaintAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+        fapi2::buffer<uint64_t> saddr = newAddr.toMaintAddr<TYPE_MBA>();
+
+        // Get the address range of the given rank.
+        fapi2::buffer<uint64_t> junk, eaddr;
+        MemRank rank = newAddr.getRank();
+        o_rc = getMemAddrRange<TYPE_MBA>( i_chip, rank, junk, eaddr,
+                                          i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                      i_chip->getHuid(), rank.getKey() );
+            break;
+        }
+
+        // Start the steer cleanup command.
+        mss_TimeBaseSteerCleanup cmd { fapiTrgt, saddr, eaddr, cmdSpeed,
+                                       i_stopCond, false };
+        FAPI_INVOKE_HWP( errl, cmd.setupAndExecuteCmd );
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() on 0x%08x,0x%02x failed",
+                      i_chip->getHuid(), rank.getKey() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
