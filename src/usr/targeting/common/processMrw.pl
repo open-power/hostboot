@@ -509,6 +509,7 @@ sub processIpmiSensors {
         $huid=$targetObj->getAttribute($target,"HUID");
     }
     my @sensors;
+    my %sensorIdsCnt;
 
     foreach my $child (@{$targetObj->getTargetChildren($target)})
     {
@@ -549,6 +550,16 @@ sub processIpmiSensors {
                 $sensor_name,$name,oct($entity_id),oct($sensor_type),
                 oct($sensor_evt), $sensor_id_str,$instance,$fru_id,
                 $huid,$target);
+
+            # Check that the sensor id hasn't already been used.  Don't check
+            # blank sensor ids.
+            if (($sensor_id ne "") && (++$sensorIdsCnt{$sensor_id} >= 2)) {
+                print "ERROR: Duplicate IPMI_SENSOR_ID ($sensor_id_str)" .
+                      " found in MRW.  Sensor name is $sensor_name.\n";
+                print "$str";
+                $targetObj->myExit(3);
+            }
+
             $targetObj->writeReport($str);
 
             if ($name =~ /^GPU\d$/)
