@@ -546,7 +546,7 @@ fapi2::ReturnCode p9_fab_iovalid_lane_validate(
         FAPI_DBG("Non zero lane fail/not locked count: %d %d",
                  l_lane_failed_count, l_lane_not_locked_count);
 
-        if ((l_lane_failed_count == 1) && (l_lane_not_locked_count == 1))
+        if ((l_lane_failed_count <= 1) && (l_lane_not_locked_count <= 1))
         {
             if (i_even_not_odd)
             {
@@ -649,8 +649,10 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
 
             if (!l_dl_trained)
             {
-                l_dl_fail_even = !((l_dl_status_even == 0x8) && ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE)));
-                l_dl_fail_odd  = !((l_dl_status_odd  == 0x8) && ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE)));
+                l_dl_fail_even = !(((l_dl_status_even == 0x8) && ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE))) ||
+                                   ((l_dl_status_even == 0x2) && ((l_dl_status_odd  >= 0x8) && (l_dl_status_odd  <= 0x9))));
+                l_dl_fail_odd  = !(((l_dl_status_odd  == 0x8) && ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE))) ||
+                                   ((l_dl_status_odd  == 0x2) && ((l_dl_status_even >= 0x8) && (l_dl_status_even <= 0x9))));
             }
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
@@ -683,7 +685,7 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     // spare has been consumed (MFG may choose to fail based on this criteria)
     //
     // if more than one spare is detected, mark the link as failed
-    if (T == fapi2::TARGET_TYPE_OBUS)
+    if (l_dl_trained && (T == fapi2::TARGET_TYPE_OBUS))
     {
         bool l_dl_fail_by_lane_status = false;
         FAPI_DBG("OBUS - Checking for DL lane failures");
@@ -732,11 +734,14 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
                  l_dl_fail_even,
                  l_dl_fail_odd);
 
+        // retrain on half link, only if:
+        // - tried to train in full width mdoe
+        // - exactly one half reported good & one half reported bad
         if ((l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH) &&
-            ((l_dl_fail_even != true) || (l_dl_fail_odd != true)) &&
-            (T == fapi2::TARGET_TYPE_OBUS))
+            (T == fapi2::TARGET_TYPE_OBUS) &&
+            ((l_dl_fail_even && !l_dl_fail_odd) ||
+             (!l_dl_fail_even && l_dl_fail_odd)))
         {
-            // setup to retrain half link only
             l_loc_link_train_next = (l_dl_fail_even) ?
                                     (fapi2::ENUM_ATTR_LINK_TRAIN_ODD_ONLY) :
                                     (fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY);
@@ -744,6 +749,10 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
             FAPI_DBG("Setting up to retrain with ATTR_LINK_TRAIN: 0x%x",
                      l_loc_link_train_next);
         }
+        // otherwise, no retraining will be attempted:
+        // - tried to train only half-width, and were not successful
+        // - tried to train full-width, and both links were detected
+        //   to be failed (or passed, should only result from code issue)
         else
         {
             l_loc_link_train_next = fapi2::ENUM_ATTR_LINK_TRAIN_NONE;
