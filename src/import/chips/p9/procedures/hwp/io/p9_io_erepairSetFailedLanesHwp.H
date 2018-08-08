@@ -207,7 +207,6 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                                l_chipTarget,
                                l_chipPosition));
 
-
         // This is needed because we can only store and compare a uint8_t
         // value. For our purpose the value in l_chipPosition (Proc Position and
         // Centaur Position) will always be within the range of uint8_t
@@ -485,14 +484,15 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
             }
         };
 
-        l_vpdDataPtr  = l_vpdPtr;
-        l_repairCnt   = 0;
-
         // Pick each faillane for copying into buffer
         for(l_it  = i_failLanes.begin();
             l_it != i_failLanes.end();
-            l_it++, (l_vpdDataPtr += l_repairDataSz))
+            l_it++)
         {
+            // Get vpd starting data pointer
+            l_vpdDataPtr  = l_vpdPtr;
+            l_repairCnt   = 0;
+
             l_repairLane  = *l_it;
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
@@ -553,10 +553,7 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                                 FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                             }
 
-                            // Increment the count of parsed bytes
-                            l_bytesParsed += l_repairDataSz;
-
-                            l_repairCnt++;
+                            // Matching record found
                             l_overWrite = true;
 
                             // Get the record updated
@@ -572,12 +569,22 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                     }
                 } // end of for(l_loop < 14)
 
+                // Increment the count of parsed bytes
+                l_bytesParsed += l_repairDataSz;
+
                 if(l_overWrite == true)
                 {
-                    // Go for the next repairLane
+                    // break out of loop to go to next repairLane
                     break;
                 }
+
             } // end of for(vpd Parsing)
+
+            if(l_overWrite == true)
+            {
+                // Go for the next repairLane
+                continue;
+            }
 
             // Check if we have parsed more bytes than the passed size
             if((l_vpdWritePtr == NULL)       &&
@@ -643,6 +650,8 @@ fapi2::ReturnCode updateRepairLanesToBufProc(
                              l_fabricBus->device.fabricBus, l_fabricBus->type, l_fabricBus->interface, i_interface);
 
                     {
+                        // For adding 'new' record, default value of failBit field should be zero
+                        l_fabricBus->failBit = 0;
                         uint32_t temp = (uint32_t)(l_fabricBus->failBit);
                         uint32_t* tptr = &temp;
                         FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_fabricBus->failBit, temp);
@@ -716,6 +725,7 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
     const uint32_t             i_bufSz,
     const uint8_t              i_clkGroup,
     const std::vector<uint8_t>& i_failLanes,
+    const uint8_t              i_dimm,
     uint8_t*                    o_buf)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -728,8 +738,6 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
     uint8_t*          l_vpdPtr              = NULL;
     uint8_t*          l_vpdDataPtr          = NULL;
     uint8_t*          l_vpdWritePtr         = NULL;
-    eRepairHeader*    l_vpdHeadPtr          = NULL;
-    eRepairPowerBus*  l_overWritePtr        = NULL;
     bool             l_overWrite            = false;
     uint8_t          l_chipNum              = 0;
     uint32_t         l_chipPosition         = 0;
@@ -745,8 +753,16 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
         FAPI_INF("(%lu):%llu ", i, i_failLanes[i]);
     }
 
+    FAPI_INF("Dimm:(%d)%s ", i_dimm,
+             (i_dimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO ? "CEN_SPD_CUSTOM_NO" : "CEN_SPD_CUSTOM_YES"));
+
+    // For Memory riser based centaur
+    if(i_dimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO)
     {
-        l_repairDataSz = sizeof(eRepairPowerBus); // Size of memory Bus and
+        eRepairHeader*    l_vpdHeadPtr          = NULL;
+        eRepairMemBus*    l_overWritePtr        = NULL;
+
+        l_repairDataSz = sizeof(eRepairMemBus); // Size of memory Bus and
         // fabric Bus eRepair data
         // is same.
         // Read the header and count information
@@ -761,306 +777,33 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
         // Get a pointer to the start of repair data
         l_vpdPtr += sizeof(eRepairHeader);
 
-        {
-            l_dmiTarget = i_target.template getParent<fapi2::TARGET_TYPE_DMI>();
+        // Get DMI parent target
+        l_dmiTarget = i_target.template getParent<fapi2::TARGET_TYPE_DMI>();
 
-            // Get the bus number
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                                   l_dmiTarget,
-                                   l_busNum));
-        }
+        // Get the bus number
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_dmiTarget,
+                               l_busNum));
 
         // Get the chip number
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POS,
                                i_target,
                                l_chipPosition));
 
-
         // This is needed because we can only store and compare a uint8_t
         // value. For our purpose the value in l_chipPosition (Proc Position and
         // Centaur Position) will always be within the range of uint8_t
         l_chipNum = l_chipPosition;
 
-        /*** Lets update the fail lane vector to the Buffer ***/
-        // Create a structure of eRepair data that we will be matching
-        // in the buffer.
-        struct erepairDataMatch
-        {
-            EREPAIR::interfaceType  intType;
-            fapi2::TargetType       tgtType;
-            union repairData
-            {
-                eRepairPowerBus fabBus;
-                eRepairMemBus   memBus;
-            } bus;
-        };
-
-        // Create an array of the above match structure to have all the
-        // combinations of Fabric and Memory repair data
-        erepairDataMatch l_repairMatch[14] =
-        {
-            {
-                // index 0 - X0A (clock group 0)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 1 - X0A (clock group 0)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 2 - X0A (clock group 1)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 3 - X0A (clock group 1)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 4 - X1A (clock group 0)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 5 - X1A (clock group 0)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 6 - X1A (clock group 1)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 7 - X1A (clock group 1)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 8
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_OBUS,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_OPT, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 9
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_OBUS,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_OPT, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 10
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_DMI,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,  // type
-                        EREPAIR::DMI_MCS_DRIVE,// interface
-                    },
-                },
-            },
-            {
-                // index 11
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_MEMBUF_CHIP,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,     // type
-                        EREPAIR::DMI_MEMBUF_DRIVE,// interface
-                    },
-                },
-            },
-            {
-                // index 12
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_DMI,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,     // type
-                        EREPAIR::DMI_MCS_RECEIVE, // interface
-                    },
-                },
-            },
-            {
-                // index 13
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_MEMBUF_CHIP,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,        // type
-                        EREPAIR::DMI_MEMBUF_RECEIVE, // interface
-                    },
-                },
-            }
-        };
-
-        l_vpdDataPtr  = l_vpdPtr;
-        l_repairCnt   = 0;
-
         // Pick each faillane for copying into buffer
         for(l_it  = i_failLanes.begin();
             l_it != i_failLanes.end();
-            l_it++, (l_vpdDataPtr += l_repairDataSz))
+            l_it++)
         {
+            // Get vpd starting data pointer
+            l_vpdDataPtr  = l_vpdPtr;
+            l_repairCnt   = 0;
+
             l_repairLane  = *l_it;
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
@@ -1073,73 +816,59 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                 l_repairCnt++, (l_vpdDataPtr += l_repairDataSz))
             {
                 l_overWritePtr =
-                    reinterpret_cast<eRepairPowerBus*> (l_vpdDataPtr);
+                    reinterpret_cast<eRepairMemBus*> (l_vpdDataPtr);
 
                 FAPI_DBG("repairLaneCnt-2:repariCnt:%d numRepair:%d byteparsed:%d bufSize:%d ", l_repairCnt, l_numRepairs,
                          l_bytesParsed,
                          i_bufSz);
 
-                // Lets find the matching fabric
-                for(uint8_t l_loop = 0; l_loop < 14; l_loop++)
+                if( (l_overWritePtr->device.proc_centaur_id == l_chipNum) &&
+                    (l_overWritePtr->device.memChannel      == l_busNum ) &&
+                    (l_overWritePtr->type                   == EREPAIR::MEMORY_EDIP) &&
+                    (((i_interface == EREPAIR::DRIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_DRIVE)) ||
+                     ((i_interface == EREPAIR::RECEIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_RECEIVE))) )
                 {
-                    FAPI_DBG("repairLaneCnt-3:cnt:%d ", l_loop);
+                    FAPI_INF("repairLaneCnt-3:Found match: Dev id:%d type:%d IF:%d  Bus:%d ", l_overWritePtr->device.proc_centaur_id,
+                             l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.memChannel);
 
+                    // update the failBit number
+                    uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
+                    uint32_t* tptr = &temp;
+                    FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+                    FAPI_TRY( gatherRepairLanes(
+                                  i_target,
+                                  l_overWritePtr->interface,
+                                  l_repairLane,
+                                  tptr),
+                              "gatherRepairLanes() failed w/rc=0x%x",
+                              static_cast<uint64_t>(fapi2::current_err) );
+                    l_overWritePtr->failBit = temp;
+                    FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+
+                    // Matching record found
+                    l_overWrite = true;
+
+                    // Get the record updated
+                    FAPI_INF("Record updated: ");
+
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
                     {
-                        if((i_interface == l_repairMatch[l_loop].intType)    &&
-                           (i_target.getType()   == l_repairMatch[l_loop].tgtType)    &&
-                           ((l_overWritePtr->device).processor_id ==
-                            l_repairMatch[l_loop].bus.memBus.device.proc_centaur_id) &&
-                           (l_overWritePtr->type ==
-                            l_repairMatch[l_loop].bus.memBus.type)       &&
-                           (l_overWritePtr->interface ==
-                            l_repairMatch[l_loop].bus.memBus.interface)  &&
-                           (l_overWritePtr->device.fabricBus ==
-                            l_repairMatch[l_loop].bus.memBus.device.memChannel))
-                        {
-                            FAPI_INF("repairLaneCnt-4:Found match: Dev id:%d type:%d IF:%d  Bus:%d ", (l_overWritePtr->device).processor_id,
-                                     l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.fabricBus);
-
-                            // update the failBit number
-                            {
-                                uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
-                                uint32_t* tptr = &temp;
-                                FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
-                                FAPI_TRY( gatherRepairLanes(
-                                              i_target,
-                                              l_overWritePtr->interface,
-                                              l_repairLane,
-                                              tptr),
-                                          "gatherRepairLanes() failed w/rc=0x%x",
-                                          static_cast<uint64_t>(fapi2::current_err) );
-                                l_overWritePtr->failBit = temp;
-                                FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
-                            }
-
-                            // Increment the count of parsed bytes
-                            l_bytesParsed += l_repairDataSz;
-
-                            l_repairCnt++;
-                            l_overWrite = true;
-
-                            // Get the record updated
-                            FAPI_INF("Record updated: ");
-
-                            for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
-                            {
-                                FAPI_INF("%02x ", *(l_vpdDataPtr + i));
-                            }
-
-                            break;
-                        }
+                        FAPI_INF("%02x ", *(l_vpdDataPtr + i));
                     }
-                } // end of for(l_loop < 14)
 
-                if(l_overWrite == true)
-                {
-                    // Go for the next repairLane
                     break;
-                }
+                } // end of record check
+
+                // Increment the count of parsed bytes
+                l_bytesParsed += l_repairDataSz;
+
             } // end of for(vpd Parsing)
+
+            if(l_overWrite == true)
+            {
+                // Go for the next repairLane
+                continue;
+            }
 
             // Check if we have parsed more bytes than the passed size
             if((l_vpdWritePtr == NULL)       &&
@@ -1210,20 +939,20 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                     FAPI_INF("Memory Bus(before update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d ", l_memBus->device.proc_centaur_id,
                              l_memBus->device.memChannel, l_memBus->type, l_memBus->interface, i_interface);
 
-                    {
-                        uint32_t temp = (uint32_t)(l_memBus->failBit);
-                        uint32_t* tptr = &temp;
-                        FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
-                        FAPI_TRY( gatherRepairLanes(
-                                      i_target,
-                                      l_memBus->interface,
-                                      l_repairLane,
-                                      tptr),
-                                  "gatherRepairLanes() failed w/rc=0x%x",
-                                  static_cast<uint64_t>(fapi2::current_err) );
-                        l_memBus->failBit = temp;
-                        FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
-                    }
+                    // For adding 'new' record, default value of failBit field should be zero
+                    l_memBus->failBit = 0;
+                    uint32_t temp = (uint32_t)(l_memBus->failBit);
+                    uint32_t* tptr = &temp;
+                    FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
+                    FAPI_TRY( gatherRepairLanes(
+                                  i_target,
+                                  l_memBus->interface,
+                                  l_repairLane,
+                                  tptr),
+                              "gatherRepairLanes() failed w/rc=0x%x",
+                              static_cast<uint64_t>(fapi2::current_err) );
+                    l_memBus->failBit = temp;
+                    FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
 
                     FAPI_INF("Memory Bus(after update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d FailBit:0x%x ",
                              l_memBus->device.proc_centaur_id,
@@ -1251,11 +980,207 @@ fapi2::ReturnCode updateRepairLanesToBufMemBuf(
                 }
             } // end of if(l_overWrite == false)
         } // end of for(failLanes)
-    }
 
-    // Update the eRepair count
-    l_vpdHeadPtr->availNumRecord = l_newNumRepairs;
-    FAPI_INF("Result:NumRec:%d ", l_vpdHeadPtr->availNumRecord);
+        // Update the eRepair count
+        l_vpdHeadPtr->availNumRecord = l_newNumRepairs;
+        FAPI_INF("Result:NumRec:%d ", l_vpdHeadPtr->availNumRecord);
+    }
+    else    // For CDIMM
+    {
+        eRepairHeader_cdimm*    l_vpdHeadPtr          = NULL;
+        eRepairMemBus_cdimm*    l_overWritePtr        = NULL;
+
+        l_repairDataSz = sizeof(eRepairMemBus_cdimm);
+        // is same.
+        // Read the header and count information
+        l_vpdPtr = o_buf; // point to the start of header data
+        l_vpdHeadPtr = reinterpret_cast<eRepairHeader_cdimm*> (l_vpdPtr);
+
+        l_numRepairs = l_newNumRepairs = l_vpdHeadPtr->numRecords;
+
+        // We've read the header data, increment bytes parsed
+        l_bytesParsed = sizeof(eRepairHeader_cdimm);
+
+        // Get a pointer to the start of repair data
+        l_vpdPtr += sizeof(eRepairHeader_cdimm);
+
+        // Get DMI parent target
+        l_dmiTarget = i_target.template getParent<fapi2::TARGET_TYPE_DMI>();
+
+        // Get the bus number
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_dmiTarget,
+                               l_busNum));
+
+        // Get the chip number
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POS,
+                               i_target,
+                               l_chipPosition));
+
+        // This is needed because we can only store and compare a uint8_t
+        // value. For our purpose the value in l_chipPosition (Proc Position and
+        // Centaur Position) will always be within the range of uint8_t
+        l_chipNum = l_chipPosition;
+
+        // Pick each faillane for copying into buffer
+        for(l_it  = i_failLanes.begin();
+            l_it != i_failLanes.end();
+            l_it++)
+        {
+            // Get vpd starting data pointer
+            l_vpdDataPtr  = l_vpdPtr;
+            l_repairCnt   = 0;
+
+            l_repairLane  = *l_it;
+            l_overWrite   = false;
+            l_vpdWritePtr = NULL;
+
+            FAPI_INF("repairLaneCnt-1:it:%d ", l_repairLane);
+
+            // Parse the VPD for fabric and memory eRepair records
+            for(;
+                (l_repairCnt < l_numRepairs) && (l_bytesParsed <= i_bufSz);
+                l_repairCnt++, (l_vpdDataPtr += l_repairDataSz))
+            {
+                l_overWritePtr =
+                    reinterpret_cast<eRepairMemBus_cdimm*> (l_vpdDataPtr);
+
+                FAPI_DBG("repairLaneCnt-2:erepairCnt:%d numRepair:%d byteparsed:%d bufSize:%d ", l_repairCnt, l_numRepairs,
+                         l_bytesParsed,
+                         i_bufSz);
+
+                if( (l_overWritePtr->device.proc_centaur_id == l_chipNum) &&
+                    (l_overWritePtr->device.memChannel      == l_busNum ) &&
+                    (l_overWritePtr->type                   == EREPAIR::MEMORY_EDIP) &&
+                    (l_overWritePtr->failBit                == l_repairLane) &&
+                    (((i_interface == EREPAIR::DRIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_DRIVE)) ||
+                     ((i_interface == EREPAIR::RECEIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MEMBUF_RECEIVE))) )
+                {
+                    FAPI_INF("repairLaneCnt-3:Found match: Dev id:%d type:%d IF:%d  Bus:%d FailBit:%d ",
+                             l_overWritePtr->device.proc_centaur_id,
+                             l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.memChannel, l_overWritePtr->failBit);
+
+                    // Matching record exist so no action taken; goto next record
+                    // Note: To be consistent & avoid too may variables to track
+                    // the name l_overWrite is retained but it doesn't mean lane
+                    // got overwritten
+                    l_overWrite = true;
+                    break;
+                }
+
+                // Increment the count of parsed bytes
+                l_bytesParsed += l_repairDataSz;
+
+            } // end of for(vpd Parsing)
+
+            if(l_overWrite == true)
+            {
+                // Go for the next repairLane
+                continue;
+            }
+
+            // Check if we have parsed more bytes than the passed size
+            if((l_vpdWritePtr == NULL)       &&
+               (l_bytesParsed > i_bufSz)     &&
+               (l_repairCnt < l_numRepairs))
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
+                            .set_VAL_BYTE_PARSED(l_bytesParsed)
+                            .set_VAL_BUF_SIZE(i_bufSz)
+                            .set_VAL_REPAIR_CNT(l_repairCnt)
+                            .set_VAL_OVERWRITE_FLAG(l_overWrite)
+                            .set_VAL_NUM_REPAIR(l_numRepairs),
+                            "ERROR-1: from updateRepairLanesToBuf(MemBuf) - MVPD full");
+            }
+
+            // Add at the end
+            if(l_overWrite == false)
+            {
+                if(l_vpdWritePtr == NULL)
+                {
+                    // We are writing at the end
+                    l_vpdWritePtr = l_vpdDataPtr;
+                }
+
+                {
+                    // Make sure we are not writing more records than the size
+                    // allocated in the VPD
+                    FAPI_ASSERT(l_bytesParsed <= i_bufSz,
+                                fapi2::P9_EREPAIR_MBVPD_FULL_ERR()
+                                .set_VAL_BYTE_PARSED(l_bytesParsed)
+                                .set_VAL_BUF_SIZE(i_bufSz)
+                                .set_VAL_REPAIR_CNT(l_repairCnt)
+                                .set_VAL_OVERWRITE_FLAG(l_overWrite)
+                                .set_VAL_NUM_REPAIR(l_numRepairs),
+                                "ERROR-2: from updateRepairLanesToBuf(MemBuf) - MBVPD full");
+
+                    eRepairMemBus_cdimm* l_memBus =
+                        reinterpret_cast<eRepairMemBus_cdimm*>(l_vpdWritePtr);
+
+                    l_memBus->device.proc_centaur_id = l_chipNum;
+                    l_memBus->device.memChannel      = l_busNum;
+                    l_memBus->type                   = EREPAIR::MEMORY_EDIP;
+
+                    if(i_interface == EREPAIR::DRIVE)
+                    {
+                        if(i_target.getType() == fapi2::TARGET_TYPE_DMI)
+                        {
+                            l_memBus->interface = EREPAIR::DMI_MCS_DRIVE;
+                        }
+                        else if(i_target.getType() == fapi2::TARGET_TYPE_MEMBUF_CHIP)
+                        {
+                            l_memBus->interface = EREPAIR::DMI_MEMBUF_DRIVE;
+                        }
+                    }
+                    else if(i_interface == EREPAIR::RECEIVE)
+                    {
+                        if(i_target.getType() == fapi2::TARGET_TYPE_DMI)
+                        {
+                            l_memBus->interface = EREPAIR::DMI_MCS_RECEIVE;
+                        }
+                        else if(i_target.getType() == fapi2::TARGET_TYPE_MEMBUF_CHIP)
+                        {
+                            l_memBus->interface = EREPAIR::DMI_MEMBUF_RECEIVE;
+                        }
+                    }
+
+                    FAPI_INF("Memory Bus(before update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d ", l_memBus->device.proc_centaur_id,
+                             l_memBus->device.memChannel, l_memBus->type, l_memBus->interface, i_interface);
+
+                    l_memBus->failBit = l_repairLane;
+
+                    FAPI_INF("Memory Bus(after update):Dev:%d Bus:%d Type:%d MemIF:%d IF:%d FailBit:0x%x ",
+                             l_memBus->device.proc_centaur_id,
+                             l_memBus->device.memChannel, l_memBus->type, l_memBus->interface, i_interface, l_memBus->failBit);
+
+                    // Get the record added
+                    FAPI_INF("Record added: ");
+
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
+                    {
+                        FAPI_INF("%02x ", *(l_vpdDataPtr + i));
+                    }
+
+                    l_newNumRepairs++;
+
+                    // Increment the count of parsed bytes
+                    l_bytesParsed += l_repairDataSz;
+#ifndef _BIG_ENDIAN
+                    // We are on a Little Endian system.
+                    // Need to swap the nibbles of structure - eRepairMemBus
+
+                    l_vpdWritePtr[2] = ((l_vpdWritePtr[2] >> 4) |
+                                        (l_vpdWritePtr[2] << 4));
+#endif
+                }
+            } // end of if(l_overWrite == false)
+        } // end of for(failLanes)
+
+        // Update the eRepair count
+        l_vpdHeadPtr->numRecords = l_newNumRepairs;
+        FAPI_INF("Result:NumRec:%d ", l_vpdHeadPtr->numRecords);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1297,7 +1222,7 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
     uint8_t*          l_vpdDataPtr          = NULL;
     uint8_t*          l_vpdWritePtr         = NULL;
     eRepairHeader*    l_vpdHeadPtr          = NULL;
-    eRepairPowerBus*  l_overWritePtr        = NULL;
+    eRepairMemBus*   l_overWritePtr         = NULL;
     bool             l_overWrite            = false;
     uint8_t          l_chipNum              = 0;
     uint32_t         l_chipPosition         = 0;
@@ -1314,7 +1239,7 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
     }
 
     {
-        l_repairDataSz = sizeof(eRepairPowerBus); // Size of memory Bus and
+        l_repairDataSz = sizeof(eRepairMemBus); // Size of memory Bus and
         // fabric Bus eRepair data
         // is same.
         // Read the header and count information
@@ -1343,292 +1268,20 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                                l_chipTarget,
                                l_chipPosition));
 
-
         // This is needed because we can only store and compare a uint8_t
         // value. For our purpose the value in l_chipPosition (Proc Position and
         // Centaur Position) will always be within the range of uint8_t
         l_chipNum = l_chipPosition;
 
-        /*** Lets update the fail lane vector to the Buffer ***/
-        // Create a structure of eRepair data that we will be matching
-        // in the buffer.
-        struct erepairDataMatch
-        {
-            EREPAIR::interfaceType   intType;
-            fapi2::TargetType        tgtType;
-            union repairData
-            {
-                eRepairPowerBus fabBus;
-                eRepairMemBus   memBus;
-            } bus;
-        };
-
-        // Create an array of the above match structure to have all the
-        // combinations of Fabric and Memory repair data
-        erepairDataMatch l_repairMatch[14] =
-        {
-            {
-                // index 0 - X0A (clock group 0)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 1 - X0A (clock group 0)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 2 - X0A (clock group 1)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 3 - X0A (clock group 1)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 4 - X1A (clock group 0)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 5 - X1A (clock group 0)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 6 - X1A (clock group 1)
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 7 - X1A (clock group 1)
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_XBUS_ENDPOINT,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_EDIP, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 8
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_OBUS,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_OPT, // type
-                        EREPAIR::PBUS_DRIVER,   // interface
-                    },
-                },
-            },
-            {
-                // index 9
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_OBUS,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// processor_id
-                            l_busNum, // fabricBus
-                        },
-                        EREPAIR::PROCESSOR_OPT, // type
-                        EREPAIR::PBUS_RECEIVER, // interface
-                    },
-                },
-            },
-            {
-                // index 10
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_DMI,
-                {
-                    // repairData
-                    {
-                        // fabBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,  // type
-                        EREPAIR::DMI_MCS_DRIVE,// interface
-                    },
-                },
-            },
-            {
-                // index 11
-                EREPAIR::DRIVE,
-                fapi2::TARGET_TYPE_MEMBUF_CHIP,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,     // type
-                        EREPAIR::DMI_MEMBUF_DRIVE,// interface
-                    },
-                },
-            },
-            {
-                // index 12
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_DMI,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,     // type
-                        EREPAIR::DMI_MCS_RECEIVE, // interface
-                    },
-                },
-            },
-            {
-                // index 13
-                EREPAIR::RECEIVE,
-                fapi2::TARGET_TYPE_MEMBUF_CHIP,
-                {
-                    // repairData
-                    {
-                        // memBus
-                        {
-                            // device
-                            l_chipNum,// proc_centaur_id
-                            l_busNum, // memChannel
-                        },
-                        EREPAIR::MEMORY_EDIP,        // type
-                        EREPAIR::DMI_MEMBUF_RECEIVE, // interface
-                    },
-                },
-            }
-        };
-
-        l_vpdDataPtr  = l_vpdPtr;
-        l_repairCnt   = 0;
-
         // Pick each faillane for copying into buffer
         for(l_it  = i_failLanes.begin();
             l_it != i_failLanes.end();
-            l_it++, (l_vpdDataPtr += l_repairDataSz))
+            l_it++)
         {
+            // Get vpd starting data pointer
+            l_vpdDataPtr  = l_vpdPtr;
+            l_repairCnt   = 0;
+
             l_repairLane  = *l_it;
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
@@ -1641,73 +1294,62 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                 l_repairCnt++, (l_vpdDataPtr += l_repairDataSz))
             {
                 l_overWritePtr =
-                    reinterpret_cast<eRepairPowerBus*> (l_vpdDataPtr);
+                    reinterpret_cast<eRepairMemBus*> (l_vpdDataPtr);
 
                 FAPI_DBG("repairLaneCnt-2:repariCnt:%d numRepair:%d byteparsed:%d bufSize:%d ", l_repairCnt, l_numRepairs,
                          l_bytesParsed,
                          i_bufSz);
 
-                // Lets find the matching fabric
-                for(uint8_t l_loop = 0; l_loop < 14; l_loop++)
+                // Lets find the matching record
+                if( (l_overWritePtr->device.proc_centaur_id == l_chipNum) &&
+                    (l_overWritePtr->device.memChannel      == l_busNum ) &&
+                    (l_overWritePtr->type                   == EREPAIR::MEMORY_EDIP) &&
+                    (((i_interface == EREPAIR::DRIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MCS_DRIVE)) ||
+                     ((i_interface == EREPAIR::RECEIVE) && (l_overWritePtr->interface == EREPAIR::DMI_MCS_RECEIVE))) )
                 {
-                    FAPI_DBG("repairLaneCnt-3:cnt:%d ", l_loop);
+                    FAPI_INF("repairLaneCnt-3:Found match: Dev id:%d type:%d IF:%d  Bus:%d ", l_overWritePtr->device.proc_centaur_id,
+                             l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.memChannel);
 
+                    // update the failBit number
                     {
-                        if((i_interface == l_repairMatch[l_loop].intType)    &&
-                           (i_target.getType()   == l_repairMatch[l_loop].tgtType)    &&
-                           ((l_overWritePtr->device).processor_id ==
-                            l_repairMatch[l_loop].bus.memBus.device.proc_centaur_id) &&
-                           (l_overWritePtr->type ==
-                            l_repairMatch[l_loop].bus.memBus.type)       &&
-                           (l_overWritePtr->interface ==
-                            l_repairMatch[l_loop].bus.memBus.interface)  &&
-                           (l_overWritePtr->device.fabricBus ==
-                            l_repairMatch[l_loop].bus.memBus.device.memChannel))
-                        {
-                            FAPI_INF("repairLaneCnt-4:Found match: Dev id:%d type:%d IF:%d  Bus:%d ", (l_overWritePtr->device).processor_id,
-                                     l_overWritePtr->type, l_overWritePtr->interface, l_overWritePtr->device.fabricBus);
-
-                            // update the failBit number
-                            {
-                                uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
-                                uint32_t* tptr = &temp;
-                                FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
-                                FAPI_TRY( gatherRepairLanes(
-                                              i_target,
-                                              l_overWritePtr->interface,
-                                              l_repairLane,
-                                              tptr),
-                                          "gatherRepairLanes() failed w/rc=0x%x",
-                                          static_cast<uint64_t>(fapi2::current_err) );
-                                l_overWritePtr->failBit = temp;
-                                FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
-                            }
-
-                            // Increment the count of parsed bytes
-                            l_bytesParsed += l_repairDataSz;
-
-                            l_repairCnt++;
-                            l_overWrite = true;
-
-                            // Get the record updated
-                            FAPI_INF("Record updated: ");
-
-                            for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
-                            {
-                                FAPI_INF("%02x ", *(l_vpdDataPtr + i));
-                            }
-
-                            break;
-                        }
+                        uint32_t temp = (uint32_t)(l_overWritePtr->failBit);
+                        uint32_t* tptr = &temp;
+                        FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
+                        FAPI_TRY( gatherRepairLanes(
+                                      i_target,
+                                      l_overWritePtr->interface,
+                                      l_repairLane,
+                                      tptr),
+                                  "gatherRepairLanes() failed w/rc=0x%x",
+                                  static_cast<uint64_t>(fapi2::current_err) );
+                        l_overWritePtr->failBit = temp;
+                        FAPI_INF("Status(after):FailBit:0x%x temp:0x%x ", l_overWritePtr->failBit, temp);
                     }
-                } // end of for(l_loop < 14)
 
-                if(l_overWrite == true)
-                {
-                    // Go for the next repairLane
+                    // Matching record found
+                    l_overWrite = true;
+
+                    // Get the record updated
+                    FAPI_INF("Record updated: ");
+
+                    for(uint8_t i = 0; i < RECORD_LENGTH_BYTES; i++)
+                    {
+                        FAPI_INF("%02x ", *(l_vpdDataPtr + i));
+                    }
+
                     break;
-                }
+                } // end of record check
+
+                // Increment the count of parsed bytes
+                l_bytesParsed += l_repairDataSz;
+
             } // end of for(vpd Parsing)
+
+            if(l_overWrite == true)
+            {
+                // Go for the next repairLane
+                continue;
+            }
 
             // Check if we have parsed more bytes than the passed size
             if((l_vpdWritePtr == NULL)       &&
@@ -1779,6 +1421,8 @@ fapi2::ReturnCode updateRepairLanesToBufDMI(
                              l_memBus->device.memChannel, l_memBus->type, l_memBus->interface, i_interface);
 
                     {
+                        // For adding 'new' record, default value of failBit field should be zero
+                        l_memBus->failBit = 0;
                         uint32_t temp = (uint32_t)(l_memBus->failBit);
                         uint32_t* tptr = &temp;
                         FAPI_INF("Status(before):FailBit:0x%x temp:0x%x ", l_memBus->failBit, temp);
@@ -2031,7 +1675,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
     size_t   l_mBufSize  = 0;
     uint8_t* l_serialBuf = NULL;
     size_t   l_serialNum = 0;
-    uint8_t    l_customDimm;
+    uint8_t    l_customDimm = 0xFF;    // Initialized to invalid value
     FAPI_INF(">> writeRepairDataToVPD - MemBuf - RxLaneSize:%llu TxLaneSize:%llu ", i_rxFailLanes.size(),
              i_txFailLanes.size());
 
@@ -2118,21 +1762,15 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
             l_customDimm = fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO;
         }
 
-        if( (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES) || (l_mBufSize == 0) )
-        {
-            if((l_mBufSize == 0) ||
-               ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
-                (l_mBufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
-               ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
-                (l_mBufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
-            {
-                FAPI_ASSERT(false,
-                            fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
-                            .set_VAL_BUF_SIZE(l_mBufSize)
-                            .set_ERROR(fapi2::current_err),
-                            "ERROR: Invalid MEM VPD size");
-            }
-        }
+        FAPI_INF("CustomDimm:(%d)%s \n", l_customDimm,
+                 (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO ? "CEN_SPD_CUSTOM_NO" : "CEN_SPD_CUSTOM_YES"));
+
+        // Check for mem buf size
+        FAPI_ASSERT(l_mBufSize > 0,
+                    fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
+                    .set_VAL_BUF_SIZE(l_mBufSize)
+                    .set_ERROR(fapi2::current_err),
+                    "ERROR: Invalid MEM VPD size");
 
         // Allocate memory for buffer
         l_retBuf = new uint8_t[l_mBufSize]();
@@ -2161,6 +1799,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                           l_mBufSize,
                           i_clkGroup,
                           i_txFailLanes,
+                          l_customDimm,
                           l_retBuf),
                       "updateRepairLanesToBufMemBuf(DRIVE) failed w/rc=0x%x",
                       static_cast<uint64_t>(fapi2::current_err) );
@@ -2175,6 +1814,7 @@ fapi2::ReturnCode writeRepairDataToVPDMemBuf(
                           l_mBufSize,
                           i_clkGroup,
                           i_rxFailLanes,
+                          l_customDimm,
                           l_retBuf),
                       "updateRepairLanesToBufMemBuf(RECEIVE) failed w/rc=0x%x",
                       static_cast<uint64_t>(fapi2::current_err) );
@@ -2405,7 +2045,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 
     for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i, i_txFailLanes[i]);
     }
 
 
@@ -2460,7 +2100,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 
     for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i, i_txFailLanes[i]);
     }
 
 
@@ -2515,7 +2155,7 @@ fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
 
     for(unsigned long i = 0; (i < i_txFailLanes.size() && i_txFailLanes.size() != 0); i++)
     {
-        FAPI_INF("Tx(%lu):%llu ", i_txFailLanes[i]);
+        FAPI_INF("Tx(%lu):%llu ", i, i_txFailLanes[i]);
     }
 
     FAPI_ASSERT(( (i_txFailLanes.size() != 0) || (i_rxFailLanes.size() != 0) ),
