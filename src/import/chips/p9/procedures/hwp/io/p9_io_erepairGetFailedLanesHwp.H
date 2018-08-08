@@ -43,7 +43,6 @@
 #include <mvpd_access.H>
 #include <fapi2_mbvpd_access.H>
 
-
 /******************************************************************************
  * Accessor HWP
  *****************************************************************************/
@@ -331,6 +330,7 @@ fapi_try_exit:
  * @param[in] i_buf         This is the buffer that has the eRepair records
  *                          read from the VPD
  * @param[in] i_bufSz       This is the size of passed buffer in terms of bytes
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
  * @param[o]  o_txFailLanes Reference to a vector that will hold eRepair fail
  *                          lane numbers of the Tx sub-interface.
  * @param[o]  o_rxFailLanes Reference to a vector that will hold eRepair fail
@@ -340,22 +340,21 @@ fapi_try_exit:
  */
 template<fapi2::TargetType K>
 fapi2::ReturnCode determineRepairLanesMemBuf(
-    const fapi2::Target < K >&           i_target,
+    const fapi2::Target < K >&         i_target,
     uint8_t*                           i_buf,
     uint32_t                           i_bufSz,
+    EREPAIR::erepairVpdType            i_vpdType,
     std::vector<uint8_t>&              o_txFailLanes,
     std::vector<uint8_t>&              o_rxFailLanes)
 {
     uint32_t         l_numRepairs         = 0;
     uint8_t*         l_vpdPtr             = NULL;
-    eRepairHeader*   l_vpdHeadPtr         = NULL;
     uint32_t         l_loop               = 0;
     uint32_t         l_bytesParsed        = 0;
-    const uint32_t   l_memRepairDataSz    = sizeof(eRepairMemBus);
-    uint8_t l_customDimm;
+    uint8_t          l_customDimm         = 0xFF; //Initialized to invalid value
     fapi2::Target<fapi2::TARGET_TYPE_DMI>       l_dmiTarget;
     fapi2::ReturnCode l_rc                      = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_busNum;
+    fapi2::ATTR_CHIP_UNIT_POS_Type              l_busNum;
     fapi2::current_err                          = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_INF(">> determineRepairLanesMemBuf - BufSize:%d ", i_bufSz);
@@ -366,38 +365,45 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
                            i_target,
                            l_chipPosition));
 
-    // Read the header and count information
-    l_vpdPtr = i_buf; // point to the start of header data
-    l_vpdHeadPtr = reinterpret_cast<eRepairHeader*> (l_vpdPtr);
+    // Check whether we have CDIMM
+    l_rc = getDimmType(i_target, l_customDimm);
 
-    l_numRepairs = l_vpdHeadPtr->availNumRecord;
+    FAPI_ASSERT(static_cast<uint64_t>(l_rc) == 0x0,
+                fapi2::P9_EREPAIR_DIMM_TYPE_CHECK_ERR()
+                .set_ERROR(l_rc),
+                "ERROR: DIMM type check");
 
-    l_bytesParsed = sizeof(eRepairHeader); // we've read the header data
-    l_vpdPtr += sizeof(eRepairHeader); // point to the start of repair data
+    FAPI_INF("CustomDimm:(%d)%s ", l_customDimm,
+             (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO ? "CEN_SPD_CUSTOM_NO" : "CEN_SPD_CUSTOM_YES"));
 
-    // Parse for Memory bus data
+    // For Memory riser based centaur
+    if(l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_NO)
     {
+        eRepairHeader*   l_vpdHeadPtr         = NULL;
+
+        // Read the header and count information
+        l_vpdPtr = i_buf; // point to the start of header data
+        l_vpdHeadPtr = reinterpret_cast<eRepairHeader*> (l_vpdPtr);
+
+        l_numRepairs = l_vpdHeadPtr->availNumRecord;
+
+        l_bytesParsed = sizeof(eRepairHeader); // we've read the header data
+        l_vpdPtr += sizeof(eRepairHeader); // point to the start of repair data
+
+        // Parse for Memory bus data
         eRepairMemBus* l_memBus;
 
         l_dmiTarget = i_target.template getParent<fapi2::TARGET_TYPE_DMI>();
 
-        // Check whether we have Memory on a CDIMM
-        l_rc = getDimmType(i_target, l_customDimm);
-
-        FAPI_ASSERT((uint64_t)l_rc == 0x0,
-                    fapi2::P9_EREPAIR_DIMM_TYPE_CHECK_ERR()
-                    .set_ERROR(l_rc),
-                    "ERROR: DIMM type check");
-
         // Read Power bus eRepair data and get the failed lane numbers
         for(l_loop = 0;
             l_loop < l_numRepairs;
-            l_loop++, (l_vpdPtr += l_memRepairDataSz))
+            l_loop++, (l_vpdPtr += sizeof(eRepairMemBus)))
         {
             FAPI_INF("Loop data:Numrepair:%d Bytesparse:%d ", l_numRepairs, l_bytesParsed);
 
             // Make sure we are not parsing more data than the passed size
-            l_bytesParsed += l_memRepairDataSz;
+            l_bytesParsed += sizeof(eRepairMemBus);
 
             if(l_bytesParsed > i_bufSz)
             {
@@ -423,8 +429,7 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
             // the Lane eRepair data for multiple Centaurs is maintained in
             // a common VPD.
 
-            if((l_customDimm != fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES) &&
-               (l_chipPosition != l_memBus->device.proc_centaur_id))
+            if(l_chipPosition != l_memBus->device.proc_centaur_id)
             {
                 FAPI_INF("DIMM:%d ChipPos:%d ", l_customDimm, l_chipPosition);
                 continue;
@@ -464,7 +469,83 @@ fapi2::ReturnCode determineRepairLanesMemBuf(
                                   l_memBus->failBit, o_rxFailLanes);
             }
         } // end of for loop
-    } // end of if(l_tgtType is DMI)
+    }
+    else    // For CDIMM
+    {
+        eRepairHeader_cdimm* l_vpdHeadPtr = NULL;
+        l_vpdPtr = i_buf; // point to the start of header data
+        l_vpdHeadPtr = reinterpret_cast<eRepairHeader_cdimm*> (l_vpdPtr);
+
+        l_numRepairs = l_vpdHeadPtr->numRecords;
+
+        l_bytesParsed = sizeof(eRepairHeader_cdimm); // we've read the header data
+        l_vpdPtr += sizeof(eRepairHeader_cdimm); // point to the start of repair data
+
+        // Parse for Memory bus data
+        eRepairMemBus_cdimm* l_memBus;
+
+        l_dmiTarget = i_target.template getParent<fapi2::TARGET_TYPE_DMI>();
+
+        // Read Power bus eRepair data and get the failed lane numbers
+        for(l_loop = 0;
+            l_loop < l_numRepairs;
+            l_loop++, (l_vpdPtr += sizeof(eRepairMemBus_cdimm)))
+        {
+            FAPI_INF("Loop data:Numrepair:%d Bytesparse:%d ", l_numRepairs, l_bytesParsed);
+
+            // Make sure we are not parsing more data than the passed size
+            l_bytesParsed += sizeof(eRepairMemBus_cdimm);
+
+            if(l_bytesParsed > i_bufSz)
+            {
+                FAPI_INF("Size:Byteparsed:%d BufSize:%d ", l_bytesParsed, i_bufSz);
+                break;
+            }
+
+            l_memBus = reinterpret_cast<eRepairMemBus_cdimm*>(l_vpdPtr);
+
+#ifndef _BIG_ENDIAN
+            // We are on a Little Endian system.
+            // Need to swap the nibbles of the structure - eRepairMemBus_cdimm
+
+            uint8_t l_temp = l_vpdPtr[2];
+            l_memBus->type = (l_temp >> 4);
+            l_memBus->interface = (l_temp & 0x0F);
+#endif
+
+            FAPI_INF("Type:%d IF:%d ", l_memBus->type, l_memBus->interface);
+
+            // Check if we have the matching the Memory Bus types
+            if(l_memBus->type != EREPAIR::MEMORY_EDIP)
+            {
+                continue;
+            }
+
+            // Check if we have the matching memory bus interface
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_dmiTarget,
+                                   l_busNum));
+
+            FAPI_INF("Channel:%d BusNum:%d ", l_memBus->device.memChannel, l_busNum);
+
+            if(l_memBus->device.memChannel != l_busNum)
+            {
+                continue;
+            }
+
+            // Copy the fail lane numbers in the vectors
+            FAPI_INF("Decode:IF:0x%x FailBit:0x%x ", l_memBus->interface, l_memBus->failBit);
+
+            if(l_memBus->interface == EREPAIR::DMI_MEMBUF_DRIVE)
+            {
+                o_txFailLanes.push_back(l_memBus->failBit);
+            }
+            else if(l_memBus->interface == EREPAIR::DMI_MEMBUF_RECEIVE)
+            {
+                o_rxFailLanes.push_back(l_memBus->failBit);
+            }
+        } // end of for loop
+    } // for l_customDimm
 
     FAPI_INF("<< No.of Fail Lanes: tx: %llu, rx: %llu",
              o_txFailLanes.size(), o_rxFailLanes.size());
@@ -647,7 +728,8 @@ fapi2::ReturnCode retrieveRepairDataProc(
     uint32_t l_serialNum                         = 0;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>  l_procTarget;
 
-    FAPI_DBG(">> retrieveRepairDataProc");
+    FAPI_INF(">> retrieveRepairDataProc: vpdType:%s",
+             (i_vpdType == EREPAIR::EREPAIR_VPD_MNFG ? "MNFG" : "FIELD"));
 
     // Determine the Processor target
     l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -791,9 +873,9 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
     uint8_t* l_serialBuf                         = NULL;
     size_t l_serialNum                           = 0;
     size_t l_bufSize                             = 0;
-    uint8_t                                      l_customDimm;
 
-    FAPI_DBG(">> retrieveRepairDataMemBuf");
+    FAPI_INF(">> retrieveRepairDataMemBuf: vpdType:%s",
+             (i_vpdType == EREPAIR::EREPAIR_VPD_MNFG ? "MNFG" : "FIELD"));
 
     fapi2::MBvpdRecord l_vpdRecord = fapi2::MBVPD_RECORD_VEIR;
 
@@ -849,29 +931,12 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
 
     FAPI_INF("retrieveRepairDataMemBuf:VPD data:RC:0x%x KW:0x%x BS:%d ", l_vpdRecord, fapi2::MBVPD_KEYWORD_PDI, l_bufSize);
 
-    // Check whether we have Memory on a CDIMM
-    l_rc = getDimmType(i_target, l_customDimm);
-
-    FAPI_ASSERT((uint64_t)l_rc == 0x0,
-                fapi2::P9_EREPAIR_DIMM_TYPE_CHECK_ERR()
+    // Check for buf size
+    FAPI_ASSERT(l_bufSize > 0,
+                fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
+                .set_VAL_BUF_SIZE(l_bufSize)
                 .set_ERROR(l_rc),
-                "ERROR: DIMM type check");
-
-    if( (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES) || (l_bufSize == 0) )
-    {
-        if((l_bufSize == 0) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_FIELD) &&
-            (l_bufSize > EREPAIR::EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR)) ||
-           ((i_vpdType == EREPAIR::EREPAIR_VPD_MNFG) &&
-            (l_bufSize > EREPAIR::EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR)))
-        {
-            FAPI_ASSERT(false,
-                        fapi2::P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR()
-                        .set_VAL_BUF_SIZE(l_bufSize)
-                        .set_ERROR(l_rc),
-                        "ERROR: Invalid MEM VPD size");
-        }
-    }
+                "ERROR: Invalid MEM VPD size");
 
     // Allocate memory for buffer
     l_retBuf = new uint8_t[l_bufSize]();
@@ -897,6 +962,7 @@ fapi2::ReturnCode retrieveRepairDataMemBuf(
                   i_target,
                   l_retBuf,
                   l_bufSize,
+                  i_vpdType,
                   o_txFailLanes,
                   o_rxFailLanes),
               "Call to determineRepairLanesMemBuf failed w/rc=0x%x",
@@ -945,7 +1011,8 @@ fapi2::ReturnCode retrieveRepairDataDMI(
     uint32_t l_serialNum                         = 0;
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>  l_procTarget;
 
-    FAPI_DBG(">> retrieveRepairDataDMI");
+    FAPI_INF(">> retrieveRepairDataDMI: vpdType:%s",
+             (i_vpdType == EREPAIR::EREPAIR_VPD_MNFG ? "MNFG" : "FIELD"));
 
     // Determine the Processor target
     l_procTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
