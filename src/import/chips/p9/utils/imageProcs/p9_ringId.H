@@ -203,17 +203,20 @@ enum RingOffset
     perv_pll_bndy_flt_2 = 16,
     perv_pll_bndy_flt_3 = 17,
     perv_pll_bndy_flt_4 = 18,
+    sbe_fure = 19,
+    sbe_gptr = 20,
     // Instance Rings
     perv_repr     = (0 | INSTANCE_RING_MARK),
     occ_repr      = (1 | INSTANCE_RING_MARK),
+    sbe_repr      = (2 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     1,  // Pervasive Chiplet ID is 1
-    19, // 19 common rings for pervasive chiplet
-    2,  // 2 instance specific rings for pervasive chiplet
-    2,
+    21, // 21 common rings for pervasive chiplet
+    3,  // 3 instance specific rings for pervasive chiplet
+    3,
     2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace PERV
@@ -401,17 +404,27 @@ enum RingOffset
     mc_pll_bndy_bucket_4 = 13,
     mc_pll_bndy_bucket_5 = 14,
     mc_pll_func = 15,
+    mc_omi0_fure = 16,
+    mc_omi0_gptr = 17,
+    mc_omi1_fure = 18,
+    mc_omi1_gptr = 19,
+    mc_omi2_fure = 20,
+    mc_omi2_gptr = 21,
+    mc_omippe_fure = 22,
+    mc_omippe_gptr = 23,
+    mc_omippe_time = 24,
     // Instance Rings
-    mc_repr       = (0 | INSTANCE_RING_MARK),
-    mc_iom23_repr = (1 | INSTANCE_RING_MARK),
+    mc_repr        = (0 | INSTANCE_RING_MARK),
+    mc_iom23_repr  = (1 | INSTANCE_RING_MARK),
+    mc_omippe_repr = (2 | INSTANCE_RING_MARK),
 };
 
 static const ChipletData_t g_chipletData =
 {
     7,  // MC Chiplet ID range is 7 - 8. The base ID is 7.
-    16, // 16 common rings for MC Chiplet
-    2,  // 1 instance specific rings for each MC instance
-    2,
+    25, // 25 common rings for MC Chiplet
+    3,  // 3 instance specific rings for each MC instance
+    3,
     2,  // 2 common ring variants: BASE, RL
 };
 }; // end of namespace MC
@@ -736,9 +749,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_func                , "perv_pll_func"               , PERV_TYPE  }, // 15
     { PERV::perv_repr                    , "perv_repr"                   , PERV_TYPE  }, // 16
     { PERV::occ_repr                     , "occ_repr"                    , PERV_TYPE  }, // 17
-    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 18
-    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 19
-    { INVALID_RING_OFFSET                , "invalid"                     , PERV_TYPE  }, // 20
+    { PERV::sbe_fure                     , "sbe_fure"                    , PERV_TYPE  }, // 18
+    { PERV::sbe_gptr                     , "sbe_gptr"                    , PERV_TYPE  }, // 19
+    { PERV::sbe_repr                     , "sbe_repr"                    , PERV_TYPE  }, // 20
     { N0::n0_fure                        , "n0_fure"                     , N0_TYPE    }, // 21
     { N0::n0_gptr                        , "n0_gptr"                     , N0_TYPE    }, // 22
     { N0::n0_time                        , "n0_time"                     , N0_TYPE    }, // 23
@@ -975,6 +988,16 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_bndy_flt_2          , "perv_pll_bndy_flt_2"         , PERV_TYPE  }, // 254
     { PERV::perv_pll_bndy_flt_3          , "perv_pll_bndy_flt_3"         , PERV_TYPE  }, // 255
     { PERV::perv_pll_bndy_flt_4          , "perv_pll_bndy_flt_4"         , PERV_TYPE  }, // 256
+    { MC::mc_omi0_fure                   , "mc_omi0_fure"                , MC_TYPE    }, // 257
+    { MC::mc_omi0_gptr                   , "mc_omi0_gptr"                , MC_TYPE    }, // 258
+    { MC::mc_omi1_fure                   , "mc_omi1_fure"                , MC_TYPE    }, // 259
+    { MC::mc_omi1_gptr                   , "mc_omi1_gptr"                , MC_TYPE    }, // 260
+    { MC::mc_omi2_fure                   , "mc_omi2_fure"                , MC_TYPE    }, // 261
+    { MC::mc_omi2_gptr                   , "mc_omi2_gptr"                , MC_TYPE    }, // 262
+    { MC::mc_omippe_fure                 , "mc_omippe_fure"              , MC_TYPE    }, // 263
+    { MC::mc_omippe_gptr                 , "mc_omippe_gptr"              , MC_TYPE    }, // 264
+    { MC::mc_omippe_time                 , "mc_omippe_time"              , MC_TYPE    }, // 265
+    { MC::mc_omippe_repr                 , "mc_omippe_repr"              , MC_TYPE    }, // 266
 };
 #endif
 
@@ -999,9 +1022,9 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_func                , PERV_TYPE  }, // 15
     { PERV::perv_repr                    , PERV_TYPE  }, // 16
     { PERV::occ_repr                     , PERV_TYPE  }, // 17
-    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 18
-    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 19
-    { INVALID_RING_OFFSET                , PERV_TYPE  }, // 20
+    { PERV::sbe_fure                     , PERV_TYPE  }, // 18
+    { PERV::sbe_gptr                     , PERV_TYPE  }, // 19
+    { PERV::sbe_repr                     , PERV_TYPE  }, // 20
     { N0::n0_fure                        , N0_TYPE    }, // 21
     { N0::n0_gptr                        , N0_TYPE    }, // 22
     { N0::n0_time                        , N0_TYPE    }, // 23
@@ -1238,6 +1261,16 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { PERV::perv_pll_bndy_flt_2          , PERV_TYPE  }, // 254
     { PERV::perv_pll_bndy_flt_3          , PERV_TYPE  }, // 255
     { PERV::perv_pll_bndy_flt_4          , PERV_TYPE  }, // 256
+    { MC::mc_omi0_fure                   , MC_TYPE    }, // 257
+    { MC::mc_omi0_gptr                   , MC_TYPE    }, // 258
+    { MC::mc_omi1_fure                   , MC_TYPE    }, // 259
+    { MC::mc_omi1_gptr                   , MC_TYPE    }, // 260
+    { MC::mc_omi2_fure                   , MC_TYPE    }, // 261
+    { MC::mc_omi2_gptr                   , MC_TYPE    }, // 262
+    { MC::mc_omippe_fure                 , MC_TYPE    }, // 263
+    { MC::mc_omippe_gptr                 , MC_TYPE    }, // 264
+    {  MC::mc_omippe_time                , MC_TYPE    }, // 265
+    { MC::mc_omippe_repr                 , MC_TYPE    }, // 266
 };
 #endif
 
