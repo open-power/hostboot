@@ -32,6 +32,7 @@
 #include "common/attntrace.H"
 #include <devicefw/userif.H>
 #include <ibscom/ibscomreasoncodes.H>
+#include <scom/scomreasoncodes.H>
 
 using namespace TARGETING;
 using namespace DeviceFW;
@@ -130,12 +131,20 @@ errlHndl_t ScomImpl::getScom(
     errlHndl_t errlH =
         deviceRead(i_target, &o_data, size, DEVICE_SCOM_ADDRESS(i_address));
 
-    if( ( NULL != errlH ) &&
-        ( IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode() )
+#ifdef __HOSTBOOT_RUNTIME
+    if ( ( NULL != errlH ) &&
+         ( SCOM::SCOM_RUNTIME_HYP_ERR == errlH->reasonCode() )
+       )
+#else
+    if ( ( NULL != errlH ) &&
+         (IBSCOM::IBSCOM_BUS_FAILURE ) == errlH->reasonCode()
+       )
+#endif
     {
         errlCommit( errlH, ATTN_COMP_ID );
-        ATTN_DBG( "deviceRead() failed with reason code IBSCOM_BUS_FAILURE."
+        ATTN_DBG( "deviceRead() failed with reason code %X."
                   " Trying again, Target HUID:0x%08X Register 0x%016X",
+                  errlH->reasonCode(),
                   get_huid( i_target), i_address );
 
         errlH = deviceRead( i_target, &o_data, size,

@@ -74,6 +74,8 @@ const uint32_t  ATTN_MAX_DMI_INTRS = 4;
 // Processor FIR set when MemBuffer raises attention
 const uint32_t  ATTN_ADDR_CHIFIR_DATA = 0x07010900;
 const uint32_t  ATTN_ADDR_CHIFIR_MASK = 0x07010903;
+const uint32_t  ATTN_ADDR_CHIFIR_ACT0 = 0x07010906;
+const uint32_t  ATTN_ADDR_CHIFIR_ACT1 = 0x07010907;
 
 // Attention bit positions in CHIFIR 16, 19,20,21
 const uint64_t  ATTN_CEN_CHECKSTOP = 0x0000800000000000ull ;
@@ -85,9 +87,9 @@ const uint64_t  ATTN_CEN_MAINT_CMD = 0x0000040000000000ull ;
 
 // @TODO RTC: 180469
 //  Move to target services part and then update all the CXX testing
-TargetHandle_t attnGetMembuf( const TargetHandle_t &i_mc,
-                              const uint32_t i_dmi,
-                              const ATTENTION_VALUE_TYPE i_attnType )
+TargetHandle_t MemOps::attnGetMembuf( const TARGETING::TargetHandle_t &i_mc,
+                                      const uint32_t i_dmi,
+                                      const ATTENTION_VALUE_TYPE i_attnType )
 {
     // where i_dmi is 0:7 value
     TargetHandle_t    membuf   = NULL;
@@ -169,6 +171,7 @@ TargetHandle_t attnGetMembuf( const TargetHandle_t &i_mc,
                 // Handle any elog
                 if (NULL != l_err)
                 {
+                    l_err->collectTrace("ATTN_SLOW" , 512 );
                     errlCommit(l_err, ATTN_COMP_ID);
                 }  // if elog
 
@@ -182,6 +185,152 @@ TargetHandle_t attnGetMembuf( const TargetHandle_t &i_mc,
     return(membuf);
 
 } // end attnGetMembuf
+
+
+uint64_t MemOps::chkMembufAttn( TARGETING::TargetHandle_t  i_memBuf,
+                                const ATTENTION_VALUE_TYPE i_attnType )
+{
+    errlHndl_t  l_err = NULL;
+    uint64_t    l_scomData = 0;
+    uint64_t    l_scomAddr = 0;
+
+
+    // Which broadcast FIR should we be checking ?
+    switch (i_attnType)
+    {
+        // These are the same for memBuf
+        case  UNIT_CS:
+            l_scomAddr = 0x500f001c;
+            break;
+
+        case  RECOVERABLE:
+            l_scomAddr = 0x500f001b;
+            break;
+
+        // These are the same for memBuf
+        case  HOST_ATTN:
+            l_scomAddr = 0x500f001a;
+            break;
+
+        default:
+            // invalid attn type
+            break;
+
+    } // end switch on attn type
+
+
+    if (0 != l_scomAddr)
+    {
+        // Read the global broadcast FIR from memory buffer
+        l_err = getScom(i_memBuf, l_scomAddr, l_scomData);
+        // Any active bits indicates it has attn pending
+
+        if (NULL != l_err)
+        {
+            ATTN_SLOW("Failed membuf readAddr:%016llx",
+                       l_scomAddr);
+
+            // ensure we don't have anything active
+            l_scomData = 0;
+            l_err->collectTrace("ATTN_SLOW" , 512 );
+            errlCommit(l_err, ATTN_COMP_ID);
+        }  // if elog
+
+    } // if valid attn type/valid addr
+
+    return(l_scomData);
+
+} // end chkMembufAttn
+
+
+bool MemOps::attnCmpAttnType( TARGETING::TargetHandle_t  i_dmiTarg,
+                              const ATTENTION_VALUE_TYPE i_attnType )
+{
+    errlHndl_t  l_err = NULL;
+    bool        l_validAttnType = false;
+    uint64_t    l_chifirData = 0;
+    uint64_t    l_chifirMask = 0;
+    uint64_t    l_chifirAct0 = 0;
+    uint64_t    l_chifirAct1 = 0;
+    uint64_t    l_result = 0;
+
+
+    // Get the actual CHIFIR data
+    l_err = getScom(i_dmiTarg, ATTN_ADDR_CHIFIR_DATA, l_chifirData);
+
+    if (NULL == l_err)
+    {
+        l_err = getScom(i_dmiTarg, ATTN_ADDR_CHIFIR_MASK, l_chifirMask);
+    } // end if no error on getscom CHIFIR data
+
+    if (NULL == l_err)
+    {
+        l_err = getScom(i_dmiTarg, ATTN_ADDR_CHIFIR_ACT0, l_chifirAct0);
+    } // end if no error on getscom CHIFIR mask
+
+    if (NULL == l_err)
+    {
+        l_err = getScom(i_dmiTarg, ATTN_ADDR_CHIFIR_ACT1, l_chifirAct1);
+    } // end if no error on getscom CHIFIR action0
+
+    if (NULL == l_err)
+    {
+        // Actions:00 CS, 01 REC, 10 SPEC/HOST, 11 UCS
+
+        // Will modify the actions appropriately so we can just
+        // AND them with the FIR data.
+        switch (i_attnType)
+        {
+            case CHECK_STOP:
+                l_chifirAct0 = ~l_chifirAct0;
+                l_chifirAct1 = ~l_chifirAct1;
+                break;
+
+            case RECOVERABLE:
+                l_chifirAct0 = ~l_chifirAct0;
+                break;
+
+            case HOST_ATTN:
+            case SPECIAL:
+                l_chifirAct1 = ~l_chifirAct1;
+                break;
+
+            case UNIT_CS:
+                // actions are fine as is ('11')
+                break;
+
+            default:
+                // Not valid attn type
+                // so won't match on anything
+                l_chifirAct0 = 0;
+                l_chifirAct1 = 0;
+                break;
+
+        } // end switch on attnType
+
+        // Validate if specified attention does exist in
+        // CHIFIR and it is not masked.
+        l_result = l_chifirData & ~l_chifirMask & l_chifirAct0 & l_chifirAct1;
+
+        if (0 != l_result)
+        {
+            l_validAttnType = true;
+        }
+
+    } // end if no error on getscom CHIFIR action1
+
+
+    if (NULL != l_err)
+    {
+        ATTN_SLOW("Failed attnCmpAttnType scom");
+        l_err->collectTrace("ATTN_SLOW" , 512 );
+        errlCommit(l_err, ATTN_COMP_ID);
+    }  // if elog
+
+
+    return(l_validAttnType);
+
+} // end attnCmpAttnType
 
 
 bool MemOps::resolve(
@@ -292,8 +441,8 @@ bool MemOps::resolve(
 
                                     if (NULL != d.targetHndl)
                                     {
-                                        ATTN_TRACE(
-                                           "     MemOpsRes -Got membuf Attn:%d",
+                                        ATTN_SLOW(
+                                        "     MemOpsRes -Got membuf Attn:%d",
                                         ATTN_MEM_CHIPLET_FIRS[l_cFir].attnType);
 
                                         i_AttnData.targetHndl = d.targetHndl;
@@ -323,12 +472,75 @@ bool MemOps::resolve(
                     // Handle any elog
                     if (NULL != l_err)
                     {
+                        l_err->collectTrace("ATTN_SLOW" , 512 );
+                        l_err->collectTrace("ATTN_ERR" , 512 );
                         errlCommit(l_err, ATTN_COMP_ID);
                     }  // if elog
 
                     // Found attn match so get out
                     break;
                 } // end if attention matches
+
+                else if (UNIT_CS == i_AttnData.attnType)
+                {
+                    // ------------------------------------------------------
+                    // The membuf may not be able to set the chkstop bit in
+                    // CHIFIR under these circumstances. Hence, we need to
+                    // see if there are any unit chkstops present in CHIFIR
+                    // and then we'll check if the membuf has one active.
+                    // ------------------------------------------------------
+
+                    // We only know the MC chiplet at this point and
+                    // so we need to check all DMI chiplets off this MC.
+                    TargetHandleList  l_dmiList;
+                    getChildChiplets(l_dmiList, l_mc, TYPE_DMI);
+
+                    // Validate CHIFIR with mask/action regs
+                    // using our DMI chiplet list.
+                    for ( auto  l_dmiTarg : l_dmiList )
+                    {
+                        if (true == attnCmpAttnType(l_dmiTarg, UNIT_CS))
+                        {
+                            // Check the membuf to see if it chkstop'd
+                            uint64_t          l_attnRaised = 0;
+                            TargetHandleList  l_memBufList;
+                            getChildAffinityTargets(l_memBufList, l_dmiTarg,
+                                                    CLASS_CHIP, TYPE_MEMBUF);
+
+                            if (l_memBufList.size() == 1)
+                            {
+                                // Check if membuf raised a matching attn
+                                l_attnRaised = chkMembufAttn(l_memBufList[0],
+                                                             UNIT_CS);
+
+                                if (l_attnRaised)
+                                {
+                                    ATTN_SLOW(
+                                    "   membuf UCS HUID:%08X Data:%016llx",
+                                    get_huid(l_memBufList[0]), l_attnRaised );
+
+                                    i_AttnData.targetHndl = l_memBufList[0];
+                                    l_attnFound = true;
+
+                                    // Exit loop on DMI targets
+                                    break;
+
+                                } // end if attn raised
+
+                             } // end if membuf found
+
+                        } // end if UCS active in CHIFIR
+
+                    } // end for on DMI list
+
+                    if (true == l_attnFound)
+                    {
+                        // Exit loop thru chiplet FIRs
+                        // since we have valid attn to process
+                        break;
+                    } // end if found valid UCS on membuf
+
+                } // end else no ATTN match but else we have UCS
 
             } // end for thru chiplet FIRs
 

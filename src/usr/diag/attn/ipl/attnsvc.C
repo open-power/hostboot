@@ -34,7 +34,6 @@
 #include "common/attntrace.H"
 #include "common/attnprd.H"
 #include "common/attnproc.H"
-#include "common/attnmem.H"
 #include "common/attntarget.H"
 #include "arch/pirformat.H"
 #include "diag/attn/attnreasoncodes.H"
