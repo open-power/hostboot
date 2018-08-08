@@ -64,7 +64,9 @@ enum RingID
     perv_pll_func = 15, //0x0F
     perv_repr = 16, //0x10
     occ_repr = 17, //0x11
-    // values 18-20 unused
+    sbe_fure = 18, //0x12
+    sbe_gptr = 19, //0x13
+    sbe_repr = 20, //0x14
 
     // Nest Chiplet Rings - N0
     n0_fure = 21, //0x15
@@ -368,6 +370,19 @@ enum RingID
     perv_pll_bndy_flt_2   = 254, //0xFE
     perv_pll_bndy_flt_3   = 255, //0xFF
     perv_pll_bndy_flt_4   = 256, //0x100
+
+    // MC OMI rings
+    mc_omi0_fure          = 257, //0x101
+    mc_omi0_gptr          = 258, //0x102
+    mc_omi1_fure          = 259, //0x103
+    mc_omi1_gptr          = 260, //0x104
+    mc_omi2_fure          = 261, //0x105
+    mc_omi2_gptr          = 262, //0x106
+    mc_omippe_fure        = 263, //0x107
+    mc_omippe_gptr        = 264, //0x108
+    mc_omippe_time        = 265, //0x109
+    // Instance rings
+    mc_omippe_repr        = 266, //0x10A
 
     //***************************
     // Rings needed for SBE - End

@@ -55,11 +55,14 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"perv_pll_bndy_flt_2"   , 0x10, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
     {"perv_pll_bndy_flt_3"   , 0x11, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
     {"perv_pll_bndy_flt_4"   , 0x12, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
+    {"sbe_fure"              , 0x13, 0x01, 0x01, EKB_RING    , 0x0103020F},
+    {"sbe_gptr"              , 0x14, 0x01, 0x01, EKB_RING    , 0x01030202},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"perv_repr"             , 0x13, 0x01, 0x01, VPD_RING    , 0x01034006},
-    {"occ_repr"              , 0x14, 0x01, 0x01, VPD_RING    , 0x01030806},
+    {"perv_repr"             , 0x15, 0x01, 0x01, VPD_RING    , 0x01034006},
+    {"occ_repr"              , 0x16, 0x01, 0x01, VPD_RING    , 0x01030806},
+    {"sbe_repr"              , 0x17, 0x01, 0x01, VPD_RING    , 0x01030206},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
@@ -216,11 +219,21 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"mc_pll_bndy_bucket_4", 0x0d, 0x07, 0x07, EKB_RING    , 0x07030018},
     {"mc_pll_bndy_bucket_5", 0x0e, 0x07, 0x07, EKB_RING    , 0x07030018},
     {"mc_pll_func"         , 0x0f, 0x07, 0x07, EKB_RING    , 0x07030010},
+    {"mc_omi0_fure"        , 0x10, 0x07, 0x08, EKB_RING    , 0x0703100F},
+    {"mc_omi0_gptr"        , 0x11, 0x07, 0x07, EKB_RING    , 0x07031002},
+    {"mc_omi1_fure"        , 0x12, 0x07, 0x07, EKB_RING    , 0x0703080F},
+    {"mc_omi1_gptr"        , 0x13, 0x07, 0x07, EKB_RING    , 0x07030802},
+    {"mc_omi2_fure"        , 0x14, 0x07, 0x07, EKB_RING    , 0x0703040F},
+    {"mc_omi2_gptr"        , 0x15, 0x07, 0x07, EKB_RING    , 0x07030402},
+    {"mc_omippe_fure"      , 0x16, 0x07, 0x07, EKB_RING    , 0x0703020F},
+    {"mc_omippe_gptr"      , 0x17, 0x07, 0x07, EKB_RING    , 0x07030202},
+    {"mc_omippe_time"      , 0x18, 0x07, 0x07, VPD_RING    , 0x07030207},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"mc_repr"             , 0x10, 0x07, 0x08, VPD_RING    , 0x07036006},
-    {"mc_iom23_repr"       , 0x11, 0x07, 0x08, VPD_RING    , 0x07030806},
+    {"mc_repr"             , 0x19, 0x07, 0x08, VPD_RING    , 0x07036006},
+    {"mc_iom23_repr"       , 0x1a, 0x07, 0x08, VPD_RING    , 0x07030806},
+    {"mc_omippe_repr"      , 0x1b, 0x07, 0x08, VPD_RING    , 0x07030206},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { RV_BASE, RV_RL, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT, UNDEFINED_RING_VARIANT };
 };
