@@ -150,11 +150,9 @@ class TdEntry
     // used for displaying FFDC in the TD controller.
     const MemRank          iv_rank; ///< The rank in which this event occurred.
 
-    #ifdef __HOSTBOOT_RUNTIME
     /** True if the current TD command can be resumed, false otherwise. Resume
      *  only supported for MBA at this time. */
     bool iv_canResumeScrub = false;
-    #endif
 };
 
 //------------------------------------------------------------------------------

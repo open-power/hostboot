@@ -202,24 +202,28 @@ uint32_t VcmEvent<TYPE_MBA>::startCmd()
     switch ( iv_phase )
     {
         case TD_PHASE_1:
-            // Start the steer cleanup procedure on this master rank.
-            o_rc = startTdSteerCleanup<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
-                                                  stopCond );
+            o_rc = ( iv_canResumeScrub )
+                     ? resumeTdSteerCleanup<TYPE_MBA>( iv_chip, MASTER_RANK,
+                                                       stopCond )
+                     : startTdSteerCleanup<TYPE_MBA>( iv_chip, iv_rank,
+                                                      MASTER_RANK, stopCond );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
+                PRDF_ERR( PRDF_FUNC "steer cleanup command failed on 0x%08x",
+                          iv_chip->getHuid() );
             }
             break;
 
         case TD_PHASE_2:
-            // Start the superfast read procedure on this master rank.
-            o_rc = startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
-                                            stopCond );
+            o_rc = ( iv_canResumeScrub )
+                     ? resumeTdSfRead<TYPE_MBA>( iv_chip, MASTER_RANK,
+                                                 stopCond )
+                     : startTdSfRead<TYPE_MBA>( iv_chip, iv_rank, MASTER_RANK,
+                                                stopCond );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
+                PRDF_ERR( PRDF_FUNC "sf read command failed on 0x%08x",
+                          iv_chip->getHuid() );
             }
             break;
 

@@ -192,19 +192,13 @@ class VcmEvent : public TdEntry
 
             if ( o_done ) break; // abort the procedure.
 
-            if ( TD_PHASE_2 == iv_phase )
+            // Complete the phase.
+            o_rc = handlePhaseComplete( eccAttns, io_sc, o_done );
+            if ( SUCCESS != o_rc )
             {
-                // Determine if the chip mark has been verified.
-                o_rc = (eccAttns & MAINT_MCE) ? verified(io_sc)
-                                              : falseAlarm(io_sc);
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "verified()/falseAlarm() failed" );
-                    break;
-                }
-
-                // Procedure is complete.
-                o_done = true;
+                PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",
+                          iv_chip->getHuid() );
+                break;
             }
 
         } while (0);
@@ -233,6 +227,20 @@ class VcmEvent : public TdEntry
      */
     uint32_t checkEcc( const uint32_t & i_eccAttns,
                        STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
+
+    /**
+     * @brief  Does appropriate actions at the end of a phase if it was not
+     *         aborted due to an error. Note that the actions will differ per
+     *         target type, runtime/IPL, or if there is an MCE on phase 2.
+     * @param  i_eccAttns Mask of all currently active maintenance attentions.
+     *                    See enum MaintEccAttns for values.
+     * @param  io_sc      The step code data struct.
+     * @param  o_done     True if the procedure is complete or has aborted.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t handlePhaseComplete( const uint32_t & i_eccAttns,
+                                  STEP_CODE_DATA_STRUCT & io_sc,
+                                  bool & o_done );
 
     /**
      * @brief  The chip mark is verified. Do additional processing such as
