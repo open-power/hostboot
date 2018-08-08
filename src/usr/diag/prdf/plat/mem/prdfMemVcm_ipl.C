@@ -157,35 +157,6 @@ uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
 
 //##############################################################################
 //
-//                          Specializations for MCA
-//
-//##############################################################################
-
-template<>
-uint32_t VcmEvent<TYPE_MCA>::startCmd()
-{
-    #define PRDF_FUNC "[VcmEvent::startCmd] "
-
-    uint32_t o_rc = SUCCESS;
-
-    // No stop conditions.
-    mss::mcbist::stop_conditions stopCond;
-
-    // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_MCA>( iv_chip, iv_rank, MASTER_RANK, stopCond );
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//##############################################################################
-//
 //                          Specializations for MBA
 //
 //##############################################################################
