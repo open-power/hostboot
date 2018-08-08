@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/generic/memory/lib/utils/conversions.C $           */
+/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/mss_nimbus_conversions.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
