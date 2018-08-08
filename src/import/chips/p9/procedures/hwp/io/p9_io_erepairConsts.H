@@ -90,6 +90,9 @@ const uint32_t EREPAIR_P9_MODULE_VPD_MNFG_SIZE        = 0x10E; // 270 bytes
 const uint32_t EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR = 0x36;  // 54 bytes
 const uint32_t EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR  = 0x36;  // 54 bytes
 
+const uint32_t EREPAIR_MEM_FIELD_VPD_SIZE_PER_CDIMM = 0x1C;  // 28 bytes - For Fleetwood
+const uint32_t EREPAIR_MEM_MNFG_VPD_SIZE_PER_CDIMM  = 0x14;  // 20 bytes - For Fleetwood
+
 //TODO:
 enum busType
 {
@@ -122,8 +125,9 @@ enum erepairVpdType
 
 }// end of EREPAIR namespace
 
+
 /******************************************************************************
- * VPD Structures.
+ * VPD Structures.- Proc & ISDIMM
  *****************************************************************************/
 
 // eRepair Header
@@ -173,6 +177,46 @@ struct __attribute__ ((packed)) eRepairMemBus
     uint8_t             interface : 4; // Range:0x0-0xF. Value:[MCS_Receive|MCS_Drive|memBuf_Receive|memBuf_Drive]
     uint32_t            failBit  : 24; // Bit stream value: Bit 0:Lane 0; Bit 1:Lane 1 ...
 };
+
+
+/******************************************************************************
+ * VPD Structures. - Proc & CDIMM
+ *****************************************************************************/
+
+// eRepair Header
+struct eRepairHeader_cdimm
+{
+    struct
+    {
+        uint8_t eye1;
+        uint8_t eye2;
+        uint8_t eye3;
+    } eyeCatcher;
+
+    uint8_t  numRecords;
+};
+
+// Device info structure of the endpoints of the Memory Channel
+struct eRepairMemDevInfo_cdimm
+{
+    uint8_t proc_centaur_id;// Range:0x00-0xFF.Value:Processor or Centaur chip position
+    uint8_t memChannel;   // Range:0x00-0xFF.Value: MemoryBus(ATTR_CHIP_UNIT_POS)
+};
+
+// eRepair structure of failing lanes on Memory Channel
+struct __attribute__ ((packed)) eRepairMemBus_cdimm
+{
+    eRepairMemDevInfo_cdimm device;   // Device info of P8/P9 and Centaur
+    uint8_t             type      : 4; // Range:0x0-0xF. Value:MEMORY_EDI
+    uint8_t             interface : 4; // Range:0x0-0xF. Value:MCS_Receive,
+    //                      MCS_Drive,
+    //                      memBuf_Receive,
+    //                      memBuf_Drive
+    uint8_t             failBit;     // Range:0x00-0xFF.
+    // Value:Failing lane number:0-16 OR 0-23
+    //       depends on DownStream or UpStream
+};
+
 
 /**
  * @brief This function combines the eRepair lane numbers read from
