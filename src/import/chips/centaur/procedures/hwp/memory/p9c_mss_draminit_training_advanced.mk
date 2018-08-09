@@ -27,10 +27,10 @@
 -include 01common.mk
 PROCEDURE=p9c_mss_draminit_training_advanced
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-OBJS+=p9c_mss_mcbist.o
-OBJS+=p9c_mss_mcbist_common.o
-OBJS+=p9c_mss_mcbist_address.o
-OBJS+=p9c_mss_generic_shmoo.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_mcbist
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_mcbist_common
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_mcbist_address
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_generic_shmoo
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_termination_control
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors

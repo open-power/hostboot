@@ -193,7 +193,8 @@ fapi2::ReturnCode p9c_mss_draminit_training_advanced(const fapi2::Target<fapi2::
     // Skips training advanced completely if VREF cal control is disable
     if(vref_cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_DISABLE)
     {
-        FAPI_INF("%s has training advanced disabled, skipping it.", mss::c_str(i_target_mba));
+        FAPI_INF("%s has training advanced disabled. Only running unmask errors.", mss::c_str(i_target_mba));
+        FAPI_TRY(mss_unmask_draminit_training_advanced_errors(i_target_mba), "Unmask Function Failed");
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
