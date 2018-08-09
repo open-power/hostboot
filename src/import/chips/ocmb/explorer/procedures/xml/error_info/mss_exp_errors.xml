@@ -39,4 +39,25 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_EXP_STATUS_CODE_UNSUCCESSFUL</rc>
+    <description>
+      Explorer status code for command ID EXP_FW_STATUS
+      did not return SUCCESS
+    </description>
+    <ffdc>STATUS_CODE</ffdc>
+    <ffdc>CMD_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
