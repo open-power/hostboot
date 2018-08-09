@@ -130,17 +130,24 @@ bool conditional(const T i_field,
 /// @brief Helper function to extract byte information
 /// @tparam F the field to extract
 /// @tparam T the fapi2 target type
+/// @tparam IT data input type
+/// @tparam OT data output type
+/// @tparam FFDC ffdc code type
 /// @param[in] i_target the fapi2 target
 /// @param[in] i_data the data
 /// @param[in] i_ffdc_codes FFDC code
 /// @param[out] o_value raw value for this field
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F, fapi2::TargetType T >
+template< const field_t& F,
+          fapi2::TargetType T,
+          typename IT,
+          typename OT,
+          typename FFDC >
 fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
-                            const std::vector<uint8_t>& i_data,
-                            const generic_ffdc_codes i_ffdc_codes,
-                            uint8_t& o_value)
+                            const std::vector<IT>& i_data,
+                            const FFDC i_ffdc_codes,
+                            OT& o_value)
 {
     constexpr size_t BYTE = F.get_byte();
 
@@ -157,8 +164,8 @@ fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
 
     {
         // Extracting desired bits
-        const fapi2::buffer<uint8_t> l_buffer(i_data[BYTE]);
-        l_buffer.extractToRight<F.get_start(), F.get_length()>(o_value);
+        const fapi2::buffer<OT> l_buffer(i_data[BYTE]);
+        l_buffer.template extractToRight<F.get_start(), F.get_length()>(o_value);
 
         FAPI_DBG("%s data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
                  spd::c_str(i_target),
@@ -179,17 +186,24 @@ fapi_try_exit:
 /// @brief Helper function to set byte field information
 /// @tparam F the field to extract
 /// @tparam T the fapi2 target type
+/// @tparam IT data input type
+/// @tparam OT data output type
+/// @tparam FFDC ffdc code type
 /// @param[in] i_target the fapi2 target
 /// @param[in] i_setting the setting to set
 /// @param[in] i_ffdc_codes FFDC code
 /// @param[in,out] io_data the data to modify
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F, fapi2::TargetType T >
+template< const field_t& F,
+          fapi2::TargetType T,
+          typename IT,
+          typename OT,
+          typename FFDC >
 fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
-                            const size_t i_setting,
-                            const generic_ffdc_codes i_ffdc_codes,
-                            std::vector<uint8_t>& io_data)
+                            const IT i_setting,
+                            const FFDC i_ffdc_codes,
+                            std::vector<OT>& io_data)
 {
     constexpr size_t BYTE = F.get_byte();
 
@@ -206,10 +220,10 @@ fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 
     {
         // Insert desired setting
-        fapi2::buffer<uint8_t> l_buffer(io_data[BYTE]);
-        l_buffer.insertFromRight<F.get_start(), F.get_length()>(i_setting);
+        fapi2::buffer<OT> l_buffer(io_data[BYTE]);
+        l_buffer.template insertFromRight<F.get_start(), F.get_length()>(i_setting);
 
-        io_data[BYTE] = static_cast<uint8_t>(l_buffer);
+        io_data[BYTE] = static_cast<OT>(l_buffer);
 
         FAPI_DBG("%s data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
                  spd::c_str(i_target),
@@ -243,10 +257,11 @@ template< const field_t& F,
           typename TT,
           fapi2::TargetType T,
           typename IT,
-          typename OT >
+          typename OT,
+          typename FFDC >
 inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                                     const std::vector<IT>& i_data,
-                                    const generic_ffdc_codes i_ffdc_codes,
+                                    const FFDC i_ffdc_codes,
                                     OT& o_value )
 {
     IT l_temp = 0;
@@ -291,6 +306,7 @@ fapi_try_exit:
 /// @tparam T the fapi2 target type
 /// @tparam IT data input type
 /// @tparam OT data output type
+/// @tparam FFDC ffdc code type
 /// @param[in] i_target the dimm target
 /// @param[in] i_setting value to set for field
 /// @param[in] i_ffdc_codes FFDC code
@@ -301,10 +317,11 @@ template< const field_t& F,
           typename TT,
           fapi2::TargetType T,
           typename IT,
-          typename OT >
+          typename OT,
+          typename FFDC >
 fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
-                             const size_t i_setting,
-                             const generic_ffdc_codes i_ffdc_codes,
+                             const IT i_setting,
+                             const FFDC i_ffdc_codes,
                              std::vector<OT>& io_data )
 {
     constexpr size_t BYTE = F.get_byte();

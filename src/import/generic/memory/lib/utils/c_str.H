@@ -137,7 +137,8 @@ namespace spd
 /// @param[in] i_target - target you want the name for
 /// @return const char *
 ///
-inline const char* c_str( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
+template < fapi2::TargetType T >
+inline const char* c_str( const fapi2::Target<T>& i_target )
 {
     fapi2::toString( i_target, c_str_storage, fapi2::MAX_ECMD_STRING_LEN );
     return c_str_storage;
