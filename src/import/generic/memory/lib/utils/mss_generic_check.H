@@ -49,6 +49,7 @@ namespace check
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
 /// @tparam IT input data type
+/// @tparam FFDC error callout code type
 /// @param[in] i_target fapi2 target
 /// @param[in] i_conditional conditional that we are testing against
 /// @param[in] i_byte_index byte index
@@ -57,12 +58,12 @@ namespace check
 /// @param[in] i_err_str error string - defaulted to ""
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< fapi2::TargetType T, typename IT >
+template< fapi2::TargetType T, typename IT , typename FFDC >
 inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                                        const bool i_conditional,
                                        const size_t i_byte_index,
                                        const IT i_data,
-                                       const generic_ffdc_codes i_ffdc_codes,
+                                       const FFDC i_ffdc_codes,
                                        const char* i_err_str = "")
 {
     FAPI_ASSERT(i_conditional,
@@ -78,6 +79,7 @@ inline fapi2::ReturnCode invalid_value(const fapi2::Target<T>& i_target,
                 i_data);
 
     return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 
