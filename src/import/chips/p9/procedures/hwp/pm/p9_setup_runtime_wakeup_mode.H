@@ -23,7 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#if 0
 #ifndef __RUN_TIME_WAKEUP_MODE_
 #define __RUN_TIME_WAKEUP_MODE_
 
@@ -55,5 +54,3 @@ extern "C"
 } //extern "C"
 
 #endif  //__RUN_TIME_WAKEUP_MODE_
-
-#endif
