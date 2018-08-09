@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -99,6 +99,10 @@ include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training_adv.mk
 
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist_common.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mcbist_address.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_generic_shmoo.mk
 include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit.mk
 include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_mc.mk
 include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_training.mk
