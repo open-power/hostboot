@@ -12,6 +12,8 @@ if ($model == "p9_cumulus") {
     if ($machine_name == "CUMULUS_CDIMM") { $hb_machine = "cumulus_cdimm" }
     if ($machine_name != "CUMULUS_CDIMM") { $hb_machine = "cumulus" }
 }
+if ($model == "p9_axone") {$hb_machine = "axone"}
+
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 

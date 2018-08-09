@@ -1179,17 +1179,11 @@
       <id>ISTEP_PAUSE_ENABLE</id>
     </attribute>
     <attribute>
-      <id>ISTEP_PAUSE_ENABLE</id>
-    </attribute>
-    <attribute>
       <default>0x0006030000000000</default>
       <id>LPC_BUS_ADDR</id>
     </attribute>
     <attribute>
       <default>43</default>
-      <id>MAX_CHIPLETS_PER_PROC</id>
-    </attribute>
-    <attribute>
       <id>MAX_CHIPLETS_PER_PROC</id>
     </attribute>
     <attribute>
@@ -1205,9 +1199,6 @@
       <id>MAX_EXS_PER_PROC_CHIP</id>
     </attribute>
     <attribute>
-      <id>MAX_EXS_PER_PROC_CHIP</id>
-    </attribute>
-    <attribute>
       <id>MAX_MBAS_PER_MEMBUF_CHIP</id>
     </attribute>
     <attribute>
@@ -1215,12 +1206,6 @@
     </attribute>
     <attribute>
       <id>MAX_MCS_PER_SYSTEM</id>
-    </attribute>
-    <attribute>
-      <id>MAX_MCS_PER_SYSTEM</id>
-    </attribute>
-    <attribute>
-      <id>MAX_PROC_CHIPS_PER_NODE</id>
     </attribute>
     <attribute>
       <id>MAX_PROC_CHIPS_PER_NODE</id>

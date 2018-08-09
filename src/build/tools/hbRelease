@@ -65,7 +65,9 @@ if((defined $ENV{'FIPS_RELEASE'}) and
                    "src/hbfw/cumulus/cumulus.pnor ".
                    "src/hbfw/cumulus/simics.tar ".
                    "src/hbfw/cumulus_cdimm/cumulus_cdimm.pnor ".
-                   "src/hbfw/cumulus_cdimm/simics.tar ";
+                   "src/hbfw/cumulus_cdimm/simics.tar ".
+                   "src/hbfw/axone/axone.pnor ".
+                   "src/hbfw/axone/simics.tar ";
 }
 
 # Directory to look up latest release tag for a specific release

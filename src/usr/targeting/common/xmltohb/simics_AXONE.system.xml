@@ -1,0 +1,614 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/simics_AXONE.system.xml $    -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+<version>1.0.0</version>
+
+<!-- =====================================================================
+     HOST BOOT TARGET INSTANCES
+     Contains target instance declarations for the Simics Axone
+     configuration
+     * Maximum amount of Axone chips in this Simics model is TBD.
+     * Currently created for 1 chip and will be expanded as needed.
+     * Each Axone has 6 EQ units
+     *     Each EQ unit has 2 EX units (a total of 12 per chip)
+     *         Each EX has 2 cores, 1 L2, 1 L3 (a total of 24 cores per chip)
+     * Each Axone has has 2 MC units
+     *     Each MC unit has 2 MI units (a total of 4 per chip)
+     *         Each MI unit has 2 MCC units (a total of 8 per chip)
+     *         Each MCC unit has 4 OMI Units (A total of 16 per chip)
+     *           OMI Units are special as they have two parents (MI + OMIC (more description below))
+     *           Each OMI unit connects to 1 OCMB chip
+     *             Each OCMB unit contains 1 MEM_PORT unit
+     *               Each MEM_PORT unit connects to 2 DIMMS  (Only 1 dimm per mem_port in this XML)
+     *     Each MC unit has 3 OMIC units (a total of 12 per chip)
+     *           Each OMIC unit contains 2 or 3 OMI Units (OMIC0/1/3/4 contain 3 and OMIC2/5 contain 2 for a total of 16 per chip)
+     *             OMI Units are special as they have two parents (OMIC + MCC (described above))
+     * Each Axone has 3 PECs
+     *     PEC 0 has 1 PHB
+     *     PEC 1 has 2 PHBs
+     *     PEC 2 has 3 PHBs
+     * Each Axone has 1 XBUS chiplet (1 XBUS Chiplet translates to multiple xbus units)
+     * Each Axone has 4 OBUS (OB0 to OB3)
+     *     Each OBUS has 3 OBUS_BRICK
+     * Each Axone has 21 PPE units (including the SBE):
+     *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.
+     * Each chiplet existing in an Axone has 1 equivalent PERV unit
+     * Each Axone has 2 CAPP units  ##TBD## has 2 sys0node0proc0capp0 units
+     *    with same target ID...input MRW has capp0 and capp1...something
+     *    wrong in the processMrw.pl (same observed for Witherspoon)
+     * Each Axone has 1 OCC unit
+
+    - p9Proc0(axone chip)
+              - mc0
+                - - mi0
+                - - - mcc0
+                - - - - omi0
+                - - - - omi1
+                - - - mcc1
+                - - - - omi2
+                - - - - omi3
+                - - mi1
+                - - - mcc2
+                - - - - omi4
+                - - - - omi5
+                - - - mcc3
+                - - - - omi6
+                - - - - omi7
+                - - omic0 - - (connects to) - - proc0/mc0/mi1/mcc0/omi0 (omi4)
+                                            - -                   /omi1 (omi5)
+                                            - -              /mcc1/omi0 (omi6)
+
+                - - omic1 - - (connects to) - - proc0/mc0/mi1/mcc1/omi1 (omi7)
+                                            - -          /mi0/mcc1/omi0 (omi2)
+                                            - -                   /omi1 (omi3)
+
+                - - omic2 - - (connects to) - - proc0/mc0/mi0/mcc0/omi0 (omi0)
+                                            - -                    omi1 (omi1)
+
+              - mc1
+                - - mi0
+                - - - mcc0
+                - - - - omi0
+                - - - - omi0
+                - - - mcc0
+                - - - - omi0
+                - - - - omi1
+                - - mi1
+                - - - mcc0
+                - - - - omi0
+                - - - - omi1
+                - - - mcc1
+                - - - - omi0
+                - - - - omi1
+                - - omic3 - - (connects to) - - proc0/mc1/mi1/mcc0/omi0 (omi12)
+                                            - -                   /omi1 (omi13)
+                                            - -              /mcc1/omi0 (omi14)
+
+                - - omic4 - - (connects to) - - proc0/mc1/mi1/mcc1/omi1 (omi15)
+                                            - -          /mi0/mcc1/omi1 (omi0)
+                                            - -                   /omi1 (omi1)
+
+                - - omic5 - - (connects to) - - proc0/mc1/mi0/mcc0/omi0 (omi8)
+                                            - -                    omi1 (omi9)
+
+    ***********************************************************************************
+    * RTC TODO 197498 - Fix these Names after getting an Axone Model:
+
+    **** Information from Simics team ****
+    - Axone Planar
+    - p9Proc0(Axone chip)
+    - MobyDick0(memory riser card)
+       - centaur-0)
+            (isdimms)
+          - IsDimm0_0_0_0
+          - IsDimm0_0_0_1
+          - IsDimm0_0_0_2
+          - IsDimm0_0_0_3
+       - -centaur-1)
+          - IsDimm0_0_1_0
+          - IsDimm0_0_1_1
+          - IsDimm0_0_1_2
+          - IsDimm0_0_1_3
+    - p9Proc0.sbe.ppe(SBE PPE core)
+    - OccComplex0(OCC complex)
+          - OccComplex0.PowmanOccSlot.gpe_ppe0(OCC GPE-0)
+          - OccComplex0.PowmanOccSlot.gpe_ppe1(OCC GPE-1)
+          - OccComplex0.PowmanOccSlot.gpe_ppe2(OCC GPE-2)
+          - OccComplex0.PowmanOccSlot.gpe_ppe0(OCC GPR-3)
+     - proc_p9chip0.tpm_chip(TPM Module)
+     - bmc0(AST2400 Chip that contains : NOR Flash, SIO, LPC and IPMI Responder model)
+
+    Summary:
+      - 1 Axone chip
+      - 8 DIMM's
+      - 1 SBE PPE
+      - 4 OCC GPE
+      - 1 TPM Module
+      - 1 BMC
+     ================================================================= -->
+
+<!-- ===================================================================== -->
+<!-- System Unit -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0</id>
+    <type>sys-sys-power9</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>O_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>O_EREPAIR_THRESHOLD_MNFG</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>SYS</default>
+    </attribute>
+    <attribute>
+        <id>EXECUTION_PLATFORM</id>
+        <default>1</default> <!-- HOST = 0x01 -->
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>k0</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_MEM_REFCLOCK</id>
+        <default>133</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PROC_REFCLOCK</id>
+        <default>133</default>
+    </attribute>
+    <attribute>
+        <id>FREQ_PB_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
+        <id>HB_SETTINGS</id>
+        <default>
+            <field><id>reserved</id><value/></field>
+            <field><id>traceContinuous</id><value/></field>
+            <field><id>traceFapiDebug</id><value/></field>
+            <field><id>traceScanDebug</id><value/></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00010000</default>
+    </attribute>
+    <attribute>
+        <id>IS_SIMULATION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MAX_CHIPLETS_PER_PROC</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+        <id>MAX_DIMMS_PER_MBA_PORT</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MAX_EXS_PER_PROC_CHIP</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>MAX_MBA_PORTS_PER_MBA</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MAX_PROC_CHIPS_PER_NODE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>MEM_MIRROR_PLACEMENT_POLICY</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>MRW_DDR3_VDDR_MAX_LIMIT</id>
+        <default>1425</default>
+    </attribute>
+    <attribute>
+        <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
+        <default>1260</default>
+    </attribute>
+    <attribute>
+        <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
+        <default>512</default>
+    </attribute>
+    <attribute>
+        <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
+        <default>3881</default>
+    </attribute>
+    <attribute>
+        <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
+        <default>3449</default>
+    </attribute>
+    <attribute>
+        <id>MSS_INTERLEAVE_ENABLE</id>
+        <default>0x06</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+        <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>MSS_VOLT_DDR3_VDDR_INTERCEPT</id>
+        <default>1425</default>
+    </attribute>
+    <attribute>
+        <id>MSS_VOLT_DDR3_VDDR_SLOPE</id>
+        <default>1375</default>
+    </attribute>
+    <attribute>
+        <id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id>
+        <default>1225</default>
+    </attribute>
+    <attribute>
+        <id>MSS_VOLT_DDR4_VDDR_SLOPE</id>
+        <default>425</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_BASE</id>
+                     <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+                    <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>NONE</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_EPS_TABLE_TYPE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PROC_FABRIC_PUMP_MODE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>REDUNDANT_CLOCKS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>SP_FUNCTIONS</id>
+        <default>
+            <field><id>baseServices</id><value>1</value></field>
+            <field><id>fsiMasterInit</id><value>1</value></field>
+            <field><id>fsiSlaveInit</id><value>1</value></field>
+            <field><id>hardwareChangeDetection</id><value>1</value></field>
+            <field><id>mailboxEnabled</id><value>0</value></field>
+            <field><id>powerLineDisturbance</id><value>1</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>SYS</default>
+    </attribute>
+    <attribute>
+        <id>X_EREPAIR_THRESHOLD_FIELD</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>X_EREPAIR_THRESHOLD_MNFG</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- ===================================================================== -->
+<!-- Node Unit -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0</id>
+    <type>enc-node-power9</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x40</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00020000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NODE</default>
+    </attribute>
+</targetInstance>
+
+<!-- ===================================================================== -->
+<!-- Proc Units -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0proc0</id>
+    <type>chip-processor-axone</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>CHIP</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_SBE_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x04</value></field>
+            <field><id>devAddr</id><value>0xA8</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x100</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_SBE_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x04</value></field>
+            <field><id>devAddr</id><value>0xA8</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x100</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x80</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>1</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x80</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>writeCycleTime</id><value>0x0A</value></field>
+            <field><id>writePageSize</id><value>0x80</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_GROUP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>pu:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:na</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0xFF</default>
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>MFSI</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>
+            <field><id>flipPort</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSP_BASE_ADDR</id>
+        <default>0x0006030100000000</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00050000</default>
+    </attribute>
+    <attribute>
+        <id>I2C_BUS_SPEED_ARRAY</id>
+        <default>400,400,0,0,0,0,0,0,0,0,0,0,0,
+                 400,400,400,400,0,0,0,0,0,0,0,0,0,
+                 400,400,0,0,0,0,0,0,0,0,0,0,0,
+                 0,0,0,0,0,0,0,0,0,0,0,0,0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00010000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>1</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>1</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PROC_EFF_FABRIC_CHIP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_EFF_FABRIC_GROUP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VCS_UOHM</id>
+        <default>0x640</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDD_UOHM</id>
+        <default>0xAA</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_DISTLOSS_VDN_UOHM</id>
+        <default>0xAA</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VCS_UOHM</id>
+        <default>0x1F4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDD_UOHM</id>
+        <default>0x1F4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_R_LOADLINE_VDN_UOHM</id>
+        <default>0x1F4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VCS_UV</id>
+        <default>0x30D4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDD_UV</id>
+        <default>0x30D4</default>
+    </attribute>
+    <attribute>
+        <id>PROC_VRM_VOFFSET_VDN_UV</id>
+        <default>0x30D4</default>
+    </attribute>
+    <attribute>
+        <id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>useFsiScom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>useSbeScom</id><value>0</value></field>
+            <field><id>useXscom</id><value>1</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>PROC</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+</attributes>
