@@ -94,6 +94,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_CUMULUS.system.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_CUMULUS_CDIMM.system.xml:openpower \
+    src/usr/targeting/common/xmltohb/simics_AXONE.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
@@ -269,12 +270,15 @@ fsp.tar_CONTENTS = \
     img/simics_NIMBUS_targeting.bin \
     img/simics_CUMULUS_targeting.bin \
     img/simics_CUMULUS_CDIMM_targeting.bin \
+    img/simics_AXONE_targeting.bin \
     img/simics_NIMBUS_targeting.bin.protected \
     img/simics_NIMBUS_targeting.bin.unprotected \
     img/simics_CUMULUS_targeting.bin.protected \
     img/simics_CUMULUS_targeting.bin.unprotected \
     img/simics_CUMULUS_CDIMM_targeting.bin.protected \
     img/simics_CUMULUS_CDIMM_targeting.bin.unprotected \
+    img/simics_AXONE_targeting.bin.protected \
+    img/simics_AXONE_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \
