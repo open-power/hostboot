@@ -22,3 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file exp_i2c.C
+/// @brief explorer I2C utility function implementation
+///
+// *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB:FSP
+
+#include <lib/i2c/exp_i2c.H>
+
+namespace mss
+{
+namespace exp
+{
+
+
+}// exp
+}// mss
