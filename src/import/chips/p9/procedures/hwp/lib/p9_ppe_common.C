@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,9 +230,10 @@ fapi2::ReturnCode pollHaltStateDone(
     while (! l_data64.getBit<0>() &&
            --l_timeout_count != 0);
 
-    // @todo Add error
-//where is this defined?   FAPI_ASSERT(l_data64.getBit<0>(), fapi2::P9_PPE_STATE_HALT_TIMEOUT_ERR(),
-//where is this defined?               "PPE Halt Timeout");
+    FAPI_ASSERT(l_data64.getBit<0>(),
+                fapi2::P9_PPE_STATE_HALT_TIMEOUT_ERR()
+                .set_TARGET(i_target),
+                "PPE Halt Timeout");
 
 
 fapi_try_exit:
