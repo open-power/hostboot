@@ -76,11 +76,11 @@ inline ReturnCode getI2c(const Target<K, V>& i_target,
 ///
 /// Example use (seeprom write 4 bytes of zeros w/ 2-byte address: 0x0208):
 /// std::vector<uint8_t> addr_data = {0x02, 0x08, 0x00, 0x00, 0x00, 0x00};
-/// FAPI_TRY(getI2c(target, addr_data));
+/// FAPI_TRY(putI2c(target, addr_data));
 ///
 /// Example use (smbus write 1 data length byte + 4 bytes of zeros w/ 1-byte command: 0x01):
 /// std::vector<uint8_t> command_data = {0x01, 0x04, 0x00, 0x00, 0x00, 0x00};
-/// FAPI_TRY(getI2c(target, command_data));
+/// FAPI_TRY(putI2c(target, command_data));
 ///
 /// @tparam K the type (Kind) of target, from i_target
 /// @tparam V the type of the target's Value, from i_target
