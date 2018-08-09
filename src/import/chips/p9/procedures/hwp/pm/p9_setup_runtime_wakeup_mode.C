@@ -33,15 +33,14 @@
 /// *HWP Consumed by:    Hostboot
 //
 
-#if 0
 #include <p9_setup_runtime_wakeup_mode.H>
 #include <p9_quad_scom_addresses.H>
 
 enum
 {
-    RUN_TIME_WAKEUP_MODE_BIT_POS    =   59,
+    RUN_TIME_WAKEUP_MODE_BIT_POS    =   3,
+    HV_COMPATIBILITY_MODE_BIT_POS   =   4,
 };
-
 
 fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
     const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget )
@@ -58,6 +57,8 @@ fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
                            l_smfEnabled),
              "Error from FAPI_ATTR_GET for attribute ATTR_SMF_ENABLED ");
 
+    FAPI_DBG("SMF Status : %s", l_smfEnabled ? "Enabled" : "Disabled" );
+
     for( auto core : l_coreList )
     {
         FAPI_TRY(fapi2::getScom(i_procTarget, C_CPPM_CPMMR, l_wakeupMode),
@@ -67,14 +68,15 @@ fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
 
         if( l_smfEnabled )
         {
-            FAPI_DBG("SMF Enabled");
             //Wakeup in Ultravisor mode
             l_wakeupMode.clearBit( RUN_TIME_WAKEUP_MODE_BIT_POS );
+            l_wakeupMode.clearBit( HV_COMPATIBILITY_MODE_BIT_POS );
         }
         else
         {
             //Wakeup in Hypervisor mode
             l_wakeupMode.setBit( RUN_TIME_WAKEUP_MODE_BIT_POS );
+            l_wakeupMode.setBit( HV_COMPATIBILITY_MODE_BIT_POS );
         }
 
         FAPI_TRY(fapi2::putScom(core, C_CPPM_CPMMR, l_wakeupMode),
@@ -88,5 +90,3 @@ fapi_try_exit:
     FAPI_INF("< p9_setup_runtime_wakeup_mode" );
     return fapi2::current_err;
 }
-
-#endif

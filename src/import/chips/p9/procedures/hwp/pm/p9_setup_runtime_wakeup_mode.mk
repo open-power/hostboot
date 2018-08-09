@@ -22,5 +22,5 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-#PROCEDURE = p9_setup_runtime_wakeup_mode
-#$(call BUILD_PROCEDURE)
+PROCEDURE = p9_setup_runtime_wakeup_mode
+$(call BUILD_PROCEDURE)
