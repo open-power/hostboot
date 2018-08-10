@@ -39,7 +39,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/scom.H>
-#include <lib/shared/mss_const.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -132,15 +132,15 @@ struct poll_parameters
 };
 
 ///
-/// @brief Poll a scom, return whether the poll croteria were met or not
-/// @tparam T, the fapi2::TargetType
-/// @tparam L, a lambda representing the completion criteria - returns true
-/// @tparam P, the fapi2::TargetType of the target in the probe vector
+/// @brief Poll a scom, return whether the poll criteria were met or not
+/// @tparam T the fapi2::TargetType
+/// @tparam L a lambda representing the completion criteria - returns true
+/// @tparam P the fapi2::TargetType of the target in the probe vector
 /// iff the poll criteria have been met (and the polling can stop)
-/// @param[in] i_target, target for the getScom
-/// @param[in] i_addr, the address for the scom
-/// @param[in] i_params, a poll_parameters structure
-/// @param[in] i_fn, the function to call to check the poll criteria
+/// @param[in] i_target target for the getScom
+/// @param[in] i_addr the address for the scom
+/// @param[in] i_params a poll_parameters structure
+/// @param[in] i_fn the function to call to check the poll criteria
 /// [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
 ///    {
 ///        return true;
@@ -195,6 +195,55 @@ inline bool poll(const fapi2::Target<T>& i_target,
 
 fapi_try_exit:
     FAPI_ERR("mss::poll() hit an error in fapi2::delay or mss::getScom");
+    return false;
+}
+
+///
+/// @brief A generic poll that return whether the poll criteria were met
+/// @tparam T the fapi2::TargetType
+/// @tparam L a lambda representing the completion criteria - returns true
+/// @param[in] i_target target for the getScom
+/// @param[in] i_params a poll_parameters structure
+/// @param[in] i_fn the function to call to check the poll criteria
+/// [capture_by_value]() -> bool
+///    {
+///        return true;
+///    }
+/// @return bool, true iff poll criteria was met before the number of iterations
+/// ran out.
+/// @warning If you want to handle a failure as an error, you need to wrap
+/// the call to poll() in a FAPI_ASSERT. FAPI_TRY is *not* the right mechanism
+/// as poll() does not return a fapi2::ReturnCode
+///
+template< fapi2::TargetType T, typename L >
+inline bool poll(const fapi2::Target<T>& i_target,
+                 const poll_parameters i_params,
+                 L i_fn)
+{
+    FAPI_DBG("%s polling initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
+             mss::c_str(i_target), i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
+             i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_poll_count);
+
+    // We know to wait this long before polling
+    FAPI_TRY( fapi2::delay(i_params.iv_initial_delay, i_params.iv_initial_sim_delay) );
+
+    for ( size_t l_poll_limit = i_params.iv_poll_count; l_poll_limit > 0; --l_poll_limit )
+    {
+        if (i_fn())
+        {
+            FAPI_DBG("%s polling finished. %d iterations remaining" , mss::c_str(i_target), l_poll_limit);
+            return true;
+        }
+
+        FAPI_TRY( fapi2::delay(i_params.iv_delay, i_params.iv_sim_delay) );
+    }
+
+    // If we're here, we ran out of poll iterations
+    FAPI_INF("%s WARNING: Timeout on polling", mss::c_str(i_target));
+    return false;
+
+fapi_try_exit:
+    FAPI_ERR("mss::poll() hit an error in fapi2::delay");
     return false;
 }
 
