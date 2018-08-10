@@ -35,7 +35,7 @@
   <valueType>uint8</valueType>
   <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
   <platInit/>
-  <persistRuntime/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -47,7 +47,7 @@
   </description>
   <valueType>uint64</valueType>
   <platInit/>
-  <persistRuntime/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************* -->
 
