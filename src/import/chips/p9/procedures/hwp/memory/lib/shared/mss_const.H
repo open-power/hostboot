@@ -61,7 +61,6 @@ enum sizes
     MAX_RANK_PAIRS = 4,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     RANK_MID_POINT = 4,            ///< Which rank number indicates the switch to the other DIMM
-    DEFAULT_POLL_LIMIT = 50,       ///< the number of poll attempts in the event we can't calculate another
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
@@ -120,6 +119,7 @@ enum sizes
 
 enum times
 {
+    // Not *exactly* a time but go with i
     BG_SCRUB_IN_HOURS       = 12,
 
     CMD_TIMEBASE            = 8192,     ///< Represents the timebase multiplier for the MCBIST inter cmd gap

@@ -43,6 +43,42 @@ namespace mss
 {
 
 ///
+/// @brief Common constants
+///
+enum common_consts
+{
+    DEFAULT_POLL_LIMIT = 50,       ///< the number of poll attempts in the event we can't calculate another
+};
+
+///
+/// @brief Common timings
+///
+enum common_timings
+{
+    DELAY_1NS               = 1,
+    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
+    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
+    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
+    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
+    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
+    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
+};
+
+///
+/// @brief Common conversions
+///
+enum conversions
+{
+    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
+    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
+    MHZ_TO_KHZ              = 1000,
+    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
+    NIBBLES_PER_BYTE = 2,
+    BITS_PER_NIBBLE = 4,
+    BITS_PER_BYTE = 8,
+};
+
+///
 /// @brief FFDC generic codes
 ///
 enum generic_ffdc_codes
@@ -190,27 +226,6 @@ enum guard_band : uint16_t
 };
 
 }// spd
-
-enum conversions
-{
-    NIBBLES_PER_BYTE = 2,
-    BITS_PER_NIBBLE = 4,
-    BITS_PER_BYTE = 8,
-
-    CONVERT_PS_IN_A_NS      = 1000,     ///< 1000 pico in an nano
-    CONVERT_PS_IN_A_US      = 1000000,  ///< 1000000 picos in a micro
-
-    DELAY_1NS               = 1,
-    DELAY_10NS              = 10 ,      ///< general purpose 10  ns delay for HW mode
-    DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
-    DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
-    DELAY_10US              = 10000,    ///< general purpose 1 usec delay for HW mode
-    DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
-    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
-
-    MHZ_TO_KHZ              = 1000,
-    SEC_IN_HOUR             = 60 * 60,  ///< seconds in an hour, used for scrub times
-};
 
 }// mss
 
