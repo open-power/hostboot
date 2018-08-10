@@ -41,8 +41,8 @@
     2133 = 2133,
     2400 = 2400
   </enum>
-  <writeable/>
   <platInit/>
+  <writeable/>
   <mssAccessorName>freq_pb_mhz</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
@@ -62,7 +62,6 @@
     2000 = 2000,
     2400 = 2400
   </enum>
-  <writeable/>
   <platInit/>
   <mssAccessorName>freq_mca_mhz</mssAccessorName>
 </attribute>
@@ -76,7 +75,6 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
-  <writeable/>
   <array>4</array>
 </attribute>
 <!-- ********************************************************************** -->
@@ -90,7 +88,7 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
-  <writeable/>
+  <writeable/><!-- only for sim tools -->
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -102,7 +100,6 @@
   </description>
   <valueType>uint32</valueType>
   <platInit/>
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -395,6 +392,7 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -453,6 +451,7 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -478,6 +477,7 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -858,9 +858,9 @@
   </description>
   <valueType>uint8</valueType>
   <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4,CHIP_CONTAINED = 0x8,NONHB_IPL = 0x10</enum>
-  <persistRuntime/>
   <writeable/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -891,8 +891,8 @@
       (excludes system/memory select/group/chip fields)
   </description>
   <valueType>uint64</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -908,8 +908,8 @@
       (excludes system/memory select/group/chip fields)
   </description>
   <valueType>uint64</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -941,7 +941,7 @@
     FLIPPED   = 0x1
   </enum>
   <platInit/>
-  <persistRuntime/>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -956,7 +956,6 @@
   <valueType>uint64</valueType>
   <array>8</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -972,7 +971,6 @@
   <valueType>uint64</valueType>
   <array>8</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -988,7 +986,6 @@
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -1004,7 +1001,6 @@
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -1025,8 +1021,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1043,8 +1037,6 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <enum>
       128_B = 0x00,
       256_B = 0x01,
@@ -1075,8 +1067,6 @@
     </description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array>8</array>
     <persistRuntime/>
 </attribute>
@@ -1112,8 +1102,6 @@
     <valueType>uint32</valueType>
     <array>16,21</array>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1127,8 +1115,6 @@
     </description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <persistRuntime/>
     <initToZero/>
 </attribute>
@@ -1162,7 +1148,6 @@
   </description>
   <valueType>uint64</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1193,7 +1178,6 @@
   </enum>
   <initToZero/>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 <!-- ********************************************************************** -->
@@ -1210,7 +1194,6 @@
   <valueType>uint64</valueType>
   <array>24</array>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1242,7 +1225,6 @@
   <array>24</array>
   <initToZero/>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1254,7 +1236,6 @@
   </description>
   <valueType>uint64</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1285,7 +1266,6 @@
   </enum>
   <initToZero/>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1301,6 +1281,7 @@
   </enum>
   <platInit/>
   <initToZero/>
+  <mrwHide/><!-- Temporary until the function is actually ready -->
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1327,7 +1308,6 @@
   </description>
   <valueType>uint64</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
 <attribute>
@@ -1358,7 +1338,6 @@
   </enum>
   <initToZero/>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -1373,7 +1352,6 @@
   <valueType>uint64</valueType>
   <array>8</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -1389,7 +1367,6 @@
   <valueType>uint64</valueType>
   <array>8</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -1405,7 +1382,6 @@
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -1421,7 +1397,6 @@
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
@@ -1438,7 +1413,6 @@
   <valueType>uint8</valueType>
   <array>8</array>
   <writeable/>
-  <persistRuntime/>
   <initToZero/>
 </attribute>
 <!-- ******************************************************************** -->

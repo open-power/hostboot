@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -42,7 +42,6 @@
     <description>Can choose mcbist address mode for full,half or quarter addressing mode.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -51,7 +50,6 @@
     <description></description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -60,7 +58,6 @@
     <description>Defines the start address for the Mcbist address range</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -69,7 +66,6 @@
     <description>Defines the end address for the Mcbist address range</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -78,7 +74,6 @@
     <description>Enables error capture; basically a flag.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -87,7 +82,6 @@
     <description>Define mcbist Max timeout</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -96,7 +90,6 @@
     <description>Enable which port prints are required.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -105,7 +98,6 @@
     <description>Flag to stop Mcbist on Error.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -114,7 +106,6 @@
     <description>Define data seed for the random data pattern or test</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -123,7 +114,6 @@
     <description>The address interleave map with user cases or deafult cases of BANK_RANK,RANK_BANK,BANK_ONLY,RANK_ONLYRANKS_DIMM0,RANKS_DIMM1,USER_PATTERN.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -132,7 +122,6 @@
     <description>User defined constraint for limiting number of rows for addressing.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -141,7 +130,6 @@
     <description>User defined constraint for limiting number of columns for addressing.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -150,7 +138,6 @@
     <description>User defined constraint for limiting number of ranks for addressing.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -159,7 +146,6 @@
     <description>User defined constraint for limiting number of banks for addressing.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -168,7 +154,6 @@
     <description>If slave ranks exists;Restrict usage or enable addressing on them as well.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -177,7 +162,6 @@
     <description>To Define custom addressing map ; Input by user.</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -186,7 +170,6 @@
     <description>Flag for Addressing to go sequential manner or random.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 </attributes>

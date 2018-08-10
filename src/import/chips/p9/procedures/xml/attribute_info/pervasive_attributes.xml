@@ -71,7 +71,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
   <valueType>uint16</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -80,8 +79,8 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Capturing EQ Gard value</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -89,8 +88,8 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Capturing EC Gard Value</description>
   <valueType>uint32</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -99,8 +98,8 @@
   <description>Indicates istep IPL</description>
   <valueType>uint8</valueType>
   <enum>NON_IPL = 0x0,IPL = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -109,8 +108,8 @@
   <description>Indicates that SBE should go directly to runtime functionality</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -119,8 +118,8 @@
   <description>Indicates whether we are connected to FSP or not</description>
   <valueType>uint8</valueType>
   <enum>FSP_LESS = 0x0,FSP = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -129,8 +128,8 @@
   <description>Indicates whether SBE should collect FFDC</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -140,8 +139,8 @@
       chipOp failure response</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -149,7 +148,6 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -158,7 +156,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select Filter PLL bucket</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -172,7 +169,6 @@
     If zero, VPD MK content will set ATTR_FILTER_PLL_BUCKET.
   </description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
   <initToZero/>
 </attribute>
@@ -196,7 +192,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS0 pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -205,7 +200,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS1 pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -214,7 +208,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS2 pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -223,7 +216,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS3 pll setting from one of the supported frequencies</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -241,7 +233,6 @@
   As an example: 3000MHz / (133MHz/8) = 3000 / 16.667 = ~180 => 0xB4
   </description>
   <valueType>uint16</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -252,8 +243,8 @@
       HWPs</description>
   <valueType>uint8</valueType>
   <enum>RL0 = 0x0,RL1 = 0x1,RL2 = 0x2,RL3 = 0x3,RL4 = 0x4, RL5 = 0x5</enum>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -263,8 +254,9 @@
   This flag is only applicable when security is disabled.</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
+  <default>FALSE</default>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -272,8 +264,8 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Set with Primary SEEPROM</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -281,8 +273,8 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Switch to using a flag to indicate SEEPROM side SBE</description>
   <valueType>uint32</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -290,9 +282,8 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>EQ boot frequency</description>
   <valueType>uint32</valueType>
-  <persistRuntime/>
   <platInit/>
-  <writeable/>
+  <default>2400</default>
 </attribute>
 
 <attribute>
@@ -300,7 +291,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -316,7 +306,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -337,7 +326,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>I2C Bus speed based on nest freq, ref clock</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -346,7 +334,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -355,7 +342,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -364,7 +350,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -373,7 +358,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>MC mesh to use Nest mesh or not</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <writeable/>
   <initToZero/>
   <enum>IN_SYNC = 1, NOT_IN_SYNC = 0</enum>
@@ -395,7 +379,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ring image for pb_bndy_dmipll ring creator: platform firmware notes:</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -404,7 +387,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ring image for pb_bndy_dmipll ring for DC cal creator: platform firmware notes:</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -413,7 +395,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll creator: platform firmware notes:</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -423,7 +404,6 @@
   <description>Indicates if SBE on this chip is serving as hosboot drawer master</description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -446,7 +426,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -455,7 +434,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -464,7 +442,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -473,7 +450,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -482,7 +458,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -491,7 +466,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>FIXME - NEEDS DESCRIPTION</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -502,8 +476,8 @@
     EX chiplets having good cores even if only a single EX chiplet mode is executed.
   </description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
+  <overrideOnly/>
 </attribute>
 
 <attribute>
@@ -512,7 +486,6 @@
   <description>Indicates the master boot core chiplet selected by p9_sbe_select_ex.
   </description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <writeable/>
 </attribute>
 
@@ -523,7 +496,6 @@
     by p9_sbe_select_ex.
   </description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <writeable/>
 </attribute>
 
@@ -568,8 +540,7 @@
         0b01     Half speed.
     </description>
     <valueType>uint8</valueType>
-    <persistRuntime/>
-    <platInit/>
+      <platInit/>
 </attribute>
 
 <attribute>
@@ -577,8 +548,7 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Pibmem repair attribute 0</description>
     <valueType>uint64</valueType>
-    <persistRuntime/>
-    <writeable/>
+      <writeable/>
 </attribute>
 
  <attribute>
@@ -586,8 +556,7 @@
      <targetType>TARGET_TYPE_SYSTEM</targetType>
      <description>Pibmem repair attribute 1</description>
      <valueType>uint64</valueType>
-     <persistRuntime/>
-     <writeable/>
+        <writeable/>
 </attribute>
 
  <attribute>
@@ -595,8 +564,7 @@
      <targetType>TARGET_TYPE_SYSTEM</targetType>
      <description>Pibmem repair attribute 2</description>
      <valueType>uint64</valueType>
-     <persistRuntime/>
-     <writeable/>
+        <writeable/>
 </attribute>
 
 <attribute>
@@ -654,7 +622,6 @@
   <initToZero></initToZero>
   <valueType>uint8</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -664,7 +631,6 @@
   <initToZero></initToZero>
   <valueType>uint8</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -674,7 +640,6 @@
   <description>Functional Target is scommable</description>
   <valueType>uint8</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -683,6 +648,7 @@
   <description>System Configurtion information - 1 indicates a chip present</description>
   <valueType>uint64</valueType>
   <platInit/>
+  <mrwHide/>
 </attribute>
 
 <attribute>
@@ -694,7 +660,6 @@
   <enum>NONE = 0, FIFTY_OHM = 1</enum>
   <valueType>uint8</valueType>
   <platInit/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -706,7 +671,6 @@
   <enum>NONE = 0, FIFTY_OHM = 1, ONE_HUNDRED_OHM = 3</enum>
   <valueType>uint8</valueType>
   <platInit/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -746,7 +710,6 @@
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Control NDL training:meshctrl setup</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <writeable/>
 </attribute>
 
@@ -768,7 +731,6 @@
   To allow skew function to be enabled/disabled. </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <initToZero/>
   <writeable/>
 </attribute>
@@ -780,7 +742,6 @@
   To allow dcadj function to be enabled/disabled. </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
-  <persistRuntime/>
   <initToZero/>
   <writeable/>
 </attribute>
@@ -790,7 +751,6 @@
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>MC pll bucket selection in async mode for Cumulus</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
 </attribute>
 
@@ -802,8 +762,8 @@
     we are going to use another proc's memory to boot. The attribute will be
     set to the chip and group ID of which proc we want to use.</description>
   <valueType>uint8</valueType>
-  <persistRuntime/>
   <platInit/>
+  <mrwHide/>
  </attribute>
 
  <attribute>
@@ -814,7 +774,6 @@
           This attribute saves the original value.</description>
   <valueType>uint64</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -825,7 +784,6 @@
           This attribute saves the original value.</description>
   <valueType>uint64</valueType>
   <writeable/>
-  <persistRuntime/>
 </attribute>
 
 </attributes>

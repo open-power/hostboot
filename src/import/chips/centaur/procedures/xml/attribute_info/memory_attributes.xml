@@ -49,7 +49,6 @@
     <valueType>uint8</valueType>
     <array> 2 2</array>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -61,7 +60,6 @@ consumer: mss_eff_cnfg, others
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -73,7 +71,6 @@ consumer: mss_eff_cnfg, others
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -85,9 +82,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <enum>AUTO = 0</enum>
     <platInit/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
+    <overrideOnly/>
 </attribute>
+
 <attribute>
     <id>ATTR_CEN_MSS_FREQ</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -97,9 +94,6 @@ consumer: mss_eff_cnfg, others
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -113,9 +107,7 @@ Set by: PLL settings written by Dave Cadigan</description>
     <valueType>uint32</valueType>
     <platInit/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
+    <overrideOnly/>
 </attribute>
 
 <attribute>
@@ -126,11 +118,9 @@ Set by: PLL settings written by Dave Cadigan</description>
 </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, P8_DRAM = 1, P8_RANK = 2, BOX = 3, TERNARY = 4</enum>
-    <default>0</default>
+    <default>DISABLE</default>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
+    <mrwHide/>
 </attribute>
 
 <attribute>
@@ -142,23 +132,7 @@ Set by: PLL settings written by Dave Cadigan</description>
     <valueType>uint8</valueType>
     <default>0x08</default>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_DIMM_MFG_ID_CODE</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2 2</array>
-</attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RANKS_CONFIGED</id>
@@ -170,10 +144,7 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -186,10 +157,7 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -203,9 +171,6 @@ NOTE: Do not use the enum type of CDIMM.  Use the attribute EFF_DIMM_CUSTOM to t
     <valueType>uint8</valueType>
     <enum>CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -217,9 +182,6 @@ Use this attribute if you need to know if the Centaur is on the DIMM instead of 
     <enum>NO = 0, YES = 1</enum>
     <platActionWrite/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -232,8 +194,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -246,8 +206,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -260,8 +218,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -275,8 +231,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -290,8 +244,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -305,8 +257,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -320,8 +270,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -335,8 +283,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -350,8 +296,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -365,8 +309,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -380,8 +322,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -395,8 +335,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -410,8 +348,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -425,8 +361,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -440,8 +374,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -455,8 +387,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -470,8 +400,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -485,8 +413,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>INVALID = 255</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -500,8 +426,6 @@ OBSOLETE: Use ATTR_CEN_VPD_DIMM_SPARE
     <valueType>uint8</valueType>
     <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 -->
@@ -519,8 +443,6 @@ This is for DDR3</description>
     <enum>VDD420 = 420, VDD425 = 425, VDD430 = 430, VDD435 = 435, VDD440 = 440, VDD445 = 445, VDD450 = 450, VDD455 = 455, VDD460 = 460, VDD465 = 465, VDD470 = 470, VDD475 = 475, VDD480 = 480, VDD485 = 485, VDD490 = 490, VDD495 = 495, VDD500 = 500, VDD505 = 505, VDD510 = 510, VDD515 = 515, VDD520 = 520, VDD525 = 525, VDD530 = 530, VDD535 = 535, VDD540 = 540, VDD545 = 545, VDD550 = 550, VDD555 = 555, VDD560 = 560, VDD565 = 565, VDD570 = 570, VDD575 = 575</enum>
     <platInit/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -530,8 +452,6 @@ This is for DDR3</description>
     <description>Enables for which VREF to use on the WR Schmoo.  The LSB corresponds to the highest WR Vref</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -542,8 +462,6 @@ This is for DDR3</description>
     <description>Enables for which VREF to use on the WR Schmoo.  The LSB corresponds to the highest WR Vref</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 -->
@@ -561,8 +479,6 @@ This is the nominal value</description>
 OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x18, OHM34_FFE0 = 0x07, OHM34_FFE480 = 0x47, OHM34_FFE240 = 0x37, OHM34_FFE160 = 0x27, OHM34_FFE120 = 0x17, OHM40_FFE0 = 0x06, OHM40_FFE480 = 0x46, OHM40_FFE240 = 0x36, OHM40_FFE160 = 0x26, OHM40_FFE120 = 0x16</enum>
     <platInit/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -572,71 +488,6 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
-This is the nominal value</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
-    <persistRuntime/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Centaur DQ and DQS Receiver Impedance Used in various locations and it comes from the VPD MT keyword for custom DIMMs or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-creator: VPD, mss_eff_cnfg_termination
-Consumer: initfile + C code
-firmware notes: none
-This is the nominal value</description>
-    <valueType>uint8</valueType>
-    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60,  OHM80 = 80, OHM120 = 120, OHM160 = 160, OHM240 = 240</enum>
-    <platInit/>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible receiver termination and start with the first value down to the last (largest) impedance as the LSB of the 32 bit field.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -654,10 +505,62 @@ SLEW_4V_NS = 4,
 SLEW_5V_NS = 5,
 SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7</enum>
-    <platInit/>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+
+<attribute>
+    <id>ATTR_CEN_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible driver strengths and start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Centaur DQ and DQS Receiver Impedance Used in various locations and it comes from the VPD MT keyword for custom DIMMs or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+creator: VPD, mss_eff_cnfg_termination
+Consumer: initfile + C code
+firmware notes: none
+This is the nominal value</description>
+    <valueType>uint8</valueType>
+    <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60,  OHM80 = 80, OHM120 = 120, OHM160 = 160, OHM240 = 240</enum>
+    <platInit/>
+    <writeable/>
+    <array> 2</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Enables for which impedance values can be used and tested in a timing test.  The bits have a one to one correspondence to the possible receiver termination and start with the first value down to the last (largest) impedance as the LSB of the 32 bit field.</description>
+    <valueType>uint32</valueType>
+    <writeable/>
     <array> 2</array>
 </attribute>
 
@@ -667,8 +570,6 @@ SLEW_MAXV_NS = 7</enum>
     <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -678,8 +579,6 @@ SLEW_MAXV_NS = 7</enum>
     <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -689,8 +588,6 @@ SLEW_MAXV_NS = 7</enum>
     <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -700,8 +597,6 @@ SLEW_MAXV_NS = 7</enum>
     <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -711,8 +606,6 @@ SLEW_MAXV_NS = 7</enum>
     <description>Slew Rates that can be selected during timing adjustments.  The fastest rate is the LSB</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -726,10 +619,7 @@ firmware notes: none
 This is the nominal value</description>
     <valueType>uint32</valueType>
     <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
-    <platInit/>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -739,8 +629,6 @@ This is the nominal value</description>
     <description>Enables for which VREF value can be used in timing adjustments.  The highest voltage corresponds to the LSB</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -753,10 +641,7 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -768,8 +653,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -781,8 +664,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -794,8 +675,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -807,8 +686,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -820,8 +697,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -833,8 +708,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -846,8 +719,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -859,8 +730,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -872,8 +741,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -885,8 +752,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -898,8 +763,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -911,8 +774,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -924,8 +785,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -937,8 +796,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -950,8 +807,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -963,8 +818,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -977,8 +830,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -990,8 +841,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1004,8 +853,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2, CL_MINUS_3 = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1017,8 +864,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1031,8 +876,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1045,8 +888,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NORMAL= 0, TEST = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1059,8 +900,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NO = 0, YES = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1072,8 +911,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1086,8 +923,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>SLOWEXIT = 0, FASTEXIT = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1100,8 +935,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>ENABLE = 0, DISABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1114,8 +947,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1128,8 +959,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1142,8 +971,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>ENABLE = 0, DISABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1156,8 +983,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>FULL = 0, FIRST_HALF = 1, FIRST_QUARTER = 2, FIRST_EIGHTH = 3, LAST_THREE_FOURTH = 4, LAST_HALF = 5, LAST_QUARTER = 6, LAST_EIGHTH = 7</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1170,8 +995,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>SRT = 0, ASR = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1184,8 +1007,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, EXTEND = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1197,8 +1018,6 @@ consumer: various
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1211,8 +1030,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1224,8 +1041,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1239,8 +1054,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -1257,8 +1070,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1272,8 +1083,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1286,8 +1095,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1300,8 +1107,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1314,8 +1119,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1328,8 +1131,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1342,8 +1143,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1357,8 +1156,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1371,8 +1168,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1385,8 +1180,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1399,8 +1192,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1413,8 +1204,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1427,8 +1216,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1441,8 +1228,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1455,8 +1240,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1469,8 +1252,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1483,8 +1264,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1497,8 +1276,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1511,8 +1288,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1525,8 +1300,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1539,8 +1312,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1553,8 +1324,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1567,8 +1336,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1581,8 +1348,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1595,8 +1360,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1609,8 +1372,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint8</valueType>
          <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1625,8 +1386,6 @@ firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -1642,8 +1401,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>IBT_BACK_OFF = 0, IBT_BACK_ON = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -1655,8 +1412,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1666,8 +1421,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1683,8 +1436,6 @@ firmware notes: none</description>
  RD_DQS = 0x10,
  BOX = 0x20</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1700,8 +1451,6 @@ firmware notes: none</description>
  RD_VREF = 0x10,
  RCV_IMP = 0x20</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1720,8 +1469,6 @@ firmware notes: none</description>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1730,8 +1477,6 @@ firmware notes: none</description>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1740,8 +1485,6 @@ firmware notes: none</description>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1750,8 +1493,6 @@ firmware notes: none</description>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1760,8 +1501,6 @@ firmware notes: none</description>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1771,8 +1510,6 @@ firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>DISABLE = 0</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1782,8 +1519,6 @@ firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>DISABLE = 0</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1793,8 +1528,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>UNDEFINED = 0, TYPE_1A = 1, TYPE_1B = 2, TYPE_1C = 3, TYPE_1D = 4, TYPE_2A = 5, TYPE_2B = 6, TYPE_2C = 7, TYPE_3A = 8, TYPE_3B = 9, TYPE_3C = 10, TYPE_4A = 11, TYPE_4B = 12, TYPE_4C = 13, TYPE_5A = 14, TYPE_5B = 15, TYPE_5C = 16, TYPE_5D = 17, TYPE_6A = 18, TYPE_6B = 19, TYPE_6C = 20, TYPE_7A = 21, TYPE_7B = 22, TYPE_7C = 23, TYPE_8A = 24, TYPE_8B = 25, TYPE_8C = 26</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1805,8 +1538,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>EMPTY = 0, SINGLE = 1, DUAL = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1816,8 +1547,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NONE = 0, DDP_QDP = 1, STACK_3DS = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1827,8 +1556,6 @@ firmware notes: none</description>
     <description>Specifies the number of master ranks per DIMM.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1838,8 +1565,6 @@ firmware notes: none</description>
     <description>Specifies the number of DRAM packages per rank.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1849,8 +1574,6 @@ firmware notes: none</description>
     <description>Specifies the number of DRAM dies per package.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1860,9 +1583,6 @@ firmware notes: none</description>
     <description>This is the throttle numerator setting for cfg_nm_n_per_mba creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1871,9 +1591,6 @@ firmware notes: none</description>
     <description>This is the throttle denominator setting for cfg_nm_m creator: mss_eff_cnfg consumer: mc_config  firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1882,9 +1599,6 @@ firmware notes: none</description>
     <description>This is the throttle numerator setting for cfg_nm_n_per_chip creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1893,9 +1607,6 @@ firmware notes: none</description>
     <description>Total memory power limit in cW for the dimms on the memory channel pair. Used to compute the throttles on the channel and/or dimms creator: unknown consumer: mss_eff_config firmware notes: none</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1904,10 +1615,7 @@ firmware notes: none</description>
     <description>Master Power slope value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1916,10 +1624,7 @@ firmware notes: none</description>
     <description>Supplier Power slope value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1928,10 +1633,7 @@ firmware notes: none</description>
     <description>Master Power intercept value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1940,10 +1642,7 @@ firmware notes: none</description>
     <description>Supplier Power intercept value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1952,10 +1651,7 @@ firmware notes: none</description>
     <description>Master Total Power slope value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1964,10 +1660,7 @@ firmware notes: none</description>
     <description>Supplier Total Power slope value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1976,10 +1669,7 @@ firmware notes: none</description>
     <description>Master Total Power intercept value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -1988,10 +1678,7 @@ firmware notes: none</description>
     <description>Supplier Total Power intercept value for dimm</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 
 <!--
@@ -2001,10 +1688,7 @@ firmware notes: none</description>
     <description>DIMM Max Bandwidth in GBs output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 -->
 
@@ -2015,10 +1699,7 @@ firmware notes: none</description>
     <description>DIMM Max Bandwidth in MRs output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 -->
 
@@ -2029,9 +1710,6 @@ firmware notes: none</description>
     <description>Channel Pair Max Bandwidth in GBs output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 -->
 
@@ -2042,9 +1720,6 @@ firmware notes: none</description>
     <description>Channel Pair Max Bandwidth MRs output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 -->
 
@@ -2055,10 +1730,7 @@ firmware notes: none</description>
     <description>DIMM Max Power output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
-    <persistRuntime/>
 </attribute>
 -->
 
@@ -2068,9 +1740,6 @@ firmware notes: none</description>
     <description>Channel Pair Max Power output from thermal procedures</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 <attribute>
     <id>ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
@@ -2078,9 +1747,6 @@ firmware notes: none</description>
     <description>Runtime throttle numerator setting for cfg_nm_n_per_mba</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2089,9 +1755,6 @@ firmware notes: none</description>
     <description>Runtime throttle denominator setting for cfg_nm_m</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2100,9 +1763,6 @@ firmware notes: none</description>
     <description>Runtime throttle numerator setting for cfg_nm_n_per_chip</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2111,8 +1771,6 @@ firmware notes: none</description>
     <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_mba</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2121,59 +1779,15 @@ firmware notes: none</description>
     <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_INTERLEAVE_ENABLE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Used in the setting of groups.  It is a bit vector.  If the value  BITWISE_AND  1 = 1 then groups of 1 are enabled with special checkerboard modes needed, if the value  BITWISE_AND  2 = 2, then groups of 2 are possible; if value  BITWISE_AND  4, the groups of 4 are possible; if value  BITWISE_AND  8, the groups of 8 are possible.  If no groups can formed according to this input, then an error will be thrown.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.  Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.   Used in the intifile. Will be obsolete when the MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT is set
-This attribute will only be found in a Tuelta system.
-</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.  Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.   Used in the intifile </description>
     <valueType>uint8</valueType>
-    <odmVisable/>
-    <odmChangeable/>
     <writeable/>
 </attribute>
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Value of on or off.  On is 256 bit interleave.  Off, the translation is on 128  bit interleave mode.  See centaur workbook chapter 5.  Will be obsolete when MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE is set.
-This attribute will only be alive in the Tuelta system.
-</description>
-    <valueType>uint8</valueType>
-    <enum>OFF = 0, ON = 1</enum>
-    <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
@@ -2181,8 +1795,6 @@ This attribute will only be alive in the Tuelta system.
     <description>Value of on or off.  On is 256 bit interleave.  Off, the translation is on 128  bit interleave mode.  See centaur workbook chapter 5.</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
-    <odmVisable/>
-    <odmChangeable/>
     <writeable/>
 </attribute>
 
@@ -2193,8 +1805,6 @@ This attribute will only be alive in the Tuelta system.
     <valueType>uint8</valueType>
     <enum>NEVER = 0, REQUIRED = 1, REQUESTED = 2</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2204,9 +1814,9 @@ This attribute will only be alive in the Tuelta system.
 Note: Cronus and Firmware plus our initfiles do not really support any of the UNK values.  It is the responsibility of the platform to map the UNK values to the appropriate value of OFF/ON/HALF_A/HALF_B</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1, HALF_A = 3, HALF_B = 5, UNK_OFF = 8, UNK_ON = 9, UNK_HALF_A = 0xB, UNK_HALF_B = 0xD</enum>
+    <default>ON</default>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
+    <mrwHide/>
 </attribute>
 
 <attribute>
@@ -2215,9 +1825,8 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
+    <default>ON</default>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2227,36 +1836,8 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_MEM_MC_IN_GROUP</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>A 8 bit vector that would be a designation of which MC are involved in the group. So the bits would represent MC0,MC1,MC2,MC3,MC4,MC5,MC6,MC7-what is grouped into the first would go into [0], the 2nd group into entry [1] and so on. set in the mss_setup_bars</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array>8</array>
-    <persistRuntime/>
-</attribute>
--->
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_MCS_GROUP_32</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>Data Structure from eff grouping to setup bars to help determine different groups
-Measured in GB</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array>16 16</array>
-</attribute>
--->
 <attribute>
     <id>ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
     <targetType>TARGET_TYPE_MBA</targetType>
@@ -2264,9 +1845,6 @@ Measured in GB</description>
 This factors in functionality</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2279,8 +1857,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>MANUAL_NORMAL =0, MANUAL_REDUCED = 1, MANUAL_EXTENDED = 2, ASR = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2293,8 +1869,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>PG0 = 0, PG1 = 1, PG2 = 2, PG3 = 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2307,8 +1881,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>HALF =0, QUARTER=1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2321,8 +1893,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 <attribute>
     <id>ATTR_CEN_EFF_TEMP_READOUT</id>
@@ -2334,8 +1904,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2348,8 +1916,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, FIXED_2X = 1, FIXED_4X = 2, FLY_2X = 5, FLY_4X = 6</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2362,8 +1928,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>4NCK = 4, 5NCK = 5, 6NCK = 6</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2376,8 +1940,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2, RESERVED_TEMP= 3</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2390,8 +1952,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2404,8 +1964,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, EXTEND = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2418,8 +1976,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2432,8 +1988,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2446,8 +2000,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2460,8 +2012,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2474,8 +2024,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2488,8 +2036,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>1NCLK = 1, 2NCLK = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2502,8 +2048,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>1NCLK = 1, 2NCLK = 2</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2516,8 +2060,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, PL4 = 4, PL5 = 5, PL6 = 6, PL8 = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2530,8 +2072,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>CLEAR = 0, ERROR = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2544,8 +2084,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>CLEAR = 0, ERROR = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2558,8 +2096,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>ACTIVATED = 0, DEACTIVATED = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <!--
@@ -2573,8 +2109,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 -->
@@ -2589,8 +2123,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2603,8 +2135,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2617,8 +2147,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2631,8 +2159,6 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2644,8 +2170,6 @@ Consumer:various
 Firmware notes: none</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -2659,8 +2183,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>RANGE1 = 0, RANGE2 = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -2674,8 +2196,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -2689,8 +2209,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <!--
@@ -2704,8 +2222,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 -->
 
@@ -2719,8 +2235,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2733,8 +2247,6 @@ Firmware notes: none</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2753,9 +2265,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
     <enum>EXT_ZQCAL = 0, WR_LVL = 1, DQS_ALIGN = 2, RDCLK_ALIGN = 3, RD_CTR = 4, WR_CTR = 5, COARSE_WR = 6, COARSE_RD = 7</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2764,24 +2273,10 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 1, ENABLE = 0</enum>
+    <default>ENABLE</default>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
+    <mrwHide/>
 </attribute>
-
-<!--
-<attribute>
-    <id>ATTR_CEN_MSS_MEM_IPL_COMPLETE</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>A numerical number indicating if the memory procedures are complete.  written by mss_setup_bars when the bars are now functional in the processor.  </description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <persistRuntime/>
-</attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_SLEW_RATE_DATA</id>
@@ -2789,8 +2284,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances.  The first dimension is port, the second is the impedance of 24,30,34, and 40 Ohms.  The 3rd dimension is the rate: 3,4,5 or 6 V/ns.  Computed and sent to the correct data blocks in phy_reset.  Also used in advanced training</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 4 4</array>
 </attribute>
 
@@ -2800,8 +2293,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>The 4 bit result of running the slew calibration algorithm at various rates and impedances.  The first dimension is the port.  The second is the impedance of 15, 20, 30 and 40 Ohms.  The 3rd dimension is the rate:3, 4,5 or 6 V/ns.  Computed and sent to the correct data blocks in phy_reset.  Also used in advanced training</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 4 4</array>
 </attribute>
 
@@ -2812,8 +2303,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
     <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2823,17 +2312,16 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
     <enum>NORMAL_TYPE_0 = 0, GLACIER_TYPE_1 = 1, ISDIMM_TYPE_2 = 2</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
+
 <attribute>
     <id>ATTR_CEN_MSS_PSRO</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Set by the centaur mss_get_cen_ecid function used diagnostic and chip characterization reporting</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
+
 <attribute>
     <id>ATTR_CEN_MSS_NWELL_MISPLACEMENT</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2841,8 +2329,8 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
     <enum>FALSE = 0, TRUE = 1</enum>
     <writeable/>
-    <odmVisable/>
 </attribute>
+
 <attribute>
     <id>ATTR_CEN_MSS_BLUEWATERFALL_BROKEN</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2850,8 +2338,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <valueType>uint8</valueType>
     <enum>FALSE = 0, TRUE = 1</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2860,8 +2346,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>Enables mcbist data pattern selection.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2870,8 +2354,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>Enables mcbist test type selection.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2880,8 +2362,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>MCBIST support for printing</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2890,8 +2370,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>MCBIST support for enabling data</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2900,8 +2378,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>MCBIST support for rank selection</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2910,8 +2386,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>MCBIST support for bank selection</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2920,36 +2394,7 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <description>MCBIST for multiple setup</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
-
-<!--
-<attribute>
-    <id>ATTR_CEN_EFF_BUFFER_LATENCY</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Additional buffer latency in the case of RDIMMs and LRDIMMs.    It is expected that this value will come from the VPD</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
--->
-
-<!--
-<attribute>
-    <id>ATTR_CEN_EFF_LRDIMM_WORD_X</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>Additional buffer control word for LRDIMM building of the BCW</description>
-    <valueType>uint64</valueType>
-    <platInit/>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-        <array> 2 2</array>
-</attribute>
--->
 
 <!--
 <attribute>
@@ -2959,8 +2404,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
 DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance for all ranks.  Eff config should set this up.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -2975,8 +2418,6 @@ F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
 Eff config should set this up</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -2991,8 +2432,6 @@ F[1]RC8, F[3]RC9, F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
 Eff config should set this up</description>
     <valueType>uint64</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 -->
@@ -3006,8 +2445,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>NORMAL = 0, 2X_MULT = 2, 4X_MULT = 4</enum>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3016,8 +2453,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>RAS weight to use for memory throttle control - set in thermal procedures</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3026,8 +2461,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>CAS weight to use for memory throttle control - set in thermal procedures</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3036,8 +2469,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Controls the MCBIST engine in the centaur chip.  The value will be set in mss_eff_config_shmoo.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3046,8 +2477,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Controls the MCBIST engine in the centaur chip.  The value will be set in mss_eff_config_shmoo.</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <!--
@@ -3057,8 +2486,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Controls PDA train enable or PBA. 00 - Disable; 01 - PDA; 02 - PBA(Lrdimm)</description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 -->
 
@@ -3069,8 +2496,6 @@ Will be set at an MBA level with one policy to be used</description>
     <enum>COLD = 0, CLOCKS_ON = 1, DMI_ACTIVE = 2</enum>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3081,8 +2506,6 @@ Will be set at an MBA level with one policy to be used</description>
     </description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -3093,8 +2516,6 @@ Will be set at an MBA level with one policy to be used</description>
     </description>
     <valueType>uint8</valueType>
     <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
     <enum>NONE = 0, 8_0G = 1, 9_6G = 2, 8_0G_OR_9_6G = 3</enum>
 </attribute>
 
@@ -3142,7 +2563,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -3152,7 +2572,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -3161,7 +2580,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Machine Readable Workbook Thermal Memory Power Limit</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -3171,7 +2589,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <!--
@@ -3181,7 +2598,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID AVDD adjustment for ACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3192,7 +2608,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID AVDD adjustment for INACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3203,7 +2618,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID AVDD adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3214,7 +2628,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID VDD adjustment for ACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3225,7 +2638,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID VDD adjustment for INACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3236,7 +2648,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID VDD adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3247,7 +2658,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID VCS adjustment for ACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3258,7 +2668,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID VCS adjustment for INACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3269,7 +2678,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID VCS adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3280,7 +2688,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID VPP adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3291,7 +2698,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID VPP adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3301,7 +2707,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x000000FA</default>
 </attribute>
 
@@ -3311,7 +2716,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x00000556</default>
 </attribute>
 
@@ -3321,7 +2725,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x000000FA</default>
 </attribute>
 
@@ -3331,7 +2734,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x000004C4</default>
 </attribute>
 
@@ -3342,7 +2744,7 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>NONE = 0x00, VOLT_135 = 0x01, VOLT_120 = 0x02</enum>
     <platInit/>
-    <odmVisable/>
+    <overrideOnly/>
 </attribute>
 
 <attribute>
@@ -3352,7 +2754,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum> PROCEDURE_DEFINED = 0x00, ALL_VOLTAGES = 0x01</enum>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 
@@ -3362,8 +2763,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Option to control MCS prefetch retry threshold, for performance optimization. This attribute controls the number of retries in the prefetch engine. Retry threshold available ranges from 16 to 30. Note: Values outside those ranges will default to 30. In MRW.</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 
@@ -3375,7 +2774,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Dynamic VID offset applied to AVDD. In mV.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3386,7 +2784,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Dynamic VID offset applied to VDD. In mV.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3397,7 +2794,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Dynamic VID offset applied to VCS. In mV.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3408,7 +2804,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Dynamic VID offset applied to VPP. In mV.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3418,7 +2813,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Dynamic VID offset applied to VDDR. In mV.</description>
     <valueType>uint32</valueType>
     <writeable/>
-    <odmVisable/>
 </attribute>
 
 <!--
@@ -3429,7 +2823,6 @@ Will be set at an MBA level with one policy to be used</description>
     <valueType>uint8</valueType>
     <enum>NONE = 0x00, VOLT_1350 = 0x01, VOLT_1200 = 0x02</enum>
     <platInit/>
-    <odmVisable/>
 </attribute>
 -->
 
@@ -3474,7 +2867,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Maximum voltage limit for the dynamic VID DDR3 VDDR voltage setpoint. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x00000591</default>
 </attribute>
 
@@ -3484,7 +2876,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage setpoint. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <default>0x000004f6</default>
 </attribute>
 
@@ -3494,7 +2885,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Machine Readable Workbook value detailing the wiring of the 8 dimm temperature sensors for non custom dimms, in DIMM A0,A1,B0,B1,C0,C1,D0,D1 order. One nibble per sensor where bit0 (MSB) is the i2c bus the sensor is attached to (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0 of the sensor i2c address (where A2 is MSB)</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -3503,8 +2893,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Machine Readable Workbook attribute that holds the step size of the VREF when doing a box shmoo</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <!--
@@ -3514,8 +2902,6 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Machine Readable Workbook attribute that holds the step size of the delay when doing a box shmoo</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 -->
 

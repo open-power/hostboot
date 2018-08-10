@@ -615,8 +615,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, followed by byte 70 nibble 1, and so forth.
    </description>
     <valueType>uint64</valueType>
-    <odmVisable/>
-    <odmChangeable/>
     <writeable/>
 </attribute>
 -->
@@ -629,8 +627,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
    </description>
     <valueType>uint8</valueType>
     <enum>1T = 0x01, 3T = 0x03</enum>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
     <platInit/>
 </attribute>
@@ -1847,8 +1843,6 @@ consumer: various.C files and initfiles
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -1861,8 +1855,6 @@ consumer: various.C and initfile
 firmware notes: none</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -1878,8 +1870,6 @@ This Attribute is to be interpreted as an Integer </description>
     <valueType>uint8</valueType>
     <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -1894,8 +1884,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -1910,8 +1898,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -1927,8 +1913,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
 
@@ -1945,8 +1929,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint32</valueType>
     <enum>VDD420 = 420, VDD425 = 425, VDD430 = 430, VDD435 = 435, VDD440 = 440, VDD445 = 445, VDD450 = 450, VDD455 = 455, VDD460 = 460, VDD465 = 465, VDD470 = 470, VDD475 = 475, VDD480 = 480, VDD485 = 485, VDD490 = 490, VDD495 = 495, VDD500 = 500, VDD505 = 505, VDD510 = 510, VDD515 = 515, VDD520 = 520, VDD525 = 525, VDD530 = 530, VDD535 = 535, VDD540 = 540, VDD545 = 545, VDD550 = 550, VDD555 = 555, VDD560 = 560, VDD565 = 565, VDD570 = 570, VDD575 = 575</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -1966,8 +1948,6 @@ Decode: (R for Range V for Value, blank for unused)
         Attr Bits  0543210</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -1984,8 +1964,6 @@ This Attribute is to be interpreted as an Integer</description>
     <enum>OHM24_FFE0 = 0x0A, OHM30_FFE0 = 0x08,
 OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x18, OHM34_FFE0 = 0x07, OHM34_FFE480 = 0x47, OHM34_FFE240 = 0x37, OHM34_FFE160 = 0x27, OHM34_FFE120 = 0x17, OHM40_FFE0 = 0x06, OHM40_FFE480 = 0x46, OHM40_FFE240 = 0x36, OHM40_FFE160 = 0x26, OHM40_FFE120 = 0x16</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2001,8 +1979,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2018,8 +1994,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2035,8 +2009,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2052,8 +2024,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2069,8 +2039,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>OHM15 = 15, OHM20 = 20, OHM30 = 30, OHM40 = 40, OHM48 = 48, OHM60 = 60,  OHM80 = 80, OHM120 = 120, OHM160 = 160, OHM240 = 240</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2090,8 +2058,6 @@ SLEW_5V_NS = 5,
 SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2111,8 +2077,6 @@ SLEW_5V_NS = 5,
 SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2132,8 +2096,6 @@ SLEW_5V_NS = 5,
 SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2154,8 +2116,6 @@ SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7
 </enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2176,8 +2136,6 @@ SLEW_6V_NS = 6,
 SLEW_MAXV_NS = 7
 </enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2193,8 +2151,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint32</valueType>
     <enum>VDD40375 = 40375, VDD41750 = 41750, VDD43125 = 43125, VDD44500 = 44500, VDD45875 = 45875, VDD47250 = 47250, VDD48625 = 48625, VDD50000 = 50000, VDD51375 = 51375, VDD52750 = 52750, VDD54125 = 54125, VDD55500 = 55500, VDD56875 = 56875, VDD58250 = 58250, VDD59625 = 59625, VDD61000 = 61000, VDD60375 = 60375, VDD61750 = 61750, VDD63125 = 63125, VDD64500 = 64500, VDD65875 = 65875, VDD67250 = 67250, VDD68625 = 68625, VDD70000 = 70000, VDD71375 = 71375, VDD72750 = 72750, VDD74125 = 74125, VDD75500 = 75500, VDD76875 = 76875, VDD78250 = 78250, VDD79625 = 79625, VDD81000 = 81000</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2204,8 +2160,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CLK_P0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2215,8 +2169,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CLK_P1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2226,8 +2178,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CLK_P0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2237,8 +2187,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CLK_P1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2248,8 +2196,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2259,8 +2205,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2270,8 +2214,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2281,8 +2223,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A3</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2292,8 +2232,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A4</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2303,8 +2241,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A5</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2314,8 +2250,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A6</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2325,8 +2259,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A7</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2336,8 +2268,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A8</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2347,8 +2277,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A9</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2358,8 +2286,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A10</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2369,8 +2295,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A11</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2380,8 +2304,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A12</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2391,8 +2313,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A13</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2402,8 +2322,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A14</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2413,8 +2331,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_A15</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2424,8 +2340,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_BA0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2435,8 +2349,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_BA1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2446,8 +2358,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_BA2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2457,8 +2367,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_CASN</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2468,8 +2376,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_RASN</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2479,8 +2385,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_CMD_WEN</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2490,8 +2394,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_PAR</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2501,8 +2403,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M_ACTN</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2512,8 +2412,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CKE0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2523,8 +2421,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CKE1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2534,8 +2430,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CKE2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2545,8 +2439,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CKE3</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2556,8 +2448,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CSN0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2567,8 +2457,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CSN1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2578,8 +2466,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CSN2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2589,8 +2475,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_CSN3</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2600,8 +2484,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_ODT0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2611,8 +2493,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M0_CNTL_ODT1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2622,8 +2502,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CKE0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2633,8 +2511,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CKE1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2644,8 +2520,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CKE2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2655,8 +2529,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CKE3</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2666,8 +2538,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CSN0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2677,8 +2547,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CSN1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2688,8 +2556,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CSN2</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2699,8 +2565,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_CSN3</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2710,8 +2574,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_ODT0</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2721,8 +2583,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>Phase rotator value that comes from MR keyword on the CDIMM VPD.  This controls the IO M1_CNTL_ODT1</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2733,8 +2593,6 @@ This Attribute is to be interpreted as an Integer</description>
 </description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -2744,7 +2602,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD keyword MT bytes 54 and 55 MT(54:55) for the Logical DIMM associated with port A.  Bytes 118:119 for port B, 182:183 for port C and 246:247 for port D.  In the end, the AB and CD portions form a 32 bit word for each mba to write into the corresponding ddrphy register</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2754,7 +2611,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD keyword MT bytes 56 to 59 MT(56:59) for the Logical DIMM associated with port A.  Bytes 120:123 for port B, 184:187 for port C and 248:251 for port D. The values for Port A concatenated with port B forms the value for one MBA.  C concat D forms the value for the other MBA</description>
     <valueType>uint64</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -2763,7 +2619,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2773,7 +2628,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD keyword MT byte 60 bits 4:7 for the Logical DIMM associated with port A.  Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2783,7 +2637,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD keyword MT byte 60 bits 0:3 for the Logical DIMM associated with port A.  Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2793,7 +2646,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD MR keyword byte 49 for ports A and B and byte 177 for port C and D.    This means that all ADR blocks use this value on an mba level</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2803,7 +2655,6 @@ This Attribute is to be interpreted as an Integer</description>
     <description>This value comes from the VPD MR keyword byte 113 for ports A and B and byte 241 for port C and D.  This means all DP18 blocks use this value on a mba level</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
     <array>2</array>
 </attribute>
 
@@ -2823,7 +2674,6 @@ This Attribute is to be interpreted as an Integer</description>
 Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -2842,7 +2692,6 @@ Comes from the VPD MW Keyword</description>
 Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>
@@ -2852,8 +2701,6 @@ Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -2862,8 +2709,6 @@ Comes from the VPD MW Keyword</description>
     <description>Master Power Slope that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2872,8 +2717,6 @@ Comes from the VPD MW Keyword</description>
     <description>Master Power Intercept that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2882,8 +2725,6 @@ Comes from the VPD MW Keyword</description>
     <description>Supplier Power Slope that comes from the VPD the MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2892,8 +2733,6 @@ Comes from the VPD MW Keyword</description>
     <description>Supplier Power Intercept that comes from MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -2902,7 +2741,6 @@ Comes from the VPD MW Keyword</description>
     <description>Describes the Version of MT Keyword</description>
     <valueType>uint8</valueType>
    <platInit/>
-     <odmVisable/>
 </attribute>
 
 <attribute>
@@ -2911,7 +2749,6 @@ Comes from the VPD MW Keyword</description>
     <description>Describes the Version of MR Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
  <attribute>
@@ -2920,7 +2757,6 @@ Comes from the VPD MW Keyword</description>
     <description>Describes the DATA control byte from MR</description>
     <valueType>uint8</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
  <attribute>
@@ -2929,7 +2765,6 @@ Comes from the VPD MW Keyword</description>
     <description>Describes the DATA control byte from MT</description>
     <valueType>uint8</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
  <attribute>
@@ -2938,7 +2773,6 @@ Comes from the VPD MW Keyword</description>
     <description>Fetches the VM Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
  <attribute>
@@ -2947,7 +2781,6 @@ Comes from the VPD MW Keyword</description>
     <description>Fetch the VD keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
  <attribute>
@@ -2956,7 +2789,6 @@ Comes from the VPD MW Keyword</description>
     <description>Describes Centaur Voltage from DW keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-     <odmVisable/>
 </attribute>
 
 
@@ -3000,7 +2832,6 @@ Comes from the VPD MW Keyword</description>
      <valueType>uint8</valueType>
      <enum>NONE = 0x00, SLOWEXIT_CAPABLE = 0x01, FASTEXIT_CAPABLE = 0x02, FASTSLOW_CAPABLE = 0x03</enum>
      <platInit/>
-     <odmVisable/>
 </attribute>
 
 
@@ -3013,8 +2844,6 @@ consumer: mss_dram_init
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2 2</array>
 </attribute>
 
@@ -3028,8 +2857,6 @@ consumer: mss_draminit_training_adv
 firmware notes: none</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <odmChangeable/>
     <array> 2</array>
 </attribute>
 
@@ -3048,8 +2875,6 @@ firmware notes: none</description>
     <description>Master Total Power Slope that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -3058,8 +2883,6 @@ firmware notes: none</description>
     <description>Master Total Power Intercept that comes from the VPD MW Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -3068,8 +2891,6 @@ firmware notes: none</description>
     <description>Supplier Total Power Slope that comes from the VPD MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -3078,8 +2899,6 @@ firmware notes: none</description>
     <description>Supplier Total Power Intercept that comes from the VPD MV Keyword</description>
     <valueType>uint32</valueType>
     <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 </attributes>
