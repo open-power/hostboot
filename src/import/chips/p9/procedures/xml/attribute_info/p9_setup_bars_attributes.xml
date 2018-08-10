@@ -36,7 +36,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -52,7 +52,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -80,7 +80,7 @@
         1_MB = 0xFFFFFC00000FFFFF
     </enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -102,7 +102,7 @@
       256_MB = 0x0000000000000000
     </enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -116,7 +116,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -133,7 +133,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -147,7 +147,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -164,7 +164,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -181,7 +181,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
    <attribute>
@@ -195,7 +195,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -209,7 +209,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* --> 
   <attribute>
@@ -226,7 +226,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************** -->
   <attribute>
@@ -240,7 +240,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -257,7 +257,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -272,7 +272,7 @@
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -288,7 +288,7 @@
     </description>
     <valueType>uint64</valueType>
     <platInit/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -303,7 +303,7 @@
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -319,7 +319,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -336,7 +336,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -351,7 +351,7 @@
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -367,7 +367,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -384,7 +384,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -399,7 +399,7 @@
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -415,7 +415,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -430,7 +430,7 @@
     <enum>4K = 0x0, 64K = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -445,7 +445,7 @@
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -461,7 +461,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -476,7 +476,7 @@
     <enum>4K = 0x0, 64K = 0x1</enum>
     <platInit/>
     <initToZero/>
-    <persistRuntime/>
+    <mrwHide/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
