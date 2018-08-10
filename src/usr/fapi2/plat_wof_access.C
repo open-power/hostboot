@@ -256,9 +256,15 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
         FAPI_INF("WOFDATA lid is %d bytes", l_lidImageSize);
 
 #ifdef __HOSTBOOT_RUNTIME
-        // Locally allocate space for the lid
-        l_pWofImage = static_cast<void*>(malloc(l_lidImageSize));
+        // In HBRT case, phyp will call malloc and return
+        // the lid pointer to us. We do not need to malloc
+        // the space ourselves. In fact, two mallocs
+        // on the WOF partition were leading to heap overflows.
+        l_pWofImage = nullptr;
 
+        // Using getStoredLidImage because we want to use the cached copies
+        // if they exist.
+        l_errl = l_wofLidMgr.getStoredLidImage(l_pWofImage, l_lidImageSize);
 #else
         // Use a special VMM block to avoid the requirement for
         //  contiguous memory
@@ -328,11 +334,10 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
         // Point my local pointer at the VMM space we allocated
         l_pWofImage = g_wofdataVMM;
 
-#endif
-
-
         // Get the tables from pnor or lid
         l_errl = l_wofLidMgr.getLid(l_pWofImage, l_lidImageSize);
+#endif
+
         if(l_errl)
         {
             FAPI_ERR("platParseWOFTables getLid failed "
