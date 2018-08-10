@@ -134,6 +134,8 @@ enum ProcessorCoreType
     CORE_POWER9_NIMBUS,
     /** Power9 "CUMULUS" (scale-up) core */
     CORE_POWER9_CUMULUS,
+    /** Power9' "AXONE" core */
+    CORE_POWER9_AXONE,
 
     CORE_UNKNOWN,
 };

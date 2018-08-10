@@ -59,6 +59,7 @@ void BaseSegment::_init()
         case CORE_POWER8_NAPLES:
         case CORE_POWER9_NIMBUS:
         case CORE_POWER9_CUMULUS:
+        case CORE_POWER9_AXONE:
         default:
             iv_physMemSize = VMM_BASE_BLOCK_SIZE;
             break;
