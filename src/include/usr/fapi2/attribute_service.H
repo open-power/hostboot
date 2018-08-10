@@ -1671,14 +1671,5 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     fapi2::platAttrSvc::\
     platGetFreqMcaMhz(TARGET, VAL)
 
-//----------------------------------------------------------------------------
-// MACRO to route ATTR_FREQ_MCA_MHZ access to the correct HB function
-//----------------------------------------------------------------------------
-#define ATTR_FREQ_MCA_MHZ_SETMACRO(ID, TARGET, VAL) \
-    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
-    ? fapi2::ReturnCode() : \
-    fapi2::platAttrSvc::\
-    platSetFreqMcaMhz(TARGET, VAL)
-
 
 #endif // ATTRIBUTESERVICE_H_
