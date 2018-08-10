@@ -77,6 +77,7 @@ struct epubTargetTypeToSub_t
 const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
 {
     // This list must be kept sorted by TYPE
+    // Look at generated file  attributeenums.H to see order
     { TARGETING::TYPE_NODE             , EPUB_CEC_HDW_SUBSYS       },
     { TARGETING::TYPE_DIMM             , EPUB_MEMORY_DIMM          },
     { TARGETING::TYPE_MEMBUF           , EPUB_MEMORY_SUBSYS        },
@@ -100,6 +101,7 @@ const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_PHB              , EPUB_IO_PHB               },
     { TARGETING::TYPE_TPM              , EPUB_CEC_HDW_SUBSYS       },
     { TARGETING::TYPE_MC               , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_SMPGROUP         , EPUB_CEC_HDW_SUBSYS       },
 };
 
 struct epubBusTypeToSub_t

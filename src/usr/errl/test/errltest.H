@@ -1176,7 +1176,7 @@ public:
     /**
      * @brief Verify subsystem mapping
      *
-     * Simple test for now that targets test for TYPE_MC related defect
+     * Simple test for now that targets test for defects in this area
      * Can be expanded on later if time permits
      */
     void testErrl_verifySubsystem(void)
@@ -1198,6 +1198,16 @@ public:
         else
         {
             TS_INFO( "Correct subsystem type returned for TYPE_MC!" );
+        }
+
+        l_subsys = l_err->getSubSystem(TARGETING::TYPE_SMPGROUP);
+        if(l_subsys != EPUB_CEC_HDW_SUBSYS)
+        {
+            TS_FAIL( "Incorrect subsystem type returned for TYPE_SMPGROUP" );
+        }
+        else
+        {
+            TS_INFO( "Correct subsystem type returned for TYPE_SMPGROUP!" );
         }
         // Delete the log
         delete l_err;
