@@ -597,7 +597,11 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         // be replaced by the ReconfigLoop info error with the
                         // same plid that matches the real errors
                         l_plid = err->plid();
-                        delete err;
+
+                        // Commit the istep log as informational since it
+                        // might include some useful information
+                        err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        errlCommit(err, INITSVC_COMP_ID);
                         err = NULL;
                     }
 
