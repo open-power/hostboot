@@ -345,6 +345,12 @@ static void checkProcessorTargeting(TargetService& i_targetService)
                     l_haveOneCorrectProcessor = true;
                 }
                 break;
+            case MODEL_AXONE:
+                if(l_coreType == CORE_POWER9_AXONE)
+                {
+                    l_haveOneCorrectProcessor = true;
+                }
+                break;
 
             default:
                 break;

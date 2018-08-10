@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ static uint64_t mmio_scratch_base()
             return 0x40;
         case CORE_POWER9_NIMBUS:
         case CORE_POWER9_CUMULUS:
+        case CORE_POWER9_AXONE:
         case CORE_UNKNOWN:
         default:
             // See misc.C - updateScratchReg() for more info on this

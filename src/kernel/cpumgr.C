@@ -469,6 +469,7 @@ size_t CpuManager::getThreadCount()
 
         case CORE_POWER9_NIMBUS:
         case CORE_POWER9_CUMULUS:
+        case CORE_POWER9_AXONE:
             threads = 4;
             break;
 

@@ -510,6 +510,7 @@ namespace KernelMisc
             case CORE_POWER8_NAPLES:
             case CORE_POWER9_NIMBUS:
             case CORE_POWER9_CUMULUS:
+            case CORE_POWER9_AXONE:
                 startAddr = reinterpret_cast<uint64_t*>
                                          ( VmmManager::INITIAL_MEM_SIZE ) ;
                 endAddr = reinterpret_cast<uint64_t*>(i_expandSize);
@@ -574,6 +575,7 @@ namespace KernelMisc
               break;
           case CORE_POWER9_NIMBUS:
           case CORE_POWER9_CUMULUS:
+          case CORE_POWER9_AXONE:
           case CORE_UNKNOWN:
           default:
               // See EX07.EC.CC.PCC0.COMMON.SPR_COMMON.SCOMC in scomdef for
@@ -660,6 +662,7 @@ const char* ProcessorCoreTypeStrings[]
     "Naples",
     "Nimbus",
     "Cumulus",
+    "Axone",
     "Unknown"
 };
 

@@ -113,13 +113,13 @@ struct PVR_t
      */
     enum
     {
-        NIMBUS_DD1_MASK = 0x00FF2F0F,
-        IS_NIMBUS_DD1   = 0x004E0100,
+        NIMBUS_DD1_MASK  = 0x00FF2F0F,
+        IS_NIMBUS_DD1    = 0x004E0100,
         IS_NIMBUS_DD20   = 0x004E0200,
         IS_NIMBUS_DD21   = 0x004E0201,
 
         // Field: chipType
-        NIMBUS_CHIP = 0,
+        NIMBUS_CHIP  = 0,
         CUMULUS_CHIP = 1,
 
         // Field: smt
@@ -130,7 +130,8 @@ struct PVR_t
         P8_MURANO = 0x4B,
         P8_NAPLES = 0x4C,
         P8_VENICE = 0x4D,
-        P9_ALL    = 0x4E,
+        P9_ALL    = 0x4E, //NIMBUS/CUMULUS
+        P9_AXONE  = 0x4F,
     };
 
     /**
