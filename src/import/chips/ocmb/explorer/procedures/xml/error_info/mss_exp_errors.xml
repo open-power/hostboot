@@ -60,4 +60,42 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_EXP_I2C_POLLING_TIMEOUT</rc>
+    <description>
+      Polling the explorer I2C slave interface for an ACK
+      timed out.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_EXP_STATUS_POLLING_TIMEOUT</rc>
+    <description>
+      Polling the explorer for successful return code
+      timed out.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
