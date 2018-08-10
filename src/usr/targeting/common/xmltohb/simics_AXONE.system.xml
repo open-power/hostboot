@@ -8297,4 +8297,472 @@
     </attribute>
 </targetInstance>
 
+<!-- ===================================================================== -->
+<!-- OCMB_CHIP Units -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0ocmb_chip0</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0000</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb_chip1</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0001</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-1</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb2</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0002</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb3</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0003</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-3</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb4</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0004</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-4</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb5</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0005</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-5</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb6</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p06</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0006</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-6</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb7</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p07</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0007</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-7</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb8</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p08</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0008</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-8</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb9</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B0009</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-9</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb10</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000A</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-10</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb11</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000B</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-11</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb12</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000C</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-12</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb13</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000D</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-13</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb14</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-0/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000E</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-14</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb15</id>
+    <type>chip-ocmb-explorer</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0004B000F</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0x00060000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-15</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>15</default>
+    </attribute>
+</targetInstance>
+
+
 </attributes>
