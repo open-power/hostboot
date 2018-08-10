@@ -8764,5 +8764,407 @@
     </attribute>
 </targetInstance>
 
+<!-- ===================================================================== -->
+<!-- MEMPORT Units -->
+<!-- ===================================================================== -->
+<targetInstance>
+    <id>sys0node0ocmb0memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0000</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-0/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c00</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb1memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0001</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-1/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c01</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb2memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0002</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-2/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c02</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb3memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0003</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-3/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c03</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb4memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0004</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-4/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c04</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb5memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0005</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-5/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-0/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c05</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb6memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0006</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-6/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c06</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb7memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0007</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-7/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/mcc-1/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c07</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb8memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0008</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-8/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c08</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb9memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C0009</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-9/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c09</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb10memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000A</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-10/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c10</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb11memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000B</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-11/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c11</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb12memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000C</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-12/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb13memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000D</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-13/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-0/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb14memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000E</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-14/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-0/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c14</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb15memport0</id>
+    <type>unit-mem_port</type>
+    <attribute><id>HUID</id><default>0x004C000F</default></attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/ocmb_chip-15/mem_port-0</default>
+        </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-1/mcc-1/omi-1/ocmb_chip-0/mem_port-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>ocmb.mp:k0:n0:s0:p00:c15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
 
 </attributes>
