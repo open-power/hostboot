@@ -325,7 +325,10 @@ void* host_update_master_tpm( void *io_pArgs )
                 !primaryHwasState.present)
             {
                 primaryTpmAvail = false;
-                pPrimaryTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+                if(isTpmRequired())
+                {
+                    pPrimaryTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+                }
             }
         }
 
@@ -1008,8 +1011,11 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     i_pTpm->setAttr<
         TARGETING::ATTR_HWAS_STATE>(hwasState);
 
-    // Mark the TPM as unusable so that FSP can perform alignment check
-    i_pTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+    if(isTpmRequired())
+    {
+        // Mark the TPM as unusable so that FSP can perform alignment check
+        i_pTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+    }
 
     #ifdef CONFIG_SECUREBOOT
     TARGETING::Target* l_tpm = i_pTpm;
@@ -1403,10 +1409,16 @@ void doInitBackupTpm()
     if(l_backupTpm)
     {
         l_backupTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
-        auto l_backupHwasState = l_backupTpm->getAttr<
+        if(isTpmRequired())
+        {
+            auto l_backupHwasState = l_backupTpm->getAttr<
                                                   TARGETING::ATTR_HWAS_STATE>();
-        l_backupTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(
-                  !(l_backupHwasState.present && l_backupHwasState.functional));
+
+            if(!l_backupHwasState.present || !l_backupHwasState.functional)
+            {
+                l_backupTpm->setAttr<TARGETING::ATTR_TPM_UNUSABLE>(true);
+            }
+        }
     }
 }
 
