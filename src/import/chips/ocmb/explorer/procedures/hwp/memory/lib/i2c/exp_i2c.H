@@ -149,6 +149,25 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks if the I2C interface returns an ACK
+/// @param[in] i_target the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode is_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    // We send a simple but valid command to poll the I2C
+    // Arbitrarily send an EXP_FW_STATUS command id
+    size_t l_size = 0;
+    std::vector<uint8_t> l_cmd_id;
+    fw_status_setup(l_size, l_cmd_id);
+
+    // We just ignore the data.  We'll see FAPI2_RC_SUCCESS if
+    // the I2C returns an ACK.
+    std::vector<uint8_t> l_data;
+    return fapi2::getI2c(i_target, l_size, l_cmd_id, l_data);
+}
+
 }// i2c
 }// exp
 }// mss
