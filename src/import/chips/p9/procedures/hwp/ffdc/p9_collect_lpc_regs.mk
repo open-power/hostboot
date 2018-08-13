@@ -23,4 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_collect_lpc_regs
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/perv)
+OBJS+=p9_lpc_utils.o
 $(call BUILD_PROCEDURE)
