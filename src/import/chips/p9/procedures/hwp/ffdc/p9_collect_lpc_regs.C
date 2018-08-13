@@ -32,7 +32,6 @@
 #include "p9_misc_scom_addresses.H"
 #include "p9_misc_scom_addresses_fld.H"
 
-const bool LPC_UTILS_TIMEOUT_FFDC = false;
 #include "../perv/p9_lpc_utils.H"
 
 static void lpc_dump(
@@ -48,7 +47,7 @@ static void lpc_dump(
 
     for (uint32_t i = 0; i < l_nregs; i++)
     {
-        fapi2::ReturnCode l_rc = lpc_read(i_target_chip, i_first_addr + (i * 4), l_data32);
+        fapi2::ReturnCode l_rc = lpc_read(i_target_chip, i_first_addr + (i * 4), l_data32, false);
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
