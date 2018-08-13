@@ -133,11 +133,6 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
         FAPI_TRY(io::write(OPT_TX_MODE2_PL, i_tgt, GRP0, lane, l_data));
     }
 
-    // Set RX_AC_COUPLED
-    FAPI_TRY(io::read( OPT_RX_CTL_MODE2_O_PG, i_tgt, GRP0, 0, l_data));
-    io::set(OPT_RX_AC_COUPLED, 1, l_data);
-    FAPI_TRY(io::write( OPT_RX_CTL_MODE2_O_PG, i_tgt, GRP0, 0, l_data));
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW419022,
                            i_chip_target,
                            l_hw419022),
