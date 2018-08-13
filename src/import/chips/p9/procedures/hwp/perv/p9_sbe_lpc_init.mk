@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_sbe_lpc_init
+OBJS+=p9_lpc_utils.o
 $(call BUILD_PROCEDURE)
