@@ -644,6 +644,27 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/**
+ * @brief A I/O Set RX AC Coupled
+ * @param[in] i_tgt     FAPI2 Target
+ * @param[in] i_data    Data to be set
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode set_obus_rx_ac_coupled( const OBUS_TGT i_tgt, const uint8_t i_data )
+{
+    FAPI_IMP( "set_obus_rx_ac_coupled: I/O Obus Entering" );
+    const uint8_t GRP0 = 0;
+    const uint8_t LN0  = 0;
+
+    // Per Group Register
+    FAPI_TRY( io::rmw( OPT_RX_AC_COUPLED, i_tgt, GRP0, LN0, i_data ) );
+
+fapi_try_exit:
+    FAPI_IMP( "set_obus_rx_ac_coupled: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
+
+
 } // end namespace P9_IO_OBUS_DCCAL
 
 using namespace P9_IO_OBUS_DCCAL;
@@ -676,6 +697,10 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
 
     // Power up Clock Distribution & Lanes
     FAPI_TRY( obus_powerup( i_tgt, i_lane_vector ) );
+
+    // SW442174 :: Set RX_AC_COUPLED = 1
+    // - This must be done before dccal to get accurate dccal values
+    FAPI_TRY( set_obus_rx_ac_coupled( i_tgt, 1 ) );
 
     // Run Tx Zcal State Machine
     FAPI_TRY( tx_run_zcal( i_tgt ), "I/O Obus Tx Run Z-Cal Failed" );
