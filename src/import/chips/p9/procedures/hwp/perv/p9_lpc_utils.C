@@ -32,21 +32,22 @@
 fapi2::ReturnCode lpc_rw(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
     const uint32_t i_addr,
+    const size_t i_size,
     const bool i_read_notwrite,
     const bool i_generate_ffdc,
     fapi2::buffer<uint32_t>& io_data)
 {
-    const int l_bit_offset = (i_addr & 4) << 3;
     fapi2::buffer<uint64_t> l_command;
+    const int l_bit_offset = (i_addr & 7 & ~(i_size - 1)) << 3;
     l_command.writeBit<PU_LPC_CMD_REG_RNW>(i_read_notwrite)
-    .insertFromRight<PU_LPC_CMD_REG_SIZE, PU_LPC_CMD_REG_SIZE_LEN>(0x4)
+    .insertFromRight<PU_LPC_CMD_REG_SIZE, PU_LPC_CMD_REG_SIZE_LEN>(i_size)
     .insertFromRight<PU_LPC_CMD_REG_ADR, PU_LPC_CMD_REG_ADR_LEN>(i_addr);
     FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_CMD_REG, l_command), "Error writing LPC command register");
 
     if (!i_read_notwrite)
     {
         fapi2::buffer<uint64_t> l_data;
-        l_data.insert(io_data, l_bit_offset, 32);
+        l_data.insert(io_data, l_bit_offset, 8 * i_size);
         FAPI_TRY(fapi2::putScom(i_target_chip, PU_LPC_DATA_REG, l_data), "Error writing LPC data");
     }
 
@@ -86,7 +87,7 @@ fapi2::ReturnCode lpc_rw(
     {
         fapi2::buffer<uint64_t> l_data;
         FAPI_TRY(fapi2::getScom(i_target_chip, PU_LPC_DATA_REG, l_data), "Error reading LPC data");
-        l_data.extract(io_data, l_bit_offset, 32);
+        l_data.extract(io_data, l_bit_offset, 8 * i_size);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
