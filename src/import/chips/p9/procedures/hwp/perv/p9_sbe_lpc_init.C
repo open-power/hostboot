@@ -44,7 +44,6 @@
 #include "p9_misc_scom_addresses.H"
 #include "p9_misc_scom_addresses_fld.H"
 
-const bool LPC_UTILS_TIMEOUT_FFDC = true;
 #include "p9_lpc_utils.H"
 
 static fapi2::ReturnCode switch_lpc_clock_mux(
