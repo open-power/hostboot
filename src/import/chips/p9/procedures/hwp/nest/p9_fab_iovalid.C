@@ -574,7 +574,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in]  i_target          Processor chip target
@@ -860,6 +859,56 @@ fapi_try_exit:
 }
 
 
+
+
+
+/// @brief Resume I/O PPE engines if HW446279
+///
+/// @param[in]  i_target          Processor chip target
+/// @param[in]  i_loc_link_ctl    X/A link control structure for link local end
+/// @param[in]  i_rem_link_ctl    X/A link control structure for link remote end
+///
+/// @return fapi2::ReturnCode
+fapi2::ReturnCode p9_fab_iovalid_enable_ppe(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p9_fbc_link_ctl_t& i_loc_link_ctl,
+    const p9_fbc_link_ctl_t& i_rem_link_ctl)
+{
+    const uint64_t OBUS_PPE_XCR_ADDR = 0x0000000009011050ull;
+    const uint64_t HARD_RESET        = 0x6000000000000000ull; // xcr cmd=110
+    const uint64_t RESUME_FROM_HALT  = 0x2000000000000000ull; // xcr cmd=010
+    fapi2::buffer<uint64_t> l_hard_reset_data(HARD_RESET);
+    fapi2::buffer<uint64_t> l_resume_data(RESUME_FROM_HALT);
+
+    fapi2::Target<fapi2::TARGET_TYPE_OBUS> l_loc_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_OBUS> l_rem_endp_target;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_rem_chip_target;
+
+    // obtain link endpoints for FFDC
+    FAPI_TRY(p9_fab_iovalid_get_link_endpoints(i_target,
+             i_loc_link_ctl,
+             i_rem_link_ctl,
+             l_loc_endp_target,
+             l_rem_endp_target,
+             l_rem_chip_target),
+             "Error from p9_fab_iovalid_get_link_endpoints");
+
+    FAPI_TRY(fapi2::putScom(l_loc_endp_target,
+                            OBUS_PPE_XCR_ADDR,
+                            l_hard_reset_data),
+             "Resume From Halt Failed.");
+
+    FAPI_TRY(fapi2::putScom(l_loc_endp_target,
+                            OBUS_PPE_XCR_ADDR,
+                            l_resume_data),
+             "Resume From Halt Failed.");
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+
 /// @brief Validate DL/TL link layers are trained
 ///
 /// @param[in]  i_target          Processor chip target
@@ -900,6 +949,15 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate_wrap(
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
             FAPI_ERR("Error from p9_fab_iovalid_link_validate_wrap");
+        }
+        else if (T == fapi2::TARGET_TYPE_OBUS)
+        {
+            // At this point, both halves of the SMP ABUS have completed training and
+            //   we will kick off the ppe if we need HW446279
+            l_rc = p9_fab_iovalid_enable_ppe(
+                       i_target,
+                       i_loc_link_ctl,
+                       i_rem_link_ctl);
         }
 
         return l_rc;

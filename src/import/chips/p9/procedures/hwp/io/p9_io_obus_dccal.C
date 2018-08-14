@@ -663,7 +663,64 @@ fapi_try_exit:
     FAPI_IMP( "set_obus_rx_ac_coupled: I/O Obus Exiting" );
     return fapi2::current_err;
 }
+/**
+ * @brief De-assert lane_disable
+ * @param[in] i_tgt         FAPI2 Target
+ * @param[in] i_lave_vector Lanve Vector
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9_obus_lane_enable( const OBUS_TGT i_tgt, const uint32_t i_lane_vector )
+{
+    FAPI_IMP( "p9_obus_lane_enable: I/O Obus Entering" );
+    const uint8_t GRP0  = 0;
+    const uint8_t LANES = 24;
 
+    // Power up Per-Lane Registers
+    for( uint8_t lane = 0; lane < LANES; ++lane )
+    {
+        if( ( (0x1 << lane) & i_lane_vector ) != 0 )
+        {
+            FAPI_TRY( io::rmw( OPT_RX_LANE_DISABLED, i_tgt, GRP0, lane, 0x0 ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "p9_obus_lane_enable: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
+
+
+/**
+ * @brief Halt Obus PPE if HW446279 is enabled
+ * @param[in] i_tgt         FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9_obus_halt_ppe(const OBUS_TGT i_tgt)
+{
+    FAPI_IMP( "p9_obus_halt_ppe: I/O Obus Entering" );
+    const uint64_t OBUS_PPE_XCR_ADDR = 0x0000000009011050ull;
+    const uint64_t HALT              = 0x1000000000000000ull; // xcr cmd=001
+    fapi2::buffer<uint64_t> l_xcr_data(HALT);
+
+    fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY_Type l_p9c;
+
+    auto l_chip = i_tgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY,
+                           l_chip,
+                           l_p9c));
+
+    if(l_p9c)
+    {
+        FAPI_TRY(fapi2::putScom(i_tgt,
+                                OBUS_PPE_XCR_ADDR,
+                                l_xcr_data),
+                 "Resume From Halt Failed.");
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "p9_obus_halt_ppe: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
 
 } // end namespace P9_IO_OBUS_DCCAL
 
@@ -695,12 +752,18 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
 
     FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
 
+    // Halt PPE if HW446279 is enabled
+    FAPI_TRY( p9_obus_halt_ppe( i_tgt ) );
+
     // Power up Clock Distribution & Lanes
     FAPI_TRY( obus_powerup( i_tgt, i_lane_vector ) );
 
     // SW442174 :: Set RX_AC_COUPLED = 1
     // - This must be done before dccal to get accurate dccal values
     FAPI_TRY( set_obus_rx_ac_coupled( i_tgt, 1 ) );
+
+    // Enable Disabled Lanes
+    FAPI_TRY( p9_obus_lane_enable( i_tgt, i_lane_vector ) );
 
     // Run Tx Zcal State Machine
     FAPI_TRY( tx_run_zcal( i_tgt ), "I/O Obus Tx Run Z-Cal Failed" );
