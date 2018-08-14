@@ -180,6 +180,11 @@
         <id>MSS_INTERLEAVE_ENABLE</id>
         <default>0xAF</default>
     </attribute>
+    <attribute>
+        <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+        <default>1</default>
+    </attribute>
+
 </targetInstance>
 
 <!-- System node 0 -->

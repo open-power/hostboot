@@ -1033,6 +1033,9 @@
   <attribute>
     <id>BOOT_FREQ_MHZ</id>
   </attribute>
+  <attribute>
+    <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+  </attribute>
 </targetType>
 
 <targetType>
