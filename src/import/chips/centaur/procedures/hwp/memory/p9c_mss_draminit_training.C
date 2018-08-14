@@ -1934,6 +1934,36 @@ extern "C" {
     ///
     fapi2::ReturnCode mss_set_bbm_regs (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba_target)
     {
+#ifndef __HOSTBOOT_MODULE
+        const uint16_t l_wrclk_disable_mask[] =       // by quads
+        {
+            0x8800, 0x4400, 0x2280, 0x1140
+        };
+
+        // 0x8000007d0301143f    from disable0 register
+        const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;
+        // 0x800000050301143f    from disable1 register
+        const uint64_t l_wrclk_en_addr_mask   = 0xFFFFFF07FFFFFFFFull;
+
+        uint64_t l_addr = 0;
+        uint16_t l_data = 0;
+        uint16_t l_data_rank0 = 0;
+        uint16_t l_data_rank1 = 0;
+        uint16_t l_data_rank2 = 0;
+        uint16_t l_data_rank3 = 0;
+        uint16_t l_data_rank4 = 0;
+        uint16_t l_data_rank5 = 0;
+        uint16_t l_data_rank6 = 0;
+        uint16_t l_data_rank7 = 0;
+        uint8_t l_dimm = 0;
+        uint8_t l_rank = 0;
+        uint8_t l_disable1_data = 0;
+        uint16_t l_wrclk_mask = 0;
+        uint16_t l_mask = 0xF000;
+        uint8_t l_all_F_mask = 0;
+        uint16_t l_nmask = 0;
+        uint16_t l_wrclk_nmask = 0;
+#endif
         const uint8_t l_rg_invalid[] =
         {
             fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID,
@@ -1942,17 +1972,7 @@ extern "C" {
             fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP3_INVALID,
         };
 
-        const uint16_t l_wrclk_disable_mask[] =       // by quads
-        {
-            0x8800, 0x4400, 0x2280, 0x1140
-        };
-
         uint8_t l_dram_width = 0;
-        uint64_t l_addr = 0;
-        // 0x8000007d0301143f    from disable0 register
-        const uint64_t l_disable1_addr_offset = 0x0000000100000000ull;
-        // 0x800000050301143f    from disable1 register
-        const uint64_t l_wrclk_en_addr_mask   = 0xFFFFFF07FFFFFFFFull;
         fapi2::buffer<uint64_t> l_data_buffer;
         fapi2::variable_buffer l_db_reg(LANES_PER_PORT);
         fapi2::variable_buffer l_db_reg_rank0(LANES_PER_PORT);
@@ -1974,23 +1994,6 @@ extern "C" {
         uint8_t l_rank5_invalid = 1;
         uint8_t l_rank6_invalid = 1;
         uint8_t l_rank7_invalid = 1;
-        uint16_t l_data = 0;
-        uint16_t l_data_rank0 = 0;
-        uint16_t l_data_rank1 = 0;
-        uint16_t l_data_rank2 = 0;
-        uint16_t l_data_rank3 = 0;
-        uint16_t l_data_rank4 = 0;
-        uint16_t l_data_rank5 = 0;
-        uint16_t l_data_rank6 = 0;
-        uint16_t l_data_rank7 = 0;
-        uint8_t l_dimm = 0;
-        uint8_t l_rank = 0;
-        uint8_t l_disable1_data = 0;
-        uint16_t l_wrclk_mask = 0;
-        uint16_t l_mask = 0xF000;
-        uint8_t l_all_F_mask = 0;
-        uint16_t l_nmask = 0;
-        uint16_t l_wrclk_nmask = 0;
         uint8_t l_port = 0;
         FAPI_INF("%s Running flash->registers(set)", mss::c_str(i_mba_target));
         uint8_t l_prank = 0;
@@ -2118,6 +2121,11 @@ extern "C" {
                     l_rank7_invalid = 0;
                 }
             }
+
+            // This is to fix 'variable set but not used' errors from HB due to the ifndef below
+            FAPI_DBG("%d %d %d %d %d %d %d %d", l_rank0_invalid, l_rank1_invalid, l_rank2_invalid, l_rank3_invalid, l_rank4_invalid,
+                     l_rank5_invalid, l_rank6_invalid, l_rank7_invalid);
+#ifndef __HOSTBOOT_MODULE
 
             // loop through primary ranks [0:3]
             for (l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
@@ -2306,6 +2314,8 @@ extern "C" {
                     }//if mask
                 } // end DP18 instance loop
             } // end primary rank loop
+
+#endif
         } // end port loop
 
     fapi_try_exit:
