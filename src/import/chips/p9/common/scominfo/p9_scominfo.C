@@ -39,6 +39,12 @@
 
 #define P9_SCOMINFO_C
 
+// bgass Aug 13 2018.  The decision was made to make
+// OMI target numbers line up logically with the memory
+// parent targets (MC, MI, MCC)                  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+const static int P9_SCOMINFO_OMI_SWIZZLE[]   = { 4, 5, 6, 7, 2, 3, 0, 1, 12, 13, 14, 15, 10, 11, 8, 9 };
+const static int P9_SCOMINFO_OMI_UNSWIZZLE[] = { 6, 7, 4, 5, 0, 1, 2, 3, 14, 15, 12, 13, 8, 9, 10, 11 };
+
 extern "C"
 {
     uint64_t p9_scominfo_createChipUnitScomAddr(const p9ChipUnits_t i_p9CU, const uint8_t i_chipUnitNum,
@@ -345,56 +351,60 @@ extern "C"
                     break;
 
                 case PU_OMI_CHIPUNIT:
-                    l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 8));
-
-                    if (P9A_MC_OMIC0_RING_ID <= l_ring && l_ring <= P9A_MC_OMIC2_RING_ID)
                     {
-                        // IO Ind regsiters  (Ring 4,5,6) reg == 63
-                        // 0701103F MCP_OMI0. Lanes 0-7    omi0
-                        // 0701103F MCP_OMI0. Lanes 8-15   omi1
-                        // 0701103F MCP_OMI0. Lanes 16-23  omi2
-                        // 0701143F MCP_OMI1. Lanes 0-7    omi3
-                        // 0701143F MCP_OMI1. Lanes 8-15   omi4
-                        // 0701143F MCP_OMI1. Lanes 16-23  omi5
-                        // 0701183F MCP_OMI2. Lanes 0-7    omi6
-                        // 0701183F MCP_OMI2. Lanes 8-15   omi7
-                        l_scom.set_ring(P9A_MC_OMIC0_RING_ID + ((i_chipUnitNum % 8) / 3));
-                        uint8_t l_lane = l_scom.get_lane_id();
-                        l_lane = l_lane % 8;
-                        uint8_t l_chipnum = i_chipUnitNum;
+                        //Unswizzle the OMI chip unit number
+                        uint8_t l_chipUnitNum = P9_SCOMINFO_OMI_UNSWIZZLE[i_chipUnitNum];
 
-                        if (l_chipnum >= 8)
+                        l_scom.set_chiplet_id(MC01_CHIPLET_ID + (l_chipUnitNum / 8));
+
+                        if (P9A_MC_OMIC0_RING_ID <= l_ring && l_ring <= P9A_MC_OMIC2_RING_ID)
                         {
-                            l_chipnum++;
+                            // IO Ind regsiters  (Ring 4,5,6) reg == 63
+                            // 0701103F MCP_OMI0. Lanes 0-7    omi0
+                            // 0701103F MCP_OMI0. Lanes 8-15   omi1
+                            // 0701103F MCP_OMI0. Lanes 16-23  omi2
+                            // 0701143F MCP_OMI1. Lanes 0-7    omi3
+                            // 0701143F MCP_OMI1. Lanes 8-15   omi4
+                            // 0701143F MCP_OMI1. Lanes 16-23  omi5
+                            // 0701183F MCP_OMI2. Lanes 0-7    omi6
+                            // 0701183F MCP_OMI2. Lanes 8-15   omi7
+                            l_scom.set_ring(P9A_MC_OMIC0_RING_ID + ((l_chipUnitNum % 8) / 3));
+                            uint8_t l_lane = l_scom.get_lane_id();
+                            l_lane = l_lane % 8;
+                            uint8_t l_chipnum = l_chipUnitNum;
+
+                            if (l_chipnum >= 8)
+                            {
+                                l_chipnum++;
+                            }
+
+                            l_scom.set_lane_id(((l_chipnum % 3) * 8) + l_lane);
                         }
 
-                        l_scom.set_lane_id(((l_chipnum % 3) * 8) + l_lane);
-                    }
-
-                    if (l_ring == P9A_MC_OMI_DL_RING_ID)
-                    {
-                        // DL Registers
-                        // reg0 dl0 -> omi0  ring: 12  sat_id: 13  regs 16..31
-                        // reg0 dl1 -> omi1  ring: 12  sat_id: 13  regs 32..47
-                        // reg0 dl2 -> omi2  ring: 12  sat_id: 13  regs 48..63
-                        // reg1 dl0 -> omi3  ring: 12  sat_id: 14  regs 16..31
-                        // reg1 dl1 -> omi4  ring: 12  sat_id: 14  regs 32..47
-                        // reg1 dl2 -> omi5  ring: 12  sat_id: 14  regs 48..63
-                        // reg2 dl0 -> omi6  ring: 12  sat_id: 15  regs 16..31
-                        // reg2 dl1 -> omi7  ring: 12  sat_id: 15  regs 32..47
-                        l_scom.set_sat_id(P9A_MC_DL_REG0_SAT_ID + ((i_chipUnitNum % 8) / 3));
-                        uint8_t l_satoff = l_sat_offset % 16;
-                        uint8_t l_chipnum = i_chipUnitNum;
-
-                        if (l_chipnum >= 8)
+                        if (l_ring == P9A_MC_OMI_DL_RING_ID)
                         {
-                            l_chipnum++;
+                            // DL Registers
+                            // reg0 dl0 -> omi0  ring: 12  sat_id: 13  regs 16..31
+                            // reg0 dl1 -> omi1  ring: 12  sat_id: 13  regs 32..47
+                            // reg0 dl2 -> omi2  ring: 12  sat_id: 13  regs 48..63
+                            // reg1 dl0 -> omi3  ring: 12  sat_id: 14  regs 16..31
+                            // reg1 dl1 -> omi4  ring: 12  sat_id: 14  regs 32..47
+                            // reg1 dl2 -> omi5  ring: 12  sat_id: 14  regs 48..63
+                            // reg2 dl0 -> omi6  ring: 12  sat_id: 15  regs 16..31
+                            // reg2 dl1 -> omi7  ring: 12  sat_id: 15  regs 32..47
+                            l_scom.set_sat_id(P9A_MC_DL_REG0_SAT_ID + ((l_chipUnitNum % 8) / 3));
+                            uint8_t l_satoff = l_sat_offset % 16;
+                            uint8_t l_chipnum = l_chipUnitNum;
+
+                            if (l_chipnum >= 8)
+                            {
+                                l_chipnum++;
+                            }
+
+                            l_scom.set_sat_offset((((l_chipnum % 3) * 16) + P9A_MC_DL_OMI0_FRST_REG) +
+                                                  l_satoff);
                         }
-
-                        l_scom.set_sat_offset((((l_chipnum % 3) * 16) + P9A_MC_DL_OMI0_FRST_REG) +
-                                              l_satoff);
                     }
-
                     break;
 
                 case PU_NV_CHIPUNIT:
@@ -1140,9 +1150,9 @@ extern "C"
                                 uint32_t l_ind_lane = l_scom.get_lane_id();
                                 o_chipUnitRelated = true;
                                 o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_OMI_CHIPUNIT,
-                                                            ((l_chiplet_id - MC01_CHIPLET_ID) * 8) +
-                                                            ((l_ring - P9A_MC_OMIC0_RING_ID) * 3) +
-                                                            ((l_ind_lane / 8))));
+                                                            P9_SCOMINFO_OMI_SWIZZLE[((l_chiplet_id - MC01_CHIPLET_ID) * 8) +
+                                                                    ((l_ring - P9A_MC_OMIC0_RING_ID) * 3) +
+                                                                    ((l_ind_lane / 8))]));
                             }
                         }
                     }
@@ -1173,9 +1183,9 @@ extern "C"
                             {
                                 o_chipUnitRelated = true;
                                 o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_OMI_CHIPUNIT,
-                                                            ((l_chiplet_id - MC01_CHIPLET_ID) * 8) +
-                                                            ((l_sat_id - P9A_MC_DL_REG0_SAT_ID) * 3) +
-                                                            ((l_sat_offset / 16) - 1)));
+                                                            P9_SCOMINFO_OMI_SWIZZLE[((l_chiplet_id - MC01_CHIPLET_ID) * 8) +
+                                                                    ((l_sat_id - P9A_MC_DL_REG0_SAT_ID) * 3) +
+                                                                    ((l_sat_offset / 16) - 1)]));
                             }
                         }
                     }
