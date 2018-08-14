@@ -68,9 +68,9 @@
  * @param[in] i_lane_vector Lanve Vector
  * @retval ReturnCode
  */
-fapi2::ReturnCode p9_io_pdwn_lanes(const OBUS_TGT i_tgt, const uint32_t i_lane_vector)
+fapi2::ReturnCode p9_io_obus_pdwn_lanes(const OBUS_TGT i_tgt, const uint32_t i_lane_vector)
 {
-    FAPI_IMP("p9_io_pdwn_lanes: I/O Obus Entering");
+    FAPI_IMP("p9_io_obus_pdwn_lanes: I/O Obus Entering");
     const uint8_t GRP0  = 0;
     const uint8_t LANES = 24;
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
@@ -89,6 +89,6 @@ fapi2::ReturnCode p9_io_pdwn_lanes(const OBUS_TGT i_tgt, const uint32_t i_lane_v
     }
 
 fapi_try_exit:
-    FAPI_IMP("p9_io_pdwn_lanes: I/O Obus Exiting");
+    FAPI_IMP("p9_io_obus_pdwn_lanes: I/O Obus Exiting");
     return fapi2::current_err;
 }
