@@ -182,11 +182,15 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
         // Disable Auto Increment
         FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_DIS), "Auto-Increment Disable Failed.");
 
-        // PPE Reset
-        FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+        // If we are in Abus SMP mode, we do not want to start the PPE before link training.
+        if(fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP != configMode)
+        {
+            // PPE Reset
+            FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
 
-        // PPE Resume From Halt
-        FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
+            // PPE Resume From Halt
+            FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
+        }
     }
 
 fapi_try_exit:
