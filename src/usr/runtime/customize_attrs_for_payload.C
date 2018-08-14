@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,8 @@ errlHndl_t computeNonPhypRtTarget(
             getParentAffinityTargets(targetList,
                                     i_pTarget,
                                     TARGETING::CLASS_UNIT,
-                                    TARGETING::TYPE_DMI);
+                                    TARGETING::TYPE_DMI,
+                                    TARGETING::UTIL_FILTER_ALL);
 
             if( targetList.empty() )
             {
@@ -186,7 +187,8 @@ errlHndl_t computeNonPhypRtTarget(
             getParentAffinityTargets(targetList,
                                      target,
                                      TARGETING::CLASS_CHIP,
-                                     TARGETING::TYPE_PROC);
+                                     TARGETING::TYPE_PROC,
+                                     TARGETING::UTIL_FILTER_ALL);
 
             if(targetList.empty())
             {
