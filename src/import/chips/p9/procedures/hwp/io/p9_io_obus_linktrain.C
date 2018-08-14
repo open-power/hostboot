@@ -55,6 +55,7 @@
 //  Includes
 //-----------------------------------------------------------------------------
 #include <p9_io_obus_linktrain.H>
+#include <p9_io_obus_pdwn_lanes.H>
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
 #include <p9_io_common.H>
@@ -159,6 +160,12 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
                                 0x1111111111100000ULL),
                  "Error from putScom (OBUS_LL0_IOOL_LINK0_TX_LANE_CONTROL)");
     }
+    else
+    {
+        const uint32_t EVEN_LANES = 0x000007FF;
+        FAPI_TRY(p9_io_obus_pdwn_lanes(i_tgt, EVEN_LANES),
+                 "Error from p9_io_obus_pdwn_lanes");
+    }
 
     if (l_odd)
     {
@@ -166,6 +173,12 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
                                 OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL,
                                 0x1111111111100000ULL),
                  "Error from putScom (OBUS_LL0_IOOL_LINK1_TX_LANE_CONTROL)");
+    }
+    else
+    {
+        const uint32_t ODD_LANES = 0x00FFE000;
+        FAPI_TRY(p9_io_obus_pdwn_lanes(i_tgt, ODD_LANES),
+                 "Error from p9_io_obus_pdwn_lanes");
     }
 
     // Delay to compensate for active links
