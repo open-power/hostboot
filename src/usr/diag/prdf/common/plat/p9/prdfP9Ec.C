@@ -112,13 +112,12 @@ int32_t PostAnalysis( ExtensibleChip * i_chip,
 #ifdef __HOSTBOOT_RUNTIME
     if ( io_sc.service_data->isProcCoreCS() )
     {
+        ExtensibleChip * n_chip = getNeighborCore(i_chip);
         maskIfCoreCs(i_chip);
         rtDcnfgCore(i_chip);
-        ExtensibleChip * n_chip = getNeighborCore(i_chip);
         if (n_chip != nullptr)
         {
             maskIfCoreCs(n_chip);
-            rtDcnfgCore(n_chip);
         }
     }
     else

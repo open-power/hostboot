@@ -947,11 +947,17 @@ ExtensibleChip * getNeighborCore( ExtensibleChip * i_core )
     PRDF_ASSERT( nullptr != i_core );
 
     TargetHandle_t thisCore = i_core->getTrgt();
-    ExtensibleChip * neighborCore = nullptr;
-    TargetHandleList list =
-      getConnected(getConnectedParent(thisCore, TYPE_EX), TYPE_CORE);
+    TargetHandleList parentEx = getConnected( thisCore, TYPE_EX );
 
-    for ( auto & trgt : list)
+    // Check that there is still a functional parent EX
+    if (parentEx.size() == 0)
+        return nullptr;
+
+    ExtensibleChip * neighborCore = nullptr;
+
+    TargetHandleList coreList = getConnected( parentEx[0], TYPE_CORE);
+
+    for ( auto & trgt : coreList)
     {
         if ( trgt != thisCore )
         {
