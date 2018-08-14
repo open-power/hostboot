@@ -8081,4 +8081,19 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
   <no_export/>
 </attribute>
 
+<attribute>
+    <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+    <description>
+        The max compute nodes available in the system.
+        Computed value based on CEC enclosures.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+</attribute>
+
 </attributes>

@@ -629,9 +629,13 @@
         <id>X_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
-
+    <attribute>
+        <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+        <default>4</default>
+    </attribute>
 
 </targetInstance>
+
 <targetInstance>
     <id>sys0node0</id>
     <type>enc-node-power9</type>
