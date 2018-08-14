@@ -296,6 +296,7 @@
 #define OPT_RX_E_INTEG_COARSE_GAIN                         0x8000c0000000003f, 48,  4 // this is integrator coarse gain control used in making common mode adjustments.
 #define OPT_RX_PR_FW_INTERTIA_AMT                          0x800228000000003f, 57,  3
 #define OPT_RX_PR_IQ_RES_SEL                               0x800010000000003f, 59,  3
+#define OPT_RX_LANE_DISABLED                               0x800320000000003f, 52,  1 // used to set the given lane to be ignored by training logic.  this does not affect powerdown.
 
 /*
  * Leaving these as comments until we close out OPT RAS discussions and write Abus link training
