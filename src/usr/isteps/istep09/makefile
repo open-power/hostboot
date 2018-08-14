@@ -73,6 +73,7 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_dccal.mk
 #p9_io_xbus_linktrain.mk has includes we dont need so manually add the .o
 OBJS+= p9_io_xbus_linktrain.o
 OBJS+= p9_io_obus_linktrain.o
+OBJS+= p9_io_obus_pdwn_lanes.o
 #Skipping p9_io_xbus_clear_firs, already included by libprdf.so
 
 # fabric_post_trainadv: xbus & obus
