@@ -554,6 +554,16 @@ int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isSpareAvailable( uint8_t i_portSlct,
 
 //------------------------------------------------------------------------------
 template <>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MCA>::isSpareAvailable( uint8_t i_portSlct,
+                                       bool & o_dramSpare, bool & o_eccSpare )
+{
+    // spares not supported on MCA
+    o_dramSpare = false;
+    o_eccSpare = false;
+    return SUCCESS;
+}
+//------------------------------------------------------------------------------
+template <>
 int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::setDramSpare( uint8_t i_portSlct,
                                                         uint8_t i_pins )
 {
