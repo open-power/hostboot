@@ -1705,6 +1705,16 @@ firmware notes: none</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_CEN_EFF_SCHMOO_VREF_STEP</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>Specifies the step size in register ticks for WR_VREF and RD_VREF shmoos.</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+
+<attribute>
     <id>ATTR_CEN_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
     <targetType>TARGET_TYPE_MBA</targetType>
     <description>Specifies the shmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
