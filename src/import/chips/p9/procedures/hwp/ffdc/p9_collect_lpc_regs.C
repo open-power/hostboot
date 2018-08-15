@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 #include "p9_misc_scom_addresses.H"
 #include "p9_misc_scom_addresses_fld.H"
 
-#include "../perv/p9_lpc_utils.H"
+#include <p9_lpc_utils.H>
 
 static void lpc_dump(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
