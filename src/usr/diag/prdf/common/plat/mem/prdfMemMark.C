@@ -953,21 +953,13 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
         const bool isX4 = isDramWidthX4( i_chip->getTrgt() );
 
         // Determine if DRAM sparing is enabled.
-        bool isEnabled = isX4; // Always an ECC spare in x4 mode.
-
-        if ( !isEnabled )
+        bool isEnabled = false;
+        o_rc = isDramSparingEnabled<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
+                                               isEnabled );
+        if ( SUCCESS != o_rc )
         {
-            // Check for any DRAM spares.
-            uint8_t cnfg = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
-            o_rc = getDimmSpareConfig<TARGETING::TYPE_MBA>( i_chip->getTrgt(),
-                                                            i_rank, ps, cnfg );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getDimmSpareConfig(0x%08x,0x%02x,%d) "
-                          "failed", i_chip->getHuid(), i_rank.getKey(), ps );
-                break;
-            }
-            isEnabled = (TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE != cnfg);
+            PRDF_ERR( PRDF_FUNC "isDramSparingEnabled() failed." );
+            break;
         }
 
         if ( isEnabled )
@@ -1003,34 +995,16 @@ uint32_t __applyRasPolicies<TYPE_MBA>( ExtensibleChip * i_chip,
 
             // Certain DIMMs may have had spares intentially made unavailable by
             // the manufacturer. Check the VPD for available spares.
-            bool dramSparePossible = false;
-            bool eccSparePossible  = false;
-
-            MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
-            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>( i_chip->getTrgt(),
-                                                        i_rank, dqBitmap );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
-                break;
-            }
-
-            o_rc = dqBitmap.isSpareAvailable( ps, dramSparePossible,
-                                              eccSparePossible );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
-                break;
-            }
-
-            if ( dramSparePossible &&
-                 (0 == ps ? !sp0.isValid() : !sp1.isValid()) )
+            bool spAvail, eccAvail;
+            o_rc = isSpareAvailable<TYPE_MBA>( i_chip->getTrgt(), i_rank, ps,
+                                               spAvail, eccAvail );
+            if ( spAvail )
             {
                 // A spare DRAM is available.
                 o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,
                                                      i_chipMark };
             }
-            else if ( eccSparePossible && !ecc.isValid() )
+            else if ( eccAvail )
             {
                 // The ECC spare is available.
                 o_dsdEvent = new DsdEvent<TYPE_MBA>{ i_chip, i_rank,

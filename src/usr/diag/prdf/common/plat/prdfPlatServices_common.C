@@ -880,8 +880,8 @@ int32_t mssSetSteerMux<TYPE_MBA>( TargetHandle_t i_mba, const MemRank & i_rank,
     return o_rc;
 }
 
-
 //------------------------------------------------------------------------------
+
 template<>
 int32_t getDimmSpareConfig<TYPE_MCA>( TargetHandle_t i_mba, MemRank i_rank,
                                       uint8_t i_ps, uint8_t & o_spareConfig )
@@ -953,6 +953,137 @@ int32_t getDimmSpareConfig<TYPE_MBA>( TargetHandle_t i_mba, MemRank i_rank,
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t isDramSparingEnabled<TYPE_MCA>( TARGETING::TargetHandle_t i_trgt,
+                                         MemRank i_rank, uint8_t i_ps,
+                                         bool & o_spareEnable )
+{
+    // DRAM sparing not supported for MCA
+    o_spareEnable = false;
+    return SUCCESS;
+}
+
+template<>
+uint32_t isDramSparingEnabled<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
+                                         MemRank i_rank, uint8_t i_ps,
+                                         bool & o_spareEnable )
+{
+    #define PRDF_FUNC "[PlatServices::isDramSparingEnabled<TYPE_MBA>] "
+
+    uint32_t o_rc = SUCCESS;
+    o_spareEnable = false;
+
+    do
+    {
+        const bool isX4 = isDramWidthX4( i_trgt );
+        if ( isX4 )
+        {
+            // Always an ECC spare in x4 mode.
+            o_spareEnable = true;
+            break;
+        }
+
+        // Check for any DRAM spares.
+        uint8_t cnfg = TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE;
+        o_rc = getDimmSpareConfig<TYPE_MBA>( i_trgt, i_rank, i_ps, cnfg );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig(0x%08x,0x%02x,%d) "
+                      "failed", getHuid(i_trgt), i_rank.getKey(), i_ps );
+            break;
+        }
+        o_spareEnable = (TARGETING::CEN_VPD_DIMM_SPARE_NO_SPARE != cnfg);
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, DIMMS_PER_RANK D>
+uint32_t __isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
+                             uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
+{
+    #define PRDF_FUNC "[PlatServices::isSpareAvailable] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_spAvail = false;
+    o_eccAvail = false;
+
+    do
+    {
+        bool dramSparingEnabled = false;
+        o_rc = isDramSparingEnabled<T>( i_trgt, i_rank, i_ps,
+                                        dramSparingEnabled );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isDramSparingEnabled() failed." );
+            break;
+        }
+
+        // Break out if dram sparing isn't enabled
+        if ( !dramSparingEnabled ) break;
+
+        // Get the current spares in hardware
+        MemSymbol sp0, sp1, ecc;
+        o_rc = mssGetSteerMux<T>( i_trgt, i_rank, sp0, sp1, ecc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
+                      getHuid(i_trgt), i_rank.getKey() );
+            break;
+        }
+
+        bool dramSparePossible = false;
+        bool eccSparePossible  = false;
+
+        // Get the bad dq data
+        MemDqBitmap<D> dqBitmap;
+        o_rc = getBadDqBitmap<D>( i_trgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
+            break;
+        }
+
+        o_rc = dqBitmap.isSpareAvailable( i_ps, dramSparePossible,
+                                          eccSparePossible );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
+            break;
+        }
+
+        if (dramSparePossible && (0 == i_ps ? !sp0.isValid() : !sp1.isValid()))
+        {
+            o_spAvail = true;
+        }
+        if ( eccSparePossible && !ecc.isValid() )
+        {
+            o_eccAvail = true;
+        }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+template<>
+uint32_t isSpareAvailable<TYPE_MBA>( TARGETING::TargetHandle_t i_trgt,
+    MemRank i_rank, uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail )
+{
+    return __isSpareAvailable<TYPE_MBA, DIMMS_PER_RANK::MBA>( i_trgt, i_rank,
+        i_ps, o_spAvail, o_eccAvail );
+}
 
 //------------------------------------------------------------------------------
 

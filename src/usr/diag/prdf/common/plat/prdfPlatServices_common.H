@@ -244,7 +244,6 @@ template<TARGETING::TYPE T>
 int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const MemRank & i_rank,
                         const MemSymbol & i_symbol, bool i_x4EccSpare );
 
-
 /**
  * @brief   Get spare DRAM information on a DIMM.
  * @param   i_mba MBA/MCA target.
@@ -260,6 +259,30 @@ template<TARGETING::TYPE T>
 int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, MemRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
 
+/**
+ * @brief Checks if DRAM sparing is enabled.
+ * @param i_trgt        Target MBA
+ * @param i_rank        Target rank
+ * @param i_ps          MBA Port select
+ * @param o_spareEnable Whether DRAM sparing is enabled or not.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t isDramSparingEnabled( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
+                               uint8_t i_ps, bool & o_spareEnable );
+
+/**
+ * @brief Checks to see if the spares are available on given target and port.
+ * @param i_trgt     Target MBA
+ * @param i_rank     Target rank
+ * @param i_ps       Port select
+ * @param o_spAvail  If the spare on inputted port select is available
+ * @param o_eccAvail If the ecc spare is available
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
+                           uint8_t i_ps, bool & o_spAvail, bool & o_eccAvail );
 
 /**
  * @brief  Returns the raw card type of a buffered DIMM.
