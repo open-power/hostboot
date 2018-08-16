@@ -540,7 +540,8 @@ errlHndl_t IpVpdFacade::loadPnor ( TARGETING::Target * i_target )
     uint16_t sRecLength = 0;
     uint16_t pRecOffset = IPVPD_TOC_SIZE;  // Records begin after TOC
     input_args_t sRecArgs;
-    sRecArgs.location = VPD::SEEPROM;
+    sRecArgs.location =
+              static_cast<VPD::vpdCmdTarget>(VPD::SEEPROM | VPD::USEVPD);
 
     std::list<TocPtRecord> recList;
     recList.clear();
