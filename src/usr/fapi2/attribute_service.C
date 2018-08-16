@@ -591,6 +591,11 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
 
+    // NOTE: this function returns the port select we need for the translation
+    // attribute. This means, for Cumulus it returns the MBA port from the
+    // centaur perspective (0-3), and for Nimbus it returns the port select from
+    // an MCS perspective (0-1).
+
     do
     {
         TARGETING::ATTR_MODEL_type procType = __getChipModel();
@@ -869,12 +874,13 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
 
         TARGETING::TargetHandle_t l_mcsTarget = nullptr;
         uint32_t l_ps = 0;
-        __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, l_ps );
 
         TARGETING::ATTR_MODEL_type procType = __getChipModel();
 
         if ( TARGETING::MODEL_NIMBUS == procType )
         {
+            __getMcsAndPortSlct( l_fapiDimm, l_mcsTarget, l_ps );
+
             l_rc = FAPI_ATTR_GET( fapi2::ATTR_EFF_DIMM_SPARE, l_mcsTarget,
                                   l_dramSpare );
         }
@@ -893,6 +899,12 @@ ReturnCode __dimmGetDqBitmapSpareByte( TARGETING::TargetHandle_t i_dimm,
             }
             l_rc = FAPI_ATTR_GET( fapi2::ATTR_CEN_VPD_DIMM_SPARE, l_mbaTrgt,
                                   l_dramSpare );
+
+            // In this case we need the port select from the MBA perspective
+            // not the centaur perspective that __getMcsAndPortSlct gives
+            // us, so we can't use that function.
+            l_ps = i_dimm->getAttr<TARGETING::ATTR_CEN_MBA_PORT>() %
+                   MAX_PORTS_PER_MBA;
         }
         else
         {
