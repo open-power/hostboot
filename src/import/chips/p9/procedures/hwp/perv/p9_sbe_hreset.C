@@ -71,7 +71,7 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
     l_data64.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
     FAPI_TRY(fapi2::putScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
 
-    FAPI_INF("Writing I2C bit rate divisor into mailbox_reg_2");
+    FAPI_INF("Writing I2C bit rate divisor into mailbox_reg_2 AND writing i2c valid bit into mailbox_reg_8");
 #ifndef __HOSTBOOT_RUNTIME
 
     if (i_masterProc)
@@ -81,6 +81,12 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
         l_data64.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
         FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Master proc Scratch2 0x%.16llX", l_data64);
         FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM, l_data64));
+
+        FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM, l_data64));
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Master proc Scratch8 0x%.16llX (before insert)", l_data64);
+        l_data64.insertFromRight< 1, 1 >(1);
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Master proc Scratch8 0x%.16llX", l_data64);
+        FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM, l_data64));
     }
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -90,6 +96,12 @@ fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
         l_data32.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
         FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Slave proc Scratch2 0x%.8X", l_data32);
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI, l_data32));
+
+        FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM, l_data64));
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Slave proc Scratch8 0x%.16llX (before insert)", l_data64);
+        l_data64.insertFromRight< 1, 1 >(1);
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Slave proc Scratch8 0x%.16llX", l_data64);
+        FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM, l_data64));
     }
 
 #endif
