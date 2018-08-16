@@ -394,17 +394,16 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
 
 //------------------------------------------------------------------------------
 
-int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
-                               ATTENTION_TYPE i_attnType )
+int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t l_rc = SUCCESS;
     ExtensibleChip * l_chipAnalyzed = ServiceDataCollector::getChipAnalyzed( );
-    ServiceDataCollector & i_sdc = *(i_serviceData.service_data);
+    ServiceDataCollector & i_sdc = *(io_sc.service_data);
     // Set default dump flags.
     i_sdc.SetDump( (hwTableContent)cv_dumpType,
                     l_chipAnalyzed->GetChipHandle() );
     // Add statement below for Drop call.
-    CaptureData & capture = i_serviceData.service_data->GetCaptureData();
+    CaptureData & capture = io_sc.service_data->GetCaptureData();
     // Get capture data for this chip.  Allow override.
     ExtensibleChipFunction * l_ignoreCapture =
             getExtensibleFunction("PreventDefaultCapture", true);
@@ -412,7 +411,7 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
 
     (*l_ignoreCapture)
         ( l_chipAnalyzed, PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, bool&>
-                 (i_serviceData, l_shouldPreventDefaultCapture));
+                 (io_sc, l_shouldPreventDefaultCapture));
 
     if (!l_shouldPreventDefaultCapture)
     {
@@ -423,48 +422,48 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
         this->CaptureErrorData( i_sdc.GetCaptureData() );
     }
 
-    // Analyze group.
-    ErrorRegisterType * l_errReg = NULL;
-    switch (i_attnType)
+    // Call the PreAnalysis plugin, if it exist. This should be done
+    // before getting the error register just in case the secondary attention
+    // type changes in the pre-analysis.
+    ExtensibleChipFunction * l_preAnalysis =
+                                    getExtensibleFunction("PreAnalysis", true);
+    bool analyzed = false;
+    (*l_preAnalysis)( l_chipAnalyzed,
+            PluginDef::bindParm<STEP_CODE_DATA_STRUCT&,bool&>(io_sc,analyzed) );
+
+    if ( !analyzed )
     {
-        case CHECK_STOP:
-            l_errReg = cv_groupAttn[0];
-            break;
+        // Analyze the group.
+        ErrorRegisterType * l_errReg = nullptr;
+        switch ( io_sc.service_data->getSecondaryAttnType() )
+        {
+            case CHECK_STOP:
+                l_errReg = cv_groupAttn[0];
+                break;
 
-        case RECOVERABLE:
-            l_errReg = cv_groupAttn[1];
-            break;
+            case RECOVERABLE:
+                l_errReg = cv_groupAttn[1];
+                break;
 
-        case SPECIAL:
-            l_errReg = cv_groupAttn[2];
-            break;
+            case SPECIAL:
+                l_errReg = cv_groupAttn[2];
+                break;
 
-        case UNIT_CS:
-            l_errReg = cv_groupAttn[3];
-            break;
+            case UNIT_CS:
+                l_errReg = cv_groupAttn[3];
+                break;
 
-        case HOST_ATTN:
-            l_errReg = cv_groupAttn[4];
-            break;
+            case HOST_ATTN:
+                l_errReg = cv_groupAttn[4];
+                break;
+        }
+
+        l_rc = ( nullptr != l_errReg ) ? l_errReg->Analyze(io_sc)
+                                       : PRD_SCAN_COMM_REGISTER_ZERO;
     }
-    if (NULL != l_errReg)
-    {  //mp02 a Start
-        //Call any pre analysis functions
-        ExtensibleChipFunction * l_preAnalysis =
-                getExtensibleFunction("PreAnalysis", true);
-        bool analyzed = false;
-        (*l_preAnalysis)( l_chipAnalyzed ,
-                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&,bool&>
-                 (i_serviceData,analyzed));
-        if ( !analyzed)
-            l_rc = l_errReg->Analyze(i_serviceData);
-    }    //mp02 a Stop
-       // mp02d l_rc = l_errReg->Analyze(i_serviceData);
-    else                                      //@jl07
-       l_rc = PRD_SCAN_COMM_REGISTER_ZERO;    //@jl07
 
     // Don't do reset or mask on CS. @pw03
-    if (CHECK_STOP != i_serviceData.service_data->getPrimaryAttnType()) //@pw04
+    if (CHECK_STOP != io_sc.service_data->getPrimaryAttnType()) //@pw04
     {
         #ifndef __HOSTBOOT_MODULE
         SyncAnalysis (i_sdc);  //mp01 Add call to Sync SDC
@@ -474,12 +473,12 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
         #if defined(__HOSTBOOT_MODULE) || defined(ESW_SIM_COMPILE)
 
         // Call mask plugin.
-        if (i_serviceData.service_data->IsAtThreshold())
+        if (io_sc.service_data->IsAtThreshold())
         {
             ExtensibleChipFunction * l_mask =
                     getExtensibleFunction("MaskError", true);
             (*l_mask)( l_chipAnalyzed ,
-                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
+                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc)
                 ); //@pw01
         }
 
@@ -487,13 +486,13 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
         ExtensibleChipFunction * l_reset =
                 getExtensibleFunction("ResetError", true);
         (*l_reset)( l_chipAnalyzed,
-             PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData)
+             PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc)
             ); //@pw01
         #endif
     }
 
     // Additional error isolation for HWPs, if needed.
-    PlatServices::hwpErrorIsolation( l_chipAnalyzed, i_serviceData );
+    PlatServices::hwpErrorIsolation( l_chipAnalyzed, io_sc );
 
     // Call postanalysis plugin.
     // @jl02 JL Adding PostAnalysis plugin call.
@@ -502,7 +501,7 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
     // @jl02 the true above means that a plugin may not exist for this call.
     // @jl02 JL Adding call for post analysis.
     (*l_postanalysis)( l_chipAnalyzed,
-              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(i_serviceData));
+              PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(io_sc));
 
 
     return l_rc;
