@@ -149,6 +149,23 @@ errlHndl_t checkMinimumHardware(
 errlHndl_t validateProcessorEcLevels();
 
 /**
+ * @brief Determines if passed in ECs are allowed to be mixed without error
+ *
+ * Called by validateProcessorEcLevels()
+ *
+ * @param[in] i_model:    Cumulus or Nimbus
+ * @param[in] i_baseEC:   EC level of primary chip
+ * @param[in] i_compareEC:  EC level of to check against mixing allowed
+ *
+ * @return bool -- true if mixing allowed, otherwise false
+ *                 note that same EC is not mixed, thus returns false
+ */
+bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,
+                     TARGETING::ATTR_EC_type i_baseEC,
+                     TARGETING::ATTR_EC_type i_compareEC);
+
+
+/**
  * @brief  Struct representing a particular target.  Used by
  * invokePresentByAssoc to populate a vector of TargetInfo's for subsequent
  * use by deconfigPresentByAssoc
