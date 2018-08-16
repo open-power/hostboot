@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 1996,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -282,13 +284,12 @@ class System
   //
   // End Function Specification ****************************************
 
-    virtual int32_t Analyze(STEP_CODE_DATA_STRUCT & serviceData,
-                            ATTENTION_TYPE attentionType);
+    virtual int32_t Analyze( STEP_CODE_DATA_STRUCT & io_sc );
+
   // Function Specification ********************************************
   //
   // Purpose:      Analyze domains for an error
-  // Parameters:   serviceData: Reference to pass back error data in
-  //               attentionType: Indicates attention type
+  // Parameters:   io_sc: Reference to pass back error data in
   // Returns:      Error value
   // Requirements: None.
   // Promises:     ServiceData completed unless error encountered
