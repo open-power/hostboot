@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <map>
+#include <algorithm>
 #include <hbotcompid.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -47,6 +48,10 @@
 #include <errl/errludattribute.H>
 #include <errl/errludstate.H>
 #include <trace/interface.H>
+
+#include "../trace/entry.H"
+#include <util/align.H>
+
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
 #include <hwas/common/deconfigGard.H>
@@ -292,7 +297,7 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
     return l_rc;
 }
 
-////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::removeBackTrace()
 {
@@ -1645,14 +1650,19 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             }
         } // for
 
+        // Before the trace UD sections are flattened, make sure there are no
+        // duplicates.
+        removeDuplicateTraces();
+
         for(it = iv_SectionVector.begin();
-            (it != iv_SectionVector.end()) && (l_flatSize != 0);
+           (it != iv_SectionVector.end()) && (l_flatSize != 0);
             it++)
         {
             // If UD section is a trace.
             if( (FIPS_ERRL_COMP_ID   == (*it)->iv_header.iv_compId) &&
                 (FIPS_ERRL_UDT_HB_TRACE == (*it)->iv_header.iv_sst) )
             {
+
                 l_cb = (*it)->flatten( pBuffer, l_sizeRemaining );
                 if( 0 == l_cb )
                 {
@@ -1793,6 +1803,227 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
 
     return copy_vector;
 }
+
+
+void ErrlEntry::removeDuplicateTraces()
+{
+    // Define a custom comparator function for std::map.find()
+    struct mapComparator
+    {
+        bool operator()(const char* a, const char * b) const
+        {
+            return strcmp(a, b) < 0;
+        }
+    };
+
+    // map of component id and corresponding trace entries.
+    std::map<const char *, std::vector<TRACE::trace_bin_entry_t*>*,
+             mapComparator> traceUD_map;
+    auto it = traceUD_map.end();
+
+    uint64_t l_flatSize = flattenedSize();
+
+    // vector that will hold all of the trace UD sections
+    // that are free of duplicates.
+    std::vector<ErrlUD*> l_uniqueTraceUDVector;
+
+
+    // Iterate through iv_SectionVector and create a map of all unique
+    // component ids and their corresponding trace entries.
+    for(auto sectionVectorIt = iv_SectionVector.begin();
+       (sectionVectorIt != iv_SectionVector.end()) && (l_flatSize != 0);
+        ++sectionVectorIt)
+    {
+        // If UD section is a trace.
+        if( (FIPS_ERRL_COMP_ID   == (*sectionVectorIt)->iv_header.iv_compId)
+          && (FIPS_ERRL_UDT_HB_TRACE == (*sectionVectorIt)->iv_header.iv_sst) )
+        {
+            char* l_data = static_cast<char*>((*sectionVectorIt)->data());
+
+            TRACE::trace_buf_head_t* l_trace_buf_head =
+                reinterpret_cast<TRACE::trace_buf_head_t*>(l_data);
+
+            // Look for the component id in the map to insert trace entries
+            // or insert a new component id into the map to insert trace entries
+            const char* l_compName = l_trace_buf_head->comp;
+
+            it = traceUD_map.find(l_compName);
+
+            if (traceUD_map.end() == it)
+            {
+                traceUD_map[l_compName] =
+                    new std::vector<TRACE::trace_bin_entry_t*>;
+                it = traceUD_map.find(l_compName);
+            }
+
+            // Add all trace entries to map for the current component id.
+            l_data += l_trace_buf_head->hdr_len;
+
+            for (size_t traceCount = 0; traceCount < l_trace_buf_head->te_count;
+                 traceCount++)
+            {
+                TRACE::trace_bin_entry_t* l_trace_entry =
+                    reinterpret_cast<TRACE::trace_bin_entry_t*>(l_data);
+
+                it->second->push_back(l_trace_entry);
+
+                // fsp-trace entries have an extra 4 bytes at the end of them
+                // hence the sizeof(uint32_t)
+                l_data += sizeof(TRACE::trace_bin_entry_t)
+                        + ALIGN_8(l_trace_entry->head.length)
+                        + sizeof(uint32_t);
+            }
+        }
+    }
+
+    // Iterate through the map to apply duplicate pruning to all component ids
+    // found in iv_SectionVector
+    for (auto const& it : traceUD_map)
+    {
+        // Sort the vector by timestamp and hash
+        std::sort(it.second->begin(), it.second->end(),
+                  // Define a lambda comparator function for sorting criteria
+                  [](const TRACE::trace_bin_entry_t* a,
+                      const TRACE::trace_bin_entry_t* b)
+                    {
+                        // a goes before b if a's timestamp is less than b's.
+                        // If they are equal then compare the hash values.
+                        bool result = false;
+                        if (a->stamp.tbh < b->stamp.tbh)
+                        {
+                            result = true;
+                        }
+                        else if ((a->stamp.tbh == b->stamp.tbh)
+                                 && (a->stamp.tbl < b->stamp.tbl))
+                        {
+                            result = true;
+                        }
+                        else if ((a->stamp.tbh == b->stamp.tbh)
+                                && (a->stamp.tbl == b->stamp.tbl)
+                                && (a->head.hash < b->head.hash))
+                        {
+                            result = true;
+                        }
+                        return result;
+                    });
+
+        // Call unique to prune the duplicate trace entries
+        auto newEndIt = std::unique(it.second->begin(), it.second->end(),
+                    // Define a lambda predicate function for duplicate criteria
+                    [](const TRACE::trace_bin_entry_t* a,
+                       const TRACE::trace_bin_entry_t* b)
+                    {
+                        // a is equivalent to b if a's timestamp is the same as
+                        // b's and their hashes are the same.
+                        bool result = false;
+                        if ((a->stamp.tbh == b->stamp.tbh)
+                            && (a->stamp.tbl == b->stamp.tbl)
+                            && (a->head.hash == b->head.hash))
+                        {
+                            result = true;
+                        }
+                        return result;
+                    });
+
+        it.second->resize(std::distance(it.second->begin(), newEndIt));
+
+        // Calculate the size of the buffer that will hold all remaining
+        // trace entries in the new UD section
+        size_t uniqueSize = sizeof(TRACE::trace_buf_head_t);
+
+        for (auto uniqueIt = it.second->begin(); uniqueIt != it.second->end();
+             ++uniqueIt)
+        {
+            uniqueSize += sizeof(TRACE::trace_bin_entry_t)
+                          + ALIGN_8((*uniqueIt)->head.length)
+                          + sizeof(uint32_t);
+        }
+
+
+        // Create a new buffer for the new UD section from the vector of traces
+        // for this component id.
+        TRACE::trace_buf_head_t* header = nullptr;
+        char* l_pBuffer = new char[ uniqueSize ]();
+        size_t l_pos = 0;
+
+        // Write the header info to the buffer.
+        // This header info was chosen based on the code that is found in
+        // Buffer::getTrace() if that code is changed in the future those
+        // changes will need to be reflected here.
+        header = reinterpret_cast<TRACE::trace_buf_head_t*>(&l_pBuffer[l_pos]);
+
+        memset(header, '\0', sizeof(TRACE::trace_buf_head_t));
+
+        header->ver = TRACE::TRACE_BUF_VERSION;
+        header->hdr_len = sizeof(TRACE::trace_buf_head_t);
+        header->time_flg = TRACE::TRACE_TIME_REAL;
+        header->endian_flg = 'B';
+        memcpy(&header->comp[0], it.first, TRAC_COMP_SIZE);
+        header->times_wrap = 0;
+        header->te_count = it.second->size();
+        header->size = uniqueSize;
+        header->next_free = uniqueSize;
+
+        l_pos += header->hdr_len;
+
+        // Copy the trace entries to the buffer
+        for (auto uniqueIt = it.second->begin(); uniqueIt != it.second->end();
+                ++uniqueIt)
+        {
+            // fsp-traces have an extra 4 bytes. Hence the sizeof(uint32_t)
+            size_t entrySize = sizeof(TRACE::trace_bin_entry_t)
+                             + ALIGN_8((*uniqueIt)->head.length)
+                             + sizeof(uint32_t);
+
+            memcpy(&l_pBuffer[l_pos], (*uniqueIt), entrySize);
+
+            l_pos += entrySize;
+
+        }
+
+        ErrlUD* l_udSection = new ErrlUD( l_pBuffer,
+                                          uniqueSize,
+                                          FIPS_ERRL_COMP_ID,
+                                          FIPS_ERRL_UDV_DEFAULT_VER_1,
+                                          FIPS_ERRL_UDT_HB_TRACE );
+
+        l_uniqueTraceUDVector.push_back(l_udSection);
+
+        delete[] l_pBuffer;
+        delete it.second;
+    }
+
+    // Remove old trace UD sections
+    auto sectionVectorIt = iv_SectionVector.begin();
+    while(sectionVectorIt != iv_SectionVector.end())
+    {
+        // If UD section is a trace.
+        if( (FIPS_ERRL_COMP_ID   == (*sectionVectorIt)->iv_header.iv_compId)
+          && (FIPS_ERRL_UDT_HB_TRACE == (*sectionVectorIt)->iv_header.iv_sst))
+        {
+            // Remove the ErrlUD* at this position
+            delete (*sectionVectorIt);
+            // Erase this entry from the vector
+            sectionVectorIt = iv_SectionVector.erase(sectionVectorIt);
+        }
+        else
+        {
+            ++sectionVectorIt;
+        }
+
+    }
+
+    // Add new trace UD sections
+    for(auto it = l_uniqueTraceUDVector.begin();
+        it != l_uniqueTraceUDVector.end();
+        ++it)
+    {
+        iv_SectionVector.push_back((*it));
+    }
+
+}
+
+
 
 /**
  * @brief Check if the severity of this log indicates it is
