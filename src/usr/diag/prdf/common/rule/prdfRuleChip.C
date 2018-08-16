@@ -105,12 +105,14 @@ int32_t RuleChip::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
     ServiceDataCollector & i_sdc = *(i_serviceData.service_data);
     ErrorSignature & l_errSig = *(i_sdc.GetErrorSignature());
 
-    // Set current ATTN type to input value.
-    // If we don't do this, then the AttnRegisters don't work.
-    i_sdc.setSecondaryAttnType(i_attnType);
+    // Set the secondary attention type. This must be done before calling
+    // Analyze() on iv_pRuleData.
+    i_sdc.setSecondaryAttnType( i_attnType );
+
     // Set Signature Chip Id.
     l_errSig.setChipId( GetId() );
-    l_rc = iv_pRuleData->Analyze( i_serviceData, i_attnType );
+
+    l_rc = iv_pRuleData->Analyze( i_serviceData );
 
     return l_rc;
 };

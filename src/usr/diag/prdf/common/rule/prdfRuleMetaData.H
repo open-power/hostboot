@@ -166,13 +166,14 @@ class RuleMetaData
         /**
          * @brief       Analyzes the attention by reading and analyzing group of
          *              registers.
+         * @pre         Must set the secondary attention type in the SDC before
+         *              calling this function.
          * @param[io]   io_serviceData   reference to STEP_CODE_DATA_STRUCT
-         * @param[in]   i_attn           attention reported by RuleChip
          * @return      SUCCESS|FAIL
          */
 
-        int32_t Analyze( STEP_CODE_DATA_STRUCT & io_serviceData,
-                            ATTENTION_TYPE i_attn );
+        int32_t Analyze( STEP_CODE_DATA_STRUCT & io_serviceData );
+
         /**
          * @brief       Captures group of register associated with RuleChip
          * @param[io]   io_capture   reference to CaptureData instance.
