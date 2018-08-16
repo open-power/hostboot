@@ -631,11 +631,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     // Free the wof tables memory
     if(l_pWofImage != nullptr)
     {
-#ifdef __HOSTBOOT_RUNTIME
-        free(l_pWofImage);
-        l_pWofImage = nullptr;
-
-#else
+#ifndef __HOSTBOOT_RUNTIME
         errlHndl_t l_tmpErr = nullptr;
         // Release the memory we may still have allocated and set the
         //  permissions to prevent further access to it
