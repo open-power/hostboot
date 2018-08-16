@@ -206,10 +206,10 @@ errlHndl_t initialize()
 
 //------------------------------------------------------------------------------
 
-errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
+errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
                  const AttnList & i_attnList )
 {
-    PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_attentionType );
+    PRDF_ENTER( "PRDF::main() Global attnType=%04X", i_priAttnType );
 
     // These have to be outside of system scope lock
     errlHndl_t retErrl = NULL;
@@ -243,13 +243,13 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
     // SPECIAL..)
     ////////////////////////////////////////////////////////////////////////////
 
-    if ( i_attentionType == INVALID_ATTENTION_TYPE ||
-         i_attentionType >= END_ATTENTION_TYPE )
+    if ( i_priAttnType == INVALID_ATTENTION_TYPE ||
+         i_priAttnType >= END_ATTENTION_TYPE )
     {
         rc = PRD_INVALID_ATTENTION_TYPE;
         PRDF_ERR( "PrdMain: Invalid attention type! Global:%x",
-                  i_attentionType );
-        i_attentionType = RECOVERABLE; // This will prevent RAS service problems
+                  i_priAttnType );
+        i_priAttnType = RECOVERABLE; // This will prevent RAS service problems
     }
 
     // link to the right service Generator
@@ -257,7 +257,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         ServiceGeneratorClass::ThisServiceGenerator();
 
     // Initialize the SDC error log. Required for GenerateSrcPfa() call below.
-    serviceGenerator.createInitialErrl( i_attentionType );
+    serviceGenerator.createInitialErrl( i_priAttnType );
 
     // check for something wrong
     if ( g_initialized == false || rc != SUCCESS || systemPtr == NULL )
@@ -279,7 +279,8 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         // flush Cache so that SCR reads access hardware
         RegDataCache::getCachedRegisters().flush();
 
-        serviceData.setPrimaryAttnType(i_attentionType);
+        // The primary attention type must be set before calling Analyze().
+        serviceData.setPrimaryAttnType(i_priAttnType);
 
         // Set the time in which PRD handled the error.
         Timer timeOfError;
@@ -290,7 +291,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         l_tempSdc.setPrimaryPass();
         sdc.service_data = &l_tempSdc;
 
-        int32_t analyzeRc = systemPtr->Analyze( sdc, i_attentionType );
+        int32_t analyzeRc = systemPtr->Analyze( sdc );
 
         if( PRD_SCAN_COMM_REGISTER_ZERO == analyzeRc )
         {
@@ -313,7 +314,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                 sdc.service_data->setSecondaryErrFlag();
             }
 
-            analyzeRc = systemPtr->Analyze( sdc, i_attentionType );
+            analyzeRc = systemPtr->Analyze( sdc );
 
             // merging capture data of primary pass with capture data of
             // secondary pass for better FFDC.
@@ -367,7 +368,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         serviceData.clearMruListGard();
     }
 
-    g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,
+    g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_priAttnType,
                                                       serviceData );
 
     // Sleep for 20msec to let attention lines settle if we are at threshold.

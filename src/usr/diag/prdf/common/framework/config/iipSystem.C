@@ -256,10 +256,9 @@ void System::Initialize(void)
     }
 }
 
-// -------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
-                    ATTENTION_TYPE attentionType)
+int32_t System::Analyze( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[System::Analyze] "
     SYSTEM_DEBUG_CLASS sysdebug;
@@ -272,17 +271,18 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     int32_t l_primaryRc = 0;
     if(rc == SUCCESS)
     {
-        // IF machine check then check for recoverable errors first
-        // otherwise just check for the given type of attention
-        ATTENTION_TYPE startAttention = attentionType;
-        if((attentionType == MACHINE_CHECK) || (attentionType == UNIT_CS))
-            startAttention = RECOVERABLE;
+        ATTENTION_TYPE priAttnType = io_sc.service_data->getPrimaryAttnType();
 
-        ATTENTION_TYPE atnType = startAttention;
+        // If the primary attention type is a system checkstop or unit checkstop
+        // then start with recoverable attentions because it is possible they
+        // may be the root cause of the checkstops.
+        ATTENTION_TYPE startAttnType = priAttnType;
+        if ( (MACHINE_CHECK == priAttnType) || (UNIT_CS == priAttnType) )
+            startAttnType = RECOVERABLE;
 
-        for( atnType = startAttention;
-             domainAtAttentionPtr == NULL && atnType >= attentionType ;
-             --atnType)
+        for ( ATTENTION_TYPE secAttnType = startAttnType;
+              domainAtAttentionPtr == NULL && secAttnType >= priAttnType;
+              --secAttnType )
         {
             DomainContainerType::iterator domainIterator;
 
@@ -291,11 +291,11 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                  domainAtAttentionPtr == NULL; )
             {
                 bool l_continueInDomain = false;
-                domainAtAttentionPtr = ((*domainIterator)->Query(atnType)) ? (*domainIterator) : NULL;
+                domainAtAttentionPtr = ((*domainIterator)->Query(secAttnType)) ? (*domainIterator) : NULL;
                 if(domainAtAttentionPtr != NULL)
                 {
-                    serviceData.service_data->setSecondaryAttnType(atnType);
-                    rc = domainAtAttentionPtr->Analyze(serviceData, atnType);
+                    io_sc.service_data->setSecondaryAttnType(secAttnType);
+                    rc = domainAtAttentionPtr->Analyze(io_sc, secAttnType);
                     if((rc == PRD_SCAN_COMM_REGISTER_ZERO) ||
                         (rc == PRD_POWER_FAULT) )
                     {
@@ -303,13 +303,13 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         if(l_saved_sdc == NULL)
                         {
                             l_saved_sdc = new ServiceDataCollector(
-                                                *serviceData.service_data);
+                                                *io_sc.service_data);
                             l_saved_rc = rc;
                         }
 
                         if( ( PRD_SCAN_COMM_REGISTER_ZERO == rc ) &&
-                            ( serviceData.service_data->isPrimaryPass() ) &&
-                             serviceData.service_data->isSecondaryErrFound() )
+                            ( io_sc.service_data->isPrimaryPass() ) &&
+                             io_sc.service_data->isSecondaryErrFound() )
                         {
                             //So, the chip was reporting attention but none of
                             //the FIR read had any Primary bit set. But some
@@ -317,7 +317,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                             //to investigate if there are other chips in
                             //the domain which are reporting primary attention.
                             l_continueInDomain = true;
-                            serviceData.service_data->clearSecondaryErrFlag();
+                            io_sc.service_data->clearSecondaryErrFlag();
                         }
 
                         domainAtAttentionPtr = NULL;
@@ -329,8 +329,8 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         }
                     }
 
-                    else if ( ( attentionType == MACHINE_CHECK )
-                             && ( atnType != MACHINE_CHECK ) )
+                    else if ( ( priAttnType == MACHINE_CHECK )
+                             && ( secAttnType != MACHINE_CHECK ) )
                     {
                         // We were asked to analyze MACHINE XTOP, but we found
                         // another attention and did analyze that. In this case
@@ -350,12 +350,12 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         // error signature.
                         domainAtAttentionPtr = NULL;
                         l_temp_sdc = new ServiceDataCollector (
-                                                    *serviceData.service_data );
+                                                    *io_sc.service_data );
                         // Set up Error Isolation Pass Flag.
-                        serviceData.service_data->setIsolationOnlyPass();
+                        io_sc.service_data->setIsolationOnlyPass();
                         // The original capture data is held with l_temp_sdc
                         // when the copy contructor was called above. If we
-                        // continue to use serviceData.service_data as is, it
+                        // continue to use io_sc.service_data as is, it
                         // still contains all of the current capture data. So
                         // any additional capture data will most likely be
                         // duplicates (which will actually be a third copy of
@@ -364,10 +364,10 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         // can prevent a lot of duplication and have a improve
                         // preformance slightly by clearing the capture data for
                         // the isolation pass.
-                        serviceData.service_data->GetCaptureData().Clear();
-                        // Set the outer for loop iteration variable atnType so
+                        io_sc.service_data->GetCaptureData().Clear();
+                        // Set the outer for loop iteration variable secAttnType so
                         // that we analyze MACHINE XSTOP in next iteration.
-                        atnType = MACHINE_CHECK + 1;
+                        secAttnType = MACHINE_CHECK + 1;
                         // save primary rc.
                         l_primaryRc = rc;
                         break;
@@ -394,12 +394,12 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         {
             if(l_saved_sdc == NULL)
             {
-                rc = noAttnResolution.Resolve(serviceData);
+                rc = noAttnResolution.Resolve(io_sc);
             }
             else
             {
-                *serviceData.service_data = *l_saved_sdc;
-                sysdebug.CalloutThoseAtAttention(serviceData);
+                *io_sc.service_data = *l_saved_sdc;
+                sysdebug.CalloutThoseAtAttention(io_sc);
                 rc = l_saved_rc;
             }
         }
@@ -416,8 +416,8 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             // However, we do not want to merge the flags when we get the SUE
             // and UERE flags together, as then we end up adjusting the gard
             // policy to null when analyzing the SueSource, which we don't want.
-            if( serviceData.service_data->IsSUE() &&
-                !serviceData.service_data->IsUERE() )
+            if( io_sc.service_data->IsSUE() &&
+                !io_sc.service_data->IsUERE() )
             {
                 l_temp_sdc->SetSUE();
             }
@@ -430,17 +430,17 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             // perspective.
 
             l_temp_sdc->AddSignatureList(
-                           *( serviceData.service_data->GetErrorSignature() ));
+                           *( io_sc.service_data->GetErrorSignature() ));
 
             // merge debug scom data from the two analysis
             l_temp_sdc->GetCaptureData().mergeData(
-                            serviceData.service_data->GetCaptureData());
+                            io_sc.service_data->GetCaptureData());
 
             // merge trace array data from the two analysis
             l_temp_sdc->getTraceArrayData().mergeData(
-                        serviceData.service_data->getTraceArrayData());
+                        io_sc.service_data->getTraceArrayData());
 
-            *serviceData.service_data = *l_temp_sdc;
+            *io_sc.service_data = *l_temp_sdc;
             delete l_temp_sdc;
 
             // We will discard any error we get in ERROR ISOLATION ONLY PASS,
