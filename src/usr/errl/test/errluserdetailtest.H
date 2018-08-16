@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,18 +37,19 @@
 #include <errl/errlentry.H>
 #include <errl/errluserdetails.H>
 #include <errl/errlreasoncodes.H>
+#include <errl/errlud.H>
 #include <errl/errludstring.H>
 #include <errl/errludbacktrace.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
 #include <errl/errludcallout.H>
 #include <errl/errludattribute.H>
+#include <errl/hberrltypes.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/util.H>
 #include <hwas/common/deconfigGard.H>
-
 #include <devicefw/driverif.H>
 
 using   namespace   ERRORLOG;
@@ -58,6 +59,184 @@ class UtilErrlUsrDataTest: public CxxTest::TestSuite
 public:
 
     // Note that errlUserDetailsTarget is tested in the targeting unit test
+
+
+    void testRemoveDuplicateTraces(void)
+    {
+        const size_t NUM_TRACE_ENTRIES = 5, NUM_COMPONENTS = 4;
+        typedef std::vector<void*> pVoidVec_t;
+
+        trace_desc_t* trac_testRmDupTrac1_trace = nullptr;
+        TRAC_INIT(&trac_testRmDupTrac1_trace, "TEST_TRACE1", 2*KILOBYTE);
+
+        trace_desc_t* trac_testRmDupTrac2_trace = nullptr;
+        TRAC_INIT(&trac_testRmDupTrac2_trace, "TEST_TRACE2", 2*KILOBYTE);
+
+        trace_desc_t* trac_testRmDupTrac3_trace = nullptr;
+        TRAC_INIT(&trac_testRmDupTrac3_trace, "TEST_TRACE3", 2*KILOBYTE);
+
+        trace_desc_t* trac_testRmDupTrac4_trace = nullptr;
+        TRAC_INIT(&trac_testRmDupTrac4_trace, "TEST_TRACE4", 2*KILOBYTE);
+
+        // Test Case 1: Collect traces five times from the same component and
+        //              verify no duplicates remain.
+
+        ErrlEntry* l_err1 = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
+                                           ERRL_USERDATA_TEST_MOD_ID,
+                                           ERRL_TEST_DUPLICATE_TRACE,
+                                           0x1234567890,
+                                           0x9876543210 );
+        // Write traces to comp 1
+        for (size_t i = 0; i < NUM_TRACE_ENTRIES; ++i)
+        {
+            TRACFCOMP(trac_testRmDupTrac1_trace, "Trace %d.", (i+1));
+        }
+
+        for (size_t i = 0; i < 5; ++i)
+        {
+           l_err1->collectTrace("TEST_TRACE1");
+        }
+
+        l_err1->removeDuplicateTraces();
+
+        pVoidVec_t traceUDSections_case1 =
+            l_err1->getUDSections(FIPS_ERRL_COMP_ID, FIPS_ERRL_UDT_HB_TRACE);
+
+        errlCommit(l_err1, CXXTEST_COMP_ID);
+
+        // ErrlEntry::removeDuplicateTraces() should have removed all duplicates
+        // and combined all trace UD sections into one section. If that isn't
+        // case then this test case should fail.
+        if(traceUDSections_case1.size() != 1)
+        {
+            TS_FAIL("The number of trace UD sections was != 1");
+        }
+
+        for(auto it = traceUDSections_case1.begin();
+            it != traceUDSections_case1.end(); ++it)
+        {
+            TRACE::trace_buf_head_t* header =
+                reinterpret_cast<TRACE::trace_buf_head_t*>((*it));
+
+            if (header->te_count != NUM_TRACE_ENTRIES)
+            {
+                TS_FAIL("The number of trace entries was != NUM_TRACE_ENTRIES");
+            }
+        }
+
+        // Test Case 2: Collect from several components and verify that none
+        //              of the traces were removed.
+
+        ErrlEntry* l_err2 = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
+                                           ERRL_USERDATA_TEST_MOD_ID,
+                                           ERRL_TEST_DUPLICATE_TRACE,
+                                           0x1234567890,
+                                           0x9876543210 );
+
+        // Write traces to comp 2
+        for (size_t i = 0; i < NUM_TRACE_ENTRIES; ++i)
+        {
+            TRACFCOMP(trac_testRmDupTrac2_trace, "Trace %d.", (i+1));
+        }
+
+        // Write traces to comp 3
+        for (size_t i = 0; i < NUM_TRACE_ENTRIES; ++i)
+        {
+            TRACFCOMP(trac_testRmDupTrac3_trace, "Trace %d.", (i+1));
+        }
+
+        // Write traces to comp 4
+        for (size_t i = 0; i < NUM_TRACE_ENTRIES; ++i)
+        {
+            TRACFCOMP(trac_testRmDupTrac4_trace, "Trace %d.", (i+1));
+        }
+
+
+        // Collect the traces for each one once.
+        l_err2->collectTrace("TEST_TRACE1");
+        l_err2->collectTrace("TEST_TRACE2");
+        l_err2->collectTrace("TEST_TRACE3");
+        l_err2->collectTrace("TEST_TRACE4");
+
+        l_err2->removeDuplicateTraces();
+
+        // Get the trace UD sections
+        pVoidVec_t traceUDSections_case2 =
+            l_err2->getUDSections(FIPS_ERRL_COMP_ID, FIPS_ERRL_UDT_HB_TRACE);
+
+        // Commit the error log
+        errlCommit(l_err2, CXXTEST_COMP_ID);
+
+        // Since the ErrlEntry::collectTrace() function creates a new UD section
+        // on each call to it there should only be NUM_COMPONENTS trace UD
+        // sections returned from ErrlEntry::getUDSections(). If that isn't the
+        // case then something unexpected happened and this test case should
+        // fail.
+        if(traceUDSections_case2.size() != NUM_COMPONENTS)
+        {
+            TS_FAIL("The number of trace UD sections was !=  NUM_COMPONENTS.");
+        }
+
+        // If ErrlEntry::removeDuplicateTraces() worked then none of the trace
+        // entries should be missing in any of the components.
+        for(auto it = traceUDSections_case2.begin();
+            it != traceUDSections_case2.end(); it++)
+        {
+            TRACE::trace_buf_head_t* header =
+                reinterpret_cast<TRACE::trace_buf_head_t*>((*it));
+
+            if (header->te_count != NUM_TRACE_ENTRIES)
+            {
+                TS_FAIL("The number of trace entries was != NUM_TRACE_ENTRIES");
+            }
+        }
+
+        // Test Case 3: Collect from a component once, write a new trace to that
+        //              component, and then collect from it several times.
+
+        ErrlEntry* l_err3 = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
+                                           ERRL_USERDATA_TEST_MOD_ID,
+                                           ERRL_TEST_DUPLICATE_TRACE,
+                                           0x1234567890,
+                                           0x9876543210 );
+
+        l_err3->collectTrace("TEST_TRACE1");
+
+        TRACFCOMP(trac_testRmDupTrac1_trace, "A New Trace.");
+
+        for (size_t i = 0; i < 5; ++i)
+        {
+            l_err3->collectTrace("TEST_TRACE1");
+        }
+
+        l_err3->removeDuplicateTraces();
+
+        pVoidVec_t traceUDSections_case3 =
+            l_err3->getUDSections(FIPS_ERRL_COMP_ID, FIPS_ERRL_UDT_HB_TRACE);
+
+        errlCommit(l_err3, CXXTEST_COMP_ID);
+
+        // ErrlEntry::removeDuplicateTraces() should have removed all duplicates
+        // and combined all trace UD sections into one section. If that isn't
+        // case then this test case should fail.
+        if(traceUDSections_case3.size() != 1)
+        {
+            TS_FAIL("The number of trace UD sections was != 1");
+        }
+
+        for(auto it = traceUDSections_case3.begin();
+            it != traceUDSections_case3.end(); ++it)
+        {
+            TRACE::trace_buf_head_t* header =
+                reinterpret_cast<TRACE::trace_buf_head_t*>((*it));
+
+            if (header->te_count != (NUM_TRACE_ENTRIES + 1))
+            {
+                TS_FAIL("The number of trace entries was != 6");
+            }
+        }
+    }
+
 
     /**
      * @test testString - Capture a String in an error log

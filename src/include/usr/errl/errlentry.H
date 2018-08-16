@@ -487,6 +487,27 @@ public:
                       const uint64_t i_max = KILOBYTE);
 
     /**
+     *  @brief Remove the duplicate trace entries from user detail data
+     *  When multiple calls to collectTrace() on the same component id occur a
+     *  new user detail section is created each time. This function removes the
+     *  duplicates created from that process.
+     *
+     *  @algorithm A high level overview of what the code does is as follows:
+     *      * Iterate through the iv_SectionVector which contains all UD
+     *        sections and add each trace_bin_entry_t to a vector corresponding
+     *        to each component id found in iv_SectionVector.
+     *      * For each vector in the map of component id vectors
+     *          * sort the collection of traces by timestamp and hash
+     *          * call unique where the same timestamp and hash are considered
+     *            to be equivalent trace entries to be removed.
+     *          * Put all remaining trace entries into a new, consolidated trace
+     *            UD section.
+     *      * Remove the old trace UD sections from iv_SectionVector
+     *      * Add the new consolidated trace UD sections to the iv_SectionVector
+     */
+    void removeDuplicateTraces(void);
+
+     /**
      *  @brief Remove the back trace user detail data
      *  When an error log is constructed, the back trace is automatically
      *  captured. This function removes the backtrace. This should be used when
@@ -896,6 +917,8 @@ private:
     ErrlEntry(const ErrlEntry& i_right);
     ErrlEntry& operator=(const ErrlEntry& i_right);
 
+
+
 private:
     // Data Members
     ErrlPrvt        iv_Private;    // private header object
@@ -909,20 +932,22 @@ private:
     // hostboot.
     errlTermState_t iv_termState;
 
-   // when true, the severity has been set "final" and can not be changed.
-   bool iv_sevFinal;
+    // when true, the severity has been set "final" and can not be changed.
+    bool iv_sevFinal;
 
-   //when true, the current error log will not be saved to PNOR, sent to the
-   //BMC, or displayed in the console
-   bool iv_skipShowingLog;
+    //when true, the current error log will not be saved to PNOR, sent to the
+    //BMC, or displayed in the console
+    bool iv_skipShowingLog;
 
-   // when true, send this special type of eSEL to the BMC
-   // This is used to send OCC informational errors up to BMC
-   bool iv_eselCallhomeInfoEvent;
+    // when true, send this special type of eSEL to the BMC
+    // This is used to send OCC informational errors up to BMC
+    bool iv_eselCallhomeInfoEvent;
 
-   // when true, if error log is committed, then the error log is tracked so
-   // doShutdown can request that a HB dump be done.
-   bool iv_doHbDump;
+    // when true, if error log is committed, then the error log is tracked so
+    // doShutdown can request that a HB dump be done.
+    bool iv_doHbDump;
+
+
 };
 
 

@@ -58,6 +58,7 @@ namespace ERRORLOG
         ERRL_TEST_LOGREGISTER_UD  = ERRL_COMP_ID | 0x05,
         ERRL_TEST_CALLOUT_UD      = ERRL_COMP_ID | 0x06,
         ERRL_CORE_EX_TARGET_NULL  = ERRL_COMP_ID | 0x07,
+        ERRL_TEST_DUPLICATE_TRACE = ERRL_COMP_ID | 0x08,
         //........
         ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
     };
