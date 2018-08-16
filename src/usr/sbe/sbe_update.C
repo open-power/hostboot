@@ -4919,6 +4919,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         uint8_t mP = UINT8_MAX;
         sbe_image_version_t mP_version;
         sbe_image_version_t * ver_ptr;
+        TARGETING::ATTR_MODEL_type l_model;
 
         do{
 
@@ -4936,6 +4937,8 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 if ( io_sbeStates_v[i].target_is_master == true )
                 {
                     mP = i;
+                    l_model = io_sbeStates_v[i].target
+                                           ->getAttr<TARGETING::ATTR_MODEL>();
 
                     // Compare against 'current' Master side in case there is
                     // an issue with the other side
@@ -5149,9 +5152,15 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                 // Compare 'current' version of target to 'current' version
                 // of Master target in case Master version is down-level
-                else if ( 0 != memcmp( &(mP_version),
+                // This check will fail compat mode mixing of parts.
+                // Allow it to pass if that is the case
+                // TODO RTC:197737 improve mixed mode, instead of skipping
+                else if ( (0 != memcmp( &(mP_version),
                                        ver_ptr,
-                                       SBE_IMAGE_VERSION_SIZE) )
+                                       SBE_IMAGE_VERSION_SIZE)) &&
+                         ! HWAS::mixedECsAllowed(l_model, io_sbeStates_v[mP].ec,
+                                               io_sbeStates_v[i].ec)
+                           )
                 {
                     TRACFCOMP( g_trac_sbe,ERR_MRK"masterVersionCompare() - "
                                "SBE Version Miscompare Between Master Target "

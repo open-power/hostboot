@@ -3386,6 +3386,55 @@ void setChipletGardsOnProc(TARGETING::Target * i_procTarget)
     i_procTarget->setAttr<TARGETING::ATTR_EC_GARD>(l_ecGard);
 }//setChipletGardsOnProc
 
+bool mixedECsAllowed(TARGETING::ATTR_MODEL_type i_model,
+                     TARGETING::ATTR_EC_type i_baseEC,
+                     TARGETING::ATTR_EC_type i_compareEC)
+{
+    bool l_mixOk = false;
+
+#ifdef __HOSTBOOT_MODULE  //Only check risk level in HB, HWSV always allow
+    //get risk level (used to know if in compat mode)
+    Target* pSys;
+    targetService().getTopLevelTarget(pSys);
+    auto l_risk = pSys->getAttr<ATTR_RISK_LEVEL>();
+#endif
+
+    if(TARGETING::MODEL_NIMBUS == i_model)
+    {
+        //For P9N  -- DD2.2 and DD2.3 can be run in mixed compat mode
+        //Compat mode risk levels 0-3 (4+ are native).  Only pass when
+        //actually running compat mode
+        if ((i_baseEC != i_compareEC) &&
+#ifdef __HOSTBOOT_MODULE  //Only check risk level in HB, HWSV always allow
+            (l_risk < 4) &&
+#endif
+            ((i_baseEC == 0x22) || (i_baseEC == 0x23)) &&
+            ((i_compareEC == 0x22) || (i_compareEC == 0x23)))
+        {
+            l_mixOk = true;
+        }
+    }
+    else if (TARGETING::MODEL_CUMULUS == i_model)
+    {
+        //For P9C  -- DD1.2 and DD1.3 can be run in mixed compat mode
+        //Compat mode risk levels 0-3 (4+ are native).  Only pass when
+        //actually running compat mode
+        if ((i_baseEC != i_compareEC) &&
+#ifdef __HOSTBOOT_MODULE  //Only check risk level in HB, HWSV always allow
+            (l_risk < 4) &&
+#endif
+            ((i_baseEC == 0x12) || (i_baseEC == 0x13)) &&
+            ((i_compareEC == 0x12) || (i_compareEC == 0x13)))
+        {
+            l_mixOk = true;
+        }
+    }
+    //else no other compat mode chips
+
+    return l_mixOk;
+}
+
+
 errlHndl_t validateProcessorEcLevels()
 {
     HWAS_INF("validateProcessorEcLevels entry");
@@ -3396,6 +3445,8 @@ errlHndl_t validateProcessorEcLevels()
     TARGETING::ATTR_HUID_type l_masterHuid = 0;
     TARGETING::TargetHandleList l_procChips;
     Target* l_pMasterProc = NULL;
+    TARGETING::ATTR_MODEL_type l_model;
+
     do
     {
         //Get all functional chips
@@ -3417,13 +3468,15 @@ errlHndl_t validateProcessorEcLevels()
         //Get master info and store it for comparing later
         l_masterEc = l_pMasterProc->getAttr<TARGETING::ATTR_EC>();
         l_masterHuid = get_huid(l_pMasterProc);
+        l_model = l_pMasterProc->getAttr<TARGETING::ATTR_MODEL>();
 
         //Loop through all functional procs and create error logs
         //for any processors whose EC does not match the master
         for(const auto & l_chip : l_procChips)
         {
             l_ecToCompare = l_chip->getAttr<TARGETING::ATTR_EC>();
-            if(l_ecToCompare != l_masterEc)
+            bool l_mixOk = mixedECsAllowed(l_model,l_masterEc, l_ecToCompare);
+            if((l_ecToCompare != l_masterEc) && !l_mixOk)
             {
                 HWAS_ERR("validateProcessorEcLevels:: Slave Proc EC level not does not match master, "
                         "this is an unrecoverable error.. system will shut down");
