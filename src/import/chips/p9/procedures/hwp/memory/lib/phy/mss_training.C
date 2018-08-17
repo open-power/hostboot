@@ -42,6 +42,7 @@
 #include <mss.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/mss_training.H>
+#include <lib/phy/mss_lrdimm_training.H>
 
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
@@ -56,6 +57,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/pda.H>
 #include <lib/phy/seq.H>
+#include <lib/phy/read_cntrl.H>
 
 namespace mss
 {
@@ -1209,6 +1211,7 @@ fapi_try_exit:
 ///
 std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps, const bool i_sim)
 {
+    // TK:LRDIMM Update the factory to add in LRDIMM training steps
     std::vector<std::shared_ptr<step>> l_steps;
 
     // WR LVL
