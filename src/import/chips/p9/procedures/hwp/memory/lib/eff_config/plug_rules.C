@@ -69,6 +69,7 @@ fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds )
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // If we have 0 DIMMs on the port, we don't care
+    // TK:LRDIMM Create appropriate check for LRDIMM(s) here
     for(const auto& l_kind : i_kinds)
     {
         FAPI_ASSERT( l_kind.iv_dimm_type != fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
