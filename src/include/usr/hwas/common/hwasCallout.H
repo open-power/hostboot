@@ -78,30 +78,87 @@ enum ErrorCategory {
 enum epubProcedureID
 {
     EPUB_PRC_NONE                   = 0x00,
+
     EPUB_PRC_FIND_DECONFIGURED_PART = 0x01,
+    ///< Look for other logs that include deconfigurations
+
     EPUB_PRC_SP_CODE                = 0x04,
+    ///< Problem is in SP/BMC code, upgrade your firmware
+
     EPUB_PRC_PHYP_CODE              = 0x05,
+    ///< Problem is in Hypervisor/Host code, upgrade your firmware
+
     EPUB_PRC_ALL_PROCS              = 0x08,
+    ///< Any processor could be at fault, manual isolation is required
+
     EPUB_PRC_ALL_MEMCRDS            = 0x09,
+    ///< Any memory card could be at fault, manual isolation is required
+
     EPUB_PRC_INVALID_PART           = 0x0A,
+    ///< Unsupported part was installed
+
     EPUB_PRC_LVL_SUPP               = 0x10,
+    ///< Isolation not possible, please contact your next level of support
+
     EPUB_PRC_SUE_PREVERROR          = 0x11,
+    ///< Unrecoverable event occurred, look for previous errors for the cause
+
     EPUB_PRC_PROCPATH               = 0x16,
+    ///< Problem is somewhere in the service control structure to the processor
+
     EPUB_PRC_NO_VPD_FOR_FRU         = 0x1C,
+    ///< No VPD found for the specified FRU(s)
+
     EPUB_PRC_MEMORY_PLUGGING_ERROR  = 0x22,
+    ///< Memory was installed incorrectly, look at callouts for clues on the
+    ///<   parts that may be at fault
+
     EPUB_PRC_FSI_PATH               = 0x2D,
+    ///< Problem is somewhere in the FSI bus path
+
     EPUB_PRC_PROC_AB_BUS            = 0x30,
+    ///< Problem is on the SMP bus, could not be isolated to a specific part,
+    ///<   Callouts will indicate the endpoints that are involved
+
     EPUB_PRC_PROC_XYZ_BUS           = 0x31,
+    ///< Problem is on the SMP bus, could not be isolated to a specific part,
+    ///<   Callouts will indicate the endpoints that are involved
+
     EPUB_PRC_MEMBUS_ERROR           = 0x34,
+    ///< Problem is on the memory bus, could not be isolated to a specific part,
+    ///<   Callouts will indicate the endpoints that are involved
+
     EPUB_PRC_EIBUS_ERROR            = 0x37,
+    ///< Problem is on a bus, could not be isolated to a specific part,
+    ///<   Callouts will indicate the endpoints that are involved
+
     EPUB_PRC_POWER_ERROR            = 0x3F,
+    ///< Problem is related to the power subsystem
+
     EPUB_PRC_PERFORMANCE_DEGRADED   = 0x4D,
+    ///< System is running in a degraded performance mode,
+    ///<   Look for previous errors for possible reasons
+
     EPUB_PRC_MEMORY_UE              = 0x4F,
+    ///< Unrecoverable memory error occurred
+    ///<  Look for previous errors for the cause
+
     EPUB_PRC_HB_CODE                = 0x55,
+    ///< Problem is in Hostboot code, upgrade your firmware
+
     EPUB_PRC_TOD_CLOCK_ERR          = 0x56,
+    ///< Problem is related to the TOD clock
+
     EPUB_PRC_COOLING_SYSTEM_ERR     = 0x5C,
+    ///< Problem is related to the cooling subsystem
+
     EPUB_PRC_FW_VERIFICATION_ERR    = 0x5D,
+    ///< Verification of one or more firmware images failed,
+    ///<   Reinstall your firmware
+
     EPUB_PRC_GPU_ISOLATION_PROCEDURE= 0x5E,
+    ///< Problem is related to one or more installed GPUs,
+    ///<   Manual isolation is required to determine which one
 };
 
 // from srci/fsp/srci.H
