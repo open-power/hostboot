@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,9 @@
 # IBM_PROLOG_END_TAG
 
 INCFLAGS += -I. -I..
+INCFLAGS += -I../../../../../../src/hwsv/server/import/chips/p9/procedures/hwp/pm
+INCFLAGS += -I../../../../../../src/hwsv/server/import/chips/p9/procedures/hwp/lib
+INCFLAGS += -I../../../../../../src/hwsv/server/import/chips/p9/common/include
 
 CFLAGS += -DPRDF_HOSTBOOT_ERRL_PLUGIN
 

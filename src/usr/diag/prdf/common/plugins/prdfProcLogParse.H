@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #define __prdfProcLogParse_H
 
 #include <stdint.h>
+#include <p9_pm_recovery_ffdc_defines.H>
 
 class ErrlUsrParser;
 
@@ -73,6 +74,17 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  */
 bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser );
+
+/**
+ * @brief parser a user data section added by PRD in case of PM malfunction.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @param[in] i_ver     sub section id
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+bool parsePmFfdcData( void * i_buf, uint32_t i_length,
+                      ErrlUsrParser & i_parser, errlver_t i_ver );
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT

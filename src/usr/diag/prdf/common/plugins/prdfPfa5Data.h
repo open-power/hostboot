@@ -70,6 +70,7 @@ enum ErrlSubsect
     ErrlCapData_2    = 2,
     ErrlMruData      = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
+    ErrlPmFfdcData   = 20,
 };
 
 struct MsDumpStruct

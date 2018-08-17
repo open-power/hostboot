@@ -133,8 +133,9 @@ int32_t pmRecovery( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     // Add FFDC sections
     for ( auto & ffdcSctn : ffdcList )
     {
-        ffdcErrl->addFFDC(PRDF_COMP_ID, ffdcSctn.iv_pBufPtr,
-                        ffdcSctn.iv_bufSize, 0, 0);
+        ffdcErrl->addFFDC( PRDF_COMP_ID, ffdcSctn.iv_pBufPtr,
+                           ffdcSctn.iv_bufSize, ffdcSctn.iv_subsec,
+                           ErrlPmFfdcData );
     }
 
     // Commit
