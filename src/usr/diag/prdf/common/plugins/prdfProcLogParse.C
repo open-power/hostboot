@@ -35,6 +35,11 @@
 #include <prdfParserEnums.H>
 #include <netinet/in.h>
 #include <prdfPlatProcConst.H>
+#include <p9n2_misc_scom_addresses.H>
+#include <p9_quad_scom_addresses.H>
+#include <p9_ppe_defs.H>
+#include <map>
+#include <string>
 
 namespace PRDF
 {
@@ -49,6 +54,77 @@ namespace FSP
 
 using namespace PARSER;
 using namespace TOD;
+
+/**
+ * @brief Misc SCOM addresses
+ */
+enum
+{
+    P9N2_PU_OCB_OCI_OCCFLG_SCOM     =   0x0006C08A,
+    P9N2_PU_OCB_OCI_OCCFLG2_SCOM    =   0x0006C18A,
+
+};
+
+/**
+ * @brief error codes returned by parser.
+ */
+enum  ErrorCode
+{
+    PARSE_SUCCESS                       =   0,
+    BAD_CORRUPT_BIN                     =   1,
+    BIN_AND_PARSER_MAJ_VER_MISMATCH     =   2,
+    BIN_AND_PARSER_MIN_VER_MISMATCH     =   3,
+    SECTION_INVALID                     =   4,
+    BAD_SCOM_ADDRESS                    =   5,
+    BAD_PPE_ADDRESS                     =   6,
+};
+
+/**
+ * @brief local constants.
+ */
+enum  BufLengths
+{
+    BUF_LENGTH      =   120,
+    LINE_LENGTH     =    80,
+};
+
+/**
+ * @brief register types supported by parser.
+ */
+enum RegType
+{
+    PPE_XIR     =   0x01,
+    SCOM_REG    =   0x02,
+};
+
+/**
+ * @brief codes for various PPE's SPRs
+ */
+enum PpeSprs
+{
+    CTR     =   9,
+    DACR    =   316,
+    DBCR    =   308,
+    DEC     =   22,
+    EDR     =   61,
+    IVPR    =   63,
+    ISR     =   62,
+    LR      =   8,
+    PIR     =   286,
+    PVR     =   287,
+    SPRG0   =   272,
+    SRR0    =   26,
+    SRR1    =   27,
+    TCR     =   340,
+    TSR     =   336,
+    XER     =   1,
+    //XIRs
+    XSR     =   4200,
+    IAR     =   2,
+    IR      =   3,
+    MSR     =   42,
+    CR      =   420,
+};
 
 //------------------------------------------------------------------------------
 bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
@@ -233,6 +309,540 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
 
     return o_rc;
 }
+
+//------------------------------------------------------------------------------------------------
+/**
+ * @brief parser a user data section consisting of SCOM register values.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @param[in] i_regList list of registers
+ * @param[in] i_majNum  major number
+ * @param[in] i_minNum  minor number
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
+                       std::map < uint32_t, std::string >& i_regList,
+                       uint32_t i_majNum, uint32_t i_minNum )
+
+{
+    using namespace p9_stop_recov_ffdc;
+    char l_lineStr[BUF_LENGTH];
+    char l_hdrStr[BUF_LENGTH];
+    uint32_t l_rc            =  PARSE_SUCCESS;
+    uint32_t secLength       =  0;
+    std::map < uint32_t, std::string > ::iterator itRegList;
+
+    do
+    {
+        FfdcSummSubSectHdr* l_pSubSecHdr  =   (FfdcSummSubSectHdr*)i_buf;
+        uint64_t* l_secBufPtr             =   (uint64_t*)( i_buf + sizeof( FfdcSummSubSectHdr ) );
+
+        if( 0 == i_length )
+        {
+            i_parser.PrintHeading( "Bad Sub-Section" );
+            l_rc    =   SECTION_INVALID;
+            break;
+        }
+
+        snprintf( l_lineStr, BUF_LENGTH, "%02d", l_pSubSecHdr->iv_majorNum );
+        i_parser.PrintString( "Major Ver", l_lineStr );
+        memset( l_lineStr, 0x00, BUF_LENGTH );
+
+        snprintf( l_lineStr, LINE_LENGTH, "%02d", l_pSubSecHdr->iv_minorNum );
+        i_parser.PrintString( "Minor Ver", l_lineStr );
+        memset( l_lineStr, 0x00, BUF_LENGTH );
+        i_parser.PrintBlank();
+
+        if( l_pSubSecHdr->iv_majorNum  !=  i_majNum )
+        {
+            i_parser.PrintBlank();
+            i_parser.PrintHeading( "Maj Ver Mismatch" );
+            l_rc    =   BIN_AND_PARSER_MAJ_VER_MISMATCH;
+            break;
+        }
+
+        if( l_pSubSecHdr->iv_minorNum  !=  i_minNum )
+        {
+            i_parser.PrintHeading( "Min Ver Mismatch" );
+            l_rc    =   BIN_AND_PARSER_MIN_VER_MISMATCH;
+            break;
+        }
+
+        if( !l_pSubSecHdr->iv_secValid )
+        {
+            i_parser.PrintBlank();
+            l_rc    =   SECTION_INVALID;
+            i_parser.PrintHeading( "Section Invalid" );
+            break;
+        }
+
+        secLength   =   (i_regList.size() * 8) + sizeof( FfdcSummSubSectHdr );
+        secLength   =   (secLength > i_length) ? i_length : secLength;
+
+        uint32_t l_currentLength    =   sizeof( FfdcSummSubSectHdr );
+
+        for( itRegList = i_regList.begin(); itRegList != i_regList.end();
+             itRegList++ )
+        {
+            if( l_currentLength > secLength )
+            {
+                break;
+            }
+
+            memset( l_lineStr, 0x00, BUF_LENGTH );
+            memset( l_hdrStr, 0x00, BUF_LENGTH );
+            snprintf( l_hdrStr, BUF_LENGTH, "%-15s ( 0x%08x )", itRegList->second.c_str(), itRegList->first );
+            snprintf( l_lineStr, BUF_LENGTH, "0x%016lx", htobe64(*l_secBufPtr) );
+
+            i_parser.PrintString( l_hdrStr, l_lineStr );
+            l_secBufPtr++;
+            l_currentLength += 8;
+        }
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of PPE register values.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @param[in] i_majNum  major number
+ * @param[in] i_minNum  minor number
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ * @note      assumes just PPE XIRs
+ */
+uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
+                       uint32_t i_majNum, uint32_t i_minNum )
+{
+    using namespace p9_stop_recov_ffdc;
+    char l_lineStr[BUF_LENGTH];
+    char l_hdrStr[BUF_LENGTH];
+    std::map < uint32_t, std::string > l_ppeRegList;
+    std::map < uint32_t, std::string > ::iterator itList;
+    uint32_t l_rc            =  PARSE_SUCCESS;
+    uint32_t l_currentLength =  0;
+    uint32_t secLength       =  0;
+
+    do
+    {
+        //NOTE: Ensure this register list always matches with list in
+        //file p9_pm_recovery_ffdc_base.C
+        l_ppeRegList[ XSR ]     =   (char*) "XSR";
+        l_ppeRegList[ IAR ]     =   (char*) "IAR";
+        l_ppeRegList[ IR ]      =   (char*) "IR";
+        l_ppeRegList[ EDR ]     =   (char*) "EDR";
+        l_ppeRegList[ SPRG0 ]   =   (char*) "SPRG0";
+
+        FfdcSummSubSectHdr* l_pSubSecHdr  =   (FfdcSummSubSectHdr*)i_buf;
+        uint32_t* l_secBufPtr  =   (uint32_t*)( i_buf + sizeof( FfdcSummSubSectHdr ) );
+
+        snprintf( l_lineStr, BUF_LENGTH, "%02d", l_pSubSecHdr->iv_majorNum );
+        i_parser.PrintString( "Major Ver", l_lineStr );
+        memset( l_lineStr, 0x00, BUF_LENGTH );
+
+        snprintf( l_lineStr, BUF_LENGTH, "%02d", l_pSubSecHdr->iv_minorNum );
+        i_parser.PrintString( "Minor Ver", l_lineStr );
+        memset( l_lineStr, 0x00, BUF_LENGTH );
+        i_parser.PrintBlank();
+
+        if( l_pSubSecHdr->iv_majorNum  !=  i_majNum )
+        {
+            i_parser.PrintBlank();
+            i_parser.PrintHeading( "Maj Ver Mismatch" );
+            l_rc    =   BIN_AND_PARSER_MAJ_VER_MISMATCH;
+            break;
+        }
+
+        if( l_pSubSecHdr->iv_minorNum  !=  i_minNum )
+        {
+            i_parser.PrintHeading( "Min Ver Mismatch" );
+            l_rc    =   BIN_AND_PARSER_MIN_VER_MISMATCH;
+            break;
+        }
+
+        if( ( !l_pSubSecHdr->iv_secValid ) || ( 0 == i_length ))
+        {
+            i_parser.PrintBlank();
+            l_rc    =   SECTION_INVALID;
+            i_parser.PrintHeading( "Section Invalid" );
+            break;
+        }
+
+        secLength   =   (l_ppeRegList.size() * 4) + sizeof( FfdcSummSubSectHdr );
+        secLength   =   (secLength > i_length) ? i_length : secLength;
+
+        l_currentLength    =   sizeof( FfdcSummSubSectHdr );
+
+        for( itList = l_ppeRegList.begin(); itList != l_ppeRegList.end();
+             itList++ )
+        {
+            if( l_currentLength > secLength )
+            {
+                break;
+            }
+
+            memset( l_lineStr, 0x00, BUF_LENGTH );
+            memset( l_hdrStr, 0x00, BUF_LENGTH );
+            snprintf( l_hdrStr, BUF_LENGTH, "%-15s ( 0x%08x )", itList->second.c_str(), itList->first );
+            snprintf( l_lineStr, BUF_LENGTH, "0x%08x", htobe32(*l_secBufPtr) );
+
+            i_parser.PrintString( l_hdrStr, l_lineStr );
+            l_secBufPtr++;
+            l_currentLength += 4;
+        }
+    }
+    while(0);
+
+    return l_rc;
+
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of CME's FFDC.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    char l_lineStr[LINE_LENGTH];
+    uint32_t l_rc            =  PARSE_SUCCESS;
+    uint32_t secLength       =  0;
+    uint32_t l_maxCme        =  MAX_CMES_PER_CHIP;
+
+    do
+    {
+        secLength   =   MAX_CMES_PER_CHIP * FFDC_SUMMARY_SIZE_CME;
+        secLength   =   secLength > i_length ? i_length : secLength;
+        l_maxCme    =   secLength / FFDC_SUMMARY_SIZE_CME;
+
+        for( uint8_t cmeId = 0; cmeId < l_maxCme; cmeId++ )
+        {
+            memset( l_lineStr, 0x00, LINE_LENGTH );
+            snprintf( l_lineStr, LINE_LENGTH, "XIR CME %02d", cmeId );
+            i_parser.PrintHeading( l_lineStr );
+            i_parser.PrintBlank();
+
+            uint8_t* l_secBufPtr   =  i_buf +  ( cmeId * FFDC_SUMMARY_SIZE_CME );
+
+            l_rc = parsePpeFfdc( i_parser, l_secBufPtr, FFDC_SUMMARY_SIZE_CME,
+                                 CME_MAJ_NUM,
+                                 CME_MIN_NUM );
+
+            if( l_rc )
+            {
+                break;
+            }
+
+            i_parser.PrintBlank();
+        }
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of SGPE's XIRs.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseSgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    uint32_t l_rc   =   PARSE_SUCCESS;
+
+    do
+    {
+        i_parser.PrintHeading( "XIR SGPE" );
+        i_parser.PrintBlank();
+        l_rc = parsePpeFfdc( i_parser, i_buf, i_length,
+                             SGPE_MAJ_NUM,
+                             SGPE_MIN_NUM );
+
+        if( l_rc )
+        {
+            break;
+        }
+
+        i_parser.PrintBlank();
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of PGPE's XIRs.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    uint32_t l_rc = PARSE_SUCCESS;
+
+    do
+    {
+        i_parser.PrintHeading( "XIR PGPE " );
+        i_parser.PrintBlank();
+        l_rc = parsePpeFfdc( i_parser, i_buf, i_length,
+                             PGPE_MAJ_NUM,
+                             PGPE_MIN_NUM );
+
+        if( l_rc )
+        {
+            break;
+        }
+
+        i_parser.PrintBlank();
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of Proc chips's config and state.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    std::map < uint32_t, std::string > l_occRegMap;
+    uint32_t l_rc = PARSE_SUCCESS;
+
+    do
+    {
+        //NOTE: Ensure this register list always matches with list in
+        //file p9_pm_recovery_ffdc_occ.C
+        l_occRegMap[ PU_OCB_OCI_CCSR_SCOM ]         =       (char*)"CCSR";
+        l_occRegMap[ PU_OCB_OCI_QSSR_SCOM ]         =       (char*)"QSSR";
+        l_occRegMap[ P9N2_PU_OCB_OCI_OCCFLG_SCOM ]  =       (char*)"OCCFLG";
+        l_occRegMap[ P9N2_PU_OCB_OCI_OCCFLG2_SCOM ] =       (char*)"OCCFLG2";
+        i_parser.PrintHeading( "Sys State " );
+        i_parser.PrintBlank();
+
+        l_rc = parseRegFfdc( i_parser, i_buf, i_length, l_occRegMap,
+                             SYS_CONFIG_MAJ_NUM,
+                             SYS_CONFIG_MIN_NUM );
+
+        if( l_rc )
+        {
+            break;
+        }
+
+        i_parser.PrintBlank();
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of CPPM registers.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    std::map < uint32_t, std::string > l_cppmRegMap;
+    uint32_t l_rc               =       PARSE_SUCCESS;
+    uint32_t l_cppm             =       0;
+    uint32_t l_cppmLength       =       0;
+    char l_lineStr[LINE_LENGTH];
+    l_cppmLength    =       i_length / FFDC_SUMMARY_SIZE_CPPM_REG;
+    //NOTE: Ensure this register list always matches with list in
+    //file p9_pm_recovery_ffdc_cppm.C
+    l_cppmRegMap[ C_PPM_SSHSRC ]        =       (char*)"C_SSHSRC";
+    l_cppmRegMap[ C_PPM_VDMCR ]         =       (char*)"VDMCR";
+
+    for( l_cppm = 0; l_cppm < l_cppmLength; l_cppm++ )
+    {
+        memset( l_lineStr, 0x00, LINE_LENGTH );
+        snprintf( l_lineStr, LINE_LENGTH, "CPPM %02d", l_cppm );
+        i_parser.PrintHeading( l_lineStr );
+        i_parser.PrintBlank();
+        uint8_t* l_secBuf       =       i_buf + ( FFDC_SUMMARY_SIZE_CPPM_REG * l_cppm );
+
+        l_rc = parseRegFfdc( i_parser, l_secBuf, l_cppmLength, l_cppmRegMap,
+                             CPPM_MAJ_NUM, CPPM_MIN_NUM );
+
+        i_parser.PrintBlank();
+
+        if( l_rc )
+        {
+            if( SECTION_INVALID == l_rc )
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section consisting of QPPM registers.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
+{
+    using namespace p9_stop_recov_ffdc;
+    std::map < uint32_t, std::string > l_qppmRegMap;
+    uint32_t l_rc = PARSE_SUCCESS;
+    char l_lineStr[LINE_LENGTH];
+    uint32_t l_qppmLength       =       i_length / FFDC_SUMMARY_SIZE_QPPM_REG;
+    //NOTE: Ensure this register list always matches with list in
+    //file p9_pm_recovery_ffdc_qppm.C
+    l_qppmRegMap[ EQ_PPM_GPMMR_SCOM ]   =       (char*)"GPMMR";
+    l_qppmRegMap[ EQ_PPM_SSHSRC ]       =       (char*)"EQ_SSHSRC";
+    l_qppmRegMap[ EQ_QPPM_DPLL_FREQ ]   =       (char*)"QPPM_DPLL_FREQ";
+
+    for( uint32_t l_qppm = 0; l_qppm < l_qppmLength; l_qppm++ )
+    {
+        l_qppmLength    =       i_length / FFDC_SUMMARY_SIZE_QPPM_REG;
+        memset( l_lineStr, 0x00, LINE_LENGTH );
+        snprintf( l_lineStr, LINE_LENGTH, "QPPM %02d", l_qppm );
+        i_parser.PrintHeading( l_lineStr );
+        i_parser.PrintBlank();
+        uint8_t* l_secBuf       =       i_buf + ( FFDC_SUMMARY_SIZE_QPPM_REG * l_qppm );
+
+        l_rc = parseRegFfdc( i_parser, l_secBuf, l_qppmLength, l_qppmRegMap,
+                             CPPM_MAJ_NUM, CPPM_MIN_NUM );
+
+        i_parser.PrintBlank();
+
+        if( l_rc )
+        {
+            if( SECTION_INVALID == l_rc )
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+//------------------------------------------------------------------------------------------------
+
+/**
+ * @brief parser a user data section added by PRD in case of PM malfunction.
+ * @param[in] i_parser  error log parser
+ * @param[in] i_buf     points to user data section
+ * @param[in] i_length  length of the section
+ * @param[in] i_subsec  sub section id
+ * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
+ */
+bool parsePmFfdcData( void* i_buf, uint32_t i_length,
+                          ErrlUsrParser& i_parser, errlver_t i_subsec )
+{
+    uint32_t l_rc = PARSE_SUCCESS;
+    using namespace p9_stop_recov_ffdc;
+    uint8_t* l_pBuf = (uint8_t*)i_buf;
+
+    switch( i_subsec )
+    {
+        case STATE_CONFIG_SECTN:
+            l_rc = parseSysState(  i_parser, l_pBuf, i_length );
+            break;
+
+        case SGPE_SECTN:
+            l_rc = parseSgpeFfdc( i_parser, l_pBuf, i_length );
+            break;
+
+        case PGPE_SECTN:
+            l_rc = parsePgpeFfdc( i_parser, l_pBuf, i_length );
+            break;
+
+        case CME_SECTN:
+            l_rc = parseCmeFfdc( i_parser, l_pBuf, i_length );
+            break;
+
+        case QPPM_SECTN:
+            l_rc = parseQppmFfdc( i_parser, l_pBuf, i_length );
+            break;
+
+        case CPPM_SECTN:
+            l_rc = parseCppmFfdc( i_parser, l_pBuf, i_length );
+            break;
+
+        case SGPE_GLOBAL_VAR_SECTN:
+            i_parser.PrintHeading( "SGPE Score Board" );
+            i_parser.PrintBlank();
+            i_parser.PrintHexDump( l_pBuf, i_length );
+            i_parser.PrintBlank();
+            break;
+
+        case PGPE_GLOBAL_VAR_SECTN:
+            i_parser.PrintHeading( "PGPE Score Board" );
+            i_parser.PrintBlank();
+            i_parser.PrintHexDump( l_pBuf, i_length );
+            i_parser.PrintBlank();
+            break;
+
+        case CME_GLOBAL_VAR_SECTN:
+            i_parser.PrintHeading( "CME Score Board" );
+            i_parser.PrintBlank();
+            i_parser.PrintHexDump( l_pBuf, i_length );
+            i_parser.PrintBlank();
+            break;
+
+        default:
+            i_parser.PrintHeading( "Unsupported Section" );
+            break;
+    }
+
+    return (l_rc == PARSE_SUCCESS);
+}
+
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT
