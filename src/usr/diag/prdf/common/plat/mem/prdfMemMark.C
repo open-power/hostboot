@@ -632,11 +632,46 @@ uint32_t clearChipMark<TYPE_MBA>( ExtensibleChip * i_chip,
         errlHndl_t l_errl = nullptr;
         fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTrgt( i_chip->getTrgt() );
 
-        // The markstore write cannot be blocked in this case, as the chip mark
-        // already exists.
-        FAPI_INVOKE_HWP( l_errl, mss_put_mark_store, fapiTrgt,
-                         i_rank.getMaster(), l_sm, l_cm );
-        if ( nullptr != l_errl )
+        fapi2::ReturnCode l_rc;
+        FAPI_INVOKE_HWP_RC( l_errl, l_rc, mss_put_mark_store, fapiTrgt,
+                            i_rank.getMaster(), l_sm, l_cm );
+
+        if ( (fapi2::ReturnCode)fapi2::RC_CEN_MSS_MAINT_MARKSTORE_WRITE_BLOCKED
+             == l_rc )
+        {
+            delete l_errl;
+            l_errl = nullptr;
+
+            // Since we were clearing the chip mark, we know we can't be
+            // blocked be an incoming chip mark. However, there is a small
+            // window after removing the chip mark and before the HWP checks the
+            // chip mark attentions, that a new chip mark can happen. If this is
+            // the case, re-read markstore and put the new chip mark in the
+            // queue.
+
+            MemMark l_newChipMark;
+            o_rc = readChipMark<TYPE_MBA>( i_chip, i_rank, l_newChipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark failed. HUID: 0x%08x Rank: "
+                          "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+
+            TdEntry * entry = new VcmEvent<TYPE_MBA>( i_chip, i_rank,
+                                                      l_newChipMark );
+            MemDbUtils::pushToQueue<TYPE_MBA>( i_chip, entry );
+
+            // Clear the fetch attention so we don't get a redundant attention.
+            o_rc = __clearFetchAttn<TYPE_MBA>( i_chip, i_rank );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "__clearFetchAttn failed. HUID: 0x%08x "
+                          "Rank: 0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                break;
+            }
+        }
+        else if ( nullptr != l_errl )
         {
             PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
                       "Rank: 0x%02x sm: %d cm: %d", i_chip->getHuid(),
