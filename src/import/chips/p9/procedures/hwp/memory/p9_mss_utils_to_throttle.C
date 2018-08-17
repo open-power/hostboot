@@ -58,6 +58,7 @@ using fapi2::TARGET_TYPE_DIMM;
 
 extern "C"
 {
+    // TK:LRDIMM Update power/thermal/throttling
 
     ///
     /// @brief Sets number commands allowed within a given port databus utilization.

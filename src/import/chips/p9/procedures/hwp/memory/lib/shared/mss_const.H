@@ -234,6 +234,7 @@ enum states
 // These are bit positions. 0 is the left most bit.
 enum cal_steps : uint64_t
 {
+    // TK:LRDIMM Update calibration steps to add or remove LRDIMM steps
     DRAM_ZQCAL        = 0,  ///< DRAM ZQ Calibration Long
     DB_ZQCAL          = 1,  ///< (LRDIMM) Data Buffer ZQ Calibration Long
     MREP              = 2,  ///< (LRDIMM) DRAM Interface MDQ Receive Enable Phase
@@ -257,6 +258,7 @@ enum cal_steps : uint64_t
     TRAINING_ADV_RD   = 20, ///< Flag for draminit training advance in the attribute/ CUSTOM_READ_CTR in code
     TRAINING_ADV_WR   = 21, ///< Flag for draminit training advance in the attribute/ CUSTOM_WRITE_CTR in code
 
+    // TK:LRDIMM Update total calibration steps to have "LRDIMM" specific ones here
     // Not *exactly* a cal step but go w/it
     RUN_ALL_CAL_STEPS          = 0xFFFFFC00,
     RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7C00,

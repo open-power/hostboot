@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ using fapi2::FAPI2_RC_INVALID_PARAMETER;
 
 namespace mss
 {
-
+// TK:LRDIMM Update the rank code + pairings to take into account LRDIMM (1 primary rank per LR + secondary to quaternary per LR) aka 4 rank DIMM's
 // Definition of the Nimbus PHY rank_pair0 config registers
 const std::vector< uint64_t > rankPairTraits<TARGET_TYPE_MCA, 0>::RANK_PAIR_REGS =
 {

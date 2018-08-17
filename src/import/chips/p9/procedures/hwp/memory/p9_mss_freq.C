@@ -64,6 +64,7 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 extern "C"
 {
+    // TK:LRDIMM Update frequency for LRDIMM - I don't think this will change at all, but better safe than sorry SPG
     ///
     /// @brief Calculate and save off DIMM frequencies
     /// @param[in] i_target, the controller (e.g., MCS)

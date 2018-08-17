@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 namespace mss
 {
 
+// TK:LRDIMM Update and/or bcw load
 ///
 /// @brief Perform the bcw_load_ddr4 operations
 /// @param[in] i_target a DIMM target

@@ -40,7 +40,6 @@
 
 #include <fapi2.H>
 #include <lib/eff_config/timing.H>
-#include <lib/phy/read_cntrl.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/mss_attribute_accessors.H>
 

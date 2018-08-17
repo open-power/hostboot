@@ -48,6 +48,7 @@
 
 namespace mss
 {
+// TK:LRDIMM Update the rank code + pairings to take into account LRDIMM (1 primary rank per LR + secondary to quaternary per LR) aka 4 rank DIMM's
 
 enum
 {

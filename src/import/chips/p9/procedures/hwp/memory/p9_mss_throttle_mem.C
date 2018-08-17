@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ using fapi2::TARGET_TYPE_MCS;
 
 extern "C"
 {
-
+// TK:LRDIMM Update power/thermal/throttling
 ///
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
 /// @param[in] i_target the controller target
