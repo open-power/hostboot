@@ -1934,7 +1934,6 @@ extern "C" {
     ///
     fapi2::ReturnCode mss_set_bbm_regs (const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_mba_target)
     {
-#ifndef __HOSTBOOT_MODULE
         const uint16_t l_wrclk_disable_mask[] =       // by quads
         {
             0x8800, 0x4400, 0x2280, 0x1140
@@ -1957,13 +1956,11 @@ extern "C" {
         uint16_t l_data_rank7 = 0;
         uint8_t l_dimm = 0;
         uint8_t l_rank = 0;
-        uint8_t l_disable1_data = 0;
-        uint16_t l_wrclk_mask = 0;
         uint16_t l_mask = 0xF000;
         uint8_t l_all_F_mask = 0;
         uint16_t l_nmask = 0;
         uint16_t l_wrclk_nmask = 0;
-#endif
+
         const uint8_t l_rg_invalid[] =
         {
             fapi2::ENUM_ATTR_CEN_EFF_PRIMARY_RANK_GROUP0_INVALID,
@@ -2122,11 +2119,6 @@ extern "C" {
                 }
             }
 
-            // This is to fix 'variable set but not used' errors from HB due to the ifndef below
-            FAPI_DBG("%d %d %d %d %d %d %d %d", l_rank0_invalid, l_rank1_invalid, l_rank2_invalid, l_rank3_invalid, l_rank4_invalid,
-                     l_rank5_invalid, l_rank6_invalid, l_rank7_invalid);
-#ifndef __HOSTBOOT_MODULE
-
             // loop through primary ranks [0:3]
             for (l_prank = 0; l_prank < NUM_RANK_GROUPS; l_prank ++ )
             {
@@ -2156,6 +2148,9 @@ extern "C" {
 
                 for ( uint8_t i = 0; i < DP18_INSTANCES; ++i ) // dp18 [0:4]
                 {
+                    uint8_t l_disable1_data = 0;
+                    uint16_t l_wrclk_mask = 0;
+
                     // check or not to check(always set register)?
                     FAPI_TRY(l_db_reg.extract(l_data, i * 16, 16));
                     FAPI_TRY(l_db_reg_rank0.extract(l_data_rank0, i * 16, 16));
@@ -2243,11 +2238,11 @@ extern "C" {
                                     // Will also save a re-training loop.  Complement in get_bbm_regs.
 
 
-                                    FAPI_INF("Disabling entire nibble %i", n);
                                     FAPI_TRY(mss_get_dqs_lane(i_mba_target, l_port, i, n,
                                                               l_disable1_data));
 
                                     l_wrclk_mask |= l_wrclk_disable_mask[n];
+                                    FAPI_INF("%s port%d Disabling entire nibble %i - mask 0x%04x", mss::c_str(i_mba_target), l_port,  n, l_wrclk_mask);
                                 }
                             }  // end x4
                             else    // width == 8+?
@@ -2270,7 +2265,7 @@ extern "C" {
                         }
                     }
 
-                    FAPI_DBG("\t\tdisable1_data=0x%04X", l_disable1_data);
+                    FAPI_INF("%s port%u DP%u disable1_data=0x%04X", mss::c_str(i_mba_target), l_port, i, l_disable1_data);
 
                     // set disable0(dq) reg
                     FAPI_TRY(l_data_buffer.insert(l_data, 3 * 16, 16, 0));
@@ -2314,8 +2309,6 @@ extern "C" {
                     }//if mask
                 } // end DP18 instance loop
             } // end primary rank loop
-
-#endif
         } // end port loop
 
     fapi_try_exit:
@@ -2953,6 +2946,9 @@ extern "C" {
         FAPI_TRY(dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DIMM_SPARE, i_mba, l_dimm_spare));
 
+        // Setting to clean to start - if we find any bad bits, we'll note em as not clean below
+        o_is_clean = 1;
+
         for (uint8_t byte = 0; byte < DIMM_DQ_RANK_BITMAP_SIZE; byte ++)
         {
             if (l_bbm[byte] != 0)
@@ -3007,7 +3003,7 @@ extern "C" {
                     if (l_bbm[byte] == 0xFF)
                     {
                         // block lanes + 1st lane{0,8}
-                        l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x07);
+                        l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane / BITS_PER_BYTE) * BITS_PER_BYTE;
                         o_reg.setBit(l_loc, 8);   // set dq byte
                         FAPI_DBG("%s 0xFF  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
                                  mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
@@ -3015,7 +3011,7 @@ extern "C" {
                     }
 
                     // block lanes + 1st lane{0,4,8,12}
-                    l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x0C);
+                    l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane / BITS_PER_NIBBLE) * BITS_PER_NIBBLE;
                     o_reg.setBit(l_loc, 4);       // set dq nibble0
                     FAPI_DBG("%s 0xF0  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
                              mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
@@ -3034,7 +3030,7 @@ extern "C" {
                                         0, l_phy_lane, l_phy_block, 0));
 
                     // block lanes + 1st lane{0,4,8,12}
-                    l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane & 0x0C);
+                    l_loc = (l_phy_block * LANES_PER_BLOCK) + (l_phy_lane / BITS_PER_NIBBLE) * BITS_PER_NIBBLE;
                     FAPI_DBG("%s 0x0F  byte=%i, lbbm=0x%02x  dp%i_%i dq=%i o=%i",
                              mss::c_str(i_mba), byte, l_bbm[byte], l_phy_block, l_phy_lane, l_dq, l_loc);
                     o_reg.setBit(l_loc, 4);               // set dq nibble1
