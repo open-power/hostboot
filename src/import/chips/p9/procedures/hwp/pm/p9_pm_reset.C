@@ -101,22 +101,34 @@ fapi2::ReturnCode p9_pm_reset(
     using namespace p9_stop_recov_ffdc;
     FAPI_IMP(">> p9_pm_reset");
 
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    bool l_malfAlert = false;
-    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type l_malfEnabled =
-        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
-
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_data64;
     fapi2::ATTR_PM_RESET_PHASE_Type l_phase = PM_RESET_INIT;
-
     fapi2::ATTR_INITIATED_PM_RESET_Type l_pmResetActive =
         fapi2::ENUM_ATTR_INITIATED_PM_RESET_ACTIVE;
+    fapi2::ATTR_PM_MALF_ALERT_ENABLE_Type l_malfEnabled =
+        fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
+    fapi2::ATTR_SKIP_WAKEUP_Type l_skip_wakeup;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    bool l_malfAlert = false;
 
     fapi2::ATTR_PM_MALF_CYCLE_Type l_pmMalfCycle =
         fapi2::ENUM_ATTR_PM_MALF_CYCLE_INACTIVE;
+    FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_MALF_CYCLE, i_target,
+                             l_pmMalfCycle));
 
-    fapi2::buffer<uint64_t> l_data64;
-    fapi2::ReturnCode l_rc;
-    fapi2::ATTR_SKIP_WAKEUP_Type l_skip_wakeup;
+    // Avoid another PM Reset before we get through the PM Init
+    // Protect FIR Masks, Special Wakeup States, PM FFDC, etc. from being
+    // trampled.
+    if (l_pmMalfCycle == fapi2::ENUM_ATTR_PM_MALF_CYCLE_ACTIVE)
+    {
+        FAPI_IMP ("PM Malf Cycle Active: Skip extraneous PM Reset!");
+        FAPI_IMP( "<< p9_pm_reset");
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SKIP_WAKEUP, FAPI_SYSTEM, l_skip_wakeup),
              "fapiGetAttribute of ATTR_SKIP_WAKEUP failed");
 

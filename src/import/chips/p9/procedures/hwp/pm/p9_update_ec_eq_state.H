@@ -45,6 +45,9 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_perv_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9n2_quad_scom_addresses.H>
+#include <p9n2_quad_scom_addresses_fld.H>
+#include <p9n2_misc_scom_addresses.H>
 
 
 
@@ -80,10 +83,13 @@ extern "C" {
 /// @brief Select the Hostboot core from the available cores on the chip
 ///
 /// @param [in] i_target    Chip target
+/// @param [in] i_skip      if this is true,then skip updating QSSR for slave
+//                          proc
 ///
 
     fapi2::ReturnCode p9_update_ec_eq_state(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        uint8_t i_qssr_skip = false);
 
 } // extern "C"
 
