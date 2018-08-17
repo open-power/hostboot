@@ -45,6 +45,7 @@ using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
 extern "C"
 {
+    // TK:LRDIMM Update power/thermal/throttling
     ///
     /// @brief Set ATTR_MSS_PORT_MAXPOWER, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT, ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT
     /// @param[in] i_targets vector of MCS's on the same VDDR domain
