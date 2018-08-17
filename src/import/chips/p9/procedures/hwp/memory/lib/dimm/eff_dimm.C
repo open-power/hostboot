@@ -4513,6 +4513,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// TK:LRDIMM Update and/or verify all bc## steps below
 ///
 /// @brief Determines & sets effective config for DIMM BC00
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
