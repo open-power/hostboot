@@ -657,6 +657,14 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                         l_calloutToAdd.procedure = HWAS::EPUB_PRC_EIBUS_ERROR;
                     }
 
+                    // I2C device callouts don't map to anything useful in the
+                    // IPMI world. They do come with a more IPMI-friendly
+                    // callout that follows after, so we can skip to the next.
+                    if (l_ud->type == HWAS::I2C_DEVICE_CALLOUT)
+                    {
+                        continue;
+                    }
+
                     // if this callout is higher than any previous callout
                     if (l_ud->priority > l_priority)
                     {

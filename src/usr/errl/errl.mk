@@ -40,3 +40,4 @@ OBJS += errludcallout.o
 OBJS += errludsensor.o
 OBJS += errludstate.o
 OBJS += errlmanager_common.o
+OBJS += errli2c.o

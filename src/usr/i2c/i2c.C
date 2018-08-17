@@ -4455,53 +4455,7 @@ void addHwCalloutsI2c(errlHndl_t i_err,
     assert(i_err != nullptr, "Bug! The supplied error log is nullptr.");
     assert(i_target != nullptr, "Bug! The supplied target is nullptr.");
 
-    // Attempt to find a target representing the device that
-    // failed to respond, and call it out as the most likely
-    // problem. For now, we only support TPM reverse lookup;
-    // TODO RTC 94872 will implement generic support for other
-    // devices.
-
-    // Loop thru TPMs in the system and match physical path,
-    // engine, and port to the i2c master
-    auto l_devFound = false;
-    const auto l_physPath = i_target->getAttr<
-                                     TARGETING::ATTR_PHYS_PATH>();
-    TARGETING::TargetHandleList allTpms;
-    TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
-    for(const auto &tpm: allTpms)
-    {
-        const auto l_tpmInfo = tpm->getAttr<
-                                      TARGETING::ATTR_TPM_INFO>();
-
-        if (l_tpmInfo.i2cMasterPath == l_physPath &&
-            l_tpmInfo.engine == i_args.engine &&
-            l_tpmInfo.port == i_args.port &&
-            l_tpmInfo.devAddrLocality0 == i_args.devAddr)
-        {
-            TRACFCOMP(g_trac_i2c,
-                "Unresponsive TPM found: "
-                "Engine=%d, masterPort=%d "
-                "huid for its i2c master is 0x%.8X",
-                l_tpmInfo.engine,
-                l_tpmInfo.port,
-                TARGETING::get_huid(i_target));
-            i_err->addHwCallout(tpm,
-                              HWAS::SRCI_PRIORITY_HIGH,
-                              HWAS::NO_DECONFIG,
-                              HWAS::GARD_NULL);
-            l_devFound = true;
-            break;
-        }
-    }
-    // For the FSP, non-TPM case add an I2c Device callout.
-    // TODO RTC 94872  In a future commit, we will want FSP to handle
-    // the TPM case also, but we won't add it here until FSP fully
-    // supports the new i2c callout type. The reasoning is that we still need
-    // TPMs to be called out as before in the interim. The other i2c devices
-    // (that were never called out to begin with) are the only ones being added
-    // as the new type, because FSP will treat the new type as unknown until
-    // support for the new type is added.
-    if (l_devFound == false && INITSERVICE::spBaseServicesEnabled())
+    if (!INITSERVICE::spBaseServicesEnabled())
     {
         i_err->addI2cDeviceCallout(i_target,
                                    i_args.engine,
@@ -4509,15 +4463,52 @@ void addHwCalloutsI2c(errlHndl_t i_err,
                                    i_args.devAddr,
                                    HWAS::SRCI_PRIORITY_HIGH);
     }
+    // For FSP systems which don't yet have special handling for
+    // i2c device callouts we still need to handle the TPM search
+    // to avoid regression back to the "non TPM aware" behavior.
+    else
+    {
+        // Loop thru TPMs in the system and match physical path,
+        // engine, and port to the i2c master
+        auto l_devFound = false;
+        const auto l_physPath = i_target->getAttr<
+                                         TARGETING::ATTR_PHYS_PATH>();
+        TARGETING::TargetHandleList allTpms;
+        TARGETING::getAllChips( allTpms, TARGETING::TYPE_TPM, false );
+        for(const auto &tpm: allTpms)
+        {
+            const auto l_tpmInfo = tpm->getAttr<
+                                          TARGETING::ATTR_TPM_INFO>();
 
-    // Could also be an issue with Processor or its bus
-    // -- both on the same FRU
-    i_err->addHwCallout( i_target,
-                       l_devFound? HWAS::SRCI_PRIORITY_MED:
-                                   HWAS::SRCI_PRIORITY_HIGH,
-                       HWAS::NO_DECONFIG,
-                       HWAS::GARD_NULL );
+            if (l_tpmInfo.i2cMasterPath == l_physPath &&
+                l_tpmInfo.engine == i_args.engine &&
+                l_tpmInfo.port == i_args.port &&
+                l_tpmInfo.devAddrLocality0 == i_args.devAddr)
+            {
+                TRACFCOMP(g_trac_i2c,
+                    "Unresponsive TPM found: "
+                    "Engine=%d, masterPort=%d "
+                    "huid for its i2c master is 0x%.8X",
+                    l_tpmInfo.engine,
+                    l_tpmInfo.port,
+                    TARGETING::get_huid(i_target));
+                i_err->addHwCallout(tpm,
+                                  HWAS::SRCI_PRIORITY_HIGH,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL);
+                l_devFound = true;
+                break;
+            }
+        }
 
+      // Could also be an issue with Processor or its bus
+      // -- both on the same FRU
+      i_err->addHwCallout( i_target,
+                           l_devFound? HWAS::SRCI_PRIORITY_MED:
+                               HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::NO_DECONFIG,
+                           HWAS::GARD_NULL );
+    }
 }
 
 }; // end namespace I2C

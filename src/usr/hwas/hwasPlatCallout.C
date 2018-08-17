@@ -202,14 +202,9 @@ errlHndl_t platHandleI2cDeviceCallout(
         callOutPriority i_priority,
         errlHndl_t &io_errl)
 {
-    // WARNING:
-    // this hostboot code should not change io_errl, unless the caller of the
-    //  processCallouts() function also changes, as today it (errlentry.C) calls
-    //  from the errlEntry object
-
     errlHndl_t errl = nullptr;
 
-    // hostboot does not yet handle or do any action for i2c callouts
+    // hostboot handling is done in ERRORLOG::addI2cDeviceCallout function
     return errl;
 }
 

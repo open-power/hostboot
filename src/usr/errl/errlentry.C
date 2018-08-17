@@ -47,6 +47,7 @@
 #include <errl/errluserdetails.H>
 #include <errl/errludattribute.H>
 #include <errl/errludstate.H>
+#include <errl/errli2c.H>
 #include <trace/interface.H>
 #include <config.h>
 
@@ -64,10 +65,12 @@
 #include <attributeenums.H>
 #include "errlentry_consts.H"
 #include <util/misc.H>
+
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #include <errl/errludsensor.H>
 #endif
+
 // Hostboot Image ID string
 extern char hbi_ImageId;
 
@@ -2203,10 +2206,12 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
         ep = nullptr;
     }
 
+    handleI2cDeviceCalloutWithinHostboot(this, i_i2cMaster, i_engine, i_port, i_address, i_priority);
+
     } while (0);
 
-
 } // addI2cDeviceCallout
+
 
 } // End namespace
 
