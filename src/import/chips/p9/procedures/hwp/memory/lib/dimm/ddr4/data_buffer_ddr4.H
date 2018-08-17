@@ -47,6 +47,12 @@
 
 namespace mss
 {
+// TK:LRDIMM Verify this functionality and data (looked good to me, but more eyes are better - SPG)
+// TK:LRDIMM Create automatic function space selector code
+// The idea behind this is
+// 1) function space 0 is the default
+// 2) we want to be able to say "here's a bunch of buffer control words, hit the appropriate function space before each is needed)
+// Will greatly simplify code
 
 enum nibble : size_t
 {
