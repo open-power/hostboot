@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,18 @@ typedef enum
   SBE_PRIMARY   = 2,
   SBE_BACKUP    = 3,
   LAST_CHIP_TYPE,
+  INVALID_CHIP_TYPE = LAST_CHIP_TYPE,
   FIRST_CHIP_TYPE = VPD_PRIMARY
 } eeprom_chip_types_t;
+
+/*
+ * @brief Miscellaneous enums for EEPROM
+ */
+enum
+{
+    EEPROM_PAGE_SIZE = 0x100,
+    EEPROM_DEVADDR_INC = 2
+};
 
 /**
  * @brief This function tests to see if the VPD_PRIMARY eeprom is present
@@ -82,8 +92,6 @@ struct EepromInfo_t
  *      the error log.
  */
 void getEEPROMs( std::list<EepromInfo_t>& o_info );
-
-
 
 };  // end namespace EEPROM
 

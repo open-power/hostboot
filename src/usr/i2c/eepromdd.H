@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,15 +71,6 @@ typedef struct
     uint64_t chipCount;      // number of chips making up eeprom device
     uint64_t writeCycleTime;  // in milliseconds
 } eeprom_addr_t;
-
-/*
- * @brief Miscellaneous enums for EEPROM
- */
-enum
-{
-    EEPROM_PAGE_SIZE = 0x100,
-    EEPROM_DEVADDR_INC = 2
-};
 
 /**
 *

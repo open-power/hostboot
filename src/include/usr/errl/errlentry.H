@@ -660,7 +660,6 @@ public:
                              const uint8_t i_address,
                              const HWAS::callOutPriority i_priority);
 
-
     /**
      * @brief  Import flattened error log
      *

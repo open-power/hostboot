@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -398,6 +398,11 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Sensor Type                : %s", #
                                           callout->sensorType);
                 } // switch sensorType
 #undef case_SENSOR_TYPE
+                break;
+
+              case HWAS::I2C_DEVICE_CALLOUT:
+                CONSOLE::displayf(nullptr, "  Callout type             : I2C Device Callout");
+
                 break;
 
             default:

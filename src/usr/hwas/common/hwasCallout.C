@@ -259,7 +259,7 @@ void processCallout(errlHndl_t &io_errl,
                 // TODO RTC 94872 - Uncomment this later after the FSP team
                 // implements it.
                 //
-                // errlHndl_t errl = platHandleI2cDeviceCallout(
+                // errl = platHandleI2cDeviceCallout(
                 //                        i2cMaster,
                 //                        pCalloutUD->engine,
                 //                        pCalloutUD->port,
