@@ -841,7 +841,9 @@ fapi2::ReturnCode check_dmi_proc_bad_lane_data(
                          (8 * (l_chipunitnum + 1) + 1) );
                 FAPI_TRY(l_data.clearBit(8 * (l_chipunitnum + 1) + 1));
 
-                FAPI_TRY(putScom(i_tgt, DMI_FIR_REG_AND, l_data));
+                fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_tgt =
+                    i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
+                FAPI_TRY(putScom(l_mc_tgt, DMI_FIR_REG_AND, l_data));
             }
         }
     }
