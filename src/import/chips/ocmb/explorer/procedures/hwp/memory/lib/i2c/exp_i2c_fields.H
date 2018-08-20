@@ -86,7 +86,7 @@ struct fieldTraits;
 template <>
 struct fieldTraits<fields::SERDES_FREQ>
 {
-    static constexpr size_t COMPARISON_VAL = 0x0F;
+    static constexpr uint8_t COMPARISON_VAL = 0x0F;
     static constexpr const char* FIELD_STR = "SerDes Frequency";
 
     template <typename T>
@@ -100,7 +100,7 @@ struct fieldTraits<fields::SERDES_FREQ>
 template <>
 struct fieldTraits<fields::LANE_MODE>
 {
-    static constexpr size_t COMPARISON_VAL = 0x02;
+    static constexpr uint8_t COMPARISON_VAL = 0x02;
     static constexpr const char* FIELD_STR = "Lane mode";
 
     template <typename T>
@@ -114,7 +114,7 @@ struct fieldTraits<fields::LANE_MODE>
 template <>
 struct fieldTraits<fields::BOOT_MODE>
 {
-    static constexpr size_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
     static constexpr const char* FIELD_STR = "Boot mode";
 
     template <typename T>
@@ -128,7 +128,7 @@ struct fieldTraits<fields::BOOT_MODE>
 template <>
 struct fieldTraits<fields::DL_LAYER_BOOT_MODE>
 {
-    static constexpr size_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
     static constexpr const char* FIELD_STR = "DL Layer Boot mode";
 
     template <typename T>
@@ -142,7 +142,7 @@ struct fieldTraits<fields::DL_LAYER_BOOT_MODE>
 template <>
 struct fieldTraits<fields::TRANSPORT_LAYER>
 {
-    static constexpr size_t COMPARISON_VAL = 0x02;
+    static constexpr uint8_t COMPARISON_VAL = 0x02;
     static constexpr const char* FIELD_STR = "Transport Layer";
 
     template <typename T>
@@ -156,7 +156,7 @@ struct fieldTraits<fields::TRANSPORT_LAYER>
 template <>
 struct fieldTraits<fields::LOOPBACK_TEST>
 {
-    static constexpr size_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
     static constexpr const char* FIELD_STR = "OpenCapi looptest test";
 
     template <typename T>
@@ -170,7 +170,7 @@ struct fieldTraits<fields::LOOPBACK_TEST>
 template <>
 struct fieldTraits<fields::FW_MODE>
 {
-    static constexpr size_t COMPARISON_VAL = 0x01;
+    static constexpr uint8_t COMPARISON_VAL = 0x01;
     static constexpr const char* FIELD_STR = "FW Mode";
 
     template <typename T>
@@ -184,7 +184,7 @@ struct fieldTraits<fields::FW_MODE>
 template<>
 struct fieldTraits<fields::CMD_ID>
 {
-    static constexpr size_t COMPARISON_VAL = 0xFF;
+    static constexpr uint8_t COMPARISON_VAL = 0xFF;
     static constexpr const char* FIELD_STR = "Command ID";
 
     template <typename T>
@@ -198,7 +198,7 @@ struct fieldTraits<fields::CMD_ID>
 template<>
 struct fieldTraits<fields::STATUS_CODE>
 {
-    static constexpr size_t COMPARISON_VAL = 0xFF;
+    static constexpr uint8_t COMPARISON_VAL = 0xFF;
     static constexpr const char* FIELD_STR = "Status Code";
 
     template <typename T>
@@ -212,7 +212,7 @@ struct fieldTraits<fields::STATUS_CODE>
 template<>
 struct fieldTraits<fields::BOOT_STAGE>
 {
-    static constexpr size_t COMPARISON_VAL = 0x03;
+    static constexpr uint8_t COMPARISON_VAL = 0x03;
     static constexpr const char* FIELD_STR = "Boot Stage";
 
     template <typename T>
@@ -275,7 +275,7 @@ namespace boot_cfg
 ///
 inline fapi2::ReturnCode get_serdes_freq(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
-        size_t& o_setting)
+        uint8_t& o_setting)
 {
     return get_field<fields::SERDES_FREQ>(i_target, i_data, o_setting);
 }
@@ -303,7 +303,7 @@ inline fapi2::ReturnCode set_serdes_freq(const fapi2::Target<fapi2::TARGET_TYPE_
 ///
 inline fapi2::ReturnCode get_lane_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                        const std::vector<uint8_t>& i_data,
-                                       size_t& o_setting)
+                                       uint8_t& o_setting)
 {
     return get_field<fields::LANE_MODE>(i_target, i_data, o_setting);
 }
@@ -331,7 +331,7 @@ inline fapi2::ReturnCode set_lane_mode(const fapi2::Target<fapi2::TARGET_TYPE_OC
 ///
 inline fapi2::ReturnCode get_boot_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                        const std::vector<uint8_t>& i_data,
-                                       size_t& o_setting)
+                                       uint8_t& o_setting)
 {
     return get_field<fields::BOOT_MODE>(i_target, i_data, o_setting);
 }
@@ -358,7 +358,7 @@ inline fapi2::ReturnCode set_boot_mode(const fapi2::Target<fapi2::TARGET_TYPE_OC
 ///
 inline fapi2::ReturnCode get_dl_layer_boot_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
-        size_t& o_setting)
+        uint8_t& o_setting)
 {
     return get_field<fields::DL_LAYER_BOOT_MODE>(i_target, i_data, o_setting);
 }
@@ -386,7 +386,7 @@ inline fapi2::ReturnCode set_dl_layer_boot_mode(const fapi2::Target<fapi2::TARGE
 ///
 inline fapi2::ReturnCode get_transport_layer(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
-        size_t& o_setting)
+        uint8_t& o_setting)
 {
     return get_field<fields::TRANSPORT_LAYER>(i_target, i_data, o_setting);
 }
@@ -415,7 +415,7 @@ inline fapi2::ReturnCode set_transport_layer(const fapi2::Target<fapi2::TARGET_T
 ///
 inline fapi2::ReturnCode get_loopback_test(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
-        size_t& o_setting)
+        uint8_t& o_setting)
 {
     return get_field<fields::LOOPBACK_TEST>(i_target, i_data, o_setting);
 }
@@ -443,7 +443,7 @@ inline fapi2::ReturnCode set_loopback_test(const fapi2::Target<fapi2::TARGET_TYP
 ///
 inline fapi2::ReturnCode get_fw_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                      const std::vector<uint8_t>& i_data,
-                                     size_t& o_setting)
+                                     uint8_t& o_setting)
 {
     return get_field<fields::FW_MODE>(i_target, i_data, o_setting);
 }
@@ -476,7 +476,7 @@ namespace status
 ///
 inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const std::vector<uint8_t>& i_data,
-                                        size_t& o_setting)
+                                        uint8_t& o_setting)
 {
     return get_field<fields::BOOT_STAGE>(i_target, i_data, o_setting);
 }
@@ -490,7 +490,7 @@ inline fapi2::ReturnCode get_boot_stage(const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 inline fapi2::ReturnCode get_status_code(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const std::vector<uint8_t>& i_data,
-        size_t& o_setting)
+        uint8_t& o_setting)
 {
     return get_field<fields::STATUS_CODE>(i_target, i_data, o_setting);
 }
@@ -504,7 +504,7 @@ inline fapi2::ReturnCode get_status_code(const fapi2::Target<fapi2::TARGET_TYPE_
 ///
 inline fapi2::ReturnCode get_cmd_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     const std::vector<uint8_t>& i_data,
-                                    size_t& o_setting)
+                                    uint8_t& o_setting)
 {
     return get_field<fields::CMD_ID>(i_target, i_data, o_setting);
 }
