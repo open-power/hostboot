@@ -33,6 +33,9 @@
 // *HWP Level: 2
 // *HWP Consumed by: CI
 
+#ifndef EXP_CONSTS_H
+#define EXP_CONSTS_H
+
 namespace mss
 {
 namespace exp
@@ -120,3 +123,5 @@ enum boot_stages
 }// i2c
 }// exp
 }// mss
+
+#endif
