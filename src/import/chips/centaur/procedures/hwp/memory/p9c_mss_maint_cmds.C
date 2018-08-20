@@ -4703,7 +4703,7 @@ fapi2::ReturnCode mss_restore_DRAM_repairs_asm( const fapi2::Target<fapi2::TARGE
     }
 
     memset(l_steer, MSS_INVALID_SYMBOL, 8 * 3);
-    memset(l_mark_store, MSS_INVALID_SYMBOL, 8 * 3);
+    memset(l_mark_store, MSS_INVALID_SYMBOL, 8 * 2);
 
     // For each port in the given MBA:0,1
     for(l_port = 0; l_port < MAX_PORTS_PER_MBA; l_port++ )
