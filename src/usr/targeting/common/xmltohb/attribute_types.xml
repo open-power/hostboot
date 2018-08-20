@@ -5095,7 +5095,7 @@
         <name>OCMB_CHIP</name>
         <value>75</value>
     </enumerator>    <enumerator>
-    <name>MEM_PORT</name>
+        <name>MEM_PORT</name>
         <value>76</value>
     </enumerator>
     <enumerator>
