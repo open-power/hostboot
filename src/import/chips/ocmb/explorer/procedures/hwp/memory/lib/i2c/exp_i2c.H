@@ -62,7 +62,7 @@ inline fapi2::ReturnCode status_code( const fapi2::Target<fapi2::TARGET_TYPE_OCM
                                       const std::vector<uint8_t>& i_data )
 {
     // Set to a high number to make sure check for SUCCESS (== 0) isn't a fluke
-    size_t l_status = ~(0);
+    uint8_t l_status = ~(0);
     FAPI_TRY( status::get_status_code(i_target, i_data, l_status) );
 
     // Technically many cmds have their own status code decoding..but SUCCESS is always 0.
@@ -92,7 +92,8 @@ inline void fw_status_setup(size_t& o_size,
                             std::vector<uint8_t>& o_cmd_id)
 {
     o_size = FW_STATUS_BYTE_LEN;
-    o_cmd_id.assign({FW_STATUS});
+    o_cmd_id.clear();
+    o_cmd_id.push_back(FW_STATUS);
 }
 
 ///
@@ -125,7 +126,16 @@ fapi_try_exit:
 inline void boot_config_setup(std::vector<uint8_t>& io_data)
 
 {
+    // Need data length as well - boot config can only ever be written
+    io_data.insert(io_data.begin(), FW_BOOT_CONFIG_BYTE_LEN);
+
+    // Then add the command
     io_data.insert(io_data.begin(), FW_BOOT_CONFIG);
+
+    // Written commands need to be in the form of
+    // CMD
+    // DATA LEN
+    // DATA
 }
 
 ///
