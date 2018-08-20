@@ -104,6 +104,13 @@
         capture     group never;
     };
 
+    register OSC_SW_SENSE
+    {
+        name        "Osc Switch Sense 1";
+        scomaddr    0x0005001D;
+        capture     group PllFIRs;
+    };
+
     register TODWOF
     {
         name        "Time of Day / WOF Counter";

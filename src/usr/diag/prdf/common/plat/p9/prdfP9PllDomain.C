@@ -82,10 +82,26 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 
             if( l_analysisPending )
             {
+                // Check if any clock errors are present
+                uint32_t l_errType = 0;
                 ExtensibleChipFunction * l_query =
-                                    l_chip->getExtensibleFunction("QueryPll");
-                int32_t rc = (*l_query)
-                    (l_chip,PluginDef::bindParm<bool &>(atAttn));
+                    l_chip->getExtensibleFunction("CheckErrorType");
+                int32_t rc = (*l_query)(l_chip,
+                    PluginDef::bindParm<uint32_t &> (l_errType));
+
+                // Check if clock errors apply to this domain
+                if ( GetId() == CLOCK_DOMAIN_IO )
+                {
+                    if ( ( l_errType & PCI_PLL_UNLOCK ) ||
+                         ( l_errType & PCI_OSC_FAILOVER ) )
+                        atAttn = true;
+                }
+                else
+                {
+                    if ( ( l_errType & SYS_PLL_UNLOCK ) ||
+                         ( l_errType & SYS_OSC_FAILOVER ) )
+                        atAttn = true;
+                }
 
                 // if rc then scom read failed
                 // Error log has already been generated
@@ -108,13 +124,11 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 //------------------------------------------------------------------------------
 
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
-                          ATTENTION_TYPE attentionType)
+                           ATTENTION_TYPE attentionType)
 {
     #define PRDF_FUNC "[PllDomain::Analyze] "
-    std::vector<ExtensibleChip *> sysRefList;
-    std::vector<ExtensibleChip *> pciList;
-    std::vector<ExtensibleChip *> mfFoList;
-    std::vector<ExtensibleChip *> sysRefFoList;
+    std::vector<ExtensibleChip *> pllUnlockList;
+    std::vector<ExtensibleChip *> failoverList;
     int32_t rc = SUCCESS;
     uint32_t mskErrType =  0;
 
@@ -147,6 +161,17 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         if ( 0 == l_errType )
             continue;
 
+        if (GetId() == CLOCK_DOMAIN_IO)
+        {
+            if (l_errType & PCI_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
+            if (l_errType & PCI_OSC_FAILOVER)  failoverList.push_back(l_chip);
+        }
+        else
+        {
+            if (l_errType & SYS_PLL_UNLOCK  ) pllUnlockList.push_back(l_chip);
+            if (l_errType & SYS_OSC_FAILOVER)  failoverList.push_back(l_chip);
+        }
+
         // Get this chip's capture data for any error
         l_chip->CaptureErrorData(
                     serviceData.service_data->GetCaptureData());
@@ -170,13 +195,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         {
             PlatServices::hwpErrorIsolation( l_chip, serviceData );
         }
-
-        // Update error lists
-        if (l_errType & SYS_PLL_UNLOCK  ) sysRefList.push_back(   l_chip );
-        if (l_errType & PCI_PLL_UNLOCK  ) pciList.push_back(      l_chip );
-        if (l_errType & PCI_OSC_FAILOVER) mfFoList.push_back(     l_chip );
-        if (l_errType & SYS_OSC_FAILOVER) sysRefFoList.push_back( l_chip );
-
     } // end for each chip in domain
 
     // Remove all non-functional chips.
@@ -215,74 +233,33 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         farClockSource.Resolve(serviceData);
     }
 
-    if (sysRefList.size() > 0 || pciList.size() > 0)
-    {
-        iv_threshold.Resolve(serviceData);
-    }
-
-    if (sysRefList.size() > 0 )
-    {
-         // Test for threshold
-        if(serviceData.service_data->IsAtThreshold())
-        {
-            mskErrType |= SYS_PLL_UNLOCK;
-        }
-
-        // Set Signature
-        serviceData.service_data->GetErrorSignature()->
-            setChipId(sysRefList[0]->getHuid());
-        serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
-
-        // If only one detected sys ref error, add it to the callout list.
-        if (sysRefList.size() == 1)
-        {
-            const uint32_t tmpCount =
-                serviceData.service_data->getMruListSize();
-
-            // Call this chip's CalloutPll plugin if it exists.
-            ExtensibleChipFunction * l_callout =
-                    sysRefList[0]->getExtensibleFunction( "CalloutPll", true );
-            if ( NULL != l_callout )
-            {
-                (*l_callout)( sysRefList[0],
-                    PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
-            }
-
-            // If CalloutPll plugin does not add anything new to the callout
-            // list, callout this chip
-            if ( tmpCount == serviceData.service_data->getMruListSize() )
-            {
-                // No additional callouts were made so add this chip to the list
-                serviceData.service_data->SetCallout( sysRefList[0]->getTrgt());
-            }
-        }
-    }
-
-    if (pciList.size() > 0)
+    if (pllUnlockList.size() > 0)
     {
         // Test for threshold
+        iv_threshold.Resolve(serviceData);
         if(serviceData.service_data->IsAtThreshold())
         {
-            mskErrType |= PCI_PLL_UNLOCK;
+            mskErrType |= (GetId() == CLOCK_DOMAIN_IO) ?
+                         PCI_PLL_UNLOCK : SYS_PLL_UNLOCK;
         }
 
         // Set Signature
         serviceData.service_data->GetErrorSignature()->
-            setChipId(pciList[0]->getHuid());
+            setChipId(pllUnlockList[0]->getHuid());
         serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
 
         // If only one detected sys ref error, add it to the callout list.
-        if (pciList.size() == 1)
+        if (pllUnlockList.size() == 1)
         {
             const uint32_t tmpCount =
                 serviceData.service_data->getMruListSize();
 
             // Call this chip's CalloutPll plugin if it exists.
             ExtensibleChipFunction * l_callout =
-                    pciList[0]->getExtensibleFunction( "CalloutPll", true );
+                pllUnlockList[0]->getExtensibleFunction( "CalloutPll", true );
             if ( NULL != l_callout )
             {
-                (*l_callout)( pciList[0],
+                (*l_callout)( pllUnlockList[0],
                     PluginDef::bindParm<STEP_CODE_DATA_STRUCT &>(serviceData) );
             }
 
@@ -291,32 +268,33 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             if ( tmpCount == serviceData.service_data->getMruListSize() )
             {
                 // No additional callouts were made so add this chip to the list
-                serviceData.service_data->SetCallout( pciList[0]->getTrgt());
+                serviceData.service_data->SetCallout(
+                    pllUnlockList[0]->getTrgt());
             }
         }
-
     }
 
-    if (mfFoList.size() > 0)
+    if (failoverList.size() > 0)
     {
-        mskErrType |= PCI_OSC_FAILOVER;
+        if (GetId() == CLOCK_DOMAIN_IO)
+        {
+            // Mask failovers for this domain
+            mskErrType |= PCI_OSC_FAILOVER;
 
-        // Set Signature
+            // Set signature
+            serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
+        }
+        else
+        {
+            // Mask failovers for this domain
+            mskErrType |= SYS_OSC_FAILOVER;
+
+            // Set signature
+            serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
+        }
+
         serviceData.service_data->GetErrorSignature()->
-            setChipId(mfFoList[0]->getHuid());
-        serviceData.service_data->SetErrorSig( PRDFSIG_MF_REF_FAILOVER );
-
-        // Make the error log predictive on first occurrence.
-        serviceData.service_data->SetThresholdMaskId(0);
-    }
-    if (sysRefFoList.size() > 0)
-    {
-        mskErrType |= SYS_OSC_FAILOVER;
-
-        // Set Signature
-        serviceData.service_data->GetErrorSignature()->
-            setChipId(sysRefFoList[0]->getHuid());
-        serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
+            setChipId(failoverList[0]->getHuid());
 
         // Make the error log predictive on first occurrence.
         serviceData.service_data->SetThresholdMaskId(0);
@@ -338,7 +316,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
 
     // Run PLL Post Analysis on any analyzed chips in this domain.
-    for(auto l_chip : sysRefList)
+    for(auto l_chip : pllUnlockList)
     {
         // Send any special messages indicating there was a PLL error.
         ExtensibleChipFunction * l_pllPostAnalysis =
@@ -347,24 +325,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
     }
 
-    for(auto l_chip : pciList)
-    {
-        // Send any special messages indicating there was a PLL error.
-        ExtensibleChipFunction * l_pllPostAnalysis =
-                l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*l_pllPostAnalysis)(l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
-    }
-
-    for(auto l_chip : mfFoList)
-    {
-        // Send any special messages indicating there was a PLL error.
-        ExtensibleChipFunction * l_pllPostAnalysis =
-                l_chip->getExtensibleFunction("PllPostAnalysis", true);
-        (*l_pllPostAnalysis)(l_chip,
-                PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
-    }
-    for(auto l_chip : sysRefFoList)
+    for(auto l_chip : failoverList)
     {
         // Send any special messages indicating there was a PLL error.
         ExtensibleChipFunction * l_pllPostAnalysis =
@@ -392,7 +353,8 @@ int32_t PllDomain::ClearPll( ExtensibleDomain * i_domain,
 {
     PllDomain * l_domain = (PllDomain *) i_domain;
 
-    const char * clearPllFuncName = "ClearPll";
+    const char * clearPllFuncName = (l_domain->GetId() == CLOCK_DOMAIN_IO) ?
+        "ClearMfPll" : "ClearPll";
 
     // Clear children chips.
     for ( uint32_t i = 0; i < l_domain->GetSize(); i++ )
