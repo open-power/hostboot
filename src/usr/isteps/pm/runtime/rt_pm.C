@@ -53,6 +53,7 @@
 using namespace TARGETING;
 using namespace RUNTIME;
 using namespace ERRORLOG;
+extern trace_desc_t* g_trac_hbrt;
 
 namespace ISTEPS_TRACE
 {
@@ -71,13 +72,12 @@ namespace RTPM
     void pm_complex_error( errlHndl_t i_err,
                            int &io_rc )
     {
-        errlCommit( i_err, RUNTIME_COMP_ID );
-
         if(io_rc == 0)
         {
-            io_rc = -1;
+            io_rc = ERRL_GETRC_SAFE(i_err);
         }
 
+        errlCommit( i_err, RUNTIME_COMP_ID );
         return;
     }
 
@@ -99,7 +99,7 @@ namespace RTPM
         errlHndl_t l_err = nullptr;
         int rc = 0;
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP( g_trac_hbrt,ENTER_MRK
                    "load_pm_complex: homer addr=%016llx. "
                    "occ common addr=%016lx. RtProcChip=%llx. mode=%d",
                    i_homer_addr,
@@ -193,6 +193,8 @@ namespace RTPM
                              rc);
         }
 
+        TRACFCOMP( g_trac_hbrt,EXIT_MRK
+                   "load_pm_complex:rc=0x%X", rc );
         return rc;
     }
 
@@ -208,7 +210,7 @@ namespace RTPM
         errlHndl_t l_err = nullptr;
         int rc = 0;
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP( g_trac_hbrt,ENTER_MRK
                    "start_pm_complex: RtProcChip %llx", i_chip);
 
         do
@@ -263,6 +265,8 @@ namespace RTPM
                              rc);
         }
 
+        TRACFCOMP( g_trac_hbrt,EXIT_MRK
+                   "start_pm_complex:rc=0x%X", rc );
         return rc;
     }
 
@@ -279,7 +283,7 @@ namespace RTPM
         errlHndl_t l_err = nullptr;
         int rc = 0;
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        TRACFCOMP( g_trac_hbrt,ENTER_MRK
                    "reset_pm_complex: RtProcChip %llx", i_chip);
 
         do
@@ -318,6 +322,8 @@ namespace RTPM
                              rc);
         }
 
+        TRACFCOMP( g_trac_hbrt,EXIT_MRK
+                   "reset_pm_complex:rc=0x%X", rc );
         return rc;
     }
 

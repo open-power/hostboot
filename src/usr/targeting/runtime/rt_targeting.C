@@ -48,6 +48,7 @@
 #include <sys/internode.h>
 
 
+extern trace_desc_t* g_trac_hbrt;
 using namespace TARGETING;
 
 namespace RT_TARG
@@ -711,6 +712,8 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
 
 int hbrt_update_prep(void)
 {
+    TRACFCOMP(g_trac_hbrt, ENTER_MRK" prepare_hbrt_update");
+    TRACFCOMP(g_trac_targeting, ENTER_MRK" hbrt_update_prep");
     errlHndl_t pError = nullptr;
     UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID);
     void *l_lidStructPtr = nullptr;
@@ -872,6 +875,8 @@ int hbrt_update_prep(void)
         errlCommit(pError,TARG_COMP_ID);
     }
 
+    TRACFCOMP(g_trac_targeting, EXIT_MRK" hbrt_update_prep");
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" prepare_hbrt_update: rc=%.X", rc);
     return rc;
 }
 

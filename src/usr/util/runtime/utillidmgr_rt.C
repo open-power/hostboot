@@ -37,6 +37,8 @@
 #include <util/utillidpnor.H>
 #include <pnor/pnor_reasoncodes.H>
 
+extern trace_desc_t* g_trac_hbrt;
+
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isLidInPnor(false), iv_lidBuffer(nullptr), iv_lidSize(0),
     iv_isLidInVFS(false), iv_isLidInHbResvMem(false)
@@ -341,20 +343,22 @@ errlHndl_t UtilLidMgr::updateLid(uint32_t i_lidId)
 
 const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 {
-        static uint32_t lidlist[] =
-        {
-            Util::OCC_LIDID,
-            Util::OCC_CONTAINER_LIDID,
-            Util::WOF_LIDID,
-            Util::WOF_CONTAINER_LIDID,
-            Util::NIMBUS_HCODE_LIDID,
-            Util::CUMULUS_HCODE_LIDID,
-            Util::HCODE_CONTAINER_LIDID,
-            Util::HWREFIMG_RINGOVD_LIDID,
-            Util::TARGETING_BINARY_LIDID
-        };
-        *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
-        return lidlist;
+    TRACFCOMP(g_trac_hbrt, ENTER_MRK" get_lid_list");
+    static uint32_t lidlist[] =
+    {
+        Util::OCC_LIDID,
+        Util::OCC_CONTAINER_LIDID,
+        Util::WOF_LIDID,
+        Util::WOF_CONTAINER_LIDID,
+        Util::NIMBUS_HCODE_LIDID,
+        Util::CUMULUS_HCODE_LIDID,
+        Util::HCODE_CONTAINER_LIDID,
+        Util::HWREFIMG_RINGOVD_LIDID,
+        Util::TARGETING_BINARY_LIDID
+    };
+    *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" get_lid_list");
+    return lidlist;
 }
 
 bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const

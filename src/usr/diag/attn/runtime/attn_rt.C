@@ -45,6 +45,7 @@ using namespace std;
 using namespace TARGETING;
 using namespace ATTN;
 using namespace PRDF;
+extern trace_desc_t* g_trac_hbrt;
 
 namespace ATTN_RT
 {
@@ -54,6 +55,7 @@ namespace ATTN_RT
      */
     int enableAttns(void)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" enable_attns");
         ATTN_SLOW(ENTER_MRK"ATTN_RT::enableAttns");
 
         int rc = 0;
@@ -91,21 +93,22 @@ namespace ATTN_RT
                 if ( err->sev() < ERRORLOG::ERRL_SEV_PREDICTIVE )
                     err->setSev( ERRORLOG::ERRL_SEV_PREDICTIVE );
 
-                errlCommit(err, ATTN_COMP_ID);
-                rc = -1;
+                rc = ERRL_GETRC_SAFE(err);
+                errlCommit( err, ATTN_COMP_ID );
                 break;
             }
 
             err = Singleton<Service>::instance().enableAttns();
             if(err)
             {
-                errlCommit(err, ATTN_COMP_ID);
-                rc = -1;
+                rc = ERRL_GETRC_SAFE(err);
+                errlCommit( err, ATTN_COMP_ID );
             }
         }while(0);
 
         ATTN_SLOW(EXIT_MRK"ATTN_RT::enableAttns rc: %d", rc);
 
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" enable_attns: rc=0x%X",rc);
         return rc;
     }
 
@@ -115,6 +118,7 @@ namespace ATTN_RT
      */
     int disableAttns(void)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" disable_attns");
         ATTN_SLOW(ENTER_MRK"ATTN_RT::disableAttns");
 
         int rc = 0;
@@ -122,12 +126,13 @@ namespace ATTN_RT
         err = Singleton<Service>::instance().disableAttns();
         if(err)
         {
-            errlCommit(err, ATTN_COMP_ID);
-            rc = -1;
+            rc = ERRL_GETRC_SAFE(err);
+            errlCommit( err, ATTN_COMP_ID );
         }
 
         ATTN_SLOW(EXIT_MRK"ATTN_RT::disableAttns rc: %d", rc);
 
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" disable_attns: rc=0x%X",rc);
         return rc;
     }
 
@@ -143,6 +148,7 @@ namespace ATTN_RT
                     uint64_t i_ipollStatus,
                     uint64_t i_ipollMask)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" handle_attns");
         ATTN_SLOW(ENTER_MRK"ATTN_RT::handleAttns RtProc: %llx"
                   ", ipollMask: %llx, ipollStatus: %llx",
                   i_proc, i_ipollMask, i_ipollStatus);
@@ -160,7 +166,6 @@ namespace ATTN_RT
             {
                 ATTN_ERR("ATTN_RT::handleAttns getHbTarget "
                    "returned error for RtProc: %llx", i_proc);
-                rc = EINVAL;
                 break;
             }
 
@@ -189,17 +194,18 @@ namespace ATTN_RT
 
         if(err)
         {
-            errlCommit( err, ATTN_COMP_ID );
             if(0 == rc)
             {
-                rc = -1;
+                rc = ERRL_GETRC_SAFE(err);
             }
+            errlCommit( err, ATTN_COMP_ID );
         }
 
 
         attentions.clear();
         ATTN_SLOW(EXIT_MRK"ATTN_RT::handleAttns rc: %d", rc);
 
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" handle_attns: rc=0x%X",rc);
         return rc;
     }
 
@@ -215,6 +221,7 @@ namespace ATTN_RT
 
     uint64_t getIpollEvents( void )
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" get_ipoll_events");
         uint64_t  l_ipollEvents = 0;
 
         // Host side should allow 'Recov', 'UnitCs' and 'HostInt'
@@ -225,6 +232,7 @@ namespace ATTN_RT
                         IPOLL_SP_RECOVERABLE | IPOLL_SP_SPECIAL    |
                         IPOLL_ROUTE_TO_SP ;
 
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" get_ipoll_events: rc=0x%X",l_ipollEvents);
         return(l_ipollEvents);
 
     } // end getIpollEvents

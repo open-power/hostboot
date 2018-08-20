@@ -46,6 +46,7 @@
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace SBE_MSG;
+extern trace_desc_t* g_trac_hbrt;
 
 // Trace
 trace_desc_t* g_trac_sbeio;
@@ -524,6 +525,7 @@ namespace RT_SBEIO
 
     int process_sbe_msg(uint32_t i_procChipId)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" sbe_message_passing: i_procChipId=%d", i_procChipId );
         int rc = 0;
         errlHndl_t errl = nullptr;
 
@@ -649,7 +651,8 @@ namespace RT_SBEIO
             errlCommit (errl, SBE_COMP_ID);
         }
 
-        TRACFCOMP(g_trac_sbeio, EXIT_MRK" process_sbe_msg: rc=%d", rc );
+        TRACFCOMP(g_trac_sbeio, EXIT_MRK" process_sbe_msg: rc=0x%X", rc );
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" sbe_message_passing: rc=0x%X", rc );
         return rc;
     }
 

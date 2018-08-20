@@ -39,6 +39,7 @@
 #include <sys/internode.h>
 
 
+extern trace_desc_t* g_trac_hbrt;
 using namespace TARGETING;
 
 namespace RT_TARG
@@ -50,6 +51,7 @@ int apply_attr_override(uint8_t* i_data,
     int rc = 0;
     errlHndl_t l_errl = NULL;
 
+    TRACFCOMP(g_trac_hbrt, ENTER_MRK" apply_attr_override");
     TRACFCOMP(g_trac_targeting, "enter apply_attr_override");
 
     bool l_allowOverrides = true;
@@ -122,6 +124,7 @@ int apply_attr_override(uint8_t* i_data,
 #endif
     }
 
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" apply_attr_override: rc=%d");
     return rc;
 }
 

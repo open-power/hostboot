@@ -31,6 +31,7 @@
 
 
 using namespace TARGETING;
+extern trace_desc_t* g_trac_hbrt;
 
 
 namespace HTMGT
@@ -40,6 +41,7 @@ namespace HTMGT
 
     void process_occ_error (uint64_t i_chipId)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" process_occ_error");
 #ifdef CONFIG_HTMGT
         TARGETING::Target* l_reportingOccTarget = NULL;
         errlHndl_t err = RT_TARG::getHbTarget(i_chipId,l_reportingOccTarget);
@@ -57,12 +59,14 @@ namespace HTMGT
         TMGT_ERR("Unexpected call to process_occ_error(%d)"
                  " when HTMGT is not enabled", i_chipId);
 #endif
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" process_occ_error");
     }
 
     //------------------------------------------------------------------------
 
     void process_occ_reset (uint64_t i_chipId)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" process_occ_reset");
 #ifdef CONFIG_HTMGT
         TARGETING::Target* l_failedOccTarget = NULL;
         errlHndl_t err = RT_TARG::getHbTarget(i_chipId,l_failedOccTarget);
@@ -80,12 +84,14 @@ namespace HTMGT
         TMGT_ERR("Unexpected call to process_occ_reset(%d)"
                  " when HTMGT is not enabled", i_chipId);
 #endif
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" process_occ_reset");
     }
 
     //------------------------------------------------------------------------
 
     int enable_occ_actuation (int i_occ_activation)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" enable_occ_actuation");
         int rc = 0;
 #ifdef CONFIG_HTMGT
         errlHndl_t err = HTMGT::enableOccActuation(0 != i_occ_activation);
@@ -107,6 +113,7 @@ namespace HTMGT
         TMGT_ERR("Unexpected call to enable_occ_actuation(%d)"
                  " when HTMGT is not enabled", i_occ_activation);
 #endif
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" enable_occ_actuation: rc=0x%X",rc);
         return rc;
     }
 
@@ -117,6 +124,7 @@ namespace HTMGT
                              uint16_t * o_rspLength,
                              uint8_t *  o_rspData)
     {
+        TRACFCOMP(g_trac_hbrt, ENTER_MRK" mfg_htmgt_pass_thru");
         int rc = 0;
 #ifdef CONFIG_HTMGT
         errlHndl_t err = HTMGT::passThruCommand(i_cmdLength, i_cmdData,
@@ -140,6 +148,7 @@ namespace HTMGT
 #else
         o_rspLength = 0;
 #endif
+        TRACFCOMP(g_trac_hbrt, EXIT_MRK" mfg_htmgt_pass_thru: rc=0x%X",rc);
         return rc;
     }
 
