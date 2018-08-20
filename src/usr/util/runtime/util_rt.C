@@ -28,6 +28,12 @@
 #include <util/utilrsvdmem.H>
 #include <util/runtime/util_rt.H>
 
+// Create a buffer for high-level HBRT enter/exit traces
+// Should only be used to bound the external calls into us
+trace_desc_t* g_trac_hbrt = NULL;
+TRAC_INIT(&g_trac_hbrt, "HBRT", 2*KILOBYTE);
+
+
 /**
  *  @brief Get the address of a reserved hostboot memory region by its label
  *  @param[in] i_label      HBRT_MEM_LABEL_ constant

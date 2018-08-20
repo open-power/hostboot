@@ -45,8 +45,8 @@
 
 extern trace_desc_t* g_trac_sbeio;
 
-#define SBE_PASSTHROUGH_TRACD(printf_string,args...) \
-    TRACDCOMP(g_trac_sbeio,"SbePassThroughTests: " printf_string,##args)
+#define SBE_PASSTHROUGH_TRACF(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"SbePassThroughTests: " printf_string,##args)
 
 
 //=======================================
@@ -129,7 +129,7 @@ public:
        l_allowOverrides = SECUREBOOT::allowAttrOverrides();
 #endif
 
-        SBE_PASSTHROUGH_TRACD("SBE_MSG_DATA_OFFSET: 0x%08X",
+        SBE_PASSTHROUGH_TRACF("SBE_MSG_DATA_OFFSET: 0x%08X",
                               SBE_MSG_DATA_OFFSET
                              );
 
@@ -209,7 +209,7 @@ public:
             // Step 3 - Get pointer to SBE COMMS AREA
             //########################################
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest. ChipId: 0x%016llX", l_chipId);
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest. ChipId: 0x%016llX", l_chipId);
 
             sbeCommAddr_t l_sbeCommAddr{};
             uint64_t address;
@@ -237,7 +237,7 @@ public:
             }
 
             l_sbeCommAddr = reinterpret_cast<void*>(address);
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, SBE Area Address: "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, SBE Area Address: "
                                   "0x%016llX. ",
                                    address
                                  );
@@ -313,7 +313,7 @@ public:
                                 *(reinterpret_cast<SBE_MSG::sbeMessage_t*>
                                                               (l_sbeCommAddr))
                                  );
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, %s", msgBuffer);
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, %s", msgBuffer);
             }
 
             //#############################################
@@ -339,7 +339,7 @@ public:
                                 *(reinterpret_cast<SBE_MSG::sbeMessage_t*>
                                                               (l_sbeCommAddr))
                                  );
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, %s", msgBuffer);
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, %s", msgBuffer);
             }
 
             //#############################################
@@ -366,13 +366,13 @@ public:
             {
                 char msgBuffer[256] = {0};
                 printSbeMessage(msgBuffer, "Actual Response", l_response);
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, actual response "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, actual response "
                                       "differs from expected response.");
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, %s", msgBuffer);
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, %s", msgBuffer);
                 printSbeMessage(msgBuffer,
                                 "Expected Response", l_expectedResponse);
 
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, %s", msgBuffer);
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, %s", msgBuffer);
 
                 TS_FAIL("applyAtrrTest: The actual response differs "
                         "from the expected response.");
@@ -429,7 +429,7 @@ public:
                                 &scratch_8_1
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT8_1"
                                      );
@@ -440,14 +440,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT8_1: 0x%02X",
                                    scratch_8_1
                                  );
 
             if(scratch_8_1_expected != scratch_8_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT8_1 value "
                                       "differs from expected! "
                                       "Expected 0x%02X, Actual 0x%02X",
@@ -479,7 +479,7 @@ public:
                                 &scratch_8_2
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT8_2"
                                      );
@@ -490,14 +490,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT8_2: 0x%02X",
                                    scratch_8_2
                                  );
 
             if(scratch_8_2_expected != scratch_8_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT8_2 value "
                                       "differs from expected! "
                                       "Expected 0x%02X, Actual 0x%02X",
@@ -529,7 +529,7 @@ public:
                                 &scratch_32_1
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT32_1"
                                      );
@@ -540,14 +540,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT32_1: 0x%08X",
                                    scratch_32_1
                                  );
 
             if(scratch_32_1_expected != scratch_32_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT32_1 value "
                                       "differs from expected! "
                                       "Expected 0x%08X, Actual 0x%08X",
@@ -579,7 +579,7 @@ public:
                                 &scratch_32_2
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT32_2"
                                      );
@@ -590,14 +590,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT32_2: 0x%08X",
                                    scratch_32_2
                                  );
 
             if(scratch_32_2_expected != scratch_32_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT32_2 value "
                                       "differs from expected! "
                                       "Expected 0x%08X, Actual 0x%08X",
@@ -628,7 +628,7 @@ public:
                                 &scratch_64_1
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT64_1"
                                      );
@@ -639,14 +639,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT64_1: 0x%016llX",
                                    scratch_64_1
                                  );
 
             if(scratch_64_1_expected != scratch_64_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT64_1 value "
                                       "differs from expected! "
                                       "Expected 0x%016llX, Actual 0x%016llX",
@@ -677,7 +677,7 @@ public:
                                 &scratch_64_2
                                     ))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "getAttribute failed for "
                                       "ATTR_SCRATCH_UINT64_2"
                                      );
@@ -688,14 +688,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT64_2: 0x%016llX",
                                    scratch_64_2
                                  );
 
             if(scratch_64_2_expected != scratch_64_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT64_2 value "
                                       "differs from expected! "
                                       "Expected 0x%016llX, Actual 0x%016llX",
@@ -724,7 +724,7 @@ public:
 
             if(nullptr == l_sys)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "Failed to obtain Sys Target."
                                  );
 
@@ -738,7 +738,7 @@ public:
             if(not l_sys->
                     tryGetAttr<TARGETING::ATTR_SCRATCH_UINT8_1>(scratch_8_1))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT8_1"
                                      );
@@ -749,14 +749,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT8_1: 0x%02X",
                                    scratch_8_1
                                  );
 
             if(scratch_8_1_expected != scratch_8_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT8_1 value "
                                       "differs from expected! "
                                       "Expected 0x%02X, Actual 0x%02X",
@@ -781,7 +781,7 @@ public:
             if(not l_sys->
                     tryGetAttr<TARGETING::ATTR_SCRATCH_UINT8_2>(scratch_8_2))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT8_2"
                                      );
@@ -792,14 +792,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT8_2: 0x%02X",
                                    scratch_8_2
                                  );
 
             if(scratch_8_2_expected != scratch_8_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT8_2 value "
                                       "differs from expected! "
                                       "Expected 0x%02X, Actual 0x%02X",
@@ -824,7 +824,7 @@ public:
             if(not l_sys->
                    tryGetAttr<TARGETING::ATTR_SCRATCH_UINT32_1>(scratch_32_1))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT32_1"
                                      );
@@ -835,14 +835,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT32_1: 0x%08X",
                                    scratch_32_1
                                  );
 
             if(scratch_32_1_expected != scratch_32_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT32_1 value "
                                       "differs from expected! "
                                       "Expected 0x%08X, Actual 0x%08X",
@@ -867,7 +867,7 @@ public:
             if(not l_sys->
                    tryGetAttr<TARGETING::ATTR_SCRATCH_UINT32_2>(scratch_32_2))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT32_2"
                                      );
@@ -878,14 +878,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT32_2: 0x%08X",
                                    scratch_32_2
                                  );
 
             if(scratch_32_2_expected != scratch_32_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT32_2 value "
                                       "differs from expected! "
                                       "Expected 0x%08X, Actual 0x%08X",
@@ -910,7 +910,7 @@ public:
             if(not l_sys->
                    tryGetAttr<TARGETING::ATTR_SCRATCH_UINT64_1>(scratch_64_1))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT64_1"
                                      );
@@ -921,14 +921,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT64_1: 0x%016llX",
                                    scratch_64_1
                                  );
 
             if(scratch_64_1_expected != scratch_64_1)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT64_1 value "
                                       "differs from expected! "
                                       "Expected 0x%016llX, Actual 0x%016llX",
@@ -953,7 +953,7 @@ public:
             if(not l_sys->
                    tryGetAttr<TARGETING::ATTR_SCRATCH_UINT64_2>(scratch_64_2))
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "tryGetAttr failed for "
                                       "ATTR_SCRATCH_UINT64_2"
                                      );
@@ -964,14 +964,14 @@ public:
                 break;
             }
 
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                   "ATTR_SCRATCH_UINT64_2: 0x%016llX",
                                    scratch_64_2
                                  );
 
             if(scratch_64_2_expected != scratch_64_2)
             {
-                SBE_PASSTHROUGH_TRACD("applyAtrrTest, "
+                SBE_PASSTHROUGH_TRACF("applyAtrrTest, "
                                       "ATTR_SCRATCH_UINT64_2 value "
                                       "differs from expected! "
                                       "Expected 0x%016llX, Actual 0x%016llX",
@@ -1005,11 +1005,11 @@ public:
 
         if(result)
         {
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest passed!");
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest passed!");
         }
         else
         {
-            SBE_PASSTHROUGH_TRACD("applyAtrrTest failed!");
+            SBE_PASSTHROUGH_TRACF("applyAtrrTest failed!");
         }
     }
 
@@ -1026,7 +1026,7 @@ private:
         {
             if(not i_proc)
             {
-                SBE_PASSTHROUGH_TRACD("ensureClearToSend, "
+                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
                                       "i_proc is NULL!"
                                      );
 
@@ -1051,7 +1051,7 @@ private:
                 delete errl;
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACD("ensureClearToSend, "
+                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
                                       "Failed to read scom register."
                                      );
                 TS_FAIL("Failed to read scom register.");
@@ -1082,7 +1082,7 @@ private:
         {
             if(not i_proc)
             {
-                SBE_PASSTHROUGH_TRACD("ensureClearToSend, "
+                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
                                       "i_proc is NULL!"
                                      );
 
@@ -1107,7 +1107,7 @@ private:
                 delete errl;
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACD("ensureClearToSend, "
+                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
                                       "Failed to read scom register."
                                      );
                 TS_FAIL("Failed to read scom register.");
@@ -1129,7 +1129,7 @@ private:
                 delete errl;
                 errl = nullptr;
 
-                SBE_PASSTHROUGH_TRACD("ensureClearToSend, "
+                SBE_PASSTHROUGH_TRACF("ensureClearToSend, "
                                       "Failed to write to scom register."
                                      );
                 TS_FAIL("Failed to read scom register.");
@@ -1242,13 +1242,13 @@ private:
             return;
         }
 
-        SBE_PASSTHROUGH_TRACD("%s", prefix);
+        SBE_PASSTHROUGH_TRACF("%s", prefix);
 
         //ATTR_SCRATCH_UINT8_1
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT8_1>(scratch_8_1))
         {
-            SBE_PASSTHROUGH_TRACD(
+            SBE_PASSTHROUGH_TRACF(
                                "\t\tATTR_SCRATCH_UINT8_1: 0x%02X",
                                scratch_8_1
                              );
@@ -1258,7 +1258,7 @@ private:
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT8_2>(scratch_8_2))
         {
-             SBE_PASSTHROUGH_TRACD(
+             SBE_PASSTHROUGH_TRACF(
                               "\t\tATTR_SCRATCH_UINT8_2: 0x%02X",
                                scratch_8_2
                              );
@@ -1268,7 +1268,7 @@ private:
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT32_1>(scratch_32_1))
         {
-            SBE_PASSTHROUGH_TRACD(
+            SBE_PASSTHROUGH_TRACF(
                               "\t\tATTR_SCRATCH_UINT32_1: 0x%08X",
                                scratch_32_1
                              );
@@ -1278,7 +1278,7 @@ private:
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT32_2>(scratch_32_2))
         {
-            SBE_PASSTHROUGH_TRACD(
+            SBE_PASSTHROUGH_TRACF(
                               "\t\tATTR_SCRATCH_UINT32_2: 0x%08X",
                                scratch_32_2
                              );
@@ -1288,7 +1288,7 @@ private:
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT64_1>(scratch_64_1))
         {
-            SBE_PASSTHROUGH_TRACD(
+            SBE_PASSTHROUGH_TRACF(
                               "\t\tATTR_SCRATCH_UINT64_1: 0x%016llX",
                                scratch_64_1
                              );
@@ -1298,7 +1298,7 @@ private:
         //===================================================
         if(l_sys->tryGetAttr<TARGETING::ATTR_SCRATCH_UINT64_2>(scratch_64_2))
         {
-            SBE_PASSTHROUGH_TRACD(
+            SBE_PASSTHROUGH_TRACF(
                               "\t\tATTR_SCRATCH_UINT64_2: 0x%016llX",
                                scratch_64_2
                              );

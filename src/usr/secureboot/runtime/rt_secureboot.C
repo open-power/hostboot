@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
+
+extern trace_desc_t* g_trac_hbrt;
 
 namespace SECUREBOOT
 {
@@ -122,6 +124,7 @@ int verify_container(
 {
     int rc = 0;
 
+    TRACFCOMP(g_trac_hbrt, ENTER_MRK" verify_container" );
     SB_ENTER(
         "verify_container: "
         "container ptr = %p, "
@@ -134,6 +137,7 @@ int verify_container(
 
     SB_EXIT(
         "verify_container: rc = %d",rc);
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" verify_container: rc=0x%X", rc );
 
     return rc;
 }

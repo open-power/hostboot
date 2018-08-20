@@ -41,6 +41,7 @@ using namespace SBEIO;
 
 // Trace definition
 extern trace_desc_t* g_trac_runtime;
+extern trace_desc_t* g_trac_hbrt;
 
 /**
  * @brief The lower and upper bounds for the sequence ID.
@@ -308,12 +309,12 @@ void attrSyncRequest( void * i_data)
  */
 void firmware_notify( uint64_t i_len, void *i_data )
 {
-   TRACFCOMP(g_trac_runtime, ENTER_MRK"firmware_notify: "
+   TRACFCOMP(g_trac_hbrt, ENTER_MRK"firmware_notify: "
              "i_len:%d", i_len );
 
    TRACFBIN(g_trac_runtime, "firmware_notify: i_data", i_data, i_len);
 
-    errlHndl_t l_err = nullptr;
+   errlHndl_t l_err = nullptr;
 
     // Flag to detect an invlaid/unknown/not used message
     bool l_badMessage = false;
@@ -437,7 +438,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
        errlCommit(l_err, RUNTIME_COMP_ID);
     }
 
-   TRACFCOMP(g_trac_runtime, EXIT_MRK"firmware_notify");
+   TRACFCOMP(g_trac_hbrt, EXIT_MRK"firmware_notify");
 };
 
 struct registerFwNotify

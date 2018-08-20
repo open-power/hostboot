@@ -27,6 +27,8 @@
 
 #ifndef __HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY
 
+#define HBRT_TRACE_NAME "HBRT"
+
 #include "interface.h"
 
 /** @file hbrt_utilities.H
