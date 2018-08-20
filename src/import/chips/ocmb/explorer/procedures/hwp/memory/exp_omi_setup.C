@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file exp_omi_setup.H
+/// @file exp_omi_setup.C
 /// @brief Contains the explorer OMI setup
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
