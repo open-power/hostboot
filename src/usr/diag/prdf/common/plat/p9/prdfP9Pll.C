@@ -412,7 +412,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         ClearChipletPll(i_chip, TYPE_XBUS);
         ClearChipletPll(i_chip, TYPE_OBUS);
         ClearChipletPll(i_chip, TYPE_MCBIST);
-        ClearChipletPll(i_chip, TYPE_PEC);
 
         // Clear TP_LFIR
         SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
@@ -420,7 +419,6 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         TP_LFIRand->setAllBits();
         TP_LFIRand->ClearBit(PLL_UNLOCK);
         TP_LFIRand->ClearBit(OSC_SW_SYS_REF);
-        TP_LFIRand->ClearBit(OSC_SW_MF_REF);
 
         rc = TP_LFIRand->Write();
         if (rc != SUCCESS)
@@ -436,6 +434,39 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, ClearPll );
 PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, ClearPll );
+
+int32_t ClearMfPll( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & i_sc)
+{
+    #define PRDF_FUNC "[Proc::ClearMfPll] "
+
+    int32_t rc = SUCCESS;
+
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
+    {
+        // Clear Pll bits in chiplet PCB Slave error regs
+        ClearChipletPll(i_chip, TYPE_PEC);
+
+        // Clear TP_LFIR
+        SCAN_COMM_REGISTER_CLASS * TP_LFIRand =
+                   i_chip->getRegister("TP_LFIR_AND");
+        TP_LFIRand->setAllBits();
+        TP_LFIRand->ClearBit(PLL_UNLOCK);
+        TP_LFIRand->ClearBit(OSC_SW_MF_REF);
+        rc = TP_LFIRand->Write();
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
+                     "for chip: 0x%08x", i_chip->getHuid());
+        }
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, ClearMfPll );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, ClearMfPll );
 
 /**
   * @brief Mask the PLL error for P9 Plugin
