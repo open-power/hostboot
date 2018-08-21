@@ -116,4 +116,5 @@ include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_qppm.mk
 include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_occ.mk
 include ${HWP_PM_PATH}/p9_cme_sram_access.mk
 include ${HWP_PM_PATH}/p9_pm_callout.mk
+include ${HWP_PM_PATH}/p9_setup_runtime_wakeup_mode.mk
 include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_core_checkstop_handler.mk

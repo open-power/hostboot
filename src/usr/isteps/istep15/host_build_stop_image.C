@@ -59,6 +59,7 @@
 //Import directory (from EKB repository)
 #include    <p9_hcode_image_build.H>
 #include    <p9_stop_api.H>
+#include    <p9_setup_runtime_wakeup_mode.H>
 #include    <p9_xip_image.h>
 #include    <p9_infrastruct_help.H>
 #include    <p9_hcode_image_defines.H>
@@ -500,7 +501,7 @@ void* host_build_stop_image (void *io_pArgs)
 
                 //Cast OUR type of target to a FAPI2 type of target.
                 const fapi2::Target<TARGET_TYPE_PROC_CHIP>
-                l_fapiCpuTarget( const_cast<TARGETING::Target*>(l_procChip));
+                l_fapiProcTarget( const_cast<TARGETING::Target*>(l_procChip));
 
                 //Default constructor sets the appropriate settings
                 ImageType_t img_type;
@@ -520,7 +521,7 @@ void* host_build_stop_image (void *io_pArgs)
                 //Call p9_hcode_image_build.C HWP
                 FAPI_INVOKE_HWP( l_errl,
                                  p9_hcode_image_build,
-                                 l_fapiCpuTarget,
+                                 l_fapiProcTarget,
                                  reinterpret_cast<void*>(l_pHcodeImage),
                                  l_pImageOut, //homer image buffer
                                  l_ringOverrides,
@@ -538,7 +539,7 @@ void* host_build_stop_image (void *io_pArgs)
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "host_build_stop_image ERROR : errorlog PLID=0x%x",
+                              "host_build_stop_image ERROR occured during p9_hcode_image_build : errorlog PLID=0x%x",
                               l_errl->plid() );
 
                     //  drop out of block with errorlog.
@@ -561,6 +562,21 @@ void* host_build_stop_image (void *io_pArgs)
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                "applyHcodeGenCpuRegs SUCCESS " );
+                }
+
+                // Set wakeup mode for processor based on SMF enablement
+                FAPI_INVOKE_HWP(l_errl,
+                                p9_setup_runtime_wakeup_mode,
+                                l_fapiProcTarget);
+
+                if ( l_errl )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "host_build_stop_image ERROR occured during p9_setup_runtime_wakeup_mode : errorlog PLID=0x%x",
+                              l_errl->plid() );
+
+                    //  drop out of block with errorlog.
+                    break;
                 }
 
             }   while (0) ;
