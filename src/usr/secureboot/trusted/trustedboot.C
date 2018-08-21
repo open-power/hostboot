@@ -1267,7 +1267,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 err->collectTrace(TRBOOT_COMP_NAME);
                 err->collectTrace( I2C_COMP_NAME );
                 err->collectTrace( TPMDD_COMP_NAME );
-                uint32_t errPlid = err->plid();
+                const auto reasonCode = err->reasonCode();
 
                 // Add Security Registers to the error log
                 SECUREBOOT::addSecurityRegistersToErrlog(err);
@@ -1301,7 +1301,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
 
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
-                INITSERVICE::doShutdown(errPlid,isBackgroundShutdown);
+                INITSERVICE::doShutdown(reasonCode,isBackgroundShutdown);
             }
             else
             {

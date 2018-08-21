@@ -88,6 +88,7 @@ namespace TRUSTEDBOOT
         RC_TPMLOGMGR_ADDEVENT_FAIL       = TRBOOT_COMP_ID | 0xAA,
         RC_TPMLOGMGR_ADDEVENTMARSH_FAIL  = TRBOOT_COMP_ID | 0xAB,
         RC_TPMLOGMGR_INIT_FAIL           = TRBOOT_COMP_ID | 0xAC,
+        //termination_rc
         RC_TPM_NOFUNCTIONALTPM_FAIL      = TRBOOT_COMP_ID | 0xAD,
         RC_TPM_COMMAND_FAIL              = TRBOOT_COMP_ID | 0xAE,
         RC_TPM_INVALID_ARGS              = TRBOOT_COMP_ID | 0xAF,
