@@ -259,11 +259,13 @@ fapi2::ReturnCode configure_pss_mss_ctrl_reg(
                 i_osc_sel == TOD_OSC_0_AND_1 ||
                 i_osc_sel == TOD_OSC_0_AND_1_SEL_1)
             {
+                l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>(); // SW440224
                 l_pss_mss_ctrl_reg.setBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
             }
             else if (i_osc_sel == TOD_OSC_0  ||
                      i_osc_sel == TOD_OSC_0_AND_1_SEL_0)
             {
+                l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_PRI_M_PATH_SELECT>(); // SW440224
                 l_pss_mss_ctrl_reg.clearBit<PERV_TOD_PSS_MSS_CTRL_REG_SEC_M_PATH_SELECT>();
             }
 
