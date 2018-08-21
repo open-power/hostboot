@@ -1422,35 +1422,58 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             l_descFunctional = false;
         }
     }
-    else // MC/MI/DMI is found on Cumulus chips
+          // MC/MI/DMI is found on Cumulus chips
+    else  // MC/MI/MCC/OMI/OMIC is found on Axone chips
     if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_MC) ||
         (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI) ||
-        (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI))
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI) ||
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCC) ||
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMIC) ||
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMI))
     {
         ATTR_CHIP_UNIT_type index =
             i_desc->getAttr<ATTR_CHIP_UNIT>();
 
+        // ** Cumulus **
         // 2 MCs/chip, 2 MIs/MC, 2 DMIs/MI
+        // ** Axone **
+        // 2 MCs/chip, 2 MIs/MC, 2 MCCs/MI, 2 OMIs/MCC
+        // 3 OMICs/MC
         size_t indexMC = 0;
-        size_t indexMI = 0;
 
         if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MC)
         {
-            indexMC = index;
-            indexMI = index * 2;
+            indexMC  = index;
         }
         else
         if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI)
         {
-            indexMI = index;
-            indexMC = index / 2;
+            indexMC  = index / 2;
         }
         else
         if (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI)
         {
-            indexMI = index / 2;
             indexMC = index / 4;
         }
+        else
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCC)
+        {
+            indexMC  = index / 4;
+        }
+        else
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMIC)
+        {
+            indexMC  = index / 3;
+        }
+        else
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OMI)
+        {
+            indexMC  = index / 8;
+        }
+
+        // if indexMC == 1 , then use MC23 PG Index
+        // if indexMC == 0 , then use MC01 PG Index
+        size_t mcPgIndex = indexMC ? VPD_CP00_PG_MC23_INDEX : VPD_CP00_PG_MC01_INDEX;
 
         // Check MCS01 bit in N3 entry if first MC
         if ((0 == indexMC) &&
@@ -1483,14 +1506,14 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         }
         else
         // Check bits in MCxx entry except those in partial good region
-        if (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMI]] !=
+        if (i_pgData[mcPgIndex] !=
              VPD_CP00_PG_MCxx_GOOD)
         {
             HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
                      "actual 0x%04X, expected 0x%04X - bad",
                      i_desc->getAttr<ATTR_HUID>(), indexMC,
-                     VPD_CP00_PG_MCxx_INDEX[indexMI],
-                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMI]],
+                     mcPgIndex,
+                     i_pgData[mcPgIndex],
                      VPD_CP00_PG_MCxx_GOOD);
             l_descFunctional = false;
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,12 @@ const uint32_t VPD_CP00_PG_XBUS_GOOD_CUMULUS= 0xE00D;
 const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x00170;
 const uint32_t VPD_CP00_PG_XBUS_IOX[3] = {0x0040, 0x0020, 0x0010};
 
-const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {7, 7, 8, 8}; // by MCS
+const uint32_t VPD_CP00_PG_MC01_INDEX       = 7;
+const uint32_t VPD_CP00_PG_MC23_INDEX       = 8;
+const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {VPD_CP00_PG_MC01_INDEX,
+                                               VPD_CP00_PG_MC01_INDEX,
+                                               VPD_CP00_PG_MC23_INDEX,
+                                               VPD_CP00_PG_MC23_INDEX}; // by MCS
 // Nimbus:
 // all good - 3:VITAL, 4:PRV, 5:MC01, 6:IOM01+, 7:IOM23+, 14:PLLMEM
 // all good - 3:VITAL, 4:PRV, 5:MC23, 6:IOM45+, 7:IOM67+, 14:PLLMEM
