@@ -276,6 +276,9 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
     if (failoverList.size() > 0)
     {
+        serviceData.service_data->GetErrorSignature()->
+            setChipId(failoverList[0]->getHuid());
+
         if (GetId() == CLOCK_DOMAIN_IO)
         {
             // Mask failovers for this domain
@@ -292,9 +295,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             // Set signature
             serviceData.service_data->SetErrorSig( PRDFSIG_SYS_REF_FAILOVER );
         }
-
-        serviceData.service_data->GetErrorSignature()->
-            setChipId(failoverList[0]->getHuid());
 
         // Make the error log predictive on first occurrence.
         serviceData.service_data->SetThresholdMaskId(0);
