@@ -173,6 +173,7 @@ namespace PNOR
         RC_TOC_HDR_CHECKSUM_ERR      = PNOR_COMP_ID | 0x2C,
         RC_PNOR_PARSE_ENTRIES_ERR    = PNOR_COMP_ID | 0x2D,
         RC_PNOR_SET_VADDR_FAILED     = PNOR_COMP_ID | 0x2E,
+        //termination_rc
         RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2F,
         RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x30,
         RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x31,
