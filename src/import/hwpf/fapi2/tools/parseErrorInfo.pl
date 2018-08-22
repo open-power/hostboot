@@ -303,7 +303,7 @@ sub addFfdcMethod
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
             $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
+                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -336,7 +336,7 @@ sub addFfdcMethod
         $method_body .= "    }\n\n";
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$buffer_ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
+            "$buffer_ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
     }
 
@@ -373,7 +373,7 @@ sub addFfdcMethod
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
+            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
     }
     elsif ( $type eq $scom_addr_type )
@@ -394,7 +394,7 @@ sub addFfdcMethod
             $method_body .= " return *this;}\n\n";
             $methods->{$key}{member} = "$type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
+                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else

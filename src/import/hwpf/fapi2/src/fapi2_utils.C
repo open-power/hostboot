@@ -58,4 +58,113 @@ ReturnCode queryChipEcAndName(
 
     return l_rc;
 }
+
+
+// convert sbe instance of target to a fapi position
+uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
+        fapi2::Target<TARGET_TYPE_PROC_CHIP>& i_proc, uint16_t i_instance)
+{
+    // Compute this target's FAPI_POS value.  We first take the parent's
+    // FAPI_POS and multiply by the max number of targets of this type that
+    // the parent's type can have. This yields the lower bound of this
+    // target's FAPI_POS.  Then we add in the relative position of this
+    // target with respect to the parent.  Typically this is done by passing
+    // in the chip unit, in which case (such as for cores) it can be much
+    // greater than the architecture limit ratio (there can be cores with
+    // chip units of 0..23, but only 2 cores per ex), so to normalize we
+    // have to take the value mod the architecture limit.  Note that this
+    // scheme only holds up because every parent also had the same type of
+    // calculation to compute its own FAPI_POS.
+
+    uint16_t max_targets = 0;
+
+    uint16_t fapi_pos = INVALID_FAPI_POS;
+
+    ATTR_FAPI_POS_Type l_procPosition = 0;
+
+    FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_proc, l_procPosition);
+
+    switch( i_targType )
+    {
+        case  TARGET_TYPE_EQ:
+            {
+                max_targets = MAX_EQ_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_CORE:
+            {
+                max_targets = MAX_CORE_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_EX:
+            {
+                max_targets = MAX_EX_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_MCS:
+            {
+                max_targets = MAX_MCS_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_MCA:
+            {
+                max_targets = MAX_MCA_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_MC:
+            {
+                max_targets = MAX_MC_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_MI:
+            {
+                max_targets = MAX_MI_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_PHB:
+            {
+                max_targets = MAX_PHB_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_MCBIST:
+            {
+                max_targets = MAX_MCBIST_PER_PROC;
+                break;
+            }
+
+        case  TARGET_TYPE_PERV:
+            {
+                max_targets = MAX_PERV_PER_PROC;
+                break;
+            }
+
+        default:
+            max_targets = INVALID_TARGET_COUNT;
+            break;
+    }
+
+    if( max_targets == INVALID_TARGET_COUNT )
+    {
+        FAPI_ERR("Unable to determine the target count "
+                 "for target type = 0x%x and instance 0x%d "
+                 "associated with proc position %d",
+                 i_targType, i_instance, l_procPosition);
+    }
+    else
+    {
+        fapi_pos = max_targets * l_procPosition +
+                   (i_instance % max_targets);
+    }
+
+    return fapi_pos;
+}
+
 };
