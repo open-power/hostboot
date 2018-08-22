@@ -93,6 +93,7 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_PROC_PCIE_MMIO_BAR1_BASE_ADDR_OFFSET_Type l_mmio_bar1_offsets;
     fapi2::ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET_Type l_register_bar_offsets;
     fapi2::ATTR_PROC_PCIE_BAR_SIZE_Type l_bar_sizes;
+    fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_fabric_pump_mode;
     fapi2::ATTR_CHIP_EC_FEATURE_HW363246_Type l_hw363246;
     fapi2::ATTR_CHIP_EC_FEATURE_HW410503_Type l_hw410503;
     fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1_Type l_hw423589_option1;
@@ -132,6 +133,11 @@ fapi2::ReturnCode p9_pcie_config(
                            l_bar_sizes),
              "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_BAR_SIZE)");
 
+    // Grab attribute to determine fabric pump mode for cache inject setup
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
+                           FAPI_SYSTEM,
+                           l_fabric_pump_mode),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_PUMP_MODE)");
 
     // determine base address of chip MMIO range
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
@@ -157,6 +163,7 @@ fapi2::ReturnCode p9_pcie_config(
                            i_target,
                            l_extended_addressing_mode),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
 
     // initialize functional PEC chiplets
     for (auto l_pec_chiplet : l_pec_chiplets_vec)
@@ -252,15 +259,21 @@ fapi2::ReturnCode p9_pcie_config(
 
         }
 
-        l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
-                              PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
-                                  PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
-
-        if (l_hw410503)
+        // Enable P9 Style cache injects if chip is group.
+        // CHIP_IS_NODE  = 0x01
+        // CHIP_IS_GROUP = 0x02
+        if (l_fabric_pump_mode != 0x1)
         {
-            l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE,
-                                  PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN>(
-                                      PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE);
+            l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
+                                  PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
+                                      PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
+
+            if (l_hw410503)
+            {
+                l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE,
+                                      PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN>(
+                                          PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE);
+            }
         }
 
         if (( l_pec_id == 1) || ((l_pec_id == 2) && (l_attr_proc_pcie_iovalid_enable != 0x4)))
