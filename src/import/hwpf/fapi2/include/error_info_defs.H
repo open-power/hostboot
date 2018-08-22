@@ -160,6 +160,24 @@ enum ErrorInfoType
     EI_LAST_TYPE              = EI_TYPE_COLLECT_TRACE + 1,
 };
 
+// @brief used when translating the SBE targets instance into a fapi pos.
+enum maxTargetsPerProc : uint16_t
+{
+    MAX_MCBIST_PER_PROC  =  2,
+    MAX_MC_PER_PROC      =  2,
+    MAX_MI_PER_PROC      =  4,
+    MAX_MCS_PER_PROC     =  4,
+    MAX_EQ_PER_PROC      =  6,
+    MAX_MCA_PER_PROC     =  8,
+    MAX_PHB_PER_PROC     =  6,
+    MAX_EX_PER_PROC      = 12,
+    MAX_CORE_PER_PROC    = 24,
+    MAX_PERV_PER_PROC    = 56,
+    INVALID_TARGET_COUNT = 0xFFFF,
+    INVALID_FAPI_POS     = INVALID_TARGET_COUNT,
+};
+
+
 #ifndef MINIMUM_FFDC
 ///
 /// @enum HwCallout
@@ -251,10 +269,21 @@ enum CollectTrace
 };
 }
 
+// @brief convert the processor relative sbe target instance into a fapi pos
+//
+// @param[in] i_targType - type of target from SBE FFDC buffer
+// @param[in] i_proc     - current SBE processor number
+// @param[in] i_instance - instance of i_targType relitive to the processor
+//                         number i_proc.
+//
+uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
+        fapi2::Target<TARGET_TYPE_PROC_CHIP>& i_proc, uint16_t i_instance);
+
 // NOTE - this assumes no buffer_t or variable_buffers are passed
 //        data is converted to a uint64_t when placed into the sbe ffdc
 //        buffer
-inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, bool& invalid_data )
+inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, uint8_t i_proc_instance,
+                                  bool& invalid_data )
 {
     fapi2::ffdc_t l_ffdc;
 
@@ -264,14 +293,31 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, bool& invalid_data )
     {
 #ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
         uint64_t targetData = i_sbeFfdc.data;
-        fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 32);
-        uint8_t instance = static_cast<uint8_t>(targetData & 0xFFFFFFFF);
-        // call hostboot to get the fapi2 target reference
-        l_ffdc.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, instance));
+        // get a fapi target for the passed in proc instance
+        auto l_proc =
+            getTarget<TARGET_TYPE_PROC_CHIP>(i_proc_instance);
 
-        if(l_ffdc.ptr() == nullptr )
+        fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 32);
+
+        // sbe returns the target instance based on processor scope,
+        // we will need to convert that number to system scope (FAPI_POS)
+        uint16_t instance = static_cast<uint16_t>(targetData & 0xFFFFFFFF);
+
+        uint16_t fapi_pos = convertSbeTargInstanceToFapiPos(type, l_proc, instance);
+
+        if( fapi_pos == INVALID_FAPI_POS )
         {
             invalid_data = true;
+        }
+        else
+        {
+            // call hostboot to get the fapi2 target pointer
+            l_ffdc.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, fapi_pos));
+
+            if(l_ffdc.ptr() == nullptr )
+            {
+                invalid_data = true;
+            }
         }
 
 #endif
