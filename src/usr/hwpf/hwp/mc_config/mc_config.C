@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1379,15 +1379,14 @@ void*    call_mss_freq( void *io_pArgs )
                 ERR_MRK"Error: call_mss_freq()::setNestBasedOffDimms()");
             l_StepError.addErrorDetails(l_err);
         }
-#ifdef CONFIG_SECUREBOOT
-        /************************************************************/
-        /* Secure/Lock SBE Seeproms in Secureboot, if necessary     */
-        /************************************************************/
-        // All error logs are handled internally in the function
-        SECUREBOOT::secureSbeSeeproms();
-#endif
 
     }
+
+    /************************************************************/
+    /* Secure/Lock SBE Seeproms in Secureboot, if necessary     */
+    /************************************************************/
+    // All error logs are handled internally in the function
+    SECUREBOOT::secureSbeSeeproms();
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 

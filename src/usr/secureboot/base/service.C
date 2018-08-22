@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -149,14 +149,8 @@ void secureSbeSeeproms( void )
 
     do{
 
-        // Check if system is in secureboot mode before proceeding
-        if ( !SECUREBOOT::enabled() )
-        {
-            // No need to secure/lock SBE Seeproms
-            TRACFCOMP( g_trac_secure, "secureSbeSeeproms() - Not securing "
-                       "SBE Seeproms since SECUREBOOT is not enabled" );
-            break;
-        }
+        // NOTE: Removed SECUREBOOT::enabled() check.  Will secure the
+        // SBE SEEPROMS regardless of system's security state
 
         /*****************************************************************/
         /*  Iterate over all the functional processors and do for each:  */
