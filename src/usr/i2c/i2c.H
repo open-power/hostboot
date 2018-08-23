@@ -133,7 +133,7 @@ ALWAYS_INLINE inline uint64_t i2cGetPollingInterval(uint64_t i_bus_speed_khz )
  * @brief Determine I2C Timeout Count based on I2C_MAX_WAIT_TIME_NS and
  *         I2C Polling Interval (in ns)
  */
-#define I2C_MAX_WAIT_TIME_NS 5 * NS_PER_MSEC
+#define I2C_MAX_WAIT_TIME_NS (20 * NS_PER_MSEC)
 #define I2C_TIMEOUT_COUNT(i_interval_ns) (I2C_MAX_WAIT_TIME_NS / i_interval_ns)
 
 /**
