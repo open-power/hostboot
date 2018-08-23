@@ -61,7 +61,7 @@ extern "C"
     const uint32_t LPCM_OPB_MASTER_TIMEOUT_REG = 0xC0010040;
     const uint32_t LPCM_OPB_MASTER_TIMEOUT_VALUE = 0x01312D00;  // 50ms at 1600MHz Nest / 400MHz OPB
     const uint32_t LPCM_LPC_MASTER_TIMEOUT_REG = 0xC001202C;
-    const uint32_t LPCM_LPC_MASTER_TIMEOUT_VALUE = 0xEF000000;
+    const uint32_t LPCM_LPC_MASTER_TIMEOUT_VALUE = 0xFE000000;
     const uint32_t CPLT_CONF1_TC_LP_RESET = 12;
     fapi2::ReturnCode p9_sbe_lpc_init(const
                                       fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
