@@ -870,7 +870,6 @@ errlHndl_t ibscomPerformOp(DeviceFW::OperationType i_opType,
 
     do
     {
-        // @todo RTC 189385 Remove inband scom bit 18 workaround
         // Addressses with bit 18 set are not handled correctly
         // by inband scom, reroute to fsi scom
         if( l_addr & BIT_18_MASK )
