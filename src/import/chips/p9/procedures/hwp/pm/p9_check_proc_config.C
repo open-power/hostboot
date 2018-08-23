@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,7 @@ enum
     PHB_POS             =   30,
     CAPP_POS            =   37,
     OBUS_POS            =   41,
+    ABUS_POS            =   41,
     NVLINK_POS          =   45,
     OBUS_BRICK_0_POS    =   0,
     OBUS_BRICK_1_POS    =   1,
@@ -106,6 +107,48 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+//-----------------------------------------------------------------------------------------
+
+/**
+ * @brief checks configuration of OBUS and populates UAV with ABUS info
+ * @param[in]   i_procTgt       fapi2 target for P9
+ * @param[io]   i_configBuf     fapi2 buffer
+ * @return      fapi2 return code.
+ */
+fapi2::ReturnCode checkAbusConfig( CONST_FAPI2_PROC& i_procTgt, uint64_t& io_configVector )
+{
+    FAPI_INF( ">> checkAbusConfig" );
+    auto l_obusList         =   i_procTgt.getChildren<fapi2::TARGET_TYPE_OBUS>(  );
+    uint8_t l_obusPos       =   0;
+    uint8_t l_configMode    =   0;
+    uint64_t l_tempVector   =   0;
+
+    for( auto l_obus : l_obusList )
+    {
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_OPTICS_CONFIG_MODE, l_obus, l_configMode ),
+                  "Failed To Read ATTR_OPTICS_CONFIG_MODE" );
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_obus, l_obusPos ),
+                  "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)" );
+
+        FAPI_DBG( "ABUS %d SMP : %s ", l_obusPos,
+                  ( l_configMode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP ) ? "Yes" : "No" );
+
+        if( fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP == l_configMode )
+        {
+
+            l_tempVector    |=   ((0x8000000000000000ull) >> ( ABUS_POS + l_obusPos ));
+        }
+    }
+
+    io_configVector  |= l_tempVector;
+
+    FAPI_DBG( "UAV with Abus: 0x%016llx", io_configVector );
+
+fapi_try_exit:
+    FAPI_INF( "<< checkAbusConfig" );
+    return fapi2::current_err;
+}
 //-----------------------------------------------------------------------------------------
 
 /**
@@ -307,10 +350,18 @@ fapi2::ReturnCode p9_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_pH
               ( i_procTgt, fapi2::TARGET_TYPE_CAPP, l_configVectVal, CAPP_POS ),
               "Failed to get CAPP configuration" );
 
-    FAPI_TRY(  checkObusChipletHierarchy ( i_procTgt, l_configVectVal, OBUS_POS, NVLINK_POS ),
-               "Failed to get OBUS Hierarchy configuration" );
-
     FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTgt, l_chipName );
+
+    if( fapi2::ENUM_ATTR_NAME_NIMBUS == l_chipName )
+    {
+        FAPI_TRY(  checkObusChipletHierarchy ( i_procTgt, l_configVectVal, OBUS_POS, NVLINK_POS ),
+                   "Failed to get OBUS Hierarchy configuration" );
+    }
+    else
+    {
+        FAPI_TRY( checkAbusConfig( i_procTgt, l_configVectVal ) ,
+                  "Failed to get Abus configuration" );
+    }
 
     if( fapi2::ENUM_ATTR_NAME_CUMULUS == l_chipName )
     {
