@@ -119,7 +119,7 @@ FAPI2_ERROR_XML += $(wildcard \
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/centaur/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
-  $(ROOTPATH)/src/import/generic/xml/error_info/*.xml)
+  $(ROOTPATH)/src/import/generic/procedures/xml/error_info/*.xml)
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \
@@ -128,6 +128,8 @@ FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*.xml)
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
