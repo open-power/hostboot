@@ -1417,7 +1417,7 @@ sub processMcaDimms
             $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
             $self->setAttribute($dimm, "POSITION",  $dimm_pos);
             $self->setAttribute($dimm, "VPD_REC_NUM", $dimm_pos);
-            $self->setAttribute($dimm, "REL_POS", $port_num);
+            $self->setAttribute($dimm, "REL_POS", $dimm_num);
             $self->setAttribute($dimm, "LOCATION_CODE",$loc_code);
 
             ## set FAPI_POS for dimm
