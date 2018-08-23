@@ -1547,7 +1547,8 @@ rule rGLOBAL_FIR
     GLOBAL_RE_FIR;
 };
 
-group gGLOBAL_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+# Priority put on MC chiplets because of channel failures analysis.
+group gGLOBAL_FIR attntype CHECK_STOP, RECOVERABLE filter priority( 7, 8 )
 {
     /** GLOBAL_FIR[1]
      *  Attention from TP chiplet
