@@ -46,7 +46,7 @@
 
 // mss lib
 #include <generic/memory/lib/spd/spd_facade.H>
-#include <lib/freq/cas_latency.H>
+#include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <lib/freq/sync.H>
 #include <lib/workarounds/freq_workarounds.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -128,7 +128,7 @@ extern "C"
                 FAPI_TRY( get_spd_decoder_list(l_mca, l_spd_facades) );
 
                 // Instantiation of class that calculates CL algorithm
-                mss::cas_latency l_cas_latency( l_mca, l_spd_facades, l_supported_freqs, l_rc );
+                mss::cas_latency<mss::mc_type::NIMBUS> l_cas_latency( l_mca, l_spd_facades, l_supported_freqs, l_rc );
 
                 FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_mca) );
 
