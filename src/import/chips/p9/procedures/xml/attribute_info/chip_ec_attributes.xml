@@ -7690,6 +7690,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_TLBIE_WAT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Enable TLBIE WAT
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x12</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW440920_DISABLE_FIX</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
