@@ -502,7 +502,7 @@ int32_t setVpdFailedLanes<TYPE_XBUS,TYPE_XBUS>(
     errlHndl_t err = nullptr;
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
-    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTxTrgt (i_rxBusTgt);
+    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTxTrgt (i_txBusTgt);
 
     FAPI_INVOKE_HWP(err,
                     erepairSetFailedLanes,
