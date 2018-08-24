@@ -44,7 +44,7 @@
 
 namespace EREPAIR
 {
-const uint8_t INVALID_FAIL_LANE_NUMBER = 0;
+const uint8_t INVALID_FAIL_LANE_NUMBER = 0xFF;
 
 // X-Bus is 16+1 lanes wide in 2 byte mode
 // Data lanes numbering:  0 - 15 in 2 byte mode
