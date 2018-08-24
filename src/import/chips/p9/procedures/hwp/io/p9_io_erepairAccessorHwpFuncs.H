@@ -1043,7 +1043,7 @@ fapi2::ReturnCode erepairGetRestoreLanes(
     fapi2::TargetType       l_endp1_tgtType = fapi2::TARGET_TYPE_NONE;
     fapi2::TargetType       l_endp2_tgtType = fapi2::TARGET_TYPE_NONE;
 
-    FAPI_DBG(">>erepairGetRestoreLanes");
+    FAPI_INF(">>erepairGetRestoreLanes - ClkGrp:%d", i_clkGroup);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MNFG_FLAGS,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
@@ -1204,6 +1204,37 @@ fapi2::ReturnCode erepairGetRestoreLanes(
                                  o_endp2_rxFaillanes);
 
     } // end of else block of "if(l_mnfgModeIPL)"
+
+
+    /***** Remove invalid lane numbers *****/
+
+    // Check if there are invalid lanes in Tx side of endp1.
+    // If found, erase them from the vector
+    o_endp1_txFaillanes.erase(std::remove(o_endp1_txFaillanes.begin(),
+                                          o_endp1_txFaillanes.end(),
+                                          EREPAIR::INVALID_FAIL_LANE_NUMBER),
+                              o_endp1_txFaillanes.end());
+
+    // Check if there are invalid lanes in Rx side of endp1.
+    // If found, erase them from the vector
+    o_endp1_rxFaillanes.erase(std::remove(o_endp1_rxFaillanes.begin(),
+                                          o_endp1_rxFaillanes.end(),
+                                          EREPAIR::INVALID_FAIL_LANE_NUMBER),
+                              o_endp1_rxFaillanes.end());
+
+    // Check if there are invalid lanes in Tx side of endp2.
+    // If found, erase them from the vector
+    o_endp2_txFaillanes.erase(std::remove(o_endp2_txFaillanes.begin(),
+                                          o_endp2_txFaillanes.end(),
+                                          EREPAIR::INVALID_FAIL_LANE_NUMBER),
+                              o_endp2_txFaillanes.end());
+
+    // Check if there are invalid lanes in Rx side of endp2.
+    // If found, erase them from the vector
+    o_endp2_rxFaillanes.erase(std::remove(o_endp2_rxFaillanes.begin(),
+                                          o_endp2_rxFaillanes.end(),
+                                          EREPAIR::INVALID_FAIL_LANE_NUMBER),
+                              o_endp2_rxFaillanes.end());
 
 
     /***** Check for threshold exceed conditions *****/
