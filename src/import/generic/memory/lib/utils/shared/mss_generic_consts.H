@@ -117,6 +117,8 @@ enum generic_ffdc_codes
     BASE_MODULE_TYPE = 0x101C,
     BAD_SPD_DATA = 0x101D,
     SET_FIELD = 0x101E,
+
+    SELECT_SUPPORTED_FREQ = 0x101F,
 };
 
 ///
@@ -133,9 +135,9 @@ enum proc_type
 ///
 enum class mc_type
 {
-    NIMBUS,
-    CENTAUR,
-    EXPLORER,
+    NIMBUS   = 0,
+    CENTAUR  = 1,
+    EXPLORER = 2,
 };
 
 ///
