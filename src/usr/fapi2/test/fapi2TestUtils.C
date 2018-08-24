@@ -53,6 +53,9 @@
 #define NUM_MC           2
 #define NUM_MI           2
 #define NUM_DMI          2
+#define NUM_OMI          2
+#define NUM_OMIC         3
+#define NUM_MCC          2
 
 namespace fapi2
 {
@@ -65,9 +68,11 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         o_targetList[x] = nullptr;
     }
 
-    // Set up entity path for NIMBUS proc
+    // Set up entity path for proc
     TARGETING::EntityPath l_epath;
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
+
+    o_targetList[MY_PROC] = i_pMasterProcChip;
 
     //Setup EQs, COREs, and EXs
     for(int i = 0; i < NUM_EQS; i++)
@@ -206,6 +211,80 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
             else
             {
               l_epath.removeLast();
+            }
+        }
+    }
+    else if (TARGETING::MODEL_AXONE ==
+                i_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+    {
+        //Setup MC, MI, MCC, OMI, and OMIC
+        i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
+        for(int i = 0; i < NUM_MC; i++)
+        {
+            l_epath.addLast(TARGETING::TYPE_MC, i);
+            if(TARGETING::targetService().toTarget(l_epath) != nullptr)
+            {
+                o_targetList[MY_MC] =
+                TARGETING::targetService().toTarget(l_epath);
+                for(int j = 0; j < NUM_MI; j++)
+                {
+                    l_epath.addLast(TARGETING::TYPE_MI, j);
+                    if(TARGETING::targetService().toTarget(l_epath) != nullptr)
+                    {
+                        o_targetList[MY_MI] =
+                        TARGETING::targetService().toTarget(l_epath);
+                        for(int k = 0; k < NUM_MCC; k++)
+                        {
+                            l_epath.addLast(TARGETING::TYPE_MCC,k);
+                            if(TARGETING::targetService().toTarget(l_epath)!=nullptr)
+                            {
+                                o_targetList[MY_MCC] =
+                                TARGETING::targetService().toTarget(l_epath);
+                                for(int l = 0; l < NUM_OMI; l++)
+                                {
+                                    l_epath.addLast(TARGETING::TYPE_OMI,l);
+                                    if(TARGETING::targetService().toTarget(l_epath)!=nullptr)
+                                    {
+                                        o_targetList[MY_OMI] =
+                                        TARGETING::targetService().toTarget(l_epath);
+                                    }
+                                    else
+                                    {
+                                        l_epath.removeLast();
+                                    }
+                                }
+                                break;
+                            }
+                            else
+                            {
+                                l_epath.removeLast();
+                            }
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        l_epath.removeLast();
+                    }
+                }
+                for(int j = 0; j < NUM_OMIC; j++)
+                {
+                    l_epath.addLast(TARGETING::TYPE_OMIC, j);
+                    if(TARGETING::targetService().toTarget(l_epath) != nullptr)
+                    {
+                        o_targetList[MY_OMIC] =
+                        TARGETING::targetService().toTarget(l_epath);
+                    }
+                    else
+                    {
+                        l_epath.removeLast();
+                    }
+                }
+                break;
+            }
+            else
+            {
+                l_epath.removeLast();
             }
         }
     }
@@ -364,18 +443,37 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
 bool isHwValid(TARGETING::Target* i_procChip, uint8_t i_hwType)
 {
     bool isValid = true;
-    if (i_procChip->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS)
+
+    // Only need to check model if this is NOT a common target for p9
+    if (!(i_hwType == MY_PROC || i_hwType == MY_EQ || i_hwType == MY_EX || i_hwType == MY_CORE ||
+        i_hwType == MY_PEC || i_hwType == MY_PHB || i_hwType == MY_XBUS || i_hwType == MY_OBUS ||
+        i_hwType == MY_OBUS_BRICK || i_hwType == MY_PPE || i_hwType == MY_PERV || i_hwType == MY_CAPP ||
+        i_hwType == MY_SBE))
     {
-        if (i_hwType == MY_MCS || i_hwType == MY_MCA || i_hwType == MY_MCBIST)
+        auto l_model = i_procChip->getAttr<TARGETING::ATTR_MODEL>();
+        if (l_model == TARGETING::MODEL_CUMULUS)
         {
-            isValid = false;
+            if (i_hwType == MY_MCS || i_hwType == MY_MCA || i_hwType == MY_MCBIST ||
+                i_hwType == MY_OMI || i_hwType == MY_OMIC || i_hwType == MY_MCC )
+            {
+                isValid = false;
+            }
         }
-    }
-    else if (i_procChip->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_NIMBUS)
-    {
-        if (i_hwType == MY_MC || i_hwType == MY_MI || i_hwType == MY_DMI)
+        else if (l_model == TARGETING::MODEL_NIMBUS)
         {
-            isValid = false;
+            if (i_hwType == MY_MC || i_hwType == MY_MI || i_hwType == MY_DMI ||
+                i_hwType == MY_OMI || i_hwType == MY_OMIC || i_hwType == MY_MCC)
+            {
+                isValid = false;
+            }
+        }
+        else if (l_model == TARGETING::MODEL_AXONE)
+        {
+            if (i_hwType == MY_MCS || i_hwType == MY_MCA || i_hwType == MY_MCBIST ||
+                i_hwType == MY_DMI)
+            {
+                isValid = false;
+            }
         }
     }
     return isValid;

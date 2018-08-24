@@ -49,948 +49,186 @@ void test_fapi2GetParentPervasive(int& numTests, int& numFails,
                                   const pervasiveParentTestRec[],
                                   TARGETING::Target *);
 
-
 //******************************************************************************
 // fapi2GetParentTest
 //******************************************************************************
 void test_fapi2GetParent()
 {
+    errlHndl_t l_err = nullptr;
     int numTests = 0;
     int numFails = 0;
-    errlHndl_t l_err = nullptr;
     do
     {
-        // Create a vector of TARGETING::Target pointers
-        TARGETING::TargetHandleList l_chipList;
+        GENERATE_TEST_TARGETS(test_fapi2GetChildren)
 
-        // Get a list of all of the proc chips
-        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
+#define GET_PARENT_TEST_MACRO(TEST_TARGET_ID, SRC_TYPE, PARENT_TEST_TARGET_ID, PARENT_TYPE)                    \
+    {                                                                                                          \
+        fapi2::Target<SRC_TYPE> l_src(targeting_targets[TEST_TARGET_ID]);                                      \
+        TARGETING::Target * l_parent = static_cast<TARGETING::Target*>(l_src.getParent<PARENT_TYPE>());        \
+        numTests++;                                                                                            \
+        if(TARGETING::get_huid(targeting_targets[PARENT_TEST_TARGET_ID]) !=                                    \
+            TARGETING::get_huid(l_parent))                                                                     \
+        {                                                                                                      \
+            uint8_t l_instance = 0;                                                                            \
+            targeting_targets[TEST_TARGET_ID]->                                                                \
+            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);                                                 \
+            TS_FAIL("fapi2TargetTest::Unable to find SRC_TYPE's" #PARENT_TYPE "parent!");                      \
+            numFails++;                                                                                        \
+        }                                                                                                      \
+    }
 
-        TARGETING::Target * l_nimbusProc = nullptr;
-        TARGETING::Target * l_cumulusProc = nullptr;
-        TARGETING::Target * l_proc = nullptr;
+    //// Start Common Targets
+    // EQ Parent Tests
+    GET_PARENT_TEST_MACRO(MY_EQ, TARGET_TYPE_EQ, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // EX Parent Tests
+    GET_PARENT_TEST_MACRO(MY_EX, TARGET_TYPE_EX, MY_EQ,   TARGET_TYPE_EQ)
+    GET_PARENT_TEST_MACRO(MY_EX, TARGET_TYPE_EX, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // Core Parent Tests
+    GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_EX,   TARGET_TYPE_EX)
+    GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_EQ,   TARGET_TYPE_EQ)
+    GET_PARENT_TEST_MACRO(MY_CORE, TARGET_TYPE_CORE, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // PHB Parent Test
+    GET_PARENT_TEST_MACRO(MY_PHB, TARGET_TYPE_PHB, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // PEC Parent Test
+    GET_PARENT_TEST_MACRO(MY_PEC, TARGET_TYPE_PEC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // XBUS Parent Test
+    GET_PARENT_TEST_MACRO(MY_XBUS, TARGET_TYPE_XBUS, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // OBUS Parent Test
+    GET_PARENT_TEST_MACRO(MY_OBUS, TARGET_TYPE_OBUS, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // OBUS Brick Parent Test
+    GET_PARENT_TEST_MACRO(MY_OBUS_BRICK, TARGET_TYPE_OBUS_BRICK, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    GET_PARENT_TEST_MACRO(MY_OBUS_BRICK, TARGET_TYPE_OBUS_BRICK, MY_OBUS, TARGET_TYPE_OBUS)
+    // PPE Parent Test
+    GET_PARENT_TEST_MACRO(MY_PPE, TARGET_TYPE_PPE, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // PERV Parent Test
+    GET_PARENT_TEST_MACRO(MY_PERV, TARGET_TYPE_PERV, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // CAPP Parent Test
+    GET_PARENT_TEST_MACRO(MY_CAPP, TARGET_TYPE_CAPP, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    // SBE Parent Test
+    GET_PARENT_TEST_MACRO(MY_SBE, TARGET_TYPE_SBE, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    ////End Common Targets
 
-        //Take the first NIMBUS proc and use it
-        for(uint32_t i = 0; i < l_chipList.size(); i++)
+    //// Start Nimbus only Targets
+    // MCA Parent Tests
+    if (isHwValid(l_proc, MY_MCA))
+    {
+        // Check proc parent
+        GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_PROC, TARGET_TYPE_PROC_CHIP)
+        if(isHwValid(l_proc, MY_MCS))
         {
-            if(TARGETING::MODEL_NIMBUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_nimbusProc = l_chipList[i];
-              break;
-            }
-            if(TARGETING::MODEL_CUMULUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_cumulusProc = l_chipList[i];
-              break;
-            }
+            // Check MCS parent
+            GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_MCS, TARGET_TYPE_MCS)
         }
-
-        if (l_nimbusProc != nullptr)
+        if(isHwValid(l_proc, MY_MCBIST))
         {
-            l_proc = l_nimbusProc;
+            // Check MCBIST parent
+            GET_PARENT_TEST_MACRO(MY_MCA, TARGET_TYPE_MCA, MY_MCBIST, TARGET_TYPE_MCBIST)
         }
-        else if (l_cumulusProc != nullptr)
+    }
+    // MCS Parent Tests
+    if (isHwValid(l_proc, MY_MCBIST) &&
+        isHwValid(l_proc, MY_MCS))
+    {
+        GET_PARENT_TEST_MACRO(MY_MCS, TARGET_TYPE_MCS, MY_MCBIST, TARGET_TYPE_MCBIST)
+        GET_PARENT_TEST_MACRO(MY_MCS, TARGET_TYPE_MCS, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    }
+    // MCBIST Parent Test
+    if (isHwValid(l_proc, MY_MCBIST))
+    {
+        GET_PARENT_TEST_MACRO(MY_MCBIST, TARGET_TYPE_MCBIST, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    }
+    //// End NIMBUS targets
+
+    //// Start Cumulus/Axone common targets
+    // MC Parent Test
+    if (isHwValid(l_proc, MY_MC))
+    {
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_MC, TARGET_TYPE_MC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    }
+    // MI Parent Tests
+    if (isHwValid(l_proc, MY_MC) &&
+        isHwValid(l_proc, MY_MI))
+    {
+        // Check parent MC
+        GET_PARENT_TEST_MACRO(MY_MI, TARGET_TYPE_MI, MY_MC, TARGET_TYPE_MC)
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_MI, TARGET_TYPE_MI, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    }
+    //// End Cumulus/Axone common targets
+
+    //// Start Cumulus only targets
+    // DMI Parent Tests
+    if (isHwValid(l_proc, MY_DMI))
+    {
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_PROC, TARGET_TYPE_PROC_CHIP)
+        if(isHwValid(l_proc, MY_MI))
         {
-            l_proc = l_cumulusProc;
+            // Check parent MI
+            GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_MI, TARGET_TYPE_MI)
         }
-        else //both are nullptr
+        if(isHwValid(l_proc, MY_MC))
         {
-            // Send errorlog because we cannot find any NIMBUS or CUMULUS procs.
-            FAPI_ERR("FAPI2_GETPARENT:: could not find Nimbus or Cumulus procs, skipping tests");
-            numFails++;
-            /*@
-            * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode   fapi2::RC_NO_PROCS_FOUND
-            * @userdata1    Model Type we looked for (Nimbus)
-            * @userdata2    Other Model Type we looked for (Cumulus)
-            * @devdesc      Couldn't find nimbus or cumulus procs in sys model
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_NO_PROCS_FOUND,
-                                          TARGETING::MODEL_NIMBUS,
-                                          TARGETING::MODEL_CUMULUS,
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            break;
+            // Check parent MC
+            GET_PARENT_TEST_MACRO(MY_DMI, TARGET_TYPE_DMI, MY_MC, TARGET_TYPE_MC)
         }
+    }
+    //// End Cumulus only targets
 
-        TARGETING::Target* targeting_targets[NUM_TARGETS];
-        generateTargets(l_proc, targeting_targets);
-
-        for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+    //// Start Axone only targets
+    // MCC Parent Tests
+    if (isHwValid(l_proc, MY_MCC))
+    {
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_MCC, TARGET_TYPE_MCC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+        if(isHwValid(l_proc, MY_MI))
         {
-            //Skip tests where the HW unit to test isn't valid for the proc type
-            if (!isHwValid(l_proc, x))
-            {
-                continue;
-            }
-            else if(targeting_targets[x] == nullptr)
-            {
-                FAPI_ERR("Unable to find target for item %d in targeting_targets", x);
-
-                /*@
-                * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid     fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-                * @reasoncode   fapi2::RC_NO_PATH_TO_TARGET_FOUND
-                * @userdata1    Index of target in array of objects
-                * @userdata2    Unused
-                * @devdesc      Could not find a path to the target of that type
-                */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_NO_PATH_TO_TARGET_FOUND,
-                                          x,
-                                          NULL,
-                                          true/*SW Error*/);
-                errlCommit(l_err,HWPF_COMP_ID);
-            }
+            // Check parent MI
+            GET_PARENT_TEST_MACRO(MY_MCC, TARGET_TYPE_MCC, MY_MI, TARGET_TYPE_MI)
         }
-
-        Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
-                l_proc);
-        Target<fapi2::TARGET_TYPE_EQ> fapi2_eqTarget(
-                targeting_targets[MY_EQ]);
-        Target<fapi2::TARGET_TYPE_EX> fapi2_exTarget(
-                targeting_targets[MY_EX]);
-        Target<fapi2::TARGET_TYPE_CORE> fapi2_coreTarget(
-                targeting_targets[MY_CORE]);
-        Target<fapi2::TARGET_TYPE_MCS> fapi2_mcsTarget(
-                targeting_targets[MY_MCS]);
-        Target<fapi2::TARGET_TYPE_MCA> fapi2_mcaTarget(
-                targeting_targets[MY_MCA]);
-        Target<fapi2::TARGET_TYPE_MCBIST> fapi2_mcbistTarget(
-                targeting_targets[MY_MCBIST]);
-        Target<fapi2::TARGET_TYPE_PEC> fapi2_pecTarget(
-                targeting_targets[MY_PEC]);
-        Target<fapi2::TARGET_TYPE_PHB> fapi2_phbTarget(
-                targeting_targets[MY_PHB]);
-        Target<fapi2::TARGET_TYPE_XBUS> fapi2_xbusTarget(
-                targeting_targets[MY_XBUS]);
-        Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
-                targeting_targets[MY_OBUS]);
-        Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
-                targeting_targets[MY_OBUS_BRICK]);
-        Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(
-                targeting_targets[MY_PPE]);
-        Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
-                targeting_targets[MY_PERV]);
-        Target<fapi2::TARGET_TYPE_SBE> fapi2_sbeTarget(
-                targeting_targets[MY_SBE]);
-        Target<fapi2::TARGET_TYPE_CAPP> fapi2_cappTarget(
-                targeting_targets[MY_CAPP]);
-        Target<fapi2::TARGET_TYPE_MC> fapi2_mcTarget( // MC (Cumulus)
-                targeting_targets[MY_MC]);
-        Target<fapi2::TARGET_TYPE_MI> fapi2_miTarget( // MI (Cumulus)
-                targeting_targets[MY_MI]);
-        Target<fapi2::TARGET_TYPE_DMI> fapi2_dmiTarget( // DMI (Cumulus)
-                targeting_targets[MY_DMI]);
-
-        TARGETING::Target * l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_coreTarget.getParent<TARGET_TYPE_EX>());
-
-        //Check CORE's parents
-        numTests++;
-        if(TARGETING::get_huid(targeting_targets[MY_EX]) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        if(isHwValid(l_proc, MY_MC))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_CORE]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_CORE_NO_EX_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of core
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent EX of this
-            *                     CORE target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_CORE_NO_EX_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          targeting_targets[MY_EX])),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_EX)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL("fapi2TargetTest::Unable to find CORE's EX parent!");
-            numFails++;
+            // Check parent MC
+            GET_PARENT_TEST_MACRO(MY_MCC, TARGET_TYPE_MCC, MY_MC, TARGET_TYPE_MC)
         }
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_coreTarget.getParent<TARGET_TYPE_EQ>());
-
-        numTests++;
-        if(TARGETING::get_huid(targeting_targets[MY_EQ]) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+    }
+    // OMIC Parent Tests
+    if (isHwValid(l_proc, MY_MC)  &&
+        isHwValid(l_proc, MY_OMIC))
+    {
+        // Check parent MC
+        GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMIC, MY_MC, TARGET_TYPE_MC)
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMIC, MY_PROC, TARGET_TYPE_PROC_CHIP)
+    }
+    // OMI Parent Tests
+    if (isHwValid(l_proc, MY_OMI))
+    {
+        // Check parent proc
+        GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_PROC, TARGET_TYPE_PROC_CHIP)
+        if (isHwValid(l_proc, MY_MCC))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_CORE]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_CORE_NO_EQ_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of core
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent EQ of this
-            *                     CORE target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_CORE_NO_EQ_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          targeting_targets[MY_EQ])),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_EQ)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find CORE's EQ parent!");
-            numFails++;
+            // Check parent MCC
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MCC, TARGET_TYPE_MCC)
         }
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_coreTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        if (isHwValid(l_proc, MY_OMIC))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_CORE]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_CORE_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of core
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     CORE target
-            */
-            l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                fapi2::RC_CORE_NO_PROC_FOUND,
-                                TWO_UINT32_TO_UINT64(
-                                TO_UINT32(
-                                TARGETING::get_huid(
-                                l_proc)),
-                                TO_UINT32(
-                                TARGETING::get_huid(
-                                l_tempTargetingParent))),
-                                TWO_UINT32_TO_UINT64(
-                                TO_UINT32(l_instance),
-                                TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find CORE's PROC parent!");
-            numFails++;
+            // Check parent OMIC
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_OMIC, TARGET_TYPE_OMIC)
         }
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_exTarget.getParent<TARGET_TYPE_EQ>());
-
-        //Check EX's parents
-        numTests++;
-        if(TARGETING::get_huid(targeting_targets[MY_EQ]) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        if (isHwValid(l_proc, MY_MI))
         {
-
-          uint8_t l_instance = 0;
-          targeting_targets[MY_EX]->
-          tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-          /*@
-          * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-          * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-          * @reasoncode         fapi2::RC_EX_NO_EQ_FOUND
-          * @userdata1[0:31]    Expected Parent HUID
-          * @userdata1[32:63]   Actual Parent HUID
-          * @userdata2[0:31]    Instance of EX
-          * @userdata2[32:63]   fapi2 Type of expected parent
-          * @devdesc            Could not find the parent EQ of this EX target
-          */
-          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                        fapi2::RC_EX_NO_EQ_FOUND,
-                                        TWO_UINT32_TO_UINT64(
-                                        TO_UINT32(
-                                        TARGETING::get_huid(
-                                        targeting_targets[MY_EQ])),
-                                        TO_UINT32(
-                                        TARGETING::get_huid(
-                                        l_tempTargetingParent))),
-                                        TWO_UINT32_TO_UINT64(
-                                        TO_UINT32(l_instance),
-                                        TO_UINT32(TARGET_TYPE_EQ)),
-                                        true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find EX's EQ parent!");
-            numFails++;
+            // Check parent MI
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MI, TARGET_TYPE_MI)
         }
-
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_exTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-        //Check EX's parents
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
+        if (isHwValid(l_proc, MY_MC))
         {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_EX]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_EX_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of EX
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc           Could not find the parent PROC of this
-            *                    EX target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_EX_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find EXs's PROC parent!");
-            numFails++;
+            // Check parent MC
+            GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MC, TARGET_TYPE_MC)
         }
-
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_eqTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-        //Check EQ's parents
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_EQ]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_EQ_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of EQ
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     EQ target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_EQ_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find EQs's PROC parent!");
-            numFails++;
-        }
-
-        if (isHwValid(l_proc, MY_MCA)
-              && isHwValid(l_proc, MY_MCBIST)
-              && isHwValid(l_proc, MY_MCS))
-        {
-            l_tempTargetingParent =
-                static_cast<TARGETING::Target*>(
-                    fapi2_mcaTarget.getParent<TARGET_TYPE_MCS>());
-
-            //Check MCA's parents
-            numTests++;
-            if(TARGETING::get_huid(targeting_targets[MY_MCS]) !=
-               TARGETING::get_huid(l_tempTargetingParent))
-            {
-                uint8_t l_instance = 0;
-                targeting_targets[MY_MCA]->
-                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-                /*@
-                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-                * @reasoncode         fapi2::RC_MCA_NO_MCS_FOUND
-                * @userdata1[0:31]    Expected Parent HUID
-                * @userdata1[32:63]   Actual Parent HUID
-                * @userdata2[0:31]    Instance of MCA
-                * @userdata2[32:63]   fapi2 Type of expected parent
-                * @devdesc            Could not find the parent MSC of this
-                *                     MCA target
-                */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_MCA_NO_MCS_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          targeting_targets[MY_MCS])),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_MCS)),
-                                          true/*SW Error*/);
-                errlCommit(l_err,HWPF_COMP_ID);
-                TS_FAIL( "fapi2TargetTest::Unable to find MCA's MCS parent!");
-                numFails++;
-            }
-
-            l_tempTargetingParent =
-                static_cast<TARGETING::Target*>(
-                    fapi2_mcaTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-            numTests++;
-
-            if(TARGETING::get_huid(l_proc) !=
-               TARGETING::get_huid(l_tempTargetingParent))
-            {
-                uint8_t l_instance = 0;
-                targeting_targets[MY_MCA]->
-                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-                /*@
-                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-                * @reasoncode         fapi2::RC_MCA_NO_PROC_FOUND
-                * @userdata1[0:31]    Expected Parent HUID
-                * @userdata1[32:63]   Actual Parent HUID
-                * @userdata2[0:31]    Instance of MCA
-                * @userdata2[32:63]   fapi2 Type of expected parent
-                * @devdesc            Could not find the parent PROC of this
-                *                     MCA target
-                */
-                l_err = new ERRORLOG::ErrlEntry(
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                  fapi2::RC_MCA_NO_PROC_FOUND,
-                                  TWO_UINT32_TO_UINT64(
-                                  TO_UINT32(
-                                  TARGETING::get_huid(
-                                  l_proc)),
-                                  TO_UINT32(
-                                  TARGETING::get_huid(
-                                  l_tempTargetingParent))),
-                                  TWO_UINT32_TO_UINT64(
-                                  TO_UINT32(l_instance),
-                                  TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                  true/*SW Error*/);
-                errlCommit(l_err,HWPF_COMP_ID);
-                TS_FAIL( "fapi2TargetTest::Unable to find MCA's PROC parent!");
-                numFails++;
-            }
-        }
-
-        //Check MCS's parents -- Only for Nimbus
-        if (isHwValid(l_proc, MY_MCA)
-              && isHwValid(l_proc, MY_MCBIST)
-              && isHwValid(l_proc, MY_MCS))
-        {
-            l_tempTargetingParent =
-                static_cast<TARGETING::Target*>(
-                    fapi2_mcsTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-            numTests++;
-            if(TARGETING::get_huid(l_proc) !=
-               TARGETING::get_huid(l_tempTargetingParent))
-            {
-                uint8_t l_instance = 0;
-                targeting_targets[MY_MCS]->
-                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-                /*@
-                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-                * @reasoncode         fapi2::RC_MCS_NO_PROC_FOUND
-                * @userdata1[0:31]    Expected Parent HUID
-                * @userdata1[32:63]   Actual Parent HUID
-                * @userdata2[0:31]    Instance of MCS
-                * @userdata2[32:63]   fapi2 Type of expected parent
-                * @devdesc            Could not find the parent PROC of this
-                *                     MCS target
-                */
-                l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_MCS_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-                errlCommit(l_err,HWPF_COMP_ID);
-                TS_FAIL( "fapi2TargetTest::Unable to find MCS's PROC parent!");
-                numFails++;
-            }
-
-            //Check MCBIST's parents
-            l_tempTargetingParent =
-                static_cast<TARGETING::Target*>(
-                    fapi2_mcbistTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-            numTests++;
-            if(TARGETING::get_huid(l_proc) !=
-               TARGETING::get_huid(l_tempTargetingParent))
-            {
-                uint8_t l_instance = 0;
-                targeting_targets[MY_MCBIST]->
-                tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-                /*@
-                * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-                * @reasoncode         fapi2::RC_MCBIST_NO_PROC_FOUND
-                * @userdata1[0:31]    Expected Parent HUID
-                * @userdata1[32:63]   Actual Parent HUID
-                * @userdata2[0:31]    Instance of MCS
-                * @userdata2[32:63]   fapi2 Type of expected parent
-                * @devdesc            Could not find the parent PROC of this
-                *                     MCBIST target
-                */
-                l_err =new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_MCBIST_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-                errlCommit(l_err,HWPF_COMP_ID);
-                TS_FAIL( "fapi2TargetTest::Unable to find MCBIST's PROC parent!");
-               numFails++;
-            }
-        }
-
-        //Check PHB's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_phbTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_PHB]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_PHB_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of PHB
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     PHB target
-            */
-            l_err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                fapi2::RC_PHB_NO_PROC_FOUND,
-                                TWO_UINT32_TO_UINT64(
-                                TO_UINT32(
-                                TARGETING::get_huid(
-                                l_proc)),
-                                TO_UINT32(
-                                TARGETING::get_huid(
-                                l_tempTargetingParent))),
-                                TWO_UINT32_TO_UINT64(
-                                TO_UINT32(l_instance),
-                                TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find PHB's PROC parent!");
-            numFails++;
-        }
-
-        //Check PEC's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_pecTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_PEC]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_PEC_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of PEC
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     PEC target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_PEC_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find PEC's PROC parent!");
-            numFails++;
-        }
-
-        //Check XBUS's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_xbusTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_XBUS]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_XBUS_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of XBUS
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     XBUS target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_XBUS_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find XBUS's PROC parent!");
-            numFails++;
-        }
-
-        //Check OBUS's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_obusTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_OBUS]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_OBUS_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of OBUS
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     OBUS target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_OBUS_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-           errlCommit(l_err,HWPF_COMP_ID);
-           TS_FAIL( "fapi2TargetTest::Unable to find OBUS's PROC parent!");
-           numFails++;
-        }
-
-        //Check OBUS BRICK's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_oBrickTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_OBUS_BRICK]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_OBRICK_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of OBUS BRICK
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     OBUS BRICK target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_OBRICK_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find OBUS BRICK's PROC parent!");
-            numFails++;
-        }
-
-        //Check PPE's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_ppeTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_PPE]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_PPE_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of PPE
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     PPE target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_PPE_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find PPE's PROC parent!");
-            numFails++;
-        }
-
-        //Check PERV's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_pervTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_PERV]->
-              tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_PERV_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of PERV
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     PERV target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_PERV_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-           errlCommit(l_err,HWPF_COMP_ID);
-           TS_FAIL( "fapi2TargetTest::Unable to find PERV's PROC parent!");
-           numFails++;
-        }
-
-        //Check CAPP's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_cappTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_CAPP]->
-              tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_CAPP_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of CAPP
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     CAPP target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_CAPP_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-           errlCommit(l_err,HWPF_COMP_ID);
-           TS_FAIL( "fapi2TargetTest::Unable to find CAPP's PROC parent!");
-           numFails++;
-        }
-
-        //Check SBE's parents
-        l_tempTargetingParent =
-            static_cast<TARGETING::Target*>(
-                fapi2_sbeTarget.getParent<TARGET_TYPE_PROC_CHIP>());
-        numTests++;
-        if(TARGETING::get_huid(l_proc) !=
-           TARGETING::get_huid(l_tempTargetingParent))
-        {
-            uint8_t l_instance = 0;
-            targeting_targets[MY_SBE]->
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
-            /*@
-            * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_SBE_NO_PROC_FOUND
-            * @userdata1[0:31]    Expected Parent HUID
-            * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of SBE
-            * @userdata2[32:63]   fapi2 Type of expected parent
-            * @devdesc            Could not find the parent PROC of this
-            *                     SBE target
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_SBE_NO_PROC_FOUND,
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_proc)),
-                                          TO_UINT32(
-                                          TARGETING::get_huid(
-                                          l_tempTargetingParent))),
-                                          TWO_UINT32_TO_UINT64(
-                                          TO_UINT32(l_instance),
-                                          TO_UINT32(TARGET_TYPE_PROC_CHIP)),
-                                          true/*SW Error*/);
-            errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::UnAble to find SBE's PROC parent!");
-            numFails++;
-        }
+    }
+    // End Axone only targets
 
         static pervasiveParentTestRec nimbusPervasiveParentTests [] = {
              {targeting_targets[MY_EQ],
@@ -1064,17 +302,65 @@ void test_fapi2GetParent()
                  {return getPervasiveParent<TARGET_TYPE_DMI>(i_pTarget); }},
           };
 
+        static pervasiveParentTestRec axonePervasiveParentTests [] = {
+            {targeting_targets[MY_EQ],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
+            {targeting_targets[MY_CORE],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CORE>(i_pTarget); }},
+            {targeting_targets[MY_PEC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PEC>(i_pTarget); }},
+            {targeting_targets[MY_PHB],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
+            {targeting_targets[MY_XBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
+            {targeting_targets[MY_OBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
+            {targeting_targets[MY_OBUS_BRICK],
+             [](TARGETING::Target* i_pTarget)
+               {return getPervasiveParent<TARGET_TYPE_OBUS_BRICK>(i_pTarget);}},
+            {targeting_targets[MY_CAPP],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
+            {targeting_targets[MY_MC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MC>(i_pTarget); }},
+            {targeting_targets[MY_MI],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MI>(i_pTarget); }},
+            {targeting_targets[MY_MCC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MCC>(i_pTarget); }},
+            {targeting_targets[MY_OMI],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_OMI>(i_pTarget); }},
+            {targeting_targets[MY_OMIC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_OMIC>(i_pTarget); }},
+          };
+
         pervasiveParentTestRec* ptr;
         int numPervTests = 0;
-        if (l_nimbusProc != nullptr)
+        auto l_model = l_proc->getAttr<TARGETING::ATTR_MODEL>();
+        if (l_model == TARGETING::MODEL_NIMBUS)
         {
             numPervTests = sizeof(nimbusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
             ptr = nimbusPervasiveParentTests;
         }
-        else
+        else if (l_model == TARGETING::MODEL_CUMULUS)
         {
             numPervTests = sizeof(cumulusPervasiveParentTests) / sizeof(pervasiveParentTestRec);
             ptr = cumulusPervasiveParentTests;
+        }
+        else
+        {
+            numPervTests = sizeof(axonePervasiveParentTests) / sizeof(pervasiveParentTestRec);
+            ptr = axonePervasiveParentTests;
         }
 
         // Test each type of target that can have exactly one pervasive parent
@@ -1087,7 +373,7 @@ void test_fapi2GetParent()
                 FAPI_ERR("Found pervasive parent to be null pervasiveParentTestRec for test: %d",
                           i);
             }
-            l_tempTargetingParent = pervasiveParentTest.getParent(
+            TARGETING::Target * l_tempTargetingParent = pervasiveParentTest.getParent(
                 pervasiveParentTest.pTarget);
 
             // Result must be a non-nullptr target of pervasive type, and its

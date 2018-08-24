@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -40,4 +40,3 @@ TMPVAR2 := ${OBJS}
 OBJS = $(filter-out getVpdTest.o, ${TMPVAR2})
 include ${ROOTPATH}/config.mk
 VPATH += ../../test/
-

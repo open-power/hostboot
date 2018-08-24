@@ -41,173 +41,58 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
     //**************************************************************************
     void test_fapi2IsFunctional()
     {
-        int numTests = 0;
-        int numFails = 0;
 
         TARGETING::HwasState currentState;
         bool functional;
-        TARGETING::Target * currTarg;
-
+        int numTests = 0;
+        int numFails = 0;
         FAPI_DBG("Enter test_fapi2IsFunctional");
         do
         {
-            // get the master proc
-            TARGETING::Target * proc;
-            TARGETING::targetService().masterProcChipTargetHandle(proc);
+            GENERATE_TEST_TARGETS(test_fapi2GetChildren)
 
-            // create targeting/fapi2 target arrays to hold targets
-            // *Note: NUM_TARGETS does not include the processor target
-            //  so we make the array big enough to add it.
-            TARGETING::Target*  targetList[NUM_TARGETS+1];
-            fapi2::Target<fapi2::TARGET_TYPE_ALL> fapiTargetList[NUM_TARGETS+1];
+            #define IS_FUNCTIONAL_TEST_MACRO(TARGETING_TARGET, FAPI2_TARGET)                \
+                if(TARGETING_TARGET != nullptr)                                             \
+                {                                                                           \
+                    numTests++;                                                             \
+                    /* get the HWAS_STATE of the current target */                          \
+                    currentState = TARGETING_TARGET->getAttr<TARGETING::ATTR_HWAS_STATE>(); \
+                    functional = FAPI2_TARGET.isFunctional();                               \
+                    if(currentState.functional != functional)                               \
+                    {                                                                       \
+                        TS_FAIL("The functional state is incorrect. huid: 0x%x - "          \
+                        "Functional State (Expected/Actual): (%d/%d)",                      \
+                                TARGETING::get_huid(TARGETING_TARGET),                      \
+                                currentState.functional,                                    \
+                                functional);                                                \
+                                numFails++;                                                 \
+                    }                                                                       \
+                }                                                                           \
 
-            // generate the TARGETING::Targets to test on and add them
-            // to targeting array
-            generateTargets(proc, targetList);
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_EQ], fapi2_eqTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_EX], fapi2_exTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_CORE], fapi2_coreTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCS], fapi2_mcsTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCBIST], fapi2_mcbistTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCA], fapi2_mcaTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PEC], fapi2_pecTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PHB], fapi2_phbTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_XBUS], fapi2_xbusTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OBUS], fapi2_obusTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OBUS_BRICK], fapi2_oBrickTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PPE], fapi2_ppeTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PERV], fapi2_pervTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_SBE], fapi2_sbeTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_CAPP], fapi2_cappTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MC], fapi2_mcTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MI], fapi2_miTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_DMI], fapi2_dmiTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMI], fapi2_omiTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC], fapi2_omicTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCC], fapi2_mccTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PROC], fapi2_procTarget)
 
-            // add the processor target to the end of the list
-            targetList[NUM_TARGETS] = proc;
 
-            // Verify we generated valid targets
-            for( uint64_t x = 0; x <= NUM_TARGETS; x++ )
-            {
-                //Skip tests where the HW unit to test isn't valid for the proc type
-                if (!isHwValid(proc, x))
-                {
-                    continue;
-                }
-                else if(targetList[x] == nullptr)
-                {
-                   FAPI_INF("fapi2IsFunctionalTest: Unable to find target at index [%d]",
-                            x);
-                }
-            }
-
-            //populate fapiTargetList
-            // EQ
-            Target<fapi2::TARGET_TYPE_EQ> fapi2_eqTarget(
-                    targetList[MY_EQ]);
-            fapiTargetList[MY_EQ] = fapi2_eqTarget;
-
-            // EX
-            Target<fapi2::TARGET_TYPE_EX> fapi2_exTarget(
-                    targetList[MY_EX]);
-            fapiTargetList[MY_EX] = fapi2_exTarget;
-
-            // CORE
-            Target<fapi2::TARGET_TYPE_CORE> fapi2_coreTarget(
-                    targetList[MY_CORE]);
-            fapiTargetList[MY_CORE] = fapi2_coreTarget;
-
-            // MCS
-            Target<fapi2::TARGET_TYPE_MCS> fapi2_mcsTarget(
-                    targetList[MY_MCS]);
-            fapiTargetList[MY_MCS] = fapi2_mcsTarget;
-
-            // MCA
-            Target<fapi2::TARGET_TYPE_MCA> fapi2_mcaTarget(
-                    targetList[MY_MCA]);
-            fapiTargetList[MY_MCA] = fapi2_mcaTarget;
-
-            // MCBIST
-            Target<fapi2::TARGET_TYPE_MCBIST> fapi2_mcbistTarget(
-                    targetList[MY_MCBIST]);
-            fapiTargetList[MY_MCBIST] = fapi2_mcbistTarget;
-
-            // PEC
-            Target<fapi2::TARGET_TYPE_PEC> fapi2_pecTarget(
-                    targetList[MY_PEC]);
-            fapiTargetList[MY_PEC] = fapi2_pecTarget;
-
-            // PHB
-            Target<fapi2::TARGET_TYPE_PHB> fapi2_phbTarget(
-                    targetList[MY_PHB]);
-            fapiTargetList[MY_PHB] = fapi2_phbTarget;
-
-            // XBUS
-            Target<fapi2::TARGET_TYPE_XBUS> fapi2_xbusTarget(
-                    targetList[MY_XBUS]);
-            fapiTargetList[MY_XBUS] = fapi2_xbusTarget;
-
-            // OBUS
-            Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
-                    targetList[MY_OBUS]);
-            fapiTargetList[MY_OBUS] = fapi2_obusTarget;
-
-            // OBUS_BRICK
-            Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
-                    targetList[MY_OBUS_BRICK]);
-            fapiTargetList[MY_OBUS_BRICK] = fapi2_oBrickTarget;
-
-            // PPE
-            Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(
-                    targetList[MY_PPE]);
-            fapiTargetList[MY_PPE] = fapi2_ppeTarget;
-
-            // PERV
-            Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
-                    targetList[MY_PERV]);
-            fapiTargetList[MY_PERV] = fapi2_pervTarget;
-
-            // SBE
-            Target<fapi2::TARGET_TYPE_SBE> fapi2_sbeTarget(
-                    targetList[MY_SBE]);
-            fapiTargetList[MY_SBE] = fapi2_sbeTarget;
-
-            // CAPP
-            Target<fapi2::TARGET_TYPE_CAPP> fapi2_cappTarget(
-                    targetList[MY_CAPP]);
-            fapiTargetList[MY_CAPP] = fapi2_cappTarget;
-
-            // MC (Cumulus)
-            Target<fapi2::TARGET_TYPE_MC> fapi2_mcTarget(
-                    targetList[MY_MC]);
-            fapiTargetList[MY_MC] = fapi2_mcTarget;
-
-            // MI (Cumulus)
-            Target<fapi2::TARGET_TYPE_MI> fapi2_miTarget(
-                    targetList[MY_MI]);
-            fapiTargetList[MY_MI] = fapi2_miTarget;
-
-            // DMI (Cumulus)
-            Target<fapi2::TARGET_TYPE_DMI> fapi2_dmiTarget(
-                     targetList[MY_DMI]);
-            fapiTargetList[MY_DMI] = fapi2_dmiTarget;
-
-            // PROC_CHIP
-            Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(
-                    targetList[NUM_TARGETS]);
-            fapiTargetList[NUM_TARGETS] = fapi2_procTarget;
-
-            // Iterate through both arrays comparing ATTR_HWAS_STATE
-            // against the return of fapi2::Target<K> isFunctional()
-            for( int i = 0; i <= NUM_TARGETS; i++ )
-            {
-                numTests++;
-
-                if(targetList[i] == nullptr)
-                {
-                    continue;
-                }
-
-                currTarg = targetList[i];
-
-                // get the HWAS_STATE of the current target
-                currentState = currTarg->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
-                functional = fapiTargetList[i].isFunctional();
-
-                if(currentState.functional != functional)
-                {
-                    TS_FAIL("The functional state is incorrect. huid: 0x%x - "
-                            "Functional State (Expected/Actual): (%d/%d)",
-                            TARGETING::get_huid(currTarg),
-                            currentState.functional,
-                            functional);
-                    numFails++;
-                }
-
-            }
         } while(0);
         FAPI_INF("test_fapi2IsFunctional Test Complete. %d/%d fails",
                   numFails,

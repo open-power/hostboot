@@ -481,10 +481,12 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TARGETING::TargetService::ALL,
                     &predMc);
 
+            auto l_model =l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>();
+
             if (l_TargetList.empty())
             {
-                if(TARGETING::MODEL_CUMULUS ==
-                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                if(TARGETING::MODEL_CUMULUS == l_model ||
+                   TARGETING::MODEL_AXONE   == l_model )
                 {
                     TS_FAIL("testVerifyMcChipletNum: empty l_TargetList");
                 }
@@ -543,10 +545,12 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                     TARGETING::TargetService::ALL,
                     &predMi);
 
+            auto l_model =l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>();
+
             if (l_TargetList.empty())
             {
-                if(TARGETING::MODEL_CUMULUS ==
-                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                if(TARGETING::MODEL_CUMULUS == l_model ||
+                   TARGETING::MODEL_AXONE   == l_model )
                 {
                     TS_FAIL("testVerifyMiChipletNum: empty l_TargetList");
                 }
@@ -580,6 +584,192 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
         } while(0);
 
         FAPI_INF("Complete testVerifyMiChipletNum");
+    }
+
+    void testVerifyMccChipletNum()
+    {
+        uint8_t  l_chiplet_id = 0;
+        uint8_t  l_exp_chiplet_id = 0;
+        uint8_t  l_chip_unit = 0;
+
+        FAPI_INF("Start testVerifyMccChipletNum");
+
+        do
+        {
+            // find all MCC units
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+            TARGETING::PredicateCTM predMcc(TARGETING::CLASS_UNIT,
+                    TARGETING::TYPE_MCC);
+
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
+            TARGETING::TargetHandleList l_TargetList;
+            TARGETING::targetService().getAssociated( l_TargetList, pSys,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &predMcc);
+
+            if (l_TargetList.empty())
+            {
+                if(TARGETING::MODEL_AXONE ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyMccChipletNum: empty l_TargetList");
+                }
+                break;
+            }
+
+            // Iterate through all MCC chiplets
+            for (auto & l_Target : l_TargetList)
+            {
+                // map Targeting Type to fapi2 Type
+                Target<fapi2::TARGET_TYPE_MCC> fapi2_Target( l_Target);
+                l_chiplet_id = fapi2_Target.getChipletNumber();
+
+                FAPI_DBG("testVerifyMccChipletNum HUID: %.8X, ChipletId: %.8X",
+                    TARGETING::get_huid(l_Target), l_chiplet_id);
+
+                // MCC 0..3, 4..7 maps to pervasive ids 0x07, 0x08
+                l_chip_unit = l_Target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                l_exp_chiplet_id = l_chip_unit / PERV_MCC_CHILDREN + START_MCC_CHIPLET_NUM;
+
+                if (l_chiplet_id != l_exp_chiplet_id)
+                {
+                    TS_FAIL("testVerifyMccChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
+                }
+            }
+        } while(0);
+
+        FAPI_INF("Complete testVerifyMccChipletNum");
+
+    }
+
+    void testVerifyOmiChipletNum()
+    {
+        uint8_t  l_chiplet_id = 0;
+        uint8_t  l_exp_chiplet_id = 0;
+        uint8_t  l_chip_unit = 0;
+
+        FAPI_INF("Start testVerifyOmiChipletNum");
+
+        do
+        {
+            // find all OMI units
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+            TARGETING::PredicateCTM predOmi(TARGETING::CLASS_UNIT,
+                    TARGETING::TYPE_OMI);
+
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
+            TARGETING::TargetHandleList l_TargetList;
+            TARGETING::targetService().getAssociated( l_TargetList, pSys,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &predOmi);
+
+            if (l_TargetList.empty())
+            {
+                if(TARGETING::MODEL_AXONE ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyOmiChipletNum: empty l_TargetList");
+                }
+                break;
+            }
+
+            // Iterate through all OMI chiplets
+            for (auto & l_Target : l_TargetList)
+            {
+                // map Targeting Type to fapi2 Type
+                Target<fapi2::TARGET_TYPE_OMI> fapi2_Target( l_Target);
+                l_chiplet_id = fapi2_Target.getChipletNumber();
+
+                FAPI_DBG("testVerifyOmiChipletNum HUID: %.8X, ChipletId: %.8X",
+                    TARGETING::get_huid(l_Target), l_chiplet_id);
+
+                // OMI 0..7, 8..15 maps to pervasive ids 0x07, 0x08
+                l_chip_unit = l_Target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                l_exp_chiplet_id = l_chip_unit / PERV_OMI_CHILDREN + START_OMI_CHIPLET_NUM;
+
+                if (l_chiplet_id != l_exp_chiplet_id)
+                {
+                    TS_FAIL("testVerifyOmiChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
+                }
+            }
+        } while(0);
+
+        FAPI_INF("Complete testVerifyOmiChipletNum");
+
+    }
+
+    void testVerifyOmicChipletNum()
+    {
+        uint8_t  l_chiplet_id = 0;
+        uint8_t  l_exp_chiplet_id = 0;
+        uint8_t  l_chip_unit = 0;
+
+        FAPI_INF("Start testVerifyOmicChipletNum");
+
+        do
+        {
+            // find all OMIC units
+            TARGETING::Target * pSys;
+            TARGETING::targetService().getTopLevelTarget(pSys);
+            TARGETING::PredicateCTM predOmic(TARGETING::CLASS_UNIT,
+                    TARGETING::TYPE_OMIC);
+
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
+            TARGETING::TargetHandleList l_TargetList;
+            TARGETING::targetService().getAssociated( l_TargetList, pSys,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,
+                    &predOmic);
+
+            if (l_TargetList.empty())
+            {
+                if(TARGETING::MODEL_AXONE ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyOmicChipletNum: empty l_TargetList");
+                }
+                break;
+            }
+
+            // Iterate through all OMI chiplets
+            for (auto & l_Target : l_TargetList)
+            {
+                // map Targeting Type to fapi2 Type
+                Target<fapi2::TARGET_TYPE_OMIC> fapi2_Target( l_Target);
+                l_chiplet_id = fapi2_Target.getChipletNumber();
+
+                FAPI_DBG("testVerifyOmicChipletNum HUID: %.8X, ChipletId: %.8X",
+                    TARGETING::get_huid(l_Target), l_chiplet_id);
+
+                // OMI 0..5, 6..11 maps to pervasive ids 0x07, 0x08
+                l_chip_unit = l_Target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                l_exp_chiplet_id = l_chip_unit / PERV_OMIC_CHILDREN + START_OMIC_CHIPLET_NUM;
+
+                if (l_chiplet_id != l_exp_chiplet_id)
+                {
+                    TS_FAIL("testVerifyOmicChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
+                }
+            }
+        } while(0);
+
+        FAPI_INF("Complete testVerifyOmicChipletNum");
+
     }
 
     void testVerifyDmiChipletNum()
@@ -1016,6 +1206,12 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
             testVerifyPecChipletNum();
 
             testVerifyiPhbChipletNum();
+
+            testVerifyMccChipletNum();
+
+            testVerifyOmiChipletNum();
+
+            testVerifyOmicChipletNum();
 
         } while(0);
         FAPI_DBG("test_fapi2ChipletNum Test Complete.");
