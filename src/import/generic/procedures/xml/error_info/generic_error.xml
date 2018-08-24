@@ -37,17 +37,159 @@
 
 <hwpErrors>
 
-<hwpError>
-  <rc>RC_MSS_INVALID_FREQUENCY</rc>
-  <description>
-    An invalid frequency was passed to frequency to clock period
-  </description>
-  <ffdc>FREQ</ffdc>
-  <callout>
-    <procedure>CODE</procedure>
-    <priority>HIGH</priority>
-  </callout>
-</hwpError>
+  <hwpError>
+    <rc>RC_MSS_EMPTY_VECTOR</rc>
+    <description>
+      Empty vector conditional failed.
+    </description>
+    <ffdc>RECEIVED</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX</rc>
+    <description>
+        Calculated Cas Latency exceeds JEDEC value for TAA Max
+        desired (and DIMM supported) cas_latency * proposed tck from mss freq attributes > jedec taa_max
+        Probably due to MRW/ VPD freqs being too high
+    </description>
+    <ffdc>CAS_LATENCY</ffdc>
+    <ffdc>TCK</ffdc>
+    <ffdc>TAA_MAX</ffdc>
+    <ffdc>COMPARE</ffdc>
+    <ffdc>IS_3DS</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_FAILED_TO_FIND_SUPPORTED_CL</rc>
+    <description>
+      Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
+    </description>
+    <ffdc>DESIRED_CAS_LATENCY</ffdc>
+    <ffdc>COMMON_CLS</ffdc>
+    <ffdc>TAA</ffdc>
+    <ffdc>TCK</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_INVALID_CALCULATED_TCK</rc>
+    <description>
+        Invalid value clock period (less than equal 0).
+        Should be code bug and error comparing MRW and VPD SUPPRTED_FREQS
+        Caused by bad MRW values for MSS_MRW_SUPPORTED_FREQ
+    </description>
+    <ffdc>TAAMIN</ffdc>
+    <ffdc>PROPOSED_TCK</ffdc>
+    <ffdc>IS_3DS</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_NO_COMMON_SUPPORTED_CL</rc>
+    <description>
+        Current Configuration has no common supported CL values.
+        Caused by bad SPD on one of the plugged DIMMS
+        or DIMM configuration is not supported
+    </description>
+    <ffdc>MC_TYPE</ffdc>
+    <ffdc>CL_SUPPORTED</ffdc>
+    <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+    <gard>
+       <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FREQ_SELECTED_FREQ_NOT_SUPPORTED</rc>
+    <description>Selected freq based on calculations from the DIMM and VPD is not supported</description>
+    <ffdc>SUPPORTED_FREQ_0</ffdc>
+    <ffdc>SUPPORTED_FREQ_1</ffdc>
+    <ffdc>SUPPORTED_FREQ_2</ffdc>
+    <ffdc>SUPPORTED_FREQ_3</ffdc>
+    <ffdc>FREQ</ffdc>
+    <ffdc>MC_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+        <childTargets>
+          <parent>TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
+        <priority>MEDIUM</priority>
+     </callout>
+  </hwpError>
 
 <hwpError>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
@@ -60,5 +202,34 @@
     <priority>HIGH</priority>
   </callout>
 </hwpError>
+
+<hwpError>
+  <rc>RC_MSS_INVALID_FREQUENCY</rc>
+  <description>
+    An invalid frequency was passed to frequency to clock period
+  </description>
+  <ffdc>FREQ</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
+    <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
+  </hwpError>
 
 </hwpErrors>
