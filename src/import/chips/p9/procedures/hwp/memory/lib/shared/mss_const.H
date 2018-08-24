@@ -191,7 +191,6 @@ enum ffdc_function_codes
     GET_STARTING_WR_DQ_DELAY_VALUE = 95,
 
     SUPPORTED_FREQS = 99,
-    SELECT_SUPPORTED_FREQ = 100,
 
     // WR VREF functions
     DRAM_TO_RP_REG = 101,
