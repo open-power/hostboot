@@ -455,3 +455,77 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+
+fapi2::ReturnCode p9_sample_procedure_omi(
+               fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+                                            uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on OMI Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on OMI Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+                  fapi2::FAPI2_SAMPLE(),
+                  "p9_sample_procedure_omi read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode p9_sample_procedure_omic(
+               fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on OMIC Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on OMIC Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+                  fapi2::FAPI2_SAMPLE(),
+                  "p9_sample_procedure_omic read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}
+
+fapi2::ReturnCode p9_sample_procedure_mcc(
+               fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                uint8_t expectedValue)
+{
+    uint8_t l_attr_scratch = 0;
+    FAPI_INF("Entering ...");
+    FAPI_INF("Set Scratch Attr on MCC Target");
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        expectedValue));
+
+    FAPI_INF("Get Scratch Attr on MCC Target");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SCRATCH_UINT8_1, i_target,
+                        l_attr_scratch));
+    FAPI_ASSERT( (l_attr_scratch == expectedValue),
+                  fapi2::FAPI2_SAMPLE(),
+                  "p9_sample_procedure_mcc read scratch value: %d , expected it to be: %d", l_attr_scratch, expectedValue);
+    FAPI_INF("Read scratch value : %d , expected it to be %d", l_attr_scratch, expectedValue);
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return fapi2::current_err;
+
+}
+
+

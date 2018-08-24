@@ -122,6 +122,18 @@ fapi2::ReturnCode p9_sample_procedure_dmi(
                fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target,
                 uint8_t expectedValue);
 
+fapi2::ReturnCode p9_sample_procedure_omi(
+               fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+                uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_omic(
+               fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_mcc(
+               fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
+                uint8_t expectedValue);
+
 }
 
 #endif // _P9_SAMPLE_PROCEDURE_H_

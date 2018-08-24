@@ -31,10 +31,7 @@
 #include <p9_sample_procedure.H>
 #include <plat_hwp_invoker.H>
 
-
-
 using namespace fapi2;
-
 
 class Fapi2HwpTest : public CxxTest::TestSuite
 {
@@ -50,317 +47,61 @@ void test_fapi2Hwp()
 
     do
     {
-        // Create a vector of TARGETING::Target pointers
-        TARGETING::TargetHandleList l_chipList;
+        GENERATE_TEST_TARGETS(test_fapi2GetChildren)
 
-        // Get a list of all of the proc chips
-        TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
-
-        TARGETING::Target * l_nimbusProc = nullptr;
-        TARGETING::Target * l_cumulusProc = nullptr;
-        TARGETING::Target * l_proc = nullptr;
-
-        //Take the first NIMBUS proc and use it
-        for(uint32_t i = 0; i < l_chipList.size(); i++)
-        {
-            if(TARGETING::MODEL_NIMBUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_nimbusProc = l_chipList[i];
-              break;
-            }
-            if(TARGETING::MODEL_CUMULUS ==
-            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
-            {
-              l_cumulusProc = l_chipList[i];
-              break;
-            }
-        }
-        numTests++;
-
-        if (l_nimbusProc != nullptr)
-        {
-            l_proc = l_nimbusProc;
-        }
-        else if (l_cumulusProc != nullptr)
-        {
-            l_proc = l_cumulusProc;
-        }
-        else //both are nullptr
-        {
-            // Send an errorlog because we cannot find any NIMBUS procs.
-            FAPI_ERR("FAPI2_GETPARENT:: could not find a proc, skipping tests");
-            numFails++;
-            /*@
-            * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid     fapi2::MOD_FAPI2_PLAT_HWP_TEST
-            * @reasoncode   fapi2::RC_NO_PROCS_FOUND
-            * @userdata1    Model Type we looked for
-            * @userdata2    Other Model Type we looked for
-            * @devdesc      Could not find procs in system model
-            */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            fapi2::MOD_FAPI2_PLAT_HWP_TEST,
-                                            fapi2::RC_NO_PROCS_FOUND,
-                                            TARGETING::MODEL_NIMBUS,
-                                            TARGETING::MODEL_CUMULUS,
-                                            true/*SW Error*/);
-            errlCommit(l_errl,HWPF_COMP_ID);
-            break;
-        }
-
-        TARGETING::Target* targeting_targets[NUM_TARGETS];
-        generateTargets(l_proc, targeting_targets);
-
-        for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-        {
-            //Skip tests where the HW unit to test isn't valid for the proc type
-            if (!isHwValid(l_proc, x))
-            {
-                continue;
-            }
-            else if(targeting_targets[x] == nullptr)
-            {
-              FAPI_ERR("Unable to find target for item %d in targeting_targets", x);
-
-              /*@
-              * @errortype    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-              * @moduleid     fapi2::MOD_FAPI2_PLAT_HWP_TEST
-              * @reasoncode   fapi2::RC_NO_PATH_TO_TARGET_FOUND
-              * @userdata1    Index of target in array of objects
-              * @userdata2    Unused
-              * @devdesc      Could not find a path to the target of that type
-              */
-              l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                              fapi2::MOD_FAPI2_PLAT_HWP_TEST,
-                                              fapi2::RC_NO_PATH_TO_TARGET_FOUND,
-                                              x,
-                                              NULL,
-                                              true/*SW Error*/);
-              errlCommit(l_errl,HWPF_COMP_ID);
-            }
-        }
-
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_proc);
-        fapi2::Target<fapi2::TARGET_TYPE_EQ> fapi2_eqTarget(targeting_targets[MY_EQ]);
-        fapi2::Target<fapi2::TARGET_TYPE_EX> fapi2_exTarget(targeting_targets[MY_EX]);
-        fapi2::Target<fapi2::TARGET_TYPE_CORE> fapi2_coreTarget(
-                targeting_targets[MY_CORE]);
-        fapi2::Target<fapi2::TARGET_TYPE_MCS> fapi2_mcsTarget(targeting_targets[MY_MCS]);
-        fapi2::Target<fapi2::TARGET_TYPE_MCA> fapi2_mcaTarget(targeting_targets[MY_MCA]);
-        fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapi2_mcbistTarget(
-                                                    targeting_targets[MY_MCBIST]);
-        fapi2::Target<fapi2::TARGET_TYPE_PEC> fapi2_pecTarget(targeting_targets[MY_PEC]);
-        fapi2::Target<fapi2::TARGET_TYPE_PHB> fapi2_phbTarget(targeting_targets[MY_PHB]);
-        fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapi2_xbusTarget(
-                targeting_targets[MY_XBUS]);
-        fapi2::Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
-                targeting_targets[MY_OBUS]);
-        fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(
-                targeting_targets[MY_OBUS_BRICK]);
-        fapi2::Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(targeting_targets[MY_PPE]);
-        fapi2::Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
-                targeting_targets[MY_PERV]);
-        fapi2::Target<fapi2::TARGET_TYPE_SBE> fapi2_sbeTarget(targeting_targets[MY_SBE]);
-        fapi2::Target<fapi2::TARGET_TYPE_CAPP> fapi2_cappTarget(
-                                      targeting_targets[MY_CAPP]);
-        fapi2::Target<fapi2::TARGET_TYPE_MC> fapi2_mcTarget(targeting_targets[MY_MC]);
-        fapi2::Target<fapi2::TARGET_TYPE_MI> fapi2_miTarget(targeting_targets[MY_MI]);
-        fapi2::Target<fapi2::TARGET_TYPE_DMI> fapi2_dmiTarget(targeting_targets[MY_DMI]);
-
+        // scratch value to use in following tests
         int scratchWriteValue = 5;
 
-        //Get/Set Attr for all of the targets
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_proc, fapi2_procTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_proc !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_eq, fapi2_eqTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_eq !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_ex, fapi2_exTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_ex !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_core, fapi2_coreTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_core !!");
-        }
-        if (isHwValid(l_proc, MY_MCS))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mcs, fapi2_mcsTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_mcs !!");
-            }
-        }
-        if (isHwValid(l_proc, MY_MCA))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mca, fapi2_mcaTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_mca !!");
-            }
-        }
-        if (isHwValid(l_proc, MY_MCBIST))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mcbist, fapi2_mcbistTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_mcbist !!");
-            }
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_pec, fapi2_pecTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_pec !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_phb, fapi2_phbTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_phb !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_xbus, fapi2_xbusTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_xbus !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_obus, fapi2_obusTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_obus !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_obrick, fapi2_oBrickTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_obrick !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_ppe, fapi2_ppeTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_ppe !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_perv, fapi2_pervTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_perv !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_sbe, fapi2_sbeTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_sbe !!");
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_capp, fapi2_cappTarget, scratchWriteValue);
-        if(l_errl != nullptr)
-        {
-          delete l_errl;
-          l_errl = nullptr;
-          numFails++;
-          TS_FAIL("Error occured in p9_sample_procedure_capp !!");
-        }
+        #define HWP_TEST_COMMON_MACRO(PROCEDURE_NAME, FAPI2_TARGET)                             \
+        /*Get/Set Attr for all of the targets*/                                                 \
+        numTests++;                                                                             \
+        FAPI_INVOKE_HWP(l_errl, PROCEDURE_NAME, FAPI2_TARGET, scratchWriteValue);               \
+        if(l_errl != nullptr)                                                                   \
+        {                                                                                       \
+            delete l_errl;                                                                      \
+            l_errl = nullptr;                                                                   \
+            numFails++;                                                                         \
+            TS_FAIL("Error occured in" #PROCEDURE_NAME "!!");                                   \
+        }                                                                                       \
 
-        if (isHwValid(l_proc, MY_MC))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mc, fapi2_mcTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_mc !!");
-            }
-        }
-        if (isHwValid(l_proc, MY_MI))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_mi, fapi2_miTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_mi !!");
-            }
-        }
-        if (isHwValid(l_proc, MY_DMI))
-        {
-            numTests++;
-            FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_dmi, fapi2_dmiTarget, scratchWriteValue);
-            if(l_errl != nullptr)
-            {
-              delete l_errl;
-              l_errl = nullptr;
-              numFails++;
-              TS_FAIL("Error occured in p9_sample_procedure_dmi !!");
-            }
-        }
+        #define HWP_TEST_MODEL_SPECIFIC_MACRO(PROCEDURE_NAME, FAPI2_TARGET, TEST_TARGET)        \
+        if (isHwValid(l_proc, TEST_TARGET))                                                     \
+        {                                                                                       \
+            numTests++;                                                                         \
+            FAPI_INVOKE_HWP(l_errl, PROCEDURE_NAME, FAPI2_TARGET, scratchWriteValue);           \
+            if(l_errl != nullptr)                                                               \
+            {                                                                                   \
+                delete l_errl;                                                                  \
+                l_errl = nullptr;                                                               \
+                numFails++;                                                                     \
+                TS_FAIL("Error occured in" #PROCEDURE_NAME "!!");                               \
+            }                                                                                   \
+        }                                                                                       \
+
+        // Common for all P9 Models
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_proc, fapi2_procTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_eq, fapi2_eqTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_ex, fapi2_exTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_core, fapi2_coreTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_pec, fapi2_pecTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_phb, fapi2_phbTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_xbus, fapi2_xbusTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_obus, fapi2_obusTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_obrick, fapi2_oBrickTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_ppe, fapi2_ppeTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_perv, fapi2_pervTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_sbe, fapi2_sbeTarget)
+        HWP_TEST_COMMON_MACRO(p9_sample_procedure_capp, fapi2_cappTarget)
+        // Targets that are only found in specific models
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcs, fapi2_mcsTarget, MY_MCS)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mca, fapi2_mcaTarget, MY_MCA)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcbist, fapi2_mcbistTarget, MY_MCBIST)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mc, fapi2_mcTarget, MY_MC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mi, fapi2_miTarget, MY_MI)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_dmi, fapi2_dmiTarget, MY_DMI)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omi, fapi2_omiTarget, MY_OMI)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omicTarget, MY_OMIC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcc, fapi2_mccTarget, MY_MCC)
 
     }while(0);
     FAPI_INF("test_fapiHWP:: Test Complete. %d/%d fails",  numFails,numTests);

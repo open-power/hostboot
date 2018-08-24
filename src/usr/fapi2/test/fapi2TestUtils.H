@@ -47,6 +47,9 @@
 #define PERV_PER_PROC        43
 #define XBUS_PER_PROC        1
 #define OBUS_PER_PROC        2
+#define MCC_PER_MI           2
+#define OMI_PER_MCC          2
+#define OMIC_PER_MC          3
 
 #define SIMULATED_GOOD_CORES 4
 
@@ -66,6 +69,12 @@
 #define START_MI_CHIPLET_NUM          0x07
 // DMI (0, 3 => 0x07, 0x08)
 #define START_DMI_CHIPLET_NUM         0x07
+// OMI (0, 16 => 0x07, 0x08)
+#define START_OMI_CHIPLET_NUM         0x07
+// OMIC (0, 5 => 0x07, 0x08)
+#define START_OMIC_CHIPLET_NUM        0x07
+// MCC (0, 8 => 0x07, 0x08)
+#define START_MCC_CHIPLET_NUM         0x07
 // OBUS (0, 3 => 0x09, 0x0C)
 #define START_OBUS_CHIPLET_NUM        0x09
 // PEC (0, 1, 2 => 0x0D, 0x0E, 0x0F)
@@ -86,7 +95,9 @@ namespace fapi2
 
 //Used by generateTargets to get a list of all platform target
 // types that directly relate to fapi2 target types
-enum{
+// NOTE: KEEP THIS IN SAME ORDER AS testTargetInfoList ARRAY BELOW
+enum FAPI2_TEST_TARGET_ID {
+    MY_PROC,
     MY_EQ,
     MY_EX,
     MY_CORE,
@@ -105,8 +116,90 @@ enum{
     MY_MC,
     MY_MI,
     MY_DMI,
+    MY_OMI,
+    MY_OMIC,
+    MY_MCC,
     NUM_TARGETS
 };
+
+// Use the following macro to generate a list of TARGETING targets for each FAPI2_TEST_TARGET_ID
+// you can then use the generated TARGETING targets by using targeting_targets[FAPI2_TEST_TARGET_ID] .
+// In addition you will be able to use the fapi2 version of the targets by using the fapi2_<target>Target.
+// You can see how the fapi2 targets are instantiated below.
+//
+// NOTE: This is expected to be called inside a do-while(0) wrapper
+// variables created : numTests, numFails, generationSuccess, l_proc, l_chipList, targeting_targets,
+//                     fapi2_procTarget, fapi2_eqTarget, fapi2_exTarget, fapi2_coreTarget, fapi2_pecTarget,
+//                     fapi2_phbTarget, fapi2_xbusTarget, fapi2_obusTarget, fapi2_oBrickTarget, fapi2_ppeTarget,
+//                     fapi2_pervTarget, fapi2_sbeTarget, fapi2_cappTarget, fapi2_mcsTarget, fapi2_mcaTarget,
+//                     fapi2_mcbistTarget, fapi2_mcTarget, fapi2_miTarget, fapi2_dmiTarget, fapi2_omiTarget,
+//                     fapi2_omicTarget, fapi2_mccTarget
+// Keep in the same order as FAPI2_TEST_TARGET_ID for ease of read
+#define GENERATE_TEST_TARGETS(TEST_FUNCTION_NAME)                                                            \
+int generationSuccess = true;                                                                                \
+TARGETING::Target * l_proc = nullptr;                                                                        \
+TARGETING::TargetHandleList l_chipList;                                                                      \
+numTests++;                                                                                                  \
+/* Get a list of all of the proc chips */                                                                    \
+TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);                                             \
+if(l_chipList.size())                                                                                        \
+{                                                                                                            \
+    l_proc = l_chipList[0];                                                                                  \
+}                                                                                                            \
+else                                                                                                         \
+{                                                                                                            \
+    TS_FAIL("TEST_FUNCTION_NAME Fail: could not find any proc, skipping tests");                             \
+    numFails++;                                                                                              \
+    break;                                                                                                   \
+}                                                                                                            \
+TARGETING::Target* targeting_targets[fapi2::NUM_TARGETS];                                                    \
+/* Call helper function to generate a bunch of TARGETING targets to use to test  */                          \
+generateTargets(l_proc, targeting_targets);                                                                  \
+for( uint64_t x = 0; x < NUM_TARGETS; x++ )                                                                  \
+{                                                                                                            \
+    /*Skip tests where the HW unit to test isn't valid for the proc type */                                  \
+    if (!isHwValid(l_proc, x))                                                                               \
+    {                                                                                                        \
+        continue;                                                                                            \
+    }                                                                                                        \
+    else if(targeting_targets[x] == nullptr)                                                                 \
+    {                                                                                                        \
+        FAPI_ERR("TEST_FUNCTION_NAME:: targeting_targets[%d] is null", x);                                   \
+        generationSuccess = false;                                                                           \
+    }                                                                                                        \
+}                                                                                                            \
+numTests++;                                                                                                  \
+if(!generationSuccess)                                                                                       \
+{                                                                                                            \
+    numFails++;                                                                                              \
+    TS_FAIL("TEST_FUNCTION_NAME Fail : failed to correctly generate targets");                               \
+}                                                                                                            \
+/* Common Targets  */                                                                                        \
+fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>  fapi2_procTarget(targeting_targets[MY_PROC]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_EQ>         fapi2_eqTarget(targeting_targets[MY_EQ]);                       \
+fapi2::Target<fapi2::TARGET_TYPE_EX>         fapi2_exTarget(targeting_targets[MY_EX]);                       \
+fapi2::Target<fapi2::TARGET_TYPE_CORE>       fapi2_coreTarget(targeting_targets[MY_CORE]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_PEC>        fapi2_pecTarget(targeting_targets[MY_PEC]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_PHB>        fapi2_phbTarget(targeting_targets[MY_PHB]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_XBUS>       fapi2_xbusTarget(targeting_targets[MY_XBUS]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_OBUS>       fapi2_obusTarget(targeting_targets[MY_OBUS]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK> fapi2_oBrickTarget(targeting_targets[MY_OBUS_BRICK]);           \
+fapi2::Target<fapi2::TARGET_TYPE_PPE>        fapi2_ppeTarget(targeting_targets[MY_PPE]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_PERV>       fapi2_pervTarget(targeting_targets[MY_PERV]);                   \
+fapi2::Target<fapi2::TARGET_TYPE_SBE>        fapi2_sbeTarget(targeting_targets[MY_SBE]);                     \
+fapi2::Target<fapi2::TARGET_TYPE_CAPP>       fapi2_cappTarget(targeting_targets[MY_CAPP]);                   \
+/* Model Specific Targets */                                                                                 \
+fapi2::Target<fapi2::TARGET_TYPE_MCS>        fapi2_mcsTarget(targeting_targets[MY_MCS]);       /* Nimbus */  \
+fapi2::Target<fapi2::TARGET_TYPE_MCA>        fapi2_mcaTarget(targeting_targets[MY_MCA]);       /* Nimbus */  \
+fapi2::Target<fapi2::TARGET_TYPE_MCBIST>     fapi2_mcbistTarget(targeting_targets[MY_MCBIST]); /* Nimbus */  \
+fapi2::Target<fapi2::TARGET_TYPE_MC>         fapi2_mcTarget(targeting_targets[MY_MC]);   /* Cumulus / Axone*/\
+fapi2::Target<fapi2::TARGET_TYPE_MI>         fapi2_miTarget(targeting_targets[MY_MI]);   /* Cumulus / Axone*/\
+fapi2::Target<fapi2::TARGET_TYPE_DMI>        fapi2_dmiTarget(targeting_targets[MY_DMI]); /* Cumulus */       \
+fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);   /* Axone */       \
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omicTarget(targeting_targets[MY_OMIC]); /* Axone */       \
+fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);   /* Axone */
+
+
 
 /**
  *  @brief Number of children of given type that applicable pervasive has
@@ -130,6 +223,10 @@ enum PERVASIVE_CHILDREN {
     PERV_MC_CHILDREN           = 1,
     PERV_MI_CHILDREN           = 2,
     PERV_DMI_CHILDREN          = 4,
+    PERV_OCC_CHILDREN          = 4,
+    PERV_MCC_CHILDREN          = 4,
+    PERV_OMI_CHILDREN          = 8,
+    PERV_OMIC_CHILDREN         = 3,
 };
 
 /**
