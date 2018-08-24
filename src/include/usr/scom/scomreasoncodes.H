@@ -42,6 +42,11 @@ namespace SCOM
         SCOM_TRANSLATE_CENTAUR          = 0x08,
         SCOM_RT_SEND_SCOM_TO_HYP        = 0x09,
         SCOM_OP_SANITY_CHECK            = 0x0A,
+        SCOM_VERIFY_CENTAUR_CACHE       = 0x0B,
+        SCOM_WRITE_CENTAUR_CACHE        = 0x0C,
+        SCOM_READ_CENTAUR_CACHE         = 0x0D,
+        SCOM_CALL_WAKEUP_HYP            = 0x0E,
+        SCOM_CALL_WAKEUP_HWP            = 0x0F,
     };
 
     enum scomReasonCode

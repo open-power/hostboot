@@ -54,39 +54,76 @@ using namespace TARGETING;
 using namespace SCOM;
 
 /**
- * @brief Enable and disable special wakeup for SCOM operations
- *   FSP:  Call the Host interface wakeup function for all core
- *         targets under the specified target, HOST wakeup bit is used
- *   BMC:  Call the wakeup HWP for the target type specified (EQ/EX/CORE),
- *         Proc type calls the HWP for all cores, FSP wakeup bit is used
+ * @brief Check to see which type of wakeup we need to use
+ * @return  true: Use Host wakeup interface;
+ *          false: Use internal wakeup HWP
  */
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
+bool useHypWakeup( void )
+{
+#ifdef __HOSTBOOT_RUNTIME
+    // FSP and BMC runtime use hostservice for wakeup, provided that
+    //  we are using a level of opal-prd that supports it
+
+    // Always use the hyp call on FSP systems
+    if( INITSERVICE::spBaseServicesEnabled() )
+    {
+        return true;
+    }
+    // PHYP always supports it
+    else if( TARGETING::is_phyp_load() )
+    {
+        return true;
+    }
+    // On non-FSP + non-PHYP systems, explicitly check that the OPAL support
+    //  is there
+    else if( (g_hostInterfaces != NULL) &&
+             (g_hostInterfaces->get_interface_capabilities != NULL) &&
+             (g_hostInterfaces->get_interface_capabilities(HBRT_CAPS_SET1_OPAL)
+              & HBRT_CAPS_OPAL_HAS_WAKEUP) &&
+             (g_hostInterfaces->wakeup != NULL) )
+    {
+        return true;
+    }
+
+    return false;
+
+#else
+
+    // IPL time always uses our internal version
+    return false;
+
+#endif
+}
+
+/**
+ * @brief Use the Host/Hyp interface to control special wakeup
+ * @param i_target  Input target core/ex/eq/etc
+ * @param i_enable  Turn wakeup on or off
+ */
+errlHndl_t callWakeupHyp(TARGETING::Target* i_target, bool i_enable)
 {
     errlHndl_t l_errl = NULL;
-    fapi2::ReturnCode l_rc;
-
-    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
 #ifdef __HOSTBOOT_RUNTIME
-    // FSP and BMC runtime use hostservice for wakeup
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     // Check for valid interface function
-    if( g_hostInterfaces == NULL ||
-        g_hostInterfaces->wakeup == NULL )
+    if( (g_hostInterfaces == NULL) ||
+        (g_hostInterfaces->wakeup == NULL) )
     {
         TRACFCOMP( g_trac_scom,
                    ERR_MRK"Hypervisor wakeup interface not linked");
 
         /*@
          * @errortype
-         * @moduleid     SCOM_HANDLE_SPECIAL_WAKEUP
+         * @moduleid     SCOM_CALL_WAKEUP_HYP
          * @reasoncode   SCOM_RUNTIME_INTERFACE_ERR
          * @userdata1    Target HUID
          * @userdata2    Wakeup Enable
          * @devdesc      Wakeup runtime interface not linked.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                         SCOM_HANDLE_SPECIAL_WAKEUP,
+                                         SCOM_CALL_WAKEUP_HYP,
                                          SCOM_RUNTIME_INTERFACE_ERR,
                                          get_huid(i_target),
                                          i_enable);
@@ -147,7 +184,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
             // convert rc to error log
             /*@
              * @errortype
-             * @moduleid         SCOM_HANDLE_SPECIAL_WAKEUP
+             * @moduleid         SCOM_CALL_WAKEUP_HYP
              * @reasoncode       SCOM_RUNTIME_WAKEUP_ERR
              * @userdata1        Hypervisor return code
              * @userdata2[0:31]  Runtime Target ID
@@ -156,7 +193,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
              */
             l_errl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                        SCOM_HANDLE_SPECIAL_WAKEUP,
+                                        SCOM_CALL_WAKEUP_HYP,
                                         SCOM_RUNTIME_WAKEUP_ERR,
                                         l_rc,
                                         TWO_UINT32_TO_UINT64(
@@ -172,7 +209,26 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
     }
 
 #else
-    // IPL time so use HWP for wakeup
+
+    assert( false, "Cannot use host wakeup in IPL code!!" );
+
+#endif
+
+    return l_errl;
+}
+
+
+/**
+ * @brief Call the wakeup HWP to control special wakeup
+ * @param i_target  Input target core/ex/eq/etc
+ * @param i_enable  Turn wakeup on or off
+ */
+errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
+{
+    errlHndl_t l_errl = NULL;
+    fapi2::ReturnCode l_rc;
+
+    TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
     if(l_type == TARGETING::TYPE_PROC)
     {
@@ -185,7 +241,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
               ++pCore_it )
         {
             // To simplify, just call recursively with the core target
-            l_errl = handleSpecialWakeup(*pCore_it, i_enable);
+            l_errl = callWakeupHwp(*pCore_it, i_enable);
             if(l_errl)
             {
                 break;
@@ -206,7 +262,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
 
         /*@
          * @errortype
-         * @moduleid         SCOM_HANDLE_SPECIAL_WAKEUP
+         * @moduleid         SCOM_CALL_WAKEUP_HWP
          * @reasoncode       SCOM_SPCWKUP_COUNT_ERR
          * @userdata1        Target HUID
          * @userdata2[0:31]  Wakeup Enable
@@ -214,7 +270,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
          * @devdesc          Disabling special wakeup when not enabled.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                         SCOM_HANDLE_SPECIAL_WAKEUP,
+                                         SCOM_CALL_WAKEUP_HWP,
                                          SCOM_SPCWKUP_COUNT_ERR,
                                          get_huid(i_target),
                                          TWO_UINT32_TO_UINT64(
@@ -318,7 +374,27 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
         i_target->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
     }
 
-#endif // __HOSTBOOT_RUNTIME
+    return l_errl;
+}
+
+
+/**
+ * @brief Enable and disable special wakeup for SCOM operations
+ */
+errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
+{
+    errlHndl_t l_errl = NULL;
+
+    static bool l_useHypWakeup = useHypWakeup();
+
+    if( l_useHypWakeup )
+    {
+        l_errl = callWakeupHyp( i_target, i_enable );
+    }
+    else
+    {
+        l_errl = callWakeupHwp( i_target, i_enable );
+    }
 
     return l_errl;
 }
