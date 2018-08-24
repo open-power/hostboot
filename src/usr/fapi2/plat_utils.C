@@ -1485,10 +1485,10 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
                                     const bool i_enable)
 {
     fapi2::ReturnCode fapi_rc = fapi2::FAPI2_RC_SUCCESS;
-    FAPI_INF("platSpecialWakeup");
 
     TARGETING::Target* l_target =
         reinterpret_cast<TARGETING::Target*>(i_target.get());
+    FAPI_INF("platSpecialWakeup : HUID=%.8X, enable=%d", TARGETING::get_huid(l_target), i_enable);
 
     errlHndl_t err_SW = handleSpecialWakeup(l_target,i_enable);
     if(err_SW)

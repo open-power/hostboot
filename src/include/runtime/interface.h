@@ -166,6 +166,7 @@ enum HbrtRcPiberr_t
 /* OPAL fixes */
 #define HBRT_CAPS_SET1_OPAL    1
 #define HBRT_CAPS_OPAL_HAS_XSCOM_RC     (1ul << 0)
+#define HBRT_CAPS_OPAL_HAS_WAKEUP       (1ul << 1)
 
 /* PHYP fixes */
 #define HBRT_CAPS_SET2_PHYP    2
