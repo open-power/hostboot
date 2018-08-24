@@ -53,23 +53,6 @@
     </deconfigure>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_EMPTY_VECTOR</rc>
-    <description>
-      Empty vector conditional failed.
-    </description>
-    <ffdc>RECEIVED</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-
    <hwpError>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
