@@ -64,6 +64,19 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t>& io_endp1_txFaillanes,
     std::vector<uint8_t>::iterator l_itDrv;
     std::vector<uint8_t>::iterator l_itRcv;
 
+    FAPI_INF("invalidateNonMatchingFailLanes - endp1Tx size:%llu endp2Rx size:%llu",
+             io_endp1_txFaillanes.size(), io_endp2_rxFaillanes.size());
+
+    for(unsigned long i = 0; (i < io_endp1_txFaillanes.size() && io_endp1_txFaillanes.size() != 0); i++)
+    {
+        FAPI_INF("Endp1Tx(%lu):%llu ", i, io_endp1_txFaillanes[i]);
+    }
+
+    for(unsigned long i = 0; (i < io_endp2_rxFaillanes.size() && io_endp2_rxFaillanes.size() != 0); i++)
+    {
+        FAPI_INF("Endp2Rx(%lu):%llu ", i, io_endp2_rxFaillanes[i]);
+    }
+
     o_invalidFails_inTx_Ofendp1 = false;
     o_invalidFails_inRx_Ofendp2 = false;
 
@@ -148,6 +161,9 @@ void combineFieldandMnfgLanes(std::vector<uint8_t>& i_mnfgFaillanes,
                               std::vector<uint8_t>& o_allFaillanes)
 {
     std::vector<uint8_t>::iterator l_it;
+
+    FAPI_INF("combineFieldandMnfgLanes - mnfgFailLanes size:%llu fieldFailLanes size:%llu",
+             i_mnfgFaillanes.size(), i_fieldFaillanes.size());
 
     // Merge the Field and Mnfg fail lanes
     l_it = o_allFaillanes.begin();
