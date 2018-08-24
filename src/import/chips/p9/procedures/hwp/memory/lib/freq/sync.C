@@ -38,13 +38,14 @@
 #include <algorithm>
 #include <vector>
 #include <map>
-#include <mss.H>
 #include <lib/freq/sync.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/assert_noexit.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/spd/spd_facade.H>
 #include <generic/memory/lib/spd/spd_utils.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <lib/mss_attribute_accessors.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
