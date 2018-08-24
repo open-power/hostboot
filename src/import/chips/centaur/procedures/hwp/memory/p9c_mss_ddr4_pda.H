@@ -38,6 +38,7 @@
 #define _MSS_DDR4_PDA_H
 #include <fapi2.H>
 #include <vector>
+#include <dimmConsts.H>
 using namespace std;
 
 extern "C"
@@ -57,6 +58,7 @@ extern "C"
             uint8_t dram;
             uint8_t rank;
             uint8_t port;
+            uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM];
 
             ///
             /// @brief PDA MRS storage constructor
@@ -66,9 +68,10 @@ extern "C"
             /// @param[in] di DIMM position
             /// @param[in] r rank
             /// @param[in] p port
+            /// @param[in] i_odt_wr nominal write ODT settings
             ///
             PDA_MRS_Storage(const uint8_t ad, const uint32_t an, const uint8_t dr, const uint8_t di, const uint8_t r,
-                            const uint8_t p);
+                            const uint8_t p, const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM]);
 
             ///
             /// @brief Destructor

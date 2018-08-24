@@ -93,6 +93,8 @@ class generic_shmoo
         uint16_t iv_dqs_rb_regval[MAX_PORT][MAX_RANK][MAX_DQ];
         uint16_t iv_dqs_lb_regval[MAX_PORT][MAX_RANK][MAX_DQ];
         uint16_t iv_dqs_nom_val[MAX_PORT][MAX_RANK][MAX_DQ];
+        uint8_t iv_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES];
+        uint8_t iv_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES];
 
     public:
 

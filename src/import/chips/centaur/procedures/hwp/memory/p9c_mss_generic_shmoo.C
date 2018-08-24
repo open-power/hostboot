@@ -143,6 +143,7 @@ extern "C"
         uint8_t l_dram_gen = 0;
         uint8_t i_rp = 0;
         uint8_t l_shmoo_param = 0;
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_target_centaur;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, eff_stack_type));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, l_dram_gen));
@@ -151,6 +152,8 @@ extern "C"
         iv_MAX_RANKS[0] = num_ranks_per_dimm[0][0] + num_ranks_per_dimm[0][1];
         iv_MAX_RANKS[1] = num_ranks_per_dimm[1][0] + num_ranks_per_dimm[1][1];
 
+        l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_SCHMOO_MODE, i_target, l_shmoo_param));
         iv_shmoo_param = l_shmoo_param;
         FAPI_INF(" +++++ The iv_shmoo_param = %d ++++ ", iv_shmoo_param);
@@ -158,11 +161,21 @@ extern "C"
         if ( l_attr_eff_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES )
         {
             iv_MAX_BYTES = 10;
+            std::fill(&iv_isdm_c4_dq[0][0],
+                      &iv_isdm_c4_dq[0][0] + (MAX_PORTS_PER_CEN * DIMM_TO_C4_DQ_ENTRIES),
+                      0);
+            std::fill(&iv_isdm_c4_dqs[0][0],
+                      &iv_isdm_c4_dqs[0][0] + (MAX_PORTS_PER_CEN * DIMM_TO_C4_DQS_ENTRIES),
+                      0);
         }
         else
         {
             iv_dmm_type = 1;
             iv_MAX_BYTES = 9;
+
+            // Cache these attrs for when we do mcb_error_map
+            FAPI_TRY(isdimmdq_workaround(l_target_centaur, iv_isdm_c4_dq));
+            FAPI_TRY(isdimmdqs_workaround(l_target_centaur, iv_isdm_c4_dqs));
         }
 
         for(uint8_t l_rnk = 0; l_rnk < iv_MAX_RANKS[0]; l_rnk++)
@@ -523,7 +536,7 @@ extern "C"
 
         FAPI_DBG("%s:  checking error map ", mss::c_str(i_target));
         FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
-                               iv_count_bad_dq), "Failed mcb_error_map");
+                               iv_count_bad_dq, iv_isdm_c4_dq, iv_isdm_c4_dqs), "Failed mcb_error_map");
 
         for (uint8_t l_p = 0; l_p < MAX_PORT; l_p++)
         {
@@ -532,6 +545,19 @@ extern "C"
                 // Byte loop
                 const uint8_t l_rank = iv_valid_rank[l_p][l_rnk];
                 const uint8_t l_dimm_rank = l_rank % MAX_RANKS_PER_DIMM;
+
+                if(l_rank > 3)
+                {
+                    l_faulted_dimm = 1;
+                }
+                else
+                {
+                    l_faulted_dimm = 0;
+                }
+
+                // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
+                FAPI_TRY(dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, l_dimm_rank, l_dqBitmap),
+                         "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target));
 
                 for (uint8_t l_byte = 0; l_byte < DIMM_DQ_RANK_BITMAP_SIZE; l_byte++)
                 {
@@ -543,19 +569,6 @@ extern "C"
                             l_memory_health = 1;
                             l_faulted_rank = l_rank;
                             l_faulted_port = l_p;
-
-                            if(l_rank > 3)
-                            {
-                                l_faulted_dimm = 1;
-                            }
-                            else
-                            {
-                                l_faulted_dimm = 0;
-                            }
-
-                            // Get the bad DQ Bitmap for l_port, l_dimm, l_rank
-                            FAPI_TRY(dimmGetBadDqBitmap(i_target, l_p, l_faulted_dimm, l_dimm_rank, l_dqBitmap),
-                                     "Error from dimmGetBadDqBitmap on %s.", mss::c_str(i_target));
 
                             if (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
                             {
@@ -698,7 +711,8 @@ extern "C"
             l_max_byte = 9;
         }
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq, iv_isdm_c4_dq,
+                               iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
@@ -799,7 +813,8 @@ extern "C"
             l_max_nibble = 18;
         }
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq, iv_isdm_c4_dq,
+                               iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         for (l_p = 0; l_p < MAX_PORT; l_p++)
@@ -1035,7 +1050,7 @@ extern "C"
                         {
                             l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
                             FAPI_INF("Before access call");
-                            FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, i_rnk, l_input_type_e, l_dq, 1, val));
+                            FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, i_rnk, l_input_type_e, l_dq, 0, val));
                             SHMOO.MBA.P[l_p].S[i_rnk].K.nom_val[l_dq] = val;
                             SHMOO.MBA.P[l_p].S[i_rnk].K.rb_regval[l_dq] = val;
                             SHMOO.MBA.P[l_p].S[i_rnk].K.lb_regval[l_dq] = val;
@@ -1186,12 +1201,13 @@ extern "C"
                                 SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq] = SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq] +
                                         l_delay;
 
-                                FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 1,
+                                FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
                                                                      SHMOO.MBA.P[l_p].S[rank].K.rb_regval[l_dq]));
 
                             }
 
-                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                                   iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
 
                             if(l_p == 0)
@@ -1253,7 +1269,7 @@ extern "C"
 
                     for (l_n = 0; l_n < l_SCHMOO_NIBBLES; l_n++)
                     {
-                        FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 1,
+                        FAPI_TRY(mss_access_delay_reg_schmoo(i_target, l_access_type_e, l_p, rank, l_input_type_e, l_dq, 0,
                                                              SHMOO.MBA.P[l_p].S[rank].K.nom_val[l_dq]));
                         l_dq = l_dq + 4;
                     }
@@ -1288,7 +1304,8 @@ extern "C"
                                                                      SHMOO.MBA.P[l_p].S[rank].K.lb_regval[l_dq]));
                             }
 
-                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                                   iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
                             if(l_p == 0)
                             {
@@ -1445,7 +1462,8 @@ extern "C"
                 do
                 {
                     l_status = 0;
-                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                           iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
@@ -1588,7 +1606,8 @@ extern "C"
                 {
                     l_status = 0;
 
-                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                           iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
@@ -1760,7 +1779,8 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                               iv_isdm_c4_dq, iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: ecb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -1918,7 +1938,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         } // end bound == right
@@ -2049,7 +2070,8 @@ extern "C"
             }
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2092,7 +2114,8 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                               iv_isdm_c4_dq, iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2213,7 +2236,8 @@ extern "C"
             } //end of bit
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2318,7 +2342,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         } //end of Left
 
@@ -2362,7 +2387,8 @@ extern "C"
         FAPI_INF("\nWRT_DQS --- > CDIMM  X8 - Scenario = %d", scenario);
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                               iv_isdm_c4_dq, iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2529,7 +2555,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -2674,7 +2701,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         } //end of bound Left
 
@@ -2718,7 +2746,8 @@ extern "C"
 
         FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+        FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                               iv_isdm_c4_dq, iv_isdm_c4_dqs),
                  "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         if(iv_dmm_type == 1)
@@ -2887,7 +2916,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
         }
 
@@ -3034,7 +3064,8 @@ extern "C"
 
             FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
 
-            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq),
+            FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                   iv_isdm_c4_dq, iv_isdm_c4_dqs),
                      "generic_shmoo::do_mcbist_test: mcb_error_map failed!!");
 
         } //end of LEFT
@@ -3260,7 +3291,8 @@ extern "C"
         const auto l_target_centaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
 
         FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
-                               iv_count_bad_dq), "generic_shmoo::print report: mcb_error_map failed!!");
+                               iv_count_bad_dq, iv_isdm_c4_dq, iv_isdm_c4_dqs),
+                 "generic_shmoo::print report: mcb_error_map failed!!");
 
         if (iv_dmm_type == 1)
         {
@@ -3996,7 +4028,8 @@ extern "C"
                 do
                 {
                     l_status = 0;
-                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                           iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
@@ -4103,6 +4136,8 @@ extern "C"
                         } // end for dq
                     } // end for rank
 
+                    FAPI_DBG("%s knob_update_bin_composite: Running RIGHT, shmoo number %d of a possible 8",
+                             mss::c_str(i_target), count_cycle);
 
                     FAPI_TRY(do_mcbist_reset(i_target), "generic_shmoo::find_bound do_mcbist_reset failed");
                     FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
@@ -4144,7 +4179,8 @@ extern "C"
                 {
                     l_status = 0;
 
-                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq));
+                    FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1, iv_count_bad_dq,
+                                           iv_isdm_c4_dq, iv_isdm_c4_dqs));
 
                     for (l_rank = 0; l_rank < iv_MAX_RANKS[l_p]; l_rank++)
                     {
@@ -4251,6 +4287,9 @@ extern "C"
                             }
                         }
                     }
+
+                    FAPI_DBG("%s knob_update_bin_composite: Running LEFT, shmoo number %d of a possible 8",
+                             mss::c_str(i_target), count_cycle);
 
                     FAPI_TRY(do_mcbist_reset(i_target), "generic_shmoo::find_bound do_mcbist_reset failed");
                     FAPI_TRY(do_mcbist_test(i_target), "generic_shmoo::find_bound do_mcbist_test failed");
@@ -4648,7 +4687,7 @@ extern "C"
             uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
-                                   iv_count_bad_dq), "Failed mcb_error_map");
+                                   iv_count_bad_dq, iv_isdm_c4_dq, iv_isdm_c4_dqs), "Failed mcb_error_map");
         }
 
         for(l_p = 0; l_p < MAX_PORT; l_p++)
@@ -4691,7 +4730,7 @@ extern "C"
             uint8_t l_CDarray0[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             uint8_t l_CDarray1[DIMM_TO_C4_DQ_ENTRIES] = { 0 };
             FAPI_TRY(mcb_error_map(i_target, iv_mcbist_error_map, l_CDarray0, l_CDarray1,
-                                   iv_count_bad_dq), "Failed mcb_error_map");
+                                   iv_count_bad_dq, iv_isdm_c4_dq, iv_isdm_c4_dqs), "Failed mcb_error_map");
         }
 
         for(l_p = 0; l_p < MAX_PORT; l_p++)

@@ -69,9 +69,11 @@ extern "C" {
     /// @param[in] di  DIMM
     /// @param[in] r   Rank
     /// @param[in] p   Port
+    /// @param[in] i_odt_wr nominal write ODT settings
     ///
     PDA_MRS_Storage::PDA_MRS_Storage(const uint8_t ad, const uint32_t an, const uint8_t dr, const uint8_t di,
-                                     const uint8_t r, const uint8_t p)
+                                     const uint8_t r, const uint8_t p,
+                                     const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM])
     {
         attribute_data = ad;
         attribute_name = an;
@@ -81,6 +83,10 @@ extern "C" {
         port = p;
         MRS = 0xFF;
         pda_string[0] = '\0';
+
+        std::copy(&i_odt_wr[0][0][0],
+                  &i_odt_wr[0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM),
+                  &odt_wr[0][0][0]);
     }
 
     ///
@@ -625,6 +631,9 @@ extern "C" {
         dimm           = temp.dimm          ;
         rank           = temp.rank          ;
         port           = temp.port          ;
+        std::copy(&odt_wr[0][0][0],
+                  &odt_wr[0][0][0] + (MAX_PORTS_PER_MBA * MAX_DIMM_PER_PORT * MAX_RANKS_PER_DIMM),
+                  &temp.odt_wr[0][0][0]);
     }
 
     ///
@@ -668,7 +677,8 @@ extern "C" {
         uint32_t l_port_number = 0;
         uint32_t dimm_number = i_dimm;
         uint32_t rank_number = i_rank;
-        const uint32_t NUM_POLL = 10;
+        // Increased polling parameters to avoid CCS hung errors in HB
+        const uint32_t NUM_POLL = 10000;
         const uint32_t WAIT_TIMER = 1500;
         uint64_t reg_address = 0;
         fapi2::buffer<uint64_t> data_buffer;
@@ -984,6 +994,7 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
+        FAPI_INF("mss_ddr4_setup_pda: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
         io_ccs_inst_cnt = 0;
 
@@ -1047,9 +1058,11 @@ extern "C" {
         uint8_t dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t num_spare[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         uint8_t wr_vref[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
+        uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         uint8_t dram_width = 0;
         uint8_t array[][2][19] = {{{0x18, 0x18, 0x1c, 0x1c, 0x18, 0x18, 0x1c, 0x1c, 0x18, 0x1c, 0x18, 0x18, 0x1c, 0x1c, 0x1c, 0x18, 0x1c, 0x18, 0x18}, {0x18, 0x1c, 0x20, 0x1c, 0x20, 0x1c, 0x20, 0x20, 0x1c, 0x1c, 0x20, 0x1c, 0x18, 0x1c, 0x1c, 0x1c, 0x1c, 0x18, 0x18}}, {{0x18, 0x1c, 0x1c, 0x1c, 0x20, 0x1c, 0x20, 0x18, 0x18, 0x18, 0x1c, 0x1c, 0x1c, 0x18, 0x18, 0x1c, 0x18, 0x18, 0x1c}, {0x18, 0x1c, 0x18, 0x1c, 0x20, 0x1c, 0x18, 0x1c, 0x20, 0x1c, 0x1c, 0x1c, 0x1c, 0x24, 0x1c, 0x1c, 0x1c, 0x1c, 0x1c}}};
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, dram_stack));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target, odt_wr));
 
         //get num master ranks per dimm for 3DS
         if(dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
@@ -1119,7 +1132,7 @@ extern "C" {
                             }
 
                             i_pda.push_back(PDA_MRS_Storage(array[port][dimm][dram], fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram, dimm, rank,
-                                                            port));
+                                                            port, odt_wr));
                             FAPI_INF("PDA STRING: %d %s", i_pda.size() - 1, i_pda[i_pda.size() - 1].c_str());
                         }//for each dram
                     }//for each rank
@@ -1199,7 +1212,8 @@ extern "C" {
         }
 
         uint32_t io_ccs_inst_cnt = 0;
-        const uint32_t NUM_POLL = 10;
+        // Increased polling parameters to avoid CCS hung errors in HB
+        const uint32_t NUM_POLL = 10000;
         const uint32_t WAIT_TIMER = 1500;
         fapi2::buffer<uint64_t> data_buffer_64;
         fapi2::variable_buffer address_16(16);
@@ -1236,7 +1250,6 @@ extern "C" {
         uint8_t wl_launch_time = 0;
         uint8_t odt_hold_time = 0;
         uint8_t post_odt_nop_idle = 0;
-        uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         bool prev_dram_set = false;
         vector<PDA_Scom_Storage> scom_storage;
         uint8_t prev_dram = 0;
@@ -1276,7 +1289,6 @@ extern "C" {
         FAPI_TRY(rasn_1.clearBit(0, 1));
         FAPI_TRY(casn_1.clearBit(0, 1));
         FAPI_TRY(wen_1.clearBit(0, 1));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR,  i_target, odt_wr));
 
         //runs through each PDA command
         for(uint32_t i = 0; i < i_pda.size(); i++)
@@ -1334,7 +1346,7 @@ extern "C" {
 
                 FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
-                FAPI_TRY(odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
+                FAPI_TRY(odt_4.insert(i_pda[i].odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
                 // Send out to the CCS array
                 FAPI_TRY(mss_ccs_inst_arry_0( i_target,
                                               io_ccs_inst_cnt,
@@ -1417,7 +1429,7 @@ extern "C" {
 
                     FAPI_TRY(mss_disable_cid(i_target, csn_8, cke_4));
 
-                    FAPI_TRY(odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
+                    FAPI_TRY(odt_4.insert(i_pda[i].odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
 
                     // Send out to the CCS array
                     FAPI_TRY(mss_ccs_inst_arry_0( i_target,
@@ -1513,6 +1525,7 @@ extern "C" {
 
                     //Execute the CCS array
                     FAPI_INF("Executing the CCS array\n");
+                    FAPI_INF("mss_ddr4_run_pda_by_dimm_rank: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
                     FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
                     io_ccs_inst_cnt = 0;
 
@@ -1590,7 +1603,7 @@ extern "C" {
             FAPI_TRY(address_16_backup.insert(address_16, 0, 16, 0));
             FAPI_TRY(bank_3_backup.clearBit(0, 3));
             FAPI_TRY(bank_3_backup.insert(bank_3, 0, 3, 0));
-            FAPI_TRY(odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
+            FAPI_TRY(odt_4.insert(i_pda[0].odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0));
 
             //loads the previous DRAM
             if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
@@ -1778,6 +1791,7 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
+        FAPI_INF("mss_ddr4_run_pda_by_dimm_rank: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
 
         //loops through and clears out the storage class
@@ -1873,7 +1887,8 @@ extern "C" {
         uint32_t l_port_number = 0;
         uint32_t dimm_number = i_dimm;
         uint32_t rank_number = i_rank;
-        const uint32_t NUM_POLL = 10;
+        // Increased polling parameters to avoid CCS hung errors in HB
+        const uint32_t NUM_POLL = 10000;
         const uint32_t WAIT_TIMER = 1500;
         uint64_t reg_address = 0;
         fapi2::buffer<uint64_t> data_buffer;
@@ -1905,11 +1920,11 @@ extern "C" {
         fapi2::variable_buffer csn_8_odt(8);
         uint8_t dram_gen = 0;
         fapi2::variable_buffer mrs3(16);
-        uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         uint8_t dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t dimm_type = 0;
         uint8_t is_sim = 0;
         uint8_t address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
+        uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
         uint8_t mpr_op = 0; // MPR Op
         uint8_t mpr_page = 0; // MPR Page Selection
         uint8_t geardown_mode = 0; // Gear Down Mode
@@ -1933,11 +1948,11 @@ extern "C" {
         FAPI_TRY(csn_8_odt.clearBit(7, 1));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target, dram_gen));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR,  i_target, odt_wr));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, dram_stack));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, dimm_type));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target, address_mirror_map));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target, odt_wr));
 
         // WORKAROUNDS
         FAPI_TRY(fapi2::getScom(i_target, CEN_MBA_CCS_MODEQ, data_buffer));
@@ -2209,6 +2224,7 @@ extern "C" {
 
         //Execute the CCS array
         FAPI_INF("Executing the CCS array\n");
+        FAPI_INF("mss_ddr4_disable_pda: Number of polls: %d, wait timer: %d", NUM_POLL, WAIT_TIMER);
         FAPI_TRY(mss_execute_ccs_inst_array (i_target, NUM_POLL, WAIT_TIMER));
 
         //Disable CCS

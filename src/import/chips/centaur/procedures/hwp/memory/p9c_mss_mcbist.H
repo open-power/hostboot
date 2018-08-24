@@ -305,13 +305,17 @@ extern "C"
     /// @param[in] i_CDarray0[80]
     /// @param[in] i_CDarray1[80]
     /// @param[in] count_bad_dq[2]
+    /// @param[in] i_isdm_c4_dq optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQ and skip attr access (default = nullptr)
+    /// @param[in] i_isdm_c4_dqs optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQS and skip attr access (default = nullptr)
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
     fapi2::ReturnCode mcb_error_map(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                                     uint8_t  o_error_map[MAX_PORTS_PER_MBA][MAX_RANKS_PER_PORT][MAX_BYTES_PER_RANK][MAX_NIBBLES_PER_BYTE],
                                     uint8_t i_CDarray0[DIMM_DQ_SPD_DATA_SIZE],
                                     uint8_t i_CDarray1[DIMM_DQ_SPD_DATA_SIZE],
-                                    uint8_t count_bad_dq[2]);
+                                    uint8_t count_bad_dq[2],
+                                    uint8_t i_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES] = nullptr,
+                                    uint8_t i_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES] = nullptr);
 
     ///
     /// @brief Based on parameters passed we write data into Register being passed

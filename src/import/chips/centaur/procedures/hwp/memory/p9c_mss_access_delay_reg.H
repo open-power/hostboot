@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <dimmConsts.H>
 
 
 //----------------------------------------------------------------------
@@ -205,6 +206,24 @@ typedef fapi2::ReturnCode (*p9c_mss_access_delay_reg_FP_t)(const fapi2::Target<f
 
 extern "C" {
 
+    ///
+    /// @brief Worksaround old VPD that does not have the isdimmdq attribute
+    /// @param[in] i_target - centaur target on which to operate
+    /// @param[out] o_isdimm_dq - the attribute data
+    /// @return fapi2::returnCode
+    ///
+    fapi2::ReturnCode isdimmdq_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                                          uint8_t (&o_isdimm_dq)[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES]);
+
+    ///
+    /// @brief Worksaround old VPD that does not have the isdimmdq attribute
+    /// @param[in] i_target - centaur target on which to operate
+    /// @param[out] o_isdimm_dqs - the attribute data
+    /// @return fapi2::returnCode
+    ///
+    fapi2::ReturnCode isdimmdqs_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target,
+                                           uint8_t (&o_isdimm_dqs)[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES]);
+
     /// @brief Reads or Writes delay values
     /// @param[in] i_target_mba     Reference to centaur.mba target
     /// @param[in] i_access_type_e  Access type (READ or WRITE)
@@ -309,13 +328,17 @@ extern "C" {
     /// @param[in]  i_input_index  Input index
     /// @param[in]  i_verbose      1 = Verbose tracing
     /// @param[out] o_value        Output C4 bit
+    /// @param[in] i_isdm_c4_dq optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQ and skip attr access (default = nullptr)
+    /// @param[in] i_isdm_c4_dqs optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQS and skip attr access (default = nullptr)
     /// @return ReturnCode
     fapi2::ReturnCode rosetta_map(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                                   const uint8_t i_port,
                                   const input_type i_input_type_e,
                                   uint8_t i_input_index,
                                   const bool i_verbose,
-                                  uint8_t& o_value);
+                                  uint8_t& o_value,
+                                  uint8_t i_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES] = nullptr,
+                                  uint8_t i_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES] = nullptr);
 
     /// @brief Gets the rank pair
     /// @param[in]  i_target_mba     Reference to centaur.mba target

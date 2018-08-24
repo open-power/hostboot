@@ -1915,13 +1915,17 @@ extern "C" {
     ///@param[in] i_input_index_u8=0-79/0-71/0-8/0-19
     ///@param[in] i_verbose-extra print statements
     ///@param[out] C4 bit=o_value
+    ///@param[in] i_isdm_c4_dq optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQ and skip attr access (default = nullptr)
+    ///@param[in] i_isdm_c4_dqs optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQS and skip attr access (default = nullptr)
     ///@return fapi2::returnCode
     fapi2::ReturnCode rosetta_map(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                                   const uint8_t i_port,
                                   const input_type i_input_type_e,
                                   const uint8_t i_input_index,
                                   const bool i_verbose,
-                                  uint8_t& o_value) //This function is used by some other procedures
+                                  uint8_t& o_value,
+                                  uint8_t i_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES],
+                                  uint8_t i_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES])
     {
         // Boundary check is done again
         uint8_t l_mbapos = 0;
@@ -1951,8 +1955,27 @@ extern "C" {
 
         if(l_dimmtype != fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
         {
-            FAPI_TRY(isdimmdqs_workaround(i_target_centaur, l_isdm_c4_dqs));
-            FAPI_TRY(isdimmdq_workaround(i_target_centaur, l_isdm_c4_dq));
+            if (i_isdm_c4_dq == nullptr)
+            {
+                FAPI_TRY(isdimmdq_workaround(i_target_centaur, l_isdm_c4_dq));
+            }
+            else
+            {
+                std::copy(&i_isdm_c4_dq[0][0],
+                          &i_isdm_c4_dq[0][0] + (MAX_PORTS_PER_CEN * DIMM_TO_C4_DQ_ENTRIES),
+                          &l_isdm_c4_dq[0][0]);
+            }
+
+            if (i_isdm_c4_dqs == nullptr)
+            {
+                FAPI_TRY(isdimmdqs_workaround(i_target_centaur, l_isdm_c4_dqs));
+            }
+            else
+            {
+                std::copy(&i_isdm_c4_dqs[0][0],
+                          &i_isdm_c4_dqs[0][0] + (MAX_PORTS_PER_CEN * DIMM_TO_C4_DQS_ENTRIES),
+                          &l_isdm_c4_dqs[0][0]);
+            }
         }
 
 

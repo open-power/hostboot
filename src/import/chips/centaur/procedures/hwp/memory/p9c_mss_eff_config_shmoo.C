@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,6 @@ extern "C" {
         uint8_t l_attr_eff_cen_rcv_imp_dq_dqs[MAX_PORTS_PER_MBA] = {0};
         uint8_t l_attr_eff_cen_drv_imp_dq_dqs[MAX_PORTS_PER_MBA] = {0};
         uint8_t l_attr_eff_cen_slew_rate_dq_dqs[MAX_PORTS_PER_MBA] = {0};
-
 
         // get these attributes from the VPD but allow the code to override later
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_RD_VREF, i_target_mba, l_attr_eff_cen_rd_vref));

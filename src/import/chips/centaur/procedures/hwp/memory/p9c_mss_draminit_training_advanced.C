@@ -888,10 +888,12 @@ fapi_try_exit:
 ///
 /// @brief set new wr vref values on a DRAM basis (PDA)
 /// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_odt_wr nominal write ODT settings
 /// @param[in] i_pda_nibble_table table of vref values from training
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode set_wr_vref_by_dram(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM],
                                       const uint32_t (
                                               &i_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
 {
@@ -940,21 +942,21 @@ fapi2::ReturnCode set_wr_vref_by_dram(const fapi2::Target<fapi2::TARGET_TYPE_MBA
 
                     // Push the PDA enable MRS commands onto the enable list
                     pda_enable.push_back(PDA_MRS_Storage(0x01, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index,
-                                                         l_rank_index, l_port_index));
+                                                         l_rank_index, l_port_index, i_odt_wr));
                     FAPI_INF("%s PDA STRING (training enable): %d %s", mss::c_str(i_target_mba), pda_enable.size() - 1,
                              pda_enable[pda_enable.size() - 1].c_str());
                     pda_enable.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index,
-                                                         l_rank_index, l_port_index));
+                                                         l_rank_index, l_port_index, i_odt_wr));
                     FAPI_INF("%s PDA STRING (vref value): %d %s", mss::c_str(i_target_mba), pda_enable.size() - 1,
                              pda_enable[pda_enable.size() - 1].c_str());
 
                     // And the disable commands onto the disable list
                     pda_disable.push_back(PDA_MRS_Storage(0x00, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_ENABLE, dram_num, l_dimm_index,
-                                                          l_rank_index, l_port_index));
+                                                          l_rank_index, l_port_index, i_odt_wr));
                     FAPI_INF("%s PDA STRING (training disable): %d %s", mss::c_str(i_target_mba), pda_disable.size() - 1,
                              pda_disable[pda_disable.size() - 1].c_str());
                     pda_disable.push_back(PDA_MRS_Storage(max_vref, fapi2::ATTR_CEN_EFF_VREF_DQ_TRAIN_VALUE, dram_num, l_dimm_index,
-                                                          l_rank_index, l_port_index));
+                                                          l_rank_index, l_port_index, i_odt_wr));
                     FAPI_INF("%s PDA STRING (vref value): %d %s", mss::c_str(i_target_mba), pda_disable.size() - 1,
                              pda_disable[pda_disable.size() - 1].c_str());
                 }
@@ -993,11 +995,13 @@ fapi_try_exit:
 ///
 /// @brief set new wr vref values and return margins
 /// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_odt_wr nominal write ODT settings
 /// @param[in] i_vref_values Vref values to test
 /// @param[in,out] io_pda_nibble_table table of vref values from training
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode wr_vref_test_helper(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+                                      const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM],
                                       const uint8_t (&i_vref_values)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4],
                                       uint32_t (&io_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
 {
@@ -1030,7 +1034,7 @@ fapi2::ReturnCode wr_vref_test_helper(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
     }
 
-    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, io_pda_nibble_table));
+    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, i_odt_wr, io_pda_nibble_table));
 
     FAPI_TRY(delay_shmoo_ddr4_pda(i_target_mba, 0, l_shmoo_type_valid,
                                   &l_left_total_margin, &l_right_total_margin, 0, io_pda_nibble_table));
@@ -1042,10 +1046,12 @@ fapi_try_exit:
 ///
 /// @brief search for best wr vref values by DRAM using ternary search algorithm
 /// @param[in] i_target_mba Centaur input MBA
+/// @param[in] i_odt_wr nominal write ODT settings
 /// @param[in] io_pda_nibble_table table of best vref values
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode wr_vref_ternary_search(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
+        const uint8_t (&i_odt_wr)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM],
         uint32_t (&io_pda_nibble_table)[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM][MAX_DRAMS_PER_RANK_X4][2])
 {
     constexpr uint8_t MAX_VREF = 50;
@@ -1170,7 +1176,7 @@ fapi2::ReturnCode wr_vref_ternary_search(const fapi2::Target<fapi2::TARGET_TYPE_
         }
 
         // Check margins at next test point
-        FAPI_TRY(wr_vref_test_helper(i_target_mba, l_test_vref, l_pda_table));
+        FAPI_TRY(wr_vref_test_helper(i_target_mba, i_odt_wr, l_test_vref, l_pda_table));
 
         // Print them and store them in our results map
         for(uint8_t l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
@@ -1222,7 +1228,7 @@ fapi2::ReturnCode wr_vref_ternary_search(const fapi2::Target<fapi2::TARGET_TYPE_
         }
     }
 
-    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, io_pda_nibble_table));
+    FAPI_TRY(set_wr_vref_by_dram(i_target_mba, i_odt_wr, io_pda_nibble_table));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1245,6 +1251,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_attr_eff_dimm_type_u8 = 0;
     uint8_t vrefdq_train_range[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
     uint8_t num_ranks_per_dimm[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+    uint8_t odt_wr[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT][MAX_RANKS_PER_DIMM] = {0};
     uint32_t total_val = 0;
     uint32_t last_total = 0;
     uint32_t base_percent = 60000;
@@ -1281,6 +1288,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_EFF_SCHMOO_TEST_VALID, i_target_mba, l_attr_shmoo_test_type_u8));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_WRDDR4_VREF, i_target_mba, vpd_wr_vref_value));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_VREF_CAL_CNTL, l_target_centaur1, cal_control));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target_mba, odt_wr));
     //FAPI_INF("++++++++++++++ATTR_CEN_MSS_VREF_CAL_CNTL = %d +++++++++++++++++++++++++++",cal_control);
 
     if(vrefdq_train_range[0][0][0] == 1)
@@ -1383,7 +1391,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
     else if (cal_control == fapi2::ENUM_ATTR_CEN_MSS_VREF_CAL_CNTL_TERNARY)
     {
         // Perform the shmoo search algorithm
-        FAPI_TRY(wr_vref_ternary_search(i_target_mba, pda_nibble_table));
+        FAPI_TRY(wr_vref_ternary_search(i_target_mba, odt_wr, pda_nibble_table));
 
         // Report final Vrefs
         for(l_port_index = 0; l_port_index < MAX_PORTS_PER_MBA; l_port_index++)
@@ -1519,7 +1527,7 @@ fapi2::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi2::Target<fapi2::TARGET_TYPE_
         }
         else
         {
-            FAPI_TRY(set_wr_vref_by_dram(i_target_mba, best_pda_nibble_table));
+            FAPI_TRY(set_wr_vref_by_dram(i_target_mba, odt_wr, best_pda_nibble_table));
         }
 
         //turn on refresh then exit

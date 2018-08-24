@@ -838,13 +838,17 @@ extern "C"
     /// @param[in] i_CDarray0[80]
     /// @param[in] i_CDarray1[80]
     /// @param[in] count_bad_dq[2]
+    /// @param[in] i_isdm_c4_dq optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQ and skip attr access (default = nullptr)
+    /// @param[in] i_isdm_c4_dqs optional param to specify ATTR_CEN_VPD_ISDIMMTOC4DQS and skip attr access (default = nullptr)
     /// @return FAPI2_RC_SUCCESS iff successful
     ///
     fapi2::ReturnCode mcb_error_map(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                                     uint8_t o_error_map[MAX_PORTS_PER_MBA][MAX_RANKS_PER_PORT][MAX_BYTES_PER_RANK][MAX_NIBBLES_PER_BYTE],
                                     uint8_t i_CDarray0[DIMM_DQ_SPD_DATA_SIZE],
                                     uint8_t i_CDarray1[DIMM_DQ_SPD_DATA_SIZE],
-                                    uint8_t count_bad_dq[2])
+                                    uint8_t count_bad_dq[2],
+                                    uint8_t i_isdm_c4_dq[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQ_ENTRIES],
+                                    uint8_t i_isdm_c4_dqs[MAX_PORTS_PER_CEN][DIMM_TO_C4_DQS_ENTRIES])
     {
         fapi2::buffer<uint64_t> l_mcbem1ab;
         fapi2::buffer<uint64_t> l_mcbem2ab;
@@ -1155,14 +1159,14 @@ extern "C"
         //port 0
         for (l_i = 0; l_i < ISDIMM_MAX_DQ_72; l_i++)
         {
-            FAPI_TRY(rosetta_map(i_target_mba, 0, l_input_type_e, l_i, 0, o_val));
+            FAPI_TRY(rosetta_map(i_target_mba, 0, l_input_type_e, l_i, 0, o_val, i_isdm_c4_dq, i_isdm_c4_dqs));
             cdimm_dq0[o_val] = l_i;
         }
 
         //port 1
         for (l_i = 0; l_i < ISDIMM_MAX_DQ_72; l_i++)
         {
-            FAPI_TRY(rosetta_map(i_target_mba, 1, l_input_type_e, l_i, 0, o_val));
+            FAPI_TRY(rosetta_map(i_target_mba, 1, l_input_type_e, l_i, 0, o_val, i_isdm_c4_dq, i_isdm_c4_dqs));
             cdimm_dq1[o_val] = l_i;
         }
 
@@ -1493,7 +1497,7 @@ extern "C"
 
                                 FAPI_TRY(rosetta_map(i_target_mba, l_port,
                                                      l_input_type_e, i_input_index_u8,
-                                                     0, o_val));
+                                                     0, o_val, i_isdm_c4_dq, i_isdm_c4_dqs));
 
                                 i_byte1 = o_val / BITS_PER_BYTE;
                                 i_nibble1 = o_val % BITS_PER_BYTE;
