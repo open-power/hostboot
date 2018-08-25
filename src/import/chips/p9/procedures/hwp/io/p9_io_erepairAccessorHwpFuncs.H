@@ -945,7 +945,6 @@ fapi2::ReturnCode erepairSetFailedLanes(
         o_thresholdExceed = true;
     }
 
-fapi_try_exit:
     /*** Update the VPD ***/
 
     // Lets write the VPD of endpoint1 with faillanes on Rx side
@@ -966,6 +965,7 @@ fapi_try_exit:
               "tx l_setLanes() from Accessor HWP failed w/rc=0x%x",
               (uint64_t)fapi2::current_err );
 
+fapi_try_exit:
     FAPI_INF("<< erepairSetFailedLanes");
     return fapi2::current_err;
 }
