@@ -290,8 +290,8 @@ int32_t powerDownLanes<TYPE_XBUS>( TargetHandle_t i_rxBusTgt,
                     p9_io_xbus_pdwn_lanes,
                     fapiTrgt,
                     i_clkGrp,
-                    i_txFailLanes,
-                    i_rxFailLanes);
+                    i_rxFailLanes,
+                    i_txFailLanes);
 
     if(nullptr != err)
     {
@@ -324,8 +324,8 @@ int32_t powerDownLanes<TYPE_MEMBUF>(TargetHandle_t i_rxBusTgt,
     FAPI_INVOKE_HWP(err,
                     p9_io_cen_pdwn_lanes,
                     fapiTrgt,
-                    i_txFailLanes,
-                    i_rxFailLanes);
+                    i_rxFailLanes,
+                    i_txFailLanes);
 
     if(nullptr != err)
     {
@@ -356,8 +356,8 @@ int32_t powerDownLanes<TYPE_DMI>(TargetHandle_t i_rxBusTgt,
     FAPI_INVOKE_HWP(err,
                     p9_io_dmi_pdwn_lanes,
                     fapiTrgt,
-                    i_txFailLanes,
-                    i_rxFailLanes);
+                    i_rxFailLanes,
+                    i_txFailLanes);
 
     if(nullptr != err)
     {
