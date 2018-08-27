@@ -161,8 +161,8 @@ int32_t powerDownLanesXbus(TargetHandle_t i_rxBusTgt,
                     p9_io_xbus_pdwn_lanes,
                     fapiTrgt,
                     i_clkGrp,
-                    i_txFailLanes,
-                    i_rxFailLanes);
+                    i_rxFailLanes,
+                    i_txFailLanes);
 
     if(nullptr != err)
     {
