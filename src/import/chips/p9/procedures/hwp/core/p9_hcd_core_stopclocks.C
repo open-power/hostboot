@@ -46,6 +46,7 @@
 #include <p9_hcd_core_stopclocks.H>
 #include <p9_hcd_cache_stopclocks.H>
 #include <p9_eq_clear_atomic_lock.H>
+#include <p9_quad_scom_addresses_fld.H>
 #ifdef __PPE__
     #include <p9_sbe_ppe_utils.H>
 #else
@@ -102,6 +103,25 @@ p9_hcd_core_stopclocks(
                            l_attr_chip_unit_pos));
     l_attr_chip_unit_pos = (l_attr_chip_unit_pos -
                             p9hcd::PERV_TO_CORE_POS_OFFSET) % 4;
+
+    //Check if EQ is powered off; if so, return
+    FAPI_TRY(fapi2::getScom(l_quad, EQ_PPM_PFSNS, l_data64),
+             "Error reading data from EQ_PPM_PFSNS");
+
+    if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        return fapi2::current_err;
+    }
+
+    //Check if core is powered off; if so, return
+    FAPI_TRY(fapi2::getScom(i_target, C_PPM_PFSNS, l_data64),
+             "Error reading data from EQ_PPM_PFSNS");
+
+    if (l_data64.getBit<C_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        return fapi2::current_err;
+    }
+
 
     // ----------------------------
     // Prepare to stop core clocks
