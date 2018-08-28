@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -464,7 +464,7 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
         INITSERVICE::stopIpl();
 
         // register for the post memory flush callback
-        INITSERVICE::registerShutdownEvent(iv_msgQ,
+        INITSERVICE::registerShutdownEvent(IPMI_COMP_ID, iv_msgQ,
                         IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
                         INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
 
@@ -551,7 +551,8 @@ void IpmiRP::execute(void)
     //      as we don't want to accidentally get this message after
     //      interrupt processing has stopped in case we need intr to
     //      finish flushing the pipe.
-    INITSERVICE::registerShutdownEvent(iv_msgQ, IPMI::MSG_STATE_SHUTDOWN,
+    INITSERVICE::registerShutdownEvent(IPMI_COMP_ID, iv_msgQ,
+                                       IPMI::MSG_STATE_SHUTDOWN,
                                        INITSERVICE::MBOX_PRIORITY);
 
     // Start the thread that waits for timeouts
@@ -710,7 +711,7 @@ void IpmiRP::execute(void)
                 iv_chassis_power_mod = IPMI::CHASSIS_POWER_RESET;
 
                 // register for the post memory flush callback
-                INITSERVICE::registerShutdownEvent(iv_msgQ,
+                INITSERVICE::registerShutdownEvent(IPMI_COMP_ID, iv_msgQ,
                         IPMI::MSG_STATE_GRACEFUL_SHUTDOWN,
                         INITSERVICE::POST_MEM_FLUSH_NOTIFY_LAST);
 

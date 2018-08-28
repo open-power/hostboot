@@ -95,15 +95,18 @@ public:
         msg_q_t msgQ;
         uint32_t msgType;
         uint32_t msgPriority;
+        compId_t compID;
 
         /**
          * @brief Constructor
          */
         regMsgQ_t(msg_q_t i_msgQ,
                   uint32_t i_msgType,
-                  EventPriority_t i_priority) :
+                  EventPriority_t i_priority,
+                  compId_t i_compId) :
             msgQ(i_msgQ), msgType(i_msgType),
-                  msgPriority((uint32_t)i_priority) {}
+                  msgPriority((uint32_t)i_priority),
+                  compID(i_compId) {}
 
         // allow us to sort the queue based on priority
         bool operator < (const regMsgQ_t &msg ) const
@@ -193,6 +196,7 @@ public:
     /**
      * @brief Register a service to be notified during shutdown
      *
+     * @param[in] i_compID, component registering event
      * @param[in] i_msgQ, A message queue to send a message to on shutdown
      * @param[in] i_msgType, The message type to send.
      * @param[in] i_priority, @See src/include/usr/initservice/initserviceif.H
@@ -200,7 +204,8 @@ public:
      * @return true  - i_msgQ registered
      *         false - i_msgQ already registered.- not registered again.
      */
-    bool registerShutdownEvent(msg_q_t i_msgQ,
+    bool registerShutdownEvent(compId_t i_compID,
+                               msg_q_t i_msgQ,
                                uint32_t i_msgType,
                                EventPriority_t i_priority);
 

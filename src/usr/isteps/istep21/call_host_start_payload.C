@@ -443,7 +443,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
     {
         // Register event to be called on shutdown
         msg_q_t l_msgQ = msg_q_create();
-        INITSERVICE::registerShutdownEvent(l_msgQ,
+        INITSERVICE::registerShutdownEvent(ISTEP_COMP_ID, l_msgQ,
                                       MSG_PRE_SHUTDOWN_INITS,
                                       INITSERVICE::PRESHUTDOWN_INIT_PRIORITY);
         // Create a task to handle the messages

@@ -61,7 +61,7 @@ namespace CONSOLE
     {
         // Detach and register daemon with shutdown path.
         task_detach();
-        INITSERVICE::registerShutdownEvent(g_msgq, SYNC,
+        INITSERVICE::registerShutdownEvent(CONSOLE_COMP_ID, g_msgq, SYNC,
                                            INITSERVICE::CONSOLE_PRIORITY);
 
         // Create a default output UART device if there isn't already one.

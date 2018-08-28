@@ -1435,7 +1435,8 @@ void* tpmDaemon(void* unused)
     // Register shutdown events with init service.
     //      Done at the "end" of shutdown processing.
     // This will flush any other messages (PCR extends) and terminate task
-    INITSERVICE::registerShutdownEvent(systemData.msgQ,
+    INITSERVICE::registerShutdownEvent(TRBOOT_COMP_ID,
+                                       systemData.msgQ,
                                        TRUSTEDBOOT::MSG_TYPE_SHUTDOWN);
 
     Message* tb_msg = nullptr;
