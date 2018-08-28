@@ -848,6 +848,14 @@ private:
      */
     void addHbBuildId();
 
+    /**
+     *  @brief Called by commit(), this function creates a user details section
+     *  which contains the version info for each of the fw components in an
+     *  OpenPOWER System and adds it to the current error log being processed.
+     *  Note: This function only executes on a BMC based system.
+     */
+    void addVersionInfo(void);
+
 #ifdef CONFIG_BMC_IPMI
     /**
      * @brief called by addHwCallout to retrieve the serial and part number
