@@ -88,13 +88,16 @@ void registerBlock(void* i_vaddr, uint64_t i_size, BlockPriority i_priority);
 /**
  * @brief Register a service to be notified during shutdown
  *
+ * @param[in] i_compID, component registering event
  * @param[in] i_msgQ, A message queue to send a message to on shutdown
  * @param[in] i_msgType, The message type to send.
  * @param[in] i_priority, See EventPriority
+ *
  * @return true - i_msgQ registered
  *         false - i_msgQ already registered. Not registered again.
  */
-bool registerShutdownEvent(msg_q_t i_msgQ,
+bool registerShutdownEvent(compId_t i_compID,
+                           msg_q_t i_msgQ,
                            uint32_t i_msgType,
                            EventPriority_t i_priority = NO_PRIORITY);
 

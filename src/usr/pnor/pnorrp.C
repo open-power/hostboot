@@ -280,9 +280,10 @@ void PnorRP::initDaemon()
         // create a message queue
         iv_msgQ = msg_q_create();
 
-        INITSERVICE::registerShutdownEvent( iv_msgQ,
-                PNOR::MSG_SHUTDOWN,
-                INITSERVICE::PNOR_RP_PRIORITY);
+        INITSERVICE::registerShutdownEvent( PNOR_COMP_ID,
+                                            iv_msgQ,
+                                            PNOR::MSG_SHUTDOWN,
+                                            INITSERVICE::PNOR_RP_PRIORITY );
 
         // create a Block, passing in the message queue
         int rc = mm_alloc_block( iv_msgQ, (void*) BASE_VADDR, TOTAL_SIZE );

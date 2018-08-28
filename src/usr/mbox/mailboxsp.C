@@ -211,7 +211,8 @@ errlHndl_t MailboxSp::_init()
         MBOX::send(FSP_MAILBOX_MSGQ,msg);
 
         // Register for shutdown
-        INITSERVICE::registerShutdownEvent(iv_msgQ,
+        INITSERVICE::registerShutdownEvent(MBOX_COMP_ID,
+                                           iv_msgQ,
                                            MSG_MBOX_SHUTDOWN,
                                            INITSERVICE::MBOX_PRIORITY);
 
