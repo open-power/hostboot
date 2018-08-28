@@ -793,6 +793,16 @@ public:
         mySBE0,
         mySBE1,
         myCAPP0,
+        myMC0,
+        myMC1,
+        myMI0,
+        myMI3,
+        myMCC0,
+        myMCC7,
+        myOMI0,
+        myOMI15,
+        myOMIC0,
+        myOMIC5,
         NUM_TARGETS
     };
 
@@ -814,6 +824,8 @@ public:
     epath.addLast(TARGETING::TYPE_NODE,0);
     epath.addLast(TARGETING::TYPE_PROC,0);
 
+    auto l_systemModel = TARGETING::targetService().toTarget(epath)->getAttr<TARGETING::ATTR_MODEL>();
+
     epath.addLast(TARGETING::TYPE_EQ,0);
     scom_targets[myEQ0] = TARGETING::targetService().toTarget(epath);
 
@@ -834,7 +846,6 @@ public:
 
     // remove CORE1 target
     epath.removeLast();
-
     // remove EX0 target
     epath.removeLast();
 
@@ -844,7 +855,6 @@ public:
 
     // remove EX1 target
     epath.removeLast();
-
     // remove EQ0 target
     epath.removeLast();
 
@@ -872,7 +882,6 @@ public:
 
     // remove MCA1 target
     epath.removeLast();
-
     // remove MCS0 target
     epath.removeLast();
 
@@ -881,6 +890,69 @@ public:
     scom_targets[myMCS3] = TARGETING::targetService().toTarget(epath);
 
     // remove MCS3 target
+    epath.removeLast();
+
+    // add MC0 target
+    epath.addLast(TARGETING::TYPE_MC,0);
+    scom_targets[myMC0] = TARGETING::targetService().toTarget(epath);
+
+    // add MI0 target
+    epath.addLast(TARGETING::TYPE_MI,0);
+    scom_targets[myMI0] = TARGETING::targetService().toTarget(epath);
+
+    // add MCC0 target
+    epath.addLast(TARGETING::TYPE_MCC,0);
+    scom_targets[myMCC0] = TARGETING::targetService().toTarget(epath);
+
+    // add OMI0 target
+    epath.addLast(TARGETING::TYPE_OMI,0);
+    scom_targets[myOMI0] = TARGETING::targetService().toTarget(epath);
+
+    // remove OMI0 target
+    epath.removeLast();
+    // remove MCC0 target
+    epath.removeLast();
+    // remove MI0 target
+    epath.removeLast();
+
+    // add OMIC0 target
+    epath.addLast(TARGETING::TYPE_OMIC,0);
+    scom_targets[myOMIC0] = TARGETING::targetService().toTarget(epath);
+
+    // remove OMIC0 target
+    epath.removeLast();
+
+    // remove MC0 target
+    epath.removeLast();
+
+    // add MC1 target
+    epath.addLast(TARGETING::TYPE_MC,1);
+    scom_targets[myMC1] = TARGETING::targetService().toTarget(epath);
+
+    // add MI3 target
+    epath.addLast(TARGETING::TYPE_MI,3);
+    scom_targets[myMI3] = TARGETING::targetService().toTarget(epath);
+
+    // add MCC7 target
+    epath.addLast(TARGETING::TYPE_MCC,7);
+    scom_targets[myMCC7] = TARGETING::targetService().toTarget(epath);
+
+    // add OMI15 target
+    epath.addLast(TARGETING::TYPE_OMI,15);
+    scom_targets[myOMI15] = TARGETING::targetService().toTarget(epath);
+
+    // remove OMI15 target
+    epath.removeLast();
+    // remove MCC7 target
+    epath.removeLast();
+    // remove MI3 target
+    epath.removeLast();
+
+    // add OMIC5 target
+    epath.addLast(TARGETING::TYPE_OMIC,5);
+    scom_targets[myOMIC5] = TARGETING::targetService().toTarget(epath);
+
+    // remove MI3 target
     epath.removeLast();
 
     //add XBUS1 target
@@ -1023,35 +1095,36 @@ public:
     uint64_t initAddr;
     uint64_t expectedAddr;
     bool     expectError;
+    TARGETING::ATTR_MODEL_type model;
     } test_data[] = {
       //Target            Address       Expected    error
-    { scom_targets[myEX0], 0x21000000 , 0x21000000, false},
-    { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myEX1], 0x21000000, 0x23000000, false},
-    { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myEX0], 0x21000000 , 0x21000000, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myEX1], 0x21000000, 0x23000000, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
     //This address is tricky, it is within EQ0 chip unit but
     //the ring value puts it in the EX1 chip unit space,
     // so you cannot use this address with EX targets
-    { scom_targets[myEX1], 0x10012400, 0x10012400, true},
-    { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false},
-    { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false},
-    { scom_targets[myCORE1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myCORE0], 0x12012826, 0x12012826, true},
-    { scom_targets[myEQ0], 0x10000008 , 0x10000008, false},
-    { scom_targets[myEQ0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myEQ5], 0x10000008, 0x15000008, false},
-    { scom_targets[myEQ5], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myEQ5], 0x24030008, 0x24030008, true},
-    { scom_targets[myMCS0], 0x05010800 , 0x05010800, false},
-    { scom_targets[myMCS0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myMCS3], 0x05010800, 0x03010880, false},
-    { scom_targets[myMCS3], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myMCS0], 0x12012826, 0x12012826, true},
-    { scom_targets[myMCS3], 0x24030008, 0x24030008, true},
-    { scom_targets[myXBUS1], 0x0FFFFFFFFFFFFFFF , 0x0FFFFFFFFFFFFFFF, true},
-    { scom_targets[myXBUS1], 0x12012826, 0x12012826, true},
-    { scom_targets[myXBUS1], 0x24030008, 0x24030008, true},
+    { scom_targets[myEX1], 0x10012400, 0x10012400, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myCORE1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
+    { scom_targets[myCORE0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myEQ0], 0x10000008 , 0x10000008, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myEQ0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myEQ5], 0x10000008, 0x15000008, false, TARGETING::MODEL_POWER9},
+    { scom_targets[myEQ5], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
+    { scom_targets[myEQ5], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myMCS0], 0x05010800 , 0x05010800, false, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myMCS0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myMCS3], 0x05010800, 0x03010880, false, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myMCS3], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myMCS0], 0x12012826, 0x12012826, true, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myMCS3], 0x24030008, 0x24030008, true, TARGETING::MODEL_NIMBUS},
+    { scom_targets[myXBUS1], 0x0FFFFFFFFFFFFFFF , 0x0FFFFFFFFFFFFFFF, true , TARGETING::MODEL_POWER9},
+    { scom_targets[myXBUS1], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+    { scom_targets[myXBUS1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
 //TODO: RTC 143005 Add MCBIST Targets to scomtest.H
 //     { scom_targets[myMCBIST0], 0x07010F15 ,0x07010F15 , false},
 //     { scom_targets[myMCBIST0], 0x0FFFFFFF, 0x0FFFFFFF, true},
@@ -1059,46 +1132,68 @@ public:
 //     { scom_targets[myMCBIST1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
 //     { scom_targets[myMCBIST0], 0x12012826, 0x12012826, true},
 //     { scom_targets[myMCBIST1], 0x24030008, 0x24030008, true},
-     { scom_targets[myMCA0], 0x07010915, 0x07010915, false},
-     { scom_targets[myMCA0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-     { scom_targets[myMCA1], 0x07010915, 0x07010955, false},
-     { scom_targets[myMCA1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-     { scom_targets[myMCA0], 0x12012826, 0x12012826, true},
-     { scom_targets[myMCA1], 0x24030008, 0x24030008, true},
-    { scom_targets[myPERV1], 0x00030009, 0x01030009, false},
-    { scom_targets[myPERV1], 0x0FF6FFFF, 0x0FF6FFFF, true},
-    { scom_targets[myPERV32], 0x00030009, 0x20030009, false},
-    { scom_targets[myPERV32], 0x0FF6FFFF, 0x0FF6FFFF ,true},
-    { scom_targets[myPERV1], 0x07010A0A, 0x32010A0A, true},
-    { scom_targets[myPERV32], 0x0D010400, 0x0D010400, true},
-    { scom_targets[myPEC0], 0x04010C03, 0x04010C03, false},
-    { scom_targets[myPEC1], 0x04010C03, 0x04011003 ,false},
-    { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myPEC0], 0x12012826, 0x12012826, true},
-    { scom_targets[myPEC1], 0x24030008, 0x24030008, true},
-    { scom_targets[myPHB0], 0x04010C4E, 0x04010C4E, false},
-    { scom_targets[myPHB5], 0x04010C4E, 0x04010C4E ,false},
-    { scom_targets[myPHB0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-    { scom_targets[myPHB5], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myPHB0], 0x12012826, 0x12012826, true},
-    { scom_targets[myPHB5], 0x24030008, 0x24030008, true},
-    { scom_targets[myOBUS0], 0x09010C55, 0x09010C55, false},
-    { scom_targets[myOBUS3], 0x09010C55, 0x0C010C55 ,false},
-    { scom_targets[myOBUS0], 0x12012826, 0x12012826, true},
-    { scom_targets[myOBUS3], 0x24030008, 0x24030008, true},
-    { scom_targets[myNV0], 0x050110D4, 0x050110D4, false},
-    { scom_targets[myNV1], 0x050110D4, 0x050110F4,false},
-    { scom_targets[myNV0], 0x12012826, 0x12012826, true},
-    { scom_targets[myNV1], 0x24030008, 0x24030008, true},
-    { scom_targets[myCAPP0],0x2010803, 0x2010803, false},
+     { scom_targets[myMCA0], 0x07010915, 0x07010915, false, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myMCA0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myMCA1], 0x07010915, 0x07010955, false, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myMCA1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myMCA0], 0x12012826, 0x12012826, true, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myMCA1], 0x24030008, 0x24030008, true, TARGETING::MODEL_NIMBUS},
+     { scom_targets[myPERV1], 0x00030009, 0x01030009, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPERV1], 0x0FF6FFFF, 0x0FF6FFFF, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPERV32], 0x00030009, 0x20030009, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPERV32], 0x0FF6FFFF, 0x0FF6FFFF ,true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPERV1], 0x07010A0A, 0x32010A0A, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPERV32], 0x0D010400, 0x0D010400, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC0], 0x04010C03, 0x04010C03, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC1], 0x04010C03, 0x04011003 ,false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPEC1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB0], 0x04010C4E, 0x04010C4E, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB5], 0x04010C4E, 0x04010C4E ,false, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB0], 0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB5], 0x0FFFFFFF, 0x0FFFFFFF ,true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myPHB5], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myOBUS0], 0x09010C55, 0x09010C55, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myOBUS3], 0x09010C55, 0x0C010C55 ,false, TARGETING::MODEL_POWER9},
+     { scom_targets[myOBUS0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myOBUS3], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myNV0], 0x050110D4, 0x050110D4, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myNV1], 0x050110D4, 0x050110F4,false, TARGETING::MODEL_POWER9},
+     { scom_targets[myNV0], 0x12012826, 0x12012826, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myNV1], 0x24030008, 0x24030008, true, TARGETING::MODEL_POWER9},
+     { scom_targets[myCAPP0],0x2010803, 0x2010803, false, TARGETING::MODEL_POWER9},
+     { scom_targets[myMC0],0x0701008, 0x0701008, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMC1],0x0701008, 0x0801008, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myMC1],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI0],0x2010803, 0x2010803, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI3],0x2010803, 0x3010803, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myMI3],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myMCC0],0x07010900, 0x07010900, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMCC7],0x07010900, 0x080109c0, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myMCC0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myMCC7],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMI0],0x0701183f, 0x0701183f, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMI15],0x0701183f, 0x0801143f, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMI0],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMI15],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMIC0],0x07011000, 0x07011000, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMIC5],0x07011000, 0x08011800, false, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMIC5],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
+     { scom_targets[myOMIC5],0x0FFFFFFF, 0x0FFFFFFF, true, TARGETING::MODEL_AXONE},
     };
 
     int numOfAddr = sizeof test_data / sizeof(test_data[0]);
 
     for (int i = 0; i < numOfAddr; i++)
       {
-        if(test_data[i].target != NULL)
+        if(test_data[i].target != NULL &&
+            ((test_data[i].model == TARGETING::MODEL_POWER9) ||
+             (test_data[i].model == l_systemModel)))
         {
             total++;
             uint64_t tempAddr = test_data[i].initAddr;
@@ -1109,28 +1204,22 @@ public:
 
             if( l_err && !test_data[i].expectError)
             {
-                TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Write: Error from device : addr=0x%X, HUID 0x%X, RC=%X",
-                          test_data[i].initAddr,
-                          TARGETING::get_huid(test_data[i].target),
-                          l_err->reasonCode() );
-                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from write1" );
-                fails++;
+                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from translating addr=0x%X for HUID 0x%X", test_data[i].initAddr,
+                          TARGETING::get_huid(test_data[i].target)) ;
                 errlCommit(l_err,SCOM_COMP_ID);
+                fails++;
             }
             else if(l_err == NULL && test_data[i].expectError)
             {
-                TRACFCOMP(g_trac_scom,  "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one for : addr=0x%X, HUID 0x%X",
-                          test_data[i].initAddr,
-                          TARGETING::get_huid(test_data[i].target))
-                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one" );
+                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one after translating addr=0x%X for HUID 0x%X",
+                        test_data[i].initAddr, TARGETING::get_huid(test_data[i].target)) ;
                 fails++;
             }
             else if(tempAddr!= test_data[i].expectedAddr &&
                     l_err == NULL && !test_data[i].expectError)
             {
-                TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
+                TS_FAIL("ScomTest::test_P9_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
                     test_data[i].initAddr, tempAddr, test_data[i].expectedAddr);
-                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from write1" );
                 fails++;
             }
             else if(l_err && test_data[i].expectError)
