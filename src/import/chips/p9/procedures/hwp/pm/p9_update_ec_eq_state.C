@@ -229,7 +229,7 @@ fapi2::ReturnCode verify_eq_ec_hw_state(
     uint8_t l_core_match = 0;
     std::vector <fapi2::Target<fapi2::TARGET_TYPE_EX>> l_ex_list;
     uint8_t l_ex_pos = 0;
-    uint8_t l_repeat_ex_pos = 0;
+    uint8_t l_repeat_ex_pos = 0xFF;
 
     //Get the perv target lists
     auto l_perv_core_target_vector = i_target.getChildren<fapi2::TARGET_TYPE_PERV>(
@@ -310,7 +310,7 @@ fapi2::ReturnCode verify_eq_ec_hw_state(
                                 *l_ex,
                                 l_ex_pos));
 
-        if (!l_repeat_ex_pos)
+        if (l_repeat_ex_pos == 0xFF)
         {
             l_repeat_ex_pos = l_ex_pos;
         }
@@ -318,7 +318,7 @@ fapi2::ReturnCode verify_eq_ec_hw_state(
         {
             if (l_repeat_ex_pos == l_ex_pos)
             {
-                l_repeat_ex_pos = 0;
+                l_repeat_ex_pos = 0xFF;
                 continue;
             }
         }
@@ -527,12 +527,20 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
         if (l_data.getBit<1>())
         {
             FAPI_INF ("Clear Poweron bit in VDMCR");
+
+            l_data.flush<0>().setBit<0>();
+            FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_CPPM_CPMMR_SCOM1, l_data),
+                     "Error writing to P9N2_C_CPPM_CPMMR_SCOM");
             l_data.flush<0>().setBit<0>();
             FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_PPM_VDMCR_CLEAR, l_data),
                      "Error writing to P9N2_C_PPM_VDMCR_CLEAR");
 
             break; //power is off
         }
+
+        l_data.flush<0>().setBit<0>();
+        FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_CPPM_CPMMR_SCOM1, l_data),
+                 "Error writing to P9N2_C_CPPM_CPMMR_SCOM");
 
         FAPI_INF(" Check core %d clock is stopped via CLOCK_STAT_SL[4-13]", i_core_unit_pos);
         FAPI_TRY(fapi2::getScom(i_core_target, P9N2_C_CLOCK_STAT_SL, l_data),
@@ -567,7 +575,7 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
                          "Error reading P9N2_C_CPLT_STAT0");
 
             }
-            while ((l_data.getBit<8>() != 1) && ((l_loops1ms--) != 0));
+            while ((l_data.getBit<8>() != 1) && ((--l_loops1ms) != 0));
 
 
             FAPI_INF(" Check core %d clock is stopped via CLOCK_STAT_SL[4-13]", i_core_unit_pos);
@@ -577,7 +585,61 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
             if ((~l_data & CLK_REGION_ALL_BUT_PLL) != 0)
             {
                 FAPI_ERR("Core %d Clock Stop Failed", i_core_unit_pos);
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::CORE_CLOCK_STOP_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CORE_TARGET(i_core_target)
+                                   .set_CORE_POS(i_core_unit_pos),
+                                   "Core clock is still on");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
             }
+
+            FAPI_DBG("Drop core clock sync enable via CPPM_CACCR[15]");
+            l_data.flush<0>().setBit<15>();
+            FAPI_TRY(putScom(i_core_target, P9N2_C_CPPM_CACCR_CLEAR, l_data));
+
+            FAPI_DBG("Poll for core clock sync done to drop via CPPM_CACSR[13]");
+            l_loops1ms = 1E6 / CORE_CLK_SYNC_POLLING_HW_NS_DELAY;
+
+            do
+            {
+                fapi2::delay(CORE_CLK_SYNC_POLLING_HW_NS_DELAY,
+                             CORE_CLK_SYNC_POLLING_SIM_CYCLE_DELAY);
+
+                FAPI_TRY(getScom(i_core_target, P9N2_C_CPPM_CACSR, l_data));
+            }
+            while((l_data.getBit<13>() == 1) && ((--l_loops1ms) != 0));
+
+            if (l_data.getBit<13>())
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::CORE_CLOCKSYNC_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CORE_TARGET(i_core_target)
+                                   .set_CORE_POS(i_core_unit_pos),
+                                   "Core clock sync is not dropped");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            FAPI_INF("Core clock sync done dropped");
+
+            l_data.flush<0>();
+            FAPI_TRY(putScom(i_core_target, P9N2_C_PPM_CGCR, l_data));
+
+            FAPI_INF("Assert skew sense to skew adjust fence via NET_CTRL0[22]");
+            l_data.flush<0>().setBit<22>();
+            FAPI_TRY(putScom(i_core_target, P9N2_C_NET_CTRL0_WOR, l_data));
+
+            FAPI_INF("Drop ABIST_SRAM_MODE_DC to support ABIST Recovery via BIST[1]");
+            FAPI_TRY(getScom(i_core_target, P9N2_C_BIST, l_data));
+            l_data.clearBit<1>();
+            FAPI_TRY(putScom(i_core_target, P9N2_C_BIST, l_data));
+
+            FAPI_INF("Assert vital fence via CPLT_CTRL1[3]");
+            l_data.flush<0>().setBit<3>();
+            FAPI_TRY(putScom(i_core_target, P9N2_C_CPLT_CTRL1_OR, l_data));
+
+            FAPI_INF("Assert regional fences via CPLT_CTRL1[4-14]");
+            FAPI_TRY(putScom(i_core_target, P9N2_C_CPLT_CTRL1_OR, CLK_REGION_ALL));
 
         }
         else
@@ -622,7 +684,18 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
                 FAPI_TRY(fapi2::getScom(i_core_target, P9N2_C_PPM_PFSNS, l_data),
                          "Error reading P9N2_C_PPM_PFSNS");
             }
-            while(!l_data.getBit<1>() && ((l_loops1ms--) != 0));
+            while(!l_data.getBit<1>() && ((--l_loops1ms) != 0));
+
+            if (!l_data.getBit<1>())
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::CORE_CLOCK_POWEROFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CORE_TARGET(i_core_target)
+                                   .set_CORE_POS(i_core_unit_pos),
+                                   "Core power off failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
 
             FAPI_INF("Turn off force voff via PFCS[0-1]");
             l_data.flush<0>().setBit<0, 2>();
@@ -649,10 +722,13 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
     fapi2::buffer<uint64_t> l_data = 0;
     uint8_t l_ex_pos = i_ex_unit_pos % 2;
     uint8_t l2_clock_stat_val = 0;
+    uint64_t l2_region_clk = 0;
+    uint64_t l3_region_clk = 0;
     uint8_t l3_clock_stat_val = 0;
     uint64_t l2_ring_fence_mask = 0;
     uint64_t l3_ring_fence_mask = 0;
     uint32_t               l_loops1ms;
+    uint8_t l2_clock_sync_val;
     uint32_t l_timeout;
     uint8_t l_eq_pos = 0;
     uint64_t l_qssr_data = 0;
@@ -661,7 +737,6 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
     {
         auto l_eq_target = i_ex_target.getParent<fapi2::TARGET_TYPE_EQ>();
         auto l_proc_chip = l_eq_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-
 
         FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
                                 l_eq_target,
@@ -675,10 +750,6 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
 
         if (l_data.getBit<1>())
         {
-            FAPI_INF ("Clear Poweron bit in VDMCR");
-            l_data.flush<0>().setBit<0>();
-            FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_PPM_VDMCR_CLEAR, l_data),
-                     "Error writing to P9N2_EQ_PPM_VDMCR_CLEAR");
 
             FAPI_DBG("Set L2 as stopped in QSSR");
             l_qssr_data = 1;
@@ -695,6 +766,8 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
 
         if (l_ex_pos)
         {
+            l2_region_clk = 0x0040000000000000;
+            l3_region_clk = 0x0100000000000000;
             l2_clock_stat_val = l_data.getBit<9>();
             l3_clock_stat_val = l_data.getBit<7>();
             l2_ring_fence_mask = 0x1010000000000000;
@@ -702,6 +775,8 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
         }
         else
         {
+            l2_region_clk = 0x0080000000000000;
+            l3_region_clk = 0x0200000000000000;
             l2_clock_stat_val = l_data.getBit<8>();
             l3_clock_stat_val = l_data.getBit<6>();
             l2_ring_fence_mask = 0x2020000000000000;
@@ -734,7 +809,21 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
             }
             while ( !(l_data.getBit<22>() & l_data.getBit<23>()) && (l_timeout-- != 0));
 
-            l_data.flush<0>().setBit<18>().setBit<22>();
+            FAPI_INF("L2 Purge values Bit 22 %d  Bit 23 %d", l_data.getBit<22>(), l_data.getBit<23>());
+
+            if (!(l_data.getBit<22>() & l_data.getBit<23>()))
+            {
+                FAPI_ERR("Timeout is zero .. L2 purge failed and L2 Purge values Bit 22 %d  Bit 23 %d",
+                         l_data.getBit<22>(), l_data.getBit<23>());
+                FAPI_ASSERT(false,
+                            fapi2::EX_L2_PURGE_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            .set_EX_TARGET(i_ex_target)
+                            .set_EX_POS(i_ex_unit_pos),
+                            "EX L2 purge failed");
+            }
+
+
+            l_data.flush<0>().setBit<18, 2>().setBit<22, 2>();
             FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_CME_SCOM_SICR_SCOM1, l_data),
                      "Error writing to P9N2_EX_CME_SCOM_SICR_SCOM1");
 
@@ -756,7 +845,7 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
 
             FAPI_INF("Stop L2 Clocks via CLK_REGION");
             FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_CLK_REGION,
-                                    (CLK_STOP_CMD | CLK_THOLD_ALL | (uint64_t)l_ex_pos << 54)),
+                                    (CLK_STOP_CMD | CLK_THOLD_ALL | l2_region_clk)),
                      "Error writing to P9N2_C_CLK_REGION");
 
             FAPI_INF("Poll for L2 clocks stopped via CPLT_STAT0[8]");
@@ -769,7 +858,7 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                 FAPI_TRY(fapi2::getScom(l_eq_target, P9N2_EQ_CPLT_STAT0, l_data),
                          "Error reading P9N2_EX_CPLT_STAT0");
             }
-            while ((l_data.getBit<8>() != 1) && ((l_loops1ms--) != 0));
+            while ((l_data.getBit<8>() != 1) && ((--l_loops1ms) != 0));
 
 
             FAPI_INF("Check L2 clock is stopped via CLOCK_STAT_SL[4-13]");
@@ -789,8 +878,75 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
             if (!l2_clock_stat_val)
             {
                 FAPI_ERR("L2 clock %d couldn't stop", i_ex_unit_pos);
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EX_L2_CLOCKOFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EX_TARGET(i_ex_target)
+                                   .set_EX_POS(i_ex_unit_pos),
+                                   "EX L2 clock off failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
+            FAPI_INF("Drop clock sync enable before switch to refclk via EXCGCR[36/37]");
+
+            if (l_ex_pos)
+            {
+                l_data.flush<0>().setBit<37>();
+            }
+            else
+            {
+                l_data.flush<0>().setBit<36>();
+            }
+
+            FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_QPPM_EXCGCR_CLEAR, l_data),
+                     "Error reading P9N2_EX_CLOCK_STAT_SL");
+
+            FAPI_INF("Poll for clock sync done to drop via QACSR[36/37]");
+            l_loops1ms = 1E6 / CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY;
+
+            do
+            {
+                fapi2::delay(CACHE_L2_CLK_STOP_POLLING_HW_NS_DELAY,
+                             CACHE_L2_CLK_STOP_POLLING_SIM_CYCLE_DELAY);
+
+
+                FAPI_TRY(fapi2::getScom(l_eq_target, P9N2_EQ_QPPM_QACSR, l_data),
+                         "Error reading P9N2_EQ_QPPM_QACSR");
+
+                if (l_ex_pos)
+                {
+                    l2_clock_sync_val = l_data.getBit<37>();
+                }
+                else
+                {
+                    l2_clock_sync_val = l_data.getBit<36>();
+                }
+
+            }
+            while(l2_clock_sync_val && (--l_loops1ms) != 0);
+
+            if (l2_clock_sync_val)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EX_L2_CLOCKSYNC_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EX_TARGET(i_ex_target)
+                                   .set_EX_POS(i_ex_unit_pos),
+                                   "EX L2 clock sync failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            FAPI_INF("Switch glsmux to refclk to save clock grid power via EXCGCR[34/35]");
+
+            if (l_ex_pos)
+            {
+                l_data.flush<0>().setBit<35>();
+            }
+            else
+            {
+                l_data.flush<0>().setBit<34>();
+            }
+
+            FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_QPPM_EXCGCR_CLEAR, l_data),
+                     "Error reading P9N2_EQ_QPPM_EXCGCR_CLEAR");
         }
         else
         {
@@ -810,8 +966,28 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
         if (!l3_clock_stat_val)
         {
 
-            FAPI_INF("Abort: assert purge L3 abort");
-            l_data.flush<0>().setBit<2>();
+            FAPI_INF("Drop LCO prior to purge via EX_PM_LCO_DIS_REG[0]");
+            l_data.flush<0>().setBit<0>();
+            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_L3_PM_LCO_DIS_REG, l_data),
+                     "Error writing to P9N2_EX_L3_PM_LCO_DIS_REG");
+
+            FAPI_INF("Halt CHTM[0+1] on EX via HTM_TRIG[1]");
+            l_data.flush<0>().setBit<1>();
+            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_HTM_TRIG, l_data),
+                     "Error writing to P9N2_EX_HTM_TRIG");
+            l_data.flush<0>();
+            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_HTM_CTRL, l_data),
+                     "Error writing to P9N2_EX_HTM_CTRL");
+            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_HTM_MODE, l_data),
+                     "Error writing to P9N2_EX_HTM_MODE");
+
+            FAPI_INF("Disable cme trace array via DEBUG_TRACE_CONTROL[1]");
+            l_data.flush<0>().setBit<1>();
+            FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_DEBUG_TRACE_CONTROL, l_data),
+                     "Error writing to P9N2_EQ_DEBUG_TRACE_CONTROL");
+
+            FAPI_INF("Assert purge L3");
+            l_data.flush<0>().setBit<0>();
             FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_L3_PM_PURGE_REG, l_data),
                      "Error writing to P9N2_EX_L3_PM_PURGE_REG");
 
@@ -829,19 +1005,37 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
             while ( (l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>() |
                      l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>()) && (l_timeout-- != 0));
 
+            FAPI_INF("L3 Purge values Bit 0 %d  Bit 2 %d", l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>(),
+                     l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>());
+
+            if ((l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>() |
+                 l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>()))
+            {
+                FAPI_ERR("Timeout is zero .. L3 purge failed Purge values Bit 0 %d  Bit 2 %d",
+                         l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>(), l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>());
+                FAPI_ASSERT(false,
+                            fapi2::EX_L3_PURGE_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            .set_EX_TARGET(i_ex_target)
+                            .set_EX_POS(i_ex_unit_pos),
+                            "EX L3 purge failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+            }
+
+
 
             FAPI_INF("Assert partial bad L2/L3 and stopping/stoped l2 pscom masks via RING_FENCE_MASK_LATCH");
             FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_RING_FENCE_MASK_LATCH_REG, l3_ring_fence_mask),
                      "Error writing to P9N2_EX_RING_FENCE_MASK_LATCH_REG");
 
             l_data.flush<0>();
-            FAPI_INF("Clear SCAN_REGION_TYPE prior to stop L2 clocks");
+            FAPI_INF("Clear SCAN_REGION_TYPE prior to stop L3 clocks");
             FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_SCAN_REGION_TYPE, l_data),
                      "Error writing to P9N2_EQ_SCAN_REGION_TYPE");
 
             FAPI_INF("Stop L3 Clocks via CLK_REGION");
             FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_CLK_REGION,
-                                    (CLK_STOP_CMD | CLK_THOLD_ALL | (uint64_t)l_ex_pos << 56)),
+                                    (CLK_STOP_CMD | CLK_THOLD_ALL | l3_region_clk)),
                      "Error writing to P9N2_EQ_CLK_REGION");
 
             FAPI_INF("Poll for L3 clocks stopped via CPLT_STAT0[8]");
@@ -854,10 +1048,10 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                 FAPI_TRY(fapi2::getScom(l_eq_target, P9N2_EQ_CPLT_STAT0, l_data),
                          "Error reading P9N2_EX_CPLT_STAT0");
             }
-            while ((l_data.getBit<8>() != 1) && ((l_loops1ms--) != 0));
+            while ((l_data.getBit<8>() != 1) && ((--l_loops1ms) != 0));
 
 
-            FAPI_INF("Check L2 clock is stopped via CLOCK_STAT_SL[4-13]");
+            FAPI_INF("Check L3 clock is stopped via CLOCK_STAT_SL[4-13]");
             FAPI_TRY(fapi2::getScom(l_eq_target, P9N2_EQ_CLOCK_STAT_SL, l_data),
                      "Error reading P9N2_EQ_CLOCK_STAT_SL");
 
@@ -873,7 +1067,12 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
             if (!l3_clock_stat_val)
             {
                 FAPI_ERR("L3 clock %d couldn't stop", i_ex_unit_pos);
-
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EX_L3_CLOCKOFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EX_TARGET(i_ex_target)
+                                   .set_EX_POS(i_ex_unit_pos),
+                                   "EX L3 clock off failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
         }
         else
@@ -927,10 +1126,6 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
             break;
         }
 
-        FAPI_INF("Acquire cache PCB slave atomic lock");
-        l_data.flush<0>().setBit<0, 5>();
-        FAPI_TRY(fapi2::putScom(i_quad_target, P9N2_EQ_ATOMIC_LOCK_REG, l_data));
-
         FAPI_INF("Assert powerbus purge via QCCR[30]");
         l_data.flush<0>().setBit<30>();
         FAPI_TRY(fapi2::putScom(i_quad_target, P9N2_EQ_QPPM_QCCR_SCOM2, l_data));
@@ -981,7 +1176,7 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
 
             FAPI_INF("Stop Cache Clocks via CLK_REGION");
             FAPI_TRY(fapi2::putScom(i_quad_target, P9N2_EQ_CLK_REGION,
-                                    (CLK_STOP_CMD | CLK_REGION_ALL_BUT_PLL | CLK_THOLD_ALL)),
+                                    (CLK_STOP_CMD | CLK_REGION_ALL | CLK_THOLD_ALL)),
                      "Error writing to P9N2_C_CLK_REGION");
 
             FAPI_INF("Poll for cache clocks stopped via CPLT_STAT0[8]");
@@ -1006,6 +1201,12 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
             if ((~l_data & CLK_REGION_ALL) != 0)
             {
                 FAPI_ERR("Cache clock couldn't stop");
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EQ_CLOCKOFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EQ_TARGET(i_quad_target)
+                                   .set_EQ_POS(i_cache_unit_pos),
+                                   "EQ clock off failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             l_data.flush<0>().setBit<3>();
@@ -1085,6 +1286,16 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
             }
             while(!l_data.getBit<3>() && (--l_loops1ms != 0));
 
+            if (!l_data.getBit<3>())
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EQ_VCS_POWEROFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EQ_TARGET(i_quad_target)
+                                   .set_EQ_POS(i_cache_unit_pos),
+                                   "EQ VCS poweroff failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
             FAPI_INF("Power off VDD via PFCS[2-3]");
             l_data.flush<0>().setBit<1>();
             FAPI_TRY(fapi2::putScom(i_quad_target, P9N2_EQ_PPM_PFCS_SCOM2, l_data),
@@ -1104,6 +1315,15 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
             }
             while(!l_data.getBit<1>() && (--l_loops1ms != 0));
 
+            if (!l_data.getBit<1>())
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::EQ_VDD_POWEROFF_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_EQ_TARGET(i_quad_target)
+                                   .set_EQ_POS(i_cache_unit_pos),
+                                   "EQ VDD poweroff failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
 
             FAPI_INF("Turn off force voff via PFCS[0-3]");
             l_data.flush<0>().setBit<0, 4>();
@@ -1115,9 +1335,6 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
         {
             FAPI_INF("Cache %d is powered off", i_cache_unit_pos);
         }
-
-        l_data.flush<0>();
-        FAPI_TRY(fapi2::putScom(i_quad_target, P9N2_EQ_ATOMIC_LOCK_REG, l_data));
     }
     while(0);
 

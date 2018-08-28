@@ -75,6 +75,31 @@ p9_query_core_access_state(
 
 
     FAPI_INF("> p9_query_core_access_state...");
+    auto l_eq_target = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
+
+    //Check if quad/core is powered off; if so, indicate
+    //not scomable or scannable
+    FAPI_TRY(fapi2::getScom(l_eq_target, EQ_PPM_PFSNS, l_data64),
+             "Error reading data from EQ_PPM_PFSNS");
+
+    if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        o_is_scomable = 0;
+        o_is_scanable = 0;
+        return fapi2::current_err;
+    }
+
+    FAPI_TRY(fapi2::getScom(i_target, C_PPM_PFSNS, l_data64),
+             "Error reading data from C_PPM_PFSNS");
+
+    if (l_data64.getBit<C_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        o_is_scomable = 0;
+        o_is_scanable = 0;
+        return fapi2::current_err;
+    }
+
+
 
     // Get the stop state from the SSHRC in the CPPM
     FAPI_TRY(fapi2::getScom(i_target, C_PPM_SSHSRC, l_csshsrc), "Error reading data from CPPM SSHSRC");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 // ----------------------------------------------------------------------
 
 #include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 #include <p9_query_cache_access_state.H>
 
 
@@ -83,6 +84,30 @@ p9_query_cache_access_state(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_INF("> p9_query_cache_access_state...");
+
+
+    //Check if EQ is powered off; if so, indicate not
+    //scomable or scannable
+    FAPI_TRY(fapi2::getScom(i_target, EQ_PPM_PFSNS, l_data64),
+             "Error reading data from EQ_PPM_PFSNS");
+
+    if (l_data64.getBit<EQ_PPM_PFSNS_VDD_PFETS_DISABLED_SENSE>())
+    {
+        for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+        {
+            o_l2_is_scomable[cnt]  = 0;
+            o_l2_is_scannable[cnt] = 0;
+        }
+
+        for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+        {
+            o_l3_is_scomable[cnt]  = 0;
+            o_l3_is_scannable[cnt] = 0;
+        }
+
+        return fapi2::current_err;
+    }
+
 
     //Get the stop state from the SSHRC in the EQPPM
     //First figure out whether we should use the C_PPM_SSHFSP (if FSP platform) or C_PPM_SSHHYP (if HOST platform)

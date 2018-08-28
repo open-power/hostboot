@@ -117,4 +117,181 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_CLOCK_STOP_FAILED</rc>
+    <description>Failed to switch off the core clock
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_POS</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_CLOCKSYNC_FAILED</rc>
+    <description>Failed to sync the core clocks
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_POS</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CORE_CLOCK_POWEROFF_FAILED</rc>
+    <description>Failed to power off the core clock
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_POS</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_L2_PURGE_FAILED</rc>
+    <description>Failed to purge L2
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_L2_CLOCKOFF_FAILED</rc>
+    <description>Failed to switch off L2 clock
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_L3_CLOCKOFF_FAILED</rc>
+    <description>Failed to switch off L3 clock
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_L3_PURGE_FAILED</rc>
+    <description>Failed to purge L3
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EQ_VDD_POWEROFF_FAILED</rc>
+    <description>Failed to poweroff VDD of EQ
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_POS</ffdc>
+    <callout>
+      <target>EQ_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EQ_VCS_POWEROFF_FAILED</rc>
+    <description>Failed to poweroff VCS of EQ
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_POS</ffdc>
+    <callout>
+      <target>EQ_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EQ_CLOCKOFF_FAILED</rc>
+    <description>Failed to switch off the eq clock
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_POS</ffdc>
+    <callout>
+      <target>EQ_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_L2_CLOCKSYNC_FAILED</rc>
+    <description>Failed to sync L2
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>
