@@ -665,6 +665,103 @@ void ErrlEntry::addHbBuildId()
     ErrlUserDetailsString(l_pString).addToLog(this);
 }
 
+void ErrlEntry::addVersionInfo()
+{
+    // Version section of PNOR is only available to OpenPOWER systems.
+    if (!INITSERVICE::spBaseServicesEnabled())
+    {
+        //TODO: CQ:SW416159 Uncomment when merged
+        // bool l_secureSectionLoaded = false;
+        errlHndl_t l_errl = nullptr/*, l_errl_loadSecureSection = nullptr*/;
+
+        do
+        {
+/* TODO: CQ:SW416159 Uncomment when merged
+#ifdef CONFIG_SECUREBOOT
+            l_errl_loadSecureSection = PNOR::loadSecureSection(PNOR::VERSION);
+            if (l_errl_loadSecureSection)
+            {
+                TRACFCOMP( g_trac_errl,
+                          "addVersionInfo: Failed to load secure VERSION");
+                // Since an error occurred while attempting to add version info
+                // to another error log there is nothing that can be done with
+                // this error since attempting to commit it will lead to an
+                // infinite loop of committing the error and then recalling this
+                // function. If this error occurred then the VERSION partition
+                // is not added and the error log commit continues.
+                delete l_errl_loadSecureSection;
+                l_errl_loadSecureSection = nullptr;
+                break;
+            }
+            else
+            {
+                l_secureSectionLoaded = true;
+            }
+#endif
+*/
+            // Get PNOR Version
+            PNOR::SectionInfo_t l_pnorVersionInfo;
+            l_errl = getSectionInfo(PNOR::VERSION, l_pnorVersionInfo);
+
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_errl,
+                          "addVersionInfo: Failed to getSectionInfo");
+                // Since an error occurred while attempting to add version info
+                // to another error log there is nothing that can be done with
+                // this error since attempting to commit it will lead to an
+                // infinite loop of committing the error and then recalling this
+                // function. If this error occurred then the VERSION partition
+                // is not added and the error log commit continues.
+                delete l_errl;
+                l_errl = nullptr;
+                break;
+            }
+
+            const uint8_t* l_versionData =
+                reinterpret_cast<uint8_t*>(l_pnorVersionInfo.vaddr);
+
+            size_t l_numberOfBytes = 0;
+
+            // Determine the size of the version data.
+            while ((static_cast<char>(l_versionData[l_numberOfBytes]) != '\0')
+                  && l_numberOfBytes < l_pnorVersionInfo.size)
+            {
+                ++l_numberOfBytes;
+            }
+
+            char l_pVersionString[l_numberOfBytes + 1]={0};
+
+            memcpy(l_pVersionString, l_versionData, l_numberOfBytes);
+
+            ErrlUserDetailsString(l_pVersionString).addToLog(this);
+        } while(0);
+
+/* TODO: CQ:SW416159 Uncomment when merged
+#ifdef CONFIG_SECUREBOOT
+        if (l_secureSectionLoaded)
+        {
+            l_errl_loadSecureSection = PNOR::unloadSecureSection(PNOR::VERSION);
+            if(l_errl_loadSecureSection)
+            {
+                TRACFCOMP( g_trac_errl,
+                          "addVersionInfo: Failed to unload secure VERSION");
+                // Since an error occurred while attempting to add version info
+                // to another error log there is nothing that can be done with
+                // this error since attempting to commit it will lead to an
+                // infinite loop of committing the error and then recalling this
+                // function. If this error occurred then the VERSION partition
+                // is not added and the error log commit continues.
+                delete l_errl_loadSecureSection;
+                l_errl_loadSecureSection = nullptr;
+            }
+        }
+#endif
+*/
+    }
+
+}
+
 enum {
     SKIP_INFO_RECOVERABLE_LOGS =
         TARGETING::HIDDEN_ERRLOGS_ENABLE_NO_HIDDEN_LOGS,
@@ -895,6 +992,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
+
+    // Add the version info to the error log for OpenPOWER systems
+    addVersionInfo();
 
     // check to see if we should skip info and recoverable errors?
     checkHiddenLogsEnable();
