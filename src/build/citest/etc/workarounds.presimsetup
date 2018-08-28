@@ -36,17 +36,15 @@
 #echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
 ##########################################################################
-echo "+++ Update standalone configs to use modern proc levels +++"
-sbex -t 1063108
-
-echo "+++ Need to alter where we look for pnor images so they will be picked up properly"
 mkdir -p  $sb/simu/data
+
 
 ###############################################################################
 ### NOTE - if you need to sbex a simicsInfo track it needs to be done BEFORE
 ###        executing the code below
 ### NOTE - these lines are permanent to allow external PNOR testing
 ###############################################################################
+echo "+++ Need to alter where we look for pnor images so they will be picked up properly"
 cp $bb/src/simu/data/simicsInfo $sb/simu/data/
 chmod +w $sb/simu/data/simicsInfo
 egrep -v "nimbus.pnor|cumulus.pnor|cumulus_cdimm.pnor" $sb/simu/data/simicsInfo > $sb/simu/data/simicsInfo.new
