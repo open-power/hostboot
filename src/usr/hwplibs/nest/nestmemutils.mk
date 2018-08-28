@@ -38,5 +38,3 @@ VPATH += ${HWP_NEST_MEM_UTILS_PATH}
 include ${ROOTPATH}/procedure.rules.mk
 
 include ${HWP_NEST_MEM_UTILS_PATH}/p9_putmemproc.mk
-
-include ${ROOTPATH}/config.mk
