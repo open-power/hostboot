@@ -67,7 +67,7 @@ if (not $self)
     $tool = basename $0;
 }
 
-#   "" : Default - Try to use memory, fall-back to symbol files
+#   "default" : Default - Try to use memory, fall-back to symbol files
 #   "usefile" : Only use the symbol files
 #   "usemem" : Only use the data from memory
 my $useSymsMode = "default";
