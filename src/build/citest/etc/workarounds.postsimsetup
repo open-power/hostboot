@@ -33,5 +33,8 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
+#echo "+++ Adding reg 501081D to p9c.chip +++"
+mkdir -p $sb/simu/data/cec-chip/
+sbex -t 1067370 -f aix@auscmvc1.austin.ibm.com@2035 -r fips921 -d $sb/../
 
 ##########################################################################
