@@ -123,6 +123,74 @@ bool PllDomain::Query(ATTENTION_TYPE attentionType)
 
 //------------------------------------------------------------------------------
 
+void mfClockResolution( STEP_CODE_DATA_STRUCT &io_sc,
+                        std::vector<ExtensibleChip *> i_chipList )
+{
+    for ( auto chip : i_chipList )
+    {
+        bool bothClocksFailed = false;
+        TargetHandle_t chipTgt = chip->GetChipHandle();
+
+        SCAN_COMM_REGISTER_CLASS *oscSw = chip->getRegister("OSC_SW_SENSE");
+        uint32_t l_rc = oscSw->Read();
+        if ( SUCCESS == l_rc )
+        {
+            const uint32_t OSC_0_OK = 28;
+            const uint32_t OSC_1_OK = 29;
+            if ( !(oscSw->IsBitSet(OSC_0_OK) || oscSw->IsBitSet(OSC_1_OK) ) )
+            {
+                bothClocksFailed = true;
+
+                // Callout both PCI Clocks
+                #ifndef __HOSTBOOT_MODULE
+                TargetHandle_t pciOsc =
+                    getClockId( chipTgt, TYPE_OSCPCICLK, 0 );
+                if (pciOsc)
+                    io_sc.service_data->SetCallout( pciOsc );
+
+                pciOsc = getClockId( chipTgt, TYPE_OSCPCICLK, 1 );
+                if (pciOsc)
+                    io_sc.service_data->SetCallout( pciOsc );
+
+                #else
+                io_sc.service_data->SetCallout( PRDcallout(chipTgt,
+                                                PRDcalloutData::TYPE_PCICLK0));
+                io_sc.service_data->SetCallout( PRDcallout(chipTgt,
+                                                PRDcalloutData::TYPE_PCICLK1));
+                #endif
+            }
+        }
+        else
+        {
+            PRDF_ERR( "ClockResolution::Resolve "
+                      "Read() failed on OSC_SW_SENSE huid 0x%08X", chipTgt );
+        }
+
+        if ( !bothClocksFailed )
+        {
+            TargetHandle_t l_ptargetClock =
+                PlatServices::getActiveRefClk(chipTgt, TYPE_OSCPCICLK);
+
+            // Callout this chip if nothing else.
+            if(NULL == l_ptargetClock)
+            {
+                l_ptargetClock = chipTgt;
+            }
+
+            // callout the clock source
+            // HB does not have the osc target modeled
+            // so we need to use the proc target with
+            // osc clock type to call out
+            #ifndef __HOSTBOOT_MODULE
+            io_sc.service_data->SetCallout(l_ptargetClock);
+            #else
+            io_sc.service_data->SetCallout( PRDcallout(l_ptargetClock,
+                                            PRDcalloutData::TYPE_PCICLK));
+            #endif
+        }
+    }
+}
+
 int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                            ATTENTION_TYPE attentionType)
 {
@@ -227,10 +295,18 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
 
     // always suspect the clock source
-    closeClockSource.Resolve(serviceData);
-    if(&closeClockSource != &farClockSource)
+    if (GetId() == CLOCK_DOMAIN_IO)
     {
-        farClockSource.Resolve(serviceData);
+        mfClockResolution(serviceData, failoverList);
+        mfClockResolution(serviceData, pllUnlockList);
+    }
+    else
+    {
+        closeClockSource.Resolve(serviceData);
+        if(&closeClockSource != &farClockSource)
+        {
+            farClockSource.Resolve(serviceData);
+        }
     }
 
     if (pllUnlockList.size() > 0)
