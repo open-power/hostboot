@@ -53,6 +53,7 @@
 #include <p9_vas_scom.H>
 #include <p9_fbc_smp_utils.H>
 #include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 #include <p9_xbus_scom_addresses.H>
 #include <p9_xbus_scom_addresses_fld.H>
 #include <p9_obus_scom_addresses.H>
@@ -82,6 +83,14 @@ static const uint64_t MCBIST_FIR_ACTION0 = 0x0000000000000000ULL;
 static const uint64_t MCBIST_FIR_ACTION1 = 0x2000000000000000ULL;
 static const uint64_t MCBIST_FIR_MASK    = 0xDC00000000000000ULL;
 
+// HW461448 MC WAT
+static const uint8_t  MCWAT_SELECT0 = 0x0;
+static const uint8_t  MCWAT_SELECT3 = 0x3;
+static const uint8_t  MCWAT_SELECT9 = 0x9;
+static const uint64_t MCWAT_DATA0   = 0x02EC001000000000ULL; // 75 counts
+static const uint64_t MCWAT_DATA3   = 0x100003BFFFF00000ULL; // 16 entries
+static const uint64_t MCWAT_DATA9   = 0x8000000001010800ULL;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -107,6 +116,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     uint32_t l_eps_write_cycles_t1 = 0;
     uint32_t l_eps_write_cycles_t2 = 0;
     uint8_t l_npu_enabled = 0;
+    uint8_t l_hw461448 = 0;
 
     FAPI_DBG("Start");
 
@@ -207,6 +217,45 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                 FAPI_ERR("Error from p9c.mi.scom.initfile");
                 fapi2::current_err = l_rc;
                 goto fapi_try_exit;
+            }
+
+            // HW461448 Configure MC WAT for Cumulus using indirect scoms
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW461448, i_target, l_hw461448),
+                     "Error from FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HW461448)");
+
+            if (l_hw461448)
+            {
+                FAPI_TRY(fapi2::getScom(l_mi_target, MCS_MCWATCNTL, l_scom_data),
+                         "Error from getScom (MCS_MCWATCNTL)");
+
+                // MCWATDATA0
+                l_scom_data.insertFromRight<MCS_MCWATCNTL_WAT_CNTL_REG_SEL, MCS_MCWATCNTL_WAT_CNTL_REG_SEL_LEN>
+                (MCWAT_SELECT0);
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATCNTL, l_scom_data),
+                         "Error from putScom (MCS_MCWATCNTL)");
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATDATA, MCWAT_DATA0),
+                         "Error from putScom (MCS_MCWATDATA)");
+
+                // MCWATDATA3
+                l_scom_data.insertFromRight<MCS_MCWATCNTL_WAT_CNTL_REG_SEL, MCS_MCWATCNTL_WAT_CNTL_REG_SEL_LEN>
+                (MCWAT_SELECT3);
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATCNTL, l_scom_data),
+                         "Error from putScom (MCS_MCWATCNTL)");
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATDATA, MCWAT_DATA3),
+                         "Error from putScom (MCS_MCWATDATA)");
+
+                // MCWATDATA9
+                l_scom_data.insertFromRight<MCS_MCWATCNTL_WAT_CNTL_REG_SEL, MCS_MCWATCNTL_WAT_CNTL_REG_SEL_LEN>
+                (MCWAT_SELECT9);
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATCNTL, l_scom_data),
+                         "Error from putScom (MCS_MCWATCNTL)");
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATDATA, MCWAT_DATA9),
+                         "Error from putScom (MCS_MCWATDATA)");
+
+                // Enable MC WAT
+                l_scom_data.setBit<MCS_MCWATCNTL_ENABLE_WAT>();
+                FAPI_TRY(fapi2::putScom(l_mi_target, MCS_MCWATCNTL, l_scom_data),
+                         "Error from putScom (MCS_MCWATCNTL)");
             }
         }
 
