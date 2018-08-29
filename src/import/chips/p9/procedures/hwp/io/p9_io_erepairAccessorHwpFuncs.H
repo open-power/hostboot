@@ -886,13 +886,6 @@ fapi2::ReturnCode erepairSetFailedLanes(
 
     FAPI_INF("Threshold:%d ModeIPL:%d \n", l_threshold, l_mnfgModeIPL);
 
-    // Check if the new fails have crossed the threshold
-    if(i_failLanes.size() > l_threshold)
-    {
-        o_thresholdExceed = true;
-        goto fapi_try_exit;
-    }
-
     // Get existing fail lanes that are in the VPD of rx endpoint
     FAPI_TRY( l_getLanes_target_J(
                   i_rxEndp_target,
