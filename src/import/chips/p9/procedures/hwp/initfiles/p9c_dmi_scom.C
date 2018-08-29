@@ -51,6 +51,8 @@ constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0x26 = 0x26;
 constexpr uint64_t literal_0x33 = 0x33;
 constexpr uint64_t literal_0x40 = 0x40;
+constexpr uint64_t literal_0b01111 = 0b01111;
+constexpr uint64_t literal_0b00001 = 0b00001;
 constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_1167 = 1167;
 constexpr uint64_t literal_1000 = 1000;
@@ -261,6 +263,13 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010827ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501082aull, l_scom_buffer ));
+
+            l_scom_buffer.insert<12, 5, 59, uint64_t>(literal_0b01111 );
+            l_scom_buffer.insert<17, 5, 59, uint64_t>(literal_0b00001 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501082aull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501082bull, l_scom_buffer ));
@@ -504,6 +513,15 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x7012348ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701234bull, l_scom_buffer ));
+
+            constexpr auto l_MCP_CHAN0_WRITE_NEST_DBG_SEL_WRT_ON = 0x1;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MCP_CHAN0_WRITE_NEST_DBG_SEL_WRT_ON );
+            constexpr auto l_MCP_CHAN0_WRITE_WBMGR_DBG_0_SELECT_ON = 0x1;
+            l_scom_buffer.insert<2, 1, 63, uint64_t>(l_MCP_CHAN0_WRITE_WBMGR_DBG_0_SELECT_ON );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701234bull, l_scom_buffer));
         }
 
     };
