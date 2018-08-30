@@ -134,6 +134,14 @@ fapi2::ReturnCode p9_sample_procedure_mcc(
                fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
                 uint8_t expectedValue);
 
+fapi2::ReturnCode p9_sample_procedure_ocmb(
+               fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                uint8_t expectedValue);
+
+fapi2::ReturnCode p9_sample_procedure_mem_port(
+               fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                uint8_t expectedValue);
+
 }
 
 #endif // _P9_SAMPLE_PROCEDURE_H_

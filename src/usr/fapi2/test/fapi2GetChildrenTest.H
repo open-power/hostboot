@@ -84,6 +84,8 @@ void test_fapi2GetChildren()
         std::vector<Target<fapi2::TARGET_TYPE_XBUS> > l_childXBUSs;
         std::vector<Target<fapi2::TARGET_TYPE_DMI> > l_childDMIs;
         std::vector<Target<fapi2::TARGET_TYPE_OMI> > l_childOMIs;
+        std::vector<Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_childOCMBs;
+        std::vector<Target<fapi2::TARGET_TYPE_MEM_PORT> > l_childMEMPORTs;
 
 
         if (isHwValid(l_proc, MY_MCA)
@@ -226,6 +228,42 @@ void test_fapi2GetChildren()
             if(l_actualSize != l_expectedSize)
             {
                 FAPI_INF("fapi2TargetTest:: OMIs per proc mismatch");
+                numFails++;
+                break;
+            }
+        }
+
+        if (isHwValid(l_proc, MY_OMI)
+            && isHwValid(l_proc, MY_OCMB))
+        {
+            l_childOCMBs = fapi2_omiTarget.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OMI]);
+            l_actualSize = l_childOCMBs.size();
+
+            //Set expected size to be the number of OMIs per proc
+            l_expectedSize = OCMB_PER_OMI;
+            numTests++;
+            if(l_actualSize != l_expectedSize)
+            {
+                FAPI_INF("fapi2TargetTest:: OCMBs per proc mismatch");
+                numFails++;
+                break;
+            }
+        }
+
+        if (isHwValid(l_proc, MY_OCMB)
+            && isHwValid(l_proc, MY_MEM_PORT))
+        {
+            l_childMEMPORTs = fapi2_ocmbTarget.getChildren<fapi2::TARGET_TYPE_MEM_PORT>(TARGET_STATE_PRESENT);
+            l_targetHuid = TARGETING::get_huid(targeting_targets[MY_OCMB]);
+            l_actualSize = l_childOCMBs.size();
+
+            //Set expected size to be the number of OMIs per proc
+            l_expectedSize = MEM_PORT_PER_OCMB;
+            numTests++;
+            if(l_actualSize != l_expectedSize)
+            {
+                FAPI_INF("fapi2TargetTest:: MEM_PORTs per proc mismatch");
                 numFails++;
                 break;
             }
