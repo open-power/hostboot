@@ -403,8 +403,11 @@ extern "C"
 
             if( l_summSectn < MAX_FFDC_SUMMARY_SECTN_CNT )
             {
-                StopErrLogSectn l_ffdcSubSectn( l_pSummary, l_sectnSize, l_summSectn );
-                o_ffdcList.push_back( l_ffdcSubSectn );
+                if( l_summSectn != CME_GLOBAL_VAR_SECTN )
+                {
+                    StopErrLogSectn l_ffdcSubSectn( l_pSummary, l_sectnSize, l_summSectn );
+                    o_ffdcList.push_back( l_ffdcSubSectn );
+                }
             }
         }
 
