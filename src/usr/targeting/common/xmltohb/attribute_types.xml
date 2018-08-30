@@ -6697,26 +6697,6 @@
     <readable/>
 </attribute>
 
-<attribute>
-    <id>REL_POS</id>
-    <description>
-        Logical position of this unit/dimm relative to its immediate parent
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0xFF</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_REL_POS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <ignoreEkb/>
-    <no_export/>
-</attribute>
-
 <enumerationType>
     <id>FUSED_CORE_MODE_HB</id>
     <description>Enum for FUSED_CORE_MODE_HB</description>
