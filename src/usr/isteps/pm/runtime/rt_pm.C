@@ -48,7 +48,7 @@
 #include    <targeting/common/targetservice.H>
 
 #include <scom/scomif.H>
-#include "handleSpecialWakeup.H"
+#include <scom/wakeup.H>
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -240,6 +240,21 @@ namespace RTPM
                 break;
             }
 
+            // The PM Complex is now live, ensure that there are no
+            //  lingering special wakeups enabled
+            l_err = WAKEUP::handleSpecialWakeup( proc_target,
+                                                 WAKEUP::FORCE_DISABLE );
+            if( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Error disabling wakeup on %.8X",
+                           TARGETING::get_huid(proc_target) );
+                //Just commit the log as informational and keep going
+                l_err->setSev(ERRL_SEV_INFORMATIONAL);
+                l_err->collectTrace(ISTEP_COMP_NAME,1024);
+                errlCommit( l_err, RUNTIME_COMP_ID );
+                l_err = nullptr;
+            }
         } while(0);
 
         if ( l_err )
@@ -250,6 +265,7 @@ namespace RTPM
 
         return rc;
     }
+
 
 
     /**
@@ -366,7 +382,7 @@ namespace RTPM
             }
 
             // Enable special wakeup
-            l_err = handleSpecialWakeup(i_target,true);
+            l_err = handleSpecialWakeup(i_target,WAKEUP::ENABLE);
             if(l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -485,7 +501,7 @@ namespace RTPM
             } // END else if (g_hostInterfaces->firmware_request != nullptr)
 
             // Disable special wakeup
-            l_err = handleSpecialWakeup(i_target,false);
+            l_err = handleSpecialWakeup(i_target,WAKEUP::DISABLE);
             if(l_err)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

@@ -56,7 +56,7 @@
 #include <hw_access_def.H>
 
 #if __HOSTBOOT_RUNTIME
-  #include "handleSpecialWakeup.H"
+  #include <scom/wakeup.H>
 #endif
 
 // Trace definition
@@ -208,7 +208,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
             TRACDCOMP(g_trac_scom,"Special wakeup required, starting now..");
             g_wakeupInProgress = true;
 
-            l_err = handleSpecialWakeup(i_target,true);
+            l_err = WAKEUP::handleSpecialWakeup(i_target,WAKEUP::ENABLE);
             if(l_err)
             {
                 TRACFCOMP(g_trac_scom, "startScomProcess: "
@@ -242,7 +242,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
             g_wakeupInProgress = true;
             errlHndl_t l_errSW = NULL;
 
-            l_errSW = handleSpecialWakeup(i_target,false);
+            l_errSW = WAKEUP::handleSpecialWakeup(i_target,WAKEUP::DISABLE);
 
             if(l_err != NULL && l_errSW)
             {

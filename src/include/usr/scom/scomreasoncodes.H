@@ -79,6 +79,8 @@ namespace SCOM
         SCOM_SENSITIVE_REG_READ_FAIL   = SCOM_COMP_ID | 0x1A,
         SCOM_BAD_TARGET                = SCOM_COMP_ID | 0x1B,
         SCOM_CACHE_SEQ_ERROR           = SCOM_COMP_ID | 0x1C,
+        SCOM_INVALID_WAKEUP_PARM       = SCOM_COMP_ID | 0x1D,
+        SCOM_UNEXPECTED_FORCE_WAKEUP   = SCOM_COMP_ID | 0x1E,
     };
 
     enum UserDetailsTypes
