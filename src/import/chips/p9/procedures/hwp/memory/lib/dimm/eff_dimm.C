@@ -48,7 +48,6 @@
 #include <lib/shared/mss_kind.H>
 #include <lib/phy/dp16.H>
 #include <lib/mss_attribute_accessors_manual.H>
-#include <endian.h>
 
 namespace mss
 {
@@ -826,7 +825,7 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
     FAPI_TRY( iv_spd_decoder.dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD %s",
               mss::c_str(iv_dimm) );
 
-    endian_swap(l_decoder_val);
+    fapi2::endian_swap(l_decoder_val);
 
     switch (l_decoder_val)
     {
