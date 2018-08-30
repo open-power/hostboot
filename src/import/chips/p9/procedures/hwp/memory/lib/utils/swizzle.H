@@ -42,27 +42,6 @@ namespace mss
 {
 
 ///
-/// @brief Endian swapping
-/// @tparam T input type
-/// @param[in,out] io_input integral input
-/// @note https://stackoverflow.com/questions/105252/how-do-i-convert-between-big-endian-and-little-endian-values-in-c
-///
-template < typename T >
-void endian_swap(T& io_input)
-{
-    constexpr size_t MIN_BYTES = 2;
-    static_assert(sizeof(T) >= MIN_BYTES, "Byte swapping requires at least 2 bytes of data");
-
-    uint8_t* l_varArray = reinterpret_cast<uint8_t*>(&io_input);
-
-    for(size_t i = 0; i < sizeof(io_input) / 2; i++)
-    {
-        const size_t BYTE_SWAP_INDEX = sizeof(io_input) - 1 - i;
-        std::swap(l_varArray[BYTE_SWAP_INDEX], l_varArray[i]);
-    }
-}
-
-///
 /// @brief Swap two bits in a buffer
 /// @tparam TB the bit in the buffer to move to SB
 /// @tparam SB the bit in the buffer to move to TB
