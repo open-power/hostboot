@@ -434,7 +434,7 @@
             l_pCmeSummaryHdr->iv_subSectnId     =   PLAT_CME;
             l_pCmeSummaryHdr->iv_majorNum       =   CME_MAJ_NUM;
             l_pCmeSummaryHdr->iv_minorNum       =   CME_MIN_NUM;
-            l_pCmeSummaryHdr->iv_secValid       =   l_pCmeLayout->iv_ppeFfdcHdr.iv_ppeFfdcHdr.iv_sectionsValid;
+            l_pCmeSummaryHdr->iv_secValid       =   htobe16(l_pCmeLayout->iv_ppeFfdcHdr.iv_ppeFfdcHdr.iv_sectionsValid);
 
             if( !l_pCmeSummaryHdr->iv_secValid )
             {
