@@ -470,6 +470,7 @@ namespace p9_stop_recov_ffdc
 
     fapi2::ReturnCode PlatOcc::generateSummary( void * i_pHomer )
     {
+       FAPI_DBG(" >> PlatOcc::generateSummary" );
        HomerFfdcRegion * l_pHomerFfdc   =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
        OccFfdcRegion * l_pOccLayout     =   ( OccFfdcRegion * ) &l_pHomerFfdc->iv_occFfdcRegion;
@@ -483,7 +484,7 @@ namespace p9_stop_recov_ffdc
        l_pSysConfigHdr->iv_subSectnId   =   PLAT_OCC;
        l_pSysConfigHdr->iv_majorNum     =   SYS_CONFIG_MAJ_NUM;
        l_pSysConfigHdr->iv_minorNum     =   SYS_CONFIG_MIN_NUM;
-       l_pSysConfigHdr->iv_secValid     =   l_pOccFfdcHdr->iv_sectionsValid;
+       l_pSysConfigHdr->iv_secValid     =   htobe16(l_pOccFfdcHdr->iv_sectionsValid);
 
        if( l_pSysConfigHdr->iv_secValid )
        {
@@ -493,10 +494,14 @@ namespace p9_stop_recov_ffdc
                    FFDC_SUMMARY_SCOM_REG_SIZE ) ; //copying first FIR value
 
                    l_pFirEntry++;
+                   l_pFirEntry++;
+                   l_pFirEntry++;
+                   l_pFirEntry++;
 
            memcpy( &l_pSysConfig->iv_occPbaFir[FFDC_SUMMARY_SCOM_REG_SIZE],
                    &l_pFirEntry->iv_scomData,
                    FFDC_SUMMARY_SCOM_REG_SIZE ); //copying second FIR value
+
 
 
            PlatPmComplex::extractScomSummaryReg( l_pOccReg,
@@ -504,6 +509,7 @@ namespace p9_stop_recov_ffdc
                                                  &l_pSysConfig->iv_configReg[0] );
        }
 
+       FAPI_DBG(" << PlatOcc::generateSummary" );
        return fapi2::FAPI2_RC_SUCCESS;
     }
 
