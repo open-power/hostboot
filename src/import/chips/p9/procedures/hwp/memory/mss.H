@@ -50,7 +50,7 @@
 #include <lib/utils/num.H>
 
 #include <generic/memory/lib/utils/pos.H>
-#include <lib/utils/swizzle.H>
+#include <generic/memory/lib/utils/buffer_ops.H>
 #include <lib/utils/mss_nimbus_conversions.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/poll.H>
