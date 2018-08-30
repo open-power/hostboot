@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/memory/lib/utils/swizzle.H $ */
+/* $Source: src/import/generic/memory/lib/utils/buffer_ops.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file swizzle.H
-/// @brief Swizzle bits
+/// @file buffer_ops.H
+/// @brief Buffer operations
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
@@ -33,8 +33,8 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_SWIZZLE_H_
-#define _MSS_SWIZZLE_H_
+#ifndef _BUFFER_OPS_H_
+#define _BUFFER_OPS_H_
 
 #include <fapi2.H>
 
@@ -130,5 +130,6 @@ inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buf
     return o_destination;
 }
 
-}
+} // ns mss
+
 #endif
