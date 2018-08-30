@@ -52,7 +52,27 @@ OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
 OBJS += p9_pm_get_poundv_bucket.o
 
-TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | sort | xargs}
+ifeq (${HOSTBOOT_RUNTIME},1)
+################################################################################
+## Remove non-runtime tests (grep -v testname.H)
+TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+         grep -v fapi2I2cAccessTest.H | \
+         sort | xargs}
+
+################################################################################
+
+else
+
+################################################################################
+## All hostboot IPL time tests
+TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
+         sort | xargs}
+OBJS += p9_i2ctests.o
+
+################################################################################
+endif
+
+TESTS += ${shell ls src/usr/fapi2/test/*TestCxx.H | sort | xargs)}
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
