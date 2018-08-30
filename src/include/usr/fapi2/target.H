@@ -445,27 +445,13 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
     // Specific parent checks for each TargetType
 
     // valid parents for DIMM
-    // DIMM -> MEMPORT
-    // DIMM -> OCMB
-    // DIMM -> OMI
-    // DIMM -> OMIC
-    // DIMM -> MCC
-    // DIMM -> MI
-    // DIMM -> MC
-    // DIMM -> PROC_CHIP
     // DIMM -> MCA
     // DIMM -> MBA
+    // DIMM -> MEM_PORT
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_DIMM)        &&
                     (K_PARENT != fapi2::TARGET_TYPE_MCA)       &&
                     (K_PARENT != fapi2::TARGET_TYPE_MBA)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OCMB_CHIP) &&
-                    (K_PARENT != fapi2::TARGET_TYPE_SYSTEM)    &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMI)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MCC)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MI)        &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MC)        &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMIC)      &&
-                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                    (K_PARENT != fapi2::TARGET_TYPE_MEM_PORT)),
                   "improper parent of fapi2::TARGET_TYPE_DIMM");
 
     // valid parents for PROC
@@ -485,39 +471,15 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
     // valid parents for OCMB
     // OCMB -> SYSTEM
     // OCMB -> OMI
-    // OCMB -> MCC
-    // OCMB -> MI
-    // OCMB -> MC
-    // OCMB -> OMIC
-    // OCMB -> PROC_CHIP
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP) &&
                     (K_PARENT != fapi2::TARGET_TYPE_SYSTEM)  &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMI)     &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MCC)     &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MI)      &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MC)      &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMIC)    &&
-                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                    (K_PARENT != fapi2::TARGET_TYPE_OMI)),
                   "improper parent of fapi2::TARGET_TYPE_OCMB_CHIP");
 
     // valid parents for MEM_PORT
-    // MEM_PORT -> SYSTEM
     // MEM_PORT -> OCMB_CHIP
-    // MEM_PORT -> OMI
-    // MEM_PORT -> MCC
-    // MEM_PORT -> MI
-    // MEM_PORT -> MC
-    // MEM_PORT -> OMIC
-    // MEM_PORT -> PROC_CHIP
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MEM_PORT)    &&
-                    (K_PARENT != fapi2::TARGET_TYPE_SYSTEM)    &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OCMB_CHIP) &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMI)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MCC)       &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MI)        &&
-                    (K_PARENT != fapi2::TARGET_TYPE_MC)        &&
-                    (K_PARENT != fapi2::TARGET_TYPE_OMIC)      &&
-                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                    (K_PARENT != fapi2::TARGET_TYPE_OCMB_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_MEM_PORT");
 
     // valid parents for EX
@@ -845,10 +807,11 @@ inline std::vector<Target<K_CHILD, V> >
     // valid children for system
     // SYSTEM -> PROC
     // SYSTEM -> MEMBUF
-    // SYSTEM -> DIMM ??? disabled for now
+    // SYSTEM -> OCMB_CHIP
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_SYSTEM) &&
                     (K_CHILD != fapi2::TARGET_TYPE_PROC_CHIP) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_MEMBUF_CHIP)),
+                    (K_CHILD != fapi2::TARGET_TYPE_MEMBUF_CHIP) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OCMB_CHIP)),
                   "improper child of fapi2::TARGET_TYPE_SYSTEM");
 
     // valid children for EQ
@@ -917,6 +880,12 @@ inline std::vector<Target<K_CHILD, V> >
                     (K_CHILD != fapi2::TARGET_TYPE_OMI)),
                   "improper child of fapi2::TARGET_TYPE_MCC");
 
+    // valid children for OMI
+    // OMI -> OCMB
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_OMI) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_OCMB_CHIP)),
+                  "improper child of fapi2::TARGET_TYPE_OMI");
+
     // valid children for OMIC
     // OMIC -> OMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OMIC) &&
@@ -925,10 +894,8 @@ inline std::vector<Target<K_CHILD, V> >
 
     // valid children for OCMB
     // OCMB -> MEM_PORT
-    // OCMB -> DIMM
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_DIMM)),
+                    (K_CHILD != fapi2::TARGET_TYPE_MEM_PORT)),
                   "improper child of fapi2::TARGET_TYPE_OCMB_CHIP");
 
     // valid children for MEM_PORT

@@ -69,9 +69,6 @@ void test_fapi2GetParent()
         if(TARGETING::get_huid(targeting_targets[PARENT_TEST_TARGET_ID]) !=                                    \
             TARGETING::get_huid(l_parent))                                                                     \
         {                                                                                                      \
-            uint8_t l_instance = 0;                                                                            \
-            targeting_targets[TEST_TARGET_ID]->                                                                \
-            tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);                                                 \
             TS_FAIL("fapi2TargetTest::Unable to find SRC_TYPE's" #PARENT_TYPE "parent!");                      \
             numFails++;                                                                                        \
         }                                                                                                      \
@@ -226,6 +223,24 @@ void test_fapi2GetParent()
         {
             // Check parent MC
             GET_PARENT_TEST_MACRO(MY_OMI, TARGET_TYPE_OMI, MY_MC, TARGET_TYPE_MC)
+        }
+    }
+    // OCMB Parent Tests
+    if (isHwValid(l_proc, MY_OCMB))
+    {
+        if (isHwValid(l_proc, MY_OMI))
+        {
+            // Check parent OMI
+            GET_PARENT_TEST_MACRO(MY_OCMB, TARGET_TYPE_OCMB_CHIP, MY_OMI, TARGET_TYPE_OMI)
+        }
+    }
+    // MEM_PORT Parent Tests
+    if (isHwValid(l_proc, MY_MEM_PORT))
+    {
+        if (isHwValid(l_proc, MY_OCMB))
+        {
+            // Check parent OCMB
+            GET_PARENT_TEST_MACRO(MY_MEM_PORT, TARGET_TYPE_MEM_PORT, MY_OCMB, TARGET_TYPE_OCMB_CHIP)
         }
     }
     // End Axone only targets

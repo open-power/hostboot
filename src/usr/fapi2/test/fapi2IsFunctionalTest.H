@@ -91,6 +91,8 @@ class Fapi2IsFunctional : public CxxTest::TestSuite
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OMIC], fapi2_omicTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MCC], fapi2_mccTarget)
             IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_PROC], fapi2_procTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_OCMB], fapi2_ocmbTarget)
+            IS_FUNCTIONAL_TEST_MACRO(targeting_targets[MY_MEM_PORT], fapi2_memportTarget)
 
 
         } while(0);

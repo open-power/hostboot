@@ -102,6 +102,8 @@ void test_fapi2Hwp()
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omi, fapi2_omiTarget, MY_OMI)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_omic, fapi2_omicTarget, MY_OMIC)
         HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mcc, fapi2_mccTarget, MY_MCC)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_ocmb, fapi2_ocmbTarget, MY_OCMB)
+        HWP_TEST_MODEL_SPECIFIC_MACRO(p9_sample_procedure_mem_port, fapi2_memportTarget, MY_MEM_PORT)
 
     }while(0);
     FAPI_INF("test_fapiHWP:: Test Complete. %d/%d fails",  numFails,numTests);

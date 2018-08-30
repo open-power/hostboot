@@ -50,6 +50,8 @@
 #define MCC_PER_MI           2
 #define OMI_PER_MCC          2
 #define OMIC_PER_MC          3
+#define OCMB_PER_OMI         1
+#define MEM_PORT_PER_OCMB    1
 
 #define SIMULATED_GOOD_CORES 4
 
@@ -119,6 +121,8 @@ enum FAPI2_TEST_TARGET_ID {
     MY_OMI,
     MY_OMIC,
     MY_MCC,
+    MY_OCMB,
+    MY_MEM_PORT,
     NUM_TARGETS
 };
 
@@ -195,10 +199,11 @@ fapi2::Target<fapi2::TARGET_TYPE_MCBIST>     fapi2_mcbistTarget(targeting_target
 fapi2::Target<fapi2::TARGET_TYPE_MC>         fapi2_mcTarget(targeting_targets[MY_MC]);   /* Cumulus / Axone*/\
 fapi2::Target<fapi2::TARGET_TYPE_MI>         fapi2_miTarget(targeting_targets[MY_MI]);   /* Cumulus / Axone*/\
 fapi2::Target<fapi2::TARGET_TYPE_DMI>        fapi2_dmiTarget(targeting_targets[MY_DMI]); /* Cumulus */       \
-fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);   /* Axone */       \
-fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omicTarget(targeting_targets[MY_OMIC]); /* Axone */       \
-fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);   /* Axone */
-
+fapi2::Target<fapi2::TARGET_TYPE_OMI>        fapi2_omiTarget(targeting_targets[MY_OMI]);          /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_OMIC>       fapi2_omicTarget(targeting_targets[MY_OMIC]);        /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_MCC>        fapi2_mccTarget(targeting_targets[MY_MCC]);          /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>  fapi2_ocmbTarget(targeting_targets[MY_OCMB]);        /* Axone */\
+fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>   fapi2_memportTarget(targeting_targets[MY_MEM_PORT]); /* Axone */
 
 
 /**
