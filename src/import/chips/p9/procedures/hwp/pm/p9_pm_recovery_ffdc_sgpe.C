@@ -327,6 +327,7 @@
 
     fapi2::ReturnCode PlatSgpe::generateSummary( void * i_pHomer )
     {
+       FAPI_DBG( ">> PlatSgpe::generateSummary" )
        HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
        PpeFfdcLayout * l_pSgpeLayout    =   ( PpeFfdcLayout * ) &l_pHomerFfdc->iv_sgpeFfdcRegion;
@@ -337,7 +338,7 @@
        l_pSgpeSummaryHdr->iv_subSectnId =   PLAT_SGPE;
        l_pSgpeSummaryHdr->iv_majorNum   =   SGPE_MAJ_NUM;
        l_pSgpeSummaryHdr->iv_minorNum   =   SGPE_MIN_NUM;
-       l_pSgpeSummaryHdr->iv_secValid   =   l_pSgpeFfdcHdr->iv_sectionsValid;
+       l_pSgpeSummaryHdr->iv_secValid   =   htobe16(l_pSgpeFfdcHdr->iv_sectionsValid);
 
        if( l_pSgpeSummaryHdr->iv_secValid )
        {
@@ -352,6 +353,7 @@
                       l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataSize );
        }
 
+       FAPI_DBG( "<< PlatSgpe::generateSummary" )
        return fapi2::FAPI2_RC_SUCCESS;
     }
 
