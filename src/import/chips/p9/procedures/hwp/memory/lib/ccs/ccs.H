@@ -42,7 +42,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 
 #include <generic/memory/lib/utils/poll.H>
-#include <lib/utils/swizzle.H>
+#include <generic/memory/lib/utils/buffer_ops.H>
 #include <lib/mc/port.H>
 #include <lib/shared/mss_const.H>
 #include <lib/eff_config/timing.H>
