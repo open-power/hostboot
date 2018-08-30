@@ -70,7 +70,7 @@ namespace DeviceFW
         DEPRECATED_MEMD_VPD,
         NODECOMM,
         NVDIMM,
-
+        FAPI_I2C,
         LAST_ACCESS_TYPE,
     };
 
@@ -366,12 +366,32 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_mode )),\
             static_cast<uint64_t>(( i_link_id )),\
             static_cast<uint64_t>(( i_mailbox_id ))
+
     /**
      * Construct the device addressing parameters for the NVDIMM device ops.
      * @param[i] i_address - NVDIMM address to internal register
      */
     #define DEVICE_NVDIMM_ADDRESS(i_address)\
         DeviceFW::NVDIMM, static_cast<uint64_t>((i_address))
+
+
+    /**
+     * Construct the device addressing parameters for the FAPI I2C operation
+     * with an initial configuration needed
+     *
+     * @param[in] i_cfg_buf_size - cfg buffer size
+     * @param[in] i_cfg_buf - buffer that holds data to write to the HW target.
+     */
+    #define DEVICE_FAPI_I2C_ADDRESS_WCONFIG(i_cfg_buf_size,  i_cfg_buf) \
+        DeviceFW::FAPI_I2C,\
+          static_cast<size_t>(( i_cfg_buf_size )),\
+          static_cast<uint8_t*>(( i_cfg_buf ))
+
+    /**
+     * Construct the device addressing parameters for the FAPI I2C operation
+     */
+    #define DEVICE_FAPI_I2C_ADDRESS()\
+        DEVICE_FAPI_I2C_ADDRESS_WCONFIG( 0, NULL )
 
     /**
      *  @brief Perform a hardware read operation.

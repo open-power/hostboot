@@ -372,6 +372,9 @@
     <id>chip-ocmb-explorer</id>
     <parent>chip-ocmb</parent>
     <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
       <default>EXPLORER</default>
       <id>MODEL</id>
     </attribute>
@@ -923,6 +926,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>EEPROM_NV_INFO</id>
+    </attribute>
+    <attribute>
       <id>FRU_ID</id>
     </attribute>
     <attribute>
@@ -939,6 +945,12 @@
     </attribute>
     <attribute>
       <id>MEM_PORT</id>
+    </attribute>
+    <attribute>
+      <id>NV_OPS_TIMEOUT_MSEC</id>
+    </attribute>
+    <attribute>
+      <id>NV_STATUS_FLAG</id>
     </attribute>
     <attribute>
       <id>POSITION</id>
@@ -958,15 +970,6 @@
     </attribute>
     <attribute>
       <id>VPD_REC_NUM</id>
-    </attribute>
-    <attribute>
-      <id>EEPROM_NV_INFO</id>
-    </attribute>
-    <attribute>
-      <id>NV_OPS_TIMEOUT_MSEC</id>
-    </attribute>
-    <attribute>
-      <id>NV_STATUS_FLAG</id>
     </attribute>
   </targetType>
 
