@@ -31,8 +31,6 @@ VPATH += ../
 
 MODULE = pm_rt
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/
-
 ## Objects unique to HBRT
 OBJS += rt_pm.o
 

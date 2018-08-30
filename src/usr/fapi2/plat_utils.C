@@ -47,8 +47,7 @@
 #include <p9_tor.H>
 #include <p9_scan_compression.H>
 #include <cen_ringId.H>
-
-#include "handleSpecialWakeup.H"
+#include <scom/wakeup.H>
 
 //******************************************************************************
 // Trace descriptors
@@ -1500,7 +1499,13 @@ fapi2::ReturnCode platSpecialWakeup(const Target<TARGET_TYPE_ALL>& i_target,
         reinterpret_cast<TARGETING::Target*>(i_target.get());
     FAPI_INF("platSpecialWakeup : HUID=%.8X, enable=%d", TARGETING::get_huid(l_target), i_enable);
 
-    errlHndl_t err_SW = handleSpecialWakeup(l_target,i_enable);
+    WAKEUP::HandleOptions_t l_option = WAKEUP::DISABLE;
+    if( i_enable )
+    {
+        l_option = WAKEUP::ENABLE;
+    }
+
+    errlHndl_t err_SW = WAKEUP::handleSpecialWakeup(l_target,l_option);
     if(err_SW)
     {
         fapi_rc.setPlatDataPtr(reinterpret_cast<void *>(err_SW));

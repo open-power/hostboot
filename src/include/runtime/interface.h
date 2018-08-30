@@ -127,9 +127,12 @@ enum HbrtRcPiberr_t
  *  Wakeup mode for the wakeup() interface
  *      HBRT_WKUP_FORCE_AWAKE: force a core awake
  *      HBRT_WKUP_CLEAR_FORCE: clear a previous force
+ *      HBRT_WKUP_CLEAR_FORCE_COMPLETELY: clear all previous forces, regardless
+ *                                        of internal counts
  */
 #define HBRT_WKUP_FORCE_AWAKE  0
 #define HBRT_WKUP_CLEAR_FORCE  1
+#define HBRT_WKUP_CLEAR_FORCE_COMPLETELY  2
 
 /**
  *  Chip ID types included in the chip_id / proc_id / core_id
@@ -167,6 +170,7 @@ enum HbrtRcPiberr_t
 #define HBRT_CAPS_SET1_OPAL    1
 #define HBRT_CAPS_OPAL_HAS_XSCOM_RC     (1ul << 0)
 #define HBRT_CAPS_OPAL_HAS_WAKEUP       (1ul << 1)
+#define HBRT_CAPS_OPAL_HAS_WAKEUP_CLEAR (1ul << 2)
 
 /* PHYP fixes */
 #define HBRT_CAPS_SET2_PHYP    2

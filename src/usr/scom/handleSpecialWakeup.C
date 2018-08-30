@@ -43,15 +43,16 @@
 
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
-
-extern "C"
-{
+#include <scom/wakeup.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
 
 using namespace TARGETING;
 using namespace SCOM;
+
+namespace WAKEUP
+{
 
 /**
  * @brief Check to see which type of wakeup we need to use
@@ -98,9 +99,10 @@ bool useHypWakeup( void )
 /**
  * @brief Use the Host/Hyp interface to control special wakeup
  * @param i_target  Input target core/ex/eq/etc
- * @param i_enable  Turn wakeup on or off
+ * @param[in] i_enable   - set or clear or clear all of the wakeups
  */
-errlHndl_t callWakeupHyp(TARGETING::Target* i_target, bool i_enable)
+errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
+                         HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
 
@@ -162,13 +164,47 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target, bool i_enable)
         }
 
         uint32_t mode;
-        if(i_enable)
+        if(i_enable == ENABLE)
         {
             mode = HBRT_WKUP_FORCE_AWAKE;
         }
-        else
+        else if(i_enable == DISABLE)
         {
             mode = HBRT_WKUP_CLEAR_FORCE;
+        }
+        else if(i_enable == FORCE_DISABLE)
+        {
+            mode = HBRT_WKUP_CLEAR_FORCE_COMPLETELY;
+        }
+        else
+        {
+            /*@
+             * @errortype
+             * @moduleid         SCOM_HANDLE_SPECIAL_WAKEUP
+             * @reasoncode       SCOM_INVALID_WAKEUP_PARM
+             * @userdata1        Wakeup Argument
+             * @userdata2        Input Target
+             * @devdesc          Invalid mode parm for wakeup operation.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        SCOM_HANDLE_SPECIAL_WAKEUP,
+                                        SCOM_INVALID_WAKEUP_PARM,
+                                        i_enable,
+                                        TARGETING::get_huid(i_target),
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            break;
+        }
+
+        // PHYP supports the complete clear but OPAL might not yet
+        if( (mode == HBRT_WKUP_CLEAR_FORCE_COMPLETELY)
+            && !TARGETING::is_phyp_load()
+            && !(g_hostInterfaces->
+                 get_interface_capabilities(HBRT_CAPS_SET1_OPAL)
+                 & HBRT_CAPS_OPAL_HAS_WAKEUP_CLEAR) )
+        {
+            TRACFCOMP( g_trac_scom, "No support for forced clear, skipping" );
+            break;
         }
 
         // Do the special wakeup
@@ -221,9 +257,10 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target, bool i_enable)
 /**
  * @brief Call the wakeup HWP to control special wakeup
  * @param i_target  Input target core/ex/eq/etc
- * @param i_enable  Turn wakeup on or off
+ * @param[in] i_enable   - set or clear or clear all of the wakeups
  */
-errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
+errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
+                         HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
     fapi2::ReturnCode l_rc;
@@ -255,7 +292,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
     // Assume HBRT is single-threaded, so no issues with concurrency
     uint32_t l_count = (i_target)->getAttr<ATTR_SPCWKUP_COUNT>();
 
-    if((l_count==0) && !i_enable)
+    if((l_count==0) && (i_enable==WAKEUP::DISABLE))
     {
         TRACFCOMP( g_trac_scom,ERR_MRK
             "Disabling special wakeup on target with SPCWKUP_COUNT=0");
@@ -266,7 +303,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
          * @reasoncode       SCOM_SPCWKUP_COUNT_ERR
          * @userdata1        Target HUID
          * @userdata2[0:31]  Wakeup Enable
-         * @userdata2[32:63] Wakeup Count
+         * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
          * @devdesc          Disabling special wakeup when not enabled.
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -274,17 +311,42 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
                                          SCOM_SPCWKUP_COUNT_ERR,
                                          get_huid(i_target),
                                          TWO_UINT32_TO_UINT64(
-                                                    i_enable, l_count));
-
-        l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                    HWAS::SRCI_PRIORITY_LOW);
+                                                    i_enable, l_count),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         errlCommit( l_errl, RUNTIME_COMP_ID );
     }
 
-    // Only call the HWP if 0-->1 or 1-->0
-    if( ((l_count==0) &&  i_enable) ||
-        ((l_count==1) && !i_enable) )
+    if( (l_count>0) && (i_enable==WAKEUP::FORCE_DISABLE) )
+    {
+        TRACFCOMP( g_trac_scom,ERR_MRK
+                   "Attempting to force disable special wakeup on %.8X with SPCWKUP_COUNT=%d",
+                   TARGETING::get_huid(i_target), l_count);
+        /*@
+         * @errortype
+         * @moduleid         SCOM_CALL_WAKEUP_HWP
+         * @reasoncode       SCOM_UNEXPECTED_FORCE_WAKEUP
+         * @userdata1        Target HUID
+         * @userdata2[0:31]  Wakeup Enable
+         * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
+         * @devdesc          Unexpectedly forcing wakeup off when the counter
+         *                   is non-zero, implies a bug in the code flow.
+         */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                         SCOM_CALL_WAKEUP_HWP,
+                                         SCOM_UNEXPECTED_FORCE_WAKEUP,
+                                         get_huid(i_target),
+                                         TWO_UINT32_TO_UINT64(
+                                                    i_enable, l_count),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+        errlCommit( l_errl, RUNTIME_COMP_ID );
+    }
+
+    // Only call the HWP if 0-->1 or 1-->0 or if it is a force
+    if( ((l_count==0) && (i_enable==WAKEUP::ENABLE)) ||
+        ((l_count==1) && (i_enable==WAKEUP::DISABLE)) ||
+        ((l_count>1) && (i_enable==WAKEUP::FORCE_DISABLE)) )
     {
         // NOTE Regarding the entity type passed to the HWP:
         // There are 3 independent registers used to trigger a
@@ -302,13 +364,13 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
             l_spcwkupSrc = p9specialWakeup::HOST;
         }
 
-        if(i_enable)
+        if(i_enable==WAKEUP::DISABLE)
         {
-            l_spcwkupType = p9specialWakeup::SPCWKUP_ENABLE;
+            l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
         }
         else
         {
-            l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
+            l_spcwkupType = p9specialWakeup::SPCWKUP_ENABLE;
         }
 
         if(l_type == TARGETING::TYPE_EQ)
@@ -363,13 +425,17 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
     // Update the counter
     if(!l_errl)
     {
-        if(i_enable)
+        if(i_enable == ENABLE)
         {
             l_count++;
         }
-        else
+        else if(i_enable == DISABLE)
         {
             l_count--;
+        }
+        else if(i_enable == FORCE_DISABLE)
+        {
+            l_count = 0;
         }
         i_target->setAttr<ATTR_SPCWKUP_COUNT>(l_count);
     }
@@ -381,7 +447,8 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target, bool i_enable)
 /**
  * @brief Enable and disable special wakeup for SCOM operations
  */
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target, bool i_enable)
+errlHndl_t handleSpecialWakeup(TARGETING::Target* i_target,
+                               HandleOptions_t i_enable)
 {
     errlHndl_t l_errl = NULL;
 
