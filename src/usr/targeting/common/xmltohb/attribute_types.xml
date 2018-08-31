@@ -959,6 +959,24 @@
         <type>uint64_t</type>
         <default>0x05</default>
       </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
     </complexType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1032,6 +1050,24 @@
                          internal memory.</description>
         <name>writeCycleTime</name>
         <type>uint64_t</type>
+      </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
       </field>
     </complexType>
     <description>Information needed to address the EERPROM slaves</description>
@@ -1109,6 +1145,24 @@
         <name>writeCycleTime</name>
         <type>uint64_t</type>
       </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
     </complexType>
     <description>Information needed to address the EERPROM slaves</description>
     <id>EEPROM_SBE_PRIMARY_INFO</id>
@@ -1184,6 +1238,24 @@
                          internal memory.</description>
         <name>writeCycleTime</name>
         <type>uint64_t</type>
+      </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
       </field>
     </complexType>
     <description>Information needed to address the EERPROM slaves</description>
@@ -1268,6 +1340,24 @@
         <name>writeCycleTime</name>
         <type>uint64_t</type>
       </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
     </complexType>
     <description>Information needed to address the EEPROM slaves</description>
     <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -1295,8 +1385,8 @@
   </attribute>
 
   <attribute>
-    <!-- @fixme -->
     <id>EFF_DRAM_COLS</id>
+    <!-- @fixme -->
     <description>Number of DRAM columns. Initialized and used by HWPs.</description>
     <simpleType>
       <uint8_t/>
@@ -1307,8 +1397,8 @@
   </attribute>
 
   <attribute>
-    <!-- @fixme -->
     <id>EFF_DRAM_ROWS</id>
+    <!-- @fixme -->
     <description>Number of DRAM rows. Initialized and used by HWPs.</description>
     <simpleType>
       <uint8_t/>
@@ -1454,6 +1544,24 @@
           but then shifted 1 bit left.</description>
         <name>devAddr</name>
         <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
       </field>
     </complexType>
     <persistency>non-volatile</persistency>
@@ -1621,6 +1729,7 @@
     <writeable/>
   </attribute>
 
+  <!-- Required by FSP -->
   <attribute>
     <id>FREQ_PROC_REFCLOCK</id>
     <description>
@@ -2016,8 +2125,8 @@
       <value>0xA</value>
     </enumerator>
     <enumerator>
-      <!-- deprecated -->
       <name>NVLINK</name>
+      <!-- deprecated -->
       <value>0xB</value>
     </enumerator>
     <enumerator>
@@ -2056,13 +2165,13 @@
       <value>0x1</value>
     </enumerator>
     <enumerator>
-      <!-- deprecated -->
       <name>955X</name>
+      <!-- deprecated -->
       <value>0x1</value>
     </enumerator>
     <enumerator>
-      <!-- deprecated -->
       <name>SEEPROM</name>
+      <!-- deprecated -->
       <value>0x2</value>
     </enumerator>
     <enumerator>
@@ -2082,8 +2191,8 @@
       <value>0x5</value>
     </enumerator>
     <enumerator>
-      <!-- deprecated -->
       <name>NVLINK</name>
+      <!-- deprecated -->
       <value>0x6</value>
     </enumerator>
     <enumerator>
@@ -2394,6 +2503,51 @@
             0,0,0,0,0,0,0,0,0,0,0,0,0</default>
       </uint16_t>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <complexType>
+      <description>Structure to define the addressing for
+                 an I2C mux target. </description>
+      <!-- Master Target Definition -->
+      <field>
+        <!--- NOTE: default physical sys-0 is not a valid entity path,
+                  this must be populated with a valid entity path.    -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the chip that contains the I2C
+                   master.</description>
+        <name>i2cMasterPath</name>
+        <type>EntityPath</type>
+      </field>
+      <!-- Port Definition -->
+      <field>
+        <default>0x00</default>
+        <description>Port from the I2C Master device. This is a
+                   6-bit value. </description>
+        <name>port</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- Device Address Definition -->
+      <field>
+        <default>0x00</default>
+        <description>Device address on the I2C bus. This is a 7-bit
+                   value, but then shifted 1 bit left. </description>
+        <name>devAddr</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- Engine Definition -->
+      <field>
+        <default>0x00</default>
+        <description>I2C master engine. This is a 2-bit value. </description>
+        <name>engine</name>
+        <type>uint8_t</type>
+      </field>
+    </complexType>
+    <description>Information used to control a specific i2c mux device,
+               to select a particular target bus. </description>
+    <id>I2C_MUX_INFO</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
@@ -2774,6 +2928,7 @@
     </simpleType>
   </attribute>
 
+  <!-- End Required by FSP -->
   <attribute>
     <id>MAX_DMI_PER_PROC</id>
     <description>
@@ -3172,7 +3327,6 @@
     </description>
     <simpleType>
       <uint64_t>
-        <!-- 4PT -->
         <default>0x4000000000000</default>
       </uint64_t>
     </simpleType>
@@ -3688,6 +3842,9 @@
     </enumerator>
     <enumerator>
       <name>AST2500</name>
+    </enumerator>
+    <enumerator>
+      <name>PCA9847</name>
     </enumerator>
     <id>MODEL</id>
   </enumerationType>
@@ -6068,8 +6225,8 @@
     <simpleType>
       <uint16_t/>
     </simpleType>
-    <!-- @fixme -->
     <persistency>non-volatile</persistency>
+    <!-- @fixme -->
     <readable/>
     <writeable/>
     <ignoreEkb/>
@@ -6979,6 +7136,24 @@
         <name>devAddr</name>
         <type>uint8_t</type>
       </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
+      </field>
     </complexType>
     <description>Information needed to address an I2C slave device</description>
     <id>TEMP_SENSOR_I2C_CONFIG</id>
@@ -7254,6 +7429,24 @@
                          internal address/offset.</description>
         <name>byteAddrOffset</name>
         <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Bus Selector Definition -->
+      <field>
+        <default>0xFF</default>
+        <description>Determines which of the N selectable buses the mux
+                     will connect to. OxFF indicates no mux present
+                     or N/A.</description>
+        <name>i2cMuxBusSelector</name>
+        <type>uint8_t</type>
+      </field>
+      <!-- i2c Mux Path Definition -->
+      <field>
+        <!-- NOTE: physical:sys-0 implies that there is no mux in
+                   the bus path for this part.                     -->
+        <default>physical:sys-0</default>
+        <description>Entity path to the I2C mux for this device.</description>
+        <name>i2cMuxPath</name>
+        <type>EntityPath</type>
       </field>
     </complexType>
     <description>Information needed to address the TPM slaves</description>
@@ -7624,8 +7817,12 @@
       <value>76</value>
     </enumerator>
     <enumerator>
-      <name>LAST_IN_RANGE</name>
+      <name>I2C_MUX</name>
       <value>77</value>
+    </enumerator>
+    <enumerator>
+      <name>LAST_IN_RANGE</name>
+      <value>78</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

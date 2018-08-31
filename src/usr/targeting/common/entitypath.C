@@ -481,6 +481,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "OCBM_CHIP";
         case TYPE_MEM_PORT:
             return "MEM_PORT";
+        case TYPE_I2C_MUX:
+            return "I2C_MUX";
 //        case TYPE_FSI_LINK:
 //            return "FSI-link";
 //        case TYPE_CFAM:

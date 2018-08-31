@@ -4986,36 +4986,176 @@ sub getAttributeDefault {
 }
 
 ################################################################################
+# Merge the fields of two complex attributes
+################################################################################
+
+# This function will merge the fields of two complex attributes.
+#
+# The field's value from $newAttrFields will be merged into $currentAttrFields.
+# $currentAttrFields must have, at a minimum, all the fields that are in
+# $newAttrFields.  If not then this function will halt execution with an error
+# message.  Fields that are in $currentAttrFields that have no associated value
+# within $newAttrFields will be left as is.
+#
+# param [in] - $newAttrFields - These are the new fields with new values that
+#                        are to be merged.
+#
+# param [in] - $currentAttrFields - These are the current fields which, at a
+#                        minimum, include ALL the fields from $newAttrFields.
+#                        There may be more.
+#
+# return - The two fields successfully merged
+#
+
+sub mergeComplexAttributeFields {
+    my($newAttrFields, $currentAttrFields) = @_;
+
+    # Make a deep copy of the current fields, don't want to modify
+    # $currentAttrFields - leave as is.  This copy will contain the merger of
+    # the two fields.
+    my $mergedFields = dclone $currentAttrFields;
+
+    # Iterate over the fields of $newField and look for their corresponding id
+    # in $currentAttrFields.  All the fields in $newField should exist in
+    # $currentAttrFields, if not, then there is a problem
+    foreach my $newField (@{$newAttrFields->{default}->{field}})
+    {
+        my $foundField = 0;
+
+        # Iterate over $mergedFields (really $currentAttrFields) looking
+        # for the $newField of $newAttrFields
+        foreach my $currentField (@{$mergedFields->{default}->{field}})
+        {
+            # Found the field in question
+            if ($currentField->{id} eq $newField->{id})
+            {
+               # Merge in the new value from $newField
+               $currentField->{value} = $newField->{value};
+               $foundField = 1;
+               last;
+            }
+        } # end foreach my $currentField ...
+
+        # A field was not found ... halt execution
+        if ($foundField == 0)
+        {
+           croak("Field $newField is not supported.")
+        }
+    } # end foreach my $newField ...
+
+    return $mergedFields;
+}
+
+################################################################################
 # Get target attributes
 ################################################################################
+
+# This function will recursively work from the most derived target to the base
+# target.  This function does not work on target instances, only the target
+# types themselves.  $type is the current target being worked on.
+#
+# The default values for the attributes associated with the current target
+# are gathered and consolidated in the attribute hash ($attrhasha). If there is
+# no default value assocaited with that attribute then the attribute in the hash
+# does not get updated - don't want to wipe out the current data with no data.
+#
+# BUT if the current target is the base target type (or the most derived target
+# type) and there is no default value for the attribute, the attribute is still
+# added to the attribute hash with defaults taken from the attribute definition
+# itself as found in the attrubutes_types.xml.
+#
+# If the attribute is a simple type and it has a default value associated with
+# it, then the attribute hash is simply updated with the new default value.
+#
+# If the attribute is a complex type and it has default values, the fields of
+# the attribute will be merged with the same attribute in the hash, with the new
+# attribute's fields taking precedence and any undefined fields keeping thier
+# current value.  Again do not want to wipe out the current fields with no data.
+#
+# param [in] - $type - The target type (ie 'base', 'unit', 'unit-phb-power9',
+#                      etc) currently being processed
+# param [in] - $attributes - This has all data associated with attributes,
+#                      target types, target instances and other data aggregates.
+# param [in/out] - $attrhasha - An aggregate list of the attributes as each
+#                      attribute is gathered from the target type and maintained
+#                      in this list.
+#
 
 sub getTargetAttributes {
     my($type,$attributes,$attrhasha) = @_;
 
     foreach my $targetType (@{$attributes->{targetType}})
     {
-        if($targetType->{id} eq $type)
+        if ($targetType->{id} eq $type)
         {
-            if(exists $targetType->{parent})
+            if (exists $targetType->{parent})
             {
                 getTargetAttributes($targetType->{parent},
-                    $attributes,$attrhasha);
+                                    $attributes,$attrhasha);
             }
 
+            # Iterate thru all of this target's attribute and
+            # copy them over to aggregate attributes if necessary
             foreach my $attr (@{$targetType->{attribute}})
             {
-                $attrhasha->{ $attr->{id} } = $attr;
+                # Flag to indicate that a complex type has been found
+                my $isComplex = 0;
 
-                if(!exists $attrhasha->{ $attr->{id}}->{default})
+                # Determine if attribute ($attr) is a complex type.
+                # Complex types are handled differently than simple types.
+                # This is SO inefficient, I know no other way to determine this
+                foreach my $attribute (@{$attributes->{attribute}})
                 {
-                   my $default = getAttributeDefault($attr->{id},$attributes);
-                   $attrhasha->{ $attr->{id}}->{default} = $default;
+                    if ( ($attribute->{id} eq $attr->{id})  &&
+                         (exists $attribute->{complexType}) )
+                    {
+                        $isComplex = 1;
+                        last;
+                    }
                 }
-            }
 
-            last;
-        }
-    }
+                # If the aggregate of attributes ($attrhasha) does NOT currently
+                # contain the attribute ($attr) then set the base's attribute
+                # to the aggregate list ($attrhasha), regardless if attribute
+                # ($attr) is complex or not.  This will give a base line to
+                # work with.
+                if (!exists $attrhasha->{ $attr->{id}})
+                {
+                    my $default = getAttributeDefault($attr->{id},$attributes);
+                    $attrhasha->{ $attr->{id}}->{default} = $default;
+
+                    # Add the 'id' value to the attribute
+                    $attrhasha->{ $attr->{id}}->{id} = $attr->{id};
+                }
+
+                # If the attribute ($attr) has no default, then there is
+                # nothing to do.  Move onto the next attribute.
+                if (!exists $attr->{default})
+                {
+                   next;
+                }
+
+                # The simple type attribute ($attr) has a default value,
+                # replace current attribute in aggregate list ($attrhasha)
+                # with this one ($attr)
+                if ($isComplex == 0)
+                {
+                   $attrhasha->{ $attr->{id} } = $attr;
+                }
+                else
+                # This is a complex attribute.  Need to merge fields of
+                # current attribute, within the aggregate list ($attrhasha),
+                # with this new attribute's fields ($attr).
+                {
+                    my $mergedFields = mergeComplexAttributeFields($attr,
+                                            $attrhasha->{ $attr->{id}});
+                    $attrhasha->{ $attr->{id}}->{default} =
+                                            $mergedFields->{default};
+                } # end if ($isComplex == 0) ... else ...
+            } # end foreach my $attr (@{$targetType->{attribute}})
+           last;
+        } # end if($targetType->{id} eq $type)
+    } # end foreach my $targetType (@{$attributes->{targetType}})
 }
 
 ################################################################################
@@ -6221,10 +6361,54 @@ sub generateTargetingImage {
         # attribute has already been defined
         foreach my $targetInstanceAttribute (@{$targetInstance->{attribute}})
         {
-            # if the default tag is missing from an attribute then verify that
+            # If the attribute($targetInstanceAttribute->{id}) is defined for
+            # the hash ($attrhash) AND the attribute($targetInstanceAttribute)
+            # has default data then update the hash.  There is no point in
+            # updating the hash if the attribute has nothing to update with and
+            # could possibly wipe out a valid default value currently in
+            # the hash.
+            if ( (exists $attrhash{$targetInstanceAttribute->{id}}) &&
+                 (exists $targetInstanceAttribute->{default}) )
+            {
+                # Determine if the attribute is a complex attribute by probing
+                # the default.  If the default is a HASH then this indicates
+                # a complex type.
+                if (ref ($targetInstanceAttribute->{default}) eq "HASH")
+                {
+                    # Grab a copy of the attribute data from the hash
+                    my $attrData = $attrhash{ $targetInstanceAttribute->{id} };
+
+                    # Merge the two data types into one consolidated data with
+                    # the attribute's field defaults replacing the hash's
+                    # attribute field data. Leaving any undefined attribute's
+                    # field as is (keeping the hash's field data in this case).
+                    my $defaultFields = mergeComplexAttributeFields(
+                                           $targetInstanceAttribute, $attrData);
+
+                    # Update the hash with the merged data
+                    $attrhash{$targetInstanceAttribute->{id}} = $defaultFields;
+                }
+                else
+                # This is a simple type, just set the data
+                {
+                    $attrhash{ $targetInstanceAttribute->{id} } =
+                                                      $targetInstanceAttribute;
+                }
+            }
+            # If the attribute is not defined in the hash, then
+            # throw out an error
+            elsif ( !exists $attrhash{ $targetInstanceAttribute->{id} } )
+            {
+                croak("Target instance \"$targetInstance->{id}\" of type \" "
+                    . "$targetInstance->{type} \" cannot override attribute "
+                    . "\"$targetInstanceAttribute->{id}\" unless the attribute "
+                    . "has already been defined in the target type "
+                    . "inheritance chain.");
+            }
+            # If the default tag is missing from an attribute then verify that
             # it is not required to be assigned a default value by the system
             # owner.
-            if(!exists $targetInstanceAttribute->{default})
+            else
             {
                 foreach my $attribute_type (@{$allAttributes->{attribute}})
                 {
@@ -6233,29 +6417,17 @@ sub generateTargetingImage {
                         if (exists $attribute_type->{mrwRequired})
                         {
                             croak("Error in Target instance "
-                                 . "\"$targetInstance->{id}\": "
-                                 . "Attribute \"$attribute_type->{id}\" with tag "
-                                 . "\"<mrwRequired/>\" is required to have an "
-                                 . "instance level override from either the MRW "
-                                 . "or MRW processing tools.");
+                               . "\"$targetInstance->{id}\": "
+                               . "Attribute \"$attribute_type->{id}\" with tag "
+                               . "\"<mrwRequired/>\" is required to have an "
+                               . "instance level override from either the MRW "
+                               . "or MRW processing tools.");
                         }
                         last;
-                    }
-                }
-            }
-
-            if(exists $attrhash{$targetInstanceAttribute->{id}})
-            {
-                $attrhash{ $targetInstanceAttribute->{id} } = $targetInstanceAttribute;
-            }
-            else
-            {
-                croak("Target instance \"$targetInstance->{id}\" of type \" $targetInstance->{type} \" cannot "
-                    . "override attribute \"$targetInstanceAttribute->{id}\" unless "
-                    . "the attribute has already been defined in the target "
-                    . "type inheritance chain.");
-            }
-        }
+                    }# end if ($attribute_type->{id} ...
+                } # end foreach my $attribute_type ...
+            } # end else
+        } # end foreach my $targetInstanceAttribute ...
 
         my $huidValue = $attrhash{HUID}->{default};
 

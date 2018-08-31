@@ -13635,10 +13635,48 @@
     </attribute>
 </targetInstance>
 
-
-<!-- Cumulus proc 0 end -->
-
-
-
+<!-- For testing purposes only, will replace with real values later -->
+<targetInstance>
+    <id>sys0node0i2cmux0</id>
+    <type>i2c_mux_pca9847</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004D0000</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/i2c_mux-0</default>
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>supportsFsiScom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>I2C_MUX_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>2</value></field>
+        </default>
+    </attribute>
+</targetInstance>
 
 </attributes>

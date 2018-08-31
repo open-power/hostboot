@@ -878,6 +878,22 @@
   </targetType>
 
   <targetType>
+    <id>i2c_mux_pca9847</id>
+    <parent>chip</parent>
+    <attribute>
+      <id>I2C_MUX_INFO</id>
+    </attribute>
+    <attribute>
+      <id>MODEL</id>
+      <default>PCA9847</default>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>I2C_MUX</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <id>lcard-dimm</id>
     <parent>card</parent>
     <attribute>
@@ -2217,7 +2233,6 @@
     </attribute>
     <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-      <!-- GARD -->
       <default>0x00000001</default>
     </attribute>
     <attribute>
