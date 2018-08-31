@@ -40,8 +40,6 @@ namespace mss
 {
 namespace exp
 {
-namespace i2c
-{
 
 ///
 /// @brief explorer ffdc codes
@@ -50,7 +48,11 @@ enum ffdc_codes
 {
     EXP_I2C_GET_FIELD = 0x0000,
     EXP_I2C_SET_FIELD = 0x0001,
+    READ_HOST_FW_RESPONSE_STRUCT = 0x0003,
 };
+
+namespace i2c
+{
 
 /// @brief List of explorer I2C commands
 ///
@@ -119,7 +121,6 @@ enum boot_stages
     FW_UPGRADE_MODE = 0x02,
     RUNTIME_FW      = 0x03,
 };
-
 }// i2c
 }// exp
 }// mss
