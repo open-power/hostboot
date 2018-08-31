@@ -132,23 +132,24 @@ template<TARGETING::TYPE T>
 void cleanupChnlAttns( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
- * @brief  Checks for channel fail attentions on the target side of the bus.
- * @note   If a channel fail attention is present, this function will set the
- *         secondary attention type to UNIT_CS, among other appropriate flags
- *         in the SDC. It is important that this is called in the PreAnalysis
- *         plugin so that PRD knows to look for UNIT_CS attentions instead of
- *         recoverable attentions.
- * @note   This only checks one side of the bus. It does not check both sides.
+ * @brief  Intended to be called in the memory subsystem PreAnalysis plugins.
+ *         Checks for channel fail attentions and does analysis as needed.
+ * @note   In some cases, analysis will be completed within this function. In
+ *         other cases, this function will set the secondary attention type to
+ *         UNIT_CS and other appropriate flags in the SDC, then exit.
+ *         Afterwards, we will rely on the normal analysis path to analyze the
+ *         channel failure appropriately.
  * @note   If the secondary attention type is HOST_ATTN, the function exits and
  *         waits for the next attention. This is for the rare scenario where a
  *         channel failure occurs after PRD is called to handle a HOST_ATTN.
  * @param  i_chip MEMBUF, DMI, or MC chip.
  * @param  io_sc  The step code data struct.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ * @return True if analysis has been completed and no further analysis is
+ *         required. False if the PreAnalysis plugin should exit and continue
+ *         normal analysis.
  */
 template<TARGETING::TYPE T>
-uint32_t handleChnlFail( ExtensibleChip * i_chip,
-                         STEP_CODE_DATA_STRUCT & io_sc );
+bool analyzeChnlFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  After analyzing a memory channel failure, we want to mask off all

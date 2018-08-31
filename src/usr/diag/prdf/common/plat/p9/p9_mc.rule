@@ -332,7 +332,9 @@ rule rMC_CHIPLET_UCS_FIR
     MC_CHIPLET_UCS_FIR & ~(MC_CHIPLET_UCS_FIR_MASK >> 1) & `7fffffffffffffff`;
 };
 
-group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
+# The IOMCFIR has been prioritized over all the other bits in this FIR. See the
+# notes in prdfMemUtils.C for the reasons why.
+group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter priority ( 10 )
 {
     /** MC_CHIPLET_UCS_FIR[1]
      *  Attention from CHIFIR 0
