@@ -1,0 +1,83 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/attribute_info/p9a_omi_setup_bars.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_OMI_INBAND_BAR_ENABLE</id>
+  <targetType>TARGET_TYPE_OMI</targetType>
+  <description> DMI inband BAR enable.
+                Set by platform.
+                Used by p9c_set_inband_addr.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_OMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+  <targetType>TARGET_TYPE_OMI</targetType>
+  <description>
+       OMI inband BAR address offset.
+
+       Set by platform.
+
+       One Axone bar register is set per MC channel for MMIO and another
+       is set per MC channel for config space. The bar is shared between
+       both sub-channels each with an OCMB.  The upper bit of the bar
+       size is used to determine which sub-channel is selected.  This
+       means that for two OCMB's their config space is contiguous and
+       their MMIO space is contiguous.  Therefore a single OCMB's MMIO
+       and config space cannot be contiguous.  However, we can still
+       use one BAR attribute.  The p9a_omi_setup_bars procedure can interleave
+       the config space and MMIO space as shown in the table bellow.
+       For example, both MMIO and config bar sizes are 2GB.  The 2GB
+       bit becomes the selector for the subchannel.  The 4GB bit becomes
+       the offset applied for MMIO operations.
+
+
+       Each OCMB is assigned one base address attribute.
+       ocmb  |  BAR ATTRIBUTE     | Type | Base reg           - end addr           | size | sub-ch
+       +-----+--------------------+------+-----------------------------------------+------+-------
+       ocmb0 | 0x0006030200000000 | cnfg | 0x0006030200000000 - 0x000603027FFFFFFF | 2GB  | 0
+       ocmb1 | 0x0006030280000000 | cnfg | 0x0006030280000000 - 0x00060302FFFFFFFF | 2GB  | 1
+       ocmb0 | N/A                | mmio | 0x0006030300000000 - 0x000603037FFFFFFF | 2GB  | 0
+       ocmb1 | N/A                | mmio | 0x0006030380000000 - 0x00060303FFFFFFFF | 2GB  | 1
+       +-----+--------------------+------+-----------------------------------------+------+-------
+       ocmb2 | 0x0006030400000000 | cnfg | 0x0006030400000000 - 0x000603047FFFFFFF | 2GB  | 0
+       ocmb3 | 0x0006030480000000 | cnfg | 0x0006030480000000 - 0x00060304FFFFFFFF | 2GB  | 1
+       ocmb2 | N/A                | mmio | 0x0006030500000000 - 0x000603057FFFFFFF | 2GB  | 0
+       ocmb3 | N/A                | mmio | 0x0006030580000000 - 0x00060305FFFFFFFF | 2GB  | 1
+
+       Used by p9a_omi_setup_bars
+  </description>
+  <valueType>uint64</valueType>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+
+</attributes>
