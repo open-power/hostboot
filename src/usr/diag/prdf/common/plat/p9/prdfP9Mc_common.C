@@ -59,10 +59,10 @@ namespace p9_mc
 int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
                      bool & o_analyzed )
 {
-    o_analyzed = false;
-
     // Check for a channel failure before analyzing this chip.
-    return MemUtils::handleChnlFail<TYPE_MC>( i_chip, io_sc );
+    o_analyzed = MemUtils::analyzeChnlFail<TYPE_MC>( i_chip, io_sc );
+
+    return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( p9_mc, PreAnalysis );
 

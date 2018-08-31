@@ -50,23 +50,6 @@ namespace p9_dmi
 //##############################################################################
 
 /**
- * @brief  Analysis code that is called before the main analyze() function.
- * @param  i_chip     A DMI chip.
- * @param  io_sc      The step code data struct.
- * @param  o_analyzed True if analysis is done on this chip, false otherwise.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                     bool & o_analyzed )
-{
-    o_analyzed = false;
-
-    // Check for a channel failure before analyzing this chip.
-    return MemUtils::handleChnlFail<TYPE_DMI>( i_chip, io_sc );
-}
-PRDF_PLUGIN_DEFINE( p9_dmi, PreAnalysis );
-
-/**
  * @brief  Plugin function called after analysis is complete but before PRD
  *         exits.
  * @param  i_chip A DMI chip.

@@ -589,197 +589,185 @@ uint32_t __fwAssistChnlFailWorkaround<TYPE_DMI>( ExtensibleChip * i_chip )
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t __queryChnlFail( ExtensibleChip * i_chip, bool & o_chnlFail );
+bool __queryUcsCentaur( ExtensibleChip * i_chip );
 
 template<>
-uint32_t __queryChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
-                                       bool & o_chnlFail )
+bool __queryUcsCentaur<TYPE_MEMBUF>( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[MemUtils::__queryChnlFail] "
-
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
 
-    uint32_t o_rc = SUCCESS;
+    uint32_t o_activeAttn = false;
 
-    o_chnlFail = false;
+    SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_CS_FIR");
 
-    do
+    if ( SUCCESS == fir->Read() )
     {
-        // Simply check the Centaur CS global reg for active attentions.
-        SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister("GLOBAL_CS_FIR");
-        o_rc = fir->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
-                      i_chip->getHuid() );
-            break;
-        }
+        o_activeAttn = !fir->BitStringIsZero();
+    }
 
-        o_chnlFail = !fir->BitStringIsZero();
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return o_activeAttn;
 }
 
-template<>
-uint32_t __queryChnlFail<TYPE_DMI>( ExtensibleChip * i_chip, bool & o_chnlFail )
-{
-    #define PRDF_FUNC "[MemUtils::__queryChnlFail] "
+//------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+bool __queryUcsChifir( ExtensibleChip * i_chip );
+
+template<>
+bool __queryUcsChifir<TYPE_DMI>( ExtensibleChip * i_chip )
+{
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
 
-    uint32_t o_rc = SUCCESS;
+    uint32_t o_activeAttn = false;
 
-    o_chnlFail = false;
+    SCAN_COMM_REGISTER_CLASS * fir  = i_chip->getRegister( "CHIFIR"      );
+    SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister( "CHIFIR_MASK" );
+    SCAN_COMM_REGISTER_CLASS * act0 = i_chip->getRegister( "CHIFIR_ACT0" );
+    SCAN_COMM_REGISTER_CLASS * act1 = i_chip->getRegister( "CHIFIR_ACT1" );
 
-    SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
-    SCAN_COMM_REGISTER_CLASS * mask = nullptr;
-    SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
-    SCAN_COMM_REGISTER_CLASS * act1 = nullptr;
-
-    do
+    if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read()) )
     {
-        // There is a hardware bug where channel failures from the IOMCFIRs
-        // doesn't report correctly. This workaround fixes the reporting and
-        // forces a channel failure if needed. It must be called before calling
-        // the query HWP in order for the hardware to be in the correct state.
-        o_rc = __fwAssistChnlFailWorkaround<TYPE_DMI>( i_chip );
-        if ( SUCCESS != o_rc ) break;
-
-        // There is a HWP on the processor side that will query if this channel
-        // has failed. Unfortunately, it does not check for an active channel
-        // fail attention (i.e. not masked). That will need to be done
-        // afterwards.
-        bool tmpChnlFail = false;
-        o_rc = PlatServices::queryChnlFail<TYPE_DMI>( i_chip, tmpChnlFail );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
-                      i_chip->getHuid() );
-            break;
-        }
-        if ( !tmpChnlFail ) break; // nothing more to do.
-
-        // Check for an active attention on the CHIFIR.
-        fir  = i_chip->getRegister( "CHIFIR" );
-        mask = i_chip->getRegister( "CHIFIR_MASK" );
-        act0 = i_chip->getRegister( "CHIFIR_ACT0" );
-        act1 = i_chip->getRegister( "CHIFIR_ACT1" );
-        o_rc = fir->Read() | mask->Read() | act0->Read() | act1->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to read CHIFIRs on 0x%08x",
-                      i_chip->getHuid() );
-            break;
-        }
-
+        // Make sure to ignore CHIFIR[16,19:21], which simply say there is an
+        // attention on the Centaur. Otherwise, we will get stuck in a loop.
         if ( 0 != (  fir->GetBitFieldJustified( 0,64) &
                     ~mask->GetBitFieldJustified(0,64) &
                      act0->GetBitFieldJustified(0,64) &
-                     act1->GetBitFieldJustified(0,64) ) )
+                     act1->GetBitFieldJustified(0,64) &
+                     0xffff63ffffffffffull ) )
         {
-            o_chnlFail = true;
-            break; // nothing more to do.
+            o_activeAttn = true;
         }
+    }
 
-        // Check for an active attention on the IOMCFIR.
-        ExtensibleChip * mcChip = getConnectedParent( i_chip, TYPE_MC );
+    return o_activeAttn;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+bool __queryUcsIomcfir( ExtensibleChip * i_chip );
+
+template<>
+bool __queryUcsIomcfir<TYPE_DMI>( ExtensibleChip * i_chip )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+
+    uint32_t o_activeAttn = false;
+
+    ExtensibleChip * mcChip = getConnectedParent( i_chip, TYPE_MC );
+
+    SCAN_COMM_REGISTER_CLASS * fir  = mcChip->getRegister( "IOMCFIR"      );
+    SCAN_COMM_REGISTER_CLASS * mask = mcChip->getRegister( "IOMCFIR_MASK" );
+    SCAN_COMM_REGISTER_CLASS * act0 = mcChip->getRegister( "IOMCFIR_ACT0" );
+    SCAN_COMM_REGISTER_CLASS * act1 = mcChip->getRegister( "IOMCFIR_ACT1" );
+
+    if ( SUCCESS == (fir->Read() | mask->Read() | act0->Read() | act1->Read()) )
+    {
         uint32_t dmiPos = i_chip->getPos() % MAX_DMI_PER_MC;
         uint32_t bitPos = 8 + dmiPos * 8;
-
-        fir  = mcChip->getRegister( "IOMCFIR" );
-        mask = mcChip->getRegister( "IOMCFIR_MASK" );
-        act0 = mcChip->getRegister( "IOMCFIR_ACT0" );
-        act1 = mcChip->getRegister( "IOMCFIR_ACT1" );
-        o_rc = fir->Read() | mask->Read() | act0->Read() | act1->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Failed to read IOMCFIRs on 0x%08x",
-                      mcChip->getHuid() );
-            break;
-        }
 
         if ( 0 != (  fir->GetBitFieldJustified( bitPos,8) &
                     ~mask->GetBitFieldJustified(bitPos,8) &
                      act0->GetBitFieldJustified(bitPos,8) &
                      act1->GetBitFieldJustified(bitPos,8) ) )
         {
-            o_chnlFail = true;
-            break; // nothing more to do.
+            o_activeAttn = true;
         }
+    }
 
-        PRDF_INF( PRDF_FUNC "Failed channel detected on 0x%08x, but no active "
-                  "attentions found", i_chip->getHuid() );
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return o_activeAttn;
 }
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-void __setChnlFailCleanup( ExtensibleChip * i_chip );
+// Ideally it would be nice to look at only the target reporting attentions for
+// a channel fail. Unfortunately, RCD parity errors can trigger a channel fail
+// anywhere on the bus. Therefore, we have to query the entire bus for at least
+// one active attention returning a channel failure.
+
+template<TARGETING::TYPE T1, TARGETING::TYPE T2>
+bool __queryChnlFail( ExtensibleChip * i_chip1, ExtensibleChip * i_chip2,
+                      STEP_CODE_DATA_STRUCT & io_sc );
 
 template<>
-void __setChnlFailCleanup<TYPE_MEMBUF>( ExtensibleChip * i_chip )
+bool __queryChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
+                                            ExtensibleChip * i_membChip,
+                                            STEP_CODE_DATA_STRUCT & io_sc )
 {
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+    #define PRDF_FUNC "[MemUtils::__queryChnlFail] "
 
-    getMembufDataBundle(i_chip)->iv_doChnlFailCleanup = true;
-}
+    PRDF_ASSERT( nullptr != i_dmiChip );
+    PRDF_ASSERT( TYPE_DMI == i_dmiChip->getType() );
 
-template<>
-void __setChnlFailCleanup<TYPE_DMI>( ExtensibleChip * i_chip )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
+    PRDF_ASSERT( nullptr != i_membChip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_membChip->getType() );
 
-    ExtensibleChip * membChip = getConnectedChild( i_chip, TYPE_MEMBUF, 0 );
-    PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
-
-    __setChnlFailCleanup<TYPE_MEMBUF>( membChip );
-}
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-uint32_t handleChnlFail( ExtensibleChip * i_chip,
-                         STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
+    bool o_chnlFail = false;
 
     do
     {
-        // Skip if already handling channel failure.
-        if ( io_sc.service_data->isMemChnlFail() ) break;
-
         // Skip if currently analyzing a host attention. This is a required for
         // a rare scenario when a channel failure occurs after PRD is called to
         // handle the host attention.
         if ( HOST_ATTN == io_sc.service_data->getPrimaryAttnType() ) break;
 
-        // Look for the channel fail attention.
-        bool isChnlFail = false;
-        uint32_t o_rc = __queryChnlFail<T>( i_chip, isChnlFail );
-        if ( SUCCESS != o_rc ) break;
+        // There is a hardware bug where channel failures from the IOMCFIRs
+        // don't report correctly. This workaround fixes the reporting and
+        // forces a channel failure if needed. It must be called before calling
+        // the query HWP in order for the hardware to be in the correct state.
+        if ( SUCCESS != __fwAssistChnlFailWorkaround<TYPE_DMI>(i_dmiChip) )
+        {
+            PRDF_ERR( PRDF_FUNC "__fwAssistChnlFailWorkaround(0x%08x) failed",
+                      i_dmiChip->getHuid() );
+            // Continue on just in case there is a channel failure attention
+            // somewhere else.
+        }
 
-        if ( ! isChnlFail ) break; // No channel fail, nothing more to do.
+        // Check for an active attention on the Centaur (simplest query).
+        if ( __queryUcsCentaur<TYPE_MEMBUF>(i_membChip) )
+        {
+            o_chnlFail = true;
+            break; // nothing more to do.
+        }
 
-        // Change the secondary attention type to UNIT_CS so the rule code will
-        // start looking for UNIT_CS attentions instead of recoverable.
-        io_sc.service_data->setSecondaryAttnType( UNIT_CS );
+        // There is a HWP on the processor side that will query if this channel
+        // has failed. Unfortunately, it does not check for an active channel
+        // fail attention (i.e. not masked). That will need to be done
+        // afterwards.
+        bool tmpChnlFail = false;
+        if ( SUCCESS != PlatServices::queryChnlFail<TYPE_DMI>(i_dmiChip,
+                                                              tmpChnlFail) )
+        {
+            PRDF_ERR( PRDF_FUNC "PlatServices::queryChnlFail(0x%08x) failed",
+                      i_dmiChip->getHuid() );
+            break;
+        }
+        if ( !tmpChnlFail ) break; // nothing more to do.
+
+        // Check for an active attention on the CHIFIR or IOMCFIR.
+        if ( __queryUcsChifir<TYPE_DMI>( i_dmiChip) ||
+             __queryUcsIomcfir<TYPE_DMI>(i_dmiChip) )
+        {
+            o_chnlFail = true;
+            break; // nothing more to do.
+        }
+
+        // This is possible if we are looking at a channel that has already
+        // failed and had been analyzed. Will likely happen when iterating DMIs
+        // in the MC analyze function.
+        PRDF_INF( PRDF_FUNC "Failed channel detected on 0x%08x, but no active "
+                  "attentions found", i_dmiChip->getHuid() );
+
+    } while (0);
+
+    if ( o_chnlFail )
+    {
+        // Note that we are not setting the secondary attention type at this
+        // time because the channel failure could have been triggered by an RCD
+        // parity error, which is a recoverable attention.
 
         // Set the MEM_CHNL_FAIL flag in the SDC to indicate a channel failure
         // has been detected and there is no need to check again.
@@ -793,57 +781,235 @@ uint32_t handleChnlFail( ExtensibleChip * i_chip,
         io_sc.service_data->setFlag( ServiceDataCollector::UERE );
 
         // Indicate cleanup is required on this channel.
-        __setChnlFailCleanup<T>( i_chip );
-
-    } while (0);
-
-    return o_rc;
-}
-
-template
-uint32_t handleChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
-                                      STEP_CODE_DATA_STRUCT & io_sc );
-template
-uint32_t handleChnlFail<TYPE_DMI>( ExtensibleChip * i_chip,
-                                   STEP_CODE_DATA_STRUCT & io_sc );
-
-template<>
-uint32_t handleChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
-                                  STEP_CODE_DATA_STRUCT & io_sc )
-{
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
-    {
-        // The MC target will get the IOMCFIR registers by default, but we
-        // will need to manually capture the channel failure registers on the
-        // DMI target just in case the rule code analysis never makes it to
-        // that target.
-        dmiChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
-                                   Util::hashString( "chnlFail" ) );
-
-        o_rc = handleChnlFail<TYPE_DMI>( dmiChip, io_sc );
-        if ( SUCCESS != o_rc ) break;
+        getMembufDataBundle(i_membChip)->iv_doChnlFailCleanup = true;
     }
 
-    return o_rc;
+    return o_chnlFail;
+
+    #undef PRDF_FUNC
 }
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T1, TARGETING::TYPE T2>
-void __cleanupChnlFail( ExtensibleChip * i_chip1, ExtensibleChip * i_chip2,
+// Channel failure analysis is designed to only look for UNIT_CS attentions and
+// not associate any recoverables as the root cause. Of course, now we have a
+// special case. RCD parity errors are recoverable attentions that could cause
+// unit CS attentions as a side effect. Therefore, we must analyze them first
+// before looking for any UNIT_CS attentions.
+
+template<TARGETING::TYPE T>
+bool __analyzeRcdParityError( ExtensibleChip * i_chip,
+                              STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+bool __analyzeRcdParityError<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemUtils::__analyzeRcdParityError] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    uint32_t o_analyzed = false;
+
+    SCAN_COMM_REGISTER_CLASS * fir  = nullptr;
+    SCAN_COMM_REGISTER_CLASS * mask = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act0 = nullptr;
+    SCAN_COMM_REGISTER_CLASS * act1 = nullptr;
+
+    for ( auto & mbaChip : getConnected(i_chip, TYPE_MBA) )
+    {
+        fir  = mbaChip->getRegister( "MBACALFIR"      );
+        mask = mbaChip->getRegister( "MBACALFIR_MASK" );
+        act0 = mbaChip->getRegister( "MBACALFIR_ACT0" );
+        act1 = mbaChip->getRegister( "MBACALFIR_ACT1" );
+
+        if ( SUCCESS != (fir->Read()  | mask->Read() |
+                         act0->Read() | act1->Read()) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to read MBACALFIRs on 0x%08x",
+                      mbaChip->getHuid() );
+            continue; // try the other MBA
+        }
+
+        uint32_t bits[] = { 4, 7 }; // bit 4: port 0, bit 7: port 1
+        for ( auto & b : bits )
+        {
+            if ( !fir->IsBitSet(b) || mask->IsBitSet(b) ) continue;
+
+            PRDF_INF( PRDF_FUNC "RCD parity error found on 0x%08x",
+                      mbaChip->getHuid() );
+
+            // Check the action registers just in case someone decides to change
+            // the attention type to unit checkstop.
+            ATTENTION_TYPE secAttnType = RECOVERABLE;
+            if ( !act0->IsBitSet(b) && !act1->IsBitSet(b) )
+                secAttnType = UNIT_CS;
+
+            // Analyze this MBA. Note that the rule code is set up on the MBA
+            // such that the RCD parity errors will always be the first
+            // attentions handled.
+            if ( SUCCESS == mbaChip->Analyze(io_sc, secAttnType) )
+            {
+                o_analyzed = true; break; // analysis complete
+            }
+        }
+        if ( o_analyzed ) break; // nothing more to do
+    }
+
+    return o_analyzed;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+// Handling channel failures from more than one channel at a time:
+// Say we were called to handle a recoverable attention on a Centaur, but the
+// channel containing that Centaur has a unit checkstop attention in the
+// IOMCFIR. There is nothing in the PRD plugin code that will allow us to
+// analyze the IOMCFIR directly. So the best we have is to analyze the MC target
+// containing the IOMCFIR. Now, say we have a second channel reporting a unit
+// checkstop from its CHIFIR (two channel failures at the same time). In order
+// to ensure that we can take care of the first channel failure, we must
+// prioritize the IOMCFIR over all of the CHIFIRs in the MC_CHIPLET_UCS_FIR.
+//
+// To complicate things further, we don't have any mechanism to target a
+// specific bus in the IOMCFIR. So we have to analyze the buses in order (0-3).
+// Therefore, it is still possible that the first bus we find with a unit
+// checkstop attention in the IOMCFIR is not the bus we originally started to
+// analyze. There isn't much we can do about this. We will have to start over
+// and switch analysis to the second channel. After completing analysis and
+// masking the second bus, we will then retry analysis on the first bus.
+//
+// So basically any time we need to look for a channel failure, we must iterate
+// all four channels in the order they exist in the IOMCFIR.
+
+template<TARGETING::TYPE T>
+bool __analyzeChnlFail( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
 
 template<>
-void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
+bool __analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
+
+    uint32_t o_analyzed = false;
+
+    // getConnected() will return the chips sorted by the unit position. This
+    // will be the same order as the buses in the IOMCFIR.
+    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
+    {
+        ExtensibleChip * membChip = getConnectedChild(dmiChip, TYPE_MEMBUF, 0);
+        PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
+
+        // Check for active channel failure attention.
+        if ( !__queryChnlFail<TYPE_DMI,TYPE_MEMBUF>(dmiChip, membChip, io_sc) )
+        {
+            continue; // nothing more to do for this channel
+        }
+
+        // First, check for RCD parity errors. They are recoverable attentions
+        // that could has a channel failure attention as a side effect.
+        if ( __analyzeRcdParityError<TYPE_MEMBUF>(membChip, io_sc) )
+        {
+            o_analyzed = true; break; // analysis complete
+        }
+
+        // Now, look for unit checkstops in the CHIFIR.
+        if ( __queryUcsChifir<TYPE_DMI>(dmiChip) )
+        {
+            // Analyze UNIT_CS on the DMI chip.
+            if ( SUCCESS == dmiChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true; break; // analysis complete
+            }
+        }
+
+        // Now, look for unit checkstops on the Centaur.
+        if ( __queryUcsCentaur<TYPE_MEMBUF>(membChip) )
+        {
+            // Analyze UNIT_CS on the MEMBUF chip.
+            if ( SUCCESS == membChip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true; break; // analysis complete
+            }
+        }
+
+        // Now, look for unit checkstops in the IOMCFIR.
+        if ( __queryUcsIomcfir<TYPE_DMI>(dmiChip) )
+        {
+            // Analyze UNIT_CS on the MC chip.
+            if ( SUCCESS == i_chip->Analyze(io_sc, UNIT_CS) )
+            {
+                o_analyzed = true; break; // analysis complete
+            }
+        }
+    }
+
+    return o_analyzed;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+bool analyzeChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+
+    uint32_t o_analyzed = false;
+
+    if ( !io_sc.service_data->isMemChnlFail() )
+    {
+        ExtensibleChip * dmiChip = getConnectedParent( i_chip,  TYPE_DMI );
+        ExtensibleChip * mcChip  = getConnectedParent( dmiChip, TYPE_MC  );
+        o_analyzed = __analyzeChnlFail<TYPE_MC>( mcChip, io_sc );
+    }
+
+    return o_analyzed;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+bool analyzeChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
+
+    uint32_t o_analyzed = false;
+
+    if ( !io_sc.service_data->isMemChnlFail() )
+    {
+        o_analyzed = __analyzeChnlFail<TYPE_MC>( i_chip, io_sc );
+    }
+
+    return o_analyzed;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T1, TARGETING::TYPE T2, TARGETING::TYPE T3>
+void __cleanupChnlFail( ExtensibleChip * i_chip1, ExtensibleChip * i_chip2,
+                        ExtensibleChip * i_chip3,
+                        STEP_CODE_DATA_STRUCT & io_sc );
+
+template<>
+void __cleanupChnlFail<TYPE_MC,TYPE_DMI,TYPE_MEMBUF>(
+                                              ExtensibleChip * i_mcChip,
+                                              ExtensibleChip * i_dmiChip,
                                               ExtensibleChip * i_membChip,
                                               STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemUtils::__cleanupChnlFail] "
+
+    PRDF_ASSERT( nullptr != i_mcChip );
+    PRDF_ASSERT( TYPE_MC == i_mcChip->getType() );
 
     PRDF_ASSERT( nullptr != i_dmiChip );
     PRDF_ASSERT( TYPE_DMI == i_dmiChip->getType() );
@@ -866,7 +1032,6 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
     // we will just move on and try the rest.
 
     SCAN_COMM_REGISTER_CLASS * reg = nullptr;
-    ExtensibleChip * mcChip = getConnectedParent( i_dmiChip, TYPE_MC );
     uint32_t dmiPos = i_dmiChip->getPos() % MAX_DMI_PER_MC;
 
     // Mask off all attentions from the DMI target in the CHIFIR.
@@ -875,7 +1040,7 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
     reg->Write();
 
     // Mask off all attentions from the DMI target in the IOMCFIR.
-    reg = mcChip->getRegister( "IOMCFIR_MASK_OR" );
+    reg = i_mcChip->getRegister( "IOMCFIR_MASK_OR" );
     reg->SetBitFieldJustified( 8 + (dmiPos * 8), 8, 0xff ); // 8, 16, 24, 32
     reg->Write();
 
@@ -916,15 +1081,20 @@ void __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( ExtensibleChip * i_dmiChip,
 }
 
 template<>
-void cleanupChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
-                                   STEP_CODE_DATA_STRUCT & io_sc )
+void cleanupChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
+                               STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
 
-    ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
+    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
+    {
+        ExtensibleChip * membChip = getConnectedChild( dmiChip, TYPE_MEMBUF, 0);
+        PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
 
-    __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( dmiChip, i_chip, io_sc );
+        __cleanupChnlFail<TYPE_MC,TYPE_DMI,TYPE_MEMBUF>( i_chip, dmiChip,
+                                                         membChip, io_sc );
+    }
 }
 
 template<>
@@ -934,23 +1104,21 @@ void cleanupChnlFail<TYPE_DMI>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_DMI == i_chip->getType() );
 
-    ExtensibleChip * membChip = getConnectedChild( i_chip, TYPE_MEMBUF, 0 );
-    PRDF_ASSERT( nullptr != membChip ); // shouldn't be possible
+    ExtensibleChip * mcChip = getConnectedParent( i_chip, TYPE_MC );
 
-    __cleanupChnlFail<TYPE_DMI,TYPE_MEMBUF>( i_chip, membChip, io_sc );
+    cleanupChnlFail<TYPE_MC>( mcChip, io_sc );
 }
 
 template<>
-void cleanupChnlFail<TYPE_MC>( ExtensibleChip * i_chip,
-                               STEP_CODE_DATA_STRUCT & io_sc )
+void cleanupChnlFail<TYPE_MEMBUF>( ExtensibleChip * i_chip,
+                                   STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_MC == i_chip->getType() );
+    PRDF_ASSERT( TYPE_MEMBUF == i_chip->getType() );
 
-    for ( auto & dmiChip : getConnected(i_chip, TYPE_DMI) )
-    {
-        cleanupChnlFail<TYPE_DMI>( dmiChip, io_sc );
-    }
+    ExtensibleChip * dmiChip = getConnectedParent( i_chip, TYPE_DMI );
+
+    cleanupChnlFail<TYPE_DMI>( dmiChip, io_sc );
 }
 
 //------------------------------------------------------------------------------
