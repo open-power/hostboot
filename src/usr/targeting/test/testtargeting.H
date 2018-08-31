@@ -395,6 +395,107 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
         TS_TRACE(EXIT_MRK "testNvTarget");
     }
+
+
+    void testI2cMux()
+    {
+        TS_TRACE(ENTER_MRK "testI2cMux" );
+
+        TARGETING::TargetRangeFilter l_targetList(
+                    TARGETING::targetService().begin(),
+                    TARGETING::targetService().end(),
+                    nullptr);
+
+        if (l_targetList)
+        {
+            for (;l_targetList;++l_targetList)
+            {
+                auto targetClass =
+                                 l_targetList->getAttr<TARGETING::ATTR_CLASS>();
+                auto targetType = l_targetList->getAttr<TARGETING::ATTR_TYPE>();
+                auto targetModel =
+                                 l_targetList->getAttr<TARGETING::ATTR_MODEL>();
+                if ( (TARGETING::CLASS_CHIP == targetClass)     &&
+                     (TARGETING::TYPE_I2C_MUX == targetType)    &&
+                     (TARGETING::MODEL_PCA9847 == targetModel) )
+                {
+                    // Mask off upper 8 bits in case of multiple nodes
+                    uint32_t l_huid = get_huid(*l_targetList) & 0x00FFFFFF;
+                    // Extract the type, drop instance info
+                    l_huid = l_huid >> 16;
+                    if (TARGETING::TYPE_I2C_MUX != l_huid)
+                    {
+                        TS_FAIL("testI2cMux::huid returned(0x%X), "
+                                "expected(0x%X)",
+                                l_huid,
+                                TARGETING::TYPE_I2C_MUX);
+                    }
+
+                    TARGETING::I2cMuxInfo l_i2cMuxInfo =
+                          l_targetList->getAttr<TARGETING::ATTR_I2C_MUX_INFO>();
+
+                    if (TARGETING::EntityPath::PATH_PHYSICAL !=
+                            l_i2cMuxInfo.i2cMasterPath.type())
+                    {
+                        TS_FAIL("testI2cMux::i2cMuxPath type "
+                                "returned(%d), expected(PHYSICAL)",
+                                l_i2cMuxInfo.i2cMasterPath.type());
+                    }
+
+                    char * l_pathAsString =
+                                  l_i2cMuxInfo.i2cMasterPath.toString();
+                    if (0 != strcmp(l_pathAsString,
+                                    "Physical:/Sys0/Node0/Proc0"))
+                    {
+                        TS_FAIL("testI2cMux::i2cMuxPath path "
+                                "returned(%s), "
+                                "expected(Physical:/Sys0/Node0/Proc0)",
+                                l_pathAsString);
+                    } // end if (TARGETING
+
+                    free (l_pathAsString);
+                    l_pathAsString = nullptr;
+                } // end if ( (TARGETING::CLASS_CHIP == targetClass) ...
+                else if ( (TARGETING::CLASS_ENC == targetClass)   &&
+                          (TARGETING::TYPE_NODE == targetType)    &&
+                          (TARGETING::MODEL_POWER9 == targetModel) )
+
+                {
+                    TARGETING::EepromVpdPrimaryInfo l_eepromInfo =
+                            l_targetList->
+                             getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                    if (TARGETING::EntityPath::PATH_PHYSICAL !=
+                        l_eepromInfo.i2cMuxPath.type())
+                    {
+                        TS_FAIL("testI2cMux::i2cMuxPath type returned(%d), "
+                                "expected(PHYSICAL)",
+                                l_eepromInfo.i2cMuxPath.type());
+                    }
+
+                    char * l_pathAsString =
+                                         l_eepromInfo.i2cMuxPath.toString();
+
+                    if (0 != strcmp(l_pathAsString,
+                                    "Physical:/Sys0"))
+                    {
+                        TS_FAIL("testI2cMux::i2cMuxPath path returned(%s), "
+                                "expected(Physical:/Sys0)",
+                                l_pathAsString);
+                    }
+                    free (l_pathAsString);
+                    l_pathAsString = nullptr;
+                }  // end if ( (TARGETING::CLASS_ENC == targetClass) ...
+            }  // end for (l_targetList;++l_targetList)
+        }  // end if  (l_targetList)
+        else
+        {
+            TS_FAIL("testI2cMux::No targets containing I2C Mux found");
+        }
+
+        TS_TRACE(EXIT_MRK "testI2cMux");
+    }
+
 };
 
 #endif // End __TARGETING_TESTTARGETING_H
