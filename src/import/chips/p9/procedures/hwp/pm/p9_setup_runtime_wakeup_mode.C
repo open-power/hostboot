@@ -61,7 +61,7 @@ fapi2::ReturnCode p9_setup_runtime_wakeup_mode(
 
     for( auto core : l_coreList )
     {
-        FAPI_TRY(fapi2::getScom(i_procTarget, C_CPPM_CPMMR, l_wakeupMode),
+        FAPI_TRY(fapi2::getScom( core, C_CPPM_CPMMR, l_wakeupMode),
                  "Failed To Read CPMMR");
 
         FAPI_DBG( "Initial CPMMR Value 0x%016llx", l_wakeupMode );
