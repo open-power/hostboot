@@ -476,13 +476,55 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         //  the OCC code.  On FSP systems this is handled by the HWSV
         //  code.  On OP systems this is handled by OPAL.
 
+        TARGETING::Target* pNode = nullptr;
+        if(i_target != nullptr)
+        {
+            if(   i_target->getAttr<TARGETING::ATTR_TYPE>()
+               == TARGETING::TYPE_NODE)
+            {
+                pNode = i_target;
+            }
+            else
+            {
+                auto nodeType = TARGETING::TYPE_NODE;
+                pNode = TARGETING::getParent(i_target,nodeType);
+            }
+        }
+
+        if(pNode == nullptr)
+        {
+            TRACFCOMP(g_trac_vpd, ERR_MRK"sendMboxWriteMsg (runtime): "
+                      "Failed to determine HUID of node target containing "
+                      "(or equalling) requested target with HUID of 0x%08X",
+                      TARGETING::get_huid(i_target));
+            /*@
+             * @errortype
+             * @moduleid   VPD_SEND_MBOX_WRITE_MESSAGE
+             * @reasoncode VPD_FAILED_TO_RESOLVE_NODE_TARGET
+             * @userdata1  HUID of target to update VPD for
+             * @userdata2  VPD message type
+             * @devdesc    Could not determine which node the target is in
+             * @custdesc   Runtime vital product data update failure
+             */
+            l_err = new ErrlEntry(
+                        ERRL_SEV_UNRECOVERABLE,
+                        VPD_SEND_MBOX_WRITE_MESSAGE,
+                        VPD_FAILED_TO_RESOLVE_NODE_TARGET,
+                        TARGETING::get_huid(i_target),
+                        i_type,
+                        true);
+            break;
+        }
+
+        const uint32_t nodeHuid = pNode->getAttr<TARGETING::ATTR_HUID>();
 
         // Get an accurate size of memory needed to transport
         // the data for the firmware_request request struct
         uint32_t l_fsp_req_size = GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE;
         // add on the 2 header words that are used in the IPL-time
         //  version of the VPD write message (see vpd.H)
-        l_fsp_req_size += sizeof(VpdWriteMsg_t) + sizeof(uint64_t);
+        l_fsp_req_size +=   sizeof(nodeHuid) + sizeof(VpdWriteMsg_t)
+                          + sizeof(uint64_t);
         // add on the extra_data portion of the message
         l_fsp_req_size += i_numBytes;
 
@@ -516,12 +558,16 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         // the full message looks like this
         struct VpdWriteMsgHBRT_t
         {
+            uint32_t nodeHuid;
             VpdWriteMsg_t vpdInfo;
             uint64_t vpdBytes;
             uint8_t vpdData; //of vpdBytes size
-        };
+
+        } PACKED;
+
         VpdWriteMsgHBRT_t* l_msg = reinterpret_cast<VpdWriteMsgHBRT_t*>
           (&(l_req_fw_msg->generic_msg.data));
+        l_msg->nodeHuid = nodeHuid;
         l_msg->vpdInfo = i_record;
         l_msg->vpdBytes = i_numBytes;
         memcpy( &(l_msg->vpdData), i_data, i_numBytes );
