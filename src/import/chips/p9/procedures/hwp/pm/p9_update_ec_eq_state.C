@@ -85,6 +85,7 @@ enum
     PB_PURGE_CACHE_STOP_POLLING_DELAY_HW_MILLISEC = 1000000ULL, // 1msec
     PB_PURGE_CACHE_STOP_POLLING_DELAY_SIM_CYCLES = 10000ULL,
     PB_PURGE_CACHE_STOP_POLLING_TIMEOUT = 10,
+    CORE_QUEISCE_TIMEOUT_LOOP = 500,
 };
 
 
@@ -103,7 +104,10 @@ static fapi2::ReturnCode update_eq_config(
 
 fapi2::ReturnCode p9_check_core_clock_power_state(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
-    uint8_t i_core_unit_pos);
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target,
+    uint8_t i_core_unit_pos,
+    uint8_t i_ex_unit_pos);
+
 
 fapi2::ReturnCode p9_check_quad_clock_power_state(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_quad_target,
@@ -283,10 +287,6 @@ fapi2::ReturnCode verify_eq_ec_hw_state(
             for ( auto l_core_target : core_present_it.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_PRESENT) )
             {
                 uint8_t l_ex_pos = 0;
-                //Check the clock state and power state
-                FAPI_TRY(p9_check_core_clock_power_state(l_core_target,
-                         l_present_core_unit_pos));
-
                 auto l_ex_target = l_core_target.getParent<fapi2::TARGET_TYPE_EX>();
 
                 FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
@@ -299,6 +299,11 @@ fapi2::ReturnCode verify_eq_ec_hw_state(
                 {
                     l_ex_list.push_back(l_ex_target);
                 }
+
+                //Check the clock state and power state
+                FAPI_TRY(p9_check_core_clock_power_state(l_core_target, l_ex_target,
+                         l_present_core_unit_pos, l_ex_pos));
+
             }
         }
     }//end of present
@@ -512,10 +517,13 @@ fapi_try_exit:
 
 fapi2::ReturnCode p9_check_core_clock_power_state(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
-    uint8_t i_core_unit_pos)
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target,
+    uint8_t i_core_unit_pos,
+    uint8_t i_ex_unit_pos)
 {
     fapi2::buffer<uint64_t> l_data = 0;
     uint32_t               l_loops1ms;
+    uint8_t l2_quiesce_state = 0;
 
     do
     {
@@ -530,7 +538,7 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
 
             l_data.flush<0>().setBit<0>();
             FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_CPPM_CPMMR_SCOM1, l_data),
-                     "Error writing to P9N2_C_CPPM_CPMMR_SCOM");
+                     "Error writing to P9N2_C_CPPM_CPMMR_SCOM1");
             l_data.flush<0>().setBit<0>();
             FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_PPM_VDMCR_CLEAR, l_data),
                      "Error writing to P9N2_C_PPM_VDMCR_CLEAR");
@@ -540,7 +548,60 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
 
         l_data.flush<0>().setBit<0>();
         FAPI_TRY(fapi2::putScom(i_core_target, P9N2_C_CPPM_CPMMR_SCOM1, l_data),
-                 "Error writing to P9N2_C_CPPM_CPMMR_SCOM");
+                 "Error writing to P9N2_C_CPPM_CPMMR_SCOM1");
+
+        FAPI_INF("Assert core-L2 + core-CC quiesces via SICR[6/7,8/9]");
+
+        if (i_core_unit_pos % 2)
+        {
+            l_data.flush<0>().setBit<P9N2_EX_CME_SCOM_SICR_PCC_CORE_INTF_QUIESCE_C1>().
+            setBit<P9N2_EX_CME_SCOM_SICR_L2_CORE_INTF_QUIESCE_C1>();
+        }
+        else
+        {
+            l_data.flush<0>().setBit<P9N2_EX_CME_SCOM_SICR_PCC_CORE_INTF_QUIESCE_C0>().
+            setBit<P9N2_EX_CME_SCOM_SICR_L2_CORE_INTF_QUIESCE_C0>();
+        }
+
+        FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_CME_SCOM_SICR_SCOM2, l_data),
+                 "Error writing to P9N2_EX_CME_SCOM_SICR_SCOM2");
+
+        FAPI_INF("Poll for L2 interface quiesced via SISR[30/31]");
+        l_loops1ms = CORE_QUEISCE_TIMEOUT_LOOP;
+
+        do
+        {
+
+            FAPI_TRY(fapi2::delay(PB_PURGE_CACHE_STOP_POLLING_DELAY_HW_MILLISEC,
+                                  PB_PURGE_CACHE_STOP_POLLING_DELAY_SIM_CYCLES),
+                     "Error from delay"); //1msec delay
+
+            FAPI_TRY(fapi2::getScom(i_ex_target, P9N2_EX_CME_LCL_SISR_SCOM, l_data),
+                     "Error reading to P9N2_EX_CME_LCL_SISR_SCOM");
+
+            if (i_core_unit_pos % 2)
+            {
+                l2_quiesce_state = l_data.getBit<31>();
+            }
+            else
+            {
+                l2_quiesce_state = l_data.getBit<30>();
+            }
+
+        }
+        while (!l2_quiesce_state && l_loops1ms -- != 0);
+
+        if (!l2_quiesce_state)
+        {
+            FAPI_ASSERT(false,
+                        fapi2::CORE_QUIESCES_INTF_FAILED()
+                        .set_CORE_TARGET(i_core_target)
+                        .set_CORE_POS(i_core_unit_pos)
+                        .set_EX_TARGET(i_ex_target)
+                        .set_EX_POS(i_ex_unit_pos),
+                        "Core QUIESCES failed");
+        }
+
 
         FAPI_INF(" Check core %d clock is stopped via CLOCK_STAT_SL[4-13]", i_core_unit_pos);
         FAPI_TRY(fapi2::getScom(i_core_target, P9N2_C_CLOCK_STAT_SL, l_data),
@@ -590,8 +651,6 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
                                    .set_CORE_TARGET(i_core_target)
                                    .set_CORE_POS(i_core_unit_pos),
                                    "Core clock is still on");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
             }
 
             FAPI_DBG("Drop core clock sync enable via CPPM_CACCR[15]");
@@ -617,7 +676,6 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
                                    .set_CORE_TARGET(i_core_target)
                                    .set_CORE_POS(i_core_unit_pos),
                                    "Core clock sync is not dropped");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             FAPI_INF("Core clock sync done dropped");
@@ -693,7 +751,6 @@ fapi2::ReturnCode p9_check_core_clock_power_state(
                                    .set_CORE_TARGET(i_core_target)
                                    .set_CORE_POS(i_core_unit_pos),
                                    "Core power off failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
 
@@ -805,23 +862,33 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                          "Error from delay"); //1msec delay
 
                 FAPI_TRY(fapi2::getScom(i_ex_target, P9N2_EX_CME_LCL_EISR_SCOM, l_data),
-                         "Error writing to P9N2_EX_CME_LCL_EISR_SCOM");
+                         "Error reading to P9N2_EX_CME_LCL_EISR_SCOM");
             }
-            while ( !(l_data.getBit<22>() & l_data.getBit<23>()) && (l_timeout-- != 0));
+            while ( !(l_data.getBit<22>() && l_data.getBit<23>()) && (l_timeout-- != 0));
 
             FAPI_INF("L2 Purge values Bit 22 %d  Bit 23 %d", l_data.getBit<22>(), l_data.getBit<23>());
 
-            if (!(l_data.getBit<22>() & l_data.getBit<23>()))
+            if (!(l_data.getBit<22>()))
             {
-                FAPI_ERR("Timeout is zero .. L2 purge failed and L2 Purge values Bit 22 %d  Bit 23 %d",
-                         l_data.getBit<22>(), l_data.getBit<23>());
+                FAPI_ERR("Timeout is zero .. L2 purge failed and L2 Purge values Bit 22 %d ",
+                         l_data.getBit<22>());
                 FAPI_ASSERT(false,
-                            fapi2::EX_L2_PURGE_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            fapi2::EX_L2_PURGE_FAILED()
                             .set_EX_TARGET(i_ex_target)
                             .set_EX_POS(i_ex_unit_pos),
                             "EX L2 purge failed");
             }
 
+            if (!(l_data.getBit<23>()))
+            {
+                FAPI_ERR("Timeout is zero .. NCU purge failed and NCU Purge values Bit 23 %d",
+                         l_data.getBit<23>());
+                FAPI_ASSERT(false,
+                            fapi2::EX_NCU_PURGE_FAILED()
+                            .set_EX_TARGET(i_ex_target)
+                            .set_EX_POS(i_ex_unit_pos),
+                            "EX NCU purge failed");
+            }
 
             l_data.flush<0>().setBit<18, 2>().setBit<22, 2>();
             FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_CME_SCOM_SICR_SCOM1, l_data),
@@ -883,7 +950,6 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                                    .set_EX_TARGET(i_ex_target)
                                    .set_EX_POS(i_ex_unit_pos),
                                    "EX L2 clock off failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             FAPI_INF("Drop clock sync enable before switch to refclk via EXCGCR[36/37]");
@@ -931,7 +997,6 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                                    .set_EX_TARGET(i_ex_target)
                                    .set_EX_POS(i_ex_unit_pos),
                                    "EX L2 clock sync failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             FAPI_INF("Switch glsmux to refclk to save clock grid power via EXCGCR[34/35]");
@@ -946,7 +1011,7 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
             }
 
             FAPI_TRY(fapi2::putScom(l_eq_target, P9N2_EQ_QPPM_EXCGCR_CLEAR, l_data),
-                     "Error reading P9N2_EQ_QPPM_EXCGCR_CLEAR");
+                     "Error writing P9N2_EQ_QPPM_EXCGCR_CLEAR");
         }
         else
         {
@@ -1002,26 +1067,21 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                 FAPI_TRY(fapi2::getScom(i_ex_target, P9N2_EX_L3_PM_PURGE_REG, l_data),
                          "Error writing to EX_CME_LCL_EISR_SCOM");
             }
-            while ( (l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>() |
-                     l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>()) && (l_timeout-- != 0));
+            while ( (l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>()) && (l_timeout-- != 0));
 
-            FAPI_INF("L3 Purge values Bit 0 %d  Bit 2 %d", l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>(),
-                     l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>());
+            FAPI_INF("L3 Purge values Bit 0 %d",
+                     l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>());
 
-            if ((l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>() |
-                 l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>()))
+            if (l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>())
             {
-                FAPI_ERR("Timeout is zero .. L3 purge failed Purge values Bit 0 %d  Bit 2 %d",
-                         l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>(), l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_ABORT>());
+                FAPI_ERR("Timeout is zero .. L3 purge failed Purge values Bit 0 %d ",
+                         l_data.getBit<P9N2_EX_L3_PM_PURGE_REG_L3_REQ>());
                 FAPI_ASSERT(false,
-                            fapi2::EX_L3_PURGE_FAILED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            fapi2::EX_L3_PURGE_FAILED()
                             .set_EX_TARGET(i_ex_target)
                             .set_EX_POS(i_ex_unit_pos),
                             "EX L3 purge failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
             }
-
 
 
             FAPI_INF("Assert partial bad L2/L3 and stopping/stoped l2 pscom masks via RING_FENCE_MASK_LATCH");
@@ -1072,7 +1132,6 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
                                    .set_EX_TARGET(i_ex_target)
                                    .set_EX_POS(i_ex_unit_pos),
                                    "EX L3 clock off failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
         }
         else
@@ -1134,10 +1193,23 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
 
         do
         {
+            FAPI_TRY(fapi2::delay(PB_PURGE_CACHE_STOP_POLLING_DELAY_HW_MILLISEC,
+                                  PB_PURGE_CACHE_STOP_POLLING_DELAY_SIM_CYCLES),
+                     "Error from delay"); //1msec delay
             FAPI_TRY(fapi2::getScom(i_quad_target, P9N2_EQ_QPPM_QCCR_SCOM, l_data));
-
         }
         while (!l_data.getBit<31>() && (--l_loop != 0));
+
+        if (!l_data.getBit<31>())
+        {
+            FAPI_ERR(" Power bus purge failed Bit 31 %d", l_data.getBit<31>());
+            FAPI_ASSERT(false,
+                        fapi2::EQ_POWERBUS_PURGE_FAILED()
+                        .set_EQ_TARGET(i_quad_target)
+                        .set_EQ_POS(i_cache_unit_pos),
+                        "EQ power bus failed");
+        }
+
 
         FAPI_INF("Drop powerbus purge via QCCR[30]");
         l_data.flush<0>().setBit<30>();
@@ -1206,7 +1278,6 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
                                    .set_EQ_TARGET(i_quad_target)
                                    .set_EQ_POS(i_cache_unit_pos),
                                    "EQ clock off failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             l_data.flush<0>().setBit<3>();
@@ -1293,7 +1364,6 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
                                    .set_EQ_TARGET(i_quad_target)
                                    .set_EQ_POS(i_cache_unit_pos),
                                    "EQ VCS poweroff failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             FAPI_INF("Power off VDD via PFCS[2-3]");
@@ -1322,7 +1392,6 @@ fapi2::ReturnCode p9_check_quad_clock_power_state(
                                    .set_EQ_TARGET(i_quad_target)
                                    .set_EQ_POS(i_cache_unit_pos),
                                    "EQ VDD poweroff failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
 
             FAPI_INF("Turn off force voff via PFCS[0-3]");
