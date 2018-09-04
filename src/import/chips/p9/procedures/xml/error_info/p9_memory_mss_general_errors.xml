@@ -36,23 +36,6 @@
 
 <hwpErrors>
 
-  <hwpError>
-    <rc>RC_MSS_LOOKUP_FAILED</rc>
-    <description>
-      Conditional that tests whether a certain key value is located in a map.
-    </description>
-    <ffdc>KEY</ffdc>
-    <ffdc>DATA</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
    <hwpError>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
