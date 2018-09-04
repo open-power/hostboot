@@ -78,6 +78,11 @@ enum conversions
     BITS_PER_BYTE = 8,
 };
 
+enum generic_sizes
+{
+    NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
+};
+
 ///
 /// @brief FFDC generic codes
 ///
@@ -118,16 +123,25 @@ enum generic_ffdc_codes
     BAD_SPD_DATA = 0x101D,
     SET_FIELD = 0x101E,
 
+    // mss_freq functions
     SELECT_SUPPORTED_FREQ = 0x101F,
+    FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT = 0x1020,
+    FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT_VECTOR = 0x1021,
+    FREQ_SCOREBOARD_REMOVE_FREQS_NOT_ON_LIST = 0x1022,
+    FREQ_SCOREBOARD_MAX_SUPPORTED_FREQ = 0x1023,
+    FREQ_SCOREBOARD_SUPPORTED_FREQS = 0x1024,
+    LIMIT_FREQ_BY_VPD = 0x1025,
 };
 
 ///
 /// @brief Supported proc types
+/// @note Processor types by system generation and sub numbering
 ///
-enum proc_type
+enum class proc_type
 {
-    NIMBUS,
-    AXONE,
+    NIMBUS  = 0x0900,
+    CUMULUS = 0x0901,
+    AXONE   = 0x0902,
 };
 
 ///

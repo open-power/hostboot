@@ -37,7 +37,6 @@
 #define _MSS_ATTR_SETTERS_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/spd/spd_facade.H>
 
 namespace mss
 {
@@ -53,15 +52,6 @@ namespace mss
 fapi2::ReturnCode set_voltage_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
         uint32_t i_selected_dram_voltage,
         uint32_t i_selected_dram_voltage_vpp);
-
-///
-/// @brief Sets pre_eff_config attributes
-/// @param[in] i_target the DIMM target
-/// @param[in] i_spd_decoder SPD decoder
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const spd::facade& i_spd_decoder );
 }  // mss
 
 #endif

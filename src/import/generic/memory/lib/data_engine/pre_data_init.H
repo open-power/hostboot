@@ -68,281 +68,6 @@ template< proc_type T, pre_data_init_fields TT >
 class preDataInitTraits;
 
 ///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, DIMM_TYPE specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, DIMM_TYPE>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_DIMM_TYPE_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_DIMM_TYPE_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_TYPE, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, DRAM_GEN specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, DRAM_GEN>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_DRAM_GEN_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_DRAM_GEN_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_GEN, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, HYBRID specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, HYBRID>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_HYBRID_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_HYBRID_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_HYBRID, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, HYBRID_MEDIA specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, HYBRID_MEDIA>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, MRANKS specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, MRANKS>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
-/// @brief Traits for pre_data_engine
-/// @class preDataInitTraits
-/// @note NIMBUS, DIMM_RANKS_CNFG specialization
-///
-template<>
-class preDataInitTraits<NIMBUS, DIMM_RANKS_CNFG>
-{
-    public:
-        using attr_type = fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED_Type;
-        static const fapi2::TargetType TARGET_TYPE = fapi2::ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_TargetType;
-
-        ///
-        /// @brief attribute getter
-        /// @param[in] i_target the MCS target
-        /// @param[out] o_setting array to populate
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode get_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          attr_type& o_setting)
-        {
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, o_setting) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief attribute setter
-        /// @param[in] i_target the MCS target
-        /// @param[in] i_setting array to set
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        static fapi2::ReturnCode set_attr(const fapi2::Target<TARGET_TYPE>& i_target,
-                                          const attr_type& i_setting)
-        {
-            attr_type l_data = {};
-            memcpy(l_data, i_setting, sizeof(l_data));
-
-            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_RANKS_CONFIGED, i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-};
-
-///
 /// @brief Helper function for attribute setting
 /// @tparam T processor type (e.g. NIMBUS, AXONE, etc.)
 /// defaulted to NIMBUS
@@ -393,7 +118,7 @@ fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
                  .set_TARGET(i_target),
                  "Failed to find a mapped value for %d on %s",
                  i_key,
-                 spd::c_str(i_target) );
+                 mss::spd::c_str(i_target) );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -437,23 +162,12 @@ fapi_try_exit:
 /// @tparam T supported processor type (e.g. Nimbus, Axone, etc.)
 ///
 template< proc_type T >
-class pre_data_engine;
-
-///
-/// @brief Data structure to set pre-effective config data
-/// @class pre_data_engine
-/// @note NIMBUS specialization
-///
-template< >
-class pre_data_engine< NIMBUS >
+class pre_data_engine
 {
     private:
 
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
-        uint8_t iv_master_ranks;
         spd::facade iv_spd_data;
-        size_t iv_port_index;
-        size_t iv_dimm_index;
 
     public:
 
@@ -467,11 +181,12 @@ class pre_data_engine< NIMBUS >
         /// @brief ctor
         /// @param[in] i_target the DIMM target
         /// @param[in] i_spd_data SPD decoder
-        /// @param[out] o_rc ReturnCode for failure to init object
         ///
         pre_data_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                        const spd::facade& i_spd_data,
-                        fapi2::ReturnCode& o_rc);
+                        const spd::facade& i_spd_data):
+            iv_dimm(i_target),
+            iv_spd_data(i_spd_data)
+        {}
 
         ///
         /// @brief default dtor
@@ -514,6 +229,69 @@ class pre_data_engine< NIMBUS >
         ///
         fapi2::ReturnCode set_dimm_ranks_configured();
 };
+
+///
+/// @brief Sets pre_eff_config attributes
+/// @tparam P processor type
+/// @param[in] i_target the DIMM target
+/// @param[in] i_spd_decoder SPD decoder
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template <mss::proc_type P>
+fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const spd::facade& i_spd_decoder )
+{
+    mss::pre_data_engine<P> l_data_engine(i_target, i_spd_decoder);
+
+    // Set attributes needed before eff_config
+    // DIMM type and DRAM gen are needed for c_str to aid debugging
+    FAPI_TRY(l_data_engine.set_dimm_type(), "Failed to set DIMM type %s", mss::spd::c_str(i_target) );
+    FAPI_TRY(l_data_engine.set_dram_gen(), "Failed to set DRAM gen %s", mss::spd::c_str(i_target) );
+
+    // Hybrid and hybrid media help detect hybrid modules, specifically NVDIMMs for Nimbus
+    FAPI_TRY(l_data_engine.set_hybrid(), "Failed to set Hybrid %s", mss::spd::c_str(i_target) );
+    FAPI_TRY(l_data_engine.set_hybrid_media(), "Failed to set Hybrid Media %s", mss::spd::c_str(i_target) );
+
+    // Number of master ranks needed for VPD decoding
+    // and dimm_ranks_configured is a PRD attr...
+    FAPI_TRY(l_data_engine.set_master_ranks(), "Failed to set Master ranks %s", mss::spd::c_str(i_target) );
+    FAPI_TRY(l_data_engine.set_dimm_ranks_configured(), "Failed to set DIMM ranks configured %s",
+             mss::spd::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets pre_eff_config attributes
+/// @tparam P processor type
+/// @tparam T fapi2::TargetType
+/// @param[in] i_target the target on which to operate
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template <mss::proc_type P, fapi2::TargetType T>
+fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<T>& i_target )
+{
+    for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        std::vector<uint8_t> l_raw_spd;
+        FAPI_TRY(mss::spd::get_raw_data(d, l_raw_spd));
+        {
+            // Gets the SPD facade
+            fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+            mss::spd::facade l_spd_decoder(d, l_raw_spd, l_rc);
+
+            // Checks that the facade was setup correctly
+            FAPI_TRY(l_rc, "Failed to initialize SPD facade for %s", mss::spd::c_str(d));
+
+            // Sets pre-init attributes
+            FAPI_TRY(mss::set_pre_init_attrs<P>(d, l_spd_decoder), "%s failed to set pre init attrs", mss::spd::c_str(d) );
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 }//mss
 

@@ -22,3 +22,79 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file gen_mss_freq_traits.H
+/// @brief Contains frequency traits information
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: CI
+
+#ifndef _GEN_MSS_FREQ_TRAITS_H_
+#define _GEN_MSS_FREQ_TRAITS_H_
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <vpd_access.H>
+
+namespace mss
+{
+
+///
+/// @class Traits and policy class for frequency and synchronous code
+/// @tparam P mss::proc_type processor type
+///
+template< mss::proc_type P >
+class frequency_traits;
+
+///
+/// @class Traits and policy class for frequency and synchronous code - specialization for the NIMBUS processor type
+///
+template<>
+class frequency_traits<mss::proc_type::NIMBUS>
+{
+    public:
+        //////////////////////////////////////////////////////////////
+        // Target types
+        //////////////////////////////////////////////////////////////
+        static constexpr fapi2::TargetType PORT_TARGET_TYPE = fapi2::TARGET_TYPE_MCA;
+        static constexpr fapi2::TargetType FREQ_TARGET_TYPE = fapi2::TARGET_TYPE_MCBIST;
+        static constexpr fapi2::TargetType VPD_TARGET_TYPE = fapi2::TARGET_TYPE_MCS;
+
+        //////////////////////////////////////////////////////////////
+        // Traits values
+        //////////////////////////////////////////////////////////////
+        static const std::vector<uint64_t> SUPPORTED_FREQS;
+        // MCBIST is our frequency domain. So 4 ports per MCBIST
+        static constexpr uint64_t PORTS_PER_FREQ_DOMAIN = 4;
+        // Max DIMM's per port
+        static constexpr uint64_t MAX_DIMM_PER_PORT = 2;
+        // Maxium number of primary ranks on a DIMM
+        static constexpr uint64_t MAX_PRIMARY_RANK_PER_DIMM = 4;
+        // MC type for Nimbus is constant - NIMBUS
+        static constexpr mss::mc_type MC = mss::mc_type::NIMBUS;
+        static constexpr const char* PROC_STR = "NIMBUS";
+
+        // VPD traits values
+        // VPD keyword max is slightly repeated (it's in NIMBUS consts too)
+        static constexpr uint64_t VPD_KEYWORD_MAX = 255;
+        static constexpr const char* VPD_BLOB_NAME = "MR";
+        static constexpr auto VPD_BLOB = fapi2::MemVpdData::MR;
+
+        // Coding minion, why have these explicitly defined frequency values?
+        // Isn't the supported frequency vector used for this purpose?
+        // Well, we need to callout the specific frequency values that are allowed on a given system
+        // As we can't callout a vector in error callouts and each traits might have a different number of allowable traits,
+        // the below values are hardcoded specifically for the error callouts
+        static constexpr uint64_t SUPPORTED_FREQ0 = DIMM_SPEED_1866;
+        static constexpr uint64_t SUPPORTED_FREQ1 = DIMM_SPEED_2133;
+        static constexpr uint64_t SUPPORTED_FREQ2 = DIMM_SPEED_2400;
+        static constexpr uint64_t SUPPORTED_FREQ3 = DIMM_SPEED_2666;
+};
+
+
+} // ns mss
+#endif

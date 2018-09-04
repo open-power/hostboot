@@ -61,35 +61,5 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Sets pre_eff_config attributes
-/// @param[in] i_target the DIMM target
-/// @param[in] i_spd_decoder SPD decoder
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode set_pre_init_attrs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const spd::facade& i_spd_decoder )
-{
-    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-    mss::pre_data_engine<mss::NIMBUS> l_data_engine(i_target, i_spd_decoder, l_rc);
-    FAPI_TRY(l_rc, "Failed to instantiate pre_data_engine object for %s", spd::c_str(i_target));
-
-    // Set attributes needed before eff_config
-    // DIMM type and DRAM gen are needed for c_str to aid debugging
-    FAPI_TRY(l_data_engine.set_dimm_type(), "Failed to set DIMM type %s", spd::c_str(i_target) );
-    FAPI_TRY(l_data_engine.set_dram_gen(), "Failed to set DRAM gen %s", spd::c_str(i_target) );
-
-    // Hybrid and hybrid media help detect hybrid modules, specifically NVDIMMs for Nimbus
-    FAPI_TRY(l_data_engine.set_hybrid(), "Failed to set Hybrid %s", spd::c_str(i_target) );
-    FAPI_TRY(l_data_engine.set_hybrid_media(), "Failed to set Hybrid Media %s", spd::c_str(i_target) );
-
-    // Number of master ranks needed for VPD decoding
-    // and dimm_ranks_configured is a PRD attr...
-    FAPI_TRY(l_data_engine.set_master_ranks(), "Failed to set Master ranks %s", spd::c_str(i_target) );
-    FAPI_TRY(l_data_engine.set_dimm_ranks_configured(), "Failed to set DIMM ranks configured %s", spd::c_str(i_target) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 } // mss

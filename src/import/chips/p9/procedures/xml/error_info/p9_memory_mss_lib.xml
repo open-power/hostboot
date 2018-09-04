@@ -496,17 +496,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
-    <description>An invalid port index was passed into an MSS function</description>
-    <ffdc>INDEX</ffdc>
-    <ffdc>FUNCTION</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_C4_PIN_OUT_OF_RANGE</rc>
     <description>Indicates a fail when attempting to get a PHY mapping for an out-of-bounds module C4 pin index</description>
     <ffdc>MCA_TARGET</ffdc>
