@@ -179,6 +179,33 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <collectRegisterFfdc>
+       <id>EX_PURGE_FFDC_REGISTER</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EX_NCU_PURGE_FAILED</rc>
+    <description>Failed to purge NCU
+    </description>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <collectRegisterFfdc>
+       <id>EX_PURGE_FFDC_REGISTER</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -227,8 +254,38 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <collectRegisterFfdc>
+       <id>EX_PURGE_FFDC_REGISTER</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+
   </hwpError>
   <!-- ******************************************************************** -->
+<hwpError>
+    <rc>RC_CORE_QUIESCES_INTF_FAILED</rc>
+    <description>Core quiesced intf failed
+    </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CORE_POS</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EX_POS</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <collectRegisterFfdc>
+       <id>CORE_QUIESCE_FFDC_REGISTER</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
   <hwpError>
     <rc>RC_EQ_VDD_POWEROFF_FAILED</rc>
     <description>Failed to poweroff VDD of EQ
@@ -264,6 +321,22 @@
   <hwpError>
     <rc>RC_EQ_CLOCKOFF_FAILED</rc>
     <description>Failed to switch off the eq clock
+    </description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EQ_POS</ffdc>
+    <callout>
+      <target>EQ_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EQ_POWERBUS_PURGE_FAILED</rc>
+    <description>Power bus purge failed of quad target
     </description>
     <ffdc>EQ_TARGET</ffdc>
     <ffdc>EQ_POS</ffdc>
