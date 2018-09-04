@@ -81,24 +81,6 @@
     </deconfigure>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
-    <description>
-        No frequency found for mbist. Either bad mrw attribute or no DIMMS installed?
-        Should be a code bug if we get here
-    </description>
-    <ffdc>MSS_FREQ</ffdc>
-    <ffdc>SUPPORTED_FREQ_0</ffdc>
-    <ffdc>SUPPORTED_FREQ_1</ffdc>
-    <ffdc>SUPPORTED_FREQ_2</ffdc>
-    <ffdc>SUPPORTED_FREQ_3</ffdc>
-    <ffdc>MCBIST_TARGET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
   <!-- Cronus only error when we can't match DIMM speeds to sync mode -->
   <hwpError>
     <rc>RC_MSS_FAILED_SYNC_MODE</rc>
@@ -277,25 +259,6 @@
      <callout>
       <childTargets>
           <parent>MCBIST_TARGET</parent>
-          <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
-    <description>
-      When considering the frequencies in the MRW and the max supported
-      frequencies based on DIMM config, the indicated port's DIMM do not support
-      the frequency of the majority of other ports' DIMM, so it will be deconfigured
-    </description>
-    <ffdc>MCBIST_TARGET</ffdc>
-    <ffdc>MCA_TARGET</ffdc>
-    <ffdc>FREQUENCY</ffdc>
-     <callout>
-      <childTargets>
-          <parent>MCA_TARGET</parent>
           <childType>TARGET_TYPE_DIMM</childType>
       </childTargets>
       <priority>MEDIUM</priority>
