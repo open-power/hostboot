@@ -69,7 +69,6 @@ enum sizes
     MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DRAM for 72 bits
 
     NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
-    NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
 
 
     MARK_STORE_COUNT = 8,          ///< Elements in a VPD mark/store array
@@ -194,14 +193,6 @@ enum ffdc_function_codes
 
     // WR VREF functions
     DRAM_TO_RP_REG = 101,
-
-    // mss_freq functions
-    FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT = 110,
-    FREQ_SCOREBOARD_REMOVE_FREQS_ABOVE_LIMIT_VECTOR = 111,
-    FREQ_SCOREBOARD_REMOVE_FREQS_NOT_ON_LIST = 112,
-    FREQ_SCOREBOARD_MAX_SUPPORTED_FREQ = 113,
-    FREQ_SCOREBOARD_SUPPORTED_FREQS = 114,
-    LIMIT_FREQ_BY_VPD = 115,
 
     // eff_dimm.C
     PRIMARY_STACK_TYPE = 116,
