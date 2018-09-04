@@ -695,4 +695,20 @@
   </registerFfdc>
 
   <!-- *********************************************************************** -->
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>EX_PURGE_FFDC_REGISTER</id>
+    <scomRegister>EX_CME_SCOM_SICR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_SISR_SCOM</scomRegister>
+  </registerFfdc>
+
+  <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>CORE_QUIESCE_FFDC_REGISTER</id>
+    <scomRegister>EX_CME_SCOM_SICR_SCOM</scomRegister>
+    <scomRegister>EX_CME_LCL_SISR_SCOM</scomRegister>
+  </registerFfdc>
+
+  <!-- *********************************************************************** -->
+
 </hwpErrors>
