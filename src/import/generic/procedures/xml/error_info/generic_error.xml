@@ -38,6 +38,25 @@
 <hwpErrors>
 
   <hwpError>
+    <rc>RC_MSS_BAD_FREQ_CALCULATED</rc>
+    <description>
+        No frequency found for MC Either bad mrw attribute or no DIMMS installed?
+        Should be a code bug if we get here
+    </description>
+    <ffdc>MSS_FREQ</ffdc>
+    <ffdc>SUPPORTED_FREQ_0</ffdc>
+    <ffdc>SUPPORTED_FREQ_1</ffdc>
+    <ffdc>SUPPORTED_FREQ_2</ffdc>
+    <ffdc>SUPPORTED_FREQ_3</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PROC_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_EMPTY_VECTOR</rc>
     <description>
       Empty vector conditional failed.
@@ -216,6 +235,17 @@
 </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
+    <description>An invalid port index was passed into an MSS function</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
@@ -230,6 +260,42 @@
     <gard>
         <target>DIMM_TARGET</target>
     </gard>
+  </hwpError>
+
+<hwpError>
+  <rc>RC_MSS_LOOKUP_FAILED</rc>
+  <description>
+    Conditional that tests whether a certain key value is located in a map.
+  </description>
+  <ffdc>KEY</ffdc>
+  <ffdc>DATA</ffdc>
+  <ffdc>FUNCTION</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET</target>
+  </deconfigure>
+</hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
+    <description>
+      When considering the frequencies in the MRW and the max supported
+      frequencies based on DIMM config, the indicated port's DIMM do not support
+      the frequency of the majority of other ports' DIMM, so it will be deconfigured
+    </description>
+    <ffdc>FREQ_TARGET</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+     <callout>
+      <childTargets>
+          <parent>PORT_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>
