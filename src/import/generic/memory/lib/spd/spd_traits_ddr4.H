@@ -54,7 +54,7 @@ namespace spd
 /// @note valid for all revisions
 ///
 template<rev R>
-class readerTraits < fields<DDR4, BASE_CNFG>::BYTES_USED, R>
+class readerTraits < fields<DDR4, BASE_CNFG>::BYTES_USED, R >
 {
     public:
 
