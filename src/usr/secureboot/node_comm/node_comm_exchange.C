@@ -198,16 +198,7 @@ errlHndl_t nodeCommAbusGetRandom(uint64_t & o_nonce)
         err->collectTrace(SECURE_COMP_NAME);
         err->collectTrace(NODECOMM_TRACE_NAME);
         err->collectTrace(TRBOOT_COMP_NAME);
-
-        // @TODO CQ: SW444320
-        //
-        // Restore errlCommit of this error as part of the referenced
-        // defect fix.  Until that fix is in place, committing an error
-        // in this path with the intent of continuing would set up a condition
-        // where FSP fails to wake Hostboot out of winkle state.
-        delete err;
-        err=nullptr;
-        //errlCommit(err, SECURE_COMP_ID);
+        errlCommit(err, SECURE_COMP_ID);
     }
 
     TRACFCOMP(g_trac_nc,EXIT_MRK"nodeCommAbusGetRandom: "
