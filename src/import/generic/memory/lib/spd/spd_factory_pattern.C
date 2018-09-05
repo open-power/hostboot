@@ -232,7 +232,8 @@ factories::factories(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
               "Failed to read DEVICE_TYPE field for %s", spd::c_str(i_target) );
     FAPI_TRY( (reader<init_fields::HYBRID, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_hybrid)),
               "Failed to read  HYBRID field for %s", spd::c_str(i_target) );
-    FAPI_TRY( (reader<init_fields::HYBRID_MEDIA, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data, iv_hybrid_media)),
+    FAPI_TRY( (reader<init_fields::HYBRID_MEDIA, spd::rev::GEN_SEC_MAX>(i_target, i_spd_data,
+               iv_hybrid_media)),
               "Failed to read HYBRID_MEDIA field for %s", spd::c_str(i_target) );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
