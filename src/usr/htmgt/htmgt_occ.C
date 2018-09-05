@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -426,21 +426,23 @@ namespace HTMGT
                     }
                 }
 
-                if (NULL != iv_occMaster)
+            } // for each processor
+
+            if (NULL != iv_occMaster)
+            {
+                // update master occsPresent bit for each slave OCC
+                for(occList_t::const_iterator occ = iv_occArray.begin();
+                    occ != iv_occArray.end();
+                    ++occ)
                 {
-                    // update master occsPresent bit for each slave OCC
-                    for(occList_t::const_iterator occ = iv_occArray.begin();
-                        occ != iv_occArray.end();
-                        ++occ)
+                    if((*occ) != iv_occMaster)
                     {
-                        if((*occ) != iv_occMaster)
-                        {
-                            iv_occMaster->
-                                updateOccPresentBits((*occ)->getPresentBits());
-                        }
+                        iv_occMaster->
+                            updateOccPresentBits((*occ)->getPresentBits());
                     }
                 }
-            } // for each processor
+            }
+
         }
         else
         {
@@ -1351,6 +1353,3 @@ namespace HTMGT
     }
 
 } // end namespace
-
-
-
