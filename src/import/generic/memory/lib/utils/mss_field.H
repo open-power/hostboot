@@ -44,10 +44,21 @@ namespace mss
 {
 
 ///
+/// @brief endian fields for use as a template selecor
+///
+enum class endian
+{
+    BIG,
+    LITTLE,
+};
+
+///
 /// @class field_t
 /// @brief data structure for byte fields
+/// @tparam E endian type for this field
 /// @note holds byte index, start bit, and bit length of a decoded field
 ///
+template< endian E >
 class field_t
 {
     private:
@@ -84,10 +95,7 @@ class field_t
         /// @brief Byte index getter
         /// @return the byte index for this field
         ///
-        constexpr size_t get_byte() const
-        {
-            return iv_byte;
-        }
+        const size_t get_byte(const std::vector<uint8_t>& i_data) const;
 
         ///
         /// @brief Starting bit getter
@@ -110,6 +118,26 @@ class field_t
 };// field_t
 
 ///
+/// @brief Byte index getter - big endian specialization
+/// @return the byte index for this field
+///
+template<>
+inline const size_t field_t<mss::endian::BIG>::get_byte(const std::vector<uint8_t>& i_data) const
+{
+    return ( i_data.size() - 1 ) - iv_byte;
+}
+
+///
+/// @brief Byte index getter - big endian specialization
+/// @return the byte index for this field
+///
+template<>
+inline const size_t field_t<mss::endian::LITTLE>::get_byte(const std::vector<uint8_t>& i_data) const
+{
+    return iv_byte;
+}
+
+///
 /// @brief Checks input field against a custom conditional
 /// @tparam T field input type
 /// @tparam F Callable object type
@@ -119,15 +147,16 @@ class field_t
 /// @return boolean true or false
 ///
 template < typename T, typename F >
-bool conditional(const T i_field,
-                 const size_t i_comparison_val,
-                 const F i_op)
+inline bool conditional(const T i_field,
+                        const size_t i_comparison_val,
+                        const F i_op)
 {
     return i_op(i_field, i_comparison_val);
 }
 
 ///
 /// @brief Helper function to extract byte information
+/// @tparam E endian type
 /// @tparam F the field to extract
 /// @tparam T the fapi2 target type
 /// @tparam IT data input type
@@ -139,17 +168,18 @@ bool conditional(const T i_field,
 /// @param[out] o_value raw value for this field
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< mss::endian E,
+          const mss::field_t<E>& F,
           fapi2::TargetType T,
           typename IT,
           typename OT,
           typename FFDC >
-fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
-                            const std::vector<IT>& i_data,
-                            const FFDC i_ffdc_codes,
-                            OT& o_value)
+inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
+                                   const std::vector<IT>& i_data,
+                                   const FFDC i_ffdc_codes,
+                                   OT& o_value)
 {
-    constexpr size_t BYTE = F.get_byte();
+    const size_t BYTE = F.get_byte(i_data);
 
     FAPI_ASSERT( BYTE < i_data.size(),
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
@@ -184,6 +214,7 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function to set byte field information
+/// @tparam E endian type
 /// @tparam F the field to extract
 /// @tparam T the fapi2 target type
 /// @tparam IT data input type
@@ -195,17 +226,18 @@ fapi_try_exit:
 /// @param[in,out] io_data the data to modify
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< mss::endian E,
+          const mss::field_t<E>& F,
           fapi2::TargetType T,
           typename IT,
           typename OT,
           typename FFDC >
-fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
-                            const IT i_setting,
-                            const FFDC i_ffdc_codes,
-                            std::vector<OT>& io_data)
+inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
+                                   const IT i_setting,
+                                   const FFDC i_ffdc_codes,
+                                   std::vector<OT>& io_data)
 {
-    constexpr size_t BYTE = F.get_byte();
+    const size_t BYTE = F.get_byte(io_data);
 
     FAPI_ASSERT( BYTE < io_data.size(),
                  fapi2::MSS_OUT_OF_BOUNDS_INDEXING()
@@ -242,6 +274,7 @@ fapi_try_exit:
 
 ///
 /// @brief byte field reader
+/// @tparam E endian type
 /// @tparam F the byte field to read
 /// @tparam TT traits associated with F - required
 /// @tparam T the fapi2 target type
@@ -253,7 +286,8 @@ fapi_try_exit:
 /// @param[out] o_value raw value for this field
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< mss::endian E,
+          const mss::field_t<E>& F,
           typename TT,
           fapi2::TargetType T,
           typename IT,
@@ -265,7 +299,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                                     OT& o_value )
 {
     IT l_temp = 0;
-    FAPI_TRY( get_field<F>(i_target, i_data, i_ffdc_codes, l_temp),
+    FAPI_TRY( (get_field<E, F>(i_target, i_data, i_ffdc_codes, l_temp)),
               "Failed get_field() for %s", spd::c_str(i_target) );
 
     // Test if retrieved data seems valid
@@ -273,7 +307,7 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
                                    conditional( l_temp,
                                            TT::COMPARISON_VAL,
                                            typename TT::template COMPARISON_OP<IT>() ),
-                                   F.get_byte(),
+                                   F.get_byte(i_data),
                                    l_temp,
                                    i_ffdc_codes),
               "Failed fail_for_invalid_value() for %s", spd::c_str(i_target) );
@@ -301,6 +335,7 @@ fapi_try_exit:
 
 ///
 /// @brief byte field writer
+/// @tparam E endian type
 /// @tparam F the byte field to read
 /// @tparam TT traits associated with writer
 /// @tparam T the fapi2 target type
@@ -313,18 +348,19 @@ fapi_try_exit:
 /// @param[in,out] io_data the data to modify
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< mss::endian E,
+          const mss::field_t<E>& F,
           typename TT,
           fapi2::TargetType T,
           typename IT,
           typename OT,
           typename FFDC >
-fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
-                             const IT i_setting,
-                             const FFDC i_ffdc_codes,
-                             std::vector<OT>& io_data )
+inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
+                                    const IT i_setting,
+                                    const FFDC i_ffdc_codes,
+                                    std::vector<OT>& io_data )
 {
-    constexpr size_t BYTE = F.get_byte();
+    const size_t BYTE = F.get_byte(io_data);
 
     // Test if the data we want to set is valid for this field
     FAPI_TRY( check::invalid_value(i_target,
@@ -336,7 +372,7 @@ fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
                                    i_ffdc_codes),
               "Failed fail_for_invalid_value() for %s", spd::c_str(i_target) );
 
-    FAPI_TRY( set_field<F>(i_target, i_setting, i_ffdc_codes, io_data),
+    FAPI_TRY( (set_field<E, F>(i_target, i_setting, i_ffdc_codes, io_data)),
               "Failed set_field() for %s", spd::c_str(i_target) );
 
     FAPI_INF("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for %s",

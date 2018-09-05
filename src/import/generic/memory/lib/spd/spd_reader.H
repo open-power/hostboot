@@ -60,17 +60,17 @@ namespace spd
 /// @param[out] o_value raw value for this SPD field
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< const field_t<endian::LITTLE>& F,
           rev R,
           typename IT,
           typename OT,
           typename TT = readerTraits<F, R> >
-fapi2::ReturnCode reader( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                          const std::vector<IT>& i_spd_data,
-                          OT& o_value)
+inline fapi2::ReturnCode reader( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                 const std::vector<IT>& i_spd_data,
+                                 OT& o_value)
 {
 
-    FAPI_TRY( (mss::get_field<F, TT>(i_target, i_spd_data, mss::READ_SPD_FIELD, o_value)),
+    FAPI_TRY( (mss::get_field<endian::LITTLE, F, TT>(i_target, i_spd_data, mss::READ_SPD_FIELD, o_value)),
               "Failed read_field() for %s", spd::c_str(i_target) );
 
 fapi_try_exit:

@@ -51,7 +51,7 @@ namespace spd
 /// @tparam F holds SPD field info
 /// @tparam R the revision of the SPD field
 ///
-template< const field_t& F, rev R >
+template< const field_t<endian::LITTLE>& F, rev R >
 class readerTraits;
 
 ///

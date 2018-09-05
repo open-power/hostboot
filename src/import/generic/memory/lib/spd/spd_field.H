@@ -84,12 +84,12 @@ class init_fields
         // 1st field: Byte number
         // 2nd field: Start bit
         // 3rd field: Bit length
-        static constexpr mss::field_t REVISION{1, REVISION_START, REVISION_LEN};
-        static constexpr mss::field_t DEVICE_TYPE{2, DEVICE_TYPE_START, DEVICE_TYPE_LEN};
-        static constexpr mss::field_t BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
-        static constexpr mss::field_t HYBRID{3, HYBRID_START, HYBRID_LEN};
-        static constexpr mss::field_t HYBRID_MEDIA{3, HYBRID_MEDIA_START, HYBRID_MEDIA_LEN};
-        static constexpr mss::field_t REF_RAW_CARD{130, REF_RAW_CARD_START, REF_RAW_CARD_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> REVISION{1, REVISION_START, REVISION_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> DEVICE_TYPE{2, DEVICE_TYPE_START, DEVICE_TYPE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> HYBRID{3, HYBRID_START, HYBRID_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> HYBRID_MEDIA{3, HYBRID_MEDIA_START, HYBRID_MEDIA_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> REF_RAW_CARD{130, REF_RAW_CARD_START, REF_RAW_CARD_LEN};
 };
 
 ///
