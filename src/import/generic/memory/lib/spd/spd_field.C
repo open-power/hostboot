@@ -22,3 +22,21 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <generic/memory/lib/spd/spd_field.H>
+
+namespace mss
+{
+namespace spd
+{
+
+// If a constexpr static data member (since C++11) is odr-used,
+// a definition at namespace scope is still required, but it cannot have an initializer.
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::REVISION;
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::DEVICE_TYPE;
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::BASE_MODULE;
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::HYBRID;
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::HYBRID_MEDIA;
+constexpr mss::field_t<mss::endian::LITTLE> init_fields::REF_RAW_CARD;
+
+}// spd
+}// mss
