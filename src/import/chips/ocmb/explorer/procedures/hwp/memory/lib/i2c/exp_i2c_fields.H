@@ -50,25 +50,25 @@ namespace i2c
 ///
 /// @class fields
 /// @brief Explorer I2C command fields
+/// @tparam E Endian type
 ///
 struct fields
 {
     // First value is byte index, then buffer extract start bit, and extract data length
 
     // Part of EXP_FW_BOOT_CONFIG
-    static constexpr mss::field_t BOOT_MODE{0, 0, 1};
-    static constexpr mss::field_t LANE_MODE{0, 1, 3};
-    static constexpr mss::field_t SERDES_FREQ{0, 4, 4};
-
-    static constexpr mss::field_t FW_MODE{1, 2, 1};
-    static constexpr mss::field_t LOOPBACK_TEST{1, 3, 1};
-    static constexpr mss::field_t TRANSPORT_LAYER{1, 4, 2};
-    static constexpr mss::field_t DL_LAYER_BOOT_MODE{1, 6, 2};
+    static constexpr mss::field_t<mss::endian::BIG> BOOT_MODE{0, 0, 1};
+    static constexpr mss::field_t<mss::endian::BIG> LANE_MODE{0, 1, 3};
+    static constexpr mss::field_t<mss::endian::BIG> SERDES_FREQ{0, 4, 4};
+    static constexpr mss::field_t<mss::endian::BIG> FW_MODE{1, 2, 1};
+    static constexpr mss::field_t<mss::endian::BIG> LOOPBACK_TEST{1, 3, 1};
+    static constexpr mss::field_t<mss::endian::BIG> TRANSPORT_LAYER{1, 4, 2};
+    static constexpr mss::field_t<mss::endian::BIG> DL_LAYER_BOOT_MODE{1, 6, 2};
 
     // Part of EXP_FW_STATUS
-    static constexpr mss::field_t CMD_ID{0, 0, 8};
-    static constexpr mss::field_t STATUS_CODE{1, 0, 8};
-    static constexpr mss::field_t BOOT_STAGE{2, 6, 2};
+    static constexpr mss::field_t<mss::endian::BIG> CMD_ID{0, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> STATUS_CODE{1, 0, 8};
+    static constexpr mss::field_t<mss::endian::BIG> BOOT_STAGE{2, 6, 2};
 };
 
 ///
@@ -76,7 +76,7 @@ struct fields
 /// @brief Traits assoiated with the Explorer I2C commands
 /// @tparam F the Explorer I2C field
 ///
-template < const field_t& F >
+template < const mss::field_t<endian::BIG>& F >
 struct fieldTraits;
 
 ///
@@ -230,7 +230,7 @@ struct fieldTraits<fields::BOOT_STAGE>
 /// @param[out] o_value the output value received
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< const mss::field_t<endian::BIG>& F,
           typename IT,
           typename OT,
           typename TT = fieldTraits<F> >
@@ -238,7 +238,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                                    const std::vector<IT>& i_data,
                                    OT& o_value)
 {
-    return mss::get_field<F, TT>(i_target, i_data, EXP_I2C_GET_FIELD, o_value);
+    return mss::get_field<endian::BIG, F, TT>(i_target, i_data, EXP_I2C_GET_FIELD, o_value);
 }
 
 ///
@@ -251,7 +251,7 @@ inline fapi2::ReturnCode get_field(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 /// @param[in,out] io_data the buffer as a reference to a vector
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template< const field_t& F,
+template< const mss::field_t<endian::BIG>& F,
           typename IT,
           typename OT,
           typename TT = fieldTraits<F> >
@@ -260,7 +260,7 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                                    const IT i_value)
 
 {
-    return mss::set_field<F, TT>(i_target, i_value, EXP_I2C_SET_FIELD, io_data);
+    return mss::set_field<endian::BIG, F, TT>(i_target, i_value, EXP_I2C_SET_FIELD, io_data);
 }
 
 namespace boot_cfg
