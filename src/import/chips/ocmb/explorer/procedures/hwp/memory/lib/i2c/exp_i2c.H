@@ -127,12 +127,12 @@ inline void boot_config_setup(std::vector<uint8_t>& io_data)
 
 {
     // Need data length as well - boot config can only ever be written
-    io_data.insert(io_data.begin(), FW_BOOT_CONFIG_BYTE_LEN);
+    io_data.push_back(FW_BOOT_CONFIG_BYTE_LEN);
 
     // Then add the command
-    io_data.insert(io_data.begin(), FW_BOOT_CONFIG);
+    io_data.push_back(FW_BOOT_CONFIG);
 
-    // Written commands need to be in the form of
+    // Written commands need to be in the form of (MSB first)
     // CMD
     // DATA LEN
     // DATA
