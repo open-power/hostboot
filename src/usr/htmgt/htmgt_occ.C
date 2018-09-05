@@ -559,19 +559,21 @@ namespace HTMGT
                     }
                 }
 
-                if (nullptr != iv_occMaster)
+            } // for each processor
+
+            if (nullptr != iv_occMaster)
+            {
+                // update master occsPresent bit for each slave OCC
+                for( const auto & occ : iv_occArray )
                 {
-                    // update master occsPresent bit for each slave OCC
-                    for( const auto & occ : iv_occArray )
+                    if(occ != iv_occMaster)
                     {
-                        if(occ != iv_occMaster)
-                        {
-                            iv_occMaster->
-                                updateOccPresentBits(occ->getPresentBits());
-                        }
+                        iv_occMaster->
+                            updateOccPresentBits(occ->getPresentBits());
                     }
                 }
-            } // for each processor
+            }
+
         }
         else
         {
