@@ -22,3 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <lib/i2c/exp_i2c_fields.H>
+
+namespace mss
+{
+namespace exp
+{
+namespace i2c
+{
+
+// If a constexpr static data member (since C++11) is odr-used,
+// a definition at namespace scope is still required, but it cannot have an initializer.
+constexpr mss::field_t<mss::endian::BIG> fields::BOOT_MODE;
+constexpr mss::field_t<mss::endian::BIG> fields::LANE_MODE;
+constexpr mss::field_t<mss::endian::BIG> fields::SERDES_FREQ;
+constexpr mss::field_t<mss::endian::BIG> fields::FW_MODE;
+constexpr mss::field_t<mss::endian::BIG> fields::LOOPBACK_TEST;
+constexpr mss::field_t<mss::endian::BIG> fields::TRANSPORT_LAYER;
+constexpr mss::field_t<mss::endian::BIG> fields::DL_LAYER_BOOT_MODE;
+constexpr mss::field_t<mss::endian::BIG> fields::CMD_ID;
+constexpr mss::field_t<mss::endian::BIG> fields::STATUS_CODE;
+constexpr mss::field_t<mss::endian::BIG> fields::BOOT_STAGE;
+
+}// i2c
+}// exp
+}// mss
