@@ -336,6 +336,20 @@ fapi_try_exit:
                 l_failAddr = P9_STOP_SPR_HID;
                 break;
             }
+
+            // Call p9_stop_save_cpureg to store the URMOR SPR value
+            l_rc = p9_stop_save_cpureg(io_image,
+                                       P9_STOP_SPR_URMOR,
+                                       l_hrmorVal,
+                                       l_pirVal | l_fuseAdj);
+            if(l_rc)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: URMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
+                          l_coreId, l_threadId, l_rc);
+                l_failAddr = P9_STOP_SPR_HRMOR;
+                break;
+            }
         }
 
         //  fill in lpcr for each thread
