@@ -180,6 +180,7 @@ fapi2::ReturnCode p9_sbe_lpc_init(
     FAPI_TRY(lpc_write(i_target_chip, LPCM_LPC_MASTER_TIMEOUT_REG, LPCM_LPC_MASTER_TIMEOUT_VALUE),
              "Error trying to set up the LPC host controller timeout");
 
+#if 0 // disable check for GA1 to make sure system boots if backup LPC is held in reset when backup DPSS breaks - SW440738
     //------------------------------------------------------------------------------------------
     //--- STEP 4: Check that everyone is happy
     //------------------------------------------------------------------------------------------
@@ -190,6 +191,7 @@ fapi2::ReturnCode p9_sbe_lpc_init(
                 set_FFDC_TARGET_CHIP(i_target_chip).
                 set_TARGET_CHIP(i_target_chip),
                 "The OPB master indicated an error after LPC setup");
+#endif
 
     FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
 
