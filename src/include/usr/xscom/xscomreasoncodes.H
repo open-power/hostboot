@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,6 +41,7 @@ namespace XSCOM
         XSCOM_DO_OP                 = 0x07,
         XSCOM_RT_DO_OP              = 0x08,
         XSCOM_RT_SANITY_CHECK       = 0x09,
+        XSCOM_TEST_XSCOM4           = 0x0A,
     };
 
     enum xscomReasonCode

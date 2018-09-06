@@ -98,6 +98,10 @@ class ErrlEntry
     friend class ErrlTest;
 
 public:
+    /** Constants to use in constructor */
+    static constexpr bool ADD_SW_CALLOUT = true;
+    static constexpr bool NO_SW_CALLOUT = false;
+
     /**
      * @brief   ErrlEntry constructor. Builds an error log with info
      * constructed from the input.

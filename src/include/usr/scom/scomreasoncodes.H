@@ -47,6 +47,7 @@ namespace SCOM
         SCOM_READ_CENTAUR_CACHE         = 0x0D,
         SCOM_CALL_WAKEUP_HYP            = 0x0E,
         SCOM_CALL_WAKEUP_HWP            = 0x0F,
+        SCOM_DO_MULTICAST_WORKAROUND    = 0x10,
     };
 
     enum scomReasonCode
@@ -74,6 +75,7 @@ namespace SCOM
         SCOM_RUNTIME_HYP_ERR           = SCOM_COMP_ID | 0x15,
         SCOM_INVALID_DATA_BUFFER       = SCOM_COMP_ID | 0x16,
         SCOM_INVALID_OP_TYPE           = SCOM_COMP_ID | 0x17,
+        SCOM_UNSUPPORTED_MULTICAST_OP  = SCOM_COMP_ID | 0x18,
     };
 
     enum UserDetailsTypes
