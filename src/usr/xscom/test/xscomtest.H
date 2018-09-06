@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,38 @@ const uint32_t g_xscomAddrTableSz =
                     sizeof(g_xscomAddrTable)/sizeof(testXscomAddrData);
 
 
+// Test table values written through xscom
+const testXscomAddrData g_xscomMultiWriteTable[] =
+{
+        // Scom registers to write
+        // Scratch reg 3
+        {0x20010A89, 0x1000000000000000},
+        {0x21010A89, 0x0200000000000000},
+        {0x22010A89, 0x0030000000000000},
+        {0x23010A89, 0x0004000000000000},
+        // Local checkstop regs
+        {0x10040018, 0x1000000000000000},  // ChipletID 0x10
+        {0x20040018, 0x1000000000000000},  // ChipletID 0x20
+};
+const uint32_t g_xscomMultiWriteTableSz =
+                sizeof(g_xscomMultiWriteTable)/sizeof(testXscomAddrData);
+
+
+// Test table values read through multicast op
+const testXscomAddrData g_xscomMultiReadTable[] =
+{
+        // Scratch reg 3
+        //   Multicast OR op
+        {0x41010a89, 0x1234000000000000},
+        // Local checkstop regs
+        //   ChipletID 0x10 0x20
+        //   Multicast BITWISE op
+        {0x50040018, 0x0000800080000000},
+};
+const uint32_t g_xscomMultiReadTableSz =
+                sizeof(g_xscomMultiReadTable)/sizeof(testXscomAddrData);
+
+
 class XscomTest: public CxxTest::TestSuite
 {
 public:
@@ -110,10 +142,10 @@ public:
              l_savedData = l_readData;
              l_writeData = (l_readData | l_testEntry.data);
              l_err = deviceWrite(l_testTarget,
-                     &l_writeData,
-                     l_size,
-                     DeviceFW::SCOM,
-                     l_testEntry.addr);
+                                 &l_writeData,
+                                 l_size,
+                                 DeviceFW::SCOM,
+                                 l_testEntry.addr);
 
              if (l_err)
              {
@@ -352,6 +384,115 @@ public:
 
         return;
     }
+
+
+    /**
+     * @brief XSCOM test #4
+     *        Write regs and read as multicast to verify
+     */
+    void testXscom4(void)
+    {
+
+        TARGETING::TargetService& l_targetService = TARGETING::targetService();
+        TARGETING::Target* l_testTarget = NULL;
+        l_targetService.masterProcChipTargetHandle( l_testTarget );
+        assert(l_testTarget != NULL);
+
+        size_t l_size = sizeof(uint64_t);
+
+        errlHndl_t l_err = NULL;
+        uint32_t l_num;
+
+        do {
+            // Loop thru write table
+            for( l_num=0; l_num < g_xscomMultiWriteTableSz; l_num++)
+            {
+                testXscomAddrData l_testEntry = g_xscomMultiWriteTable[l_num];
+
+                // Perform an XSCom write
+                uint64_t l_writeData = l_testEntry.data;
+                l_err = deviceWrite( l_testTarget,
+                                    &l_writeData,
+                                    l_size,
+                                    DeviceFW::SCOM,
+                                    l_testEntry.addr );
+
+                if (l_err)
+                {
+                    TS_FAIL("testXscom4: XSCom write: deviceWrite() fails!");
+                    break;
+                }
+                else
+                {
+                    TS_TRACE("testXscom4: XSCom write, Address 0x%.8X, Data %llx",
+                             l_testEntry.addr,
+                             (long long unsigned)l_writeData);
+                }
+            }
+
+            if (l_err)
+            {
+                break;
+            }
+
+            // Read back as multicast, should see combined data
+            // Multicast OP type (BITWISE / OR) defined in the address
+            for( l_num=0; l_num < g_xscomMultiReadTableSz; l_num++)
+            {
+                testXscomAddrData l_testEntry = g_xscomMultiReadTable[l_num];
+
+                uint64_t l_readData = 0;
+                l_err = deviceRead(l_testTarget,
+                                    &l_readData,
+                                    l_size,
+                                    DEVICE_SCOM_ADDRESS(l_testEntry.addr));
+
+                if (l_err)
+                {
+                    TS_FAIL("testXscom4: XSCom multicast read back: deviceRead() fails!");
+                    break;
+                }
+                else
+                {
+                    TS_TRACE("testXscom4: result addr 0x%X data 0x%llX",l_testEntry.addr ,l_readData);
+                }
+
+                if( l_readData != l_testEntry.data )
+                {
+                    TS_FAIL("testXscom4: XSCom multicast read back doesn't match write!");
+                    /*@
+                    * @errortype
+                    * @moduleid     XSCOM::XSCOM_TEST_XSCOM4
+                    * @reasoncode   XSCOM::XSCOM_DATA_UNMATCHED
+                    * @userdata1    Write value
+                    * @userdata2    Multicast read back value
+                    * @devdesc      Read back value doesn't match write
+                    */
+                    l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            XSCOM::XSCOM_TEST_XSCOM4,
+                            XSCOM::XSCOM_DATA_UNMATCHED,
+                            l_testEntry.data,
+                            l_readData);
+                    break;
+                }
+            }
+
+        } while(0);
+
+        if (l_err)
+        {
+            TS_FAIL("testXscom4 failed!  Error committed.");
+            errlCommit(l_err,XSCOM_COMP_ID);
+        }
+        else
+        {
+            TS_TRACE("testXscom4 runs successfully!");
+        }
+        return;
+  }
+
+
 };
 
 #endif

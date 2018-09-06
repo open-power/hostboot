@@ -362,7 +362,7 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   SCOM_INVALID_FORM,
                                   i_addr,
                                   get_huid(i_target),
-                                  true /*Add HB Software Callout*/);
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             break;
         }
@@ -786,7 +786,7 @@ errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
                                   SCOM_FORM_1_READ_REQUEST,
                                   i_addr,
                                   i_opType,
-                                  true /*Add HB SW Callout*/);
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             break;
         }
@@ -811,7 +811,7 @@ errlHndl_t doForm1IndirectScom(DeviceFW::OperationType i_opType,
                                   SCOM_FORM_1_INVALID_DATA,
                                   i_addr,
                                   l_io_buffer,
-                                  true /*Add HB SW Callout*/);
+                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             break;
         }
@@ -1269,12 +1269,16 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
     errlHndl_t l_err = nullptr;
     uint64_t* l_summaryReg = reinterpret_cast<uint64_t*>(io_buffer);
 
-    constexpr uint64_t IS_MULTICAST = 0x40000000;
-    constexpr uint64_t MULTICAST_GROUP = 0x07000000;
-    constexpr uint64_t IS_PCBSLAVE = 0x000F0000;
-    constexpr uint64_t CHIPLET_BYTE = 0xFF000000;
-    constexpr uint64_t MULTICAST_OP = 0x38000000;
+    // Some masks for parsing the address
+    constexpr uint64_t IS_MULTICAST         = 0x40000000;
+    constexpr uint64_t MULTICAST_GROUP      = 0x07000000;
+    constexpr uint64_t GROUP_ZERO           = 0x00000000;
+    constexpr uint64_t GROUP_ONE            = 0x01000000;
+    constexpr uint64_t IS_PCBSLAVE          = 0x000F0000;
+    constexpr uint64_t CHIPLET_BYTE         = 0xFF000000;
+    constexpr uint64_t MULTICAST_OP         = 0x38000000;
     constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
+    constexpr uint64_t MULTICAST_OP_OR      = 0x00000000;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Some P9-specific chiplet values to make things more efficient
@@ -1286,108 +1290,177 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
     constexpr uint64_t P9_LAST_EC    = 0x3F;
 #endif
 
-    // Skip calls to the SENTINEL since we don't have the
-    //  ability to find its children
-    if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-        == i_target )
-    {
-        o_didWorkaround = false;
-        return nullptr;
-    }
+    o_didWorkaround = false;
 
-    // Only perform this workaround for:
-    //  - reads
-    //  - multicast registers
-    //  - scom is not part of pcb slave
-    //  - multicast read option XXX 'bit-wise'
-    //  - multicast group0 'all functional chiplets'
-    if( !((DeviceFW::READ == i_opType)
-          && ((IS_MULTICAST & i_addr) == IS_MULTICAST)
-          && ((IS_PCBSLAVE & i_addr) != IS_PCBSLAVE)
-          && ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE)
-          && ((MULTICAST_GROUP & i_addr) == 0)) )
+    do
     {
-        o_didWorkaround = false;
-        return nullptr;
-    }
-    TRACFCOMP( g_trac_scom, "doMulticastWorkaround on %.8X for %.8X", TARGETING::get_huid(i_target), i_addr );
 
-    // Loop around every functional pervasive target
-    TARGETING::TargetHandleList l_chiplets;
-    TARGETING::getChildChiplets( l_chiplets,
-                                 i_target,
-                                 TARGETING::TYPE_PERV,
-                                 true );
-    for( auto l_chiplet : l_chiplets )
-    {
-        uint64_t l_data = 0;
-        uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
-        uint64_t l_unit = l_chiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        // Skip calls to the SENTINEL since we don't have the
+        //  ability to find its children
+        if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
+        {
+            break;
+        }
+
+        bool l_opIsBitwise = false;
+        bool l_opIsOr      = false;
+        bool l_groupIsZero = false;
+        bool l_groupIsOne  = false;
+
+        // Only perform this workaround for:
+        //  - reads
+        //  - multicast registers
+        //  - scom is not part of pcb slave
+        if( (DeviceFW::READ == i_opType)
+            && ((IS_MULTICAST & i_addr) == IS_MULTICAST)
+            && ((IS_PCBSLAVE & i_addr) != IS_PCBSLAVE) )
+        {
+            l_opIsBitwise = ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE);
+            l_opIsOr      = ((MULTICAST_OP & i_addr) == MULTICAST_OP_OR);
+            l_groupIsZero = ((MULTICAST_GROUP & i_addr) == GROUP_ZERO);
+            l_groupIsOne  = ((MULTICAST_GROUP & i_addr) == GROUP_ONE);
+
+            //  - multicast read option XXX 'bit-wise'
+            //  - multicast read option XXX 'or'
+            //  - multicast group0 'all functional chiplets'
+            //  - multicast group1 'all functional cores'
+            if( (l_opIsBitwise || l_opIsOr) &&
+                (l_groupIsZero || l_groupIsOne) )
+            {
+                TRACFCOMP( g_trac_scom, "doMulticastWorkaround on %.8X for %.8X", TARGETING::get_huid(i_target), i_addr );
+            }
+            // Not a supported multicast op
+            else
+            {
+                TRACFCOMP(g_trac_scom, "doMulticastWorkaround Multicast op has unsupported group 0x%X",(MULTICAST_OP & i_addr));
+
+                /*@
+                * @errortype
+                * @moduleid     SCOM::SCOM_DO_MULTICAST_WORKAROUND
+                * @reasoncode   SCOM::SCOM_UNSUPPORTED_MULTICAST_OP
+                * @userdata1    Address
+                * @userdata1    Target huid
+                * @devdesc      Unsupported multicast op
+                */
+                l_err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    SCOM_DO_MULTICAST_WORKAROUND,
+                                    SCOM_UNSUPPORTED_MULTICAST_OP,
+                                    i_addr,
+                                    get_huid(i_target),
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                break;
+            }
+        }
+        // Common path when not a multicast op
+        else
+        {
+            break;
+        }
+
+        TARGETING::TargetHandleList l_chiplets;
+        if( l_groupIsZero )
+        {
+            // Get every functional pervasive target
+            TARGETING::getChildChiplets( l_chiplets,
+                                        i_target,
+                                        TARGETING::TYPE_PERV,
+                                        true );
+        }
+        else if( l_groupIsOne )
+        {
+            // Get every functional core target
+            TARGETING::getChildChiplets( l_chiplets,
+                                        i_target,
+                                        TARGETING::TYPE_CORE,
+                                        true );
+        }
+
+        // Loop through the chiplets, perform the xscom reads, combine results
+        for( auto l_chiplet : l_chiplets )
+        {
+            uint64_t l_data = 0;
+            uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
+            // Use CHIPLET_ID for unit, is equal to CHIP_UNIT for TYPE_PERV
+            uint64_t l_unit = l_chiplet->getAttr<TARGETING::ATTR_CHIPLET_ID>();
 
 #ifndef __HOSTBOOT_RUNTIME
-        // filter out some chiplets that aren't running yet
-        if( !g_useSlaveCores
-            && (((l_unit >= P9_FIRST_EQ) && (l_unit <= P9_LAST_EQ))
-                || ((l_unit >= P9_FIRST_EC) && (l_unit <= P9_LAST_EC))
+            // filter out some chiplets that aren't running yet
+            if( !g_useSlaveCores
+                && (((l_unit >= P9_FIRST_EQ) && (l_unit <= P9_LAST_EQ))
+                    || ((l_unit >= P9_FIRST_EC) && (l_unit <= P9_LAST_EC))
+                    )
                 )
-            )
-        {
-            // Only access the master ec/eq
-            static const TARGETING::Target* l_masterCore =
-              TARGETING::getMasterCore();
-            uint64_t l_ecNum =
-              l_masterCore->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-            bool l_fused = TARGETING::is_fused_mode();
-            if( !((l_unit == l_ecNum)  //master
-                  || (l_fused && (l_unit == l_ecNum+1))) )  //fused-pair
             {
-                continue;
+                // Only access the master ec/eq
+                static const TARGETING::Target* l_masterCore =
+                TARGETING::getMasterCore();
+                uint64_t l_ecNum =
+                l_masterCore->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                bool l_fused = TARGETING::is_fused_mode();
+                if( !((l_unit == l_ecNum)  //master
+                    || (l_fused && (l_unit == l_ecNum+1))) )  //fused-pair
+                {
+                    continue;
+                }
+                auto l_eqNum = 0x10 + l_ecNum/4;
+                if( l_unit == l_eqNum )
+                {
+                    continue;
+                }
             }
-            auto l_eqNum = 0x10 + l_ecNum/4;
-            if( l_unit == l_eqNum )
+            if( !g_useMemChiplets
+                && ((l_unit >= P9_FIRST_MC) && (l_unit <= P9_LAST_MC)) )
             {
-                continue;
+                // Only access the mem chiplets if we're not in async mode
+                //  because we don't start clocks until later on in that case
+                auto l_syncMode =
+                i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+                if( l_syncMode == TARGETING::MC_SYNC_MODE_NOT_IN_SYNC )
+                {
+                    continue;
+                }
             }
-        }
-        if( !g_useMemChiplets
-            && ((l_unit >= P9_FIRST_MC) && (l_unit <= P9_LAST_MC)) )
-        {
-            // Only access the mem chiplets if we're not in async mode
-            //  because we don't start clocks until later on in that case
-            auto l_syncMode =
-              i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
-            if( l_syncMode == TARGETING::MC_SYNC_MODE_NOT_IN_SYNC )
-            {
-                continue;
-            }
-        }
 #endif
 
-        l_addr |= (l_unit << 24);
-        io_buflen = sizeof(uint64_t);
-        l_err = deviceOp(i_opType,
-                         i_target,
-                         &l_data,
-                         io_buflen,
-                         DEVICE_XSCOM_ADDRESS_NO_ERROR(l_addr));
-        // just ignore any errors, we expect they will happen
-        if( l_err )
-        {
-            delete l_err;
-            l_err = nullptr;
-        }
-        // if any bits are set, set this unit's bit in summary reg
-        //   note: this is good enough for the use-case we have now
-        //         but a better implementation would be to actually
-        //         check the select regs as well so we know which bit(s)
-        //         are the trigger
-        else if( l_data & 0x8000000000000000 )
-        {
-            *l_summaryReg |= (0x8000000000000000 >> l_unit);
-        }
-    }
+            l_addr |= (l_unit << 24);
+            io_buflen = sizeof(uint64_t);
+            l_err = deviceOp(i_opType,
+                            i_target,
+                            &l_data,
+                            io_buflen,
+                            DEVICE_XSCOM_ADDRESS_NO_ERROR(l_addr));
+            // just ignore any errors, we expect they will happen
+            if( l_err )
+            {
+                delete l_err;
+                l_err = nullptr;
+                continue;
+            }
 
-    o_didWorkaround = true;
+            if( l_opIsBitwise )
+            {
+                // if any bits are set, set this unit's bit in summary reg
+                //   note: this is good enough for the use-case we have now
+                //         but a better implementation would be to actually
+                //         check the select regs as well so we know which bit(s)
+                //         are the trigger
+                if( l_data & 0x8000000000000000 )
+                {
+                    *l_summaryReg |= (0x8000000000000000 >> l_unit);
+                }
+            }
+            else if( l_opIsOr )
+            {
+                *l_summaryReg |= l_data;
+            }
+        }
+
+        o_didWorkaround = true;
+
+    } while (0);
+
 
     return l_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -395,14 +395,16 @@ fapi2::ReturnCode p9_piberrmask_masktest(
     fapi2::setPIBErrorMask(static_cast<uint8_t>(PIB::PIB_INVALID_ADDRESS));
 
     //Attempt writing to a bad address
+    // Avoid multicast error by not setting bit 1
     FAPI_TRY(fapi2::putScom(i_target,
-                            0xDEADBEEF,
+                            0xBADDBEEF,
                             l_scomdata));
 
     //try another scom, this time a get to make sure that
     // FAPI_TRY does not reset the mask
+    // Avoid multicast error by not setting bit 1
     FAPI_TRY(fapi2::getScom(i_target,
-                            0xDEADBEEF,
+                            0xBADDBEEF,
                             l_scomdata));
 
     completionCheck = 1;
