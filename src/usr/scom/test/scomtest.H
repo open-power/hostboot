@@ -1621,9 +1621,19 @@ public:
           TARGETING::Target* target;
           uint64_t addr;
           uint64_t data;
+          bool write;
+          bool read;
       } test_data[] = {
-          { scom_targets[PROC1],    0x02010803, 0x1234567887654321}, // addr: CXA FIR Mask Register
-          { scom_targets[PROC1],    0x02011083, 0x1122334455667788}, // addr: PBI CQ FIR Mask Register
+          { scom_targets[PROC1], 0x02010803, 0x1234567887654321, 1, 1}, // addr: CXA FIR Mask Register
+          { scom_targets[PROC1], 0x02011083, 0x1122334455667788, 1, 1}, // addr: PBI CQ FIR Mask Register
+          { scom_targets[PROC1], 0x20010A89, 0x1000000000000000, 1, 0}, // addr: Scratch reg 3
+          { scom_targets[PROC1], 0x20110A89, 0x0200000000000000, 1, 0}, // addr: Scratch reg 3
+          { scom_targets[PROC1], 0x20210A89, 0x0030000000000000, 1, 0}, // addr: Scratch reg 3
+          { scom_targets[PROC1], 0x20310A89, 0x0004000000000000, 1, 0}, // addr: Scratch reg 3
+          { scom_targets[PROC1], 0x10040018, 0x1000000000000000, 1, 0}, // addr: Local checkstop chipletID 0x10
+          { scom_targets[PROC1], 0x20040018, 0x1000000000000000, 1, 0}, // addr: Local checkstop chipletID 0x20
+          { scom_targets[PROC1], 0x41010a89, 0x1234000000000000, 0, 1}, // addr: Scratch reg 3 multicast read   (OR type)
+          { scom_targets[PROC1], 0x50040018, 0x0000800080000000, 0, 1}, // addr: Local checkstop multicast read (BITWISE type)
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -1638,6 +1648,12 @@ public:
           if(test_data[x].target == NULL)
           {
               TRACFCOMP(g_trac_scom, "test_SBESCOMreadWrite_proc> Target %d does NOT exist to write", x);
+              continue;
+          }
+
+          //only run if write is specified
+          if(test_data[x].write == false)
+          {
               continue;
           }
 
@@ -1663,6 +1679,12 @@ public:
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          //only run if read is specified
+          if(test_data[x].read == false)
           {
               continue;
           }
