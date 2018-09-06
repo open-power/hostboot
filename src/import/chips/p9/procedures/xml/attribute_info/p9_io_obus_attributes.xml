@@ -41,6 +41,57 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IO_OBUS_PAT_A_DETECT_RUN</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Marks whether pattern A detection routine has been run on this
+    endpoint
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_OBUS_PAT_A_DETECT_RX_AMP_VALUE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Set RX AMP value for pattern A detection.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+  <default>35</default>
+  <overrideOnly/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_OBUS_PAT_A_CAPTURE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Pattern A data pattern collected on this endpoint
+  </description>
+  <valueType>uint32</valueType>
+  <array>24</array>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_OBUS_LANE_PDWN</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Per-lane powerdown state
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IO_O_DEBUG</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>

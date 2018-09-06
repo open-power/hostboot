@@ -515,7 +515,9 @@
 #define OPT_RX_PRBS_TEST_DATA                              0x800008000000003f, 55,  3 // prbs test data
 #define OPT_RX_B_BANK_CONTROLS                             0x800008000000003f, 58,  6 // power down pins, 0=cml2cmos, 1=ctle, 2=dac, 3=deserializer, 4=integrator, 5=phase rotator
 #define OPT_RX_DAC_CNTL1_EO_PL                             0x800008000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_A_CONTROLS                                  0x800010000000003f, 48,  6 // bit0 dfe h1 speculation mux select override enables speculation\r\n\tbit1 dfe h1 speculation mux select override\r\n\tbit2 when set, put this lanes front end into offset cancellation mode. also needed for common mode calibration.\r\n\tbit3 enables the amp dac for measurements in this bank/nbit4 enables fence for initloff\r\n\tbit5 disables all the h-dacs when a 1\r\n\tcpg
+/*
 #define OPT_RX_CM_CNTL                                     0x800010000000003f, 54,  3 // bit0 enables integrator common mode cal, used in conjunction with integrator cal enable\r\n\tbit1 is the polarity bit\r\n\tbit 2 is common mode even when 1, odd when 0 /ncpg
 #define OPT_RX_DAC_CNTL2_EO_PL                             0x800010000000003f, 48, 16 // register -- description
 #define OPT_RX_A_OFFSET_E0                                 0x800018000000003f, 48,  7 // this is the vertical offset of the even low threshold sampling latch.
@@ -534,7 +536,9 @@
 #define OPT_RX_A_H1E_VAL                                   0x800038000000003f, 48,  7 // dfe h1 value for even samplers
 #define OPT_RX_A_H1O_VAL                                   0x800038000000003f, 56,  7 // dfe h1 value for odd samplers
 #define OPT_RX_DAC_CNTL7_EO_PL                             0x800038000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_AMP_VAL                                     0x800040000000003f, 48,  8 // rx ampdac value stored as sign magnitude
+/*
 #define OPT_RX_DAC_CNTL8_EO_PL                             0x800040000000003f, 48, 16 // register -- description
 #define OPT_RX_B_CONTROLS                                  0x800080000000003f, 48,  5 // bit0 dfe h1 speculation mux select override enables speculation\r\n\tbit1 dfe h1 speculation mux select override\r\n\tbit2 when set, put this lanes front end into offset cancellation mode. also needed for common mode calibration.\r\n\tbit3 enables the amp dac for measurements in this bank/nbit4 enables fence for initloff\r\n\tcpg
 #define OPT_RX_DAC_CNTL1_O_PL                              0x800080000000003f, 48, 16 // register -- description
@@ -615,9 +619,11 @@
 #define OPT_RX_PR_PHASE_STEP_COARSE                        0x800238000000003f, 53,  4 // phase step in coarse mode. see rx_pr_phase_step for a description.
 #define OPT_RX_PR_COARSE_MODE_TIMER_SEL                    0x800238000000003f, 57,  2 // selects how long to remain in coarse mode; the timer is always reset on an invalid lock.  00: ~1.3us, 01: ~2.6us, 10: ~5.2us, 11: ~10.5us
 #define OPT_RX_BIT_MODE4_EO_PL                             0x800238000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_CAL_LANE_SEL                                0x800240000000003f, 48,  1 // selects which lane to recalibrate.
 #define OPT_RX_PIPE_SEL                                    0x800240000000003f, 49,  2 // selects what to mux onto the data pipe bus going to the calibration logic. \r\n\t00: first half main data, second half alt data \r\n\t01: first half main data, second half edge data \r\n\t10: double width deserialized main data \r\n\t11: reserved
 #define OPT_RX_BANK_SEL_A                                  0x800240000000003f, 51,  1 // selects which data bank to select for main data samples and alt data samples. \r\n\t0:(datab) data bank b is selected for main data, and data bank a is selected for alt data \r\n\t1:(dataa) data bank a is selected for main data, and data bank b is selected for alt data.
+/*
 #define OPT_RX_PIPE_MARGIN                                 0x800240000000003f, 52,  1 // adds extra cycles of padding on the async data pipe handshake
 #define OPT_RX_SCOPE_MODE                                  0x800240000000003f, 53,  2 // adds extra cycles in the asyc crossing for scope mode
 #define OPT_RX_BIST_PIPE_DATA_SHIFT                        0x800240000000003f, 57,  1 // selects what to mux onto the data pipe bus going to the rx_bist engine to get upper order lanes on edge and alt only \r\n\t0: no shift \r\n\t1: shift data
@@ -682,9 +688,11 @@
 #define OPT_RX_RUN_LANE                                    0x800320000000003f, 48,  1 // run training and subsequent recalibration on given lane
 #define OPT_RX_RUN_DCCAL                                   0x800320000000003f, 49,  1 // run on-die dc training on given lane
 #define OPT_RX_RECAL_REQ                                   0x800320000000003f, 50,  1 // request recalibration on given lane
+*/
 #define OPT_RX_RECAL_ABORT                                 0x800320000000003f, 51,  1 // stop recalibration on given lane
 #define OPT_RX_LANE_DISABLED                               0x800320000000003f, 52,  1 // used to set the given lane to be ignored by training logic.  this does not affect powerdown.
 #define OPT_RX_FORCE_INIT_DONE                             0x800320000000003f, 53,  1 // force init_done output port for this lane to one.
+/*
 #define OPT_RX_FORCE_RECAL_DONE                            0x800320000000003f, 54,  1 // force recal_done output port for this lane to one.
 #define OPT_RX_GLBSM_PL_CNTL1_O_PL                         0x800320000000003f, 48, 16 // register -- description
 #define OPT_RX_INIT_DONE                                   0x800328000000003f, 48,  1 // initial training complete on given lane
@@ -1052,7 +1060,9 @@
 #define OPT_RX_BER_COUNT_CLR                               0x800b88000000003f, 49,  1 // diag ber error counter clear pulse. when written to a 1 the per-lane error counters are cleared to all zeroes. writing both this bit and the timer clear bit to a 1 will clear both and allow a new set of measurements to be run.
 #define OPT_RX_BER_TIMER_CLR                               0x800b88000000003f, 50,  1 // diag ber timer clear pulse. when written to a 1 the timers are cleared to all zeroes. writing both this bit and the error counter clear bit to a 1 will clear both and allow a new set of measurements to be run.
 #define OPT_RX_SCOPE_CAPTURE                               0x800b88000000003f, 51,  1 // when written to a 1 it will cause the scope capture register to copy the current main input
+*/
 #define OPT_RX_DATA_PIPE_CAPTURE                           0x800b88000000003f, 52,  1 // data pipe capture clear pulse. when written to a 1 it will capture and freeze new data pipe data.
+/*
 #define OPT_RX_RESET_SERVO_STATUS                          0x800b88000000003f, 53,  1 // data pipe capture clear pulse. when written to a 1 it will capture and freeze new data pipe data.
 #define OPT_RX_BER_RESET                                   0x800b88000000003f, 54,  1 // diag ber reset pulse. when written to a 1 it will clear both the error counter and timer.
 #define OPT_RX_DATASM_CNTLX1_EO_PG                         0x800b88000000003f, 48, 16 // register -- description
@@ -1066,9 +1076,13 @@
 #define OPT_RX_DATASM_STAT2_EO_PG                          0x800b98000000003f, 48, 16 // register -- description
 #define OPT_RX_BER_TIMER_VALUE_16_31                       0x800ba0000000003f, 48, 16 // pl diag ber timer value, bits 16-31.
 #define OPT_RX_DATASM_STAT3_EO_PG                          0x800ba0000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_DATA_PIPE_0_15                              0x800ba8000000003f, 48, 16 // data pipe captured output bits 0-15.
+/*
 #define OPT_RX_DATASM_STAT4_EO_PG                          0x800ba8000000003f, 48, 16 // register -- description
+*/
 #define OPT_RX_DATA_PIPE_16_31                             0x800bb0000000003f, 48, 16 // data pipe captured output bits 16-31.
+/*
 #define OPT_RX_DATASM_STAT5_EO_PG                          0x800bb0000000003f, 48, 16 // register -- description
 #define OPT_RX_SERVO_STATUS                                0x800bb8000000003f, 48, 16 // per group servo status. , bits 0-10 are the servo op captured, bits 11-15 are the lane captured. no error if bits 0 to 10 are all zeroes
 #define OPT_RX_DATASM_STAT6_EO_PG                          0x800bb8000000003f, 48, 16 // register -- description

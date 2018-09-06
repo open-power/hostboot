@@ -598,9 +598,9 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     fapi2::ATTR_LINK_TRAIN_Type l_loc_link_train;
     fapi2::ATTR_LINK_TRAIN_Type l_loc_link_train_next;
     bool l_dl_trained = false;
-    uint8_t l_dl_status_even = 0;
+    uint8_t l_dl_status_even = 0, l_dl_prior_status_even = 0;
     bool l_dl_fail_even = false;
-    uint8_t l_dl_status_odd = 0;
+    uint8_t l_dl_status_odd = 0, l_dl_prior_status_odd = 0;
     bool l_dl_fail_odd = false;
     uint8_t l_tl_trained = 0;
     uint32_t l_poll_loops = DL_MAX_POLL_LOOPS;
@@ -637,9 +637,17 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
                                        XBUS_LL0_IOEL_DLL_STATUS_LINK0_CURRENT_STATE_LEN>
                                        (l_dl_status_even);
 
+        l_dl_status_reg.extractToRight<XBUS_LL0_IOEL_DLL_STATUS_LINK0_PRIOR_STATE,
+                                       XBUS_LL0_IOEL_DLL_STATUS_LINK0_PRIOR_STATE_LEN>
+                                       (l_dl_prior_status_even);
+
         l_dl_status_reg.extractToRight<XBUS_LL0_IOEL_DLL_STATUS_LINK1_CURRENT_STATE,
                                        XBUS_LL0_IOEL_DLL_STATUS_LINK1_CURRENT_STATE_LEN>
                                        (l_dl_status_odd);
+
+        l_dl_status_reg.extractToRight<XBUS_LL0_IOEL_DLL_STATUS_LINK1_PRIOR_STATE,
+                                       XBUS_LL0_IOEL_DLL_STATUS_LINK1_PRIOR_STATE_LEN>
+                                       (l_dl_prior_status_odd);
 
         if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
         {
@@ -648,11 +656,20 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
 
             if (!l_dl_trained)
             {
-                l_dl_fail_even = !(((l_dl_status_even == 0x8) && ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE))) ||
-                                   ((l_dl_status_even == 0x2) && ((l_dl_status_odd  >= 0x8) && (l_dl_status_odd  <= 0x9))));
-                l_dl_fail_odd  = !(((l_dl_status_odd  == 0x8) && ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE))) ||
-                                   ((l_dl_status_odd  == 0x2) && ((l_dl_status_even >= 0x8) && (l_dl_status_even <= 0x9))));
+                l_dl_fail_even = !((((l_dl_status_even == 0x8) || (l_dl_prior_status_even == 0x8) || (l_dl_status_even == 0x9)
+                                     || (l_dl_prior_status_even == 0x9)) &&
+                                    ((l_dl_status_odd  >= 0xB) && (l_dl_status_odd  <= 0xE))) ||
+                                   ((l_dl_status_even == 0x2) && ((l_dl_status_odd  >= 0x8) && (l_dl_status_odd  <= 0xC))));
+                l_dl_fail_odd  = !((((l_dl_status_odd == 0x8) || (l_dl_prior_status_odd == 0x8) || (l_dl_status_odd == 0x9)
+                                     || (l_dl_prior_status_odd == 0x9)) &&
+                                    ((l_dl_status_even >= 0xB) && (l_dl_status_even <= 0xE))) ||
+                                   ((l_dl_status_odd == 0x2) && ((l_dl_status_even >= 0x8) && (l_dl_status_even <= 0xC))));
             }
+
+            FAPI_DBG("even -- fail: %d, status_even: %X, prior_status_even: %X", l_dl_fail_even ? (1) : (0), l_dl_status_even,
+                     l_dl_prior_status_even);
+            FAPI_DBG("odd  -- fail: %d, status_odd: %X, prior_status_odd: %X", l_dl_fail_odd ? (1) : (0), l_dl_status_odd,
+                     l_dl_prior_status_odd);
         }
         else if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
         {
@@ -721,7 +738,7 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     }
     else
     {
-        FAPI_DBG("XBUS - Skipping check for DL lane failures");
+        FAPI_DBG("Skipping check for DL lane failures");
     }
 
     // control reconfig loop behavior

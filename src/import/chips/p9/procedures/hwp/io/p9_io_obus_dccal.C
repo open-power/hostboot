@@ -738,8 +738,14 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
     FAPI_IMP( "p9_io_obus_dccal: I/O Obus Entering" );
     uint8_t dccal_flags = 0x0;
     uint8_t l_run_dccal = 1;
+    const uint8_t LANES = 24;
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString( i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN );
+    fapi2::ATTR_IO_OBUS_PAT_A_DETECT_RUN_Type l_pat_a_detect_run_clear =
+        fapi2::ENUM_ATTR_IO_OBUS_PAT_A_DETECT_RUN_FALSE;
+    fapi2::ATTR_IO_OBUS_LANE_PDWN_Type l_lane_pdwn;
+    fapi2::ATTR_IO_OBUS_PAT_A_CAPTURE_Type l_pat_a_capture;
+
     FAPI_DBG( "I/O Obus Dccal %s, Lane Vector(0x%X)", l_tgtStr, i_lane_vector );
 
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_tgt, l_run_dccal ) );
@@ -793,7 +799,40 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
     FAPI_TRY( set_obus_flywheel_off( i_tgt, i_lane_vector, 0 ) );
     FAPI_TRY( set_obus_pr_edge_track_cntl( i_tgt, i_lane_vector, 0 ) );
 
+    // reset attributes used in subsequent link training HWP calls
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_OBUS_PAT_A_DETECT_RUN,
+                           i_tgt,
+                           l_pat_a_detect_run_clear),
+             "Error from FAPI_ATTR_SET (ATTR_IO_OBUS_PAT_A_DETECT_RUN)");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_OBUS_LANE_PDWN,
+                           i_tgt,
+                           l_lane_pdwn),
+             "Error from FAPI_ATTR_GET (ATTR_IO_OBUS_LANE_PDWN)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_OBUS_PAT_A_CAPTURE,
+                           i_tgt,
+                           l_pat_a_capture),
+             "Error from FAPI_ATTR_GET (ATTR_IO_OBUS_PAT_A_CAPTURE)");
+
+    for (uint8_t lane = 0; lane < LANES; lane++)
+    {
+        if (((0x1 << lane) & i_lane_vector) != 0)
+        {
+            l_lane_pdwn = l_lane_pdwn & (uint32_t) (~(0x80000000 >> lane));
+            l_pat_a_capture[lane] = 0;
+        }
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_OBUS_LANE_PDWN,
+                           i_tgt,
+                           l_lane_pdwn),
+             "Error from FAPI_ATTR_SET (ATTR_IO_OBUS_LANE_PDWN)");
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IO_OBUS_PAT_A_CAPTURE,
+                           i_tgt,
+                           l_pat_a_capture),
+             "Error from FAPI_ATTR_SET (ATTR_IO_OBUS_PAT_A_CAPTURE)");
 
 fapi_try_exit:
     FAPI_IMP( "p9_io_obus_dccal: I/O Obus Exiting" );

@@ -70,4 +70,34 @@
             <target>TARGET</target>
         </gard>
     </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_OBUS_PDWN_BAD_LANE_TIMEOUT</rc>
+        <ffdc>TARGET</ffdc>
+        <ffdc>GROUP</ffdc>
+        <ffdc>LANE</ffdc>
+        <description>I/O Obus -- timeout waiting for rx_lane_busy when powering down bad lane</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>TARGET</target>
+        </gard>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_OBUS_INVALID_PATTERN</rc>
+        <ffdc>TARGET</ffdc>
+        <ffdc>PATTERN</ffdc>
+        <description>I/O Obus -- invalid pattern type requested</description>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
 </hwpErrors>
