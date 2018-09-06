@@ -390,37 +390,6 @@ void* call_host_start_payload (void *io_pArgs)
         // calculate lowest addressable memory location to be used as COMM base
         uint64_t l_commBase = cpu_spr_value(CPU_SPR_HRMOR) - VMM_HRMOR_OFFSET;
 
-        // About to call shutdown, if we're running on a PHYP system, we need
-        // to switch back to running unit checkstops
-        if(! is_sapphire_load() )
-        {
-            TARGETING::TargetHandleList l_coreTargetList;
-            getAllChiplets(l_coreTargetList, TYPE_CORE);
-
-            for( auto l_core_target : l_coreTargetList)
-            {
-                l_errl = HBPM::core_checkstop_helper_hwp( l_core_target,
-                                                          false);
-
-                if(l_errl)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "p9_core_checkup_handler_hwp ERROR : Returning "
-                        "errorlog, reason=0x%x",l_errl->reasonCode() );
-
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
-
-                    break;
-                }
-            }
-        }
-
-        if(l_errl)
-        {
-            break;
-        }
-
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
@@ -491,7 +460,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         // Revert back to standard runtime mode where core checkstops
         // do not escalate to system checkstops
-        // Workaround for HW286670
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "calling enableCoreCheckstops() in node");
 
@@ -773,163 +741,32 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 errlHndl_t enableCoreCheckstops()
 {
     errlHndl_t l_errl = nullptr;
-    //@TODO RTC:133848
-#if 0
-    void* l_slwPtr = nullptr;
-    int mm_rc = 0;
 
-    // for OpenPower systems, leave core checkstops as system checkstops
-    if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
+    // If we're running on a PHYP system, we need
+    // to switch back to running unit checkstops
+    if(! is_sapphire_load() )
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Leaving local core checkstops as escalating to system checkstop" );
-        return nullptr;
-    }
-    //@todo-RTC:130092 Remove this when Opal support is in place
+        TARGETING::TargetHandleList l_coreTargetList;
+        getAllChiplets(l_coreTargetList, TYPE_CORE);
 
-    // loop thru all proc and find all functional ex units
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
-    for (TargetHandleList::const_iterator l_procIter =
-         l_procTargetList.begin();
-         l_procIter != l_procTargetList.end();
-         ++l_procIter)
-    {
-        const TARGETING::Target* l_pChipTarget = *l_procIter;
-
-        //  calculate location of the SLW output buffer
-        uint64_t l_physAddr =
-          l_pChipTarget->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
-        l_slwPtr = mm_block_map(reinterpret_cast<void*>(l_physAddr),
-                                HOMER_MAX_STOP_IMG_SIZE_IN_MB*MEGABYTE);
-        if( l_slwPtr == nullptr )
+        for( auto l_core_target : l_coreTargetList)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_map : phys=%.16X", l_physAddr );
-            /*@
-             * @errortype
-             * @reasoncode   RC_MM_MAP_ERR
-             * @moduleid     MOD_ENABLE_CORE_CHECKSTOPS
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @userdata1    Size of STOP IMG
-             * @userdata2    Physical address
-             * @devdesc      mm_block_map() returns error
-             * @custdesc     A problem occurred during the IPL
-             *               of the system.
-             */
-            l_errl =
-              new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      ISTEP::MOD_ENABLE_CORE_CHECKSTOPS,
-                                      ISTEP::RC_MM_MAP_ERR,
-                                      HOMER_MAX_STOP_IMG_SIZE_IN_MB*MEGABYTE,
-                                      l_physAddr);
-        }
+            l_errl = HBPM::core_checkstop_helper_hwp( l_core_target,
+                                                      false);
 
-        // Get EX list under this proc
-        TARGETING::TargetHandleList l_exList;
-        getChildChiplets( l_exList, l_pChipTarget, TYPE_EX );
-
-        for (TargetHandleList::const_iterator
-             l_exIter = l_exList.begin();
-             l_exIter != l_exList.end();
-             ++l_exIter)
-        {
-            TARGETING::Target* l_exTarget = *l_exIter;
-
-            // Write the runtime version of the Action1 reg
-            // Core FIR Action1 Register value from Nick
-            uint64_t action1_reg = 0xFEFC17F7FF9C8A09;
-            size_t opsize = sizeof(uint64_t);
-            l_errl = deviceWrite( l_exTarget,
-                        &action1_reg,
-                        opsize,
-                        DEVICE_SCOM_ADDRESS(EX_CORE_FIR_ACTION1_0x10013107) );
-            if( l_errl )
-            {
-                break;
-            }
-
-            // Need to force core checkstops to escalate to a system checkstop
-            //  by telling the SLW to update the ACTION1 register when it
-            //  comes out of winkle  (see HW286670)
-            TARGETING::ATTR_CHIP_UNIT_type l_coreId =
-              l_exTarget->getAttr<ATTR_CHIP_UNIT>();
-            uint32_t l_rc = p8_pore_gen_scom_fixed( l_slwPtr,
-                                           P8_SLW_MODEBUILD_IPL,
-                                           EX_CORE_FIR_ACTION1_0x10013107,
-                                           l_coreId,
-                                           action1_reg,//ignored
-                                           P8_PORE_SCOM_NOOP,
-                                           P8_SCOM_SECTION_NC );
-            if( l_rc )
+            if(l_errl)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "ERROR: ACTION1: chip=%.8X, core=0x%x,l_rc=0x%x",
-                           get_huid(l_pChipTarget), l_coreId, l_rc );
-                /*@
-                 * @errortype
-                 * @reasoncode  RC_BAD_RC
-                 * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    MOD_ENABLE_CORE_CHECKSTOPS
-                 * @userdata1[00:31]  rc from p8_pore_gen_scom_fixed function
-                 * @userdata1[32:63]  address being added to image
-                 * @userdata2[00:31]  Failing Proc HUID
-                 * @userdata2[32:63]  Failing Core Id
-                 *
-                 * @devdesc p8_pore_gen_scom_fixed returned an error when
-                 *          attempting to erase a reg value in the PORE image.
-                 * @custdesc         A problem occurred during the IPL
-                 *                   of the system.
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     MOD_ENABLE_CORE_CHECKSTOPS,
-                                     RC_BAD_RC,
-                                     TWO_UINT32_TO_UINT64(l_rc,
-                                             EX_CORE_FIR_ACTION1_0x10013107),
-                                     TWO_UINT32_TO_UINT64(
-                                             get_huid(l_pChipTarget),
-                                             l_coreId) );
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                l_errl->collectTrace("ISTEPS_TRACE",256);
+                    "p9_core_checkup_handler_hwp ERROR : Returning "
+                    "errorlog, reason=0x%x",l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
+
                 break;
             }
         }
-
-        mm_rc = mm_block_unmap(l_slwPtr);
-        if( mm_rc )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_unmap : rc=%d, ptr=%p", mm_rc, l_slwPtr );
-            /*@
-             * @errortype
-             * @reasoncode   ISTEP::RC_MM_UNMAP_ERR
-             * @moduleid     ISTEP::MOD_ENABLE_CORE_CHECKSTOPS
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @userdata1    Return Code
-             * @userdata2    Unmap address
-             * @devdesc      mm_block_unmap() returns error
-             * @custdesc     A problem occurred during the IPL
-             *               of the system.
-             */
-            l_errl =
-                new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      ISTEP::MOD_ENABLE_CORE_CHECKSTOPS,
-                                      ISTEP::RC_MM_UNMAP_ERR,
-                                      mm_rc,
-                                      reinterpret_cast<uint64_t>
-                                      (l_slwPtr));
-            // Just commit error and keep going
-            errlCommit( l_errl, ISTEP_COMP_ID );
-        }
-        l_slwPtr = nullptr;
-
-        if(l_errl)
-        {
-            break;
-        }
     }
-#endif
     return l_errl;
 }
 

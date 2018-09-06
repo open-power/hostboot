@@ -48,6 +48,7 @@ namespace ISTEP_21
     extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
                                      bool i_masterInstance,
                                      const uint64_t i_commBase );
+    extern errlHndl_t enableCoreCheckstops();
 
     extern errlHndl_t callCheckFreqAttrData(uint64_t freqData1, uint64_t freqData2);
 };
@@ -468,12 +469,17 @@ void IpcSp::msgHandler()
 
                 if (err) break;
 
-                if(!err)
+                err = ISTEP_21::enableCoreCheckstops();
+
+                if (err)
                 {
-                    //  Function will not return unless error
-                    err = ISTEP_21::callShutdown(msg->data[0],false,
-                                                                  msg->data[1]);
+                    // Commit the error but continue to shutdown
+                    errlCommit(err, IPC_COMP_ID);
                 }
+
+                //  Function will not return unless error
+                err = ISTEP_21::callShutdown(msg->data[0],false,
+                                             msg->data[1]);
 
                 if(err)
                 {
