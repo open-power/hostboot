@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+for var in "$@"
+do
+    if [[ $var = *target_types*.xml ]] || [[ $var = *attribute_types*.xml ]] ;
+    then
+        echo "Applying targeting sort for file: "
+        echo "    $var"
+        xsltproc $TOOLSDIR/sort_targeting.xsl $var > temp.xml
+        rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+        xsltproc $TOOLSDIR/insert_newlines.xsl temp.xml > $var
+        rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
+        rm temp.xml
+        rc=$?; if [[ $rc != 0 ]];
+        then
+            echo "rm $PROJECT_ROOT/temp.xml failed. Manual removal required."
+        fi
+    fi
+done
+

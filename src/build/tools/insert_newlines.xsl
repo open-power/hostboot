@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/attribute_types_cfm.xml $    -->
+<!-- $Source: src/build/tools/insert_newlines.xsl $                         -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,65 +22,19 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- =====================================================================
-     CONCURRENT FIRMWARE UPDATE ATTRIBUTE TYPES
-     Contains the definition of attributes used to test CFM
-     ================================================================= -->
-<attributes>
-  <attribute>
-    <description>
-        CFM test attribute - non-volatile read-only
-    </description>
-    <id>CFM_TEST_NV_RO</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x75804084</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="xml" indent="no" omit-xml-declaration="yes"/>
 
-  <attribute>
-    <description>
-        CFM test attribute - non-volatile writeable
-    </description>
-    <id>CFM_TEST_NV_WR</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x90359461</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
+    <!-- Copy everything from the source file to the destination as it is but
+         add newlines if the current match is a child element of the root node.
+     -->
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:copy>
+        <xsl:if test=". = /node()/*">
+            <xsl:text>&#xa;</xsl:text>
+        </xsl:if>
+    </xsl:template>
 
-  <attribute>
-    <description>
-        CFM test attribute - volatile-zeroed
-    </description>
-    <id>CFM_TEST_VZ</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <simpleType>
-      <uint32_t/>
-    </simpleType>
-  </attribute>
-
-  <attribute>
-    <description>
-        CFM test attribute - volatile writeable
-    </description>
-    <id>CFM_TEST_V_WR</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x33EFE76B</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
-
-</attributes>
+</xsl:stylesheet>

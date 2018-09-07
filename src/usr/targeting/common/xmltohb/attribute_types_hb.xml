@@ -23,1090 +23,13 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<attributes>
-
 <!-- =====================================================================
      HOST BOOT ATTRIBUTE TYPES
      Contains the definition of hostboot attributes which should not be
      synced to/from FSP
      ================================================================= -->
-
-<attribute>
-    <id>HIDDEN_ERRLOGS_ENABLE</id>
-    <description>
-        Used to decide whether or not to prevent INFORMATIONAL/RECOVERED error
-        logs from being sent to the BMC via SEL/eSEL, saved to the PNOR, and
-        displayed to the console.
-        0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
-        1 = Send only INFORMATIONAL error logs.
-        2 = Send only RECOVERED error logs.
-        3 = Allow all hidden error logs to be processed.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-</attribute>
-
-<enumerationType>
-    <id>HIDDEN_ERRLOGS_ENABLE</id>
-    <description>Enumeration of HIDDEN_ERRLOGS_ENABLE</description>
-    <enumerator>
-        <name>NO_HIDDEN_LOGS</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>ALLOW_INFORMATIONAL</name>
-        <value>1</value>
-    </enumerator>
-    <enumerator>
-        <name>ALLOW_RECOVERED</name>
-        <value>2</value>
-    </enumerator>
-    <enumerator>
-        <name>ALLOW_ALL_LOGS</name>
-        <value>3</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-  <description>
-      Are we doing checkstop analysis on
-      systems as we are booting back up based
-      on information captured in FIRDATA section.
-  </description>
-  <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
-  <persistency>volatile-zeroed</persistency>
-  <readable></readable>
-  <simpleType>
-    <uint8_t></uint8_t>
-  </simpleType>
-  <writeable></writeable>
-</attribute>
-
-<enumerationType>
-  <description>Enum for CHKSTOP_ANALYSIS_ON_STARTUP</description>
-  <enumerator>
-    <name>NOT_ANALYZING_DEFAULT</name>
-    <value>0</value>
-  </enumerator>
-  <enumerator>
-    <name>ANALYZING_CHECKSTOP</name>
-    <value>1</value>
-  </enumerator>
-  <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
-</enumerationType>
-
-<attribute>
-    <id>IS_MPIPL_HB</id>
-    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_IS_MPIPL</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MPIPL_HB_MDRT_COUNT</id>
-    <description>Actual MDRT count in Memory Preserving IPL mode.</description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>IS_SLAVE_DRAWER</id>
-    <description>0 = is master node, 1 = is slave node</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>XSCOM_VIRTUAL_ADDR</id>
-    <description>Cached Virtual Address of Xscom memory space for this Chip</description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>FSI_MASTER_MUTEX</id>
-    <description>Mutex for FSI Master Operations</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>EEPROM_PAGE_ARRAY</id>
-    <description>
-        Used to keep track of which EEPROM page the current I2C master bus is set to
-        0 = PAGE_ZERO
-        1 = PAGE_ONE
-        2 = UNKNOWN_PAGE
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
-        </uint8_t>
-        <array>4,4</array>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<!-- For POD Testing -->
-<attribute>
-    <id>HB_MUTEX_TEST_LOCK</id>
-    <description>Host boot mutex for testing</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_PAGE_MUTEX_0</id>
-    <description>
-        Mutex to protect page select operations for I2C Master engine 0
-    </description>
-    <simpleType>
-        <hbmutex></hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_PAGE_MUTEX_1</id>
-    <description>
-        Mutex to protect page select operations for I2C Master engine 1
-    </description>
-    <simpleType>
-        <hbmutex></hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_PAGE_MUTEX_2</id>
-    <description>
-        Mutex to protect page select operations for I2C Master engine 2
-    </description>
-    <simpleType>
-        <hbmutex></hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_PAGE_MUTEX_3</id>
-    <description>
-        Mutex to protect page select operations for I2C Master engine 3
-    </description>
-    <simpleType>
-        <hbmutex></hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_ENGINE_MUTEX_0</id>
-    <description>Mutex for I2C Master engine 0</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_ENGINE_MUTEX_1</id>
-    <description>Mutex for I2C Master engine 1</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_ENGINE_MUTEX_2</id>
-    <description>Mutex for I2C Master engine 2</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>I2C_ENGINE_MUTEX_3</id>
-    <description>Mutex for I2C Master engine 3</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>FSI_SCOM_MUTEX</id>
-    <description>Mutex for FSI-based SCOM Operations</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>SCOM_IND_MUTEX</id>
-    <description>Mutex for Indirect SCOM read operation</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>SCAN_MUTEX</id>
-    <description>Mutex for SCAN operations</description>
-    <simpleType>
-        <hbmutex>
-            <default>0</default>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>IBSCOM_VIRTUAL_ADDR</id>
-    <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>IBSCOM_MUTEX</id>
-    <description>Mutex for Inband SCOM Operations</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>IBSCOM_ENABLE_OVERRIDE</id>
-    <description>Used to force IBSCOM enabled for lab testing</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HB_EXISTING_IMAGE</id>
-    <description>Indicates which logical nodes have a hostboot image.</description>
-    <!-- Bit position [0-7] (left to right) represents logical node.
-    '1' means the logical node has an active hostboot image.
-    -->
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-
-<attribute>
-    <id>HB_TARGET_SCOMABLE</id>
-    <description>
-        This attribute indicates if the target can be SCOMed.
-        It's used in FSP only but declared here because the attribute
-        is defined in chip_attributes.xml, which is a common file
-        between FSP and HB (without this, HB will get a compilation error).
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0x0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_TARGET_SCOMABLE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>OCC_COMMON_AREA_PHYS_ADDR</id>
-    <description>
-        Physical address where OCC Common Area is placed in mainstore.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HOMER_VIRT_ADDR</id>
-    <description>
-        Virtual address where HOMER memory is mapped into.  If value is zero,
-        memory must be mapped into virtual space.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HOMER_HCODE_LOADED</id>
-    <description>
-        Attribute to check if HCODE is loaded in HOMER
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<enumerationType>
-    <id>IPMI_SENSOR_ARRAY</id>
-    <description>Enumeration defining the offsets into the
-        IPMI_SENSORS array.</description>
-    <enumerator>
-        <name>NAME_OFFSET</name>
-        <value>0x00</value>
-    </enumerator>
-    <enumerator>
-        <name>NUMBER_OFFSET</name>
-        <value>0x01</value>
-    </enumerator>
-</enumerationType>
-
-<enumerationType>
-    <id>SENSOR_NAME</id>
-    <description>Enumeration indicating the IPMI sensor name, which will
-        be used by hostboot when determining the sensor number to return.
-        The sensor name consists of one byte of sensor type plus one byte of
-        sub-type, to differentiate similar sensors under the same target.
-        Our implementaion uses the IPMI defined entity ID as the sub-type.
-    </description>
-    <enumerator>
-        <name>PROC_TEMP</name>
-        <value>0x0103</value>
-    </enumerator>
-    <enumerator>
-        <name>DIMM_TEMP</name>
-        <value>0x0120</value>
-    </enumerator>
-    <enumerator>
-        <name>CORE_TEMP</name>
-        <value>0x01D0</value>
-    </enumerator>
-    <enumerator>
-        <name>STATE</name>
-        <value>0x0500</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMBUF_TEMP</name>
-        <value>0x01D1</value>
-    </enumerator>
-    <enumerator>
-        <name>GPU_TEMP</name>
-        <value>0x01D8</value>
-    </enumerator>
-    <enumerator>
-        <name>GPU_MEM_TEMP</name>
-        <value>0x01D9</value>
-    </enumerator>
-    <enumerator>
-        <name>VRM_VDD_TEMP</name>
-        <value>0x01DA</value>
-    </enumerator>
-    <enumerator>
-        <name>GPU_STATE</name>
-        <value>0x17D8</value>
-    </enumerator>
-    <enumerator>
-        <name>PROC_STATE</name>
-        <value>0x0703</value>
-    </enumerator>
-    <enumerator>
-        <name>CORE_STATE</name>
-        <value>0x07D0</value>
-    </enumerator>
-    <enumerator>
-        <name>HOST_AUTO_REBOOT_CONTROL</name>
-        <value>0x0921</value>
-    </enumerator>
-    <enumerator>
-        <name>DIMM_STATE</name>
-        <value>0x0C20</value>
-    </enumerator>
-    <enumerator>
-        <name>HB_VOLATILE</name>
-        <value>0x0C21</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMBUF_STATE</name>
-        <value>0x0CD1</value>
-    </enumerator>
-    <enumerator>
-        <name>FW_BOOT_PROGRESS</name>
-        <value>0x0F22</value>
-    </enumerator>
-    <enumerator>
-        <name>SYSTEM_EVENT</name>
-        <value>0x1201</value>
-    </enumerator>
-    <enumerator>
-        <name>OS_BOOT</name>
-        <value>0x1F23</value>
-    </enumerator>
-    <enumerator>
-        <name>HOST_STATUS</name>
-        <value>0x2223</value>
-    </enumerator>
-    <enumerator>
-        <name>OCC_ACTIVE</name>
-        <value>0x07D2</value>
-    </enumerator>
-    <enumerator>
-        <name>CORE_FREQ</name>
-        <value>0xC1D0</value>
-    </enumerator>
-    <enumerator>
-        <name>APSS_CHANNEL</name>
-        <value>0xC2D7</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_ACTIVE</name>
-        <value>0xC423</value>
-    </enumerator>
-    <enumerator>
-        <name>REBOOT_COUNT</name>
-        <value>0xC322</value>
-    </enumerator>
-    <enumerator>
-        <name>FAULT</name>
-        <value>0xC700</value>
-    </enumerator>
-    <enumerator>
-        <name>BACKPLANE_FAULT</name>
-        <value>0xC707</value>
-    </enumerator>
-    <enumerator>
-        <name>REF_CLOCK_FAULT</name>
-        <value>0xC7D4</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_CLOCK_FAULT</name>
-        <value>0xC7D5</value>
-    </enumerator>
-    <enumerator>
-        <name>TOD_CLOCK_FAULT</name>
-        <value>0xC7D6</value>
-    </enumerator>
-    <enumerator>
-        <name>APSS_FAULT</name>
-        <value>0xC7D7</value>
-    </enumerator>
-    <!-- default callout set to BackPlane  -->
-    <enumerator>
-        <name>VRM_VDD_FAULT</name>
-        <value>0xC707</value>
-    </enumerator>
-    <enumerator>
-        <name>DERATING_FACTOR</name>
-        <value>0xC815</value>
-    </enumerator>
-    <enumerator>
-        <name>REDUNDANT_PS_POLICY</name>
-        <value>0xCA22</value>
-    </enumerator>
-    <enumerator>
-        <name>TURBO_ALLOWED</name>
-        <value>0xCB03</value>
-    </enumerator>
-    <enumerator>
-        <name>TPM_REQUIRED</name>
-        <value>0xCC03</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-    <id>SBE_FFDC_ADDR</id>
-    <description>
-        Virtual address where SBE FFDC is placed in mainstore.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>SBE_COMM_ADDR</id>
-    <description>
-        Virtual address where SBE Communications are placed in mainstore.
-        This area is used for SBE message passing and may contain an SBE
-        command or the response to it from HBRT.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>SERIAL_NUMBER</id>
-    <description>The serial number for a particular FRU target</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>18</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SERIAL_NUMBER</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>PART_NUMBER</id>
-    <description>The part number for a particular FRU target</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>20</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PART_NUMBER</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>VPD_SWITCHES</id>
-    <description>Attribute storing VPD state information</description>
-    <complexType>
-        <description>VPD flags</description>
-        <field>
-            <name>pnorCacheValid</name>
-            <description>Set when this target's VPD data has been loaded
-                from EEPROM into the PNOR.
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>pnorCacheValidRT</name>
-            <description>See pnorCacheValid. Allows runtime version to be
-                set separately from common version.
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>disableWriteToPnorRT</name>
-            <description>Set to disable write-thru to PNOR at runtime
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>reserved</name>
-            <description>Reserved for future expansion</description>
-            <type>uint8_t</type>
-            <bits>5</bits>
-            <default>0</default>
-        </field>
-    </complexType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>SPCWKUP_COUNT</id>
-    <description>
-        Keep track of the calls to Special Wakeup. Increment for each
-        call to enable, decrement for each call to disable. Not
-        thread-safe, used at runtime which is single-threaded.
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
-    <description>Units: uV/DRAM
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id>
-    <description>Units: mV
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id>
-    <description>Units: 1/Amps
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id>
-    <description>Units: mV
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id>
-    <description>Maximum voltage limit for the dynamic VID DDR3 VDDR
-        voltage setpoint. In mV.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id>
-    <description>Units: 1/Amps
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id>
-    <description>Units: mV
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id>
-    <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage
-        setpoint. In mV.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>CLEAR_DIMM_SPD_ENABLE</id>
-    <description>
-      Used to enable clearing of SPD on all present DIMMs. This attribute is
-      set via attribute override.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-  <id>WOF_FREQUENCY_UPLIFT_SELECTED</id>
-  <description>
-      The selected WOF frequency uplift table.
-  </description>
-  <simpleType>
-    <uint16_t>
-    </uint16_t>
-    <array>22,13</array>
-  </simpleType>
-  <persistency>volatile-zeroed</persistency>
-  <readable/>
-  <writeable/>
-  <hbOnly/>
-</attribute>
-
-<!-- TODO RTC 122856 When support for HB only volatile attributes with non-zero
-     default is implemented, update default value to match the description,
-     Until that happens, code must set the appropriate default if needed. -->
-<attribute>
-  <id>HBRT_HYP_ID</id>
-  <description>
-      Effective ID used by the hypervisor to specify a given target. A value
-      of 0xFFFFFFFFFFFFFFFF means invalid/unknown.
-  </description>
-  <simpleType>
-      <uint64_t>
-          <default>0</default>
-      </uint64_t>
-  </simpleType>
-  <persistency>volatile-zeroed</persistency>
-  <readable/>
-  <writeable/>
-  <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>IS_DRTM_MPIPL_HB</id>
-    <description>
-      Indicates if this is a DRTM MPIPL flow or not.
-        0x00 = Not a DRTM MPIPL
-        0x01 = DRTM MPIPL
-    </description>
-    <simpleType>
-        <uint8_t><default>0</default></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>DRTM_PAYLOAD_ADDR_MB_HB</id>
-    <description>
-      Physical address of DRTM payload in megabytes.  0 MB is not considered to
-      be a valid DRTM payload address
-    </description>
-    <simpleType>
-        <uint32_t><default>0</default></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>FORCE_PRE_PAYLOAD_DRTM</id>
-    <description>
-        If Hostboot is compiled with CONFIG_DRTM_TRIGGERING, controls
-        whether Hostboot will initiate a DRTM late launch sequence in place of
-        loading the payload.  This attribute should always be compiled in not to
-        force the late launch sequence; it is designed to be changed via
-        attribute overrides only, to facilitate testing.
-            0x00: Do not force a DRTM late launch sequence
-            0x01: Force a DRTM late launch sequence (if not a DRTM boot)
-    </description>
-    <simpleType>
-        <uint8_t><default>0</default></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>ATTN_CHK_ALL_PROCS</id>
-    <description>
-      Used to tell ATTN code whether to chk MASTER(0) OR all PROCs(1)
-      when the checkForIplAttns routine is called.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>MASTER_MBOX_SCRATCH</id>
-    <description>
-      Value of the master mailbox scratch regs
-      at the beginning of the boot.  Need to save these
-      away since HB uses some of them for communication purposes.
-    </description>
-    <simpleType>
-     <uint32_t></uint32_t>
-     <array>8</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HB_RSV_MEM_NEXT_SECTION</id>
-    <description>
-        The next HB reserved memory section available to assign
-        a new reserved memory range.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<!-- TPM Attributes -->
-
-<attribute>
-    <id>HB_TPM_INIT_ATTEMPTED</id>
-    <description>
-        Whether TPM initialization was attempted or not
-            0x00 (false) = Did not attempt to initialize TPM
-            0x01 (true)  = Attempted to initialize TPM
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<enumerationType>
-    <id>TPM_ROLE</id>
-    <description>
-        Enumeration of possible roles a TPM can play within a node.  A TPM has
-        the primary role if it's connected to the acting master processor,
-        otherwise it has the backup role.
-    </description>
-    <enumerator>
-        <name>TPM_PRIMARY</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>TPM_BACKUP</name>
-        <value>1</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-    <id>TPM_ROLE</id>
-    <description>
-        Whether the TPM is primary or backup within its parent node.  It is
-        dynamically computed during the boot.
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HB_TPM_MUTEX</id>
-    <description>Mutex to guard TPM access</description>
-    <simpleType>
-        <hbmutex>
-        </hbmutex>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>HB_TPM_LOG_MGR_PTR</id>
-    <description>Pointer to TPM log manager</description>
-    <simpleType>
-        <uint64_t>
-            <default>0</default>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
+<attributes>
+  <attribute>
     <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>
     <description>
         Indicates if Attribute Overrides are allowed when the system is booted
@@ -1118,84 +41,285 @@
             0x01 = Attribute Overrides are allowed
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0x00</default>
-        </uint8_t>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <writeable/>
     <readable/>
     <hbOnly/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>MEMD_OFFSET</id>
+  <attribute>
+    <id>ATTN_CHK_ALL_PROCS</id>
     <description>
-            Working offset for MEMD section, this allows us to move between
-            the different MEMD instances and the MEMD header.
+      Used to tell ATTN code whether to chk MASTER(0) OR all PROCs(1)
+      when the checkForIplAttns routine is called.
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
+      <uint8_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
     <id>CENTAUR_REGISTER_CACHE_PTR</id>
     <description>
         Pointer to Secure Boot Centaur SCOM register cache
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
+      <uint64_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>IPC_NODE_BUFFER_GLOBAL_ADDRESS</id>
-    <description>Global IPC Buffer Addresseses for each Node
-        dimension: node number (0:7)
+  <attribute>
+    <description>
+      Are we doing checkstop analysis on
+      systems as we are booting back up based
+      on information captured in FIRDATA section.
+  </description>
+    <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <description>Enum for CHKSTOP_ANALYSIS_ON_STARTUP</description>
+    <enumerator>
+      <name>NOT_ANALYZING_DEFAULT</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>ANALYZING_CHECKSTOP</name>
+      <value>1</value>
+    </enumerator>
+    <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
+  </enumerationType>
+
+  <attribute>
+    <id>CLEAR_DIMM_SPD_ENABLE</id>
+    <description>
+      Used to enable clearing of SPD on all present DIMMs. This attribute is
+      set via attribute override.
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
-        <array>8</array>
+      <uint8_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable />
-    <writeable />
-</attribute>
+    <readable/>
+    <writeable/>
+  </attribute>
 
-<attribute>
-    <id>HB_NODE_COMM_XBUS_MUTEX</id>
-    <description>Mutex to guard Node Comm XBUS register access</description>
+  <attribute>
+    <id>DRTM_PAYLOAD_ADDR_MB_HB</id>
+    <description>
+      Physical address of DRTM payload in megabytes.  0 MB is not considered to
+      be a valid DRTM payload address
+    </description>
     <simpleType>
-        <hbmutex>
-        </hbmutex>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>EEPROM_PAGE_ARRAY</id>
+    <description>
+        Used to keep track of which EEPROM page the current I2C master bus is set to
+        0 = PAGE_ZERO
+        1 = PAGE_ONE
+        2 = UNKNOWN_PAGE
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2</default>
+      </uint8_t>
+      <array>4,4</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>FORCE_PRE_PAYLOAD_DRTM</id>
+    <description>
+        If Hostboot is compiled with CONFIG_DRTM_TRIGGERING, controls
+        whether Hostboot will initiate a DRTM late launch sequence in place of
+        loading the payload.  This attribute should always be compiled in not to
+        force the late launch sequence; it is designed to be changed via
+        attribute overrides only, to facilitate testing.
+            0x00: Do not force a DRTM late launch sequence
+            0x01: Force a DRTM late launch sequence (if not a DRTM boot)
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>FSI_MASTER_MUTEX</id>
+    <description>Mutex for FSI Master Operations</description>
+    <simpleType>
+      <hbmutex/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hbOnly/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>FSI_SCOM_MUTEX</id>
+    <description>Mutex for FSI-based SCOM Operations</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <!-- TODO RTC 122856 When support for HB only volatile attributes with non-zero
+     default is implemented, update default value to match the description,
+     Until that happens, code must set the appropriate default if needed. -->
+  <attribute>
+    <id>HBRT_HYP_ID</id>
+    <description>
+      Effective ID used by the hypervisor to specify a given target. A value
+      of 0xFFFFFFFFFFFFFFFF means invalid/unknown.
+  </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HB_EXISTING_IMAGE</id>
+    <description>Indicates which logical nodes have a hostboot image.</description>
+    <!-- Bit position [0-7] (left to right) represents logical node.
+    '1' means the logical node has an active hostboot image.
+    -->
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HB_INITIATED_PM_RESET</id>
+    <description>
+        Indicates that a chip has already been put into reset elsewhere
+        such that the next reset request will be skipped.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>HB_INITIATED_PM_RESET</id>
+    <description>Enum for HB_INITIATED_PM_RESET</description>
+    <enumerator>
+      <!-- Default state, no extra reset has been performed -->
+      <name>INACTIVE</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <!-- Currently in the middle of doing an extra reset -->
+      <name>IN_PROGRESS</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <!-- Chip has already been reset -->
+      <name>COMPLETE</name>
+      <value>2</value>
+    </enumerator>
+  </enumerationType>
+
+  <!-- For POD Testing -->
+  <attribute>
+    <id>HB_MUTEX_TEST_LOCK</id>
+    <description>Host boot mutex for testing</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>HB_NODE_COMM_ABUS_MUTEX</id>
     <description>Mutex to guard Node Comm ABUS register access</description>
     <simpleType>
-        <hbmutex>
-        </hbmutex>
+      <hbmutex/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hbOnly/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>HB_NODE_COMM_XBUS_MUTEX</id>
+    <description>Mutex to guard Node Comm XBUS register access</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HB_RSV_MEM_NEXT_SECTION</id>
+    <description>
+        The next HB reserved memory section available to assign
+        a new reserved memory range.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>HB_SBE_SEEPROM_VERSION_MISMATCH</id>
     <description>
         Describes if the processor's SBE's seeprom versions match or not
@@ -1203,46 +327,900 @@
         0x1 = MISMATCH
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
+      <uint8_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>HB_INITIATED_PM_RESET</id>
+  <attribute>
+    <id>HB_TARGET_SCOMABLE</id>
     <description>
-        Indicates that a chip has already been put into reset elsewhere
-        such that the next reset request will be skipped.
+        This attribute indicates if the target can be SCOMed.
+        It's used in FSP only but declared here because the attribute
+        is defined in chip_attributes.xml, which is a common file
+        between FSP and HB (without this, HB will get a compilation error).
     </description>
     <simpleType>
-       <uint8_t/>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+    <hbOnly/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_TARGET_SCOMABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
 
-<enumerationType>
-  <id>HB_INITIATED_PM_RESET</id>
-  <description>Enum for HB_INITIATED_PM_RESET</description>
-  <enumerator>
-    <!-- Default state, no extra reset has been performed -->
-    <name>INACTIVE</name>
-    <value>0</value>
-  </enumerator>
-  <enumerator>
-    <!-- Currently in the middle of doing an extra reset -->
-    <name>IN_PROGRESS</name>
-    <value>1</value>
-  </enumerator>
-  <enumerator>
-    <!-- Chip has already been reset -->
-    <name>COMPLETE</name>
-    <value>2</value>
-  </enumerator>
-</enumerationType>
+  <attribute>
+    <id>HB_TPM_INIT_ATTEMPTED</id>
+    <description>
+        Whether TPM initialization was attempted or not
+            0x00 (false) = Did not attempt to initialize TPM
+            0x01 (true)  = Attempted to initialize TPM
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HB_TPM_LOG_MGR_PTR</id>
+    <description>Pointer to TPM log manager</description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HB_TPM_MUTEX</id>
+    <description>Mutex to guard TPM access</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HIDDEN_ERRLOGS_ENABLE</id>
+    <description>
+        Used to decide whether or not to prevent INFORMATIONAL/RECOVERED error
+        logs from being sent to the BMC via SEL/eSEL, saved to the PNOR, and
+        displayed to the console.
+        0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
+        1 = Send only INFORMATIONAL error logs.
+        2 = Send only RECOVERED error logs.
+        3 = Allow all hidden error logs to be processed.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <enumerationType>
+    <id>HIDDEN_ERRLOGS_ENABLE</id>
+    <description>Enumeration of HIDDEN_ERRLOGS_ENABLE</description>
+    <enumerator>
+      <name>NO_HIDDEN_LOGS</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>ALLOW_INFORMATIONAL</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>ALLOW_RECOVERED</name>
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <name>ALLOW_ALL_LOGS</name>
+      <value>3</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>HOMER_HCODE_LOADED</id>
+    <description>
+        Attribute to check if HCODE is loaded in HOMER
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HOMER_VIRT_ADDR</id>
+    <description>
+        Virtual address where HOMER memory is mapped into.  If value is zero,
+        memory must be mapped into virtual space.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_ENGINE_MUTEX_0</id>
+    <description>Mutex for I2C Master engine 0</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_ENGINE_MUTEX_1</id>
+    <description>Mutex for I2C Master engine 1</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_ENGINE_MUTEX_2</id>
+    <description>Mutex for I2C Master engine 2</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_ENGINE_MUTEX_3</id>
+    <description>Mutex for I2C Master engine 3</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_PAGE_MUTEX_0</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 0
+    </description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_PAGE_MUTEX_1</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 1
+    </description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_PAGE_MUTEX_2</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 2
+    </description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>I2C_PAGE_MUTEX_3</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 3
+    </description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IBSCOM_ENABLE_OVERRIDE</id>
+    <description>Used to force IBSCOM enabled for lab testing</description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IBSCOM_MUTEX</id>
+    <description>Mutex for Inband SCOM Operations</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IBSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Inband Scom memory space for this Chip</description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IPC_NODE_BUFFER_GLOBAL_ADDRESS</id>
+    <description>Global IPC Buffer Addresseses for each Node
+        dimension: node number (0:7)
+    </description>
+    <simpleType>
+      <uint64_t/>
+      <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>IPMI_SENSOR_ARRAY</id>
+    <description>Enumeration defining the offsets into the
+        IPMI_SENSORS array.</description>
+    <enumerator>
+      <name>NAME_OFFSET</name>
+      <value>0x00</value>
+    </enumerator>
+    <enumerator>
+      <name>NUMBER_OFFSET</name>
+      <value>0x01</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>IS_DRTM_MPIPL_HB</id>
+    <description>
+      Indicates if this is a DRTM MPIPL flow or not.
+        0x00 = Not a DRTM MPIPL
+        0x01 = DRTM MPIPL
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>IS_MPIPL_HB</id>
+    <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_IS_MPIPL</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <id>IS_SLAVE_DRAWER</id>
+    <description>0 = is master node, 1 = is slave node</description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>MASTER_MBOX_SCRATCH</id>
+    <description>
+      Value of the master mailbox scratch regs
+      at the beginning of the boot.  Need to save these
+      away since HB uses some of them for communication purposes.
+    </description>
+    <simpleType>
+      <uint32_t/>
+      <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MEMD_OFFSET</id>
+    <description>
+            Working offset for MEMD section, this allows us to move between
+            the different MEMD instances and the MEMD header.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>MPIPL_HB_MDRT_COUNT</id>
+    <description>Actual MDRT count in Memory Preserving IPL mode.</description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id>
+    <description>Maximum voltage limit for the dynamic VID DDR3 VDDR
+        voltage setpoint. In mV.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id>
+    <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage
+        setpoint. In mV.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id>
+    <description>Units: 1/Amps
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id>
+    <description>Units: 1/Amps
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
+    <description>Units: uV/DRAM
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>OCC_COMMON_AREA_PHYS_ADDR</id>
+    <description>
+        Physical address where OCC Common Area is placed in mainstore.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>PART_NUMBER</id>
+    <description>The part number for a particular FRU target</description>
+    <simpleType>
+      <uint8_t/>
+      <array>20</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PART_NUMBER</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <id>SBE_COMM_ADDR</id>
+    <description>
+        Virtual address where SBE Communications are placed in mainstore.
+        This area is used for SBE message passing and may contain an SBE
+        command or the response to it from HBRT.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_FFDC_ADDR</id>
+    <description>
+        Virtual address where SBE FFDC is placed in mainstore.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SCAN_MUTEX</id>
+    <description>Mutex for SCAN operations</description>
+    <simpleType>
+      <hbmutex>
+        <default>0</default>
+      </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>SCOM_IND_MUTEX</id>
+    <description>Mutex for Indirect SCOM read operation</description>
+    <simpleType>
+      <hbmutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <enumerationType>
+    <id>SENSOR_NAME</id>
+    <description>Enumeration indicating the IPMI sensor name, which will
+        be used by hostboot when determining the sensor number to return.
+        The sensor name consists of one byte of sensor type plus one byte of
+        sub-type, to differentiate similar sensors under the same target.
+        Our implementaion uses the IPMI defined entity ID as the sub-type.
+    </description>
+    <enumerator>
+      <name>PROC_TEMP</name>
+      <value>0x0103</value>
+    </enumerator>
+    <enumerator>
+      <name>DIMM_TEMP</name>
+      <value>0x0120</value>
+    </enumerator>
+    <enumerator>
+      <name>CORE_TEMP</name>
+      <value>0x01D0</value>
+    </enumerator>
+    <enumerator>
+      <name>STATE</name>
+      <value>0x0500</value>
+    </enumerator>
+    <enumerator>
+      <name>MEMBUF_TEMP</name>
+      <value>0x01D1</value>
+    </enumerator>
+    <enumerator>
+      <name>GPU_TEMP</name>
+      <value>0x01D8</value>
+    </enumerator>
+    <enumerator>
+      <name>GPU_MEM_TEMP</name>
+      <value>0x01D9</value>
+    </enumerator>
+    <enumerator>
+      <name>VRM_VDD_TEMP</name>
+      <value>0x01DA</value>
+    </enumerator>
+    <enumerator>
+      <name>GPU_STATE</name>
+      <value>0x17D8</value>
+    </enumerator>
+    <enumerator>
+      <name>PROC_STATE</name>
+      <value>0x0703</value>
+    </enumerator>
+    <enumerator>
+      <name>CORE_STATE</name>
+      <value>0x07D0</value>
+    </enumerator>
+    <enumerator>
+      <name>HOST_AUTO_REBOOT_CONTROL</name>
+      <value>0x0921</value>
+    </enumerator>
+    <enumerator>
+      <name>DIMM_STATE</name>
+      <value>0x0C20</value>
+    </enumerator>
+    <enumerator>
+      <name>HB_VOLATILE</name>
+      <value>0x0C21</value>
+    </enumerator>
+    <enumerator>
+      <name>MEMBUF_STATE</name>
+      <value>0x0CD1</value>
+    </enumerator>
+    <enumerator>
+      <name>FW_BOOT_PROGRESS</name>
+      <value>0x0F22</value>
+    </enumerator>
+    <enumerator>
+      <name>SYSTEM_EVENT</name>
+      <value>0x1201</value>
+    </enumerator>
+    <enumerator>
+      <name>OS_BOOT</name>
+      <value>0x1F23</value>
+    </enumerator>
+    <enumerator>
+      <name>HOST_STATUS</name>
+      <value>0x2223</value>
+    </enumerator>
+    <enumerator>
+      <name>OCC_ACTIVE</name>
+      <value>0x07D2</value>
+    </enumerator>
+    <enumerator>
+      <name>CORE_FREQ</name>
+      <value>0xC1D0</value>
+    </enumerator>
+    <enumerator>
+      <name>APSS_CHANNEL</name>
+      <value>0xC2D7</value>
+    </enumerator>
+    <enumerator>
+      <name>PCI_ACTIVE</name>
+      <value>0xC423</value>
+    </enumerator>
+    <enumerator>
+      <name>REBOOT_COUNT</name>
+      <value>0xC322</value>
+    </enumerator>
+    <enumerator>
+      <name>FAULT</name>
+      <value>0xC700</value>
+    </enumerator>
+    <enumerator>
+      <name>BACKPLANE_FAULT</name>
+      <value>0xC707</value>
+    </enumerator>
+    <enumerator>
+      <name>REF_CLOCK_FAULT</name>
+      <value>0xC7D4</value>
+    </enumerator>
+    <enumerator>
+      <name>PCI_CLOCK_FAULT</name>
+      <value>0xC7D5</value>
+    </enumerator>
+    <enumerator>
+      <name>TOD_CLOCK_FAULT</name>
+      <value>0xC7D6</value>
+    </enumerator>
+    <enumerator>
+      <name>APSS_FAULT</name>
+      <value>0xC7D7</value>
+    </enumerator>
+    <!-- default callout set to BackPlane  -->
+    <enumerator>
+      <name>VRM_VDD_FAULT</name>
+      <value>0xC707</value>
+    </enumerator>
+    <enumerator>
+      <name>DERATING_FACTOR</name>
+      <value>0xC815</value>
+    </enumerator>
+    <enumerator>
+      <name>REDUNDANT_PS_POLICY</name>
+      <value>0xCA22</value>
+    </enumerator>
+    <enumerator>
+      <name>TURBO_ALLOWED</name>
+      <value>0xCB03</value>
+    </enumerator>
+    <enumerator>
+      <name>TPM_REQUIRED</name>
+      <value>0xCC03</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>SERIAL_NUMBER</id>
+    <description>The serial number for a particular FRU target</description>
+    <simpleType>
+      <uint8_t/>
+      <array>18</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SERIAL_NUMBER</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+  </attribute>
+
+  <attribute>
+    <id>SPCWKUP_COUNT</id>
+    <description>
+        Keep track of the calls to Special Wakeup. Increment for each
+        call to enable, decrement for each call to disable. Not
+        thread-safe, used at runtime which is single-threaded.
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <enumerationType>
+    <id>TPM_ROLE</id>
+    <description>
+        Enumeration of possible roles a TPM can play within a node.  A TPM has
+        the primary role if it's connected to the acting master processor,
+        otherwise it has the backup role.
+    </description>
+    <enumerator>
+      <name>TPM_PRIMARY</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>TPM_BACKUP</name>
+      <value>1</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>TPM_ROLE</id>
+    <description>
+        Whether the TPM is primary or backup within its parent node.  It is
+        dynamically computed during the boot.
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>VPD_SWITCHES</id>
+    <description>Attribute storing VPD state information</description>
+    <complexType>
+      <description>VPD flags</description>
+      <field>
+        <name>pnorCacheValid</name>
+        <description>Set when this target's VPD data has been loaded
+                from EEPROM into the PNOR.
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>pnorCacheValidRT</name>
+        <description>See pnorCacheValid. Allows runtime version to be
+                set separately from common version.
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>disableWriteToPnorRT</name>
+        <description>Set to disable write-thru to PNOR at runtime
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>reserved</name>
+        <description>Reserved for future expansion</description>
+        <type>uint8_t</type>
+        <bits>5</bits>
+        <default>0</default>
+      </field>
+    </complexType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>WOF_FREQUENCY_UPLIFT_SELECTED</id>
+    <description>
+      The selected WOF frequency uplift table.
+  </description>
+    <simpleType>
+      <uint16_t/>
+      <array>22,13</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>XSCOM_VIRTUAL_ADDR</id>
+    <description>Cached Virtual Address of Xscom memory space for this Chip</description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
 
 </attributes>

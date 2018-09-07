@@ -22,8 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attributes>
-
 <!-- =====================================================================
      Contains the definition of attributes that are only available on
      openpower systems.  This file is only compiled when
@@ -31,1173 +29,151 @@
      FSP based systems.
      =====================================================================
 -->
-
-<attribute>
+<attributes>
+  <attribute>
     <id>ADC_CHANNEL_FUNC_IDS</id>
     <description>ADC Channel function id. 16 channels.</description>
     <simpleType>
-        <uint8_t></uint8_t>
-        <array>16</array>
+      <uint8_t/>
+      <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
-    <description>ADC Channel IPMI sensor numbers. 16 channels.</description>
-    <simpleType>
-        <uint32_t></uint32_t>
-        <array>16</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>ADC_CHANNEL_GNDS</id>
-    <description>ADC Channel ground. 16 channels.</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>16</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
+  <attribute>
     <id>ADC_CHANNEL_GAINS</id>
     <description>ADC channel gain * 1000. 16 channels.</description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>16</array>
+      <uint32_t/>
+      <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>ADC_CHANNEL_GNDS</id>
+    <description>ADC Channel ground. 16 channels.</description>
+    <simpleType>
+      <uint8_t/>
+      <array>16</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>ADC_CHANNEL_OFFSETS</id>
     <description>ADC channel offset * 1000. 16 channels</description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>16</array>
+      <uint32_t/>
+      <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
+    <description>ADC Channel IPMI sensor numbers. 16 channels.</description>
+    <simpleType>
+      <uint32_t/>
+      <array>16</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
+    <description>Flag used to allow sending informational call-home errors as ESELS to the BMC</description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>APSS_GPIO_PORT_MODES</id>
     <description>APSS GPIO PORT MODES</description>
     <simpleType>
-        <uint8_t></uint8_t>
-        <array>2</array>
+      <uint8_t/>
+      <array>2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
     <id>APSS_GPIO_PORT_PINS</id>
     <description>APSS GPIO PORT PINS
         Port0 pin 0-7
         Port1 pin 8-15
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
-        <array>16</array>
+      <uint8_t/>
+      <array>16</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>GPIO_INFO</id>
-    <description>Information needed to address GPIO device</description>
-    <complexType>
-        <description>Structure to define the addessing for an I2C
-                     slave device.</description>
-        <field>
-            <name>i2cMasterPath</name>
-            <description>Entity path to the chip that contains the I2C
-                         master</description>
-            <type>EntityPath</type>
-            <default>physical:sys-0</default>
-        </field>
-        <field>
-            <name>port</name>
-            <description>Port from the I2C Master device. This is a 6-bit
-                         value.</description>
-            <type>uint8_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>devAddr</name>
-            <description>Device address on the I2C bus. This is a 7-bit value,
-                         but then shifted 1 bit left.</description>
-            <type>uint8_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>engine</name>
-            <description>I2C master engine. This is a 2-bit
-                         value.</description>
-            <type>uint8_t</type>
-            <default>0</default>
-        </field>
-        <field>
-            <name>vddrPin</name>
-            <description>
-                Logical GPIO pin number used to enabled/disable VDDR
-            </description>
-            <type>uint8_t</type>
-            <default>0</default>
-        </field>
-    </complexType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_ENGINE</id>
-    <description>
-        This attribute holds the values of the I2C Engine from the i2c device
-        connections as defined in the MRW.  It is parsed into a struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_MASTER_PORT</id>
-    <description>
-        This attribute holds the values of the I2C Master Port from the i2c
-        device connections as defined in the MRW.  It is parsed into a
-        struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_DEVICE_TYPE</id>
-    <description>
-        This attribute holds the values of the I2C device type from the i2c
-        device connections as defined in the MRW.  It is parsed into a
-        struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_ADDR</id>
-    <description>
-        This attribute holds the values of the I2C address from the i2c
-        device connections as defined in the MRW.  It is parsed into a
-        struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_SLAVE_PORT</id>
-    <description>
-        This attribute holds the values of the I2C slave port from the i2c
-        device connections as defined in the MRW.  It is parsed into a
-        struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_BUS_FREQ</id>
-    <description>
-        This attribute holds the values of the I2C bus frequency in Hz from
-        the i2c device connections as defined in the MRW.  It is parsed
-        into a struct in i2c.C
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_DEVICE_PURPOSE</id>
-    <description>
-        This attribute holds the values of the I2C device purpose from the i2c
-        device connections as defined in the MRW.  It is parsed into a
-        struct in i2c.C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_DEVICE_LABEL</id>
-    <description>
-        This attribute holds the string descriptions of the I2C devices from
-        the i2c device connections as defined in the MRW.  It is parsed into
-        a struct in i2c.C
-    </description>
-    <simpleType>
-        <string>
-            <sizeInclNull>64</sizeInclNull>
-        </string>
-        <array>32</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>HDAT_I2C_ELEMENTS</id>
-    <description>
-        This attribute holds the number of elements that were found under this
-        particular target, and how many devices are stored in the arrays.
-    </description>
-    <simpleType>
-        <uint8_t><default>0</default></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>IPMI_INSTANCE</id>
-    <description>Holds the IPMI instance number for this entity.</description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>IPMI_SENSORS</id>
-    <description>Attribute to hold 16 pairs of sensor name, sensor number
-        pairs. A sensor name consists of one byte of general sensor type
-        and one byte of sub-type</description>
-    <simpleType>
-        <uint16_t></uint16_t>
-        <array>16,2</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<enumerationType>
-    <id>GPU_SENSOR_ARRAY</id>
-    <description>
-        Enumeration defining the offsets into the GPU_SENSORS array.
-    </description>
-    <enumerator>
-        <name>FUNC_OFFSET</name>
-        <value>0x00</value>
-    </enumerator>
-    <enumerator>
-        <name>FUNC_ID_OFFSET</name>
-        <value>0x01</value>
-    </enumerator>
-    <enumerator>
-        <name>TEMP_OFFSET</name>
-        <value>0x02</value>
-    </enumerator>
-    <enumerator>
-        <name>TEMP_ID_OFFSET</name>
-        <value>0x03</value>
-    </enumerator>
-    <enumerator>
-        <name>MEM_TEMP_OFFSET</name>
-        <value>0x04</value>
-    </enumerator>
-    <enumerator>
-        <name>MEM_TEMP_ID_OFFSET</name>
-        <value>0x05</value>
-    </enumerator>
-    <enumerator>
-        <name>OBUS_CFG_OFFSET</name>
-        <value>0x06</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
-    <id>GPU_SENSORS</id>
-    <description>Attribute to hold 3 possible GPU sensors.
-    Includes sensor types, ids, and OBUS_CFG bits
-    </description>
-    <simpleType>
-        <uint16_t></uint16_t>
-        <array>3,7</array>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <no_export/>
-</attribute>
-
-
-<attribute>
-    <id>OP_TRACE_LITE</id>
-    <description>
-        Enable Trace lite on openpower.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default></default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
-    <description>
-        DIMM temperature threshold where throttling will
-        occur in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
-    <description>
-        DIMM temperature where an error will be generated
-        in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
-    <description>
-         Memory controller temperature threshold
-         where throttling will occur in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_PROC_WEIGHT</id>
-    <description>
-        Weight factor (in 1/10ths) for each core DTS to calculate a core
-        temperature.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_QUAD_WEIGHT</id>
-    <description>
-        Weight factor (in 1/10ths) for each quad (cache) DTS to calculate a core
-        temperature.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
-    <description>
-        Processor temperature where DVFS will occur in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
-    <description>
-        Memory controller temperature where an error will occur
-        in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id>
-    <description>
-        N mode bulk power supply limit in Watts
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id>
-    <description>
-        Maximum power allocated to DIMMs in Watts
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id>
-    <description>
-        Power used by components other than CPU, memory,
-        or GPUs in Watts
-    </description>
-    <simpleType>
-        <uint16_t></uint16_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
-    <description>
-        Memory controller read timeout in seconds
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
-    <description>
-        DIMM read timeout in seconds
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
-    <description>
-        Processor temperature error threshold in degrees C
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id>
-    <description>
-        Minimum memory utilization percent (from 0-100)
-        for memory throttling
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP</id>
-    <description>
-        Minimum memory utilization percent (from 0-100)
-        for power capping
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_VRM_READ_TIMEOUT_SEC</id>
-    <description>
-        VRM read timeout in seconds (from 0-255)
-        Use 0 to disable VRM OT monitoring
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
-    <description>
-        Processor read timeout in seconds
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
-    <description>
-        Regulator efficiency factor
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
-    <description>
-        Minimum hard power cap in Watts
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
-    <description>
-        Minimum soft power cap in Watts
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
-    <description>
-        N+1 bulk power limit in Watts for systems running
-        with redundant power supplies (default)
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
-    <description>
-        N+1 bulk power limit in Watts for High Performance Computing
-        systems running with a non-redundant power supply policy
-    </description>
-    <simpleType>
-        <uint64_t>
-            <default>0</default>
-        </uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
-    <description>
-        N+1 max memory power in Watts
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_TURBO_MODE_SUPPORTED</id>
-    <description>
-        If this system supports Turbo frequency mode.
-            0x00 = no
-            0x01 = yes
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
-    <description>
-        GPU core temperature read timeout in seconds
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
-    <description>
-        GPU core temperature error threshold in degrees C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
-    <description>
-        GPU memory temperature read timeout in seconds
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
-    <description>
-        GPU memory temperature error threshold in degrees C
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>OPAL_MODEL</id>
-    <description>
-        Specifies the compatible model name for Opal to key off of.
-        This is sourced from the MRW and should be of the format
-        'vendor,model', e.g. 'tyan,palmetto'.
-    </description>
-    <simpleType>
-        <string>
-            <default>ibm,miscopenpower</default>
-            <sizeInclNull>32</sizeInclNull>
-        </string>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>IS_MPIPL_SUPPORTED</id>
-    <description>
-        Specifies if the mpipl is supported on this platform
-        0 : No , 1 : Yes
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<enumerationType>
-    <id>ENTITY_ID</id>
-    <description>Enumeration indicating the IPMI entity ID, these values are
-        defined in the IPMI specification.  These values will be used in place
-        of target type when events are sent to the BMC.</description>
-    <enumerator>
-        <name>NA</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>OTHER</name>
-        <value>0x01</value>
-    </enumerator>
-    <enumerator>
-        <name>PROCESSOR</name>
-        <value>0x03</value>
-    </enumerator>
-    <enumerator>
-        <name>SYSTEM_BOARD</name>
-        <value>0x07</value>
-    </enumerator>
-    <enumerator>
-        <name>POWER_MGMT</name>
-        <value>0x15</value>
-    </enumerator>
-    <enumerator>
-        <name>CHASSIS</name>
-        <value>0x17</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMORY_DEVICE</name>
-        <value>0x20</value>
-    </enumerator>
-    <enumerator>
-        <name>SYS_MGMT_SOFTWARE</name>
-        <value>0x21</value>
-    </enumerator>
-    <enumerator>
-        <name>BIOS</name>
-        <value>0x22</value>
-    </enumerator>
-    <enumerator>
-        <name>OS</name>
-        <value>0x23</value>
-    </enumerator>
-    <enumerator>
-        <name>CORE</name>
-        <value>0xD0</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMBUF</name>
-        <value>0xD1</value>
-    </enumerator>
-    <enumerator>
-        <name>OCC</name>
-        <value>0xD2</value>
-    </enumerator>
-    <enumerator>
-        <name>REF_CLOCK</name>
-        <value>0xD4</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_CLOCK</name>
-        <value>0xD5</value>
-    </enumerator>
-    <enumerator>
-        <name>TOD_CLOCK</name>
-        <value>0xD6</value>
-    </enumerator>
-    <enumerator>
-        <name>APSS</name>
-        <value>0xD7</value>
-    </enumerator>
-    <enumerator>
-        <name>GPU_CORE</name>
-        <value>0xD8</value>
-    </enumerator>
-    <enumerator>
-        <name>GPU_MEMORY</name>
-        <value>0xD9</value>
-    </enumerator>
-</enumerationType>
-
-
-<enumerationType>
-    <id>SENSOR_TYPE</id>
-    <description>Enumeration indicating the IPMI sensor type, these values
-        are defined in the IPMI specification. These values will be used when
-    sending sensor reading events to the BMC.</description>
-    <enumerator>
-        <name>NA</name>
-        <value>0</value>
-    </enumerator>
-    <enumerator>
-        <name>TEMPERATURE</name>
-        <value>0x01</value>
-    </enumerator>
-    <enumerator>
-        <name>PROCESSOR</name>
-        <value>0x07</value>
-    </enumerator>
-    <enumerator>
-        <name>POWER_UNIT</name>
-        <value>0x09</value>
-    </enumerator>
-    <enumerator>
-        <name>MEMORY</name>
-        <value>0x0c</value>
-    </enumerator>
-    <enumerator>
-        <name>SYS_FW_PROGRESS</name>
-        <value>0x0F</value>
-    </enumerator>
-    <enumerator>
-        <name>SYS_EVENT</name>
-        <value>0x12</value>
-    </enumerator>
-    <enumerator>
-        <name>ADDIN_CARD</name>
-        <value>0x17</value>
-    </enumerator>
-    <enumerator>
-        <name>OS_BOOT</name>
-       <value>0x1F</value>
-    </enumerator>
-    <enumerator>
-        <name>APCI_POWER_STATE</name>
-        <value>0x22</value>
-    </enumerator>
-    <enumerator>
-        <name>FREQ</name>
-        <value>0xC1</value>
-    </enumerator>
-    <enumerator>
-        <name>POWER</name>
-        <value>0xC2</value>
-    </enumerator>
-    <enumerator>
-        <name>BOOT_COUNT</name>
-        <value>0xC3</value>
-    </enumerator>
-    <enumerator>
-        <name>PCI_LINK_PRES</name>
-        <value>0xC4</value>
-    </enumerator>
-    <enumerator>
-        <name>PWR_LIMIT_ACTIVE</name>
-        <value>0xC4</value>
-    </enumerator>
-    <enumerator>
-        <name>FAULT</name>
-        <value>0xC7</value>
-    </enumerator>
-</enumerationType>
-
-<!-- IPMI Sensor numbers are defined in the IPMI spec as 8 bit values. However
-in the hostboot code they will be defined as a uint16_t to allow us to add
-additonal information. An example relates to error logs returned by the OCC,
-we might want to pass the Entity ID in the upper byte of the sensor ID, this
-would allow hostboot to search only the target type identifed by the Entity
-ID for the sensor number returned with the elog. -->
-
-<!-- attribute to hold 16 pairs of sensor type, sensor number values -->
-
-<attribute>
-    <id>IPMI_MAX_BUFFER_SIZE</id>
-    <description>max buffer size to use for ipmi messages</description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>BMC_MAX_ERROR_LOG_SIZE</id>
-    <description>max size of error log that can be sent to BMC</description>
-    <simpleType>
-        <uint32_t>
-            <default>2048</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>BMC_MANUFACTURER</id>
-    <description>The manufacturer of the BMC</description>
-    <simpleType>
-    <string>
-        <default>ibm</default>
-        <sizeInclNull>32</sizeInclNull>
-    </string>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
+  <attribute>
     <id>BMC_HW_CHIP_TYPE</id>
     <description>The type of hardware of the BMC</description>
     <simpleType>
-    <string>
+      <string>
         <default>ast2500</default>
         <sizeInclNull>32</sizeInclNull>
-    </string>
+      </string>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>BMC_MANUFACTURER</id>
+    <description>The manufacturer of the BMC</description>
+    <simpleType>
+      <string>
+        <default>ibm</default>
+        <sizeInclNull>32</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>BMC_MAX_ERROR_LOG_SIZE</id>
+    <description>max size of error log that can be sent to BMC</description>
+    <simpleType>
+      <uint32_t>
+        <default>2048</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>BMC_SW_TYPE</id>
     <description>The software type of the BMC</description>
     <simpleType>
-    <string>
+      <string>
         <default>openbmc</default>
         <sizeInclNull>32</sizeInclNull>
-    </string>
+      </string>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<!-- Start of HTMGT attributes -->
-
-<attribute>
-    <id>HTMGT_SAFEMODE</id>
-    <description>1 = in safemode. 0 = in normal mode.</description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-</attribute>
-
-<attribute>
-    <id>PSTATE_TABLE</id>
-    <description>HTMGT PSTATE data</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>3656</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>PSTATE_TABLE_MFG</id>
-    <description>HTMGT PSTATE data for mfg</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>3656</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OCC_CONTROL_DATA</id>
-    <description>OCC operational data
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-        <array>256</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HTMGT_INTERNAL_FLAGS</id>
-    <description>HTMGT internal flags
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0x00000000</default>
-        </uint32_t>
-    </simpleType>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OT_MIN_N_PER_MBA</id>
-    <description>
-        Lowest per MBA numerator ever allowed when OCC is
-        throttling due to OT.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OT_MEM_POWER</id>
-    <description>
-        Maximum memory power in centiWatts with throttle
-        set to minimum.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0,0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>N_PLUS_ONE_N_PER_MBA</id>
-    <description>
-        Static per MBA numerator setting when not in
-        oversubscription.  Calculated based on MRW memory
-        power with redundant power. Lowest per MBA numerator
-        ever allowed when OCC is throttling due to OT.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>N_PLUS_ONE_N_PER_CHIP</id>
-    <description>
-        Static per chip numerator setting when not in oversubscription.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>N_PLUS_ONE_MEM_POWER</id>
-    <description>
-        Maximum memory power in centiWatts with throttle
-        set to nominal/turbo
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0,0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>POWERCAP_N_PER_MBA</id>
-    <description>
-        Static per slot numerator setting when power is being capped.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>POWERCAP_N_PER_CHIP</id>
-    <description>
-        Static per chip numerator setting when power is being capped.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>POWERCAP_MEM_POWER</id>
-    <description>
-        Maximum memory power in centiWatts with when power is being capped.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0,0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
+  <attribute>
     <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
     <description>
         HTMGT calculates the total non-GPU maximum power in W when the
@@ -1205,16 +181,16 @@ ID for the sensor number returned with the elog. -->
         and then adds MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS
     </description>
     <simpleType>
-        <uint16_t>
-            <default>0x0000</default>
-        </uint16_t>
+      <uint16_t>
+        <default>0x0000</default>
+      </uint16_t>
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
     <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
     <description>
         HTMGT calculates the total processor/memory power drop in W when the
@@ -1223,16 +199,483 @@ ID for the sensor number returned with the elog. -->
         can be reduced by.
     </description>
     <simpleType>
-        <uint16_t>
-            <default>0x0000</default>
-        </uint16_t>
+      <uint16_t>
+        <default>0x0000</default>
+      </uint16_t>
     </simpleType>
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <enumerationType>
+    <id>ENTITY_ID</id>
+    <description>Enumeration indicating the IPMI entity ID, these values are
+        defined in the IPMI specification.  These values will be used in place
+        of target type when events are sent to the BMC.</description>
+    <enumerator>
+      <name>NA</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>OTHER</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>PROCESSOR</name>
+      <value>0x03</value>
+    </enumerator>
+    <enumerator>
+      <name>SYSTEM_BOARD</name>
+      <value>0x07</value>
+    </enumerator>
+    <enumerator>
+      <name>POWER_MGMT</name>
+      <value>0x15</value>
+    </enumerator>
+    <enumerator>
+      <name>CHASSIS</name>
+      <value>0x17</value>
+    </enumerator>
+    <enumerator>
+      <name>MEMORY_DEVICE</name>
+      <value>0x20</value>
+    </enumerator>
+    <enumerator>
+      <name>SYS_MGMT_SOFTWARE</name>
+      <value>0x21</value>
+    </enumerator>
+    <enumerator>
+      <name>BIOS</name>
+      <value>0x22</value>
+    </enumerator>
+    <enumerator>
+      <name>OS</name>
+      <value>0x23</value>
+    </enumerator>
+    <enumerator>
+      <name>CORE</name>
+      <value>0xD0</value>
+    </enumerator>
+    <enumerator>
+      <name>MEMBUF</name>
+      <value>0xD1</value>
+    </enumerator>
+    <enumerator>
+      <name>OCC</name>
+      <value>0xD2</value>
+    </enumerator>
+    <enumerator>
+      <name>REF_CLOCK</name>
+      <value>0xD4</value>
+    </enumerator>
+    <enumerator>
+      <name>PCI_CLOCK</name>
+      <value>0xD5</value>
+    </enumerator>
+    <enumerator>
+      <name>TOD_CLOCK</name>
+      <value>0xD6</value>
+    </enumerator>
+    <enumerator>
+      <name>APSS</name>
+      <value>0xD7</value>
+    </enumerator>
+    <enumerator>
+      <name>GPU_CORE</name>
+      <value>0xD8</value>
+    </enumerator>
+    <enumerator>
+      <name>GPU_MEMORY</name>
+      <value>0xD9</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>GPIO_INFO</id>
+    <description>Information needed to address GPIO device</description>
+    <complexType>
+      <description>Structure to define the addessing for an I2C
+                     slave device.</description>
+      <field>
+        <name>i2cMasterPath</name>
+        <description>Entity path to the chip that contains the I2C
+                         master</description>
+        <type>EntityPath</type>
+        <default>physical:sys-0</default>
+      </field>
+      <field>
+        <name>port</name>
+        <description>Port from the I2C Master device. This is a 6-bit
+                         value.</description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+      <field>
+        <name>devAddr</name>
+        <description>Device address on the I2C bus. This is a 7-bit value,
+                         but then shifted 1 bit left.</description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+      <field>
+        <name>engine</name>
+        <description>I2C master engine. This is a 2-bit
+                         value.</description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+      <field>
+        <name>vddrPin</name>
+        <description>
+                Logical GPIO pin number used to enabled/disable VDDR
+            </description>
+        <type>uint8_t</type>
+        <default>0</default>
+      </field>
+    </complexType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>GPU_SENSORS</id>
+    <description>Attribute to hold 3 possible GPU sensors.
+    Includes sensor types, ids, and OBUS_CFG bits
+    </description>
+    <simpleType>
+      <uint16_t/>
+      <array>3,7</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <enumerationType>
+    <id>GPU_SENSOR_ARRAY</id>
+    <description>
+        Enumeration defining the offsets into the GPU_SENSORS array.
+    </description>
+    <enumerator>
+      <name>FUNC_OFFSET</name>
+      <value>0x00</value>
+    </enumerator>
+    <enumerator>
+      <name>FUNC_ID_OFFSET</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>TEMP_OFFSET</name>
+      <value>0x02</value>
+    </enumerator>
+    <enumerator>
+      <name>TEMP_ID_OFFSET</name>
+      <value>0x03</value>
+    </enumerator>
+    <enumerator>
+      <name>MEM_TEMP_OFFSET</name>
+      <value>0x04</value>
+    </enumerator>
+    <enumerator>
+      <name>MEM_TEMP_ID_OFFSET</name>
+      <value>0x05</value>
+    </enumerator>
+    <enumerator>
+      <name>OBUS_CFG_OFFSET</name>
+      <value>0x06</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>HDAT_I2C_ADDR</id>
+    <description>
+        This attribute holds the values of the I2C address from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_BUS_FREQ</id>
+    <description>
+        This attribute holds the values of the I2C bus frequency in Hz from
+        the i2c device connections as defined in the MRW.  It is parsed
+        into a struct in i2c.C
+    </description>
+    <simpleType>
+      <uint32_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_DEVICE_LABEL</id>
+    <description>
+        This attribute holds the string descriptions of the I2C devices from
+        the i2c device connections as defined in the MRW.  It is parsed into
+        a struct in i2c.C
+    </description>
+    <simpleType>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_DEVICE_PURPOSE</id>
+    <description>
+        This attribute holds the values of the I2C device purpose from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_DEVICE_TYPE</id>
+    <description>
+        This attribute holds the values of the I2C device type from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_ELEMENTS</id>
+    <description>
+        This attribute holds the number of elements that were found under this
+        particular target, and how many devices are stored in the arrays.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_ENGINE</id>
+    <description>
+        This attribute holds the values of the I2C Engine from the i2c device
+        connections as defined in the MRW.  It is parsed into a struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_MASTER_PORT</id>
+    <description>
+        This attribute holds the values of the I2C Master Port from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HDAT_I2C_SLAVE_PORT</id>
+    <description>
+        This attribute holds the values of the I2C slave port from the i2c
+        device connections as defined in the MRW.  It is parsed into a
+        struct in i2c.C
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>HTMGT_INTERNAL_FLAGS</id>
+    <description>HTMGT internal flags
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0x00000000</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HTMGT_SAFEMODE</id>
+    <description>1 = in safemode. 0 = in normal mode.</description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>HTMGT_SAVED_POWER_LIMIT</id>
+    <description>User power limit information from the BMC to be used if
+        communication with the BMC is lost after system is powered on.
+        Used internally by HTMGT.
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>IPMI_INSTANCE</id>
+    <description>Holds the IPMI instance number for this entity.</description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <!-- IPMI Sensor numbers are defined in the IPMI spec as 8 bit values. However
+in the hostboot code they will be defined as a uint16_t to allow us to add
+additonal information. An example relates to error logs returned by the OCC,
+we might want to pass the Entity ID in the upper byte of the sensor ID, this
+would allow hostboot to search only the target type identifed by the Entity
+ID for the sensor number returned with the elog. -->
+  <!-- attribute to hold 16 pairs of sensor type, sensor number values -->
+  <attribute>
+    <id>IPMI_MAX_BUFFER_SIZE</id>
+    <description>max buffer size to use for ipmi messages</description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IPMI_SENSORS</id>
+    <description>Attribute to hold 16 pairs of sensor name, sensor number
+        pairs. A sensor name consists of one byte of general sensor type
+        and one byte of sub-type</description>
+    <simpleType>
+      <uint16_t/>
+      <array>16,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>IS_MPIPL_SUPPORTED</id>
+    <description>
+        Specifies if the mpipl is supported on this platform
+        0 : No , 1 : Yes
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MAX_VDD_CURRENT_READING</id>
+    <description>
+       Maximum theoretical Vdd current reading in 10mA units.
+       Used when VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE is set.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0x0000</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id>
+    <description>
+        Power used by components other than CPU, memory,
+        or GPUs in Watts
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>
+        Machine Readable Workbook safe mode throttle value for
+        numerator cfg_nm_n_per_chip
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MSS_UTIL_N_PER_MBA</id>
+    <description>
+        cfg_nm_n_per_mba throttle N value that was calculated from
+        MSS_DATABUS_UTIL_PER_MBA
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>NO_APSS_PROC_POWER_VCS_VIO_WATTS</id>
     <description>
         A constant power (in watts) that the OCC is to add onto Vdd and Vdn
@@ -1240,70 +683,579 @@ ID for the sensor number returned with the elog. -->
         This is used by the OCC to calculate a total processor socket power.
     </description>
     <simpleType>
-        <uint16_t>
-            <default>0</default>
-        </uint16_t>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-<attribute>
+  </attribute>
+
+  <attribute>
+    <id>N_PLUS_ONE_MEM_POWER</id>
+    <description>
+        Maximum memory power in centiWatts with throttle
+        set to nominal/turbo
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0,0</default>
+      </uint32_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>N_PLUS_ONE_N_PER_CHIP</id>
+    <description>
+        Static per chip numerator setting when not in oversubscription.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>N_PLUS_ONE_N_PER_MBA</id>
+    <description>
+        Static per MBA numerator setting when not in
+        oversubscription.  Calculated based on MRW memory
+        power with redundant power. Lowest per MBA numerator
+        ever allowed when OCC is throttling due to OT.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OCC_CONTROL_DATA</id>
+    <description>OCC operational data
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>256</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OPAL_MODEL</id>
+    <description>
+        Specifies the compatible model name for Opal to key off of.
+        This is sourced from the MRW and should be of the format
+        'vendor,model', e.g. 'tyan,palmetto'.
+    </description>
+    <simpleType>
+      <string>
+        <default>ibm,miscopenpower</default>
+        <sizeInclNull>32</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
+    <description>
+        DIMM temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
+    <description>
+        DIMM read timeout in seconds
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        DIMM temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
+    <description>
+        GPU core temperature error threshold in degrees C
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
+    <description>
+        GPU memory temperature error threshold in degrees C
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
+    <description>
+        GPU memory temperature read timeout in seconds
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
+    <description>
+        GPU core temperature read timeout in seconds
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
+    <description>
+        Memory controller temperature where an error will occur
+        in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
+    <description>
+        Memory controller read timeout in seconds
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    <description>
+         Memory controller temperature threshold
+         where throttling will occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP</id>
+    <description>
+        Minimum memory utilization percent (from 0-100)
+        for power capping
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id>
+    <description>
+        Minimum memory utilization percent (from 0-100)
+        for memory throttling
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
+    <description>
+        Minimum hard power cap in Watts
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        N mode bulk power supply limit in Watts
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id>
+    <description>
+        Maximum power allocated to DIMMs in Watts
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        N+1 bulk power limit in Watts for systems running
+        with redundant power supplies (default)
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        N+1 bulk power limit in Watts for High Performance Computing
+        systems running with a non-redundant power supply policy
+    </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    <description>
+        N+1 max memory power in Watts
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
+    <description>
+        Processor temperature where DVFS will occur in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
+    <description>
+        Processor temperature error threshold in degrees C
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
+    <description>
+        Processor read timeout in seconds
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PROC_WEIGHT</id>
+    <description>
+        Weight factor (in 1/10ths) for each core DTS to calculate a core
+        temperature.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_QUAD_WEIGHT</id>
+    <description>
+        Weight factor (in 1/10ths) for each quad (cache) DTS to calculate a core
+        temperature.
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
+    <description>
+        Regulator efficiency factor
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
+    <description>
+        Minimum soft power cap in Watts
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_TURBO_MODE_SUPPORTED</id>
+    <description>
+        If this system supports Turbo frequency mode.
+            0x00 = no
+            0x01 = yes
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_VRM_READ_TIMEOUT_SEC</id>
+    <description>
+        VRM read timeout in seconds (from 0-255)
+        Use 0 to disable VRM OT monitoring
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C</id>
     <description>
         VRM Vdd Temperature in degrees C to invoke DVFS (clip max Pstate)
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0xFF</default>
-        </uint8_t>
+      <uint8_t>
+        <default>0xFF</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-<attribute>
+  </attribute>
+
+  <attribute>
     <id>OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C</id>
     <description>
         VRM Vdd Temperature in degrees C that an overtemp error will be logged
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0xFF</default>
-        </uint8_t>
+      <uint8_t>
+        <default>0xFF</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-<attribute>
+  </attribute>
+
+  <attribute>
     <id>OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC</id>
     <description>
          Maximum time in seconds allowed without having a new VRM Vdd
          temperature before DVFS will occur
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0xFF</default>
-        </uint8_t>
+      <uint8_t>
+        <default>0xFF</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>PROC_SOCKET_POWER_WATTS</id>
+  <attribute>
+    <id>OP_TRACE_LITE</id>
     <description>
-        The maximum power a single procesor socket can support (in watts)
-        This is used to populate CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
+        Enable Trace lite on openpower.
     </description>
     <simpleType>
-        <uint16_t>
-            <default>250</default>
-        </uint16_t>
+      <uint8_t>
+        <default/>
+      </uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
-</attribute>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>OT_MEM_POWER</id>
+    <description>
+        Maximum memory power in centiWatts with throttle
+        set to minimum.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0,0</default>
+      </uint32_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OT_MIN_N_PER_MBA</id>
+    <description>
+        Lowest per MBA numerator ever allowed when OCC is
+        throttling due to OT.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>POWERCAP_MEM_POWER</id>
+    <description>
+        Maximum memory power in centiWatts with when power is being capped.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0,0</default>
+      </uint32_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>POWERCAP_N_PER_CHIP</id>
+    <description>
+        Static per chip numerator setting when power is being capped.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>POWERCAP_N_PER_MBA</id>
+    <description>
+        Static per slot numerator setting when power is being capped.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>PROC_MHZ_PER_WATT</id>
     <description>
         Frequency (in MHz) for 1 Watt of processor power change.  Used by the
@@ -1312,15 +1264,54 @@ ID for the sensor number returned with the elog. -->
         This is used in populating CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
     </description>
     <simpleType>
-        <uint16_t>
-            <default>28</default>
-        </uint16_t>
+      <uint16_t>
+        <default>28</default>
+      </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
+    <id>PROC_SOCKET_POWER_WATTS</id>
+    <description>
+        The maximum power a single procesor socket can support (in watts)
+        This is used to populate CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>250</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>PSTATE_TABLE</id>
+    <description>HTMGT PSTATE data</description>
+    <simpleType>
+      <uint8_t/>
+      <array>3656</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>PSTATE_TABLE_MFG</id>
+    <description>HTMGT PSTATE data for mfg</description>
+    <simpleType>
+      <uint8_t/>
+      <array>3656</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>REPORT_THROTTLE_BELOW_NOMINAL</id>
     <description>
          Indicates if OCC should wait to report DVFS due to power/thermal until
@@ -1332,27 +1323,86 @@ ID for the sensor number returned with the elog. -->
          0 = OCC report throttling when max freq. lowered below turbo
     </description>
     <simpleType>
-        <uint8_t><default>0</default></uint8_t>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>HTMGT_SAVED_POWER_LIMIT</id>
-    <description>User power limit information from the BMC to be used if
-        communication with the BMC is lost after system is powered on.
-        Used internally by HTMGT.
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
+  <enumerationType>
+    <id>SENSOR_TYPE</id>
+    <description>Enumeration indicating the IPMI sensor type, these values
+        are defined in the IPMI specification. These values will be used when
+    sending sensor reading events to the BMC.</description>
+    <enumerator>
+      <name>NA</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>TEMPERATURE</name>
+      <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <name>PROCESSOR</name>
+      <value>0x07</value>
+    </enumerator>
+    <enumerator>
+      <name>POWER_UNIT</name>
+      <value>0x09</value>
+    </enumerator>
+    <enumerator>
+      <name>MEMORY</name>
+      <value>0x0c</value>
+    </enumerator>
+    <enumerator>
+      <name>SYS_FW_PROGRESS</name>
+      <value>0x0F</value>
+    </enumerator>
+    <enumerator>
+      <name>SYS_EVENT</name>
+      <value>0x12</value>
+    </enumerator>
+    <enumerator>
+      <name>ADDIN_CARD</name>
+      <value>0x17</value>
+    </enumerator>
+    <enumerator>
+      <name>OS_BOOT</name>
+      <value>0x1F</value>
+    </enumerator>
+    <enumerator>
+      <name>APCI_POWER_STATE</name>
+      <value>0x22</value>
+    </enumerator>
+    <enumerator>
+      <name>FREQ</name>
+      <value>0xC1</value>
+    </enumerator>
+    <enumerator>
+      <name>POWER</name>
+      <value>0xC2</value>
+    </enumerator>
+    <enumerator>
+      <name>BOOT_COUNT</name>
+      <value>0xC3</value>
+    </enumerator>
+    <enumerator>
+      <name>PCI_LINK_PRES</name>
+      <value>0xC4</value>
+    </enumerator>
+    <enumerator>
+      <name>PWR_LIMIT_ACTIVE</name>
+      <value>0xC4</value>
+    </enumerator>
+    <enumerator>
+      <name>FAULT</name>
+      <value>0xC7</value>
+    </enumerator>
+  </enumerationType>
 
-<attribute>
+  <attribute>
     <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
     <description>
         Used to enable Vdd current overflow worakaround.
@@ -1361,69 +1411,12 @@ ID for the sensor number returned with the elog. -->
         Set to 0 to disable.
     </description>
     <simpleType>
-        <uint16_t>
-            <default>0x0000</default>
-        </uint16_t>
+      <uint16_t>
+        <default>0x0000</default>
+      </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
-
-<attribute>
-    <id>MAX_VDD_CURRENT_READING</id>
-    <description>
-       Maximum theoretical Vdd current reading in 10mA units.
-       Used when VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE is set.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0x0000</default>
-        </uint16_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<!-- end HTMGT attributes -->
-
-<attribute>
-    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-    <description>
-        Machine Readable Workbook safe mode throttle value for
-        numerator cfg_nm_n_per_chip
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>MSS_UTIL_N_PER_MBA</id>
-    <description>
-        cfg_nm_n_per_mba throttle N value that was calculated from
-        MSS_DATABUS_UTIL_PER_MBA
-    </description>
-    <simpleType>
-        <uint32_t></uint32_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
-    <description>Flag used to allow sending informational call-home errors as ESELS to the BMC</description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
+  </attribute>
 
 </attributes>

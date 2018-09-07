@@ -22,8 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attributes>
-
 <!-- =====================================================================
      Contains the definition of attributes that are only available on
      openpower systems for a PowerVM build.  This file is only compiled when
@@ -31,8 +29,451 @@
      FSP based systems.
      =====================================================================
 -->
+<attributes>
+  <attribute>
+    <id>ASCII_VPD_LX_KEYWORD</id>
+    <description>LX keyword VPD data for HDAT module
+    </description>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
 
-<attribute>
+  <enumerationType>
+    <id>CHIP_VER</id>
+    <description>Enumeration indicating the chip version</description>
+    <enumerator>
+      <name>DD10</name>
+      <value>0x10</value>
+    </enumerator>
+    <enumerator>
+      <name>DD11</name>
+      <value>0x11</value>
+    </enumerator>
+    <enumerator>
+      <name>DD20</name>
+      <value>0x20</value>
+    </enumerator>
+    <enumerator>
+      <name>DD21</name>
+      <value>0x21</value>
+    </enumerator>
+    <default>DD10</default>
+  </enumerationType>
+
+  <attribute>
+    <id>CHIP_VER</id>
+    <description>Attribute indicating the target's chip version</description>
+    <simpleType>
+      <enumeration>
+        <id>CHIP_VER</id>
+      </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+  </attribute>
+
+  <attribute>
+    <id>CREATE_DEF_PARTITION</id>
+    <description>
+        User configuration for creating default partition
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ENLARGED_IO_SLOT_COUNT</id>
+    <description>
+        User configuration for Enlarged IO SLot Count
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HUGE_PAGE_COUNT</id>
+    <description>
+       Huge Memory Page Count
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HUGE_PAGE_SIZE</id>
+    <description>
+       Huge Memory Page Size
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <enumerationType>
+    <id>HW_VER</id>
+    <description>Enumeration indicating the chip HW version</description>
+    <enumerator>
+      <name>FSP_HW_VER</name>
+      <value>0x2</value>
+    </enumerator>
+    <enumerator>
+      <name>BMC_HW_VER</name>
+      <value>0x3</value>
+    </enumerator>
+    <default>BMC_HW_VER</default>
+  </enumerationType>
+
+  <attribute>
+    <id>HW_VER</id>
+    <description>Attribute indicating the target's hw version</description>
+    <simpleType>
+      <enumeration>
+        <id>HW_VER</id>
+      </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hasStringConversion/>
+  </attribute>
+
+  <attribute>
+    <id>HYPERVISOR_IPL_DESTINATION</id>
+    <description>
+      Hypervisor IPL Destination
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HYPERVISOR_IPL_SIDE</id>
+    <description>
+       Platform IPL Side
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>HYP_DISPATCH_WHEEL</id>
+    <description>
+       Hypervisor Dispatch Wheel
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>IPL_ATTRIBUTES</id>
+    <description>
+       Assorted list of differnt IPL attributes passed via HDAT
+   </description>
+    <complexType>
+      <description>struct - 8 booleans </description>
+      <field>
+        <name>createDefaultPartition</name>
+        <description>
+             0b0: Dont create default partition;
+             0b1: Create default partition;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>clickToAcceptState</name>
+        <description>
+             0b0: Customer has not accepted license agreement;
+             0b1: Customer has accepted license agreement;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>disableVirtIO</name>
+        <description>
+             0b0: Enable Virtual IO Connections between partitions;
+             0b1: Disable Virtual IO Connections between partitions;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>resetPCINumbers</name>
+        <description>
+             0b0: Do not reset PCI Numbers;
+             0b1: Reset PCI Numbers;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>clearHypNVRAM</name>
+        <description>
+             0b0: Do not clear HYP NVRAM;
+             0b1: Clear HYP NVRAM;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>deleteHYPSELs</name>
+        <description>
+             0b0: Do not delete SELs originating from HYP;
+             0b1: Delete SELs originating from HYP;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>deleteHBSELs</name>
+        <description>
+             0b0: Do not delete SELs originating from Hostboot;
+             0b1: Delete SELs originating from Hostboot;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+      <field>
+        <name>deleteBMCSELs</name>
+        <description>
+             0b0: Do not delete SELs originating from BMC;
+             0b1: Delete SELs originating from BMC;
+            </description>
+        <type>uint8_t</type>
+        <bits>1</bits>
+        <default>0</default>
+      </field>
+    </complexType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>IPS_ENABLE</id>
+    <description>
+        Indicates if Idle Power Save is enabled.  This is independent of
+        the OPEN_POWER_PM_MODE (DPS and IPS can be enabled at the same time).
+        Valid Values: 0 = Disabled (default), 1 = Enabled.
+        See IPS_ENTER / IPS_EXIT attributes for IPS configuration.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <!-- disabled -->
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>IPS_ENTER_TIME_SECONDS</id>
+    <description>
+        When IPS is enabled, this defines the delay time in seconds
+        (between 10 and 600) to enter Idle Power Save.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>240</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>IPS_ENTER_UTILIZATION_PERCENT</id>
+    <description>
+        When IPS is enabled, this defines the utilization threshold as a
+        percent (between 0 and 100) to enter Idle Power Save.  This value
+        should be less than IPS_EXIT_UTILIZATION_PERCENT.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>8</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>IPS_EXIT_TIME_SECONDS</id>
+    <description>
+        When IPS is enabled, this defines the delay time in seconds
+        (between 10 and 600) to exit Idle Power Save.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>10</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>IPS_EXIT_UTILIZATION_PERCENT</id>
+    <description>
+        When IPS is enabled, this defines the utilization threshold as a
+        percent (between 0 and 100) to exit Idle Power Save.  This value
+        should be greater than IPS_ENTER_UTILIZATION_PERCENT.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>12</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>LMB_SIZE</id>
+    <description>
+       Logical Memory Block Size
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
+    <description>
+        User configuration for max HSL Opticonnect connections
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PM_MODE</id>
+    <description>
+      Power management mode the system should use.
+      Valid values: 1 = Nominal (default),
+      5 = Static Power Save (percentage below nominal whose value
+      is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT),
+      6 = Dynamic Power Save - Favor Energy (DPS-FE),
+      10 = Dynamic Power Save - Favor Performance (DPS-FP),
+      11 = Fixed Frequency Override - (percentage above nominal whose
+      value is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT)
+    </description>
+    <simpleType>
+      <uint8_t>
+        <!-- Nominal -->
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OPEN_POWER_PM_MODE_FREQ_PERCENT</id>
+    <description>
+        Percentage from nominal that the processors should run at when
+        OPEN_POWER_PM_MODE is set to Static Power Save or
+        Fixed Frequency Override (ignored on all other modes).
+        Unit is in tenths of a percent (150 = 15.0%).
+        Static Power Save (5): percentage to decrease frequency,
+        Fixed Frequency Override (11): percentage to increase frequency
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>OS_IPL_MODE</id>
+    <description>
+       Operating System IPL Mode
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>PHYP_SYSTEM_TYPE</id>
+    <description>PHYP system type value for habanero
+            and barreleye (0x3015 and 0x3016 respectively).
+            The value is updated in the system xml.
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>PRESERVE_MDC_PARTITION_VPD</id>
+    <description>
+        MFG setting to preserve MDC partition vpd
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>PROC_HW_TOPOLOGY</id>
     <description>Hardware topology for HDAT
         creator:MRW
@@ -46,588 +487,131 @@
             bit 12-15:Hub Id inside proc
     </description>
     <simpleType>
-        <uint16_t>
-        </uint16_t>
+      <uint16_t/>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+  </attribute>
 
-<enumerationType>
-    <id>CHIP_VER</id>
-    <description>Enumeration indicating the chip version</description>
-    <enumerator>
-        <name>DD10</name>
-        <value>0x10</value>
-    </enumerator>
-    <enumerator>
-        <name>DD11</name>
-        <value>0x11</value>
-    </enumerator>
-    <enumerator>
-        <name>DD20</name>
-        <value>0x20</value>
-    </enumerator>
-    <enumerator>
-        <name>DD21</name>
-        <value>0x21</value>
-    </enumerator>
-    <default>DD10</default>
-</enumerationType>
-
-<enumerationType>
-    <id>HW_VER</id>
-    <description>Enumeration indicating the chip HW version</description>
-    <enumerator>
-        <name>FSP_HW_VER</name>
-        <value>0x2</value>
-    </enumerator>
-    <enumerator>
-        <name>BMC_HW_VER</name>
-        <value>0x3</value>
-    </enumerator>
-    <default>BMC_HW_VER</default>
-</enumerationType>
-
-<enumerationType>
-    <id>SW_VER</id>
-    <description>Enumeration indicating the SW version</description>
-    <enumerator>
-        <name>FSP_SW_VER</name>
-        <value>0x1</value>
-    </enumerator>
-    <enumerator>
-        <name>BMC_SW_VER</name>
-        <value>0x2</value>
-    </enumerator>
-    <default>BMC_SW_VER</default>
-</enumerationType>
-
-<enumerationType>
+  <enumerationType>
     <id>ROLE</id>
     <description>Enumeration indicating the master's FSI type</description>
     <enumerator>
-        <name>PRIMARY</name>
-        <value>1</value>
+      <name>PRIMARY</name>
+      <value>1</value>
     </enumerator>
     <enumerator>
-        <name>BACKUP</name>
-        <value>0</value>
+      <name>BACKUP</name>
+      <value>0</value>
     </enumerator>
     <default>PRIMARY</default>
-</enumerationType>
+  </enumerationType>
 
-<attribute>
-    <id>CHIP_VER</id>
-    <description>Attribute indicating the target's chip version</description>
-    <simpleType>
-        <enumeration>
-            <id>CHIP_VER</id>
-        </enumeration>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hasStringConversion/>
-</attribute>
-
-<attribute>
-    <id>HW_VER</id>
-    <description>Attribute indicating the target's hw version</description>
-    <simpleType>
-        <enumeration>
-            <id>HW_VER</id>
-        </enumeration>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hasStringConversion/>
-</attribute>
-
-<attribute>
-    <id>SW_VER</id>
-    <description>Attribute indicating the target's software version</description>
-    <simpleType>
-        <enumeration>
-            <id>SW_VER</id>
-        </enumeration>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hasStringConversion/>
-</attribute>
-
-<attribute>
+  <attribute>
     <id>ROLE</id>
     <description>Attribute indicating the target's role</description>
     <simpleType>
-        <enumeration>
-            <id>ROLE</id>
-        </enumeration>
+      <enumeration>
+        <id>ROLE</id>
+      </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hasStringConversion/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>PHYP_SYSTEM_TYPE</id>
-    <description>PHYP system type value for habanero
-            and barreleye (0x3015 and 0x3016 respectively).
-            The value is updated in the system xml.
-    </description>
-    <simpleType>
-        <uint32_t>
-        </uint32_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>ASCII_VPD_LX_KEYWORD</id>
-    <description>LX keyword VPD data for HDAT module
-    </description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>ENLARGED_IO_SLOT_COUNT</id>
-    <description>
-        User configuration for Enlarged IO SLot Count
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>CREATE_DEF_PARTITION</id>
-    <description>
-        User configuration for creating default partition
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-   <id>IPL_ATTRIBUTES</id>
-   <description>
-       Assorted list of differnt IPL attributes passed via HDAT
-   </description>
-   <complexType>
-        <description>struct - 8 booleans </description>
-        <field>
-            <name>createDefaultPartition</name>
-            <description>
-             0b0: Dont create default partition;
-             0b1: Create default partition;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>clickToAcceptState</name>
-            <description>
-             0b0: Customer has not accepted license agreement;
-             0b1: Customer has accepted license agreement;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>disableVirtIO</name>
-            <description>
-             0b0: Enable Virtual IO Connections between partitions;
-             0b1: Disable Virtual IO Connections between partitions;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>resetPCINumbers</name>
-            <description>
-             0b0: Do not reset PCI Numbers;
-             0b1: Reset PCI Numbers;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>clearHypNVRAM</name>
-            <description>
-             0b0: Do not clear HYP NVRAM;
-             0b1: Clear HYP NVRAM;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>deleteHYPSELs</name>
-            <description>
-             0b0: Do not delete SELs originating from HYP;
-             0b1: Delete SELs originating from HYP;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>deleteHBSELs</name>
-            <description>
-             0b0: Do not delete SELs originating from Hostboot;
-             0b1: Delete SELs originating from Hostboot;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-        <field>
-            <name>deleteBMCSELs</name>
-            <description>
-             0b0: Do not delete SELs originating from BMC;
-             0b1: Delete SELs originating from BMC;
-            </description>
-            <type>uint8_t</type>
-            <bits>1</bits>
-            <default>0</default>
-        </field>
-   </complexType>
-   <persistency>volatile-zeroed</persistency>
-   <readable/>
-   <writeable/>
-</attribute>
-
-<attribute>
-    <id>PRESERVE_MDC_PARTITION_VPD</id>
-    <description>
-        MFG setting to preserve MDC partition vpd
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HYPERVISOR_IPL_SIDE</id>
-    <description>
-       Platform IPL Side
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OS_IPL_MODE</id>
-    <description>
-       Operating System IPL Mode
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>LMB_SIZE</id>
-    <description>
-       Logical Memory Block Size
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>MAX_HSL_OPTICONNECT_CONNECTIONS</id>
-    <description>
-        User configuration for max HSL Opticonnect connections
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HUGE_PAGE_COUNT</id>
-    <description>
-       Huge Memory Page Count
-    </description>
-    <simpleType>
-        <uint16_t>
-        </uint16_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HUGE_PAGE_SIZE</id>
-    <description>
-       Huge Memory Page Size
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>VLAN_SWITCHES</id>
-    <description>
-       Number of VLAN Switches
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>VTPM_ENABLED</id>
-    <description>
-       Virtual TPM Enabled
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HYPERVISOR_IPL_DESTINATION</id>
-    <description>
-      Hypervisor IPL Destination
-    </description>
-    <simpleType>
-    <uint8_t>
-    </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>HYP_DISPATCH_WHEEL</id>
-    <description>
-       Hypervisor Dispatch Wheel
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>SYSTEM_BRAND_NAME</id>
-    <description>
-       Brand Name of OEM systems
-    </description>
-    <simpleType>
-     <string>
-        <sizeInclNull>64</sizeInclNull>
-     </string>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
+  <attribute>
     <id>SLCA_INDEX</id>
     <description>
        SLCA index for this FRU
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+      <uint32_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
+  <attribute>
     <id>SLCA_RID</id>
     <description>
        SLCA RID for this FRU
     </description>
     <simpleType>
-        <uint32_t>
-        </uint32_t>
+      <uint32_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
+  </attribute>
 
-<attribute>
-    <id>OPEN_POWER_PM_MODE</id>
-    <description>
-      Power management mode the system should use.
-      Valid values: 1 = Nominal (default),
-      5 = Static Power Save (percentage below nominal whose value
-      is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT),
-      6 = Dynamic Power Save - Favor Energy (DPS-FE),
-      10 = Dynamic Power Save - Favor Performance (DPS-FP),
-      11 = Fixed Frequency Override - (percentage above nominal whose
-      value is defined in OPEN_POWER_PM_MODE_FREQ_PERCENT)
-    </description>
+  <enumerationType>
+    <id>SW_VER</id>
+    <description>Enumeration indicating the SW version</description>
+    <enumerator>
+      <name>FSP_SW_VER</name>
+      <value>0x1</value>
+    </enumerator>
+    <enumerator>
+      <name>BMC_SW_VER</name>
+      <value>0x2</value>
+    </enumerator>
+    <default>BMC_SW_VER</default>
+  </enumerationType>
+
+  <attribute>
+    <id>SW_VER</id>
+    <description>Attribute indicating the target's software version</description>
     <simpleType>
-        <uint8_t>
-            <default>1</default> <!-- Nominal -->
-        </uint8_t>
+      <enumeration>
+        <id>SW_VER</id>
+      </enumeration>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+    <hasStringConversion/>
+  </attribute>
 
-<attribute>
-    <id>OPEN_POWER_PM_MODE_FREQ_PERCENT</id>
+  <attribute>
+    <id>SYSTEM_BRAND_NAME</id>
     <description>
-        Percentage from nominal that the processors should run at when
-        OPEN_POWER_PM_MODE is set to Static Power Save or
-        Fixed Frequency Override (ignored on all other modes).
-        Unit is in tenths of a percent (150 = 15.0%).
-        Static Power Save (5): percentage to decrease frequency,
-        Fixed Frequency Override (11): percentage to increase frequency
-    </description>
-    <simpleType><uint16_t></uint16_t></simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>IPS_ENABLE</id>
-    <description>
-        Indicates if Idle Power Save is enabled.  This is independent of
-        the OPEN_POWER_PM_MODE (DPS and IPS can be enabled at the same time).
-        Valid Values: 0 = Disabled (default), 1 = Enabled.
-        See IPS_ENTER / IPS_EXIT attributes for IPS configuration.
+       Brand Name of OEM systems
     </description>
     <simpleType>
-        <uint8_t>
-            <default>0</default> <!-- disabled -->
-        </uint8_t>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-</attribute>
+    <writeable/>
+  </attribute>
 
-<attribute>
-    <id>IPS_ENTER_TIME_SECONDS</id>
+  <attribute>
+    <id>VLAN_SWITCHES</id>
     <description>
-        When IPS is enabled, this defines the delay time in seconds
-        (between 10 and 600) to enter Idle Power Save.
+       Number of VLAN Switches
     </description>
     <simpleType>
-        <uint16_t>
-            <default>240</default>
-        </uint16_t>
+      <uint8_t/>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
-</attribute>
+    <writeable/>
+  </attribute>
 
-<attribute>
-    <id>IPS_ENTER_UTILIZATION_PERCENT</id>
+  <attribute>
+    <id>VTPM_ENABLED</id>
     <description>
-        When IPS is enabled, this defines the utilization threshold as a
-        percent (between 0 and 100) to enter Idle Power Save.  This value
-        should be less than IPS_EXIT_UTILIZATION_PERCENT.
+       Virtual TPM Enabled
     </description>
     <simpleType>
-        <uint8_t>
-            <default>8</default>
-        </uint8_t>
+      <uint8_t/>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
-</attribute>
-
-<attribute>
-    <id>IPS_EXIT_TIME_SECONDS</id>
-    <description>
-        When IPS is enabled, this defines the delay time in seconds
-        (between 10 and 600) to exit Idle Power Save.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>10</default>
-        </uint16_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
-    <id>IPS_EXIT_UTILIZATION_PERCENT</id>
-    <description>
-        When IPS is enabled, this defines the utilization threshold as a
-        percent (between 0 and 100) to exit Idle Power Save.  This value
-        should be greater than IPS_ENTER_UTILIZATION_PERCENT.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>12</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
+    <writeable/>
+  </attribute>
 
 </attributes>

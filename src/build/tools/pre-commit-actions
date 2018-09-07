@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@
 # the code beautifier astyle.
 
 my $copyrightScript = "addCopyright";
+my $xmlSortingScript = "applyTargetingStyle";
 
 ##  Make up a list of all staged files ( --cached --name-only )
 ##  Filter for only Added or Modified ( --diff-filter=AM )
@@ -41,6 +42,9 @@ if ( @fileList )
     print "\n";
 
     system "$ENV{'TOOLSDIR'}/$copyrightScript update @fileList";
+    die("$?") if ($? != 0);
+
+    system "$ENV{'TOOLSDIR'}/$xmlSortingScript @fileList";
     die("$?") if ($? != 0);
 
     system "git add @fileList";
