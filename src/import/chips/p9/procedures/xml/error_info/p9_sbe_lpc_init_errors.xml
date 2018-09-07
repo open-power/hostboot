@@ -49,7 +49,9 @@
     <sbeError/>
     <rc>RC_LPC_OPB_ERROR</rc>
     <description>After LPC initialization, the OPB master indicated an error.</description>
-    <collectFfdc>p9_collect_lpc_regs, FFDC_TARGET_CHIP</collectFfdc>
+    <ffdc>FFDC_TARGET_CHIP</ffdc>
+    <!-- TODO RTC: 198639 Handle collectFfdc xml tags in fapi error xml in FIFO FFDC buffer -->
+    <!-- <collectFfdc>p9_collect_lpc_regs, FFDC_TARGET_CHIP</collectFfdc> -->
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
