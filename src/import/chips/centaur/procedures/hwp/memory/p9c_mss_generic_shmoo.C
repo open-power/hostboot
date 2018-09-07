@@ -4583,9 +4583,8 @@ extern "C"
         return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:
-        // We're here, so we took a fail - log it as recovered, as we just want it to be informational
-        // Box shmoo is just used to collect data in case we take fails later
-        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        // We're here, so we took a fail - log it as predictive, so we get callouts in MFG test but don't fail out of training_adv
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         return fapi2::FAPI2_RC_SUCCESS;
     }
