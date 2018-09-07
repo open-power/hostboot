@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/attribute_types_cfm.xml $    -->
+<!-- $Source: src/build/tools/sort_targeting.xsl $                          -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018                             -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,65 +22,31 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- =====================================================================
-     CONCURRENT FIRMWARE UPDATE ATTRIBUTE TYPES
-     Contains the definition of attributes used to test CFM
-     ================================================================= -->
-<attributes>
-  <attribute>
-    <description>
-        CFM test attribute - non-volatile read-only
-    </description>
-    <id>CFM_TEST_NV_RO</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x75804084</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml" indent="yes" omit-xml-declaration="yes"/>
+<xsl:strip-space elements="*"/>
 
-  <attribute>
-    <description>
-        CFM test attribute - non-volatile writeable
-    </description>
-    <id>CFM_TEST_NV_WR</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x90359461</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
+<!-- Setup a key that maps preceding comments to the first following sibling.
+     That way the output can keep the comments in the same relative position
+     after sorting has occurred.
+ -->
+<xsl:key name  = "k_precedingComment"
+         match = "comment()"
+         use   = "generate-id(following-sibling::*[1])" />
 
-  <attribute>
-    <description>
-        CFM test attribute - volatile-zeroed
-    </description>
-    <id>CFM_TEST_VZ</id>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <simpleType>
-      <uint32_t/>
-    </simpleType>
-  </attribute>
+<!-- For each element in the file sort it recursively based on its child
+     <id> tag. If an element doesn't have a child <id> tag then its order
+     relative to its parent won't change.
+ -->
+<xsl:template match="*">
+    <!-- Add the preceding comments back atop the current matched element -->
+    <xsl:copy-of select="key('k_precedingComment', generate-id())" />
+    <xsl:copy>
+        <xsl:apply-templates select="@*"/>
+        <xsl:apply-templates select="node()">
+            <xsl:sort select="id"/>
+        </xsl:apply-templates>
+    </xsl:copy>
+</xsl:template>
 
-  <attribute>
-    <description>
-        CFM test attribute - volatile writeable
-    </description>
-    <id>CFM_TEST_V_WR</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint32_t>
-        <default>0x33EFE76B</default>
-      </uint32_t>
-    </simpleType>
-  </attribute>
-
-</attributes>
+</xsl:stylesheet>

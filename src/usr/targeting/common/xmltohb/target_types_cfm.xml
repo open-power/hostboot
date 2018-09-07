@@ -22,29 +22,42 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<attributes>
-
 <!-- =====================================================================
      CONCURRENT FIRMWARE UPDATE TARGETS
      Contains the definition of CFM target type extensions
      to add CFM attributes to common target types
      ================================================================= -->
-
-<targetTypeExtension>
-    <id>sys-sys-power9</id>
-    <attribute><id>CFM_TEST_VZ</id></attribute>
-    <attribute><id>CFM_TEST_V_WR</id></attribute>
-    <attribute><id>CFM_TEST_NV_RO</id></attribute>
-    <attribute><id>CFM_TEST_NV_WR</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
+<attributes>
+  <targetTypeExtension>
     <id>chip-processor</id>
-    <attribute><id>CFM_TEST_VZ</id></attribute>
-    <attribute><id>CFM_TEST_V_WR</id></attribute>
-    <attribute><id>CFM_TEST_NV_RO</id></attribute>
-    <attribute><id>CFM_TEST_NV_WR</id></attribute>
-</targetTypeExtension>
+    <attribute>
+      <id>CFM_TEST_NV_RO</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_NV_WR</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_VZ</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_V_WR</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>sys-sys-power9</id>
+    <attribute>
+      <id>CFM_TEST_NV_RO</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_NV_WR</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_VZ</id>
+    </attribute>
+    <attribute>
+      <id>CFM_TEST_V_WR</id>
+    </attribute>
+  </targetTypeExtension>
 
 </attributes>

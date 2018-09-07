@@ -459,6 +459,10 @@ sub filetype
     {
         return "xml"
     }
+    if ( $filename =~ m/\.xsl$/i )
+    {
+        return "xsl"
+    }
     if ( $filename =~ m/\.txt$/i )
     {
         return "txt"
@@ -777,6 +781,10 @@ sub removeCopyrightBlock
     {
         $data = removeProlog( $data, '<!--', '-->' );
     }
+    elsif ( $filetype  eq "xsl" )
+    {
+        $data = removeProlog( $data, '<!--', '-->' );
+    }
     elsif  ( "Assembly" eq $filetype )
     {
         $data = removeProlog( $data, '\#', '' );
@@ -1032,6 +1040,10 @@ EOF
         $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '//', '');
     }
     elsif ( "xml" eq $filetype)
+    {
+        $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '<!--', '-->');
+    }
+    elsif ( "xsl" eq $filetype)
     {
         $IBMCopyrightBlock = addPrologComments($IBMCopyrightBlock, '<!--', '-->');
     }

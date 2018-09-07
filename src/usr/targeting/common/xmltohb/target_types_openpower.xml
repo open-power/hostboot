@@ -22,8 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<attributes>
-
 <!-- =====================================================================
      Contains the target definition of attributes that are only available
      on openpower systems.  This file is only compiled when
@@ -31,153 +29,327 @@
      FSP based systems.
      =====================================================================
  -->
-<targetTypeExtension>
-    <id>chip-processor</id>
-    <attribute><id>HDAT_I2C_ENGINE</id></attribute>
-    <attribute><id>HDAT_I2C_MASTER_PORT</id></attribute>
-    <attribute><id>HDAT_I2C_DEVICE_TYPE</id></attribute>
-    <attribute><id>HDAT_I2C_ADDR</id></attribute>
-    <attribute><id>HDAT_I2C_SLAVE_PORT</id></attribute>
-    <attribute><id>HDAT_I2C_BUS_FREQ</id></attribute>
-    <attribute><id>HDAT_I2C_DEVICE_PURPOSE</id></attribute>
-    <attribute><id>HDAT_I2C_DEVICE_LABEL</id></attribute>
-    <attribute><id>HDAT_I2C_ELEMENTS</id></attribute>
-    <attribute>
-        <id>IPMI_INSTANCE</id>
-        <default>0xFF</default>
-    </attribute>
-    <attribute><id>GPU_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>sys-sys-power9</id>
-    <attribute><id>OCC_CONTROL_DATA</id></attribute>
-    <attribute><id>HTMGT_INTERNAL_FLAGS</id></attribute>
-    <attribute><id>HTMGT_SAFEMODE</id></attribute>
-    <attribute><id>ADC_CHANNEL_FUNC_IDS</id></attribute>
-    <attribute><id>ADC_CHANNEL_SENSOR_NUMBERS</id></attribute>
-    <attribute><id>ADC_CHANNEL_GNDS</id></attribute>
-    <attribute><id>ADC_CHANNEL_GAINS</id></attribute>
-    <attribute><id>ADC_CHANNEL_OFFSETS</id></attribute>
-    <attribute><id>APSS_GPIO_PORT_MODES</id></attribute>
-    <attribute><id>APSS_GPIO_PORT_PINS</id></attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
-    <attribute><id>BMC_MAX_ERROR_LOG_SIZE</id></attribute>
-    <attribute><id>OP_TRACE_LITE</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_WEIGHT</id></attribute>
-    <attribute><id>OPEN_POWER_QUAD_WEIGHT</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id></attribute>
-    <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP</id></attribute>
-    <attribute><id>OPEN_POWER_VRM_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id></attribute>
-    <attribute><id>OPEN_POWER_MIN_POWER_CAP_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
-    <attribute><id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPAL_MODEL</id></attribute>
-    <attribute><id>IS_MPIPL_SUPPORTED</id></attribute>
-    <attribute><id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id></attribute>
-    <attribute><id>CALCULATED_PROC_MEMORY_POWER_DROP</id></attribute>
-    <attribute><id>PROC_SOCKET_POWER_WATTS</id></attribute>
-    <attribute><id>PROC_MHZ_PER_WATT</id></attribute>
-    <attribute><id>ALLOW_CALLHOME_ESELS_TO_BMC</id></attribute>
-    <attribute><id>REPORT_THROTTLE_BELOW_NOMINAL</id></attribute>
-    <attribute><id>HTMGT_SAVED_POWER_LIMIT</id></attribute>
-    <attribute><id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id></attribute>
-    <attribute><id>MAX_VDD_CURRENT_READING</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>enc-node-power9</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>chip-processor-power9</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>NO_APSS_PROC_POWER_VCS_VIO_WATTS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>chip-membuf-centaur</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute>
-        <id>GPIO_INFO</id>
-    </attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>lcard-dimm</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-occ-power9</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>occ</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-core-power9</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-
-</targetTypeExtension>
-
-<targetTypeExtension>
+<attributes>
+  <targetTypeExtension>
     <id>chip-bmc-ast2500</id>
-    <attribute><id>BMC_MANUFACTURER</id></attribute>
-    <attribute><id>BMC_HW_CHIP_TYPE</id></attribute>
-    <attribute><id>BMC_SW_TYPE</id></attribute>
-    <attribute><id>FRU_ID</id></attribute>
-</targetTypeExtension>
+    <attribute>
+      <id>BMC_HW_CHIP_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>BMC_MANUFACTURER</id>
+    </attribute>
+    <attribute>
+      <id>BMC_SW_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>FRU_ID</id>
+    </attribute>
+  </targetTypeExtension>
 
-<targetTypeExtension>
+  <targetTypeExtension>
+    <id>chip-membuf-centaur</id>
+    <attribute>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>GPIO_INFO</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>chip-processor</id>
+    <attribute>
+      <id>GPU_SENSORS</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_ADDR</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_BUS_FREQ</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_DEVICE_LABEL</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_DEVICE_PURPOSE</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_DEVICE_TYPE</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_ELEMENTS</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_ENGINE</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_MASTER_PORT</id>
+    </attribute>
+    <attribute>
+      <id>HDAT_I2C_SLAVE_PORT</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_INSTANCE</id>
+      <default>0xFF</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>chip-processor-power9</id>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+    <attribute>
+      <id>NO_APSS_PROC_POWER_VCS_VIO_WATTS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>enc-node-power9</id>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>lcard-dimm</id>
+    <attribute>
+      <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>occ</id>
     <attribute>
-        <id>PSTATE_TABLE</id>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>occ</id>
+    <attribute>
+      <id>PSTATE_TABLE</id>
     </attribute>
     <attribute>
-        <id>PSTATE_TABLE_MFG</id>
+      <id>PSTATE_TABLE_MFG</id>
     </attribute>
-</targetTypeExtension>
+  </targetTypeExtension>
 
-<targetTypeExtension>
+  <targetTypeExtension>
+    <id>sys-sys-power9</id>
+    <attribute>
+      <id>ADC_CHANNEL_FUNC_IDS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_GAINS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_GNDS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_OFFSETS</id>
+    </attribute>
+    <attribute>
+      <id>ADC_CHANNEL_SENSOR_NUMBERS</id>
+    </attribute>
+    <attribute>
+      <id>ALLOW_CALLHOME_ESELS_TO_BMC</id>
+    </attribute>
+    <attribute>
+      <id>APSS_GPIO_PORT_MODES</id>
+    </attribute>
+    <attribute>
+      <id>APSS_GPIO_PORT_PINS</id>
+    </attribute>
+    <attribute>
+      <id>BMC_MAX_ERROR_LOG_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
+    </attribute>
+    <attribute>
+      <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_INTERNAL_FLAGS</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_SAFEMODE</id>
+    </attribute>
+    <attribute>
+      <id>HTMGT_SAVED_POWER_LIMIT</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_MAX_BUFFER_SIZE</id>
+    </attribute>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+    <attribute>
+      <id>IS_MPIPL_SUPPORTED</id>
+    </attribute>
+    <attribute>
+      <id>MAX_VDD_CURRENT_READING</id>
+    </attribute>
+    <attribute>
+      <id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OCC_CONTROL_DATA</id>
+    </attribute>
+    <attribute>
+      <id>OPAL_MODEL</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_PROC_WEIGHT</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_QUAD_WEIGHT</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_SOFT_MIN_PCAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_TURBO_MODE_SUPPORTED</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_VRM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>OP_TRACE_LITE</id>
+    </attribute>
+    <attribute>
+      <id>PROC_MHZ_PER_WATT</id>
+    </attribute>
+    <attribute>
+      <id>PROC_SOCKET_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>REPORT_THROTTLE_BELOW_NOMINAL</id>
+    </attribute>
+    <attribute>
+      <id>VDD_CURRENT_OVERFLOW_WORKAROUND_ENABLE</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>unit-core-power9</id>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>unit-mcs-power9</id>
-    <attribute><id>OT_MIN_N_PER_MBA</id></attribute>
-    <attribute><id>OT_MEM_POWER</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
-    <attribute><id>N_PLUS_ONE_MEM_POWER</id></attribute>
-    <attribute><id>POWERCAP_N_PER_MBA</id></attribute>
-    <attribute><id>POWERCAP_N_PER_CHIP</id></attribute>
-    <attribute><id>POWERCAP_MEM_POWER</id></attribute>
-</targetTypeExtension>
+    <attribute>
+      <id>N_PLUS_ONE_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_N_PER_CHIP</id>
+    </attribute>
+    <attribute>
+      <id>N_PLUS_ONE_N_PER_MBA</id>
+    </attribute>
+    <attribute>
+      <id>OT_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>OT_MIN_N_PER_MBA</id>
+    </attribute>
+    <attribute>
+      <id>POWERCAP_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>POWERCAP_N_PER_CHIP</id>
+    </attribute>
+    <attribute>
+      <id>POWERCAP_N_PER_MBA</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>unit-occ-power9</id>
+    <attribute>
+      <id>IPMI_SENSORS</id>
+    </attribute>
+  </targetTypeExtension>
 
 </attributes>
