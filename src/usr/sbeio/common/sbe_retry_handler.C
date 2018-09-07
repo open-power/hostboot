@@ -63,6 +63,9 @@
 #include <secureboot/service.H>
 
 #include <devicefw/driverif.H>
+#include <plat_utils.H>
+#include <set_sbe_error.H>
+
 
 
 extern trace_desc_t* g_trac_sbeio;
@@ -78,6 +81,7 @@ extern trace_desc_t* g_trac_sbeio;
     TRACDBIN(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 
 using namespace ERRORLOG;
+using namespace fapi2;
 
 namespace SBEIO
 {
@@ -979,20 +983,52 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             // Process each FFDC package
             for(auto i=0; i<l_pkgs; i++)
             {
-                // Add each package to the log
-                l_errl->addFFDC( SBEIO_COMP_ID,
-                                l_ffdc_parser->getFFDCPackage(i),
-                                l_ffdc_parser->getPackageLength(i),
-                                0,
-                                SBEIO_UDT_PARAMETERS,
-                                false );
-
                 // Get the RC from the FFDC package
                 uint32_t l_rc = l_ffdc_parser->getPackageRC(i);
 
                 // Determine an action for the RC
                 P9_EXTRACT_SBE_RC::RETURN_ACTION l_action =
                             static_cast<P9_EXTRACT_SBE_RC::RETURN_ACTION>(action_for_ffdc_rc(l_rc));
+
+                //See if HWP error, create another error log with callouts
+                if (l_rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
+                {
+                    fapi2::ReturnCode l_fapiRc;
+                    ffdc_package l_package = {nullptr, 0, 0};
+                    if(!l_ffdc_parser->getFFDCPackage(i, l_package))
+                    {
+                        continue;
+                    }
+
+                    //Put FFDC into sbeFfdc_t struct and
+                    //call FAPI_SET_SBE_ERROR
+                    fapi2::sbeFfdc_t l_sbeFfdc;
+                    l_sbeFfdc.size = l_package.size;
+                    l_sbeFfdc.data = reinterpret_cast<uint64_t>(
+                                                                l_package.ffdcPtr);
+
+                    uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
+                    FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, &l_sbeFfdc, l_pos);
+                    errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc);
+                    if(l_sbeHwpfErr)
+                    {
+                        // Set the PLID of the error log to master PLID
+                        // if the master PLID is set
+                        updatePlids(l_sbeHwpfErr);
+
+                        ERRORLOG::errlCommit( l_sbeHwpfErr, SBEIO_COMP_ID );
+                    }
+                }
+                else
+                {
+                  // Add each package to the log
+                  l_errl->addFFDC( SBEIO_COMP_ID,
+                                  l_ffdc_parser->getFFDCPackage(i),
+                                  l_ffdc_parser->getPackageLength(i),
+                                  0,
+                                  SBEIO_UDT_PARAMETERS,
+                                  false );
+                }
 
                 if(l_action != NO_ACTION_FOUND_FOR_THIS_RC)
                 {

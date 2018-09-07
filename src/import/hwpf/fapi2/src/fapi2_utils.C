@@ -84,85 +84,96 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
 
     FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_proc, l_procPosition);
 
-    switch( i_targType )
+    // if the target type being converted is a proc chip, then
+    // it will be the same proc as the sbe instance, just return that one
+    if(i_targType == TARGET_TYPE_PROC_CHIP )
     {
-        case  TARGET_TYPE_EQ:
-            {
-                max_targets = MAX_EQ_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_CORE:
-            {
-                max_targets = MAX_CORE_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_EX:
-            {
-                max_targets = MAX_EX_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_MCS:
-            {
-                max_targets = MAX_MCS_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_MCA:
-            {
-                max_targets = MAX_MCA_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_MC:
-            {
-                max_targets = MAX_MC_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_MI:
-            {
-                max_targets = MAX_MI_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_PHB:
-            {
-                max_targets = MAX_PHB_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_MCBIST:
-            {
-                max_targets = MAX_MCBIST_PER_PROC;
-                break;
-            }
-
-        case  TARGET_TYPE_PERV:
-            {
-                max_targets = MAX_PERV_PER_PROC;
-                break;
-            }
-
-        default:
-            max_targets = INVALID_TARGET_COUNT;
-            break;
-    }
-
-    if( max_targets == INVALID_TARGET_COUNT )
-    {
-        FAPI_ERR("Unable to determine the target count "
-                 "for target type = 0x%x and instance 0x%d "
-                 "associated with proc position %d",
-                 i_targType, i_instance, l_procPosition);
+        fapi_pos = l_procPosition;
     }
     else
     {
-        fapi_pos = max_targets * l_procPosition +
-                   (i_instance % max_targets);
+        switch( i_targType )
+        {
+            case  TARGET_TYPE_EQ:
+                {
+                    max_targets = MAX_EQ_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_CORE:
+                {
+                    max_targets = MAX_CORE_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_EX:
+                {
+                    max_targets = MAX_EX_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MCS:
+                {
+                    max_targets = MAX_MCS_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MCA:
+                {
+                    max_targets = MAX_MCA_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MC:
+                {
+                    max_targets = MAX_MC_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MI:
+                {
+                    max_targets = MAX_MI_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PHB:
+                {
+                    max_targets = MAX_PHB_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_MCBIST:
+                {
+                    max_targets = MAX_MCBIST_PER_PROC;
+                    break;
+                }
+
+            case  TARGET_TYPE_PERV:
+                {
+                    max_targets = MAX_PERV_PER_PROC;
+                    break;
+                }
+
+            default:
+                max_targets = INVALID_TARGET_COUNT;
+                break;
+        }
+
+        if( max_targets == INVALID_TARGET_COUNT )
+        {
+            FAPI_ERR("Unable to determine the target count "
+                     "for target type = 0x%x and instance 0x%d "
+                     "associated with proc position %d",
+                     i_targType, i_instance, l_procPosition);
+        }
+        else
+        {
+            fapi_pos = max_targets * l_procPosition +
+                       (i_instance % max_targets);
+        }
     }
+
+    FAPI_INF("Returning FAPI_POS= %d for target type 0x%x", fapi_pos, i_targType);
 
     return fapi_pos;
 }
