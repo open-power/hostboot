@@ -317,16 +317,6 @@ void* call_host_start_payload (void *io_pArgs)
             break;
         }
 
-        msg_q_t l_msgQ = msg_q_create();
-
-        // Register event to be called on shutdown
-        INITSERVICE::registerShutdownEvent(l_msgQ,
-                                           MSG_PRE_SHUTDOWN_INITS,
-                                           INITSERVICE::PRESHUTDOWN_INIT_PRIORITY);
-
-        // Create a task to handle the messages
-        task_create(ISTEP_21::msg_handler, l_msgQ);
-
         // For single-node systems, the non-master processors can be in a
         // different logical (powerbus) group.  Need to migrate task to master.
         task_affinity_pin();
@@ -482,6 +472,14 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
     do
     {
+        // Register event to be called on shutdown
+        msg_q_t l_msgQ = msg_q_create();
+        INITSERVICE::registerShutdownEvent(l_msgQ,
+                                      MSG_PRE_SHUTDOWN_INITS,
+                                      INITSERVICE::PRESHUTDOWN_INIT_PRIORITY);
+        // Create a task to handle the messages
+        task_create(ISTEP_21::msg_handler, l_msgQ);
+
         // Tell SBE to Close All Unsecure Memory Regions
         err = SBEIO::closeAllUnsecureMemRegions();
         if (err)
