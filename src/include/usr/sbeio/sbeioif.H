@@ -101,12 +101,17 @@ namespace SBEIO
     /**
      * @brief Sends a PSU chipOp to quiesce the SBE
      *
-     * @param[in]  i_target  Target with SBE to quiesce
+     * @param[in]  i_pProc  Processor target with SBE to quiesce.
+     *     Throws error if requested target is nullptr or does not
+     *     refer to a processor.
+     *
+     * @note Sets the requested processor's ASSUME_SBE_QUIESCED attribute
+     *   to true to inhibit future quiesce sensitive operations.
      *
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target);
+    errlHndl_t sendPsuQuiesceSbe(TARGETING::Target* i_pProc);
 
      /**
      * @brief Get the capabilities of the SBE via PSU

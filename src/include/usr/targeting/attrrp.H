@@ -325,6 +325,54 @@ class AttrRP
 #ifndef __HOSTBOOT_RUNTIME
 
         /**
+          * @enum msg_mm_rp_runtime_prep_t
+          *
+          * @brief Message subtypes for the MSG_MM_RP_RUNTIME_PREP message
+          */
+        enum msg_mm_rp_runtime_prep_t
+        {
+            // data[0] = MSG_MM_RP_RUNTIME_PREP_BEGIN or
+            // data[0] = MSG_MM_RP_RUNTIME_PREP_END
+            MSG_MM_RP_RUNTIME_PREP_BEGIN, ///< Force all pages to be validated
+            MSG_MM_RP_RUNTIME_PREP_END,   ///< Disable force validation
+        };
+
+        /**
+         *  @enum ATTRRP_MSG_TYPE
+         *
+         *  @brief Non-kernel message types for the attribute resource provider
+         *      message handler
+         */
+        enum ATTRRP_MSG_TYPE : uint32_t
+        {
+            // Prepare runtime for secure transition of attributes
+            MSG_MM_RP_RUNTIME_PREP        = 0x00000002,
+            // Arm service to synchronize attributes when Hostboot shuts down
+            MSG_PRIME_SHUTDOWN_ATTR_SYNC  = 0x00000003,
+            // Invoke attribute synchronization at shutdown
+            MSG_INVOKE_SHUTDOWN_ATTR_SYNC = 0x00000004,
+        };
+
+        /**
+         *  @enum RESOURCE
+         *
+         *  @brief Enumeration which indicates a specific resource (service,
+         *      condition, etc.)
+         */
+        enum RESOURCE : uint8_t
+        {
+            MAILBOX, ///< FSI mailbox service
+        };
+
+        /**
+         *  @brief Notifies the attribute resource provider that a specific
+         *      resource of interest is ready/available
+         *
+         *  @param[in] i_resource Resource that is ready/available
+         */
+        static void notifyResourceReady(RESOURCE i_resource);
+
+        /**
         *  @brief Modifies the memory R/W permissions on VMM pages for a
         *         given type of AttrRP_Section. Valid types can be found
         *         in the generated file pnorheader.H. Valid permissions
@@ -433,8 +481,9 @@ class AttrRP
          */
         AttrRP()
 #ifndef __HOSTBOOT_RUNTIME
-            : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0),
-              iv_isMpipl(false)
+            : iv_msgQ(nullptr), iv_attrSyncMsgQ(msg_q_create()),
+              iv_sections(nullptr), iv_sectionCount(0),
+              iv_shutdownAttrSyncPrimed(false),iv_isMpipl(false)
 #else
             : iv_isTempInstance(false), iv_isMpipl(false)
 #endif
@@ -568,14 +617,47 @@ class AttrRP
 #ifndef __HOSTBOOT_RUNTIME
 
         /**
+         *  @brief Notifies the attribute resource provider that a specific
+         *      resource of interest is ready/available
+         *
+         *  @param[in] i_resource Resource that is ready/available
+         */
+        void _notifyResourceReady(RESOURCE i_resource) const;
+
+        /**
+         *  @brief Synchronizes attributes to FSP during a user space initiated
+         *      shutdown
+         *
+         *  @par Detailed Description:
+         *      During a user space initiated shutdown, the init service calls
+         *      the resource provider shutdown handler which attempts to
+         *      synchronize attributes down to the FSP.  For this to succeed,
+         *      the FSP must be available, the mailbox must be online (and have
+         *      earlier called notifyResourceReady API to arm the
+         *      synchronization), and SBE must not be quiesced (or mailbox
+         *      traffic going through the SBE FIFO in secure mode will fail)
+         */
+        void invokeShutdownAttrSync() const;
+
+        /**
          *  @brief Processes daemon messages
          *
          *  @par Detailed Description:
-         *      Performs a while(1) waiting for messages from the
-         *      kernel/VMM and handles as appropriately.  Reads / writes
-         *      data from / to PNOR for the attribute sections.
+         *      Performs a while(1) waiting for messages from
+         *      kernel/VMM/user space and handles as appropriate.  Reads /
+         *      writes data from / to PNOR for the attribute sections for
+         *      kernel/VMM messages.
          */
         void msgServiceTask() const;
+
+        /**
+         *  @brief Task which processes attribute synchronization requests
+         *
+         *  @par Detailed Description:
+         *      Processes attribute synchronization requests, especially in
+         *      relation to synchronizing attributes when Hostboot terminates.
+         */
+        void attrSyncTask();
 
         /**
          *  @brief Parses the attribute section header in PNOR.
@@ -656,14 +738,35 @@ class AttrRP
          */
         static void* startMsgServiceTask(void* i_pInstance);
 
+        /**
+         *  @brief Starts the attribute provider's attribute synchronization
+         *      task
+         *
+         *  @par Detailed Description:
+         *      task_create should call this static function to enter the
+         *      daemonized attribute synchronization task which handles
+         *      attribute synchronization requests
+         *
+         *  @param[in] i_pInstance The AttrRP to call attrSyncTask on.  Must not
+         *      be nullptr (or asserts);
+         */
+        static void* startAttrSyncTask(void* i_pInstance);
+
         // Message Queue for VMM requests
         msg_q_t iv_msgQ;
+
+        // Message Queue for attribute sync requests
+        msg_q_t iv_attrSyncMsgQ;
 
         // Parsed structures of the attribute sections.
         AttrRP_Section* iv_sections;
 
         // Count of attribute sections.
         size_t iv_sectionCount;
+
+        // Whether service is primed to invoke attribute synchronization when
+        // Hostboot shuts down under user space control
+        bool iv_shutdownAttrSyncPrimed;
 #else
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;
@@ -681,21 +784,8 @@ class AttrRP
 TARG_DECLARE_SINGLETON(TARGETING::AttrRP,theAttrRP);
 
 extern const char* ATTRRP_MSG_Q;
+extern const char* ATTRRP_ATTR_SYNC_MSG_Q;
 
-// user-defined message subtype for MSG_MM_RP_RUNTIME_PREP
-/**
-  * @enum msg_mm_rp_runtime_prep_t
-  * @brief Message type and subtypes for the MSG_MM_RP_RUNTIME_PREP message
-  */
-enum msg_mm_rp_runtime_prep_t
-{
-    MSG_MM_RP_RUNTIME_PREP = 0x2, // prepare runtime for secure transition
-                                  // of attrs
-                                  // data[0] = MSG_MM_RP_RUNTIME_PREP_BEGIN or
-                                  // data[0] = MSG_MM_RP_RUNTIME_PREP_END
-    MSG_MM_RP_RUNTIME_PREP_BEGIN,
-    MSG_MM_RP_RUNTIME_PREP_END,
-};
 
 } // End namespace TARGETING
 

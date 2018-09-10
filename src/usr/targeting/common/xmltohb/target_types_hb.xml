@@ -87,6 +87,9 @@
   <targetTypeExtension>
     <id>chip-processor</id>
     <attribute>
+      <id>ASSUME_SBE_QUIESCED</id>
+    </attribute>
+    <attribute>
       <id>FSI_MASTER_MUTEX</id>
     </attribute>
     <attribute>

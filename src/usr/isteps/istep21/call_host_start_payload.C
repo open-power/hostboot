@@ -449,6 +449,14 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         // Create a task to handle the messages
         task_create(ISTEP_21::msg_handler, l_msgQ);
 
+        // Unregister the AttrRP shutdown handler which synchronizes all
+        // attributes at shutdown, as closing the SBE memory regions below will
+        // cause all DMAs (and thus attribute sync) to fail.  Intentionally
+        // ignore the response from unregister.  This API will get called on
+        // all nodes.
+        auto pAttrMsgQ = msg_q_resolve(TARGETING::ATTRRP_ATTR_SYNC_MSG_Q);
+        INITSERVICE::unregisterShutdownEvent(pAttrMsgQ);
+
         // Tell SBE to Close All Unsecure Memory Regions
         err = SBEIO::closeAllUnsecureMemRegions();
         if (err)

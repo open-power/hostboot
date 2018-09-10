@@ -55,6 +55,11 @@
 #include <secureboot/service.H>
 #include <kernel/bltohbdatamgr.H>
 #include <bootloader/bootloaderif.H>
+#include <common_ringId.H>
+#include <fapi2.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p9_sbe_ext_defs.H>
+#include <p9_get_sbe_msg_register.H>
 #include <sbeio/sbeioif.H>
 
 using namespace INITSERVICE;
@@ -66,6 +71,7 @@ namespace TARGETING
 {
 
     const char* ATTRRP_MSG_Q = "attrrpq";
+    const char* ATTRRP_ATTR_SYNC_MSG_Q = "attrrpattrsyncq";
 
     void* AttrRP::getBaseAddress(const NODE_ID i_nodeIdUnused)
     {
@@ -78,6 +84,13 @@ namespace TARGETING
         TARG_ASSERT(i_pInstance, "No instance passed to startMsgServiceTask");
         static_cast<AttrRP*>(i_pInstance)->msgServiceTask();
         return NULL;
+    }
+
+    void* AttrRP::startAttrSyncTask(void* i_pInstance)
+    {
+        TARG_ASSERT(i_pInstance, "No instance passed to startAttrSyncTask");
+        static_cast<AttrRP*>(i_pInstance)->attrSyncTask();
+        return nullptr;
     }
 
     void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool i_isMpipl)
@@ -112,6 +125,15 @@ namespace TARGETING
             // Spawn daemon thread.
             task_create(&AttrRP::startMsgServiceTask, this);
 
+            // Register attribute sync message queue so it can be discovered by
+            // istep 21 in order to deregister it from shutdown event handling.
+            auto rc = msg_q_register(iv_attrSyncMsgQ, ATTRRP_ATTR_SYNC_MSG_Q);
+            assert(rc == 0, "Bug! Unable to register attribute sync message "
+                "queue");
+
+            // Spawn attribute sync thread
+            task_create(&AttrRP::startAttrSyncTask, this);
+
             if(iv_isMpipl)
             {
                 populateAttrsForMpipl();
@@ -129,6 +151,246 @@ namespace TARGETING
 
         //  return any errlogs to _start()
         io_taskRetErrl = l_errl;
+    }
+
+    void AttrRP::notifyResourceReady(const RESOURCE i_resource)
+    {
+        Singleton<AttrRP>::instance()._notifyResourceReady(i_resource);
+    }
+
+    void AttrRP::_notifyResourceReady(const RESOURCE i_resource) const
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK
+                  "AttrRP::notifyResourceReady: resource type = 0x%02X.",
+                  i_resource);
+
+        auto pMsg = msg_allocate();
+
+        switch (i_resource)
+        {
+            case MAILBOX:
+                {
+                    pMsg->type = MSG_PRIME_SHUTDOWN_ATTR_SYNC;
+                }
+                break;
+            default:
+                {
+                    TRACFCOMP(g_trac_targeting, ERR_MRK
+                              "AttrRP::notifyResourceReady: Bug! Unhandled "
+                              "resource type = 0x%02X.",
+                              i_resource);
+                    assert(0);
+                }
+                break;
+        }
+
+        auto rc = msg_send(iv_attrSyncMsgQ,pMsg);
+        if (rc)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK
+                      "AttrRP::notifyResourceReady: Failed in msg_send for "
+                      "resource type = 0x%02X, message type = 0x%08X; rc = %d.",
+                      i_resource,pMsg->type,rc);
+            /*@
+             *  @errortype
+             *  @moduleid   TARG_NOTIFY_RESOURCE_READY
+             *  @reasoncode TARG_RC_ATTR_MSG_FAIL
+             *  @userdata1  Resource type
+             *  @userdata2  Return code
+             *  @devdesc    Failed to alert attribute resource provider that a
+             *      specific resource is available.  Various shutdown
+             *      steps, such as synchronizing attributes to FSP, may not
+             *      trigger as a result.
+             *  @custdesc   Unexpected boot firmware error occurred
+             */
+            errlHndl_t pError = new ErrlEntry(
+                ERRL_SEV_UNRECOVERABLE,
+                TARG_NOTIFY_RESOURCE_READY,
+                TARG_RC_ATTR_MSG_FAIL,
+                i_resource,
+                static_cast<uint64_t>(rc),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            errlCommit(pError,TARG_COMP_ID);
+        }
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK
+                  "AttrRP::notifyResourceReady: rc = %d.",rc);
+    }
+
+    void AttrRP::invokeShutdownAttrSync() const
+    {
+        errlHndl_t pError = nullptr;
+
+        do {
+
+        if(!iv_shutdownAttrSyncPrimed)
+        {
+            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync: "
+                      "Shutdown attribute sync not primed; suppressing "
+                      "attribute sync.");
+            break;
+        }
+
+        // Nothing to do unless FSP is available to respond to the attribute
+        // sync request
+        if(!INITSERVICE::spBaseServicesEnabled())
+        {
+            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync: "
+                      "FSP services not available; suppressing "
+                      "attribute sync.");
+            break;
+        }
+
+        // Ensure that SBE is not quiesced (in which case mailbox related SBE
+        // FIFO traffic will not be serviced)
+        TARGETING::Target* pMasterProc=nullptr;
+
+        // Master processor is assumed to be functional since we're running on
+        // it; if  no functional master is found, we'll error out.
+        pError = TARGETING::targetService().queryMasterProcChipTargetHandle(
+                                                pMasterProc);
+        if(pError)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK "invokeShutdownAttrSync: "
+                      "Failed to determine master processor target; "
+                      "suppressing attribute sync.");
+            break;
+        }
+
+        if(pMasterProc->getAttr<TARGETING::ATTR_ASSUME_SBE_QUIESCED>())
+        {
+            TRACFCOMP(g_trac_targeting, INFO_MRK "invokeShutdownAttrSync; SBE "
+                      "is quiesced; suppressing attribute sync.");
+            break;
+        }
+
+        pError = syncAllAttributesToFsp();
+        if(pError)
+        {
+            TRACFCOMP(g_trac_targeting, ERR_MRK "invokeShutdownAttrSync: "
+                      "Failed syncing attributes to FSP.");
+            break;
+        }
+
+        } while(0);
+
+        if(pError)
+        {
+            errlCommit(pError,TARG_COMP_ID);
+        }
+    }
+
+    void AttrRP::attrSyncTask()
+    {
+        // Crash Hostboot if this task dies
+        (void)task_detach();
+
+        TRACFCOMP(g_trac_targeting, ENTER_MRK "AttrRP::attrSyncTask.");
+
+        // Register to synchronize applicable attributes down to FSP when
+        // a shutdown occurs.  NO_PRIORITY priority forces the attribute
+        // synchronization to complete prior to the mailbox shutdown.
+        // Intentionally ignores the return code that simply indicates if this
+        // registration happened already.
+        INITSERVICE::registerShutdownEvent(TARG_COMP_ID,
+                                           iv_attrSyncMsgQ,
+                                           MSG_INVOKE_SHUTDOWN_ATTR_SYNC,
+                                           INITSERVICE::NO_PRIORITY);
+        while(1)
+        {
+            int rc = 0;
+
+            auto pMsg = msg_wait(iv_attrSyncMsgQ);
+            if (!pMsg)
+            {
+                continue;
+            }
+
+            TRACFCOMP(g_trac_targeting, INFO_MRK
+                "AttrRP: attrSyncTask: "
+                "Received message of type = 0x%08X.",
+                pMsg->type);
+
+            do {
+
+            switch(pMsg->type)
+            {
+                case MSG_PRIME_SHUTDOWN_ATTR_SYNC:
+                    {
+                        iv_shutdownAttrSyncPrimed=true;
+                        TRACFCOMP(g_trac_targeting, INFO_MRK
+                            "AttrRP: attrSyncTask: "
+                            "Attribute provider primed to synchronize "
+                            "attributes at shutdown.");
+                    }
+                    break;
+                case MSG_INVOKE_SHUTDOWN_ATTR_SYNC:
+                    {
+                        TRACFCOMP(g_trac_targeting, INFO_MRK
+                            "AttrRP: attrSyncTask: "
+                            "Invoking shutdown attribute sync.");
+
+                        (void)invokeShutdownAttrSync();
+                    }
+                    break;
+               default:
+                    {
+                        TRACFCOMP(g_trac_targeting,ERR_MRK
+                            "AttrRP: attrSyncTask: "
+                            "Unhandled message type = 0x%08X.",
+                            pMsg->type);
+                        rc = -EINVAL;
+                    }
+                    break;
+            }
+
+            } while (0);
+
+            if (rc != 0)
+            {
+                /*@
+                 * @errortype
+                 * @moduleid   TARG_ATTR_SYNC_TASK
+                 * @reasoncode TARG_RC_UNSUPPORTED_ATTR_SYNC_MSG
+                 * @userdata1  Return code
+                 * @userdata2  Message type
+                 * @devdesc    Invalid message type requested through the
+                 *     attribute resource provider's attribute synchronization
+                 *     sync daemon.
+                 * @custdesc   Unexpected boot firmware failure
+                 */
+                auto pError = new ErrlEntry(
+                    ERRL_SEV_UNRECOVERABLE,
+                    TARG_ATTR_SYNC_TASK,
+                    TARG_RC_UNSUPPORTED_ATTR_SYNC_MSG,
+                    TO_UINT64(rc),
+                    TO_UINT64(pMsg->type),
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errlCommit(pError,TARG_COMP_ID);
+            }
+
+            if(msg_is_async(pMsg))
+            {
+                // When caller sends an async message, the receiver must
+                // deallocate the message
+                (void)msg_free(pMsg);
+                // Free doesn't nullify the caller's pointer automatically,
+                pMsg=nullptr;
+            }
+            else
+            {
+                // Respond to request.
+                pMsg->data[1] = rc;
+                rc = msg_respond(iv_attrSyncMsgQ, pMsg);
+                if (rc)
+                {
+                    TRACFCOMP(g_trac_targeting,ERR_MRK
+                        "AttrRP: attrSyncTask: "
+                        "Bad rc = %d from msg_respond.", rc);
+                }
+            }
+        }
     }
 
     void AttrRP::msgServiceTask() const
@@ -152,17 +414,27 @@ namespace TARGETING
             uint64_t size = 0;
 
             TRACDCOMP(g_trac_targeting, INFO_MRK "AttrRP: Message recv'd: "
-                        "0x%x");
+                      "0x%08X",msg->type);
+
+            // These messages are sent directly from the kernel and have
+            // virtual/physical addresses for data 0 and 1 respectively.
+            const std::array<uint32_t,2> kernelMessageTypes =
+                {MSG_MM_RP_READ,
+                 MSG_MM_RP_WRITE};
 
             do {
 
-                if (msg->type != MSG_MM_RP_RUNTIME_PREP)
+                if(   std::find(kernelMessageTypes.begin(),
+                                kernelMessageTypes.end(),
+                                msg->type)
+                   != kernelMessageTypes.end())
                 {
                     vAddr = msg->data[0];
                     pAddr = reinterpret_cast<void*>(msg->data[1]);
 
-                    TRACDCOMP(g_trac_targeting,
-                        INFO_MRK "AttrRP: vAddr=0x%lx pAddr=0x%p",
+                    TRACDCOMP(g_trac_targeting,INFO_MRK
+                        "AttrRP: message type = 0x%08X, vAddr = 0x%016llX, "
+                        "pAddr = 0x%016llX.",
                         msg->type, vAddr, pAddr);
 
                     // Locate corresponding attribute section for message.
@@ -337,7 +609,7 @@ namespace TARGETING
             if (rc)
             {
                 TRACFCOMP(g_trac_targeting,
-                          ERR_MRK "AttrRP: Bad rc from msg_respond: %d", rc);
+                          ERR_MRK"AttrRP: Bad rc from msg_respond: %d", rc);
             }
         }
     }

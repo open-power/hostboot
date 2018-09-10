@@ -57,6 +57,7 @@ enum sbeioModuleId
     SBEIO_GET_FFDC_HANDLER              = 0x0C,
     SBEIO_GET_SBE_RC                    = 0x0D,
     SBEIO_HANDLE_VITAL_ATTN             = 0x0E,
+    SBEIO_SEND_PSU_QUIESCE_SBE          = 0x0F,
 };
 
 /**
@@ -75,6 +76,7 @@ enum sbeioReasonCode
     SBEIO_PSU_NOT_READY                = SBEIO_COMP_ID | 0x03,
     SBEIO_PSU_FFDC_MISSING             = SBEIO_COMP_ID | 0x04,
     SBEIO_PSU_SEND                     = SBEIO_COMP_ID | 0x05,
+    SBEIO_PSU_INVALID_TARGET           = SBEIO_COMP_ID | 0x06,
 
     // SBE FIFO error codes
     SBEIO_FIFO_UPSTREAM_TIMEOUT        = SBEIO_COMP_ID | 0x10,

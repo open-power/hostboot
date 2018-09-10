@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_psudd.H>
+#include <sbeio/sbeioreasoncodes.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -43,20 +44,38 @@ TRACFCOMP(g_trac_sbeio,"psuQuiesce: " printf_string,##args)
 
 namespace SBEIO
 {
-
-    /**
-     * @brief Sends a PSU chipOp to quiesce the SBE
-     *
-     * @param[in]  i_target  Target with SBE to quiesce
-     *
-     * @return errlHndl_t Error log handle on failure.
-     *
-     */
-    errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target)
+    errlHndl_t sendPsuQuiesceSbe(TARGETING::Target* i_pProc)
     {
-        errlHndl_t errl = NULL;
+        errlHndl_t pError = nullptr;
 
         SBE_TRACD(ENTER_MRK "sending psu quiesce command from HB -> SBE");
+
+        do {
+
+        if(   (i_pProc == nullptr)
+           || (   i_pProc->getAttr<TARGETING::ATTR_TYPE>()
+               != TARGETING::TYPE_PROC))
+        {
+            /*@
+             * @errortype
+             * @moduleid   SBEIO_SEND_PSU_QUIESCE_SBE
+             * @reasoncode SBEIO_PSU_INVALID_TARGET
+             * @userdata1  Target HUID (0, if invalid pointer)
+             * @userdata2  Target type (TYPE_NA, if invalid pointer)
+             * @devdesc    Caller requested PSU quiesce against an unassigned
+             *     target or a target that is not a processor.
+             * @custdesc   Firmware logic bug detected
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SBEIO_SEND_PSU_QUIESCE_SBE,
+                SBEIO_PSU_INVALID_TARGET,
+                TARGETING::get_huid(i_pProc),
+                i_pProc ? i_pProc->getAttr<TARGETING::ATTR_TYPE>() : 0,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            pError->collectTrace(SBEIO_COMP_NAME);
+            break;
+        }
 
         // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(
@@ -66,16 +85,23 @@ namespace SBEIO
         SbePsu::psuResponse  l_psuResponse;
 
 
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_target,
+        pError =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_pProc,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                                 SbePsu::SBE_QUIESCE_REQ_USED_REGS,
                                 SbePsu::SBE_QUIESCE_RSP_USED_REGS);
 
+        // Regardless of whether the operation was successful, assume it
+        // was, in order to suppress future SBE activity like shutdown
+        // attribute synchronization.
+        i_pProc->setAttr<TARGETING::ATTR_ASSUME_SBE_QUIESCED>(true);
+
+        } while(0);
+
         SBE_TRACD(EXIT_MRK "sendPsuQuiesceSbe");
 
-        return errl;
+        return pError;
     };
 
 } //end namespace SBEIO
