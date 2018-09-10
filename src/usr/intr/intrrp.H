@@ -33,6 +33,7 @@
 #include <sys/msg.h>
 #include <sys/misc.h>
 #include <sys/time.h>
+#include <sys/sync.h>
 #include <sys/internode.h>
 #include <intr/interrupt.H>
 #include <map>
@@ -91,6 +92,14 @@ namespace INTR
             ALWAYS_INLINE
             PIR_t intrDestCpuId() const { return iv_masterCpu; }
 
+            /**
+             * @brief Returns a boolean indicating whether the shutDown
+             *        has been initiated for IntrRp
+             * @return true IntrRp is shut down
+             *         false IntrRp is running
+             */
+            bool isIntrRpShutdown() const;
+
         protected:
 
             /**
@@ -99,7 +108,8 @@ namespace INTR
             IntrRp() :
                 iv_msgQ(NULL),
                 iv_baseAddr(0),
-                iv_masterCpu(0) {}
+                iv_masterCpu(0),
+                iv_IntrRpShutdownRequested(false) {}
 
             /**
              * Destructor
@@ -388,11 +398,17 @@ namespace INTR
             typedef std::pair<uint64_t, msg_t*> IPI_Info_t;
             typedef std::map<PIR_t, IPI_Info_t> IPI_Pending_t;
             IPI_Pending_t iv_ipisPending;  //!< Pending IPIs.
+            bool iv_IntrRpShutdownRequested; //!< Whether the shutdown of IntrRp
+                                             // has been requested.
 
             // PE regs
             static const uint32_t cv_PE_IRSN_COMP_SCOM_LIST[]; //IRSN comp regs
             static const uint32_t cv_PE_IRSN_MASK_SCOM_LIST[]; //IRSN mask regs
             static const uint32_t cv_PE_BAR_SCOM_LIST[];       //IRSN enable
+
+            // Mutex to prevent potential race conditions in IntRp shutdown and
+            // complete interrupt processing paths.
+            mutex_t iv_intrRpMutex;
 
         private:        //functions
 

@@ -297,6 +297,8 @@ errlHndl_t IntrRp::_init()
               iv_masterCpu.groupId, iv_masterCpu.chipId, iv_masterCpu.coreId,
               iv_masterCpu.threadId);
 
+    iv_IntrRpShutdownRequested = false; // Not shutting down
+
     // Do the initialization steps on the master proc chip
     // The other proc chips will be setup at a later point
     TARGETING::Target* procTarget = NULL;
@@ -1924,6 +1926,15 @@ void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
 
     do {
 
+        mutex_lock(&iv_intrRpMutex);
+        // Do not complete interrupt processing if IntrRp has been shut down.
+        // This prevents a race condition from happening where we try to access
+        // a memory region that's been locked as part of the shutdown procedure.
+        if(isIntrRpShutdown())
+        {
+            break;
+        }
+
         //Check if we found a matching proc handler for the interrupt to remove
         //  This is needed so the iNTRRP will honor new interrupts from this
         //  source
@@ -1985,6 +1996,8 @@ void IntrRp::completeInterruptProcessing(uint64_t& i_intSource, PIR_t& i_pir)
         }
 
     } while(0);
+
+    mutex_unlock(&iv_intrRpMutex);
 
     return;
 }
@@ -2129,6 +2142,10 @@ void IntrRp::shutDown(uint64_t i_status)
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error masking all interrupt sources.");
     }
 
+    mutex_lock(&iv_intrRpMutex);
+
+    iv_IntrRpShutdownRequested = true;
+
     //Reset PSIHB Interrupt Space
     TRACFCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
 
@@ -2198,6 +2215,8 @@ void IntrRp::shutDown(uint64_t i_status)
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Master Interrupt BARs");
     }
 
+    mutex_unlock(&iv_intrRpMutex);
+
 #ifdef CONFIG_ENABLE_P9_IPI
     size_t threads = cpu_thread_count();
     uint64_t en_threads = get_enabled_threads();
@@ -2220,6 +2239,7 @@ void IntrRp::shutDown(uint64_t i_status)
         }
     }
 #endif
+
     TRACFCOMP(g_trac_intr,INFO_MRK"INTR is shutdown");
 }
 
@@ -3651,4 +3671,9 @@ void INTR::IntrRp::printEsbStates() const
             TRACFCOMP(g_trac_intr, "                 SRC: %02d         State: %s", i , l_esbStateString );
         }
     }
+}
+
+bool INTR::IntrRp::isIntrRpShutdown() const
+{
+    return iv_IntrRpShutdownRequested;
 }
