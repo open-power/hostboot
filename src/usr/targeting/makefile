@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,10 @@ MODULE = targeting
 TARGETING_REL_PATH = .
 
 include ${TARGETING_REL_PATH}/hostboot_common.mk
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 
 ATTR_RP_OBJS += attrrp.o
 ATTR_RP_OBJS += attrsync.o

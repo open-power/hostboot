@@ -3497,9 +3497,9 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
 
     assert(l_msg != nullptr, "Bug! Message allocation failed!");
 
-    l_msg->type = TARGETING::MSG_MM_RP_RUNTIME_PREP;
+    l_msg->type = TARGETING::AttrRP::MSG_MM_RP_RUNTIME_PREP;
 
-    l_msg->data[0] = TARGETING::MSG_MM_RP_RUNTIME_PREP_BEGIN;
+    l_msg->data[0] = TARGETING::AttrRP::MSG_MM_RP_RUNTIME_PREP_BEGIN;
 
     int rc = msg_sendrecv(l_msgQ, l_msg);
 
@@ -3539,8 +3539,8 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
             validateAllRwNvAttr( *targets );
         }
 
-        l_msg->type = TARGETING::MSG_MM_RP_RUNTIME_PREP;
-        l_msg->data[0] = TARGETING::MSG_MM_RP_RUNTIME_PREP_END;
+        l_msg->type = TARGETING::AttrRP::MSG_MM_RP_RUNTIME_PREP;
+        l_msg->data[0] = TARGETING::AttrRP::MSG_MM_RP_RUNTIME_PREP_END;
 
         int rc = msg_sendrecv(l_msgQ, l_msg);
 

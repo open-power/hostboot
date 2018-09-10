@@ -52,6 +52,30 @@
   </attribute>
 
   <attribute>
+    <id>ASSUME_SBE_QUIESCED</id>
+    <description>
+        Returns whether to treat SBE as quiesced or not.  When Hostboot goes
+        through an SBE update (always during key transition, possibly during
+        normal flow), it may attempt to quiesce the SBE.  Whether or not this
+        was successful, firmware should treat the SBE as if it had been
+        quiesced (and inhibit attribute synchronization during shutdown, etc.)
+
+        Valid values (bool):
+             0x00: Do not assume SBE is quiesced
+            !0x00: Assume SBE is quiesced
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>ATTN_CHK_ALL_PROCS</id>
     <description>
       Used to tell ATTN code whether to chk MASTER(0) OR all PROCs(1)

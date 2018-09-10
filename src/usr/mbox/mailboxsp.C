@@ -52,6 +52,7 @@
 #include <sbeio/sbeioif.H>
 #include <sys/time.h>
 #include <intr/interrupt.H>
+#include <targeting/attrrp.H>
 
 // Local functions
 namespace MBOX
@@ -222,8 +223,17 @@ errlHndl_t MailboxSp::_init()
 #ifndef CONFIG_VPO_COMPILE
     // Start the the interprocessor communications message handler
     IPC::IpcSp::init(err);
-    // call ErrlManager function - tell him that MBOX is ready!
-    ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::MBOX);
+
+    // On error VFS won't initialize the mailbox address space, opening up
+    // the chance of downstream task crashes later.
+    if(!err)
+    {
+        // call ErrlManager function - tell him that MBOX is ready!
+        ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::MBOX);
+        TARGETING::AttrRP::notifyResourceReady(
+            TARGETING::AttrRP::RESOURCE::MAILBOX);
+    }
+
 #endif
 
     return err;
