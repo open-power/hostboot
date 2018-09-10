@@ -776,8 +776,7 @@ P9FuncModel::P9FuncModel(  ):
     iv_funcExes(0),
     iv_funcQuads(0),
     iv_ddLevel(0),
-    iv_chipName(0),
-    iv_urmorBug(0)
+    iv_chipName(0)
 { }
 //-------------------------------------------------------------------------
 
@@ -802,12 +801,11 @@ P9FuncModel::P9FuncModel( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_
 
     FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTgt, iv_ddLevel);
     FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTgt, iv_chipName);
-    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW403111, i_procTgt, iv_urmorBug);
 
     FAPI_DBG("functional core : 0x%08x Ex  : 0x%08x quad 0x%08x"
-             "EC : 0x%02x ChipName : 0x%02x URMOR Bug 0x%02x",
+             "EC : 0x%02x ChipName : 0x%02x",
              iv_funcCores, iv_funcExes, iv_funcQuads, iv_ddLevel,
-             iv_chipName, iv_urmorBug );
+             iv_chipName );
 }
 
 //---------------------------------------------------------------------------
@@ -844,18 +842,8 @@ uint8_t P9FuncModel::getChipLevel() const
     return iv_ddLevel;
 }
 
-//-------------------------------------------------------------------------
 uint8_t P9FuncModel::getChipName() const
 {
     return iv_chipName;
 }
-
-//-------------------------------------------------------------------------
-uint8_t P9FuncModel::hasUrmorBug() const
-{
-    return iv_urmorBug;
-}
-
-//-------------------------------------------------------------------------
-
 }
