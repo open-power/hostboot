@@ -686,6 +686,7 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_P9_PGPE_AUX_TASK_BIN_SIZE_ERROR</rc>
@@ -695,45 +696,6 @@
     <ffdc>CHIP_TYPE</ffdc>
     <ffdc>MAX_ALLOWED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_SELF_RESTORE_INIT_FAILED</rc>
-    <description>hcode image build procedure failed to initialize self-restore region.</description>
-    <ffdc>HOMER_PTR</ffdc>
-    <ffdc>CORE_POS</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_SELF_SAVE_INIT_FAILED</rc>
-    <description>hcode image build procedure failed to initialize self-save region.</description>
-    <ffdc>HOMER_PTR</ffdc>
-    <ffdc>CORE_POS</ffdc>
-    <ffdc>FAILURE_CODE</ffdc>
-    <ffdc>EC_LEVEL</ffdc>
-    <ffdc>CHIP_TYPE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_URMOR_RESTORE_ENTRY_FAILED</rc>
-    <description>hcode image build procedure failed to create URMOR restor entry</description>
-    <ffdc>PIR</ffdc>
-    <ffdc>STOP_API_RC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
