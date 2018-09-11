@@ -230,10 +230,6 @@
     <ffdc>MSS_VPD_FREQ_1</ffdc>
     <ffdc>MSS_VPD_FREQ_2</ffdc>
     <ffdc>MSS_VPD_FREQ_3</ffdc>
-    <ffdc>MSS_VPD_FREQ_4</ffdc>
-    <ffdc>MSS_VPD_FREQ_5</ffdc>
-    <ffdc>MSS_VPD_FREQ_6</ffdc>
-    <ffdc>MSS_VPD_FREQ_7</ffdc>
     <ffdc>MSS_MAX_FREQ_0</ffdc>
     <ffdc>MSS_MAX_FREQ_1</ffdc>
     <ffdc>MSS_MAX_FREQ_2</ffdc>
