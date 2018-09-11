@@ -458,6 +458,10 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
 
 fapi_try_exit:
+    // current_err can get overridden by any call to FAPI_TRY so we
+    //  need to save it away before we execute additional code
+    fapi2::ReturnCode l_current_err = fapi2::current_err;
+
     //  Update PM FFDC Section Header with Miscellaneous Info
     l_rc = p9_pm_collect_ffdc (i_target, i_pHomerImage, PLAT_MISC);
 
@@ -471,7 +475,7 @@ fapi_try_exit:
 
     FAPI_ATTR_GET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase);
     FAPI_IMP("<< p9_pm_reset: Phase 0x%02X", l_phase);
-    return fapi2::current_err;
+    return l_current_err;
 }
 
 fapi2::ReturnCode
@@ -748,6 +752,12 @@ fapi2::ReturnCode p9_pm_collect_ffdc (
     fapi2::ATTR_PM_RESET_FFDC_ENABLE_Type l_ffdcEnable =
         fapi2::ENUM_ATTR_PM_RESET_FFDC_ENABLE_FALSE;
     fapi2::ATTR_PM_RESET_PHASE_Type l_phase = PM_RESET_UNKNOWN;
+
+    if( i_pHomerImage == nullptr )
+    {
+        FAPI_INF ("HOMER is not valid, skipping p9_pm_collect_ffdc");
+        goto fapi_try_exit;
+    }
 
     FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_RESET_PHASE, i_target, l_phase));
     FAPI_TRY (FAPI_ATTR_GET (fapi2::ATTR_PM_RESET_FFDC_ENABLE, FAPI_SYSTEM, l_ffdcEnable));
