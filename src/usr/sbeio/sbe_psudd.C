@@ -780,6 +780,10 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
             }
             psuResponse* l_resp = reinterpret_cast<psuResponse*>(l_respRegs);
 
+            // Collect SBE traces in simics
+            MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                                      SBEIO_PSU_RESPONSE_TIMEOUT);
+
             if(!(l_resp->primaryStatus & SBE_PRI_FFDC_ERROR))
             {
                 SBE_TRACF("Error: PSU Timeout and no FFDC present");
@@ -911,10 +915,6 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 l_respRegsFFDC.addToLog(l_errl);
                 l_errl->collectTrace(SBEIO_COMP_NAME);
             }
-
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_PSU_RESPONSE_TIMEOUT);
 
             break;
         }
