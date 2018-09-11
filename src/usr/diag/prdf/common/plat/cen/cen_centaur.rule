@@ -964,7 +964,7 @@ rule rDMIFIR
 };
 
 group gDMIFIR filter priority( 10, 2, 11, 12, 9  ),
-                     cs_root_cause( 12 )
+                     cs_root_cause( 10, 12 )
 {
     /** DMIFIR[0]
      *  RX invalid state or parity error

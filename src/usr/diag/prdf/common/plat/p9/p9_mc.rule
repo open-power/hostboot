@@ -534,7 +534,7 @@ rule rIOMCFIR
     IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 &  IOMCFIR_ACT1;
 };
 
-group gIOMCFIR filter singlebit, cs_root_cause( 12, 20, 28, 36 )
+group gIOMCFIR filter singlebit, cs_root_cause( 10, 12, 18, 20, 26, 28, 34, 36 )
 {
     /** IOMCFIR[0]
      *  RX_INVALID_STATE_OR_PARITY_ERROR
