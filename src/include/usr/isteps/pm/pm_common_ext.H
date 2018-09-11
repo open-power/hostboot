@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,17 @@ namespace HBPM
     };
 
     /**
+     * @brief Enumeration of the  attribute
+     *
+     */
+    enum resetOptions_t
+    {
+        RESET_HW                   = 0x1,
+        CLEAR_ATTRIBUTES           = 0x2,
+        RESET_AND_CLEAR_ATTRIBUTES = (RESET_HW | CLEAR_ATTRIBUTES),
+    };
+
+    /**
      *  @brief Convert HOMER physical address space to a vitual address
      *  @param[in]  i_proc_target  Processsor target
      *  @param[in]  i_phys_addr    Physical address
@@ -106,9 +117,11 @@ namespace HBPM
     /**
      * @brief Reset PM Complex for all proc targets.
      *
+     * @param[in]  i_opt  Option to reset HW, attributes, or both
+     *
      * @return errlHndl_t  Error log if resetPMAll failed
      */
-    errlHndl_t resetPMAll();
+    errlHndl_t resetPMAll( resetOptions_t i_opt = RESET_HW );
 
     /**
      * @brief Verify all OCCs at checkpoint.
