@@ -52,6 +52,7 @@
 #include    <sys/misc.h>
 
 #include <hbotcompid.H>
+#include <util/misc.H>
 
 #include "freqAttrData.H"
 
@@ -735,6 +736,33 @@ void* call_host_runtime_setup (void *io_pArgs)
                 }
             }
 #endif
+        }
+        // No support for OCC 
+        else if( !Util::isSimicsRunning() )
+        {
+            // Since we are not leaving the PM complex alive, we will
+            //  explicitly put it into reset and clean up any memory
+            l_err = HBPM::resetPMAll(HBPM::RESET_AND_CLEAR_ATTRIBUTES);
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "resetPMAll failed");
+
+                // Commit the error and continue with the istep
+                errlCommit(l_err, ISTEP_COMP_ID);
+
+                // Force an attribute clear here even if the rest failed
+                l_err = HBPM::resetPMAll(HBPM::CLEAR_ATTRIBUTES);
+                if( l_err )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               "Explicit attribute clear failed");
+                    // no reason to keep this log around, most likely it
+                    //  is the same fail we hit above
+                    delete l_err;
+                    l_err = nullptr;
+                }
+            }
         }
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
