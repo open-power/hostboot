@@ -331,14 +331,22 @@ namespace TRACE
         #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
             if (strcmp( i_td->iv_compName, "FAPI" ))
         #endif
-            { CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args); }
+            {
+                char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
+                sprintf(tmpstr, "%u %s", l_time.tid, i_td->iv_compName );
+                CONSOLE::vdisplayf(tmpstr, *l_cb, l_tl_args);
+            }
 #else
             if (iv_traceLite)
             {
             #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
                 if (strcmp( i_td->iv_compName, "FAPI" ))
             #endif
-                { CONSOLE::vdisplayf(i_td->iv_compName, *l_cb, l_tl_args); }
+                {
+                    char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
+                    sprintf(tmpstr, "%d %s", l_time.tid, i_td->iv_compName );
+                    CONSOLE::vdisplayf(tmpstr, *l_cb, l_tl_args);
+                }
             }
 
 #endif //CONFIG_CONSOLE_TRACE_LITE
