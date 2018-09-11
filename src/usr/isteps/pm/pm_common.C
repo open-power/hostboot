@@ -148,8 +148,16 @@ namespace HBPM
                 }
             }
 
-            l_virt_addr = HBPM_MAP(HBPM_PHYS_ADDR,
-                                   sizeof(Homerlayout_t));
+            // Remap unless we're zeroing things out
+            if( i_phys_addr )
+            {
+                l_virt_addr = HBPM_MAP(HBPM_PHYS_ADDR,
+                                       sizeof(Homerlayout_t));
+            }
+            else
+            {
+                l_virt_addr = nullptr;
+            }
 
             // Update the attributes for the current values
             i_proc_target->setAttr<ATTR_HOMER_PHYS_ADDR>(i_phys_addr);
@@ -1110,7 +1118,7 @@ namespace HBPM
     /**
      *  @brief Reset PM complex for all chips
      */
-    errlHndl_t resetPMAll()
+    errlHndl_t resetPMAll( resetOptions_t i_opt )
     {
         errlHndl_t l_errl = nullptr;
 
@@ -1118,18 +1126,37 @@ namespace HBPM
         getAllChips(l_procChips, TYPE_PROC, true);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "resetPMAll: %d proc(s) found",
+                   "resetPMAll(%d): %d proc(s) found",
+                   i_opt,
                    l_procChips.size());
 
         for (const auto & l_procChip: l_procChips)
         {
-            l_errl = resetPMComplex(l_procChip);
-            if( l_errl )
+            if( RESET_HW & i_opt )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"resetPMAll: "
-                           "reset PM complex failed!" );
-                break;
+                l_errl = resetPMComplex(l_procChip);
+                if( l_errl )
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"resetPMAll: "
+                               "reset PM complex failed!" );
+                    break;
+                }
+            }
+
+            if( CLEAR_ATTRIBUTES & i_opt )
+            {
+                (void) convertHomerPhysToVirt( l_procChip, 0 );
+            }
+        }
+
+        if( !l_errl )
+        {
+            if( CLEAR_ATTRIBUTES & i_opt )
+            {
+                TARGETING::Target* sys = nullptr;
+                TARGETING::targetService().getTopLevelTarget(sys);
+                sys->setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(0);
             }
         }
 
