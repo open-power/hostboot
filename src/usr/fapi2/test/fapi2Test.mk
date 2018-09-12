@@ -57,6 +57,7 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 ## Remove non-runtime tests (grep -v testname.H)
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          grep -v fapi2I2cAccessTest.H | \
+         grep -v fapi2MmioAccessTest.H | \
          sort | xargs}
 
 ################################################################################
@@ -68,6 +69,7 @@ else
 TESTS += ${shell ls ${ROOTPATH}/src/usr/fapi2/test/*Test.H | \
          sort | xargs}
 OBJS += p9_i2ctests.o
+OBJS += p9_mmiotests.o
 
 ################################################################################
 endif
