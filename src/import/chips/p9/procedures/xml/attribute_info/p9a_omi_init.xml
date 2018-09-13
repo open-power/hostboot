@@ -22,8 +22,8 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- @file p9a_omi_init.xml -->
-<!-- @brief Attribute xml for p9a_omi_init -->
+<!-- @file exp_omi_init.xml -->
+<!-- @brief Attribute xml for exp_omi_init -->
 <!-- -->
 <!-- *HWP HWP Owner: Benjamin Gass <bgass@us.ibm.com> -->
 <!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
@@ -33,4 +33,168 @@
 <!-- *HWP Consumed by: FSP:HB -->
 <!-- -->
 <attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_DSTLCFG_MMIO_ADDRBIT_POS</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+        Configures position of where to set bit for mmio addr bar. (Bit position = dialvalue + 43)
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x00</default>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_ENABLE_DL_TMPL_1</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+         Enable proc downstream transmit template 1.
+         Should be enabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>ENABLED</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_ENABLE_DL_TMPL_4</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+         Enable proc downstream transmit template 4.
+         Should be enabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>ENABLED</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_ENABLE_DL_TMPL_7</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+         Enable proc downstream transmit template 7.
+         Should be disabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>DISABLED</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_ENABLE_DL_TMPL_A</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+         Enable proc downstream transmit template A.
+         Should be disabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>DISABLED</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_TMPL_0_PACING</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+      Downstream Template 0 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0xF</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_TMPL_1_PACING</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+      Downstream Template 1 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_TMPL_4_PACING</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+      Downstream Template 4 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_TMPL_7_PACING</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+      Downstream Template 7 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_TMPL_A_PACING</id>
+  <targetType>TARGET_TYPE_MCC</targetType>
+  <description>
+      Downstream Template A pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_OMI_OC_MAJOR_VER</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+      The OMI OpenCAPI major version supported by this processor
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x3</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_OMI_OC_MINOR_VER</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+      The OMI OpenCAPI minor version supported by this processor
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x1</default>
+  <writeable/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
