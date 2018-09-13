@@ -22,11 +22,42 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file p9a_mcc_omi_scom.C
-///
-// *HWP HWP Owner: Benjamin Gass <bgass@us.ibm.com>
-// *HWP HWP Backup: Daniel Crowell <dcrowell@us.ibm.com>
-// *HWP Team:
-// *HWP Level: 2
-// *HWP Consumed by: HB
+#include "p9a_mcc_omi_scom.H"
+#include <stdint.h>
+#include <stddef.h>
+#include <fapi2.H>
+
+using namespace fapi2;
+
+constexpr uint64_t literal_0b100000 = 0b100000;
+constexpr uint64_t literal_0b0001 = 0b0001;
+constexpr uint64_t literal_0b1000000 = 0b1000000;
+constexpr uint64_t literal_0b011000 = 0b011000;
+constexpr uint64_t literal_0b1 = 0b1;
+
+fapi2::ReturnCode p9a_mcc_omi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT0,
+                                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
+{
+    {
+        fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090aull, l_scom_buffer ));
+
+            l_scom_buffer.insert<2, 6, 58, uint64_t>(literal_0b100000 );
+            l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0001 );
+            l_scom_buffer.insert<17, 7, 57, uint64_t>(literal_0b1000000 );
+            l_scom_buffer.insert<50, 6, 58, uint64_t>(literal_0b011000 );
+            l_scom_buffer.insert<58, 6, 58, uint64_t>(literal_0b011000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090aull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x701090bull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0b1 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x701090bull, l_scom_buffer));
+        }
+
+    };
+fapi_try_exit:
+    return fapi2::current_err;
+}
