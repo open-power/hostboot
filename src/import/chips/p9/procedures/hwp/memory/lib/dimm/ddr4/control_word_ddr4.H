@@ -46,6 +46,9 @@
 
 namespace mss
 {
+///
+/// @brief Control word types
+///
 enum control_word
 {
     // buffer control words
@@ -56,6 +59,10 @@ enum control_word
     RCW_4BIT,
     RCW_8BIT,
 };
+
+// Constexprs to make our lives easier
+static constexpr uint64_t CW4_DATA_LEN = 4;
+static constexpr uint64_t CW8_DATA_LEN = 8;
 }
 
 ///
@@ -80,7 +87,7 @@ class cwTraits< mss::BCW_8BIT >
         // Address bits denoted by A
 
         // Data settings are set by A[7:0]
-        static constexpr uint64_t DATA_LEN = 8;
+        static constexpr uint64_t DATA_LEN = mss::CW8_DATA_LEN;
 
         // Control words are set by A[11:4]
         static constexpr uint64_t WORD_LEN = 4;
@@ -107,7 +114,7 @@ class cwTraits< mss::BCW_4BIT >
         // Address bits denoted by A
 
         // Data settings are set by A[3:0]
-        static constexpr uint64_t DATA_LEN = 4;
+        static constexpr uint64_t DATA_LEN = mss::CW4_DATA_LEN;
 
         // Control words are set by A[11:4]
         // Word length is technically 8
@@ -136,7 +143,7 @@ class cwTraits< mss::RCW_8BIT >
         // Address bits denoted by A
 
         // Data settings are set by A[7:0]
-        static constexpr uint64_t DATA_LEN = 8;
+        static constexpr uint64_t DATA_LEN = mss::CW8_DATA_LEN;
 
         // Control words are set by A[12:8]
         // Word length is technically 5
@@ -165,7 +172,7 @@ class cwTraits< mss::RCW_4BIT >
         // Address bits denoted by A
 
         // Data settings are set by A[3:0]
-        static constexpr uint64_t DATA_LEN = 4;
+        static constexpr uint64_t DATA_LEN = mss::CW4_DATA_LEN;
 
         // Control words are set by A[12:4]
         // Word length is technically 9
@@ -215,7 +222,12 @@ struct cw_data
     }
 
     ///
-    /// @brief default ctor for attribute driven data
+    /// @brief default dtor
+    ///
+    ~cw_data() = default;
+
+    ///
+    /// @brief default ctor
     ///
     cw_data() = default;
 
@@ -267,16 +279,17 @@ struct cw_data
 /// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data control word data to send
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
+/// @param[in] i_sim true if in simulation mode
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW
+/// @param[out] o_instruction CCS instruction we created
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
                                       const bool i_sim,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst,
-                                      const bool i_turn_on_cke = true)
+                                      const bool i_turn_on_cke,
+                                      ccs::instruction_t<OT>& o_instruction)
 {
     // You're probably asking "Why always turn off CKE's? What is this madness?"
     // Well, due to a vendor sensitivity, we need to have the CKE's off until we run RC09 at the very end
@@ -285,7 +298,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
     // Therefore, we want to setup all RCW commands to have CKE's off across both DIMM's
     // We then manually turn on the CKE's associated with a specific DIMM
     constexpr bool CKE_OFF = false;
-    ccs::instruction_t<OT> l_inst =  ccs::rcd_command<OT>(i_target, i_sim, CKE_OFF);
+    ccs::instruction_t<OT> l_inst = ccs::rcd_command<OT>(i_target, i_sim, CKE_OFF);
 
     // Turn on the CKE's for the ranks we're not touching, if it's needed
     // Note: we only have the whole CKE field, not the per DIMM one by default
@@ -332,9 +345,38 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
                  i_data.iv_delay,
                  uint64_t(l_inst.arr0), uint64_t(l_inst.arr1),
                  mss::c_str(i_target));
-
-        io_inst.push_back(l_inst);
     }
+
+    // All setup now, output it
+    o_instruction = l_inst;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Control word engine that sets the CCS instruction
+/// @tparam T the buffer control word type (4 bit or 8 bit)
+/// @tparam TT traits type defaults to cwTraits<T>
+/// @tparam OT the TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_data control word data to send
+/// @param[in] i_sim true if in simulation mode
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
+fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const cw_data& i_data,
+                                      const bool i_sim,
+                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      const bool i_turn_on_cke = true)
+{
+    ccs::instruction_t<OT> l_inst;
+    FAPI_TRY(control_word_engine<T>(i_target, i_data, i_sim, i_turn_on_cke, l_inst));
+    io_inst.push_back(l_inst);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -347,6 +389,7 @@ fapi_try_exit:
 /// @tparam OT the TargetType of the CCS instruction
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data_list a vector of control word data to send
+/// @param[in] i_sim true if in simulation mode
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @param[in] i_turn_on_cke flag that states whether we want CKE on for all RCWs in the vector (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -358,15 +401,179 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
                                       std::vector< ccs::instruction_t<OT> >& io_inst,
                                       const bool i_turn_on_cke = true)
 {
-    if( i_data_list.empty() )
-    {
-        FAPI_ERR("%s. cw_data vector is empty!", mss::c_str(i_target) );
-        fapi2::Assert(false);
-    }
+    FAPI_ASSERT( !i_data_list.empty(),
+                 fapi2::MSS_EMPTY_VECTOR().
+                 set_FUNCTION(CW_DATA_ENGINE).
+                 set_TARGET(i_target),
+                 "%s. cw_data vector is empty!", mss::c_str(i_target) );
 
     for (const auto& data : i_data_list)
     {
         FAPI_TRY( control_word_engine<T>(i_target, data, i_sim, io_inst, i_turn_on_cke) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/////////////////////////////////////////////////
+// Now for the API related to CW information
+/////////////////////////////////////////////////
+
+///
+/// @class cw_info
+/// @brief class that represents (register/buffer) control word data as well as length and RCW vs BCW
+/// @note used to store all CW data to move the knowledge of 4-bit vs 8-bit to runtime
+///
+struct cw_info
+{
+// Values of A12 which determines BCW vs RCW
+// A12 is 1 for BCW and 0 for RCW
+    static constexpr bool BCW = true;
+    static constexpr bool RCW = false;
+
+    // CW data
+    cw_data iv_cw_data;
+
+    // Data length 4 vs 8 bits
+    uint64_t iv_data_len;
+
+    // Boolean that controls BCW vs RCW - true if BCW
+    bool iv_is_bcw;
+
+    ///
+    /// @brief default dtor
+    ///
+    ~cw_info() = default;
+
+    ///
+    /// @brief default ctor
+    ///
+    cw_info() = default;
+
+    ///
+    /// @brief ctor for attribute driven data
+    /// @param[in] i_func_space the function space number
+    /// @param[in] i_number register control word number
+    /// @param[in] i_func attribute accessor function pointer
+    /// @param[in] i_delay delay in cycles after current RCW
+    /// @param[in] i_data_len data length
+    /// @param[in] i_bcw buffer control word
+    ///
+    cw_info( const uint64_t i_func_space,
+             const uint64_t i_number,
+             fapi2::ReturnCode (*i_func)(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&, uint8_t&),
+             const uint64_t i_delay,
+             const uint64_t i_data_len,
+             const bool i_bcw ):
+        iv_cw_data(i_func_space, i_number, i_func, i_delay),
+        iv_data_len(i_data_len),
+        iv_is_bcw(i_bcw)
+    {}
+
+    ///
+    /// @brief ctor for custom data
+    /// @param[in] i_func_space the function space number
+    /// @param[in] i_number register control word number
+    /// @param[in] i_data RCW data to write
+    /// @param[in] i_delay delay in cycles after current RCW
+    /// @param[in] i_data_len data length
+    /// @param[in] i_bcw buffer control word
+    ///
+    cw_info( const uint64_t i_func_space,
+             const uint64_t i_number,
+             const uint64_t i_data,
+             const uint64_t i_delay,
+             const uint64_t i_data_len,
+             const bool i_bcw ):
+        iv_cw_data(i_func_space, i_number, i_data, i_delay),
+        iv_data_len(i_data_len),
+        iv_is_bcw(i_bcw)
+    {}
+
+};
+
+///
+/// @brief Control word engine that sets the CCS instruction
+/// @tparam OT the TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_info control word data and information about how to send it
+/// @param[in] i_sim true if in simulation mode
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW
+/// @param[out] o_instruction CCS instruction we created
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType OT >
+fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const cw_info& i_info,
+                                      const bool i_sim,
+                                      const bool i_turn_on_cke,
+                                      ccs::instruction_t<OT>& o_instruction)
+{
+    // BCW 4-bit
+    if(i_info.iv_is_bcw && i_info.iv_data_len == CW4_DATA_LEN)
+    {
+        FAPI_TRY(control_word_engine<BCW_4BIT>(i_target, i_info.iv_cw_data, i_sim, i_turn_on_cke, o_instruction));
+    }
+    // BCW 8-bit
+    else if(i_info.iv_is_bcw && i_info.iv_data_len == CW8_DATA_LEN)
+    {
+        FAPI_TRY(control_word_engine<BCW_8BIT>(i_target, i_info.iv_cw_data, i_sim, i_turn_on_cke, o_instruction));
+    }
+    // RCW 4-bit
+    else if(!i_info.iv_is_bcw && i_info.iv_data_len == CW4_DATA_LEN)
+    {
+        FAPI_TRY(control_word_engine<RCW_4BIT>(i_target, i_info.iv_cw_data, i_sim, i_turn_on_cke, o_instruction));
+    }
+    // RCW 8-bit
+    else if(!i_info.iv_is_bcw && i_info.iv_data_len == CW8_DATA_LEN)
+    {
+        FAPI_TRY(control_word_engine<RCW_8BIT>(i_target, i_info.iv_cw_data, i_sim, i_turn_on_cke, o_instruction));
+    }
+    // Error case
+    else
+    {
+        FAPI_ASSERT(false,
+                    fapi2::MSS_INVALID_CW_ENCODING()
+                    .set_CW_DATA_LEN(i_info.iv_data_len)
+                    .set_BCW(i_info.iv_is_bcw)
+                    .set_TARGET(i_target),
+                    "%s data_len: %u and %s are an invalid combination",
+                    mss::c_str(i_target), i_info.iv_data_len, i_info.iv_is_bcw ? "BCW" : "RCW");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Control word engine that sets the CCS instruction
+/// @tparam OT the TargetType of the CCS instruction
+/// @param[in] i_target a DIMM target
+/// @param[in] i_info_list a vector of control word data to send
+/// @param[in] i_sim true if in simulation mode
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for all RCWs in the vector (defaulted to true)
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType OT >
+fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const std::vector<cw_info>& i_info_list,
+                                      const bool i_sim,
+                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      const bool i_turn_on_cke = true)
+{
+    FAPI_ASSERT( !i_info_list.empty(),
+                 fapi2::MSS_EMPTY_VECTOR().
+                 set_FUNCTION(CW_INFO_ENGINE).
+                 set_TARGET(i_target),
+                 "%s. cw_info vector is empty!", mss::c_str(i_target) );
+
+    for (const auto& l_info : i_info_list)
+    {
+        ccs::instruction_t<OT> l_inst;
+        FAPI_TRY( control_word_engine(i_target, l_info, i_sim, i_turn_on_cke, l_inst) );
+        io_inst.push_back(l_inst);
     }
 
 fapi_try_exit:

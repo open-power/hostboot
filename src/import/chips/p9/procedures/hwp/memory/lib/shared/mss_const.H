@@ -196,6 +196,10 @@ enum ffdc_function_codes
 
     // eff_dimm.C
     PRIMARY_STACK_TYPE = 116,
+
+    // CW engine information
+    CW_DATA_ENGINE = 117,
+    CW_INFO_ENGINE = 118,
 };
 
 enum states

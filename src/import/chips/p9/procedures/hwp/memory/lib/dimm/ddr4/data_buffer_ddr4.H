@@ -73,6 +73,9 @@ enum db02_def : size_t
     FUNC_SPACE_6 = 6,
     FUNC_SPACE_7 = 7,
 
+    // From DB02 spec - F[3:0]BC7x control word
+    MAX_FUNC_SPACE = 7,
+
     // 4 bit BCWs
     DQ_RTT_NOM_CW = 0x0,
     DQ_RTT_WR_CW = 0x1,
@@ -125,48 +128,6 @@ enum command : size_t
 
 ///
 /// @brief Sets the function space for the BCW
-/// @tparam T the functon space number we want
-/// @param[in] i_target a DIMM target
-/// @param[in,out] io_inst a vector of CCS instructions we should add to
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< uint64_t T >
-inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGET_TYPE_DIMM >& i_target,
-        std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
-{
-    // From DB02 spec - F[3:0]BC7x control word
-    constexpr size_t MAX_FUNC_SPACE = 7;
-
-    uint8_t l_sim = 0;
-    mss::is_simulation(l_sim);
-
-    // Function spaces are typically user selected.
-    // Sometimes function spaces are selected based on rank number
-    // or MDQ lane number which currently are also user inputs.
-
-    // We assert out for user programming erros
-    static_assert( T <= MAX_FUNC_SPACE, "Invalid function space selection received. Must be <= 7");
-
-    // function space bits for the function space selector are
-    // don't cares (XXX).  We choose 0 for simplicity.
-    cw_data l_data( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, T, mss::tmrd() );
-
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst),
-              "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
-
-    // I don't know what already existed in this ccs instruction vector beforehand so
-    // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Sets the function space for the BCW
 /// @param[in] i_target a DIMM target
 /// @param[in] i_func_space the functon space number we want
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
@@ -176,38 +137,97 @@ inline fapi2::ReturnCode function_space_select(const fapi2::Target< fapi2::TARGE
         const uint64_t i_func_space,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst)
 {
-    // From DB02 spec - F[3:0]BC7x control word
-    constexpr size_t MAX_FUNC_SPACE = 7;
-
-    if( i_func_space > MAX_FUNC_SPACE )
-    {
-        // Function spaces are typically user selected.
-        // Sometimes function spaces are selected based on rank number
-        // or MDQ lane number which currently are also user inputs.
-
-        // We assert out for user programming erros
-        FAPI_ERR("%s. Invalid function space selection: %d, max valid function space is %d",
-                 mss::c_str(i_target), i_func_space, MAX_FUNC_SPACE);
-
-        fapi2::Assert(false);
-    }
-
-    uint8_t l_sim = 0;
-    mss::is_simulation(l_sim);
+    FAPI_ASSERT(i_func_space <= MAX_FUNC_SPACE,
+                fapi2::MSS_LRDIMM_FUNC_SPACE_OUT_OF_RANGE()
+                .set_TARGET(i_target)
+                .set_MAX_FUNC_SPACE(MAX_FUNC_SPACE)
+                .set_FUNC_SPACE(i_func_space),
+                "%s function space (%u) greater than maximum range (%u)",
+                mss::c_str(i_target), i_func_space, MAX_FUNC_SPACE);
 
     // function space bits for the function space selector are
     // don't cares (XXX).  We choose 0 for simplicity.
-    cw_data l_data( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, mss::tmrd() );
+    {
+        uint8_t l_sim = 0;
+        mss::is_simulation(l_sim);
 
-    FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst),
-              "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
-              mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
+        cw_data l_data( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, mss::tmrd() );
 
-    // I don't know what already existed in this ccs instruction vector beforehand so
-    // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
+        FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, l_sim, io_inst),
+                  "%s. Failed control_word_engine for 8-bit BCW (F%dBC%02lxX)",
+                  mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number) );
+
+        // I don't know what already existed in this ccs instruction vector beforehand so
+        // I use the back() method to access the last added ccs instruction of interest
+        FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
+                 mss::c_str(i_target), uint8_t(l_data.iv_func_space), uint8_t(l_data.iv_number),
+                 uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(l_data.iv_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Inserts a function space selector into a vector of cw_info functions
+/// @param[in] i_func_space the functon space number we want
+/// @param[in] i_iterator an iterator to a vector of cw_info structures
+/// @param[in,out] io_vector vector in which to insert the function space selector
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+inline fapi2::ReturnCode insert_function_space_select(const uint64_t i_func_space,
+        const std::vector< cw_info >::iterator& i_iterator,
+        std::vector< cw_info >& io_vector)
+{
+    FAPI_ASSERT(i_func_space <= MAX_FUNC_SPACE,
+                fapi2::MSS_LRDIMM_INSERT_FUNC_SPACE_OUT_OF_RANGE()
+                .set_MAX_FUNC_SPACE(MAX_FUNC_SPACE)
+                .set_FUNC_SPACE(i_func_space),
+                "function space (%u) greater than maximum range (%u)",
+                i_func_space, MAX_FUNC_SPACE);
+    {
+        constexpr uint64_t FUNC_SPACE_LEN = 8;
+        cw_info l_info( FUNC_SPACE_0, FUNC_SPACE_SELECT_CW, i_func_space, mss::tmrd(), FUNC_SPACE_LEN, cw_info::BCW );
+        io_vector.insert(i_iterator, l_info);
+    }
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Inserts all needed function space selects into a vector of cw_info functions
+/// @param[in,out] io_vector vector in which to insert the function space selector
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+inline fapi2::ReturnCode insert_function_space_select(std::vector< cw_info >& io_vector)
+{
+    fapi2::buffer<uint8_t> l_func_space(FUNC_SPACE_0);
+
+    // Looping on numbers here as using iterators creates memfaults due to the insert
+    for(uint64_t i = 0; i < io_vector.size(); ++i)
+    {
+        // If the current function space is different than our desired one...
+        if(l_func_space != io_vector[i].iv_cw_data.iv_func_space)
+        {
+            // Add in a CW to do the function space change
+            l_func_space = io_vector[i].iv_cw_data.iv_func_space;
+            auto l_it = io_vector.begin() + i;
+            FAPI_TRY(insert_function_space_select(l_func_space, l_it, io_vector));
+        }
+    }
+
+    // So, we always want to know what function space we're in
+    // The way to do that is to always return to one function space
+    // The LR spec recommends that we return to the default function space - function space 0
+    // If the vector is not at our default function space of function space 0, return to function space 0
+    if(l_func_space != FUNC_SPACE_0)
+    {
+        FAPI_TRY(insert_function_space_select(FUNC_SPACE_0, io_vector.end(), io_vector));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
