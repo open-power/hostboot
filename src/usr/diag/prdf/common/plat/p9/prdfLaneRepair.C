@@ -397,12 +397,13 @@ void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
         PRDF_ASSERT(nullptr != l_smpPeerTgt);
 
         // Call SVPD routine to add callouts
-        l_err = HWSV::SvrError::AddSMPCalloutAndFFDC(i_smpTgt, l_smpPeerTgt,
-                                                     l_mainElog);
+        l_err = HWSV::SvrError::AddBusCallouts( l_mainElog, i_smpTgt,
+                                                l_smpPeerTgt, HWAS::O_BUS_TYPE,
+                                                SRCI_PRIORITY_MED );
 
         if (NULL != l_err)
         {
-            PRDF_ERR("handleSmpCable callouts failed");
+            PRDF_ERR("AddBusCallouts failed");
             l_err->CollectTrace(PRDF_COMP_NAME, 1024);
             l_err->commit( PRDF_COMP_ID, ERRL_ACTION_REPORT );
             delete l_err;
