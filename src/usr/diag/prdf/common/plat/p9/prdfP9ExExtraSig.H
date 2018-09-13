@@ -35,5 +35,7 @@ PRDR_ERROR_SIGNATURE( P9EX_L3CE_LD_ISSUED, 0x0fff0005, "L3FIR[4]",
                       "L3 Cache Read CE, Line Delete Issued");
 PRDR_ERROR_SIGNATURE( P9EX_L3CE_LD_FAILURE, 0x0fff0006, "L3FIR[4]",
                       "L3 Cache Read CE, Line Delete Failed");
+PRDR_ERROR_SIGNATURE( P9EX_L3CE_MBF_FAIL, 0x0fff0007, "L3FIR[4]",
+                      "L3 Cache Read CE, Multi-bitline failure");
 #endif // __prdfP9ExExtraSig_H
 

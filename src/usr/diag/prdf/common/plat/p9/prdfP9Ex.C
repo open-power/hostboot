@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -490,6 +490,7 @@ int32_t L3CE( ExtensibleChip * i_chip,
     do {
         P9ExDataBundle * l_bundle = getExDataBundle(i_chip);
         uint16_t l_maxLineDelAllowed = 0;
+        uint16_t curMem = 0xFFFF;
         int32_t l_rc = SUCCESS;
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -521,6 +522,8 @@ int32_t L3CE( ExtensibleChip * i_chip,
         ldcrffdc.L3errHshAddress   = errorAddr.hashed_real_address_45_56;
         ldcrffdc.L3errCacheAddress = errorAddr.cache_read_address;
         addL3LdCrFfdc( i_chip, io_sc, ldcrffdc );
+
+        curMem = errorAddr.member;
 #endif
 
         if (mfgMode())
@@ -555,6 +558,27 @@ int32_t L3CE( ExtensibleChip * i_chip,
             // errors before applying a line delete
             break;
         }
+
+        // Check for multi-bitline fail
+        Timer curTime = io_sc.service_data->GetTOE();
+        uint16_t prvMem = l_bundle->iv_prevMember;
+
+        if ( prvMem != 0xFFFF && // we have data saved from a previous LD
+             l_bundle->iv_blfTimeout > curTime && // the timer has not expired
+             prvMem != curMem ) // the current fail is on a different bitline
+        {
+            // We have multiple bit lines failing within a 24 hour period
+            // Make this predictive
+            PRDF_TRAC( "[L3CE] HUID: 0x%08x Multi-bitline fail detected",
+                       i_chip->GetId() );
+            io_sc.service_data->SetThresholdMaskId(0);
+            io_sc.service_data->SetErrorSig( PRDFSIG_P9EX_L3CE_MBF_FAIL );
+            break;
+        }
+
+        // Update saved bitline data
+        l_bundle->iv_prevMember = curMem;
+        l_bundle->iv_blfTimeout = curTime + Timer::SEC_IN_DAY;
 
         // Execute the line delete
         if ( MODEL_NIMBUS != getChipModel(i_chip->getTrgt()) ||
