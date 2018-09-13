@@ -37,6 +37,7 @@
 #define _BUFFER_OPS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/mss_buffer_utils.H>
 
 namespace mss
 {
@@ -109,25 +110,68 @@ static inline void reverse( T& io_buffer )
 /// @tparam SB source buffer type
 /// @tparam DB destination buffer type
 /// @param[in] i_source  source buffer - these bits will be decremented
-/// @param[out] o_destination destination buffer - these bits will be incremented
+/// @param[in,out] io_destination destination buffer - these bits will be incremented
 /// @return reference to the destination
 ///
 template<uint64_t DS, uint64_t L, uint64_t SS, typename SB, typename DB>
-inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buffer<DB>& o_destination )
+inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buffer<DB>& io_destination )
 {
-    // Reverse the destination, and then mangle the start bits to get things to line up
+    // Steps for the swizzle
+    // 1) Reverse the destination buffer
+    // 2) compute the source buffer start
+
+    // 1) Reverse the destination buffer
     fapi2::buffer<SB> l_tmp(i_source);
     reverse(l_tmp);
 
-    o_destination.template insert < DS, L, (sizeof(SB) * 8) - (SS + 1) > (SB(l_tmp));
+    // 2) compute the source buffer start
+    // For the swizzle, we need to know where the source buffer's data starts at
+    // The data is right justified, so we want to get the data's length and subtract out the whole data length
+    // We subtract out an additonal 1 to account for bits being from 0 to N-1
+    constexpr auto l_source_data_start = get_bit_length<SB>() - (SS + 1);
+    io_destination.template insert < DS, L, l_source_data_start > (SB(l_tmp));
 
 #ifdef SWIZZLE_TRACE
     // s: source, r: reverse, d: destination, ds: distination start, l: length, ss: source start
     FAPI_DBG("swizzle s: 0x%016llx, r: 0x%016llx, d: 0x%016llx, ds: %d, l: %d, ss: %d",
-             i_source, l_tmp, o_destination, DS, L, (sizeof(SB) * 8) - (SS + 1));
+             i_source, l_tmp, io_destination, DS, L, l_source_data_start);
 #endif
 
-    return o_destination;
+    return io_destination;
+}
+
+///
+/// @brief Swizzle bits between two fapi2 buffers, and insert from source to destination
+/// @tparam SB source buffer type
+/// @tparam DB destination buffer type
+/// @tparam i_destination_start the start bit in the destination buffer - swizzle will count up from here
+/// @tparam i_length how many bits to swizzle
+/// @tparam i_source_start the start bit in the source buffer - swizzle will count down from here
+/// @param[in] i_source  source buffer - these bits will be decremented
+/// @param[in,out] io_destination destination buffer - these bits will be incremented
+/// @return fapi2::ReturnCode SUCCESS iff the code is successful
+///
+template<typename SB, typename DB>
+inline fapi2::ReturnCode swizzle( const uint64_t i_destination_start,
+                                  const uint64_t i_length,
+                                  const uint64_t i_source_start,
+                                  const fapi2::buffer<SB>& i_source,
+                                  fapi2::buffer<DB>& io_destination )
+{
+    // Steps for the swizzle
+    // 1) Reverse the destination buffer
+    // 2) compute the source buffer start
+
+    // 1) Reverse the destination buffer
+    fapi2::buffer<SB> l_tmp(i_source);
+    reverse(l_tmp);
+
+    // 2) compute the source buffer start
+    // For the swizzle, we need to know where the source buffer's data starts at
+    // The data is right justified, so we want to get the data's length and subtract out the whole data length
+    // We subtract out an additonal 1 to account for bits being from 0 to N-1
+    const auto l_source_data_start = get_bit_length<SB>() - (i_source_start + 1);
+    return io_destination.insert(SB(l_tmp), i_destination_start, i_length, l_source_data_start);
 }
 
 } // ns mss
