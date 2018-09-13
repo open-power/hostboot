@@ -392,6 +392,22 @@ class isdimmIpmiFruInv : public IpmiFruInv
                           uint8_t i_keyword,
                           bool i_ascii=false);
 
+    /**
+     * @brief Add manufacturer name of memory module into IPMI message buffer.
+     * @param[in/out] data, The container with record data
+     * @return errlHndl_t, Error handle, NULL if operation was completed
+     *                     successfully
+     */
+    errlHndl_t addSpdManufacturer(std::vector<uint8_t> &io_data);
+
+    /**
+     * @brief Add detailed description of memory module into IPMI message buffer.
+     * @param[in/out] data, The container with record data
+     * @return errlHndl_t, Error handle, NULL if operation was completed
+     *                     successfully
+     */
+    errlHndl_t addSpdDetails(std::vector<uint8_t> &io_data);
+
 };
 
 //Child class for building up Processor Fru Inventory Record Data

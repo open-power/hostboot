@@ -45,6 +45,151 @@
 #include <console/consoleif.H>
 extern trace_desc_t * g_trac_ipmi;
 
+// JEDEC constants used to calculate memory module capacity
+#define JEDEC_DENSITY_MASK                   7
+#define JEDEC_DENSITY_MIN_VALUE              256
+#define JEDEC_MEMORY_BUS_WIDTH_PRI_MASK      3
+#define JEDEC_MEMORY_BUS_WIDTH_PRI_MIN_VALUE 8
+#define JEDEC_DRAM_WIDTH_MASK                3
+#define JEDEC_DRAM_WIDTH_MIN_VALUE           4
+#define JEDEC_RANKS_MASK                     3
+#define JEDEC_RANKS_MIN_VALUE                1
+
+/**
+ * @brief Structure described mapping between JEDEC identifiers
+ * and their decoded values.
+ */
+struct JedecNameMap
+{
+    uint16_t    id;
+    const char* decoded;
+};
+
+static const JedecNameMap jedecManufacturer[] =
+{
+    { 0x014F, "Transcend Information" },
+    { 0x017A, "Apacer Technology" },
+    { 0x0198, "Kingston" },
+    { 0x0230, "Corsair" },
+    { 0x0245, "Siemens AG" },
+    { 0x04F1, "Toshiba Corporation" },
+    { 0x0831, "Baikal Electronics" },
+    { 0x8001, "AMD" },
+    { 0x8004, "Fujitsu" },
+    { 0x802C, "Micron Technology" },
+    { 0x8054, "Hewlett-Packard" },
+    { 0x8089, "Intel" },
+    { 0x8089, "Intel" },
+    { 0x8096, "LG Semi" },
+    { 0x80A4, "IBM" },
+    { 0x80AD, "SK Hynix" },
+    { 0x80CE, "Samsung Electronics" },
+    { 0x859B, "Crucial Technology" },
+    { 0x8983, "Hewlett Packard Enterprise" }
+};
+
+static const JedecNameMap jedecBasicType[] =
+{
+    { 0x0B, "DDR3" },
+    { 0x0C, "DDR4" },
+    { 0x0E, "DDR4E" },
+    { 0x0F, "LPDDR3" },
+    { 0x10, "LPDDR4" }
+};
+
+static const JedecNameMap jedecModuleType[] =
+{
+    { 0x01, "RDIMM" },
+    { 0x02, "UDIMM" },
+    { 0x03, "SODIMM" },
+    { 0x04, "LRDIMM" },
+    { 0x05, "MINI RDIMM" },
+    { 0x06, "MINI UDIMM" },
+    { 0x08, "SORDIMM 72b"},
+    { 0x09, "SOUDIMM 72b" },
+    { 0x0C, "SODIMM 16b" },
+    { 0x0D, "SODIMM 32b" }
+};
+
+static const JedecNameMap jedecBusWidthPri[] =
+{
+    { 0x00, "8-bit" },
+    { 0x01, "16-bit" },
+    { 0x02, "32-bit" },
+    { 0x03, "64-bit" }
+};
+
+static const JedecNameMap jedecBusWidthExt[] =
+{
+    { 0x00, "non-ECC" },
+    { 0x01, "ECC" }
+};
+
+static const JedecNameMap jedecTckMin[] =
+{
+    { 0x05, "3200" },
+    { 0x06, "2666" },
+    { 0x07, "2400" },
+    { 0x08, "2133" },
+    { 0x09, "1866" },
+    { 0x0A, "1600" }
+};
+
+#define JEDEC_TABLE_SIZE(a) (sizeof(a) / sizeof(a[0]))
+
+/**
+ * @brief Get decoded value of JEDEC id.
+ * @param[in] i_spdId, SPD field identifier (type of JEDEC table)
+ * @param[in] i_jedecId, JEDEC identifier
+ * @return const char*, text string or NULL if identifier is unknown
+ */
+static const char* jedecDecode(uint16_t i_spdId, uint16_t i_jedecId)
+{
+    const JedecNameMap* l_table;
+    size_t l_tableSize;
+
+    switch (i_spdId)
+    {
+        case SPD::MODULE_MANUFACTURER_ID:
+            l_table = jedecManufacturer;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecManufacturer);
+            break;
+        case SPD::BASIC_MEMORY_TYPE:
+            l_table = jedecBasicType;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecBasicType);
+            break;
+        case SPD::MODULE_TYPE:
+            l_table = jedecModuleType;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecModuleType);
+            break;
+        case SPD::MODULE_MEMORY_BUS_WIDTH_PRI:
+            l_table = jedecBusWidthPri;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecBusWidthPri);
+            break;
+        case SPD::MODULE_MEMORY_BUS_WIDTH_EXT:
+            l_table = jedecBusWidthExt;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecBusWidthExt);
+            break;
+        case SPD::TCK_MIN:
+            l_table = jedecTckMin;
+            l_tableSize = JEDEC_TABLE_SIZE(jedecTckMin);
+            break;
+        default:
+            l_table = NULL;
+            l_tableSize = 0;
+    }
+
+    for (size_t i = 0; i < l_tableSize; ++i)
+    {
+        if (l_table[i].id == i_jedecId)
+        {
+            return l_table[i].decoded;
+        }
+    }
+
+    return NULL;
+}
+
 /**
  * @brief Compairs two pairs - used for std:sort
  * @param[in] lhs - left pair for comparison
@@ -581,11 +726,11 @@ errlHndl_t isdimmIpmiFruInv::buildProductInfoArea(std::vector<uint8_t> &io_data)
         //Set formatting data that goes at the beginning of the record
         preFormatProcessing(io_data, true);
 
-        //Set Manufacturer's Name - Use JEDEC standard MFG ID
-        l_errl = addVpdData(io_data, SPD::MODULE_MANUFACTURER_ID);
+        //Set Manufacturer Name - Use full info with decoded name
+        l_errl = addSpdManufacturer(io_data);
         if (l_errl) { break; }
-        //Set Product Name - Use Basic SPD Memory Type
-        l_errl = addVpdData(io_data, SPD::BASIC_MEMORY_TYPE);
+        //Set Product Name - Use detailed description
+        l_errl = addSpdDetails(io_data);
         if (l_errl) { break; }
         //Set Product Part/Model Number
         l_errl = addVpdData(io_data, SPD::MODULE_PART_NUMBER, true);
@@ -679,6 +824,201 @@ errlHndl_t isdimmIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
     if (l_errl)
     {
         TRACFCOMP(g_trac_ipmi, "addVpdData - Error acquiring data from Vpd.");
+    }
+
+    return l_errl;
+}
+
+errlHndl_t isdimmIpmiFruInv::addSpdManufacturer(std::vector<uint8_t> &io_data)
+{
+    const uint16_t i_keyword = SPD::MODULE_MANUFACTURER_ID;
+    uint16_t       l_manufacturerId;
+    size_t         l_fieldSize = sizeof(l_manufacturerId);
+
+    // Read manufacturer ID from SDP
+    const errlHndl_t l_errl = deviceRead(iv_target,
+                                         &l_manufacturerId,
+                                         l_fieldSize,
+                                         DEVICE_SPD_ADDRESS(i_keyword));
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_ipmi,
+                  "isdimmIpmiFruInv::addSpdManufacturer - "
+                  "Error while reading SPD keyword 0x%04x",
+                  i_keyword);
+    }
+    else
+    {
+        // SPD values are stored in LE format
+        l_manufacturerId = le16toh(l_manufacturerId);
+
+        // Decode and put manufacturer name into the message buffer
+        const char* l_name = jedecDecode(i_keyword, l_manufacturerId);
+        if (l_name)
+        {
+            const size_t l_len = strlen(l_name);
+            io_data.push_back(l_len + IPMIFRUINV::TYPELENGTH_BYTE_ASCII);
+            io_data.insert(io_data.end(), l_name, l_name + l_len);
+        }
+        else {
+            char l_buf[IPMIFRUINV::MAX_ASCII_FIELD_SIZE];
+            const size_t l_len = snprintf(l_buf, sizeof(l_buf),
+                                          "Unknown (0x%04x)", l_manufacturerId);
+            io_data.push_back(l_len + IPMIFRUINV::TYPELENGTH_BYTE_ASCII);
+            io_data.insert(io_data.end(), l_buf, l_buf + l_len);
+        }
+    }
+
+    return l_errl;
+}
+
+errlHndl_t isdimmIpmiFruInv::addSpdDetails(std::vector<uint8_t> &io_data)
+{
+    errlHndl_t l_errl = NULL;
+
+    do {
+        // All fields that we need are 1 byte
+        size_t l_fieldSize = sizeof(uint8_t);
+        const uint8_t l_invalidValue = 0xff;
+
+        // Read detailed memory module info
+
+        uint8_t l_basicType = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_basicType, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+        if (l_errl) { break; }
+
+        uint8_t l_moduleType = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_moduleType, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
+        if (l_errl) { break; }
+
+        uint8_t l_busWidthPri = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_busWidthPri, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH_PRI));
+        if (l_errl) { break; }
+
+        uint8_t l_busWidthExt = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_busWidthExt, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH_EXT));
+        if (l_errl) { break; }
+
+        uint8_t l_tckMin = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_tckMin, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::TCK_MIN));
+        if (l_errl) { break; }
+
+        uint8_t l_density = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_density, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::DENSITY));
+        if (l_errl) { break; }
+
+        uint8_t l_dramWidth = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_dramWidth, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::MODULE_DRAM_WIDTH));
+        if (l_errl) { break; }
+
+        uint8_t l_ranks = l_invalidValue;
+        l_errl = deviceRead(iv_target, &l_ranks, l_fieldSize,
+                            DEVICE_SPD_ADDRESS(SPD::MODULE_RANKS));
+        if (l_errl) { break; }
+
+        // Calculate capacity of memory module
+        uint16_t l_capacityGiB = 0;
+        if (l_density <= JEDEC_DENSITY_MASK &&
+            l_busWidthPri <= JEDEC_MEMORY_BUS_WIDTH_PRI_MASK &&
+            l_dramWidth <= JEDEC_DRAM_WIDTH_MASK &&
+            l_ranks <= JEDEC_RANKS_MASK)
+        {
+            // Get density
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 9
+            // density = 256 Mb* (2 ^ density) / 8 = 32 MB * (2 ^ density)
+            const uint32_t l_realDensity = (JEDEC_DENSITY_MIN_VALUE / 8) << l_density;
+
+            // Calculate the Primary Bus Width
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 15
+            // b00 - 8 bits ... b11 - 64 bits. All others reserved.
+            const uint32_t l_realBusWidth = JEDEC_MEMORY_BUS_WIDTH_PRI_MIN_VALUE << l_busWidthPri;
+
+            // Calculate the SDRAM Device Width
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 14
+            // b00 - 4 bits ... b11 - 32 bits. All others reserved.
+            const uint32_t l_realDevWidth = JEDEC_DRAM_WIDTH_MIN_VALUE << l_dramWidth;
+
+            // Calculate the Number of Package Ranks per DIMM
+            // JEDEC Standard No. 21-C. Page 4.1.2.12 – 14
+            // b00 - 1 package rank ... b11 - 4 package ranks. All others reserved.
+            const uint32_t l_realRanks = JEDEC_RANKS_MIN_VALUE + l_ranks;
+
+            // Calculate the Module Capacity (in GiB >> 10) according to the formula
+            // from the JEDEC Standard specification No. 21-C. Page 4.1.2.12 – 15
+            l_capacityGiB = (l_realDensity * (l_realBusWidth / l_realDevWidth) * l_realRanks) >> 10;
+        }
+
+        // Construct detailed string description
+        char l_desc[IPMIFRUINV::MAX_ASCII_FIELD_SIZE] = { 0 };
+        // Always store last null-termination symbol
+        const size_t l_descSz = sizeof(l_desc) - 1;
+
+        const char* l_decoded;
+
+        l_decoded = jedecDecode(SPD::BASIC_MEMORY_TYPE, l_basicType);
+        if (l_decoded)
+        {
+            strncpy(l_desc, l_decoded, l_descSz);
+        }
+        else
+        {
+            snprintf(l_desc, l_descSz, "N/A (%02x)", l_basicType);
+        }
+
+        l_decoded = jedecDecode(SPD::TCK_MIN, l_tckMin);
+        if (l_decoded)
+        {
+            strncat(l_desc, "-", l_descSz);
+            strncat(l_desc, l_decoded, l_descSz);
+        }
+
+        if (l_capacityGiB)
+        {
+            char l_buff[16] = { 0 };
+            snprintf(l_buff, sizeof(l_buff) - 1, " %iGiB", l_capacityGiB);
+            strncat(l_desc, l_buff, l_descSz);
+        }
+
+        l_decoded = jedecDecode(SPD::MODULE_MEMORY_BUS_WIDTH_PRI, l_busWidthPri);
+        if (l_decoded)
+        {
+            strncat(l_desc, " ", l_descSz);
+            strncat(l_desc, l_decoded, l_descSz);
+        }
+
+        l_decoded = jedecDecode(SPD::MODULE_MEMORY_BUS_WIDTH_EXT, l_busWidthExt);
+        if (l_decoded)
+        {
+            strncat(l_desc, " ", l_descSz);
+            strncat(l_desc, l_decoded, l_descSz);
+        }
+
+        l_decoded = jedecDecode(SPD::MODULE_TYPE, l_moduleType);
+        if (l_decoded)
+        {
+            strncat(l_desc, " ", l_descSz);
+            strncat(l_desc, l_decoded, l_descSz);
+        }
+
+        // Put detailed description into the message buffer
+        const size_t l_len = strlen(l_desc);
+        io_data.push_back(l_len + IPMIFRUINV::TYPELENGTH_BYTE_ASCII);
+        io_data.insert(io_data.end(), l_desc, l_desc + l_len);
+
+    } while(0);
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_ipmi,
+                  "isdimmIpmiFruInv::addSpdDetails - "
+                  "Error while reading SPD data");
     }
 
     return l_errl;
