@@ -155,8 +155,9 @@ int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
             }
 
             // Add newly failed lanes to capture data
-            for ( auto & lane : rx_lanes[i] )
+            for ( auto lane : rx_lanes[i] )
             {
+                lane += i * 16; // Adjust for multiple clock groups (XBUS only).
                 if (lane < 64)
                     l_newLaneMap0to63.setBit(lane);
                 else if (lane < 128)
@@ -198,8 +199,10 @@ int32_t __handleLaneRepairEvent( ExtensibleChip * i_chip,
                 }
 
                 // Add VPD lanes to capture data
-                for ( auto & lane : rx_vpdLanes[i] )
+                for ( auto lane : rx_vpdLanes[i] )
                 {
+                    lane += i * 16; // Adjust for multiple clock groups (XBUS
+                                    // only).
                     if (lane < 64)
                         l_vpdLaneMap0to63.setBit(lane);
                     else if (lane < 128)
