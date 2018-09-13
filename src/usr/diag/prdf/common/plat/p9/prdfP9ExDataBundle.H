@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@ class P9ExDataBundle : public DataBundle
      * @param i_exChip The ex chip.
      */
     explicit P9ExDataBundle( ExtensibleChip * i_exChip ) :
-        iv_L2LDCount(0), iv_L3LDCount(0), 
+        iv_L2LDCount(0), iv_L3LDCount(0), iv_prevMember(0xFFFF),
         iv_exChip(i_exChip)
     {
         // Set up thresholds for line deletes.
@@ -77,8 +77,12 @@ class P9ExDataBundle : public DataBundle
     LineDelete::PrdfCacheCETable * iv_L2CETable;
 
     // Current counts for L3 line deletes.
-    uint8_t iv_L3LDCount;
+    uint8_t  iv_L3LDCount;
     LineDelete::PrdfCacheCETable * iv_L3CETable;
+
+    // Previously-deleted member data for detecting L3 multi-bitline fails
+    uint16_t iv_prevMember;
+    Timer    iv_blfTimeout;
 
   private:
     ExtensibleChip * iv_exChip;  ///< This ex chip
