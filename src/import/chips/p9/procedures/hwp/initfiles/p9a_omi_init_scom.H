@@ -22,11 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file p9a_omi_init_scom.H
-///
-// *HWP HWP Owner: Benjamin Gass <bgass@us.ibm.com>
-// *HWP HWP Backup: Daniel Crowell <dcrowell@us.ibm.com>
-// *HWP Team:
-// *HWP Level: 2
-// *HWP Consumed by: HB
+#ifndef _INIT_P9A_OMI_INIT_SCOM_PROCEDURE_H_
+#define _INIT_P9A_OMI_INIT_SCOM_PROCEDURE_H_
+
+
+#include <stddef.h>
+#include <stdint.h>
+#include <fapi2.H>
+
+
+typedef fapi2::ReturnCode (*p9a_omi_init_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCC>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+
+extern "C"
+{
+
+    fapi2::ReturnCode p9a_omi_init_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& TGT0,
+                                        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
+
+}
+
+#endif

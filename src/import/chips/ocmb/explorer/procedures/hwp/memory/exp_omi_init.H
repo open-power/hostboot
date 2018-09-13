@@ -31,3 +31,28 @@
 // *HWP Team:
 // *HWP Level: 2
 // *HWP Consumed by: HB
+
+
+#ifndef __EXP_OMI_INIT_H_
+#define __EXP_OMI_INIT_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*exp_omi_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+extern "C"
+{
+
+///
+/// @brief Initialize Explorer OpenCAPI configuration
+///
+/// @param[in] i_target                 Explorer to initialize
+///
+/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+} // extern "C"
+
+
+#endif

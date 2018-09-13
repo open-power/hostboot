@@ -22,4 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# Makefile for p9a_omi_init_scom HWP
+PROCEDURE=p9a_omi_init_scom
+lib$(PROCEDURE)_COMMONFLAGS+=-fno-var-tracking-assignments
+$(call BUILD_PROCEDURE)

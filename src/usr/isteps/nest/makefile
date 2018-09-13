@@ -65,6 +65,9 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_chiplet_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_psi_scominit.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_mcc_omi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_init_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9a_omi_scom.mk
 
 # call_host_p9_fbc_eff_config_links: Determine powerbus config
 include ${PROCEDURES_PATH}/hwp/nest/p9_fbc_eff_config_links.mk

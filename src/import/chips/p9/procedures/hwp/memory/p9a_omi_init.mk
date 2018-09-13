@@ -23,3 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 # Makefile for p9a_omi_init HWP
+PROCEDURE=p9a_omi_init
+$(call BUILD_PROCEDURE)

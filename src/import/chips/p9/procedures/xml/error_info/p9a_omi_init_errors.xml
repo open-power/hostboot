@@ -24,4 +24,23 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9a_omi_init procedure -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_DOWNSTREAM_TMPL1_REQUIRED_ERR</rc>
+    <description>
+      Procedure: p9a_omi_init
+      Downstream template 1 required
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_DOWNSTREAM_TMPL4OR7_REQUIRED_ERR</rc>
+    <description>
+      Procedure: p9a_omi_init
+      Downstream template 4 or/and 7 is required
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

@@ -31,3 +31,28 @@
 // *HWP Team:
 // *HWP Level: 2
 // *HWP Consumed by: HB
+
+
+#ifndef __P9A_OMI_INIT_H_
+#define __P9A_OMI_INIT_H_
+
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*p9a_omi_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCC>&);
+
+extern "C"
+{
+
+///
+/// @brief Finalize the OMI
+///
+/// @param[in] i_target                 p9a channel to work on
+///
+/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p9a_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target);
+
+} // extern "C"
+
+
+#endif
