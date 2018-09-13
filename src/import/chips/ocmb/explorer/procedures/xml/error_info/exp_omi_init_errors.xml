@@ -24,4 +24,63 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for exp_omi_init HWP -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_OCMB_IS_NOT_EXPLORER</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      The Explorer O0DID was not read.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXPLR_OMI_TEMPLATE_ERR</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      Required template not supported
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TEMPLATE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_DOES_NOT_SUPPORT_US_B</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      Upstream tempate B was requested, but the
+      connected processor does not support it.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>B</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_DOES_NOT_SUPPORT_DS_A</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      Downstream tempate A was requested, but the
+      connected processor does not support it.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>A</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
