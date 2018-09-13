@@ -51,6 +51,8 @@
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
+#include <p9a_omi_scom.H>
+#include <p9a_mcc_omi_scom.H>
 #include <p9_fbc_smp_utils.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
@@ -101,14 +103,24 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MC>> l_mc_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DMI>> l_dmi_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCC>> l_mcc_targets;
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_OMI>> l_omi_targets;
     uint8_t l_is_simulation = 0;
     uint8_t l_nmmu_ndd1 = 0;
     uint32_t l_eps_write_cycles_t1 = 0;
     uint32_t l_eps_write_cycles_t2 = 0;
     uint8_t l_npu_enabled = 0;
     uint8_t l_hw461448 = 0;
+    uint8_t l_chip_type = 0;
+    bool l_is_cumulus = false;
+    bool l_is_axone = false;
 
     FAPI_DBG("Start");
+
+    FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_target, l_chip_type );
+
+    l_is_cumulus = ( l_chip_type == fapi2::ENUM_ATTR_NAME_CUMULUS );
+    l_is_axone = ( l_chip_type == fapi2::ENUM_ATTR_NAME_AXONE );
 
     // Get simulation indicator attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_is_simulation));
@@ -155,10 +167,11 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     l_mi_targets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
     l_dmi_targets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
     l_mc_targets = i_target.getChildren<fapi2::TARGET_TYPE_MC>();
+    l_omi_targets = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
 
     if (l_mcs_targets.size())
     {
-        for (auto l_mcs_target : l_mcs_targets)
+        for (const auto& l_mcs_target : l_mcs_targets)
         {
             fapi2::toString(l_mcs_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
             FAPI_DBG("Invoking p9n.mcs.scom.initfile on target %s...", l_chipletTargetStr);
@@ -175,38 +188,84 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     }
     else if (l_mc_targets.size())
     {
-        for (auto l_mc_target : l_mc_targets)
+        if (l_is_cumulus)
         {
-            fapi2::toString(l_mc_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
-            FAPI_DBG("Invoking p9c.mc.scom.initfile on target %s...", l_chipletTargetStr);
-            FAPI_EXEC_HWP(l_rc, p9c_mc_scom, l_mc_target, FAPI_SYSTEM);
-
-            if (l_rc)
+            //--------------------------------------------------
+            //-- Cumulus
+            //--------------------------------------------------
+            for (const auto& l_mc_target : l_mc_targets)
             {
-                FAPI_ERR("Error from p9c.mc.scom.initfile");
-                fapi2::current_err = l_rc;
-                goto fapi_try_exit;
-            }
+                fapi2::toString(l_mc_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+                FAPI_DBG("Invoking p9c.mc.scom.initfile on target %s...", l_chipletTargetStr);
+                FAPI_EXEC_HWP(l_rc, p9c_mc_scom, l_mc_target, FAPI_SYSTEM);
 
-            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT0, MCBIST_FIR_ACTION0),
-                     "Error from putScom (MCBIST_MCBISTFIRACT0)");
-            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT1, MCBIST_FIR_ACTION1),
-                     "Error from putScom (MCBIST_MCBISTFIRACT1)");
-            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRMASK, MCBIST_FIR_MASK),
-                     "Error from putScom (MCBIST_MCBISTFIRMASK)");
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9c.mc.scom.initfile");
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
+
+                FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT0, MCBIST_FIR_ACTION0),
+                         "Error from putScom (MCBIST_MCBISTFIRACT0)");
+                FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT1, MCBIST_FIR_ACTION1),
+                         "Error from putScom (MCBIST_MCBISTFIRACT1)");
+                FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRMASK, MCBIST_FIR_MASK),
+                         "Error from putScom (MCBIST_MCBISTFIRMASK)");
+            }
         }
 
-        for (auto l_mi_target : l_mi_targets)
+        for (const auto& l_mi_target : l_mi_targets)
         {
-            fapi2::toString(l_mi_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
-            FAPI_DBG("Invoking p9c.mi.scom.initfile on target %s...", l_chipletTargetStr);
-            FAPI_EXEC_HWP(l_rc, p9c_mi_scom, l_mi_target, FAPI_SYSTEM, i_target);
-
-            if (l_rc)
+            //--------------------------------------------------
+            //-- Cumulus
+            //--------------------------------------------------
+            if (l_is_cumulus)
             {
-                FAPI_ERR("Error from p9c.mi.scom.initfile");
-                fapi2::current_err = l_rc;
-                goto fapi_try_exit;
+                fapi2::toString(l_mi_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
+                FAPI_DBG("Invoking p9c.mi.scom.initfile on target %s...", l_chipletTargetStr);
+                FAPI_EXEC_HWP(l_rc, p9c_mi_scom, l_mi_target, FAPI_SYSTEM, i_target);
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9c.mi.scom.initfile");
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
+            }
+
+            //--------------------------------------------------
+            //-- Axone OMI inits
+            //--------------------------------------------------
+            if (l_is_axone)
+            {
+                l_mcc_targets = l_mi_target.getChildren<fapi2::TARGET_TYPE_MCC>();
+
+                for (const auto& l_mcc_target : l_mcc_targets)
+                {
+                    FAPI_EXEC_HWP(l_rc, p9a_mcc_omi_scom, l_mcc_target, FAPI_SYSTEM);
+
+                    if (l_rc)
+                    {
+                        FAPI_ERR("Error from p9a.mcc.omi.scom.initfile");
+                        fapi2::current_err = l_rc;
+                        goto fapi_try_exit;
+                    }
+
+                    l_omi_targets = l_mcc_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+
+                    for (auto l_omi_target : l_omi_targets)
+                    {
+                        FAPI_EXEC_HWP(l_rc, p9a_omi_scom, l_mi_target, l_omi_target, l_mcc_target, FAPI_SYSTEM);
+
+                        if (l_rc)
+                        {
+                            FAPI_ERR("Error from p9a.omi.scom.initfile");
+                            fapi2::current_err = l_rc;
+                            goto fapi_try_exit;
+                        }
+                    }
+                }
             }
 
             // HW461448 Configure MC WAT for Cumulus using indirect scoms
@@ -251,6 +310,9 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
         for (auto l_dmi_target : l_dmi_targets)
         {
+            //--------------------------------------------------
+            //-- Cumulus
+            //--------------------------------------------------
             fapi2::toString(l_dmi_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
             FAPI_DBG("Invoking p9c.dmi.scom.initfile on target %s...", l_chipletTargetStr);
             FAPI_EXEC_HWP(l_rc, p9c_dmi_scom, l_dmi_target, FAPI_SYSTEM, i_target);
