@@ -1031,10 +1031,12 @@ fapi2::ReturnCode p9_check_ex_clock_power_state(
         if (!l3_clock_stat_val)
         {
 
-            FAPI_INF("Drop LCO prior to purge via EX_PM_LCO_DIS_REG[0]");
-            l_data.flush<0>().setBit<0>();
-            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_L3_PM_LCO_DIS_REG, l_data),
-                     "Error writing to P9N2_EX_L3_PM_LCO_DIS_REG");
+            FAPI_INF("Drop LCO and Cache Inject prior to purge via EX_L3_MODE_REG1[22]");
+            FAPI_TRY(fapi2::getScom(i_ex_target, P9N2_EX_L3_MODE_REG1, l_data),
+                     "Error reading to P9N2_EX_L3_MODE_REG1");
+            l_data.setBit<P9N2_EX_L3_MODE_REG1_L3_SCOM_CINJ_LCO_DIS>();
+            FAPI_TRY(fapi2::putScom(i_ex_target, P9N2_EX_L3_MODE_REG1, l_data),
+                     "Error writing to P9N2_EX_L3_MODE_REG1");
 
             FAPI_INF("Halt CHTM[0+1] on EX via HTM_TRIG[1]");
             l_data.flush<0>().setBit<1>();
