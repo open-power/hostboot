@@ -113,8 +113,8 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
     if( (g_hostInterfaces == NULL) ||
         (g_hostInterfaces->wakeup == NULL) )
     {
-        TRACFCOMP( g_trac_scom,
-                   ERR_MRK"Hypervisor wakeup interface not linked");
+        TRACFCOMP( g_trac_scom,ERR_MRK
+                   "callWakeupHyp> Hypervisor wakeup interface not linked");
 
         /*@
          * @errortype
@@ -210,10 +210,19 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
         // Do the special wakeup
         int l_rc = g_hostInterfaces->wakeup(rtTargetId,mode);
 
-        if(l_rc)
+        // Check for the specific case where PHYP has detected a core
+        //  checkstop and will fail no matter what
+        if( HBRT_RC_WAKEUP_INVALID_ON_CORE_XSTOP == l_rc )
         {
             TRACFCOMP( g_trac_scom,ERR_MRK
-                "Hypervisor wakeup failed. "
+                       "callWakeupHyp> Wakeup on %.8X failed due to core checkstop",
+                       TARGETING::get_huid(i_target) );
+        }
+        // Any other failure is valid
+        else if(l_rc)
+        {
+            TRACFCOMP( g_trac_scom,ERR_MRK
+                "callWakeupHyp> Hypervisor wakeup failed. "
                 "rc 0x%X target_huid 0x%llX rt_target_id 0x%llX mode %d",
                 l_rc, get_huid(*pCore_it), rtTargetId, mode );
 
@@ -295,7 +304,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
     if((l_count==0) && (i_enable==WAKEUP::DISABLE))
     {
         TRACFCOMP( g_trac_scom,ERR_MRK
-            "Disabling special wakeup on target with SPCWKUP_COUNT=0");
+            "callWakeupHwp> Disabling special wakeup on target with SPCWKUP_COUNT=0");
 
         /*@
          * @errortype
@@ -413,7 +422,7 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
         if(l_errl)
         {
             TRACFCOMP( g_trac_scom,
-                    "p9_cpu_special_wakeup ERROR :"
+                    "callWakeupHwp> p9_cpu_special_wakeup ERROR :"
                     " Returning errorlog, reason=0x%x",
                     l_errl->reasonCode() );
 

@@ -184,6 +184,9 @@ enum HbrtRcPiberr_t
 /* FSP failed due to a a reset/reload */
 #define HBRT_FW_REQUEST_RETRIES  1
 
+/* Defined Return Codes for wakeup() */
+#define HBRT_RC_WAKEUP_INVALID_ON_CORE_XSTOP      -12289   /* -0x3001 */
+
 
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
