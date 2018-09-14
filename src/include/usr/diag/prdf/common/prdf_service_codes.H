@@ -109,7 +109,11 @@ enum ReasonCode
     PRDF_DETECTED_FAIL_SOFTWARE             = PRDF_COMP_ID | 0x60,
     PRDF_UNSUPPORTED_SCAN_WRITE             = PRDF_COMP_ID | 0x61,
 
-    // Note: Ranges from 0x70 through 0x7f are currently reserved (unused).
+    // Note: Ranges from 0x70 through 0x7f are reserved for other PRD errorlogs
+    //       aside from our main PRD analysis log
+
+    // Extra FFDC errorlog linked to a PRD log
+    PRDF_EXTRA_FFDC                         = PRDF_COMP_ID | 0x70,
 
     // Note: Ranges from 0x80 through 0xff are reserved for PRD software
     //       callouts. When PRD detects a code problem in PRD itself or as a
@@ -124,9 +128,6 @@ enum ReasonCode
     // general code for user error or unsupported configuration
     PRDF_INVALID_CONFIG                     = PRDF_COMP_ID | 0x82,
     PRDF_NULL_VALUE_RETURNED                = PRDF_COMP_ID | 0x83,
-
-    // Extra FFDC errorlog linked to a PRD log
-    PRDF_EXTRA_FFDC                         = PRDF_COMP_ID | 0x90,
 
     PRDF_LAST_REASONCODE                    = PRDF_COMP_ID | 0xFF,
 };
