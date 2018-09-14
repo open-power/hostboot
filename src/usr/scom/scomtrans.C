@@ -209,6 +209,11 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
             g_wakeupInProgress = true;
 
             l_err = WAKEUP::handleSpecialWakeup(i_target,WAKEUP::ENABLE);
+
+            // always clear the global flag, even on error, otherwise we'll
+            //  never call wakeup again even for different targets
+            g_wakeupInProgress = false;
+
             if(l_err)
             {
                 TRACFCOMP(g_trac_scom, "startScomProcess: "
@@ -220,8 +225,6 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
                 l_err->collectTrace(SCOM_COMP_NAME,1024);
                 break;
             }
-
-            g_wakeupInProgress = false;
         }
 #endif
 
