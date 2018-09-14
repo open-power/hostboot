@@ -206,10 +206,9 @@ fapi2::ReturnCode determineRepairLanesProc(
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_chipTarget;
     fapi2::ReturnCode l_rc                      = fapi2::FAPI2_RC_SUCCESS;
     fapi2::ATTR_CHIP_UNIT_POS_Type l_busNum;
-    bool l_bClkGroupFound                       = false;
     fapi2::current_err                          = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(">> determineRepairLanesProc - BufSize:%d ", i_bufSz);
+    FAPI_INF(">> determineRepairLanesProc - BufSize:%d ClkGrp:%d ", i_bufSz, i_clkGroup);
 
     // Get the parent chip target
     l_chipTarget = i_target.template getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
@@ -284,15 +283,8 @@ fapi2::ReturnCode determineRepairLanesProc(
 
             FAPI_INF("Channel:%d BusNum:%d ", l_fabricBus->device.fabricBus, l_busNum);
 
-            if(l_fabricBus->device.fabricBus != l_busNum)
+            if(l_fabricBus->device.fabricBus != ((i_clkGroup << 4) | l_busNum))
             {
-                continue;
-            }
-
-            if(i_clkGroup > 0 && !l_bClkGroupFound)
-            {
-                l_vpdPtr += l_fabricRepairDataSz;
-                l_bClkGroupFound = true;
                 continue;
             }
 
