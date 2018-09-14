@@ -150,6 +150,9 @@ struct eRepairProcDevInfo
 {
     uint8_t processor_id;// Range:0x00-0xFF. Value:Processor MRU IDs
     uint8_t fabricBus;   // Range:0x00-0xFF. Value: FabricBus(ATTR_CHIP_UNIT_POS)
+    // fabricBus for XBUS would be treated in two parts:
+    // bits [0:3] ==> Clock group param [0,1]
+    // bits [4:7] ==> XBUS bus number [0,1,2]
 };
 
 // eRepair structure for failing lanes on Power Bus
