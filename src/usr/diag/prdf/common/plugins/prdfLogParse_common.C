@@ -957,6 +957,10 @@ bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src )
                 srcErrClass = "Software caused hardware error condition "
                               "detected";
                 break;
+            case PRDF_EXTRA_FFDC:
+                srcErrClass = "This errorlog contains extra FFDC associated "
+                              "with a PLID-linked PRD analysis log";
+                break;
             default:
                 srcErrClass = "Unknown error classification";
                 break;

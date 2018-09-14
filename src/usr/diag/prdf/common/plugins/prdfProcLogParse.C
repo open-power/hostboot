@@ -126,6 +126,17 @@ enum PpeSprs
     CR      =   420,
 };
 
+/**
+ * Misc constants local to file.
+ */
+enum
+{
+    MAX_EQ          =       6,
+    MAX_CPPM        =       24,
+    INVALID_DATA    =       0x212d2d21212d2d21ull,
+    MAX_XIR_NAME    =       5,
+};
+
 //------------------------------------------------------------------------------
 bool parseTodFfdcData(  uint8_t * i_buffer, uint32_t i_buflen,
                         ErrlUsrParser & i_parser )
@@ -322,7 +333,7 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
 uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length,
-                       std::map < uint32_t, std::string >& i_regList,
+                       std::vector < std::string >& i_regList,
                        uint32_t i_majNum, uint32_t i_minNum )
 
 {
@@ -331,7 +342,7 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
     char l_hdrStr[BUF_LENGTH];
     uint32_t l_rc            =  PARSE_SUCCESS;
     uint32_t secLength       =  0;
-    std::map < uint32_t, std::string > ::iterator itRegList;
+    std::vector < std::string > ::iterator itRegList;
 
     do
     {
@@ -392,8 +403,16 @@ uint32_t parseRegFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
             memset( l_lineStr, 0x00, BUF_LENGTH );
             memset( l_hdrStr, 0x00, BUF_LENGTH );
-            snprintf( l_hdrStr, BUF_LENGTH, "%-15s ( 0x%08x )", itRegList->second.c_str(), itRegList->first );
-            snprintf( l_lineStr, BUF_LENGTH, "0x%016lx", htobe64(*l_secBufPtr) );
+            snprintf( l_hdrStr, BUF_LENGTH, "%s", (*itRegList).c_str() );
+
+            if( INVALID_DATA == htobe64(*l_secBufPtr) )
+            {
+                memcpy( l_lineStr, "--", BUF_LENGTH );
+            }
+            else
+            {
+                snprintf( l_lineStr, BUF_LENGTH, "0x%016lx", htobe64(*l_secBufPtr) );
+            }
 
             i_parser.PrintString( l_hdrStr, l_lineStr );
             l_secBufPtr++;
@@ -424,11 +443,19 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
     using namespace p9_stop_recov_ffdc;
     char l_lineStr[BUF_LENGTH];
     char l_hdrStr[BUF_LENGTH];
-    std::map < uint32_t, std::string > l_ppeRegList;
-    std::map < uint32_t, std::string > ::iterator itList;
+    //NOTE: Ensure this register list always matches with list in
+    //file p9_pm_recovery_ffdc_base.C
+    std::vector < std::string > l_ppeRegList;
+    std::vector < std::string > ::iterator itRegList;
     uint32_t l_rc            =  PARSE_SUCCESS;
     uint32_t l_currentLength =  0;
     uint32_t secLength       =  0;
+
+    l_ppeRegList.push_back( "XSR" );
+    l_ppeRegList.push_back( "IAR" );
+    l_ppeRegList.push_back( "IR" );
+    l_ppeRegList.push_back( "EDR" );
+    l_ppeRegList.push_back( "SPRG0" );
 
     do
     {
@@ -480,8 +507,8 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
         l_currentLength    =   sizeof( FfdcSummSubSectHdr );
 
-        for( itList = l_ppeRegList.begin(); itList != l_ppeRegList.end();
-             itList++ )
+        for( itRegList = l_ppeRegList.begin(); itRegList != l_ppeRegList.end();
+             itRegList++ )
         {
             if( l_currentLength > secLength )
             {
@@ -490,7 +517,7 @@ uint32_t parsePpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
 
             memset( l_lineStr, 0x00, BUF_LENGTH );
             memset( l_hdrStr, 0x00, BUF_LENGTH );
-            snprintf( l_hdrStr, BUF_LENGTH, "%-15s ( 0x%08x )", itList->second.c_str(), itList->first );
+            snprintf( l_hdrStr, BUF_LENGTH, "%-15s ", (*itRegList).c_str() );
             snprintf( l_lineStr, BUF_LENGTH, "0x%08x", htobe32(*l_secBufPtr) );
 
             i_parser.PrintString( l_hdrStr, l_lineStr );
@@ -520,6 +547,7 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
     uint32_t l_rc            =  PARSE_SUCCESS;
     uint32_t secLength       =  0;
     uint32_t l_maxCme        =  MAX_CMES_PER_CHIP;
+    const char* lines       =  "---------------------------------------------";
 
     do
     {
@@ -539,6 +567,8 @@ uint32_t parseCmeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_lengt
             l_rc = parsePpeFfdc( i_parser, l_secBufPtr, FFDC_SUMMARY_SIZE_CME,
                                  CME_MAJ_NUM,
                                  CME_MIN_NUM );
+
+            i_parser.PrintHeading( lines );
 
             if( l_rc )
             {
@@ -636,17 +666,18 @@ uint32_t parsePgpeFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
-    std::map < uint32_t, std::string > l_occRegMap;
+    std::vector < std::string > l_occRegMap;
     uint32_t l_rc = PARSE_SUCCESS;
 
     do
     {
         //NOTE: Ensure this register list always matches with list in
         //file p9_pm_recovery_ffdc_occ.C
-        l_occRegMap[ PU_OCB_OCI_CCSR_SCOM ]         =       (char*)"CCSR";
-        l_occRegMap[ PU_OCB_OCI_QSSR_SCOM ]         =       (char*)"QSSR";
-        l_occRegMap[ P9N2_PU_OCB_OCI_OCCFLG_SCOM ]  =       (char*)"OCCFLG";
-        l_occRegMap[ P9N2_PU_OCB_OCI_OCCFLG2_SCOM ] =       (char*)"OCCFLG2";
+        l_occRegMap.push_back( "CCSR" );
+        l_occRegMap.push_back( "QSSR" );
+        l_occRegMap.push_back( "OCCFLG" );
+        l_occRegMap.push_back( "OCCFLG2" );
+
         i_parser.PrintHeading( "Sys State " );
         i_parser.PrintBlank();
 
@@ -679,18 +710,25 @@ uint32_t parseSysState( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
-    std::map < uint32_t, std::string > l_cppmRegMap;
+    std::vector < std::string > l_cppmRegMap;
     uint32_t l_rc               =       PARSE_SUCCESS;
     uint32_t l_cppm             =       0;
-    uint32_t l_cppmLength       =       0;
+    uint32_t l_cppmSectn        =       0;
     char l_lineStr[LINE_LENGTH];
-    l_cppmLength    =       i_length / FFDC_SUMMARY_SIZE_CPPM_REG;
+    const char* lines = "---------------------------------------------";
+    l_cppmSectn    =       (i_length / (FFDC_SUMMARY_SIZE_CPPM_REG));
+
+    if( l_cppmSectn > MAX_CPPM )
+    {
+        l_cppmSectn = MAX_CPPM;
+    }
+
     //NOTE: Ensure this register list always matches with list in
     //file p9_pm_recovery_ffdc_cppm.C
-    l_cppmRegMap[ C_PPM_SSHSRC ]        =       (char*)"C_SSHSRC";
-    l_cppmRegMap[ C_PPM_VDMCR ]         =       (char*)"VDMCR";
+    l_cppmRegMap.push_back( "C_SSHSRC" );
+    l_cppmRegMap.push_back( "VDMCR" );
 
-    for( l_cppm = 0; l_cppm < l_cppmLength; l_cppm++ )
+    for( l_cppm = 0; l_cppm < l_cppmSectn; l_cppm++ )
     {
         memset( l_lineStr, 0x00, LINE_LENGTH );
         snprintf( l_lineStr, LINE_LENGTH, "CPPM %02d", l_cppm );
@@ -698,10 +736,11 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
         i_parser.PrintBlank();
         uint8_t* l_secBuf       =       i_buf + ( FFDC_SUMMARY_SIZE_CPPM_REG * l_cppm );
 
-        l_rc = parseRegFfdc( i_parser, l_secBuf, l_cppmLength, l_cppmRegMap,
+        l_rc = parseRegFfdc( i_parser, l_secBuf, FFDC_SUMMARY_SIZE_CPPM_REG, l_cppmRegMap,
                              CPPM_MAJ_NUM, CPPM_MIN_NUM );
 
         i_parser.PrintBlank();
+        i_parser.PrintHeading( lines );
 
         if( l_rc )
         {
@@ -731,29 +770,37 @@ uint32_t parseCppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_length )
 {
     using namespace p9_stop_recov_ffdc;
-    std::map < uint32_t, std::string > l_qppmRegMap;
+    std::vector < std::string > l_qppmRegMap;
     uint32_t l_rc = PARSE_SUCCESS;
     char l_lineStr[LINE_LENGTH];
-    uint32_t l_qppmLength       =       i_length / FFDC_SUMMARY_SIZE_QPPM_REG;
+    uint32_t l_qppmSectn = (i_length / (FFDC_SUMMARY_SIZE_QPPM_REG) );
+
+    const char* lines = "---------------------------------------------";
+
     //NOTE: Ensure this register list always matches with list in
     //file p9_pm_recovery_ffdc_qppm.C
-    l_qppmRegMap[ EQ_PPM_GPMMR_SCOM ]   =       (char*)"GPMMR";
-    l_qppmRegMap[ EQ_PPM_SSHSRC ]       =       (char*)"EQ_SSHSRC";
-    l_qppmRegMap[ EQ_QPPM_DPLL_FREQ ]   =       (char*)"QPPM_DPLL_FREQ";
+    l_qppmRegMap.push_back( "GPMMR" );
+    l_qppmRegMap.push_back( "EQ_SSHSRC" );
+    l_qppmRegMap.push_back( "QPPM_DPLL_FREQ" );
 
-    for( uint32_t l_qppm = 0; l_qppm < l_qppmLength; l_qppm++ )
+    if( l_qppmSectn > MAX_EQ )
     {
-        l_qppmLength    =       i_length / FFDC_SUMMARY_SIZE_QPPM_REG;
+        l_qppmSectn = MAX_EQ;
+    }
+
+    for( uint32_t l_qppm = 0; l_qppm < l_qppmSectn; l_qppm++ )
+    {
         memset( l_lineStr, 0x00, LINE_LENGTH );
         snprintf( l_lineStr, LINE_LENGTH, "QPPM %02d", l_qppm );
         i_parser.PrintHeading( l_lineStr );
         i_parser.PrintBlank();
-        uint8_t* l_secBuf       =       i_buf + ( FFDC_SUMMARY_SIZE_QPPM_REG * l_qppm );
+        uint8_t* l_secBuf  =  i_buf + ( FFDC_SUMMARY_SIZE_QPPM_REG * l_qppm );
 
-        l_rc = parseRegFfdc( i_parser, l_secBuf, l_qppmLength, l_qppmRegMap,
+        l_rc = parseRegFfdc( i_parser, l_secBuf, FFDC_SUMMARY_SIZE_QPPM_REG, l_qppmRegMap,
                              CPPM_MAJ_NUM, CPPM_MIN_NUM );
 
         i_parser.PrintBlank();
+        i_parser.PrintHeading( lines );
 
         if( l_rc )
         {
@@ -775,9 +822,9 @@ uint32_t parseQppmFfdc( ErrlUsrParser& i_parser, uint8_t* i_buf, uint32_t i_leng
 
 /**
  * @brief parser a user data section added by PRD in case of PM malfunction.
- * @param[in] i_parser  error log parser
  * @param[in] i_buf     points to user data section
  * @param[in] i_length  length of the section
+ * @param[in] i_parser  error log parser
  * @param[in] i_subsec  sub section id
  * @return    PARSE_SUCCESS if parsing succeeds, error code otherwise.
  */
