@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,6 +137,16 @@ const uint64_t OCBLWSBRn[4]    = {PU_OCB_OCI_OCBLWSBR0_SCOM,
                                   PU_OCB_OCI_OCBLWSBR2_SCOM,
                                   PU_OCB_OCI_OCBLWSBR3_SCOM
                                  };
+
+const uint32_t PU_OCB_OCI_OIMR0_OR = PU_OCB_OCI_OIMR0_SCOM2;
+const uint32_t PU_OCB_OCI_OIMR1_OR = PU_OCB_OCI_OIMR1_SCOM2;
+
+const uint32_t PU_OCB_OCI_OITR0_CLEAR = PU_OCB_OCI_OITR0_SCOM1;
+const uint32_t PU_OCB_OCI_OITR1_CLEAR = PU_OCB_OCI_OITR1_SCOM1;
+const uint32_t PU_OCB_OCI_OIEPR0_CLEAR = PU_OCB_OCI_OIEPR0_SCOM1;
+const uint32_t PU_OCB_OCI_OIEPR1_CLEAR = PU_OCB_OCI_OIEPR1_SCOM1;
+const uint32_t PU_OCB_OCI_OISR0_CLEAR = PU_OCB_OCI_OISR0_SCOM1;
+const uint32_t PU_OCB_OCI_OISR1_CLEAR = PU_OCB_OCI_OISR1_SCOM1;
 
 //------------------------------------------------------------------------------
 //  Function prototypes
@@ -569,53 +579,54 @@ fapi2::ReturnCode pm_ocb_reset(
     //  - keep word1 0's for simics
     l_buf64.flush<0>().insertFromRight<0, 32>(INTERRUPT_SRC_MASK_REG);
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIMR0_SCOM2,
+                            PU_OCB_OCI_OIMR0_OR,
                             l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Mask Register0 (OIMR0)");
 
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIMR1_SCOM2,
+                            PU_OCB_OCI_OIMR1_OR,
                             l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Mask Register1 (OIMR1)");
 
     // Clear OCC Interrupt Type Registers 0 & 1
+    l_buf64.flush<1>();
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OITR0_SCOM2,
-                            0),
+                            PU_OCB_OCI_OITR0_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Type Register0 (OITR0)");
 
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OITR1_SCOM2,
-                            0),
+                            PU_OCB_OCI_OITR1_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Type Register1 (OITR1)");
 
     // Clear OCC Interupt Edge/Polarity Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIEPR0_SCOM2,
-                            0),
+                            PU_OCB_OCI_OIEPR0_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Edge Polarity Register0 (OIEPR0)");
 
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OIEPR1_SCOM2,
-                            0),
+                            PU_OCB_OCI_OIEPR1_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Edge Polarity Register1 (OIEPR1)");
 
     // Clear OCC Interrupt Source Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OISR0_SCOM2,
-                            0),
+                            PU_OCB_OCI_OISR0_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Register0 (OISR0)");
 
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OISR1_SCOM2,
-                            0),
+                            PU_OCB_OCI_OISR1_CLEAR,
+                            l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Register1 (OISR1)");
 
