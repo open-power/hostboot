@@ -2717,8 +2717,30 @@ sub writeAttrErrlCFile {
     print $outFile "    char *tmpBuffer = NULL;\n";
     print $outFile "    uint32_t attrSize = 0;\n";
     print $outFile "\n";
-    print $outFile "#if 0 //\@fixme-RTC:152874\n";
     print $outFile "    switch (i_attr) {\n";
+
+    print $outFile "        case (ATTR_SERIAL_NUMBER): { //simpleType:uint, :int...\n";
+    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: SERIAL_NUMBER entry\");\n";
+    print $outFile "            AttributeTraits<ATTR_SERIAL_NUMBER>::Type tmp;\n";
+    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_SERIAL_NUMBER>(tmp) ) {\n";
+    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+    print $outFile "                attrSize = sizeof(tmp);\n";
+    print $outFile "            }\n";
+    print $outFile "            break;\n";
+    print $outFile "        }\n";
+    print $outFile "        case (ATTR_PART_NUMBER): { //simpleType:uint, :int...\n";
+    print $outFile "            //TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: PART_NUMBER entry\");\n";
+    print $outFile "            AttributeTraits<ATTR_PART_NUMBER>::Type tmp;\n";
+    print $outFile "            if( iv_pTarget->tryGetAttr<ATTR_PART_NUMBER>(tmp) ) {\n";
+    print $outFile "                tmpBuffer = new char[sizeof(tmp)];\n";
+    print $outFile "                memcpy(tmpBuffer, &tmp, sizeof(tmp));\n";
+    print $outFile "                attrSize = sizeof(tmp);\n";
+    print $outFile "            }\n";
+    print $outFile "            break;\n";
+    print $outFile "        }\n";
+
+    print $outFile "#if 0 //\@fixme-RTC:152874\n";
 
     # loop through every attribute to make the swith/case
     foreach my $attribute (@{$attributes->{attribute}})
@@ -2822,9 +2844,11 @@ sub writeAttrErrlCFile {
     print $outFile "            TRACDCOMP( g_trac_errl, \"ErrlUserDetailsAttribute: UNKNOWN i_attr %x\", i_attr);\n";
     print $outFile "            break;\n";
     print $outFile "        }\n";
+
+    print $outFile "#endif //\@fixme-RTC:152874\n";
+
     print $outFile "    } //switch\n";
     print $outFile "\n";
-    print $outFile "#endif //\@fixme-RTC:152874\n";
 
     print $outFile "    // if we generated one, copy the string into the buffer\n";
     print $outFile "    if (attrSize) { // we have something to output\n";
