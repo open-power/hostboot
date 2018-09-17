@@ -47,6 +47,7 @@ using PnorDD = PnorSfcDD;
 #include "pnor_mboxdd.H"
 #elif CONFIG_PNORDD_IS_IPMI
 #include "pnor_ipmidd.H"
+using PnorDD = PnorIpmiDD;
 #else
 #error "No PNOR DD implementation configured"
 #endif
