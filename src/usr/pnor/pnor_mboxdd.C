@@ -103,11 +103,11 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
 
         // The PNOR device driver interface is initialized with the
         // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorDD class created
+        // access requires a separate PnorMboxDD class created
         assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
 
         // Read the flash
-        l_err = Singleton<PnorDD>::instance().readFlash(io_buffer,
+        l_err = Singleton<PnorMboxDD>::instance().readFlash(io_buffer,
                 io_buflen,
                 l_addr);
 
@@ -162,11 +162,11 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
 
         // The PNOR device driver interface is initialized with the
         // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorDD class created
+        // access requires a separate PnorMboxDD class created
         assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
 
         // Write the flash
-        l_err = Singleton<PnorDD>::instance().writeFlash(io_buffer,
+        l_err = Singleton<PnorMboxDD>::instance().writeFlash(io_buffer,
                 io_buflen,
                 l_addr);
 
@@ -201,9 +201,9 @@ void getPnorInfo( PnorInfo_t& o_pnorInfo )
 {
     o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
     o_pnorInfo.norWorkarounds =
-        Singleton<PnorDD>::instance().getNorWorkarounds();
+        Singleton<PnorMboxDD>::instance().getNorWorkarounds();
     o_pnorInfo.flashSize =
-        Singleton<PnorDD>::instance().getNorSize();
+        Singleton<PnorMboxDD>::instance().getNorSize();
 }
 
 
@@ -229,9 +229,9 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
 /**
  * @brief Performs a PNOR Read Operation
  */
-errlHndl_t PnorDD::readFlash(void* o_buffer,
-                             size_t& io_buflen,
-                             uint64_t i_address)
+errlHndl_t PnorMboxDD::readFlash(void* o_buffer,
+                                 size_t& io_buflen,
+                                 uint64_t i_address)
 {
     /* We support 256M max */
     uint32_t l_address = i_address & 0x0fffffff;
@@ -246,11 +246,11 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
 /**
  * @brief Performs a PNOR Write Operation
  */
-errlHndl_t PnorDD::writeFlash(const void* i_buffer,
-                              size_t& io_buflen,
-                              uint64_t i_address)
+errlHndl_t PnorMboxDD::writeFlash(const void* i_buffer,
+                                  size_t& io_buflen,
+                                  uint64_t i_address)
 {
-    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
+    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorMboxDD::writeFlash(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     uint32_t l_address = i_address & 0x0fffffff;
@@ -264,7 +264,7 @@ errlHndl_t PnorDD::writeFlash(const void* i_buffer,
         io_buflen = 0;
     }
 
-    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
+    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorMboxDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
 
     return l_err;
 }
@@ -273,29 +273,29 @@ errlHndl_t PnorDD::writeFlash(const void* i_buffer,
 /********************
  Private/Protected Methods
  ********************/
-mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
+mutex_t PnorMboxDD::cv_mutex = MUTEX_INITIALIZER;
 
 /**
  * LPC FW space accessors
  */
-errlHndl_t PnorDD::readLpcFw(uint32_t i_offset, size_t i_size, void* o_buf)
+errlHndl_t PnorMboxDD::readLpcFw(uint32_t i_offset, size_t i_size, void* o_buf)
 {
     // Exploit new LPC large read facility
     return deviceOp(DeviceFW::READ, iv_target, o_buf, i_size,
                     DEVICE_LPC_ADDRESS(LPC::TRANS_FW, i_offset));
 }
 
-errlHndl_t PnorDD::writeLpcFw(uint32_t i_offset, size_t i_size,
-                              const void* i_buf)
+errlHndl_t PnorMboxDD::writeLpcFw(uint32_t i_offset, size_t i_size,
+                                  const void* i_buf)
 {
     // Exploit new LPC large write facility
     return deviceOp(DeviceFW::WRITE, iv_target, (void*)i_buf, i_size,
                     DEVICE_LPC_ADDRESS(LPC::TRANS_FW, i_offset));
 }
 
-errlHndl_t PnorDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
-                                    size_t i_reqSize, uint32_t& o_lpcAddr,
-                                    size_t& o_chunkLen)
+errlHndl_t PnorMboxDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
+                                        size_t i_reqSize, uint32_t& o_lpcAddr,
+                                        size_t& o_chunkLen)
 {
     errlHndl_t l_err = NULL;
     uint32_t l_pos, l_wSize, l_reqSize;
@@ -391,7 +391,7 @@ errlHndl_t PnorDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
     return l_err;
 }
 
-errlHndl_t PnorDD::writeDirty(uint32_t i_addr, size_t i_size)
+errlHndl_t PnorMboxDD::writeDirty(uint32_t i_addr, size_t i_size)
 {
     /* To pass a correct "size" for both protocol versions, we
      * calculate the block-aligned start and end.
@@ -416,7 +416,7 @@ errlHndl_t PnorDD::writeDirty(uint32_t i_addr, size_t i_size)
     return iv_mbox->doMessage(dirtyMsg);
 }
 
-errlHndl_t PnorDD::writeFlush(void)
+errlHndl_t PnorMboxDD::writeFlush(void)
 {
     astMbox::mboxMessage flushMsg(astMbox::MBOX_C_WRITE_FLUSH);
 
@@ -428,11 +428,11 @@ errlHndl_t PnorDD::writeFlush(void)
 /**
  * @brief Write data to PNOR using Mbox LPC windows
  */
-errlHndl_t PnorDD::_writeFlash( uint32_t i_addr,
-                                size_t i_size,
-                                const void* i_data )
+errlHndl_t PnorMboxDD::_writeFlash( uint32_t i_addr,
+                                    size_t i_size,
+                                    const void* i_data )
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorDD::_writeFlash(i_addr=0x%.8X)> ", i_addr);
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorMboxDD::_writeFlash(i_addr=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL, l_flushErr = NULL;
 
     while (i_size)
@@ -498,11 +498,11 @@ errlHndl_t PnorDD::_writeFlash( uint32_t i_addr,
 /**
  * @brief Read data from PNOR using Mbox LPC windows
  */
-errlHndl_t PnorDD::_readFlash( uint32_t i_addr,
-                               size_t i_size,
-                               void* o_data )
+errlHndl_t PnorMboxDD::_readFlash( uint32_t i_addr,
+                                   size_t i_size,
+                                   void* o_data )
 {
-    TRACDCOMP(g_trac_pnor, "PnorDD::_readFlash(i_addr=0x%.8X)> ", i_addr);
+    TRACDCOMP(g_trac_pnor, "PnorMboxDD::_readFlash(i_addr=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL;
 
     while (i_size)
@@ -540,7 +540,7 @@ errlHndl_t PnorDD::_readFlash( uint32_t i_addr,
 /**
  * @brief Retrieve size of NOR flash
  */
-uint32_t PnorDD::getNorSize( void )
+uint32_t PnorMboxDD::getNorSize( void )
 {
     return iv_flashSize;
 }
@@ -548,7 +548,7 @@ uint32_t PnorDD::getNorSize( void )
 /**
  * @brief Retrieve bitstring of NOR workarounds
  */
-uint32_t PnorDD::getNorWorkarounds( void )
+uint32_t PnorMboxDD::getNorWorkarounds( void )
 {
     return 0;
 }
@@ -556,9 +556,9 @@ uint32_t PnorDD::getNorWorkarounds( void )
 /**
  * @brief  Constructor
  */
-PnorDD::PnorDD( TARGETING::Target* i_target )
+PnorMboxDD::PnorMboxDD( TARGETING::Target* i_target )
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK "PnorDD::PnorDD()" );
+    TRACFCOMP(g_trac_pnor, ENTER_MRK "PnorMboxDD::PnorMboxDD()" );
     errlHndl_t l_err = NULL;
 
     // Use i_target if all of these apply
@@ -578,14 +578,15 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
         TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
             iv_target->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
 
-        // Master target could collide and cause deadlocks with PnorDD singleton
-        // used for ddRead/ddWrite with MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+        // Master target could collide and cause deadlocks with PnorMboxDD
+        // singleton used for ddRead/ddWrite with
+        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
         assert( type_enum != TARGETING::PROC_MASTER_TYPE_ACTING_MASTER );
 
         // Initialize and use class-specific mutex
         iv_mutex_ptr = &iv_mutex;
         mutex_init(iv_mutex_ptr);
-        TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr",
+        TRACFCOMP(g_trac_pnor, "PnorMboxDD::PnorMboxDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr",
                   TARGETING::get_huid(i_target));
     }
     else
@@ -665,12 +666,12 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
         INITSERVICE::doShutdown( PNOR::RC_PNOR_INIT_FAILURE );
     }
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK "PnorDD::PnorDD()" );
+    TRACFCOMP(g_trac_pnor, EXIT_MRK "PnorMboxDD::PnorMboxDD()" );
 }
 
 /**
  * @brief  Destructor
  */
-PnorDD::~PnorDD()
+PnorMboxDD::~PnorMboxDD()
 {
 }
