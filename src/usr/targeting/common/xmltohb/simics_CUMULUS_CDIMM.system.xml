@@ -496,41 +496,6 @@
     </attribute>
 
     <attribute>
-        <id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-        <default>0x1e8480</default>
-    </attribute>
-    <attribute>
-        <id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-        <default>0x3136a2</default>
-    </attribute>
-    <attribute>
-        <id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-        <default>0x499102</default>
-    </attribute>
-    <attribute>
-        <id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-        <default>0x1e70f8</default>
-    </attribute>
-    <attribute>
-        <id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-        <default>0x30b4c0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SAFE_FREQUENCY</id>
-        <default>2028</default>
-    </attribute>
-
-
-    <attribute>
-        <id>PM_SPIVID_FREQUENCY</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
-        <default>0x00</default>
-    </attribute>
-
-    <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
             <field><id>reserved</id><value/></field>
@@ -563,12 +528,6 @@
 
 
 
-
-
-    <attribute>
-        <id>PROC_REFCLOCK_RCVR_TERM</id>
-        <default>0x0</default>
-    </attribute>
 
 
 

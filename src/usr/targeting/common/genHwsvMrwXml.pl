@@ -275,20 +275,7 @@ push @systemAttr,
     "DMI_EREPAIR_THRESHOLD_MNFG", $reqPol->{'dmi-erepair-threshold-mnfg'},
     "MSS_MBA_ADDR_INTERLEAVE_BIT", $reqPol->{'mss_mba_addr_interleave_bit'},
     "EXTERNAL_VRM_STEPSIZE", $reqPol->{'pm_external_vrm_stepsize'},
-    "PM_SPIVID_FREQUENCY", $reqPol->{'pm_spivid_frequency'}->{content},
-    "PM_SAFE_FREQUENCY", $reqPol->{'pm_safe_frequency'}->{content},
     "PM_SAFE_FREQUENCY_MHZ", $reqPol->{'pm_safe_frequency'}->{content},
-    "PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY",
-        $reqPol->{'pm_resonant_clock_full_clock_sector_buffer_frequency'}->
-            {content},
-    "PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY",
-        $reqPol->{'pm_resonant_clock_low_band_lower_frequency'}->{content},
-    "PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY",
-        $reqPol->{'pm_resonant_clock_low_band_upper_frequency'}->{content},
-    "PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY",
-        $reqPol->{'pm_resonant_clock_high_band_lower_frequency'}->{content},
-    "PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY",
-        $reqPol->{'pm_resonant_clock_high_band_upper_frequency'}->{content},
     "SPIPSS_FREQUENCY", $reqPol->{'pm_spipss_frequency'}->{content},
     "MEM_MIRROR_PLACEMENT_POLICY", $placement,
     "MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT",
@@ -303,7 +290,6 @@ push @systemAttr,
         $reqPol->{'mss_mrw_max_number_dimms_possible_per_vmem_regulator'},
     "MSS_MRW_THERMAL_MEMORY_POWER_LIMIT",
         $reqPol->{'mss_mrw_thermal_memory_power_limit'},
-    "PM_SYSTEM_IVRM_VPD_MIN_LEVEL", $reqPol->{'pm_system_ivrm_vpd_min_level'},
     "MNFG_DMI_MIN_EYE_WIDTH", $reqPol->{'mnfg-dmi-min-eye-width'},
     "MNFG_DMI_MIN_EYE_HEIGHT", $reqPol->{'mnfg-dmi-min-eye-height'},
     "MNFG_ABUS_MIN_EYE_WIDTH", $reqPol->{'mnfg-abus-min-eye-width'},
@@ -753,21 +739,10 @@ foreach my $i (@{$pmSettings->{'processor-settings'}})
     push @pmChipAttr,
     [
         $i->{target}->{node}, $i->{target}->{position},
-        "PM_UNDERVOLTING_FRQ_MINIMUM",
-            $i->{pm_undervolting_frq_minimum}->{content},
-        "PM_UNDERVOLTING_FREQ_MAXIMUM",
-            $i->{pm_undervolting_frq_maximum}->{content},
-        "PM_SPIVID_PORT_ENABLE", $i->{pm_spivid_port_enable},
         "PM_APSS_CHIP_SELECT", $i->{pm_apss_chip_select},
         $pbaxAttr, $pbaxId,
         "PBAX_CHIPID", $i->{pm_pbax_chipid},
         "PBAX_BRDCST_ID_VECTOR", $i->{pm_pbax_brdcst_id_vector},
-        "PM_SLEEP_ENTRY", $i->{pm_sleep_entry},
-        "PM_SLEEP_EXIT", $i->{pm_sleep_exit},
-        "PM_SLEEP_TYPE", $i->{pm_sleep_type},
-        "PM_WINKLE_ENTRY", $i->{pm_winkle_entry},
-        "PM_WINKLE_EXIT", $i->{pm_winkle_exit},
-        "PM_WINKLE_TYPE", $i->{pm_winkle_type}
     ];
 }
 
@@ -3948,25 +3923,6 @@ sub generate_proc
         # Default the values.
         print "    <!-- PM_ attributes (default values) -->\n";
         print "    <attribute>\n";
-        print "        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>\n";
-        print "        <default>0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>\n";
-        print "        <default>0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_SPIVID_PORT_ENABLE</id>\n";
-        if( $proc % 2 == 0 ) # proc0 of DCM
-        {
-            print "        <default>0x4</default><!-- PORT0NONRED -->\n";
-        }
-        else # proc1 of DCM
-        {
-            print "        <default>0x0</default><!-- NONE -->\n";
-        }
-        print "    </attribute>\n";
-        print "    <attribute>\n";
         print "        <id>PM_APSS_CHIP_SELECT</id>\n";
         if( $proc % 2 == 0 ) # proc0 of DCM
         {
@@ -3988,30 +3944,6 @@ sub generate_proc
         print "    <attribute>\n";
         print "        <id>PBAX_BRDCST_ID_VECTOR</id>\n";
         print "        <default>$lognode</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_SLEEP_ENTRY</id>\n";
-        print "        <default>0x0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_SLEEP_EXIT</id>\n";
-        print "        <default>0x0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_SLEEP_TYPE</id>\n";
-        print "        <default>0x0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_WINKLE_ENTRY</id>\n";
-        print "        <default>0x0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_WINKLE_EXIT</id>\n";
-        print "        <default>0x0</default>\n";
-        print "    </attribute>\n";
-        print "    <attribute>\n";
-        print "        <id>PM_WINKLE_TYPE</id>\n";
-        print "        <default>0x0</default>\n";
         print "    </attribute>\n";
         print "    <!-- End PM_ attributes (default values) -->\n";
     }

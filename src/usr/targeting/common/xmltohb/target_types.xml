@@ -61,9 +61,6 @@
       <id>PHYS_PATH</id>
     </attribute>
     <attribute>
-      <id>PNOR_FLASH_WORKAROUNDS</id>
-    </attribute>
-    <attribute>
       <id>PRIMARY_CAPABILITIES</id>
     </attribute>
     <attribute>
@@ -468,36 +465,6 @@
     </attribute>
     <attribute>
       <id>LOCATION_CODE</id>
-    </attribute>
-    <attribute>
-      <id>PM_PBAX_NODEID</id>
-    </attribute>
-    <attribute>
-      <id>PM_SLEEP_ENTRY</id>
-    </attribute>
-    <attribute>
-      <id>PM_SLEEP_EXIT</id>
-    </attribute>
-    <attribute>
-      <id>PM_SLEEP_TYPE</id>
-    </attribute>
-    <attribute>
-      <id>PM_SPIVID_PORT_ENABLE</id>
-    </attribute>
-    <attribute>
-      <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
-    </attribute>
-    <attribute>
-      <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
-    </attribute>
-    <attribute>
-      <id>PM_WINKLE_ENTRY</id>
-    </attribute>
-    <attribute>
-      <id>PM_WINKLE_EXIT</id>
-    </attribute>
-    <attribute>
-      <id>PM_WINKLE_TYPE</id>
     </attribute>
     <attribute>
       <default>
@@ -1422,28 +1389,7 @@
       <id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id>
     </attribute>
     <attribute>
-      <id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_RESONANT_CLOCK_HIGH_BAND_LOWER_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_RESONANT_CLOCK_HIGH_BAND_UPPER_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_RESONANT_CLOCK_LOW_BAND_LOWER_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_RESONANT_CLOCK_LOW_BAND_UPPER_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_SAFE_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_SPIVID_FREQUENCY</id>
-    </attribute>
-    <attribute>
-      <id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
+      <id>PNOR_FLASH_WORKAROUNDS</id>
     </attribute>
     <attribute>
       <id>PROC_REFCLOCK_RCVR_TERM</id>
