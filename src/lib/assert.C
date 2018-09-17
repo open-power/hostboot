@@ -42,7 +42,8 @@
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 
-extern "C" void __assert(AssertBehavior i_assertb, int i_line)
+extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
+                         int i_line)
 {
 
     task_t* task = NULL;
@@ -70,15 +71,15 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
             }
             else
             {
-                printk("Assertion failed @%p on line %d.\n",
-                       linkRegister(), i_line);
+                printk("Assertion failed @%p at %s:%d.\n",
+                       linkRegister(), i_file, i_line);
             }
             task_crash();
             break;
 
         case ASSERT_CRITICAL:  // Critical task, trace not available.
-            printk("Assertion failed @%p on line %d.(Crit_Assert)\n",
-                   linkRegister(), i_line);
+            printk("Assertion failed @%p on line %s:%d. (Crit_Assert)\n",
+                   linkRegister(), i_file, i_line);
 
             KernelMisc::printkBacktrace(task);
 
@@ -87,8 +88,8 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
             break;
 
         case ASSERT_KERNEL:  // Kernel assert called.
-            printk("Assertion failed @%p on line %d. (kassert)\n",
-                   linkRegister(), i_line);
+            printk("Assertion failed @%p on line %s:%d. (kassert)\n",
+                   linkRegister(), i_file, i_line);
 
             KernelMisc::printkBacktrace(task);
 
