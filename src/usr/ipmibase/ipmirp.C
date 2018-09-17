@@ -43,7 +43,6 @@
 #include <initservice/istepdispatcherif.H>
 #include <sys/vfs.h>
 
-#include <targeting/common/commontargeting.H>
 #include <kernel/ipc.H>
 #include <arch/ppc.H>
 #include <errl/errlmanager.H>
@@ -286,17 +285,6 @@ void IpmiRP::getInterfaceCapabilities(void)
 
         mutex_unlock(&iv_mutex);
     } while(false);
-
-    // store this size for hbrt's usage
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    if (sys)
-    {
-        sys->setAttr<TARGETING::ATTR_IPMI_MAX_BUFFER_SIZE>
-                        (iv_xmit_buffer_size - getXportHeaderSize() - 1);
-        IPMI_TRAC("setAttr(IPMI_MAX_BUFFER_SIZE) = %d",
-                    (iv_xmit_buffer_size - getXportHeaderSize() - 1));
-    }
 
     delete[] data;
 
