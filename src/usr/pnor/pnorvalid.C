@@ -47,17 +47,14 @@
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <lpc/lpcif.H>
-#ifdef CONFIG_PNORDD_IS_SFC
+#if defined(CONFIG_PNORDD_IS_SFC)
 #include "pnor_sfcdd.H"
 using PnorDD = PnorSfcDD;
-#elif CONFIG_PNORDD_IS_BMCMBOX
-#include "pnor_mboxdd.H"
-using PnorDD = PnorMboxDD;
-#elif CONFIG_PNORDD_IS_IPMI
-#include "pnor_ipmidd.H"
-using PnorDD = PnorIpmiDD;
+#elif (defined(CONFIG_PNORDD_IS_BMCMBOX) || defined(CONFIG_PNORDD_IS_IPMI))
+#include "pnor_hiomapdd.H"
+using PnorDD = PnorHiomapDD;
 #else
-#error "No PNOR DD implementation configured"
+#error "No PNOR DD configured"
 #endif
 
 // Used for creating an Invalid TOC ("PNOR")

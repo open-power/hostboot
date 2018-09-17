@@ -93,170 +93,6 @@ enum {
 // Initialized in pnorrp.C
 extern trace_desc_t* g_trac_pnor;
 
-namespace PNOR
-{
-
-/**
- * @brief Performs an PNOR Read Operation
- * This function performs a PNOR Read operation. It follows a pre-defined
- * prototype functions in order to be registered with the device-driver
- * framework.
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        PNOR target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
- *                              Output:
- *                                  Read: Size of output data
- *                                  Write: Size of data written
- * @param[in]   i_accessType    DeviceFW::AccessType enum (usrif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there's only one argument,
- *                              containing the PNOR address and chip select
- * @return  errlHndl_t
- */
-errlHndl_t ddRead(DeviceFW::OperationType i_opType,
-                  TARGETING::Target* i_target,
-                  void* io_buffer,
-                  size_t& io_buflen,
-                  int64_t i_accessType,
-                  va_list i_args)
-{
-    errlHndl_t l_err = NULL;
-    uint64_t l_addr = va_arg(i_args, uint64_t);
-
-    do
-    {
-        //@todo (RTC:36951) - add support for unaligned data
-        // Ensure we are operating on a 32-bit (4-byte) boundary
-        assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
-        assert( io_buflen % 4 == 0 );
-
-        // The PNOR device driver interface is initialized with the
-        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorIpmiDD class created
-        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
-
-        // Read the flash
-        l_err = Singleton<PnorIpmiDD>::instance().readFlash(io_buffer,
-                io_buflen,
-                l_addr);
-
-        if(l_err)
-        {
-            break;
-        }
-
-    }
-    while(0);
-
-    return l_err;
-}
-
-/**
- * @brief Performs an PNOR Write Operation
- * This function performs a PNOR Write operation. It follows a pre-defined
- * prototype functions in order to be registered with the device-driver
- * framework.
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        PNOR target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
- *                              Output:
- *                                  Read: Size of output data
- *                                  Write: Size of data written
- * @param[in]   i_accessType    DeviceFW::AccessType enum (usrif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there's only one argument,
- *                              containing the PNOR address and chip select
- * @return  errlHndl_t
- */
-errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
-                   TARGETING::Target* i_target,
-                   void* io_buffer,
-                   size_t& io_buflen,
-                   int64_t i_accessType,
-                   va_list i_args)
-{
-    errlHndl_t l_err = NULL;
-    uint64_t l_addr = va_arg(i_args, uint64_t);
-
-    do
-    {
-        //@todo (RTC:36951) - add support for unaligned data
-        // Ensure we are operating on a 32-bit (4-byte) boundary
-        assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
-        assert( io_buflen % 4 == 0 );
-
-        // The PNOR device driver interface is initialized with the
-        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorIpmiDD class created
-        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
-
-        // Write the flash
-        l_err = Singleton<PnorIpmiDD>::instance().writeFlash(io_buffer,
-                io_buflen,
-                l_addr);
-
-        if(l_err)
-        {
-            break;
-        }
-
-    }
-    while(0);
-
-    return l_err;
-}
-
-/**
- * @brief Informs caller if the driver is using
- *        L3 Cache for fake PNOR or not.
- *
- * @return Indicate state of fake PNOR
- *         true = PNOR DD is using L3 Cache for fake PNOR
- *         false = PNOR DD not using L3 Cache for fake PNOR
- */
-bool usingL3Cache()
-{
-    return false;
-}
-
-/**
- * @brief Retrieve some information about the PNOR/SFC hardware
- */
-void getPnorInfo( PnorInfo_t& o_pnorInfo )
-{
-    o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
-    o_pnorInfo.norWorkarounds =
-        Singleton<PnorIpmiDD>::instance().getNorWorkarounds();
-    o_pnorInfo.flashSize =
-        Singleton<PnorIpmiDD>::instance().getNorSize();
-}
-
-// Register access functions to DD framework
-DEVICE_REGISTER_ROUTE(DeviceFW::READ,
-                      DeviceFW::PNOR,
-                      TARGETING::TYPE_PROC,
-                      ddRead);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
-                      DeviceFW::PNOR,
-                      TARGETING::TYPE_PROC,
-                      ddWrite);
-
-}; //namespace PNOR
-
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-
 /**
  * @brief Performs a PNOR Read Operation
  */
@@ -865,4 +701,49 @@ PnorIpmiDD::PnorIpmiDD( TARGETING::Target* i_target )
  */
 PnorIpmiDD::~PnorIpmiDD()
 {
+}
+
+PnorIf* PnorIpmiDD::probe(TARGETING::Target* i_target)
+{
+    errlHndl_t l_err = NULL;
+
+    /*
+     * Test if the daemon is alive by sending an ack message. Make it a no-op
+     * by not setting any flags in the mask argument
+     */
+    HiomapMessage* l_msg = new HiomapMessage(HIOMAP_C_ACK);
+    l_msg->put8(0, 0);
+
+    /* Open-code the exchange to avoid constructing the class for sendCommand */
+    IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+
+    l_msg->iv_seq = 0;
+
+    uint8_t old_seq = l_msg->iv_seq;
+    uint8_t* l_data = reinterpret_cast <uint8_t*>((char*)l_msg);
+    size_t l_len = 2 + 1; /* Account for command and sequence number */
+    bool success;
+
+    l_err = IPMI::sendrecv(
+                IPMI::pnor_hiomap_request(), l_cc, l_len, l_data);
+    if (!l_err && (l_cc == IPMI::CC_OK))
+    {
+        /* Don't look too closely, storage size doesn't necessarily match */
+        assert(l_len >= 2);
+        l_msg = reinterpret_cast<HiomapMessage *>((char *)l_data);
+        success = (old_seq == l_msg->iv_seq);
+        delete l_msg;
+    }
+    else
+    {
+        success = false;
+    }
+
+    if (success)
+    {
+        TRACFCOMP(g_trac_pnor, "PnorIpmiDD: Detected IPMI HIOMAP transport");
+        return new PnorIpmiDD(i_target);
+    }
+
+    return nullptr;
 }

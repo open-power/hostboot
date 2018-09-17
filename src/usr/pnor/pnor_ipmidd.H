@@ -33,6 +33,8 @@
 #include <limits.h>
 #include <config.h>
 
+#include "pnorif.H"
+
 namespace PNOR
 {
 class UdPnorDDParms;
@@ -112,59 +114,14 @@ class HiomapMessage
  *  @brief  PNOR Device Driver Class
  *     Provides access to the PNOR flash via the LPC MBOX hardware
  */
-class PnorIpmiDD
+class PnorIpmiDD : public PnorIf
 {
 
     public:
-        /**
-         * @brief Performs a PNOR Read Operation
-         *
-         * @parm o_buffer  Buffer to read data into
-         * @parm io_buflen  Input: Number of bytes to read,
-         *       Output: Number of bytes actually read
-         * @parm i_address  Offset into flash to read
-         *
-         * @return Error from operation
+        /** @brief Test for the IPMI HIOMAP transport and return an appropriate
+         * PnorDD instance if detected, otherwise nullptr.
          */
-        errlHndl_t readFlash(void* o_buffer,
-                             size_t& io_buflen,
-                             uint64_t i_address);
-
-        /**
-         * @brief Performs a PNOR Write Operation
-         *
-         * @parm i_buffer  Buffer to write data from
-         * @parm io_buflen  Input: Number of bytes to write,
-         *       Output: Number of bytes actually written
-         * @parm i_address  Offset into flash to write
-         *
-         * @return Error from operation
-         */
-        errlHndl_t writeFlash(const void* i_buffer,
-                              size_t& io_buflen,
-                              uint64_t i_address);
-
-        /**
-         * @brief Informs caller if PNORDD is using
-         *        L3 Cache for fake PNOR or not.
-         *
-         * @return Indicate state of fake PNOR
-         *         true = PNOR DD is using L3 Cache for fake PNOR
-         *         false = PNOR DD not using L3 Cache for fake PNOR
-         */
-        bool usingL3Cache( );
-
-        /**
-         * @brief Retrieve size of NOR flash
-         * @return Size of PNOR in bytes
-         */
-        uint32_t getNorSize( void );
-
-        /**
-         * @brief Retrieve bitstring of NOR workarounds
-         * @return NOR workarounds (see VendorWorkarounds in norflash.H)
-         */
-        uint32_t getNorWorkarounds( void );
+        static PnorIf* probe(TARGETING::Target* target);
 
         /**
          * @brief Constructor
@@ -173,11 +130,19 @@ class PnorIpmiDD
          *       NOTE: i_target can only be used after targeting is loaded
          */
         PnorIpmiDD( TARGETING::Target* i_target = NULL );
+        virtual ~PnorIpmiDD();
 
-        /**
-         * @brief Destructor
-         */
-        ~PnorIpmiDD();
+        virtual errlHndl_t readFlash(void* o_buffer,
+                                     size_t& io_buflen,
+                                     uint64_t i_address);
+
+        virtual errlHndl_t writeFlash(const void* i_buffer,
+                                      size_t& io_buflen,
+                                      uint64_t i_address);
+
+        virtual uint32_t getNorSize(void);
+
+        virtual uint32_t getNorWorkarounds(void);
 
     protected:
 

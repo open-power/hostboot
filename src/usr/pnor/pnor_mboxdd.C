@@ -60,172 +60,6 @@
 // Initialized in pnorrp.C
 extern trace_desc_t* g_trac_pnor;
 
-namespace PNOR
-{
-
-/**
- * @brief Performs an PNOR Read Operation
- * This function performs a PNOR Read operation. It follows a pre-defined
- * prototype functions in order to be registered with the device-driver
- * framework.
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        PNOR target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
- *                              Output:
- *                                  Read: Size of output data
- *                                  Write: Size of data written
- * @param[in]   i_accessType    DeviceFW::AccessType enum (usrif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there's only one argument,
- *                              containing the PNOR address and chip select
- * @return  errlHndl_t
- */
-errlHndl_t ddRead(DeviceFW::OperationType i_opType,
-                  TARGETING::Target* i_target,
-                  void* io_buffer,
-                  size_t& io_buflen,
-                  int64_t i_accessType,
-                  va_list i_args)
-{
-    errlHndl_t l_err = NULL;
-    uint64_t l_addr = va_arg(i_args, uint64_t);
-
-    do
-    {
-        //@todo (RTC:36951) - add support for unaligned data
-        // Ensure we are operating on a 32-bit (4-byte) boundary
-        assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
-        assert( io_buflen % 4 == 0 );
-
-        // The PNOR device driver interface is initialized with the
-        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorMboxDD class created
-        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
-
-        // Read the flash
-        l_err = Singleton<PnorMboxDD>::instance().readFlash(io_buffer,
-                io_buflen,
-                l_addr);
-
-        if(l_err)
-        {
-            break;
-        }
-
-    }
-    while(0);
-
-    return l_err;
-}
-
-/**
- * @brief Performs an PNOR Write Operation
- * This function performs a PNOR Write operation. It follows a pre-defined
- * prototype functions in order to be registered with the device-driver
- * framework.
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        PNOR target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
- *                              Output:
- *                                  Read: Size of output data
- *                                  Write: Size of data written
- * @param[in]   i_accessType    DeviceFW::AccessType enum (usrif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there's only one argument,
- *                              containing the PNOR address and chip select
- * @return  errlHndl_t
- */
-errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
-                   TARGETING::Target* i_target,
-                   void* io_buffer,
-                   size_t& io_buflen,
-                   int64_t i_accessType,
-                   va_list i_args)
-{
-    errlHndl_t l_err = NULL;
-    uint64_t l_addr = va_arg(i_args, uint64_t);
-
-    do
-    {
-        //@todo (RTC:36951) - add support for unaligned data
-        // Ensure we are operating on a 32-bit (4-byte) boundary
-        assert( reinterpret_cast<uint64_t>(io_buffer) % 4 == 0 );
-        assert( io_buflen % 4 == 0 );
-
-        // The PNOR device driver interface is initialized with the
-        // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorMboxDD class created
-        assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
-
-        // Write the flash
-        l_err = Singleton<PnorMboxDD>::instance().writeFlash(io_buffer,
-                io_buflen,
-                l_addr);
-
-        if(l_err)
-        {
-            break;
-        }
-
-    }
-    while(0);
-
-    return l_err;
-}
-
-/**
- * @brief Informs caller if the driver is using
- *        L3 Cache for fake PNOR or not.
- *
- * @return Indicate state of fake PNOR
- *         true = PNOR DD is using L3 Cache for fake PNOR
- *         false = PNOR DD not using L3 Cache for fake PNOR
- */
-bool usingL3Cache()
-{
-    return false;
-}
-
-/**
- * @brief Retrieve some information about the PNOR/SFC hardware
- */
-void getPnorInfo( PnorInfo_t& o_pnorInfo )
-{
-    o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
-    o_pnorInfo.norWorkarounds =
-        Singleton<PnorMboxDD>::instance().getNorWorkarounds();
-    o_pnorInfo.flashSize =
-        Singleton<PnorMboxDD>::instance().getNorSize();
-}
-
-
-
-// Register MBOXDD access functions to DD framework
-DEVICE_REGISTER_ROUTE(DeviceFW::READ,
-                      DeviceFW::PNOR,
-                      TARGETING::TYPE_PROC,
-                      ddRead);
-
-DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
-                      DeviceFW::PNOR,
-                      TARGETING::TYPE_PROC,
-                      ddWrite);
-
-}; //namespace PNOR
-
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-
 /**
  * @brief Performs a PNOR Read Operation
  */
@@ -674,4 +508,12 @@ PnorMboxDD::PnorMboxDD( TARGETING::Target* i_target )
  */
 PnorMboxDD::~PnorMboxDD()
 {
+}
+
+PnorIf* PnorMboxDD::probe(TARGETING::Target* i_target)
+{
+    /* If we get so far as to probe mbox, it better be available */
+    TRACFCOMP(g_trac_pnor, "PnorMboxDD: Detected AST mailbox HIOMAP transport");
+
+    return new PnorMboxDD(i_target);
 }

@@ -25,15 +25,15 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
+HIOMAP_DEPS = ast_mboxdd.o pnor_mboxdd.o pnor_ipmidd.o pnor_hiomapdd.o
 
 MODULE = pnor
 OBJS += pnor_utils.o
 OBJS += pnorrp.o
 OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnor_sfcdd.o)
-OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),ast_mboxdd.o)
-OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),pnor_mboxdd.o)
-OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),pnor_ipmidd.o)
+OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),$(HIOMAP_DEPS))
+OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),$(HIOMAP_DEPS))
 OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
