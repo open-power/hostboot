@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pnor/pnordd.H $                                       */
+/* $Source: src/usr/pnor/pnor_sfcdd.H $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -33,7 +33,7 @@
 namespace PNOR { class UdPnorDDParms; }
 class SfcDD;
 
-/** @file pnordd.H
+/** @file pnor_sfcdd.H
  *  @brief Provides the interfaces to the PNOR Device Driver
  */
 
@@ -41,7 +41,7 @@ class SfcDD;
  *  @brief  PNOR Device Driver Class
  *     Provides access to the PNOR flash via the ECCB/LPC hardware
  */
-class PnorDD
+class PnorSfcDD
 {
 
   public:
@@ -102,12 +102,12 @@ class PnorDD
      * @parm i_target     Processor Target connected to PNOR
      *       NOTE: i_target can only be used after targeting is loaded
      */
-    PnorDD( TARGETING::Target* i_target = NULL );
+    PnorSfcDD( TARGETING::Target* i_target = NULL );
 
     /**
      * @brief Destructor
      */
-    ~PnorDD();
+    ~PnorSfcDD();
 
   protected:
 

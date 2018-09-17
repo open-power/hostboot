@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pnor/pnordd.C $                                       */
+/* $Source: src/usr/pnor/pnor_sfcdd.C $                                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -45,7 +45,7 @@
 #include <errl/errludlogregister.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
-#include "pnordd.H"
+#include "pnor_sfcdd.H"
 #include "pnor_common.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
@@ -106,13 +106,13 @@ errlHndl_t ddRead(DeviceFW::OperationType i_opType,
 
         // The PNOR device driver interface is initialized with the
         // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorDD class created
+        // access requires a separate PnorSfcDD class created
         assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
 
         // Read the flash
-        l_err = Singleton<PnorDD>::instance().readFlash(io_buffer,
-                                                        io_buflen,
-                                                        l_addr);
+        l_err = Singleton<PnorSfcDD>::instance().readFlash(io_buffer,
+                                                           io_buflen,
+                                                           l_addr);
         if(l_err)
         {
             break;
@@ -162,13 +162,13 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
 
         // The PNOR device driver interface is initialized with the
         // MASTER_PROCESSOR_CHIP_TARGET_SENTINEL.  Other target
-        // access requires a separate PnorDD class created
+        // access requires a separate PnorSfcDD class created
         assert( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
 
         // Write the flash
-        l_err = Singleton<PnorDD>::instance().writeFlash(io_buffer,
-                                                         io_buflen,
-                                                         l_addr);
+        l_err = Singleton<PnorSfcDD>::instance().writeFlash(io_buffer,
+                                                            io_buflen,
+                                                            l_addr);
         if(l_err)
         {
             break;
@@ -189,7 +189,7 @@ errlHndl_t ddWrite(DeviceFW::OperationType i_opType,
  */
 bool usingL3Cache()
 {
-    return Singleton<PnorDD>::instance().usingL3Cache();
+    return Singleton<PnorSfcDD>::instance().usingL3Cache();
 }
 
 /**
@@ -199,9 +199,9 @@ void getPnorInfo( PnorInfo_t& o_pnorInfo )
 {
     o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET|LPC_FW_SPACE;
     o_pnorInfo.norWorkarounds =
-      Singleton<PnorDD>::instance().getNorWorkarounds();
+      Singleton<PnorSfcDD>::instance().getNorWorkarounds();
     o_pnorInfo.flashSize =
-      Singleton<PnorDD>::instance().getNorSize();
+      Singleton<PnorSfcDD>::instance().getNorSize();
 }
 
 
@@ -227,11 +227,11 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
 /**
  * @brief Performs a PNOR Read Operation
  */
-errlHndl_t PnorDD::readFlash(void* o_buffer,
-                             size_t& io_buflen,
-                             uint64_t i_address)
+errlHndl_t PnorSfcDD::readFlash(void* o_buffer,
+                                size_t& io_buflen,
+                                uint64_t i_address)
 {
-    //TRACDCOMP(g_trac_pnor, "PnorDD::readFlash(i_address=0x%llx)> ", i_address);
+    //TRACDCOMP(g_trac_pnor, "PnorSfcDD::readFlash(i_address=0x%llx)> ", i_address);
 
     //mask off chip select for now, will probably break up fake PNOR into
     //multiple fake chips eventually
@@ -247,11 +247,11 @@ errlHndl_t PnorDD::readFlash(void* o_buffer,
 /**
  * @brief Performs a PNOR Write Operation
  */
-errlHndl_t PnorDD::writeFlash(void* i_buffer,
-                              size_t& io_buflen,
-                              uint64_t i_address)
+errlHndl_t PnorSfcDD::writeFlash(void* i_buffer,
+                                 size_t& io_buflen,
+                                 uint64_t i_address)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorSfcDD::writeFlash(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     do{
@@ -339,7 +339,7 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
     {
         io_buflen = 0;
     }
-    TRACFCOMP(g_trac_pnor,EXIT_MRK"PnorDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
+    TRACFCOMP(g_trac_pnor,EXIT_MRK"PnorSfcDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
 
     return l_err;
 }
@@ -348,17 +348,17 @@ errlHndl_t PnorDD::writeFlash(void* i_buffer,
 /********************
  Private/Protected Methods
  ********************/
-mutex_t PnorDD::cv_mutex = MUTEX_INITIALIZER;
+mutex_t PnorSfcDD::cv_mutex = MUTEX_INITIALIZER;
 
 /**
  * @brief  Constructor
  */
-PnorDD::PnorDD( TARGETING::Target* i_target )
+PnorSfcDD::PnorSfcDD( TARGETING::Target* i_target )
 : iv_eraseSizeBytes(ERASESIZE_BYTES_DEFAULT)
 , iv_norChipId(0)
 , iv_sfc(NULL)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK "PnorDD::PnorDD()" );
+    TRACFCOMP(g_trac_pnor, ENTER_MRK "PnorSfcDD::PnorSfcDD()" );
     errlHndl_t l_err = NULL;
 
     //Zero out erase counter
@@ -381,14 +381,14 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
         TARGETING::ATTR_PROC_MASTER_TYPE_type type_enum =
                    iv_target->getAttr<TARGETING::ATTR_PROC_MASTER_TYPE>();
 
-        // Master target could collide and cause deadlocks with PnorDD singleton
+        // Master target could collide and cause deadlocks with PnorSfcDD singleton
         // used for ddRead/ddWrite with MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
         assert( type_enum != TARGETING::PROC_MASTER_TYPE_ACTING_MASTER );
 
         // Initialize and use class-specific mutex
         iv_mutex_ptr = &iv_mutex;
         mutex_init(iv_mutex_ptr);
-        TRACFCOMP(g_trac_pnor, "PnorDD::PnorDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr", TARGETING::get_huid(i_target));
+        TRACFCOMP(g_trac_pnor, "PnorSfcDD::PnorSfcDD()> Using i_target=0x%X (non-master) and iv_mutex_ptr", TARGETING::get_huid(i_target));
     }
     else
     {
@@ -426,13 +426,13 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
         INITSERVICE::doShutdown( PNOR::RC_PNOR_INIT_FAILURE );
     }
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK "PnorDD::PnorDD()" );
+    TRACFCOMP(g_trac_pnor, EXIT_MRK "PnorSfcDD::PnorSfcDD()" );
 }
 
 /**
  * @brief  Destructor
  */
-PnorDD::~PnorDD()
+PnorSfcDD::~PnorSfcDD()
 {
     if( iv_sfc )
     {
@@ -444,7 +444,7 @@ PnorDD::~PnorDD()
  * @brief Informs caller if PNORDD is using
  *        L3 Cache for fake PNOR or not.
  */
-bool PnorDD::usingL3Cache( void )
+bool PnorSfcDD::usingL3Cache( void )
 {
     return iv_sfc->usingL3Cache();
 }
@@ -453,7 +453,7 @@ bool PnorDD::usingL3Cache( void )
  * @brief Compare the existing data in 1 erase block of the flash with
  *   the incoming data and write or erase as needed
  */
-errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
+errlHndl_t PnorSfcDD::compareAndWriteBlock(uint32_t i_blockStart,
                                         uint32_t i_writeStart,
                                         size_t i_bytesToWrite,
                                         void* i_data)
@@ -630,10 +630,10 @@ errlHndl_t PnorDD::compareAndWriteBlock(uint32_t i_blockStart,
 /**
  * @brief Erase a block of flash
  */
-errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
+errlHndl_t PnorSfcDD::eraseFlash(uint32_t i_address)
 {
     errlHndl_t l_err = NULL;
-    TRACDCOMP(g_trac_pnor, ">>PnorDD::eraseFlash> Block 0x%.8X", i_address );
+    TRACDCOMP(g_trac_pnor, ">>PnorSfcDD::eraseFlash> Block 0x%.8X", i_address );
 
     do {
         if( findEraseBlock(i_address) != i_address )
@@ -644,7 +644,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
              * @reasoncode   PNOR::RC_INVALID_ADDRESS
              * @userdata1    Flash Address
              * @userdata2    Nearest Erase Boundary
-             * @devdesc      PnorDD::eraseFlash> Address not on erase boundary
+             * @devdesc      PnorSfcDD::eraseFlash> Address not on erase boundary
              * @custdesc     Firmware error accessing flash during IPL
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -663,7 +663,7 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
             {
                 iv_erases[idx].count++;
                 TRACFCOMP(g_trac_pnor,
-                          "PnorDD::eraseFlash> Block 0x%.8X has %d erasures",
+                          "PnorSfcDD::eraseFlash> Block 0x%.8X has %d erasures",
                           i_address, iv_erases[idx].count );
                 break;
 
@@ -675,13 +675,13 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
                 iv_erases[idx].addr = i_address;
                 iv_erases[idx].count = 1;
                 TRACFCOMP(g_trac_pnor,
-                          "PnorDD::eraseFlash> Block 0x%.8X has %d erasures",
+                          "PnorSfcDD::eraseFlash> Block 0x%.8X has %d erasures",
                           i_address, iv_erases[idx].count );
                 break;
             }
             else if( idx == (ERASE_COUNT_MAX - 1))
             {
-                TRACFCOMP(g_trac_pnor, "PnorDD::eraseFlash> Erase counter full!  Block 0x%.8X Erased", i_address );
+                TRACFCOMP(g_trac_pnor, "PnorSfcDD::eraseFlash> Erase counter full!  Block 0x%.8X Erased", i_address );
                 break;
             }
         }
@@ -701,12 +701,12 @@ errlHndl_t PnorDD::eraseFlash(uint32_t i_address)
  * @brief Returns if an operation should be retried and handles
  *        the error logs
  */
-bool PnorDD::shouldRetry( RetryOp     i_op,
-                          errlHndl_t& io_err,
-                          errlHndl_t& io_original_err,
-                          uint8_t&    io_retry_count   )
+bool PnorSfcDD::shouldRetry( RetryOp     i_op,
+                             errlHndl_t& io_err,
+                             errlHndl_t& io_original_err,
+                             uint8_t&    io_retry_count   )
 {
-    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorDD::shouldRetry(%d)", i_op);
+    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorSfcDD::shouldRetry(%d)", i_op);
 
     bool should_retry = false;
 
@@ -729,14 +729,14 @@ bool PnorDD::shouldRetry( RetryOp     i_op,
                 io_original_err = io_err;
                 io_err = NULL;
 
-                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::shouldRetry(%d)> Error rc=0x%X, eid=0x%X, retry/MAX=%d/%d. Save error and retry", i_op, io_original_err->reasonCode(), io_original_err->eid(), io_retry_count, PNORDD_MAX_RETRIES);
+                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorSfcDD::shouldRetry(%d)> Error rc=0x%X, eid=0x%X, retry/MAX=%d/%d. Save error and retry", i_op, io_original_err->reasonCode(), io_original_err->eid(), io_retry_count, PNORDD_MAX_RETRIES);
 
                 io_original_err->collectTrace(PNOR_COMP_NAME);
             }
             else
             {
                 // Add data to original error
-                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::shouldRetry(%d)> Another Error rc=0x%X, eid=0x%X, plid=%d, retry/MAX=%d/%d. Delete error and retry", i_op, io_err->reasonCode(), io_err->eid(), io_err->plid(), io_retry_count, PNORDD_MAX_RETRIES);
+                TRACFCOMP(g_trac_pnor, ERR_MRK"PnorSfcDD::shouldRetry(%d)> Another Error rc=0x%X, eid=0x%X, plid=%d, retry/MAX=%d/%d. Delete error and retry", i_op, io_err->reasonCode(), io_err->eid(), io_err->plid(), io_retry_count, PNORDD_MAX_RETRIES);
 
                 char err_str[80];
                 snprintf(err_str, sizeof(err_str), "Another fail: Deleted "
@@ -759,7 +759,7 @@ bool PnorDD::shouldRetry( RetryOp     i_op,
         {
             should_retry = false;
 
-            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::shouldRetry(%d)> Another Error rc=0x%X, eid=0x%X, No More Retries (retry/MAX=%d/%d). Returning Original Error (rc=0x%X, eid=0x%X)", i_op, io_err->reasonCode(), io_err->eid(), io_retry_count, PNORDD_MAX_RETRIES, io_original_err->reasonCode(), io_original_err->eid());
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorSfcDD::shouldRetry(%d)> Another Error rc=0x%X, eid=0x%X, No More Retries (retry/MAX=%d/%d). Returning Original Error (rc=0x%X, eid=0x%X)", i_op, io_err->reasonCode(), io_err->eid(), io_retry_count, PNORDD_MAX_RETRIES, io_original_err->reasonCode(), io_original_err->eid());
 
             // error logs handled below
         }
@@ -773,7 +773,7 @@ bool PnorDD::shouldRetry( RetryOp     i_op,
             // commit l_err with original error PLID as informational
             io_err->plid(io_original_err->plid());
             io_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorDD::shouldRetry(%d)> Committing latest io_err eid=0x%X with plid of original err (eid=0x%X): plid=0x%X", i_op, io_err->eid(), io_original_err->plid(), io_err->plid());
+            TRACFCOMP(g_trac_pnor, ERR_MRK"PnorSfcDD::shouldRetry(%d)> Committing latest io_err eid=0x%X with plid of original err (eid=0x%X): plid=0x%X", i_op, io_err->eid(), io_original_err->plid(), io_err->plid());
 
             io_err->collectTrace(PNOR_COMP_NAME);
 
@@ -788,14 +788,14 @@ bool PnorDD::shouldRetry( RetryOp     i_op,
         else
         {
             // Since we eventually succeeded, delete original error
-            TRACFCOMP(g_trac_pnor, "PnorDD::shouldRetry(%d)> Op successful, deleting saved err eid=0x%X, plid=0x%X", i_op, io_original_err->eid(), io_original_err->plid());
+            TRACFCOMP(g_trac_pnor, "PnorSfcDD::shouldRetry(%d)> Op successful, deleting saved err eid=0x%X, plid=0x%X", i_op, io_original_err->eid(), io_original_err->plid());
 
             delete io_original_err;
             io_original_err = NULL;
         }
     }
 
-    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorDD::shouldRetry(%d)> return %d (io_retry_count=%d)", i_op, should_retry, io_retry_count);
+    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorSfcDD::shouldRetry(%d)> return %d (io_retry_count=%d)", i_op, should_retry, io_retry_count);
 
     return should_retry;
 }
@@ -803,11 +803,11 @@ bool PnorDD::shouldRetry( RetryOp     i_op,
 /**
  * @brief Calls the SFC to perform a PNOR Write Operation
  */
-errlHndl_t PnorDD::_writeFlash( uint32_t i_addr,
-                                size_t i_size,
-                                void* i_data )
+errlHndl_t PnorSfcDD::_writeFlash( uint32_t i_addr,
+                                   size_t i_size,
+                                   void* i_data )
 {
-    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorDD::_writeFlash(i_addr=0x%.8X)> ", i_addr);
+    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorSfcDD::_writeFlash(i_addr=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL;
     errlHndl_t original_err = NULL;
     uint8_t retry = 0;
@@ -831,11 +831,11 @@ errlHndl_t PnorDD::_writeFlash( uint32_t i_addr,
 /**
  * @brief Calls the SFC to perform a PNOR Read Operation
  */
-errlHndl_t PnorDD::_readFlash( uint32_t i_addr,
-                               size_t i_size,
-                               void* o_data )
+errlHndl_t PnorSfcDD::_readFlash( uint32_t i_addr,
+                                  size_t i_size,
+                                  void* o_data )
 {
-    //TRACDCOMP(g_trac_pnor, "PnorDD::_readFlash(i_address=0x%.8X)> ", i_addr);
+    //TRACDCOMP(g_trac_pnor, "PnorSfcDD::_readFlash(i_address=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL;
     errlHndl_t original_err = NULL;
     uint8_t retry = 0;
@@ -858,9 +858,9 @@ errlHndl_t PnorDD::_readFlash( uint32_t i_addr,
 /**
  * @brief Calls the SFC to perform a PNOR Read Operation
  */
-errlHndl_t PnorDD::_eraseFlash( uint32_t i_addr )
+errlHndl_t PnorSfcDD::_eraseFlash( uint32_t i_addr )
 {
-    TRACDCOMP(g_trac_pnor, "PnorDD::_eraseFlash(i_address=0x%.8X)> ", i_addr);
+    TRACDCOMP(g_trac_pnor, "PnorSfcDD::_eraseFlash(i_address=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL;
     errlHndl_t original_err = NULL;
     uint8_t retry = 0;
@@ -883,7 +883,7 @@ errlHndl_t PnorDD::_eraseFlash( uint32_t i_addr )
 /**
  * @brief Retrieve bitstring of NOR workarounds
  */
-uint32_t PnorDD::getNorWorkarounds( void )
+uint32_t PnorSfcDD::getNorWorkarounds( void )
 {
     return iv_sfc->getNorWorkarounds();
 }
@@ -891,7 +891,7 @@ uint32_t PnorDD::getNorWorkarounds( void )
 /**
  * @brief Retrieve size of NOR flash
  */
-uint32_t PnorDD::getNorSize( void )
+uint32_t PnorSfcDD::getNorSize( void )
 {
 #ifdef CONFIG_PNOR_IS_32MB
     return (32*MEGABYTE);
