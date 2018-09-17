@@ -27,11 +27,12 @@
 
 /** @file pnor_ipmidd.H
  *  @brief Provides the interfaces to the PNOR via the
- *         HIOMAP protocol
+ *         HIOMAP protocol over IPMI
  */
 
 #include <limits.h>
 #include <config.h>
+
 namespace PNOR
 {
 class UdPnorDDParms;
@@ -111,7 +112,7 @@ class HiomapMessage
  *  @brief  PNOR Device Driver Class
  *     Provides access to the PNOR flash via the LPC MBOX hardware
  */
-class PnorDD
+class PnorIpmiDD
 {
 
     public:
@@ -171,12 +172,12 @@ class PnorDD
          * @parm i_target     Processor Target connected to PNOR
          *       NOTE: i_target can only be used after targeting is loaded
          */
-        PnorDD( TARGETING::Target* i_target = NULL );
+        PnorIpmiDD( TARGETING::Target* i_target = NULL );
 
         /**
          * @brief Destructor
          */
-        ~PnorDD();
+        ~PnorIpmiDD();
 
     protected:
 
@@ -314,7 +315,7 @@ class PnorDD
         /**
          * @brief Global Mutex to prevent concurrent PNOR accesses to Master
          *        Proc. This needs to be static so we can mutex across multiple
-         *        instances of PnorDD
+         *        instances of PnorIpmiDD
          */
         static mutex_t cv_mutex;
 
