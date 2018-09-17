@@ -120,6 +120,7 @@ void* IpmiRP::last_chance_event_handler(void* unused)
 
 void IpmiRP::daemonProcess(errlHndl_t& o_errl)
 {
+    task_create(&IpmiRP::attach, NULL);
     task_create(&IpmiRP::start, NULL);
 }
 
@@ -538,6 +539,27 @@ void IpmiRP::lastChanceEventHandler(void)
     } while(true);
 
     return;
+}
+
+void* IpmiRP::attach(void *unused)
+{
+    Singleton<IpmiRP>::instance().attach();
+
+    return NULL;
+}
+
+void IpmiRP::attach(void)
+{
+    task_detach();
+
+    msg_q_t mq = Singleton<IpmiDD>::instance().eventQueue();
+
+    while (!iv_shutdown_now)
+    {
+        /* Forward it into the internal message queue */
+        msg_send(iv_msgQ, msg_wait(mq));
+        lwsync();
+    }
 }
 
 /**

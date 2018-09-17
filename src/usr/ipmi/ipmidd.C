@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #include <errl/errludlogregister.H>
 #include <errl/errludstring.H>
 #include "ipmidd.H"
-#include "ipmirp.H"
 #include <ipmi/ipmiif.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
@@ -189,7 +188,6 @@ void IpmiDD::pollCtrl(void)
     // We send a message to this message queue when the ipmi state changes.
     // Don't free these messages - these messages are sent async so the
     // consumer will free the message.
-    static msg_q_t mq = Singleton<IpmiRP>::instance().msgQueue();
     msg_t* msg = NULL;
 
     uint8_t ctrl = 0;
@@ -221,7 +219,7 @@ void IpmiDD::pollCtrl(void)
                 {
                     msg = msg_allocate();
                     msg->type = IPMI::MSG_STATE_IDLE;
-                    msg_send(mq, msg);
+                    msg_send(iv_eventQ, msg);
                     iv_eagains = false;
                 }
                 // Check on shutdown if idle
@@ -236,7 +234,7 @@ void IpmiDD::pollCtrl(void)
             {
                 msg = msg_allocate();
                 msg->type = IPMI::MSG_STATE_RESP;
-                msg_send(mq, msg);
+                msg_send(iv_eventQ, msg);
             }
 
             // If we see the SMS_ATN, there's an event waiting
@@ -245,7 +243,7 @@ void IpmiDD::pollCtrl(void)
                 IPMI_TRAC(INFO_MRK "sending state sms/event");
                 msg = msg_allocate();
                 msg->type = IPMI::MSG_STATE_EVNT;
-                msg_send(mq, msg);
+                msg_send(iv_eventQ, msg);
 
                 // Clear the SMS bit.
                 errlHndl_t err = writeLPC(REG_CONTROL, CTRL_SMS_ATN);
@@ -447,7 +445,8 @@ void IpmiDD::handleShutdown(void)
  */
 IpmiDD::IpmiDD(void):
     iv_shutdown_now(false),
-    iv_eagains(false)
+    iv_eagains(false),
+    iv_eventQ(msg_q_create())
 {
     mutex_init(&iv_mutex);
 
