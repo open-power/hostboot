@@ -362,6 +362,15 @@ namespace IPMI
                           uint8_t* i_data);
 
     /**
+     * Register a queue to receive an IPMI SEL.
+     *
+     * @param[in] i_cmd, the SEL command
+     * @param[in] i_msgq, the message queue on which to send the SEL
+     */
+    void register_for_event(const IPMI::command_t& i_cmd,
+                            const msg_q_t& i_msgq);
+
+    /**
      * Get the max buffer size
      * @param void
      *

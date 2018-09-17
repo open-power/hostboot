@@ -327,6 +327,12 @@ void IpmiRP::registerForEvent(const IPMI::command_t& i_cmd,
     IPMI_TRAC("event registration for %x:%x", i_cmd.first, i_cmd.second);
 }
 
+void IPMI::register_for_event(const IPMI::command_t& i_cmd,
+                              const msg_q_t& i_msgq)
+{
+    Singleton<IpmiRP>::instance().registerForEvent(i_cmd, i_msgq);
+}
+
 /**
  * @brief Give the resource provider a message to put in the eventq
  * @param[in] i_event, pointer to the new'd event (OEM SEL)
