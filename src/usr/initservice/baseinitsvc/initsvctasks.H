@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,6 +54,21 @@ const TaskInfo    g_taskinfolist[]   =   {
                         BASE_IMAGE,
                 }
         },
+
+#ifdef CONFIG_BMC_IPMI
+        /**
+         * @brief IPMI resource provider
+         */
+        {
+            "libipmibase.so",                           // taskname
+            NULL,                                       // no ptr to fnct
+            {
+
+                START_TASK,                             // task type
+                BASE_IMAGE,                             // Base Module
+            }
+        },
+#endif
 
         /**
          * @brief   PNOR    Driver  Task
