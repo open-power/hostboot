@@ -32,6 +32,7 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <no_export/>
+    <mrwRequired/>
   </attribute>
 
   <attribute>
@@ -2221,6 +2222,7 @@
       <uint32_t/>
     </simpleType>
     <no_export/>
+    <mrwRequired/>
   </attribute>
 
   <enumerationType>
@@ -3770,6 +3772,17 @@
     <readable/>
   </attribute>
 
+  <!--attribute>
+    <id>MRW_REQUIRED_TEST</id>
+    <description>An attribute to test the mrwRequired keyword</description>
+    <persistency>non-volatile</persistency>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <mrwRequired/>
+  </attribute-->
   <attribute>
     <description>AVDD memory programming type
     0 = POWERON  - domain is programmed as part of regular power on sequence,
@@ -4909,6 +4922,7 @@
     </simpleType>
     <writeable/>
     <no_export/>
+    <mrwRequired/>
   </attribute>
 
   <attribute>
@@ -5493,6 +5507,7 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <mrwRequired/>
   </attribute>
 
   <attribute>

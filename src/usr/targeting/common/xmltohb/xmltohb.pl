@@ -1037,6 +1037,7 @@ sub validateAttributes {
     $elements{"global"} = { required => 0, isscalar => 0};
     $elements{"range"} = { required => 0, isscalar => 0};
     $elements{"ignoreEkb"} = { required => 0, isscalar => 0};
+    $elements{"mrwRequired"} = { required => 0, isscalar => 0};
 
     # do NOT export attribute & its associated enum to serverwiz
     $elements{"no_export"}   = { required => 0, isscalar => 0};
@@ -6218,16 +6219,39 @@ sub generateTargetingImage {
 
         # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
-        foreach my $attr (@{$targetInstance->{attribute}})
+        foreach my $targetInstanceAttribute (@{$targetInstance->{attribute}})
         {
-            if(exists $attrhash{$attr->{id}})
+            # if the default tag is missing from an attribute then verify that
+            # it is not required to be assigned a default value by the system
+            # owner.
+            if(!exists $targetInstanceAttribute->{default})
             {
-                $attrhash{ $attr->{id} } = $attr;
+                foreach my $attribute_type (@{$allAttributes->{attribute}})
+                {
+                    if ($attribute_type->{id} eq $targetInstanceAttribute->{id})
+                    {
+                        if (exists $attribute_type->{mrwRequired})
+                        {
+                            croak("Error in Target instance "
+                                 . "\"$targetInstance->{id}\": "
+                                 . "Attribute \"$attribute_type->{id}\" with tag "
+                                 . "\"<mrwRequired/>\" is required to have an "
+                                 . "instance level override from either the MRW "
+                                 . "or MRW processing tools.");
+                        }
+                        last;
+                    }
+                }
+            }
+
+            if(exists $attrhash{$targetInstanceAttribute->{id}})
+            {
+                $attrhash{ $targetInstanceAttribute->{id} } = $targetInstanceAttribute;
             }
             else
             {
                 croak("Target instance \"$targetInstance->{id}\" of type \" $targetInstance->{type} \" cannot "
-                    . "override attribute \"$attr->{id}\" unless "
+                    . "override attribute \"$targetInstanceAttribute->{id}\" unless "
                     . "the attribute has already been defined in the target "
                     . "type inheritance chain.");
             }
