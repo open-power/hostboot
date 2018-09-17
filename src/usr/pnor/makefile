@@ -28,7 +28,7 @@ MODULE = pnor
 
 OBJS += pnorrp.o
 OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
-OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnordd.o)
+OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnor_sfcdd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),pnor_ipmidd.o)
 OBJS += pnor_common.o
 OBJS += pnorvalid.o

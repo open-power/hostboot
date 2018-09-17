@@ -44,13 +44,13 @@
 #include "ffs.h"
 #include "common/ffs_hb.H"
 #include "pnorrp.H"
-#include "pnordd.H"
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <lpc/lpcif.H>
 
 #ifdef CONFIG_PNORDD_IS_SFC
-#include "pnordd.H"
+#include "pnor_sfcdd.H"
+typedef PnorSfcDD PnorDD;
 #elif CONFIG_PNORDD_IS_IPMI
 #include "pnor_ipmidd.H"
 #else

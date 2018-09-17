@@ -42,7 +42,8 @@
 #include <sys/time.h>
 
 #ifdef CONFIG_PNORDD_IS_SFC
-#include "pnordd.H"
+#include "pnor_sfcdd.H"
+typedef PnorSfcDD PnorDD;
 #elif CONFIG_PNORDD_IS_IPMI
 #include "pnor_ipmidd.H"
 #else
