@@ -37,6 +37,7 @@
 #include <kernel/terminate.H>
 #include <sys/misc.h>
 #include <kernel/kernel_reasoncodes.H>
+#include <kernel/taskmgr.H>
 
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
@@ -44,9 +45,17 @@ namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
                          int i_line)
 {
-    if ((i_assertb == ASSERT_CRITICAL) && (KernelMisc::in_kernel_mode()))
+
+    task_t* task = NULL;
+
+    if (KernelMisc::in_kernel_mode())
     {
-        i_assertb = ASSERT_KERNEL;
+        task = TaskManager::getCurrentTask();
+
+        if (i_assertb == ASSERT_CRITICAL)
+        {
+            i_assertb = ASSERT_KERNEL;
+        }
     }
 
     switch (i_assertb)
@@ -72,6 +81,8 @@ extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
             printk("Assertion failed @%p on line %s:%d. (Crit_Assert)\n",
                    linkRegister(), i_file, i_line);
 
+            KernelMisc::printkBacktrace(task);
+
             // Need to call the external CritAssert system call
             cpu_crit_assert(reinterpret_cast<uint64_t>(linkRegister()));
             break;
@@ -79,6 +90,8 @@ extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
         case ASSERT_KERNEL:  // Kernel assert called.
             printk("Assertion failed @%p on line %s:%d. (kassert)\n",
                    linkRegister(), i_file, i_line);
+
+            KernelMisc::printkBacktrace(task);
 
             /*@
              * @errortype
