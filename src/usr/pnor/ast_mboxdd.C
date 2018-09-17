@@ -241,7 +241,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_ASTMBOXDD_DO_MESSAGE
-             * @reasoncode   PNOR::RC_MBOX_BAD_SEQUENCE
+             * @reasoncode   PNOR::RC_HIOMAP_BAD_SEQUENCE
              * @userdata1[48:55] mbox status 1 reg
              * @userdata1[56:63] mbox flag reg
              * @userdata2[32:39] original command code
@@ -254,7 +254,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_ASTMBOXDD_DO_MESSAGE,
-                                            PNOR::RC_MBOX_BAD_SEQUENCE,
+                                            PNOR::RC_HIOMAP_BAD_SEQUENCE,
                                           TWO_UINT8_TO_UINT16(l_stat1, l_flags),
                                             FOUR_UINT8_TO_UINT32(old_cmd,
                                                     io_msg.iv_cmd,
@@ -282,7 +282,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
             /*@
              * @errortype
              * @moduleid     PNOR::MOD_ASTMBOXDD_DO_MESSAGE
-             * @reasoncode   PNOR::RC_MBOX_ERROR_STATUS
+             * @reasoncode   PNOR::RC_HIOMAP_ERROR_STATUS
              * @userdata1[48:55] mbox status 1 reg
              * @userdata1[56:63] mbox flag reg
              * @userdata2[32:39] original command code
@@ -295,7 +295,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_ASTMBOXDD_DO_MESSAGE,
-                                            PNOR::RC_MBOX_ERROR_STATUS,
+                                            PNOR::RC_HIOMAP_ERROR_STATUS,
                                           TWO_UINT8_TO_UINT16(l_stat1, l_flags),
                                             FOUR_UINT8_TO_UINT32(old_cmd,
                                                     io_msg.iv_cmd,

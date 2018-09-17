@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -49,10 +49,13 @@
 #include <lpc/lpcif.H>
 #ifdef CONFIG_PNORDD_IS_SFC
 #include "pnordd.H"
-#else
+#elif CONFIG_PNORDD_IS_BMCMBOX
 #include "pnor_mboxdd.H"
+#elif CONFIG_PNORDD_IS_IPMI
+#include "pnor_ipmidd.H"
+#else
+#error "No PNOR DD implementation configured"
 #endif
-
 
 // Used for creating an Invalid TOC ("PNOR")
 #define PNORVALID_FAKE_MAGIC 0x504E4F52

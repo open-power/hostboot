@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/pnor/pnor_mboxdd.H $                                  */
+/* $Source: src/usr/pnor/pnor_ipmidd.H $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2018                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PNOR_MBOXDD_H
-#define __PNOR_MBOXDD_H
+#ifndef __PNOR_IPMIDD_H
+#define __PNOR_IPMIDD_H
+
+/** @file pnor_ipmidd.H
+ *  @brief Provides the interfaces to the PNOR via the
+ *         HIOMAP protocol
+ */
 
 #include <limits.h>
 #include <config.h>
@@ -35,12 +40,72 @@ class UdPnorDDParms;
 //NOTE: Protocol Definition is here:
 //   https://github.com/openbmc/mboxbridge/blob/master/Documentation/protocol.md
 
-class astMbox;
+enum {
+    HIOMAP_MAX_ARGS_SIZE = 11,
+};
 
-/** @file pnor_mboxdd.H
- *  @brief Provides the interfaces to the PNOR via the
- *         MBOX protocol
+/**
+ *  @brief Host IO Mapping message class.
+ *         Encapsulates a HIOMAP protocol message and provides accessors to
+ *         read/write 8, 16 and 32-bit quantities in the right endianness at
+ *         specified offsets of the "args" section.
  */
+class HiomapMessage
+{
+    public:
+
+    HiomapMessage( uint8_t i_cmd )
+    {
+        iv_cmd = i_cmd;
+    }
+
+    uint8_t iv_cmd;
+    uint8_t iv_seq;
+    uint8_t iv_args[HIOMAP_MAX_ARGS_SIZE];
+
+    inline uint8_t get8( uint8_t i_index )
+    {
+        assert( i_index < HIOMAP_MAX_ARGS_SIZE);
+        return iv_args[i_index];
+    }
+
+    inline void put8( uint8_t i_index, uint8_t i_value )
+    {
+        assert( i_index < HIOMAP_MAX_ARGS_SIZE);
+        iv_args[i_index] = i_value;
+    }
+
+    inline uint16_t get16( uint8_t i_index )
+    {
+        assert( i_index < (HIOMAP_MAX_ARGS_SIZE - 1));
+        return iv_args[i_index] | (iv_args[i_index + 1] << 8);
+    }
+
+    inline void put16( uint8_t i_index, uint16_t i_value )
+    {
+        assert( i_index < (HIOMAP_MAX_ARGS_SIZE - 1));
+        iv_args[i_index] = i_value & 0xff;
+        iv_args[i_index + 1] = i_value >> 8;
+    }
+
+    inline uint32_t get32( uint8_t i_index )
+    {
+        assert( i_index < (HIOMAP_MAX_ARGS_SIZE - 3));
+        return iv_args[i_index] |
+               (iv_args[i_index + 1] << 8) |
+               (iv_args[i_index + 2] << 16) |
+               (iv_args[i_index + 3] << 24);
+    }
+
+    inline void put32( uint8_t i_index, uint32_t i_value )
+    {
+        assert( i_index < (HIOMAP_MAX_ARGS_SIZE - 3));
+        iv_args[i_index] = i_value & 0xff;
+        iv_args[i_index + 1] = (i_value >> 8) & 0xff;
+        iv_args[i_index + 2] = (i_value >> 16) & 0xff;
+        iv_args[i_index + 3 ] = i_value >> 24;
+    }
+};
 
 /**
  *  @brief  PNOR Device Driver Class
@@ -154,11 +219,11 @@ class PnorDD
          *
          * @return Error from operation
          */
-        errlHndl_t adjustMboxWindow(bool i_isWrite,
-                                    uint32_t i_reqAddr,
-                                    size_t i_reqSize,
-                                    uint32_t& o_lpcAddr,
-                                    size_t& o_chunkLen);
+        errlHndl_t adjustWindow(bool i_isWrite,
+                                uint32_t i_reqAddr,
+                                size_t i_reqSize,
+                                uint32_t& o_lpcAddr,
+                                size_t& o_chunkLen);
 
         /**
          * @brief Mark a range dirty in a write window
@@ -199,10 +264,33 @@ class PnorDD
         errlHndl_t writeLpcFw(uint32_t i_offset,
                               size_t i_size,
                               const void* i_buf);
+    private: // Methods
+        /**
+         * @brief Send a HIOMAP command using IPMI
+         */
+        errlHndl_t sendCommand(HiomapMessage*& io_msg, size_t& io_len);
+
+        /**
+         * @brief Perform the HIOMAP protocol handshake and fetch flash params
+         */
+        errlHndl_t initialiseHiomap(void);
+
+        /**
+         * @brief Perform the HIOMAP protocol handshake, negotiating version
+         */
+        errlHndl_t getInfo(void);
+
+        /**
+         * @brief Fetch the parameters of the flash exposed by HIOMAP
+         */
+        errlHndl_t getFlashInfo(void);
+
 
     private: // Variables
-
-        astMbox* iv_mbox;
+        // Protocol metadata
+        uint8_t  iv_sequence;
+        uint8_t  iv_bmcStatus;
+        bool     iv_initialised;
         uint32_t iv_protocolVersion;
         //Block size is either 4k (V1) or BMC defined (V2)
         // the iv_blockShift parm is a representation of that size
@@ -255,4 +343,5 @@ class PnorDD
         friend class PNOR::UdPnorDDParms;
 };
 
-#endif /* __PNOR_MBOXDD_H */
+#endif /* __PNOR_IPMIDD_H */
+

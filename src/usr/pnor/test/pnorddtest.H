@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,9 +41,13 @@
 #include <kernel/console.H>
 #include <sys/time.h>
 #ifdef CONFIG_PNORDD_IS_SFC
-#include "../pnordd.H"
+#include "pnordd.H"
+#elif CONFIG_PNORDD_IS_BMCMBOX
+#include "pnor_mboxdd.H"
+#elif CONFIG_PNORDD_IS_IPMI
+#include "pnor_ipmidd.H"
 #else
-#include "../pnor_mboxdd.H"
+#error "No PNOR DD implementation configured"
 #endif
 #include "../pnorrp.H"
 #include <list>
