@@ -5558,24 +5558,8 @@
 
     <!-- PM_ attributes -->
     <attribute>
-        <id>PM_UNDERVOLTING_FRQ_MINIMUM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PM_UNDERVOLTING_FREQ_MAXIMUM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SPIVID_PORT_ENABLE</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
         <id>PM_APSS_CHIP_SELECT</id>
         <default>0xff</default>
-    </attribute>
-    <attribute>
-        <id>PM_PBAX_NODEID</id>
-        <default>0x0</default>
     </attribute>
     <attribute>
         <id>PBAX_CHIPID</id>
@@ -5583,30 +5567,6 @@
     </attribute>
     <attribute>
         <id>PBAX_BRDCST_ID_VECTOR</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SLEEP_ENTRY</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SLEEP_EXIT</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_SLEEP_TYPE</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_WINKLE_ENTRY</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_WINKLE_EXIT</id>
-        <default>0x0</default>
-    </attribute>
-    <attribute>
-        <id>PM_WINKLE_TYPE</id>
         <default>0x0</default>
     </attribute>
     <!-- End PM_ attributes -->
