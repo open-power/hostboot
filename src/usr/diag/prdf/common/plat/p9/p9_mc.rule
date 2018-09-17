@@ -714,22 +714,22 @@ group gMCPPEFIR filter singlebit, cs_root_cause
     /** MCPPEFIR[0]
      *  PPE general error.
      */
-    (rMCPPEFIR, bit(0)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(0)) ? defaultMaskedError;
 
     /** MCPPEFIR[1]
      *  PPE general error.
      */
-    (rMCPPEFIR, bit(1)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(1)) ? defaultMaskedError;
 
     /** MCPPEFIR[2]
      *  PPE general error.
      */
-    (rMCPPEFIR, bit(2)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(2)) ? defaultMaskedError;
 
     /** MCPPEFIR[3]
      *  PPE general error.
      */
-    (rMCPPEFIR, bit(3)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(3)) ? defaultMaskedError;
 
     /** MCPPEFIR[4]
      *  PPE halted.
@@ -749,17 +749,17 @@ group gMCPPEFIR filter singlebit, cs_root_cause
     /** MCPPEFIR[7]
      *  Arb missed scrub tick.
      */
-    (rMCPPEFIR, bit(7)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(7)) ? defaultMaskedError;
 
     /** MCPPEFIR[8]
      *  Arb ary ue error.
      */
-    (rMCPPEFIR, bit(8)) ? self_th_1;
+    (rMCPPEFIR, bit(8)) ? defaultMaskedError;
 
     /** MCPPEFIR[9]
      *  Arb ary ce error.
      */
-    (rMCPPEFIR, bit(9)) ? threshold_and_mask_self;
+    (rMCPPEFIR, bit(9)) ? defaultMaskedError;
 
     /** MCPPEFIR[10]
      *  spare
