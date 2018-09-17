@@ -71,6 +71,21 @@ const TaskInfo g_exttaskinfolist[]   =   {
 #endif
 
         /**
+         * @brief IPMI resource provider
+         */
+#ifdef CONFIG_BMC_IPMI
+        {
+            "libipmibase.so",                           // taskname
+            NULL,                                       // no ptr to fnct
+            {
+
+                START_TASK,                             // task type
+                EXT_IMAGE,                              // Extended Module
+            }
+        },
+#endif
+
+        /**
          * @brief   targeting task,
          */
         {
@@ -155,15 +170,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
          * @brief IPMI
          */
 #ifdef CONFIG_BMC_IPMI
-        {
-            "libipmibase.so",                           // taskname
-            NULL,                                       // no ptr to fnct
-            {
-
-                START_TASK,                             // task type
-                EXT_IMAGE,                              // Extended Module
-            }
-        },
         {
             "libipmiext.so",                            // taskname
             NULL,                                       // no ptr to fnct

@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -43,11 +44,6 @@
 #include <limits.h>
 
 #include "ipmimsg.H"
-
-namespace TARGETING
-{
-    class Target;
-};
 
 class IpmiRP
 {

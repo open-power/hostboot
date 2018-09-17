@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -55,6 +55,10 @@
 #include <devicefw/userif.H>
 #include <config.h>
 
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmiif.H>
+#endif
+
 
 //******************************************************************************
 // targetService
@@ -86,7 +90,7 @@ static void checkProcessorTargeting(TargetService& i_targetService);
 /**
  *  @brief Entry point for initialization service to initialize the targeting
  *      code
- * 
+ *
  *  @param[in] io_pError
  *      Error log handle; returns NULL on success, !NULL otherwise
  *
@@ -124,6 +128,13 @@ static void initTargeting(errlHndl_t& io_pError)
         // call ErrlManager function - tell him that TARG is ready!
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
 #endif
+
+#ifdef CONFIG_BMC_IPMI
+        /* Break IPMI's dependency on targeting by setting buffer size here */
+        l_pTopLevel->setAttr<TARGETING::ATTR_IPMI_MAX_BUFFER_SIZE>
+            (IPMI::max_buffer());
+#endif
+
     }
 
     TARG_EXIT();
