@@ -597,7 +597,16 @@ void IpmiRP::execute(void)
             // bottom of this loop will start the transmit process.
             // Be sure to push_back to ensure ordering of transmission.
         case IPMI::MSG_STATE_SEND:
-            if (!l_shutdown_pending)
+        {
+            IPMI::Message* l_ipmi_msg =
+                static_cast<IPMI::Message*>(msg->extra_data);
+            const IPMI::command_t l_pnor = IPMI::pnor_hiomap_request();
+            bool l_is_pnor = (l_ipmi_msg->iv_netfun == l_pnor.first &&
+                              l_ipmi_msg->iv_cmd == l_pnor.second);
+            IPMI_TRAC(WARN_MRK "Got message (0x%x:0x%x): l_is_pnor: %d",
+                      l_ipmi_msg->iv_netfun, l_ipmi_msg->iv_cmd, l_is_pnor);
+            /* PNOR requests always allowed, else we hang shutdown */
+            if (!l_shutdown_pending || l_is_pnor)
             {
                 iv_sendq.push_back(msg);
             }
@@ -605,15 +614,14 @@ void IpmiRP::execute(void)
             else
             {
                 IPMI_TRAC(WARN_MRK "IPMI shutdown pending. Message dropped");
-                IPMI::Message* ipmi_msg =
-                    static_cast<IPMI::Message*>(msg->extra_data);
-                response(ipmi_msg, IPMI::CC_BADSTATE);
+                response(l_ipmi_msg, IPMI::CC_BADSTATE);
                 msg_free(msg);
             }
             break;
 
             // State changes from the IPMI hardware. These are async
             // messages so we get rid of them here.
+        }
         case IPMI::MSG_STATE_IDLE:
             msg_free(msg);
             // No-op - we do it at the bottom of the loop.

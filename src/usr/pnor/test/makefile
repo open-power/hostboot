@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2019
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -24,6 +24,8 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
+
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
 
 MODULE = testpnor
 

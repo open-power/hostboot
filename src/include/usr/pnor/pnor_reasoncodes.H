@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -106,6 +106,12 @@ namespace PNOR
         MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
         MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
         MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
+
+        // ast_mboxdd.C
+        MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
+
+        // pnor_ipmidd.C
+        MOD_IPMIPNORDD_SEND_MESSAGE     = 0xF0, /**< PnorDD::sendMessage */
     };
 
     enum PNORReasonCode
@@ -163,11 +169,13 @@ namespace PNOR
         RC_INVALID_WORKING_TOC       = PNOR_COMP_ID | 0x28,
         RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
-        RC_GETSECTIONINFO_FAILED     = PNOR_COMP_ID | 0x2B,
-        RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2C,
-        RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x2D,
-        RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x2E,
-        RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x2F,
+        //termination_rc
+        RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2B,
+        RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x2C,
+        RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x2D,
+        RC_HIOMAP_BAD_SEQUENCE       = PNOR_COMP_ID | 0x2E,
+        RC_HIOMAP_ERROR_STATUS       = PNOR_COMP_ID | 0x2F,
+        RC_READ_ONLY_PERM_FAIL       = PNOR_COMP_ID | 0x30,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

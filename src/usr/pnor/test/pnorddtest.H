@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,7 +40,15 @@
 #include <devicefw/userif.H>
 #include <kernel/console.H>
 #include <sys/time.h>
-#include "../pnordd.H"
+
+#ifdef CONFIG_PNORDD_IS_SFC
+#include "pnordd.H"
+#elif CONFIG_PNORDD_IS_IPMI
+#include "pnor_ipmidd.H"
+#else
+#error "No PNOR DD implementation configured"
+#endif
+
 #include "../pnorrp.H"
 #include <list>
 #include <targeting/common/attributes.H>

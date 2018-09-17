@@ -1,3 +1,15 @@
+config PNORDD_IS_SFC
+    default y
+    depends on !PNORDD_IS_IPMI
+    help
+        The Serial Flash Controller is based on the SFC backends
+
+config PNORDD_IS_IPMI
+    default n
+    depends on !PNORDD_IS_SFC
+    help
+        The Serial Flash Controller is managed via IPMI
+
 config SFC_IS_IBM_DPSS
     default y
     depends on !SFC_IS_AST2400 && !SFC_IS_FAKE
