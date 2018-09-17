@@ -830,9 +830,9 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
         }
 
         UTIL_FT("%d: memcpy(%p, %p, %ld)", l_chip, coreThreadRestoreBEFORE,
-            l_virt_addr->coreThreadRestore, coreThreadRestoreSize);
+            l_virt_addr->iv_coreThreadRestore, coreThreadRestoreSize);
         sprintf( l_tmpstr, "%d: memcpy(%p, %p, %ld)\n", l_chip,
-            coreThreadRestoreBEFORE, l_virt_addr->coreThreadRestore,
+            coreThreadRestoreBEFORE, l_virt_addr->iv_coreThreadRestore,
             coreThreadRestoreSize );
         strcat( o_output, l_tmpstr );
         if (stopAt == 1)
@@ -840,7 +840,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
             break;
         }
         memcpy( coreThreadRestoreBEFORE,
-                l_virt_addr->coreThreadRestore,
+                l_virt_addr->iv_coreThreadRestore,
                 coreThreadRestoreSize);
 
         // RUN LOAD_PM_COMPLEX
@@ -876,7 +876,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
 
         // NOW COMPARE THE TWO SNAPSHOTS
         uint8_t lastMatch = memcmp(coreThreadRestoreBEFORE,
-                                   l_virt_addr->coreThreadRestore,
+                                   l_virt_addr->iv_coreThreadRestore,
                                    coreThreadRestoreSize);
         // Both sections should be equal as
         // hostboot should NOT touch this section of memory
@@ -892,25 +892,25 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
                 for (int y = 0; y < MAX_THREADS_PER_CORE; y++)
                 {
                     // Check for non-zero threadArea
-                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->threadArea),
-                                &zeroedSprArea.threadArea,
-                                sizeof(zeroedSprArea.threadArea)))
+                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->iv_threadArea),
+                                &zeroedSprArea.iv_threadArea,
+                                sizeof(zeroedSprArea.iv_threadArea)))
                     {
                         UTIL_FT("Found non-zero value in row %d, column %d threadArea", x, y);
                         UTIL_FBIN("Thread Area",
-                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->threadArea),
-                            sizeof(zeroedSprArea.threadArea));
+                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->iv_threadArea),
+                            sizeof(zeroedSprArea.iv_threadArea));
                         foundNonZero = true;
                     }
                     // Check for non-zero coreArea
-                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->coreArea),
-                                &zeroedSprArea.coreArea,
-                                sizeof(zeroedSprArea.coreArea)))
+                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->iv_coreArea),
+                                &zeroedSprArea.iv_coreArea,
+                                sizeof(zeroedSprArea.iv_coreArea)))
                     {
                         UTIL_FT("Found non-zero value in row %d, column %d coreArea", x, y);
                         UTIL_FBIN("Core Area",
-                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->coreArea),
-                            sizeof(zeroedSprArea.coreArea));
+                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->iv_coreArea),
+                            sizeof(zeroedSprArea.iv_coreArea));
                         foundNonZero = true;
                     }
                 }
@@ -935,7 +935,7 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
             strcat( o_output, l_tmpstr );
 
             UTIL_FBIN("BEFORE coreThreadRestore", &coreThreadRestoreBEFORE, coreThreadRestoreSize);
-            UTIL_FBIN("AFTER  coreThreadRestore", l_virt_addr->coreThreadRestore, coreThreadRestoreSize);
+            UTIL_FBIN("AFTER  coreThreadRestore", l_virt_addr->iv_coreThreadRestore, coreThreadRestoreSize);
         }
     }
     delete coreThreadRestoreBEFORE;
