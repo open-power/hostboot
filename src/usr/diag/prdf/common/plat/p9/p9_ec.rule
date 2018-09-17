@@ -182,6 +182,7 @@ chip p9_ec
 ################################################################################
 # EC Chiplet FIR
 ################################################################################
+
 rule rEC_CHIPLET_FIR
 {
   CHECK_STOP:
@@ -206,6 +207,7 @@ group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
      *  Attention from COREFIR
      */
     (rEC_CHIPLET_FIR, bit(4)) ? analyzeCOREFIR;
+
 };
 
 ################################################################################
@@ -221,9 +223,10 @@ rule rEC_CHIPLET_UCS_FIR
 group gEC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
 {
     /** EC_CHIPLET_UCS_FIR[1]
-     *  Unit Checkstop from COREFIR
+     *  Attention from COREFIR
      */
     (rEC_CHIPLET_UCS_FIR, bit(1)) ? analyzeCOREFIR;
+
 };
 
 ################################################################################

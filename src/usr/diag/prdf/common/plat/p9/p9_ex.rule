@@ -358,7 +358,7 @@ group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
     (rL2FIR, bit(21)) ? defaultMaskedError;
 
     /** L2FIR[22]
-     *  CopyPaste_Tgt_Nodal_req_cresp_dinc_Err
+     *  TGT_NODAL_REQ_DINC_ERR
      */
     (rL2FIR, bit(22)) ? self_th_1;
 

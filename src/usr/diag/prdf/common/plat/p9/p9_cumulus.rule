@@ -2221,29 +2221,29 @@ group gTP_LFIR filter singlebit, cs_root_cause
     (rTP_LFIR, bit(35)) ? defaultMaskedError;
 
     /** TP_LFIR[36]
-     *  Osc switch to backup or lost detected
+     *  system ref osc switch to backup
      */
     (rTP_LFIR, bit(36)) ? defaultMaskedError;
 
     /** TP_LFIR[37]
-     *  Osc switch to backup or lost detected
+     *  PCI osc switch to backup
      */
     (rTP_LFIR, bit(37)) ? defaultMaskedError;
 
     /** TP_LFIR[38]
      *  PIB MEM: Summarized err - PIB access ops
      */
-    (rTP_LFIR, bit(38)) ? self_th_1;
+    (rTP_LFIR, bit(38)) ? defaultMaskedError;
 
     /** TP_LFIR[39]
      *  PIB MEM: Summarized err-fast access ops
      */
-    (rTP_LFIR, bit(39)) ? self_th_1;
+    (rTP_LFIR, bit(39)) ? defaultMaskedError;
 
     /** TP_LFIR[40]
      *  OTP Logic: UE or CE counter overflow
      */
-    (rTP_LFIR, bit(40)) ? self_th_1;
+    (rTP_LFIR, bit(40)) ? defaultMaskedError;
 
     /** TP_LFIR[41]
      *  malfunction alert or Local Checkstop
@@ -3761,7 +3761,7 @@ group gVASFIR filter singlebit, cs_root_cause
     /** VASFIR[33]
      *  MMIO Read to Unimplemented Reg (OS)
      */
-    (rVASFIR, bit(33)) ? self_th_1;
+    (rVASFIR, bit(33)) ? defaultMaskedError;
 
     /** VASFIR[34]
      *  MMIO Write to Unimplemented Reg (HYP)
@@ -3771,7 +3771,7 @@ group gVASFIR filter singlebit, cs_root_cause
     /** VASFIR[35]
      *  MMIO Write to Unimplemented Reg (OS)
      */
-    (rVASFIR, bit(35)) ? self_th_1;
+    (rVASFIR, bit(35)) ? defaultMaskedError;
 
     /** VASFIR[36]
      *  non-8B MMIO Detected (HYP)
@@ -3781,7 +3781,7 @@ group gVASFIR filter singlebit, cs_root_cause
     /** VASFIR[37]
      *  non-8B MMIO Detected (OS)
      */
-    (rVASFIR, bit(37)) ? self_th_1;
+    (rVASFIR, bit(37)) ? defaultMaskedError;
 
     /** VASFIR[38]
      *  Write Monitor Op to non-open Window

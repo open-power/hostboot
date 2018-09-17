@@ -1222,17 +1222,12 @@ group gMBSFIR filter singlebit, cs_root_cause( 0, 1, 2, 4, 6, 8, 10, 13, 16, 18,
     /** MBSFIR[3]
      *  EXTERNAL_TIMEOUT
      */
-    (rMBSFIR, bit(3)) ? level2_th_1;
+    (rMBSFIR, bit(3)) ? defaultMaskedError;
 
     /** MBSFIR[4]
      *  INTERNAL_TIMEOUT
      */
     (rMBSFIR, bit(4)) ? mbs_internal_timeout;
-
-    /** MBSFIR[3,4]
-     *  EXTERNAL_TIMEOUT
-     */
-    (rMBSFIR, bit(3,4)) ? mbs_int_ext_timeout;
 
     /** MBSFIR[5]
      *  INT_BUFFER_CE
