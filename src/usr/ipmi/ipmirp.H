@@ -61,6 +61,11 @@ class IpmiRP
     static void daemonProcess(errlHndl_t& o_errl);
 
     /**
+     * IpmiDD data source
+     */
+    static void* attach(void *unused);
+
+    /**
      * Thread start routine for the resource provider
      * @param[in] void*, unused
      */
@@ -140,6 +145,7 @@ class IpmiRP
     void handlePowerMessage(IPMI::oemSEL* i_event);
 
   private:
+    void attach(void);
 
     /**
      * Entry point for the resource provider
