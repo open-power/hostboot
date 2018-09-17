@@ -74,6 +74,10 @@
 #include <sys/mm.h>
 #include "../runtime/hdatstructs.H"
 
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmiif.H>
+#endif
+
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
 #endif
@@ -303,6 +307,12 @@ static void initTargeting(errlHndl_t& io_pError)
 
         // set global that TARG is ready
         Util::setIsTargetingLoaded();
+
+#ifdef CONFIG_BMC_IPMI
+        /* Break IPMI's dependency on targeting by setting buffer size here */
+        l_pTopLevel->setAttr<TARGETING::ATTR_IPMI_MAX_BUFFER_SIZE>
+            (IPMI::max_buffer());
+#endif
     }
 
     TARG_EXIT();
