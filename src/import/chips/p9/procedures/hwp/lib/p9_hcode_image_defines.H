@@ -137,7 +137,10 @@ HCD_HDR_ATTN  ( attnOpcodes, 2);
 HCD_HDR_UINT64( magic_number, CPMR_MAGIC_NUMBER);
 HCD_HDR_UINT32( cpmrbuildDate, 0);
 HCD_HDR_UINT32( cpmrVersion, 0);
-HCD_HDR_UINT8_VEC (cpmrReserveFlags, 7, 0);
+HCD_HDR_UINT8_VEC (cpmrReserveFlags, 4, 0);
+HCD_HDR_UINT8 ( selfRestoreVer, 0);
+HCD_HDR_UINT8 ( stopApiVer, 0);
+HCD_HDR_UINT8 ( urmorFix, 0);
 HCD_HDR_UINT8 ( fusedModeStatus, 0);
 HCD_HDR_UINT32( cmeImgOffset, 0);
 HCD_HDR_UINT32( cmeImgLength, 0);
@@ -596,11 +599,11 @@ typedef struct
 
 typedef union CPMRSelfRestoreLayout
 {
-    uint8_t region[SELF_RESTORE_CODE_SIZE];
+    uint8_t region[SMF_SELF_RESTORE_CODE_SIZE];
     struct
     {
         cpmrHeader_t CPMRHeader;
-        uint8_t      exe[SELF_RESTORE_CODE_SIZE - sizeof(cpmrHeader_t)];
+        uint8_t      exe[SMF_SELF_RESTORE_CODE_SIZE - sizeof(cpmrHeader_t)];
     } elements;
 } CPMRSelfRestoreLayout_t;
 
@@ -610,8 +613,8 @@ typedef union CPMRSelfRestoreLayout
 typedef struct
 {
     CPMRSelfRestoreLayout_t CPMR_SR;
-    uint8_t                 coreSelfRestore[SELF_RESTORE_CORE_REGS_SIZE];
-    uint8_t                 reserve[CORE_SCOM_RESTORE_CPMR_OFFSET - SELF_RESTORE_SIZE_TOTAL];
+    uint8_t                 coreSelfRestore[SMF_SELF_RESTORE_CORE_REGS_SIZE];
+    uint8_t                 reserve[CORE_SCOM_RESTORE_CPMR_OFFSET - SMF_SELF_RESTORE_SIZE_TOTAL];
     uint8_t                 coreScom[CORE_SCOM_RESTORE_SIZE_TOTAL];
 } SelfRestoreLayout_t;
 

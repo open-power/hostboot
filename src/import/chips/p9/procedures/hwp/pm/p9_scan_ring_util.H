@@ -321,6 +321,11 @@ class P9FuncModel
         uint8_t getChipName() const;
 
         /**
+         * returns true if URMOR has a hw bug else false.
+         */
+        bool hasUrmorBug() const;
+
+        /**
          * @brief   constructor
          */
         P9FuncModel(  );
@@ -332,8 +337,9 @@ class P9FuncModel
         uint16_t iv_funcExes;
         uint8_t  iv_funcQuads;
         uint8_t  iv_ddLevel;
-        uint8_t iv_chipName;
-        uint8_t iv_reserve[3];
+        uint8_t  iv_chipName;
+        uint8_t  iv_urmorBug;
+        uint8_t  iv_reserve[2];
 };
 
 }// namesapce p9_hcodeImageBuild ends
