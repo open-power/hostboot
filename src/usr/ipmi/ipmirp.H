@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <ipmi/ipmiif.H>
-#include "ipmibt.H"
 #include <errl/errlentry.H>
 #include <sys/msg.h>
 #include <sys/sync.h>
@@ -43,6 +42,8 @@
 #include <util/locked/list.H>
 #include <intr/interrupt.H>
 #include <limits.h>
+
+#include "ipmimsg.H"
 
 namespace TARGETING
 {
