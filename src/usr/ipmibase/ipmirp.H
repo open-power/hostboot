@@ -45,11 +45,6 @@
 
 #include "ipmimsg.H"
 
-namespace TARGETING
-{
-    class Target;
-};
-
 class IpmiRP
 {
   public:
