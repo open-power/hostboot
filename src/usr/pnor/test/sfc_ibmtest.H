@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -37,7 +37,8 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <sys/time.h>
-#include "../pnordd.H"
+#include "../pnor_sfcdd.H"
+using PnorDD = PnorSfcDD;
 #include <list>
 #include <targeting/common/attributes.H>
 #include "../sfc_ibm.H"
