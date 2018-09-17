@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -28,12 +30,13 @@
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 
-extern "C" void __assert(AssertBehavior i_assertb, int i_line)
+extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
+                         int i_line)
 {
     if (i_assertb != ASSERT_TRACE_DONE)
     {
-        printk("Assertion failed @%p on line %d.\n",
-                linkRegister(), i_line);
+        printk("Assertion failed @%p on line %s:%d.\n",
+                linkRegister(), i_file, i_line);
     }
 
     g_hostInterfaces->assert();
