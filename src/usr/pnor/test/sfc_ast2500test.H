@@ -37,7 +37,8 @@
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
 #include <sys/time.h>
-#include "../pnordd.H"
+#include "../pnor_sfcdd.H"
+using PnorDD = PnorSfcDD;
 #include <list>
 #include <targeting/common/attributes.H>
 #include <lpc/lpcif.H>

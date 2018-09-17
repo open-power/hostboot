@@ -41,7 +41,8 @@
 #include <kernel/console.H>
 #include <sys/time.h>
 #ifdef CONFIG_PNORDD_IS_SFC
-#include "pnordd.H"
+#include "pnor_sfcdd.H"
+using PnorDD = PnorSfcDD;
 #elif CONFIG_PNORDD_IS_BMCMBOX
 #include "pnor_mboxdd.H"
 #elif CONFIG_PNORDD_IS_IPMI
