@@ -291,6 +291,9 @@ namespace IPMI
     inline const command_t pnor_response(void)
     { return std::make_pair(NETFUN_IBM, 0x08); }
 
+    inline const command_t hiomap_event(void)
+    { return std::make_pair(NETFUN_IBM, 0x0f); }
+
     // $TODO RTC:123256 - need to add code to get dcmi capabilities
     // This is a dcmi message used to request the
     // user defined power limit from the BMC.
@@ -306,6 +309,10 @@ namespace IPMI
     // will drop this message so we can test timeouts.
     inline const command_t test_drop(void)
     { return std::make_pair(NETFUN_APP, 0x3e); }
+
+    // IPMI PNOR
+    inline const command_t pnor_hiomap_request(void)
+    { return std::make_pair(NETFUN_IBM, 0x5a); }
 
     /**
      * Send message asynchronously

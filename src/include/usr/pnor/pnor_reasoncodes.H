@@ -112,6 +112,9 @@ namespace PNOR
 
         // ast_mboxdd.C
         MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
+
+        // pnor_ipmidd.C
+        MOD_IPMIPNORDD_SEND_MESSAGE     = 0xF0, /**< PnorDD::sendMessage */
     };
 
     enum PNORReasonCode
@@ -177,8 +180,8 @@ namespace PNOR
         RC_BASE_EXT_MISMATCH         = PNOR_COMP_ID | 0x2F,
         RC_KEY_TRAN_FLAG_UNSET       = PNOR_COMP_ID | 0x30,
         RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x31,
-        RC_MBOX_BAD_SEQUENCE         = PNOR_COMP_ID | 0x32,
-        RC_MBOX_ERROR_STATUS         = PNOR_COMP_ID | 0x33,
+        RC_HIOMAP_BAD_SEQUENCE       = PNOR_COMP_ID | 0x32,
+        RC_HIOMAP_ERROR_STATUS       = PNOR_COMP_ID | 0x33,
         RC_UNSIGNED_PNOR_SECTION     = PNOR_COMP_ID | 0x34,
         RC_NOT_A_LOADED_SECTION      = PNOR_COMP_ID | 0x35,
         RC_NOT_A_SUPPORTED_SECTION   = PNOR_COMP_ID | 0x36,
