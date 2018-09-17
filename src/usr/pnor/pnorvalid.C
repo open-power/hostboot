@@ -52,6 +52,7 @@
 using PnorDD = PnorSfcDD;
 #elif CONFIG_PNORDD_IS_BMCMBOX
 #include "pnor_mboxdd.H"
+using PnorDD = PnorMboxDD;
 #elif CONFIG_PNORDD_IS_IPMI
 #include "pnor_ipmidd.H"
 using PnorDD = PnorIpmiDD;

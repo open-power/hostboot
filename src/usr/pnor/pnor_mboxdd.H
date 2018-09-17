@@ -46,7 +46,7 @@ class astMbox;
  *  @brief  PNOR Device Driver Class
  *     Provides access to the PNOR flash via the LPC MBOX hardware
  */
-class PnorDD
+class PnorMboxDD
 {
 
     public:
@@ -106,12 +106,12 @@ class PnorDD
          * @parm i_target     Processor Target connected to PNOR
          *       NOTE: i_target can only be used after targeting is loaded
          */
-        PnorDD( TARGETING::Target* i_target = NULL );
+        PnorMboxDD( TARGETING::Target* i_target = NULL );
 
         /**
          * @brief Destructor
          */
-        ~PnorDD();
+        ~PnorMboxDD();
 
     protected:
 
@@ -226,7 +226,7 @@ class PnorDD
         /**
          * @brief Global Mutex to prevent concurrent PNOR accesses to Master
          *        Proc. This needs to be static so we can mutex across multiple
-         *        instances of PnorDD
+         *        instances of PnorMboxDD
          */
         static mutex_t cv_mutex;
 
