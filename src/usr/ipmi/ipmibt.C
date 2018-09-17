@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -358,4 +358,42 @@ namespace IPMI
         delete this;
     }
 
+    ///
+    /// @brief static factory
+    ///
+    /// Implement the factory member in terms of the BT interface. This is done
+    /// in each of the back-end implementations, only one of which should be
+    /// configured in at build time.
+    ///
+    /// @param[in] i_cmd, the network function & command
+    /// @param[in] i_len, the length of the data
+    /// @param[in] i_data, the data (allocated space)
+    /// @param[in] i_type, synchronous or async
+    ///
+    /// @return a pointer to a new'd Message object
+    ///
+    Message* Message::factory(const command_t& i_cmd, const uint8_t i_len,
+                              uint8_t* i_data, const message_type i_type)
+    {
+        Message* new_message = NULL;
+
+        switch(i_type)
+        {
+        case TYPE_SYNC:
+            new_message = new BTSyncMessage(i_cmd, i_len, i_data);
+            break;
+        case TYPE_ASYNC:
+            new_message = new BTAsyncMessage(i_cmd, i_len, i_data);
+            break;
+        case TYPE_EVENT:
+            new_message = new BTAsyncReadEventMessage(i_cmd, i_len, i_data);
+            break;
+        default:
+            // We have ourselves a bug
+            assert(false, "ipmi message factory: unk type %d\n", i_type);
+            break;
+        }
+
+        return new_message;
+    }
 };
