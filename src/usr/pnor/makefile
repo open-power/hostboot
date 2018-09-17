@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2011,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -33,6 +33,7 @@ OBJS += $(if $(CONFIG_SECUREBOOT),spnorrp.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_SFC),pnordd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),ast_mboxdd.o)
 OBJS += $(if $(CONFIG_PNORDD_IS_BMCMBOX),pnor_mboxdd.o)
+OBJS += $(if $(CONFIG_PNORDD_IS_IPMI),pnor_ipmidd.o)
 OBJS += pnor_common.o
 OBJS += pnorvalid.o
 OBJS += ecc.o
