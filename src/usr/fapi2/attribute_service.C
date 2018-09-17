@@ -2153,10 +2153,21 @@ ReturnCode platGetControlCapableData(
     return rc;
 }
 
+template<typename T1>
+struct VPD_CACHING_PAIR
+{
+    TARGETING::ATTR_HUID_type huid;
+    T1 value;
+
+    inline bool operator==(TARGETING::ATTR_HUID_type huid_rhs) {
+        return huid_rhs == huid;
+    }
+} ;
+
 //-----------------------------------------------------------------------------
 ReturnCode platGetDQAttrISDIMM(
                            const Target<TARGET_TYPE_ALL>& i_fapiTarget,
-                   ATTR_CEN_VPD_ISDIMMTOC4DQ_Type &o_vpdIsDimmTOC4DQVal
+                           ATTR_CEN_VPD_ISDIMMTOC4DQ_Type &o_vpdIsDimmTOC4DQVal
                               )
 {
     ReturnCode rc;
@@ -2167,6 +2178,8 @@ ReturnCode platGetDQAttrISDIMM(
     // the generic TARGET_TYPE_ALL -- so convert back to the correct type
     // manually
     TARGETING::Target * l_pTarget = NULL;
+    static std::vector<VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQ_Type>> l_cachedC4DQValues;
+    static mutex_t l_C4DQmutex = MUTEX_INITIALIZER;
     errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
 
     if (l_errl)
@@ -2176,12 +2189,31 @@ ReturnCode platGetDQAttrISDIMM(
     }
     else
     {
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
-        rc = getDQAttrISDIMM(l_fapiTarget, o_vpdIsDimmTOC4DQVal);
+        auto l_huid = TARGETING::get_huid(l_pTarget);
+        auto l_iterator = std::find ( l_cachedC4DQValues.begin(),
+                                      l_cachedC4DQValues.end(),
+                                      l_huid);
+
+        if(l_iterator == l_cachedC4DQValues.end())
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+            VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQ_Type> l_kvPair = VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQ_Type>();
+            l_kvPair.huid = l_huid;
+            rc = getDQAttrISDIMM(l_fapiTarget, l_kvPair.value);
+            memcpy(o_vpdIsDimmTOC4DQVal, l_kvPair.value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQ_Type));
+            mutex_lock(&l_C4DQmutex);
+            l_cachedC4DQValues.push_back(l_kvPair);
+            mutex_unlock(&l_C4DQmutex);
+        }
+        else
+        {
+            memcpy(o_vpdIsDimmTOC4DQVal, (*l_iterator).value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQ_Type));
+        }
     }
 
     return rc;
 }
+
 
 //-----------------------------------------------------------------------------
 ReturnCode platGetDQSAttrISDIMM(
@@ -2197,6 +2229,8 @@ ReturnCode platGetDQSAttrISDIMM(
     // the generic TARGET_TYPE_ALL -- so convert back to the correct type
     // manually
     TARGETING::Target * l_pTarget = NULL;
+    static std::vector<VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQS_Type>> l_cachedC4DQSValues;
+    static mutex_t l_C4DQSmutex = MUTEX_INITIALIZER;
     errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
 
     if (l_errl)
@@ -2206,8 +2240,27 @@ ReturnCode platGetDQSAttrISDIMM(
     }
     else
     {
-        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
-        rc = getDQSAttrISDIMM(l_fapiTarget,o_vpdIsDimmTOC4DQSVal);
+        auto l_huid = TARGETING::get_huid(l_pTarget);
+        auto l_iterator = std::find ( l_cachedC4DQSValues.begin(),
+                                      l_cachedC4DQSValues.end(),
+                                      l_huid);
+
+        if(l_iterator == l_cachedC4DQSValues.end())
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+            VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQS_Type>l_kvPair =
+                                  VPD_CACHING_PAIR<ATTR_CEN_VPD_ISDIMMTOC4DQS_Type>();
+            l_kvPair.huid = l_huid;
+            rc = getDQSAttrISDIMM(l_fapiTarget, l_kvPair.value);
+            memcpy(o_vpdIsDimmTOC4DQSVal, l_kvPair.value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQS_Type));
+            mutex_lock(&l_C4DQSmutex);
+            l_cachedC4DQSValues.push_back(l_kvPair);
+            mutex_unlock(&l_C4DQSmutex);
+        }
+        else
+        {
+            memcpy(o_vpdIsDimmTOC4DQSVal, (*l_iterator).value, sizeof(ATTR_CEN_VPD_ISDIMMTOC4DQS_Type));
+        }
     }
 
     return rc;
