@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -324,6 +324,12 @@ void IpmiRP::registerForEvent(const IPMI::command_t& i_cmd,
     iv_eventq[i_cmd.second] = i_msgq;
     mutex_unlock(&iv_mutex);
     IPMI_TRAC("event registration for %x:%x", i_cmd.first, i_cmd.second);
+}
+
+void IPMI::register_for_event(const IPMI::command_t& i_cmd,
+                              const msg_q_t& i_msgq)
+{
+    Singleton<IpmiRP>::instance().registerForEvent(i_cmd, i_msgq);
 }
 
 /**
