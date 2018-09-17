@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,8 @@
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 
-extern "C" void __assert(AssertBehavior i_assertb, int i_line)
+extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
+                         int i_line)
 {
     if ((i_assertb == ASSERT_CRITICAL) && (KernelMisc::in_kernel_mode()))
     {
@@ -61,23 +62,23 @@ extern "C" void __assert(AssertBehavior i_assertb, int i_line)
             }
             else
             {
-                printk("Assertion failed @%p on line %d.\n",
-                       linkRegister(), i_line);
+                printk("Assertion failed @%p at %s:%d.\n",
+                       linkRegister(), i_file, i_line);
             }
             task_crash();
             break;
 
         case ASSERT_CRITICAL:  // Critical task, trace not available.
-            printk("Assertion failed @%p on line %d.(Crit_Assert)\n",
-                   linkRegister(), i_line);
+            printk("Assertion failed @%p on line %s:%d. (Crit_Assert)\n",
+                   linkRegister(), i_file, i_line);
 
             // Need to call the external CritAssert system call
             cpu_crit_assert(reinterpret_cast<uint64_t>(linkRegister()));
             break;
 
         case ASSERT_KERNEL:  // Kernel assert called.
-            printk("Assertion failed @%p on line %d. (kassert)\n",
-                   linkRegister(), i_line);
+            printk("Assertion failed @%p on line %s:%d. (kassert)\n",
+                   linkRegister(), i_file, i_line);
 
             /*@
              * @errortype
