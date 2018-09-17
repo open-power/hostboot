@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,7 @@ enum AssertBehavior
  *
  *  @param[in] i_assertb - Internal enumeration used by macros to communicate
  *                         desired behavior.
+ *  @param[in] i_file - The file in which the assert exists
  *  @param[in] i_line - Line number at which the assert macro was called.
  *
  *  Current Behaviors:
@@ -93,7 +94,7 @@ enum AssertBehavior
  *               user-space dispatching.
  */
 NO_RETURN
-void __assert(AssertBehavior i_assertb, int i_line);
+void __assert(AssertBehavior i_assertb, const char* i_file, int i_line);
 
 #ifdef __HOSTBOOT_MODULE // Only allow traced assert in module code.
 
@@ -132,7 +133,7 @@ void __assert(AssertBehavior i_assertb, int i_line);
         __ASSERT_DO_TRACE(expr, __VA_ARGS__); \
         __assert((__ASSERT_HAS_TRACE(__VA_ARGS__) ? \
                  ASSERT_TRACE_DONE : ASSERT_TRACE_NOTDONE),\
-                 __LINE__);\
+                 __FILE__, __LINE__);\
     }\
 }
 
@@ -147,7 +148,7 @@ void __assert(AssertBehavior i_assertb, int i_line);
 {\
     if (unlikely(!(expr)))\
     {\
-        __assert(ASSERT_KERNEL, __LINE__);\
+        __assert(ASSERT_KERNEL, __FILE__, __LINE__);\
     }\
 }
 
@@ -163,7 +164,7 @@ void __assert(AssertBehavior i_assertb, int i_line);
 {\
     if (unlikely(!(expr)))\
     {\
-        __assert(ASSERT_CRITICAL, __LINE__);\
+        __assert(ASSERT_CRITICAL, __FILE__, __LINE__);\
     }\
 }
 
