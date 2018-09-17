@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,15 @@ class IpmiDD
     void handleShutdown(void);
 
     /**
+     * @brief Get the queue on which IpmiDD publishes hardware events
+     *
+     * The events on the queue are consumed by IpmiRP. This "publish" approach
+     * avoids circular dependencies between the two components.
+     */
+    msg_q_t eventQueue(void)
+        { return iv_eventQ; }
+
+    /**
      * @brief Constructor
      *
      * @parm void
@@ -155,6 +164,16 @@ class IpmiDD
      * @brief True if we told the RP to try a write again
      */
     bool iv_eagains;
+
+    /**
+     * @brief Publishes changes to device state
+     *
+     * To clarify, IpmiDD does not consume any messages from this queue. The
+     * queue exists purely for the purpose of another component to consume IPMI
+     * hardware events (currently, IpmiRP). IpmiDD performs an asynchronous
+     * msg_send() to deliver the events to the listening task.
+     */
+    msg_q_t iv_eventQ;
 
     // Disallow copying this class.
     IpmiDD& operator=(const IpmiDD&);
