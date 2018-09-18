@@ -1599,6 +1599,41 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
 
 
 //******************************************************************************
+void DeconfigGard::_deconfigAffinityParent( TARGETING::Target & i_child,
+                                        const uint32_t i_errlEid,
+                                        const DeconfigureFlags i_deconfigRule )
+{
+    Target * l_parent = NULL;
+
+    if (!i_child.getAttr<ATTR_PARENT_DECONFIG_DISABLED>())
+    {
+        // General predicate to determine if target is functional
+        PredicateIsFunctional isFunctional;
+
+        l_parent = getImmediateParentByAffinity(&i_child);
+        if ((l_parent != NULL) && isFunctional(l_parent))
+        {
+            // Now check if parent has any functional affinity children
+            if ( !anyChildFunctional(*l_parent,
+                                     TargetService::CHILD_BY_AFFINITY) )
+            {
+                bool isDeconfigured = false;
+                _deconfigureTarget(*l_parent, i_errlEid,
+                                   &isDeconfigured, i_deconfigRule);
+                if (isDeconfigured)
+                {
+                    // Just need to rollup the deconfig
+                    // (all children already marked as non-functional)
+                    // Roll up deconfigure to parent's parent,
+                    // call this to take care of special deconfig cases
+                    _deconfigParentAssoc(*l_parent, i_errlEid, i_deconfigRule);
+                }
+            }
+        }
+    }
+}
+
+//******************************************************************************
 void DeconfigGard::_deconfigureByAssoc(
         Target & i_target,
         const uint32_t i_errlEid,
@@ -1653,16 +1688,16 @@ void DeconfigGard::_deconfigureByAssoc(
         (l_targetType == TYPE_EX)          ||
         (l_targetType == TYPE_CORE))
     {
-        // if the rule is NOT_AT_RUNTIME and we got here, then we are
-        // not at runtime.
-        // only do these 'by association' checks if we are NOT at runtime
-        // reason is, we're not really deconfigureing anything, we're just
-        // marking them as non-functional. we only want to do that for the
-        // desired target and it's CHILD
-        // Except for target EQ, EX, CORE.  Deconfigure these regardless of the
-        // runtime status
+        // Allow any affinity deconfigure if NOT at runtime
+        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
+        //      not at runtime.
+        //
+        // Allow all speculative deconfigures, irregardless of runtime status
+        //
+        // Allow affinity deconfig of EQ, EX, and CORE targets,
+        // regardless of the runtime status
 
-
+        // Work deconfigure down to its children
         // find all CHILD_BY_AFFINITY targets and deconfigure them
         targetService().getAssociated(pChildList, &i_target,
             TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
@@ -1681,11 +1716,51 @@ void DeconfigGard::_deconfigureByAssoc(
             _deconfigureByAssoc(*pChild, i_errlEid, i_deconfigRule);
         } // for CHILD_BY_AFFINITY
 
+        // Work the deconfig up the parent side (if necessary)
+        _deconfigParentAssoc(i_target, i_errlEid, i_deconfigRule);
+
+    } // !i_Runtime-ish
+    else
+    {
+        HWAS_INF("_deconfigureByAssoc() - system is at runtime"
+                " skipping all association checks beyond"
+                " the CHILD");
+    }
+
+    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", get_huid(&i_target));
+} // _deconfigByAssoc
+
+//******************************************************************************
+void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
+                                        const uint32_t i_errlEid,
+                                        const DeconfigureFlags i_deconfigRule)
+{
+    HWAS_INF("_deconfigParentAssoc for %.8X (i_deconfigRule %d)",
+            get_huid(&i_target), i_deconfigRule);
+
+    // Retrieve the target type from the given target
+    TYPE l_targetType = i_target.getAttr<ATTR_TYPE>();
+
+    if ((i_deconfigRule == NOT_AT_RUNTIME) ||
+        (i_deconfigRule == SPEC_DECONFIG)  ||
+        (l_targetType == TYPE_EQ)          ||
+        (l_targetType == TYPE_EX)          ||
+        (l_targetType == TYPE_CORE))
+    {
+        // Allow any affinity deconfigure if NOT at runtime
+        //  --> if the rule is NOT_AT_RUNTIME and we got here, then we are
+        //      not at runtime.
+        //
+        // Allow all speculative deconfigures, irregardless of runtime status
+        //
+        // Allow affinity deconfig of EQ, EX, and CORE targets,
+        // regardless of the runtime status
+
         // Handles bus endpoint (TYPE_XBUS, TYPE_ABUS, TYPE_PSI) and
         // memory (TYPE_MEMBUF, TYPE_MBA, TYPE_DIMM)
         // chip  (TYPE_EQ, TYPE_EX, TYPE_CORE)
+        // obus specific (TYPE_OBUS, TYPE_NPU, TYPE_SMPGROUP)
         // deconfigureByAssociation rules
-
         switch (l_targetType)
         {
             case TYPE_CORE:
@@ -1704,8 +1779,11 @@ void DeconfigGard::_deconfigureByAssoc(
                 getParentAffinityTargetsByState(pParentExList, &i_target,
                         CLASS_UNIT, TYPE_EX, UTIL_FILTER_ALL);
                 HWAS_ASSERT((pParentExList.size() == 1),
-                    "HWAS _deconfigureByAssoc: pParentExList != 1");
+                    "HWAS _deconfigParentAssoc: pParentExList != 1");
                 Target *l_parentEX = pParentExList[0];
+
+                // General predicate to determine if target is functional
+                PredicateIsFunctional isFunctional;
 
                 if (isFunctional(l_parentEX))
                 {
@@ -1759,7 +1837,7 @@ void DeconfigGard::_deconfigureByAssoc(
                         UTIL_FILTER_ALL);
 
                 HWAS_ASSERT((pEqList.size() == 1),
-                    "HWAS _deconfigureByAssoc: pEqList != 1");
+                    "HWAS _deconfigParentAssoc: pEqList != 1");
                 Target *l_targetEq = pEqList[0];
 
                 if (!anyChildFunctional(*l_targetEq))
@@ -1783,237 +1861,6 @@ void DeconfigGard::_deconfigureByAssoc(
                 break;
             } // TYPE_EX
 
-            case TYPE_MEMBUF:
-            {
-                //  get parent DMI
-                TargetHandleList pParentDmiList;
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                getParentAffinityTargetsByState(pParentDmiList, &i_target,
-                        CLASS_UNIT, TYPE_DMI, UTIL_FILTER_ALL);
-                HWAS_ASSERT((pParentDmiList.size() == 1),
-                    "HWAS _deconfigureByAssoc: pParentDmiList > 1");
-                const Target *l_parentDmi = pParentDmiList[0];
-
-                // If parent is functional, deconfigure it
-                if (isFunctional(l_parentDmi))
-                {
-                    // deconfigure the parent
-                    HWAS_INF("_deconfigureByAssoc MEMBUF parent DMI: %.8X",
-                        get_huid(l_parentDmi));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentDmi),
-                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentDmi),
-                        i_errlEid, i_deconfigRule);
-                }
-                break;
-            } // TYPE_MEMBUF
-
-            case TYPE_MCA:
-            {
-                // get parent MCS
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentMcsList;
-                getParentAffinityTargetsByState(pParentMcsList, &i_target,
-                                                CLASS_UNIT, TYPE_MCS,
-                                                UTIL_FILTER_ALL);
-
-                HWAS_ASSERT((pParentMcsList.size() == 1),
-                "HWAS _deconfigureByAssoc: pParentMcsList != 1");
-
-                Target *l_parentMcs = pParentMcsList[0];
-                // if parent MCS hasn't already been deconfigured
-                if (!pParentMcsList.empty() &&
-                    isFunctional(l_parentMcs) &&
-                    !anyChildFunctional(*l_parentMcs))
-                {
-                    // deconfigure parent MCS
-                    HWAS_INF("_deconfigureByAssoc MCS parent with no functional MCAs: %.8X", get_huid(l_parentMcs));
-                    _deconfigureTarget(*l_parentMcs,
-                                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(*l_parentMcs,
-                                        i_errlEid,i_deconfigRule);
-                }
-
-                // and we're done, so break;
-                break;
-            }
-
-            case TYPE_MCS:
-            {
-                // get parent MCBIST
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentMcbistList;
-                getParentAffinityTargetsByState(pParentMcbistList, &i_target,
-                                                CLASS_UNIT, TYPE_MCBIST,
-                                                UTIL_FILTER_ALL);
-
-                HWAS_ASSERT((pParentMcbistList.size() <= 1),
-                            "HWAS _deconfigureByAssoc: MCS has multiple MCBIST parents, this is impossible");
-
-                Target *l_parentMcbist = pParentMcbistList[0];
-
-                // if parent MCBIST hasn't already been deconfigured
-                if (!pParentMcbistList.empty() &&
-                    isFunctional(l_parentMcbist) &&
-                    !anyChildFunctional(*l_parentMcbist))
-                {
-                    // deconfigure parent MCBIST
-                    HWAS_INF("_deconfigureByAssoc MCBIST parent with no functional children: %.8X",
-                    get_huid(l_parentMcbist));
-                    _deconfigureTarget(*l_parentMcbist,
-                                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(*l_parentMcbist,
-                                        i_errlEid,i_deconfigRule);
-                }
-                else
-                {
-                    HWAS_ASSERT((pParentMcbistList.size() <= 1),
-                                "HWAS _deconfigureByAssoc: No MCBIST parents for for MCS w/ HUID: %lx", get_huid(&i_target));
-                }
-                // and we're done, so break;
-                break;
-            }
-
-            case TYPE_MI:
-            {
-                // get parent MC
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentMctList;
-                getParentAffinityTargetsByState(pParentMctList, &i_target,
-                                                CLASS_UNIT, TYPE_MC,
-                                                UTIL_FILTER_ALL);
-
-                HWAS_ASSERT((pParentMctList.size() <= 1),
-                            "HWAS _deconfigureByAssoc: MI has multiple MC parents, this is impossible");
-
-                Target *l_parentMc = pParentMctList[0];
-
-                // if parent MC hasn't already been deconfigured
-                if (!pParentMctList.empty() &&
-                    isFunctional(l_parentMc) &&
-                    !anyChildFunctional(*l_parentMc))
-                {
-                    // deconfigure parent MC
-                    HWAS_INF("_deconfigureByAssoc MC parent with no functional children: %.8X",
-                    get_huid(l_parentMc));
-                    _deconfigureTarget(*l_parentMc,
-                                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(*l_parentMc,
-                                        i_errlEid,i_deconfigRule);
-                }
-                else
-                {
-                    HWAS_ASSERT((pParentMctList.size() <= 1),
-                                "HWAS _deconfigureByAssoc: No MC parents for for MI w/ HUID: %lx", get_huid(&i_target));
-                }
-                // and we're done, so break;
-                break;
-            }
-
-            case TYPE_DMI:
-            {
-                // get parent MI
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentMitList;
-                getParentAffinityTargetsByState(pParentMitList, &i_target,
-                                                CLASS_UNIT, TYPE_MI,
-                                                UTIL_FILTER_ALL);
-
-                HWAS_ASSERT((pParentMitList.size() <= 1),
-                            "HWAS _deconfigureByAssoc: DMI has multiple MI parents, this is impossible");
-
-                Target *l_parentMi = pParentMitList[0];
-
-                // if parent MI hasn't already been deconfigured
-                if (!pParentMitList.empty() &&
-                    isFunctional(l_parentMi) &&
-                    !anyChildFunctional(*l_parentMi))
-                {
-                    // deconfigure parent MI
-                    HWAS_INF("_deconfigureByAssoc MI parent with no functional children: %.8X",
-                    get_huid(l_parentMi));
-                    _deconfigureTarget(*l_parentMi,
-                                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(*l_parentMi,
-                                        i_errlEid,i_deconfigRule);
-                }
-                else
-                {
-                    HWAS_ASSERT((pParentMitList.size() <= 1),
-                                "HWAS _deconfigureByAssoc: No MI parents for for DMI w/ HUID: %lx", get_huid(&i_target));
-                }
-                // and we're done, so break;
-                break;
-            }
-
-            case TYPE_MBA:
-            {
-                // get parent MEMBUF (Centaur)
-                const Target *l_parentMembuf = getParentChip(&i_target);
-
-                // get children DIMM that are functional
-                TargetHandleList pDimmList;
-                PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
-                PredicatePostfixExpr funcDimms;
-                funcDimms.push(&predDimm).push(&isFunctional).And();
-                targetService().getAssociated(pDimmList,
-                        l_parentMembuf,
-                        TargetService::CHILD_BY_AFFINITY,
-                        TargetService::ALL,
-                        &funcDimms);
-
-                // if parent MEMBUF (Centaur) has no functional memory
-                if (pDimmList.empty())
-                {
-                    // deconfigure parent MEMBUF (Centaur)
-                    HWAS_INF("_deconfigureByAssoc MEMBUF parent with no memory: %.8X",
-                        get_huid(l_parentMembuf));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentMembuf),
-                        i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMembuf),
-                        i_errlEid, i_deconfigRule);
-                }
-
-                // and we're done, so break;
-                break;
-            } // TYPE_MBA
-
-            case TYPE_DIMM:
-            {
-                //  get immediate parent (MCA/MBA/etc)
-                TargetHandleList pParentList;
-                PredicatePostfixExpr funcParent;
-                funcParent.push(&isFunctional);
-                targetService().getAssociated(pParentList,
-                        &i_target,
-                        TargetService::PARENT_BY_AFFINITY,
-                        TargetService::IMMEDIATE,
-                        &funcParent);
-
-                HWAS_ASSERT((pParentList.size() <= 1),
-                    "HWAS _deconfigureByAssoc: pParentList > 1");
-
-                // if parent hasn't already been deconfigured
-                //  then deconfigure it
-                if (!pParentList.empty())
-                {
-                    const Target *l_parentMba = pParentList[0];
-                    HWAS_INF("_deconfigureByAssoc DIMM parent: %.8X",
-                             get_huid(l_parentMba));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
-                                       i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
-                                        i_errlEid, i_deconfigRule);
-                }
-
-                break;
-            } // TYPE_DIMM
-
             // If target is a bus endpoint, deconfigure its peer
             case TYPE_XBUS:
             case TYPE_ABUS:
@@ -2026,7 +1873,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 if (l_pDstTarget)
                 {
                     // Deconfigure peer endpoint
-                    HWAS_INF("_deconfigureByAssoc BUS Peer: %.8X",
+                    HWAS_INF("_deconfigParentAssoc BUS Peer: %.8X",
                         get_huid(l_pDstTarget));
                     _deconfigureTarget(const_cast<Target &> (*l_pDstTarget),
                                        i_errlEid, NULL,
@@ -2048,7 +1895,7 @@ void DeconfigGard::_deconfigureByAssoc(
                     if (l_pDstTarget)
                     {
                         // Deconfigure peer endpoint
-                        HWAS_INF("_deconfigureByAssoc OBUS Peer: 0x%.8X",
+                        HWAS_INF("_deconfigParentAssoc OBUS Peer: 0x%.8X",
                             get_huid(l_pDstTarget));
                         _deconfigureTarget(
                                     const_cast<Target &>(*l_pDstTarget),
@@ -2057,69 +1904,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 }
                 break;
             }
-            case TYPE_PORE:
-            {
-                // Get parent proc target of PORE
-                const Target * l_pParentProc = getParentChip(&i_target);
-                // Deconfigure parent proc
-                HWAS_INF("deconfigByAssoc parent proc: %.8X",
-                    get_huid(l_pParentProc));
-                _deconfigureTarget(const_cast<Target &> (*l_pParentProc),
-                                   i_errlEid, NULL,
-                                   i_deconfigRule);
-                _deconfigureByAssoc(const_cast<Target &> (*l_pParentProc),
-                                    i_errlEid, i_deconfigRule);
-                break;
-            } // TYPE_PORE
-            case TYPE_PHB:
-            {
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentPECList;
-                getParentAffinityTargetsByState(pParentPECList, &i_target,
-                                                CLASS_UNIT, TYPE_PEC,
-                                                UTIL_FILTER_ALL);
-                HWAS_ASSERT((pParentPECList.size() == 1),
-                            "HWAS _deconfigureByAssoc: pParentPECList != 1");
-                Target *l_parentPEC = pParentPECList[0];
 
-                if (isFunctional(l_parentPEC))
-                {
-                    if (!anyChildFunctional(*l_parentPEC))
-                    {
-                        _deconfigureTarget(*l_parentPEC,
-                                           i_errlEid, NULL, i_deconfigRule);
-                        _deconfigureByAssoc(*l_parentPEC,
-                                            i_errlEid,i_deconfigRule);
-                    }
-                }
-
-                break;
-            } // TYPE_PHB
-            case TYPE_OBUS_BRICK:
-            {
-                // Other errors may have affected parent state so use
-                // UTIL_FILTER_ALL
-                TargetHandleList pParentObusList;
-                getParentAffinityTargetsByState(pParentObusList, &i_target,
-                                                CLASS_UNIT, TYPE_OBUS,
-                                                UTIL_FILTER_ALL);
-                HWAS_ASSERT((pParentObusList.size() == 1),
-                            "HWAS _deconfigureByAssoc: pParentObusList != 1");
-
-                Target *l_parentObus = pParentObusList[0];
-                if ((isFunctional(l_parentObus)) &&
-                   (!anyChildFunctional(*l_parentObus)))
-                {
-
-                    _deconfigureTarget(*l_parentObus,
-                                       i_errlEid, NULL, i_deconfigRule);
-                    _deconfigureByAssoc(*l_parentObus,
-                                       i_errlEid,i_deconfigRule);
-                }
-
-                break;
-            } // TYPE_OBUS_BRICK
             case TYPE_NPU:
             {
                 //Get the parent proc associated with this npu
@@ -2157,7 +1942,7 @@ void DeconfigGard::_deconfigureByAssoc(
 
                 if (l_pDstTarget)
                 {
-                    HWAS_INF("_deconfigureByAssoc SMPGROUP Peer: 0x%.8X",
+                    HWAS_INF("_deconfigParentAssoc SMPGROUP Peer: 0x%.8X",
                         get_huid(l_pDstTarget));
                     _deconfigureTarget(
                                 const_cast<Target &>(*l_pDstTarget),
@@ -2171,7 +1956,7 @@ void DeconfigGard::_deconfigureByAssoc(
                         UTIL_FILTER_PRESENT);
 
                 HWAS_ASSERT((pObusList.size() == 1),
-                    "HWAS _deconfigureByAssoc: pObusList != 1");
+                    "HWAS _deconfigParentAssoc: pObusList != 1");
                 Target *l_targetObus = pObusList[0];
 
                 if ((l_targetObus->getAttr<ATTR_OPTICS_CONFIG_MODE>() ==
@@ -2185,19 +1970,16 @@ void DeconfigGard::_deconfigureByAssoc(
                 break;
             } // TYPE_SMPGROUP
             default:
-                // no action
+            {
+              // TYPE_MEMBUF, TYPE_MCA, TYPE_MCS, TYPE_MI, TYPE_DMI,
+              // TYPE_MBA, TYPE_DIMM, TYPE_PHB, TYPE_OBUS_BRICK, TYPE_PORE
+              _deconfigAffinityParent(i_target, i_errlEid, i_deconfigRule);
+            }
             break;
         } // switch
-    } // !i_Runtime
-    else
-    {
-        HWAS_INF("_deconfigureByAssoc() - system is at runtime"
-                " skipping all association checks beyond"
-                " the CHILD");
     }
-
-    HWAS_DBG("_deconfigureByAssoc exiting: %.8X", get_huid(&i_target));
-} // _deconfigByAssoc
+    HWAS_DBG("_deconfigureParentAssoc exiting: %.8X", get_huid(&i_target));
+}
 
 //******************************************************************************
 void DeconfigGard::_deconfigureTarget(
@@ -3028,9 +2810,8 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
 //******************************************************************************
 #endif // __HOSTBOOT_RUNTIME
 
-//Note this will not find child DIMMs because they are
-//affinity children, not physical
-bool DeconfigGard::anyChildFunctional(Target & i_parent)
+bool DeconfigGard::anyChildFunctional(Target & i_parent,
+                            TargetService::ASSOCIATION_TYPE i_type)
 {
     bool retVal = false;
     TargetHandleList pChildList;
@@ -3042,9 +2823,8 @@ bool DeconfigGard::anyChildFunctional(Target & i_parent)
         // find all CHILD targets, that match the predicate
         // if any of them are functional return true
         // if all of them are non-functional return false
-        targetService().getAssociated(pChildList, &i_parent,
-            TargetService::CHILD, TargetService::ALL, &isFunctional);
-
+        targetService().getAssociated(pChildList, &i_parent, i_type,
+                                      TargetService::ALL, &isFunctional);
         if (pChildList.size() >= 1)
         {
             retVal = true;
@@ -3052,6 +2832,7 @@ bool DeconfigGard::anyChildFunctional(Target & i_parent)
     }
     return retVal;
 } //anyChildFunctional
+
 
 bool DeconfigGard::anyChildFCO (Target & i_parent)
 {
