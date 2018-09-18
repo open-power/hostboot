@@ -260,8 +260,9 @@ uint32_t VcmEvent<TYPE_MBA>::rowRepairEndRank( STEP_CODE_DATA_STRUCT & io_sc )
 
         // If scrub gets to the end of the master rank with an MCE
         // Update VPD with row repair
+        // Note: inputted DRAM position needs to be relative to the Centaur DQs
         o_rc = setRowRepairData<TYPE_MBA>( l_dimm, iv_rank,
-            iv_rowRepairFailAddr, iv_mark.getSymbol().getDram() );
+            iv_rowRepairFailAddr, iv_mark.getSymbol().getDramRelCenDqs() );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setRowRepairData(0x%08x, 0x%02x) "
