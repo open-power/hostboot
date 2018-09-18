@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
+#include <targeting/common/utilFilter.H>
 
 #include <vpd/cvpdenums.H>
 #include <vpd/vpdreasoncodes.H>
@@ -103,6 +104,22 @@ cvpdTestData cvpdDataCumulus[] =
 
 };
 
+cvpdTestData cvpdDataCDIMM[] =
+{
+    { CVPD::VEIR, CVPD::pdI },
+    { CVPD::MER0, CVPD::pdI },
+    { CVPD::VINI, CVPD::VZ },
+    { CVPD::VINI, CVPD::FN },
+    { CVPD::VINI, CVPD::PN },
+    { CVPD::VINI, CVPD::HE },
+    { CVPD::VINI, CVPD::CT },
+    { CVPD::VSPD, CVPD::VM },
+    { CVPD::VSPD, CVPD::pdI },
+    { CVPD::VSPD, CVPD::MX },
+    { CVPD::VSPD, CVPD::AM },
+
+};
+
 
 void getMembufTargets( TargetHandleList & o_membufList )
 {
@@ -158,6 +175,27 @@ bool isNimbusModel(void)
     TRACDCOMP( g_trac_vpd, "isNimbusModel() exit");
 
     return isNimbus;
+}
+
+bool isCdimmModel(void)
+{
+    TRACDCOMP( g_trac_vpd, "isCdimmModel() - what model is running");
+
+    bool isCdimmModel = false;
+    TargetHandleList l_dimms;
+    getAllLogicalCards(l_dimms, TYPE_DIMM, true );
+
+    // check if the first dimm is a CDIMM
+    assert(l_dimms.size() != 0);
+    auto l_type = (l_dimms[0])->getAttr<ATTR_CEN_SPD_CUSTOM>();
+    if( CEN_SPD_CUSTOM_YES == l_type )
+    {
+        isCdimmModel = true;
+    }
+
+    TRACDCOMP( g_trac_vpd, "isCdimmModel() exit");
+
+    return isCdimmModel;
 }
 
 TARGETING::Target* getFunctionalMembufTarget()
@@ -225,11 +263,18 @@ class CVPDTest: public CxxTest::TestSuite
                 uint32_t numCmds;
 
                 bool isNimbus = isNimbusModel();
+                bool isCdimm = isCdimmModel();
 
-                if(isNimbus)
+                if(isNimbus) //NIMBUS
                 {
                     numCmds = sizeof(cvpdDataNimbus)/sizeof(cvpdDataNimbus[0]);
-                }else
+                }
+                else if( isCdimm ) //CUMULUS_CDIMM
+                {
+                    numCmds = sizeof(cvpdDataCDIMM)/sizeof(
+                                    cvpdDataCDIMM[0]);
+                }
+                else //CUMULUS
                 {
                     numCmds = sizeof(cvpdDataCumulus)/sizeof(
                                     cvpdDataCumulus[0]);
@@ -238,11 +283,17 @@ class CVPDTest: public CxxTest::TestSuite
                 for( uint32_t curCmd = 0; curCmd < numCmds; curCmd++ )
                 {
                     cmds++;
-                    if(isNimbus)
+                    if(isNimbus) //NIMBUS
                     {
                         theRecord = (uint64_t)cvpdDataNimbus[curCmd].record;
                         theKeyword = (uint64_t)cvpdDataNimbus[curCmd].keyword;
-                    }else
+                    }
+                    else if( isCdimm ) //CUMULUS_CDIMM
+                    {
+                        theRecord = (uint64_t)cvpdDataCDIMM[curCmd].record;
+                        theKeyword = (uint64_t)cvpdDataCDIMM[curCmd].keyword;
+                    }
+                    else //CUMULUS
                     {
                         theRecord = (uint64_t)cvpdDataCumulus[curCmd].record;
                         theKeyword = (uint64_t)cvpdDataCumulus[curCmd].keyword;
