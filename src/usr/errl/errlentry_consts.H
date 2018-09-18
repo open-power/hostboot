@@ -133,6 +133,8 @@ const epubClockTypeToSub_t CLOCK_TO_SUBSYS_TABLE[] =
     { HWAS::MEMCLK_TYPE                , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCREFCLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
     { HWAS::OSCPCICLK_TYPE             , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCPCICLK0_TYPE            , EPUB_CEC_HDW_CLK_CTL },
+    { HWAS::OSCPCICLK1_TYPE            , EPUB_CEC_HDW_CLK_CTL },
 };
 
 struct epubPartTypeToSub_t
@@ -150,7 +152,12 @@ const epubPartTypeToSub_t PART_TO_SUBSYS_TABLE[] =
     { HWAS::VPD_PART_TYPE               , EPUB_CEC_HDW_SUBSYS   },
     { HWAS::LPC_SLAVE_PART_TYPE         , EPUB_CEC_HDW_SUBSYS   },
     { HWAS::GPIO_EXPANDER_PART_TYPE     , EPUB_MEMORY_SUBSYS    },
-    { HWAS::SPIVID_SLAVE_PART_TYPE      , EPUB_POWER_SUBSYS   },
+    { HWAS::SPIVID_SLAVE_PART_TYPE      , EPUB_POWER_SUBSYS     },
+    { HWAS::TOD_CLOCK                   , EPUB_CEC_HDW_TOD_HDW  },
+    { HWAS::MEM_REF_CLOCK               , EPUB_CEC_HDW_CLK_CTL  },
+    { HWAS::PROC_REF_CLOCK              , EPUB_CEC_HDW_CLK_CTL  },
+    { HWAS::PCI_REF_CLOCK               , EPUB_CEC_HDW_CLK_CTL  },
+    { HWAS::SMP_CABLE                   , EPUB_CEC_HDW_SUBSYS   },
 };
 
 struct epubSensorTypeToSub_t
