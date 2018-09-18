@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -54,4 +54,19 @@
         scomaddr    0x09010817;
         capture     group default;
     };
+
+    register LINK_STATUS_REG0
+    {
+        name        "P9 OBUS target Link0 Quality Status register";
+        scomaddr    0x09010826;
+        capture     group default;
+    };
+
+    register LINK_STATUS_REG1
+    {
+        name        "P9 OBUS target Link1 Quality Status register";
+        scomaddr    0x09010827;
+        capture     group default;
+    };
+
 
