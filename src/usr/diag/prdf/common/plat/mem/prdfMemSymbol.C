@@ -125,6 +125,47 @@ uint8_t MemSymbol::getDram() const
 
 //------------------------------------------------------------------------------
 
+uint8_t MemSymbol::getDramRelCenDqs() const
+{
+    // This function will return the DRAM position for this symbol relative
+    // to the Centaur DQs. Mainly this is needed for the DRAM position input
+    // of Row Repair.
+
+    const uint8_t X4_ECC_SPARE = 17;
+    const uint8_t X8_ECC_SPARE = 8;
+
+    const uint8_t X4_DRAM_SPARE_LOWER = 18;
+    const uint8_t X4_DRAM_SPARE_UPPER = 19;
+    const uint8_t X8_DRAM_SPARE = 9;
+
+
+    uint8_t l_dramWidth = ( isDramWidthX4(iv_trgt) ) ? 4 : 8;
+    uint8_t l_dram = getDq() / l_dramWidth; // (x8: 0-9, x4: 0-19)
+
+    // Adjust for spares
+    if ( isDramSpared() )
+    {
+        if ( isDramWidthX4(iv_trgt) )
+        {
+            uint8_t l_bit  = getDq() % DQS_PER_BYTE;
+            l_dram = ( l_bit < 4 ) ? X4_DRAM_SPARE_LOWER : X4_DRAM_SPARE_UPPER;
+        }
+        else
+        {
+            l_dram = X8_DRAM_SPARE;
+        }
+    }
+    else if ( isEccSpared() )
+    {
+        l_dram = ( isDramWidthX4(iv_trgt) ) ? X4_ECC_SPARE : X8_ECC_SPARE;
+    }
+
+    return l_dram;
+
+}
+
+//------------------------------------------------------------------------------
+
 uint8_t MemSymbol::getDramPins() const
 {
     bool isMba = TYPE_MBA == getTargetType(iv_trgt);

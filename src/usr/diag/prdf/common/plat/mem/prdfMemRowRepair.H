@@ -125,7 +125,8 @@ uint32_t setRowRepairData( TARGETING::TargetHandle_t i_dimm,
  * @param  i_dimm A dimm target.
  * @param  i_rank Target rank.
  * @param  i_addr Address for the row repair.
- * @param  i_dram Dram position for the row repair.
+ * @param  i_dram Dram position for the row repair. NOTE: this is the dram
+ *                position relative to the Centaur DQs (x8: 0-9, x4: 0-19)
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
