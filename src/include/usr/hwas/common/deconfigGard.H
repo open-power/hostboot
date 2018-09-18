@@ -40,6 +40,7 @@
 #include <hwas/hwasPlatThread.H>
 
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/targetservice.H>
 
 class HwasGardTest;
 
@@ -640,6 +641,34 @@ private:
                                     NOT_AT_RUNTIME);
 
     /**
+     * @brief Works deconfig up the parent branch
+     *        Handles special cases like FCO deconfig and peer targets
+     *
+     * @param[in] i_target   Reference to child target
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_deconfigRule Deconfigure Runtime options
+     */
+    void _deconfigParentAssoc(TARGETING::Target & i_target,
+                              const uint32_t i_errlEid,
+                              const DeconfigureFlags i_deconfigRule);
+
+    /**
+     * @brief This rolls up deconfigure of child to its parent level(s)
+     *        This is called by _deconfigParentAssoc
+     *
+     * This will check the immediate affinity parent and
+     * deconfigure it if it has no more functional children.
+     * If it deconfigures, it will then try to roll up the deconfigure
+     * to next parent level.
+     *
+     * @param[in] i_child   Reference to child target
+     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
+     * @param[in] i_deconfigRule Deconfigure Runtime options
+     */
+    void _deconfigAffinityParent(TARGETING::Target & i_child,
+                                 const uint32_t i_errlEid,
+                                 const DeconfigureFlags i_deconfigRule);
+    /**
      * @brief Performs Deconfigure Actions.
      *
      * @param[in] i_target Reference to Target to perform actions on.
@@ -745,12 +774,17 @@ private:
      *  child is functional then returns true.
      *
      *  @param[in] Pointer parent target id
+     *  @param[in] Indicates what relationship the result child targets should
+     *             have to the parent target in question
+     *             TargetService::CHILD or TargetService::CHILD_BY_AFFINITY
      *
      *  @return true if any child state is functional.
      *
      */
     bool anyChildFunctional(
-                TARGETING::Target &  i_parent);
+                  TARGETING::Target & i_parent,
+                  TARGETING::TargetService::ASSOCIATION_TYPE i_type =
+                      TARGETING::TargetService::CHILD );
 
     /**
      *  @brief Return FCO state of children

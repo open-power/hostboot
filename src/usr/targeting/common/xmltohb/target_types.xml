@@ -58,6 +58,9 @@
       <id>ORDINAL_ID</id>
     </attribute>
     <attribute>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>PHYS_PATH</id>
     </attribute>
     <attribute>
@@ -129,6 +132,10 @@
       <id>MRU_ID</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>POSITION</id>
     </attribute>
     <attribute>
@@ -183,6 +190,10 @@
     <attribute>
       <default>AST2500</default>
       <id>MODEL</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>PHYS_PATH</id>
@@ -756,6 +767,10 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>TPM_INFO</id>
     </attribute>
     <attribute>
@@ -842,6 +857,10 @@
     </attribute>
     <attribute>
       <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id>
@@ -1720,6 +1739,10 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -1842,6 +1865,10 @@
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
     </attribute>
     <attribute>
+      <id>PARENT_DECONFIG_DISABLED</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -1943,6 +1970,10 @@
     </attribute>
     <attribute>
       <id>MSS_VOLT_VPP_OFFSET_MILLIVOLTS</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2321,6 +2352,10 @@
       <id>MFG_WRAP_TEST_ABUS_LINKS_SET</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <id>PARENT_PERVASIVE</id>
     </attribute>
     <attribute>
@@ -2504,12 +2539,12 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>
@@ -2613,6 +2648,10 @@
     <attribute>
       <default>0</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <default>5</default>
@@ -2723,6 +2762,10 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
+    </attribute>
+    <attribute>
       <default>PPE</default>
       <id>TYPE</id>
     </attribute>
@@ -2764,6 +2807,10 @@
     <attribute>
       <default>0</default>
       <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <default>SBE</default>
@@ -2815,6 +2862,10 @@
     <attribute>
       <default>0x00000031</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>PARENT_DECONFIG_DISABLED</id>
     </attribute>
     <attribute>
       <id>PARENT_PERVASIVE</id>

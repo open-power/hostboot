@@ -5072,6 +5072,21 @@
 
   <attribute>
     <description>
+    Do not allow deconfiguration of this target to rollup to its parent
+      0x00 (false) = Allow parent deconfiguration rollup (default setting)
+      0x01 (true)  = Do not allow parent deconfiguration rollup
+    </description>
+    <id>PARENT_DECONFIG_DISABLED</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
         Physical entity path of the target's associated pervasive target
     </description>
     <id>PARENT_PERVASIVE</id>
