@@ -32,5 +32,5 @@
 PRDR_ERROR_SIGNATURE( ERepair_ERROR, 0xffff0000, "","ERepair Internal error" );
 PRDR_ERROR_SIGNATURE( ERepair_FWThrExceeded, 0xffff0001, "",
                       "ERepair FW threshold exceeded" );
-
+PRDR_ERROR_SIGNATURE( LinkFailed, 0xffff0002, "", "Half link failed; degraded performance" );
 #endif // __prdfLaneRepairExtraSig_H

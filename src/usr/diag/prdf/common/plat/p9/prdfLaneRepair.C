@@ -374,11 +374,11 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
 }
 
 
-void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
+void   obus_smpCallout( TargetHandle_t i_smpTgt, TargetHandle_t i_obusTgt,
+                        STEP_CODE_DATA_STRUCT & i_sc )
 {
     errlHndl_t l_mainElog = NULL;
     l_mainElog = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
-
 
     if ( NULL == l_mainElog )
     {
@@ -387,17 +387,40 @@ void   obus_smpCallout_link( TargetHandle_t &i_smpTgt )
     else
     {
         // add callout(s) on any bit firing
+        // get the peer SMGROUP target associated with input SMPGROUP
+        TargetHandle_t  l_smpPeerTgt =  i_smpTgt->getAttr<ATTR_PEER_TARGET>();
+        PRDF_ASSERT(nullptr != l_smpPeerTgt);
+
     #ifdef __HOSTBOOT_MODULE
-        l_mainElog->addPartCallout( i_smpTgt, HWAS::SMP_CABLE,
-               HWAS::SRCI_PRIORITY_MED, HWAS::NO_DECONFIG, HWAS::GARD_Predictive );
+        HWAS::CalloutFlag_t calloutFlg = HWAS::FLAG_NONE;
+
+        // Get Link position 0/1 (check if tgt pos is even/odd)
+        uint32_t lnk = getTargetPosition(i_smpTgt) % 2;
+
+        // If Link status reg has been zeroed, we know this link has failed
+        ExtensibleChip *obusChip =
+            (ExtensibleChip *)systemPtr->GetChip( i_obusTgt );
+        SCAN_COMM_REGISTER_CLASS *lnkStat = obusChip->getRegister(
+            lnk==0 ? "LINK_STATUS_REG0" : "LINK_STATUS_REG1" );
+
+        int32_t rc = lnkStat->Read();
+
+        if (rc != SUCCESS)
+        {
+            PRDF_ERR("smpCallout_link Failed to read LINK_STATUS_REG");
+        }
+        else if ( lnkStat->BitStringIsZero() )
+        {
+            calloutFlg = HWAS::FLAG_LINK_DOWN;
+            i_sc.service_data->SetErrorSig(PRDFSIG_LinkFailed);
+        }
+
+        l_mainElog->addBusCallout( i_smpTgt, l_smpPeerTgt, HWAS::O_BUS_TYPE,
+                                   HWAS::SRCI_PRIORITY_MED, calloutFlg );
     #else
         // FSP code
         #ifndef ESW_SIM_COMPILE
         errlHndl_t  l_err = NULL;
-
-        // get the peer SMGROUP target associated with input SMPGROUP
-        TargetHandle_t  l_smpPeerTgt =  i_smpTgt->getAttr<ATTR_PEER_TARGET>();
-        PRDF_ASSERT(nullptr != l_smpPeerTgt);
 
         // Call SVPD routine to add callouts
         l_err = HWSV::SvrError::AddBusCallouts( l_mainElog, i_smpTgt,
@@ -481,7 +504,8 @@ void  obus_getSmpTarget( TargetHandle_t &i_obusTgt,
 
 
 /** Given the OBUS TARGET and SMP link number -- do the callout **/
-void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
+void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link,
+                            STEP_CODE_DATA_STRUCT & i_sc )
 {
     TargetHandle_t  l_smpTarg     = nullptr;
 
@@ -491,7 +515,7 @@ void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
     PRDF_ASSERT(nullptr != l_smpTarg);
 
     // Callout both SMPGROUPS
-    obus_smpCallout_link( l_smpTarg );
+    obus_smpCallout( l_smpTarg, i_obusTgt, i_sc );
 
 
     return;
@@ -499,8 +523,8 @@ void  obus_smpCallout_link( TargetHandle_t &i_obusTgt, uint32_t i_link )
 
 
 /** Given the OBUS unit number and SMP link number -- do the callout **/
-void  obus_smpCallout_link( uint32_t  i_obusNum,
-                            ExtensibleChip * i_chip,  uint32_t i_link )
+void  obus_smpCallout_link( uint32_t  i_obusNum, ExtensibleChip * i_chip,
+                            uint32_t i_link, STEP_CODE_DATA_STRUCT & i_sc )
 {
     // From NEST so it will be a processor target
     TargetHandle_t rxTrgt = i_chip->getTrgt();
@@ -512,7 +536,7 @@ void  obus_smpCallout_link( uint32_t  i_obusNum,
     PRDF_ASSERT( NULL != l_obus );
 
     // We found the right OBUS target
-    obus_smpCallout_link( l_obus, i_link );
+    obus_smpCallout_link( l_obus, i_link, i_sc );
 
 } // end  obus_smpCallout_link - obus & smp link numbers
 
@@ -525,7 +549,7 @@ int32_t obus_callout_L0( ExtensibleChip * i_chip,
     // Need the obus target
     TargetHandle_t rxTrgt = i_chip->getTrgt();
     // Call out LINK0 in SMPGROUP
-    obus_smpCallout_link( rxTrgt, 0 );
+    obus_smpCallout_link( rxTrgt, 0, i_sc );
 
     return rc;
 
@@ -541,7 +565,7 @@ int32_t obus_callout_L1( ExtensibleChip * i_chip,
     // Need the obus target
     TargetHandle_t rxTrgt = i_chip->getTrgt();
     // Call out LINK1 in SMPGROUP
-    obus_smpCallout_link( rxTrgt, 1 );
+    obus_smpCallout_link( rxTrgt, 1, i_sc );
 
     return rc;
 
@@ -555,7 +579,7 @@ int32_t obus0_callout_L0( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus0 link0
-    obus_smpCallout_link( 0, i_chip, 0 );
+    obus_smpCallout_link( 0, i_chip, 0, i_sc );
 
     return rc;
 
@@ -570,7 +594,7 @@ int32_t obus0_callout_L1( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus0 link1
-    obus_smpCallout_link( 0, i_chip, 1 );
+    obus_smpCallout_link( 0, i_chip, 1, i_sc );
 
     return rc;
 
@@ -585,7 +609,7 @@ int32_t obus1_callout_L0( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus1 link0
-    obus_smpCallout_link( 1, i_chip, 0 );
+    obus_smpCallout_link( 1, i_chip, 0, i_sc );
 
     return rc;
 
@@ -600,7 +624,7 @@ int32_t obus1_callout_L1( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus1 link1
-    obus_smpCallout_link( 1, i_chip, 1 );
+    obus_smpCallout_link( 1, i_chip, 1, i_sc );
 
     return rc;
 
@@ -615,7 +639,7 @@ int32_t obus2_callout_L0( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus2 link0
-    obus_smpCallout_link( 2, i_chip, 0 );
+    obus_smpCallout_link( 2, i_chip, 0, i_sc );
 
     return rc;
 
@@ -630,7 +654,7 @@ int32_t obus2_callout_L1( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus2 link1
-    obus_smpCallout_link( 2, i_chip, 1 );
+    obus_smpCallout_link( 2, i_chip, 1, i_sc );
 
     return rc;
 
@@ -645,7 +669,7 @@ int32_t obus3_callout_L0( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus3 link0
-    obus_smpCallout_link( 3, i_chip, 0 );
+    obus_smpCallout_link( 3, i_chip, 0, i_sc );
 
     return rc;
 
@@ -660,7 +684,7 @@ int32_t obus3_callout_L1( ExtensibleChip * i_chip,
     int32_t rc = SUCCESS;
 
     // callout obus3 link0
-    obus_smpCallout_link( 3, i_chip, 1 );
+    obus_smpCallout_link( 3, i_chip, 1, i_sc );
 
     return rc;
 
