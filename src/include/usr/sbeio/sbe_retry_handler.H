@@ -270,17 +270,6 @@ class SbeRetryHandler
          */
         errlHndl_t switch_sbe_sides(TARGETING::Target * i_target);
 
-
-        /**
-         * @brief This is the switch case that identifies the action needed
-         *        for the RC value in an SBE FFDC package.
-         *
-         * @param[in] i_rc            - RC value from SBE FFDC package
-         *
-         * @return - pass(0) or specific returned SBE action
-         */
-        uint32_t action_for_ffdc_rc( uint32_t i_rc);
-
         /**
          * @brief This function handles the call to the p9_get_sbe_msg_handler.
          *        It will read the sbe msg register (Cfam 2809 or Scom 50009)
@@ -362,19 +351,6 @@ class SbeRetryHandler
         *        to call start_cbs or hreset depending on iv_sbeRestartMethod
         */
         uint8_t iv_currentSideBootAttempts;
-
-        /*
-        * @brief If the asyncFFDC bit is found to be set on the status register
-        *        this indicates to hostboot that the SBE was able to collect
-        *        FFDC about what went wrong in its attempt to boot itself
-        *        in this case Hostboot will send a FIFO chip op to the SBE
-        *        so the SBE will write the FFDC data out to memory where
-        *        Hostboot can parse it. Note that after the SBE writes
-        *        the data to memory the asyncFFDC bit on the status register
-        *        will be off.
-        */
-        bool iv_ffdcSetAction;
-
 
         /*
          * @brief The mode of operation that needs to be run through the
