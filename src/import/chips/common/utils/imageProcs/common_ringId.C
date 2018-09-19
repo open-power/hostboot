@@ -157,8 +157,7 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
             strcat(io_ringPath, l_ringDir);
             strcat(io_ringPath, "/");
         }
-        else if ( i_magic == TOR_MAGIC_CME ||
-                  i_magic == TOR_MAGIC_SGPE )
+        else if ( i_magic == TOR_MAGIC_QME )
         {
             if ( i_ringVariant == RV_BASE ||
                  i_ringVariant == RV_RL ||
@@ -189,7 +188,8 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
             strcat(io_ringPath, "/");
         }
         else if ( i_magic == TOR_MAGIC_OVRD ||
-                  i_magic == TOR_MAGIC_OVLY )
+                  i_magic == TOR_MAGIC_OVLY ||
+                  i_magic == TOR_MAGIC_DYN )
         {
             // Path already fully qualified. Return io_ringPath as is.
         }
@@ -218,6 +218,7 @@ int ringid_get_num_ring_ids( ChipId_t   i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             *o_numRingIds = P9_RID::NUM_RING_IDS;
             break;
 
@@ -240,19 +241,17 @@ int ringid_get_num_chiplets( ChipId_t  i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
-                 i_torMagic == TOR_MAGIC_OVLY )
+                 i_torMagic == TOR_MAGIC_OVLY ||
+                 i_torMagic == TOR_MAGIC_DYN )
             {
                 *o_numChiplets = P9_RID::SBE_NUM_CHIPLETS;
             }
-            else if ( i_torMagic == TOR_MAGIC_CME )
+            else if ( i_torMagic == TOR_MAGIC_QME )
             {
                 *o_numChiplets = P9_RID::CME_NUM_CHIPLETS;
-            }
-            else if ( i_torMagic == TOR_MAGIC_SGPE )
-            {
-                *o_numChiplets = P9_RID::SGPE_NUM_CHIPLETS;
             }
             else
             {
@@ -276,11 +275,14 @@ int ringid_get_ringProps( ChipId_t           i_chipId,
 {
     int rc = INFRASTRUCT_RC_SUCCESS;
 
+    *o_ringProps = NULL;
+
     switch (i_chipId)
     {
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             *o_ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
             break;
 
@@ -308,9 +310,11 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
-                 i_torMagic == TOR_MAGIC_OVLY )
+                 i_torMagic == TOR_MAGIC_OVLY ||
+                 i_torMagic == TOR_MAGIC_DYN )
             {
                 rc = P9_RID::ringid_get_chiplet_properties(
                          i_chipletType,
@@ -335,19 +339,9 @@ int ringid_get_chipletProps( ChipId_t           i_chipId,
                     *o_numVariants = 1;
                 }
             }
-            else if ( i_torMagic == TOR_MAGIC_CME )
+            else if ( i_torMagic == TOR_MAGIC_QME )
             {
                 *o_chipletData        = (ChipletData_t*)&P9_RID::EC::g_chipletData;
-                *o_numVariants        = (*o_chipletData)->numCommonRingVariants;
-
-                if (i_torVersion < 7)
-                {
-                    *o_numVariants = *o_numVariants - 3;
-                }
-            }
-            else if ( i_torMagic == TOR_MAGIC_SGPE )
-            {
-                *o_chipletData        = (ChipletData_t*)&P9_RID::EQ::g_chipletData;
                 *o_numVariants        = (*o_chipletData)->numCommonRingVariants;
 
                 if (i_torVersion < 7)
@@ -385,6 +379,7 @@ int ringid_get_scanScomAddr( ChipId_t   i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if (i_ringId >= P9_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_get_scanScomAddr(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not"
@@ -421,6 +416,7 @@ int ringid_get_ringClass( ChipId_t      i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if (i_ringId >= P9_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringid_get_ringClass(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
@@ -454,6 +450,7 @@ int ringid_check_ringId( ChipId_t  i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if ( i_ringId >= P9_RID::NUM_RING_IDS && i_ringId != UNDEFINED_RING_ID )
             {
                 MY_ERR("ringid_check_ringId(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
@@ -486,9 +483,11 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
-                 i_torMagic == TOR_MAGIC_OVLY )
+                 i_torMagic == TOR_MAGIC_OVLY ||
+                 i_torMagic == TOR_MAGIC_DYN )
             {
                 if ( i_chipletType < P9_RID::SBE_NUM_CHIPLETS )
                 {
@@ -499,20 +498,9 @@ int ringid_get_chipletIndex( ChipId_t        i_chipId,
                     rc = TOR_INVALID_CHIPLET_TYPE;
                 }
             }
-            else if ( i_torMagic == TOR_MAGIC_CME )
+            else if ( i_torMagic == TOR_MAGIC_QME )
             {
                 if ( i_chipletType == P9_RID::EC_TYPE )
-                {
-                    *o_chipletIndex = 0;
-                }
-                else
-                {
-                    rc = TOR_INVALID_CHIPLET_TYPE;
-                }
-            }
-            else if ( i_torMagic == TOR_MAGIC_SGPE )
-            {
-                if ( i_chipletType == P9_RID::EQ_TYPE )
                 {
                     *o_chipletIndex = 0;
                 }
@@ -554,7 +542,8 @@ std::map <ChipId_t, std::string> chipIdIsMap
     { UNDEFINED_CHIP_ID, ""    },
     { (ChipId_t)CID_P9N, "p9n" },
     { (ChipId_t)CID_P9C, "p9c" },
-    { (ChipId_t)CID_P9A, "p9a" }
+    { (ChipId_t)CID_P9A, "p9a" },
+    { (ChipId_t)CID_P10, "p10" }
 };
 
 // Mapping from chipType name to our [InfraStructure's} chipId (revers of above map)
@@ -563,7 +552,8 @@ std::map <std::string, ChipId_t> chipTypeIsMap
     { "",    UNDEFINED_CHIP_ID },
     { "p9n", (ChipId_t)CID_P9N },
     { "p9c", (ChipId_t)CID_P9C },
-    { "p9a", (ChipId_t)CID_P9A }
+    { "p9a", (ChipId_t)CID_P9A },
+    { "p10", (ChipId_t)CID_P10 }
 };
 
 // Mapping from InitCompiler's chipId to InfraStructure's chipId
@@ -572,7 +562,8 @@ std::map <uint8_t, ChipId_t> chipIdIcToIsMap
     { 0x0, UNDEFINED_CHIP_ID },
     { 0x5, (ChipId_t)CID_P9N },
     { 0x6, (ChipId_t)CID_P9C },
-    { 0x7, (ChipId_t)CID_P9A }
+    { 0x7, (ChipId_t)CID_P9A },
+    { 0xA, (ChipId_t)CID_P10 }
 };
 
 int ringidGetRootRingId( ChipId_t    i_chipId,
@@ -592,6 +583,7 @@ int ringidGetRootRingId( ChipId_t    i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
             numRingIds = P9_RID::NUM_RING_IDS;
             break;
@@ -669,6 +661,7 @@ int ringidGetRingId1( ChipId_t     i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
             numRingIds = P9_RID::NUM_RING_IDS;
             break;
@@ -752,22 +745,20 @@ int ringidGetRingId2( ChipId_t       i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             ringProps = (RingProperties_t*)&P9_RID::RING_PROPERTIES;
             numRingIds = P9_RID::NUM_RING_IDS;
 
             if ( i_torMagic == TOR_MAGIC_SBE  ||
                  i_torMagic == TOR_MAGIC_OVRD ||
-                 i_torMagic == TOR_MAGIC_OVLY )
+                 i_torMagic == TOR_MAGIC_OVLY ||
+                 i_torMagic == TOR_MAGIC_DYN )
             {
                 l_chipletType = i_chipletType;
             }
-            else if ( i_torMagic == TOR_MAGIC_CME )
+            else if ( i_torMagic == TOR_MAGIC_QME )
             {
                 l_chipletType = P9_RID::EC_TYPE;
-            }
-            else if ( i_torMagic == TOR_MAGIC_SGPE )
-            {
-                l_chipletType = P9_RID::EQ_TYPE;
             }
             else
             {
@@ -872,6 +863,7 @@ int ringidGetRingName( ChipId_t     i_chipId,
         case CID_P9N:
         case CID_P9C:
         case CID_P9A:
+        case CID_P10:
             if (i_ringId >= P9_RID::NUM_RING_IDS)
             {
                 MY_ERR("ringidGetRingName(): ringId(=0x%x) >= NUM_RING_IDS(=0x%x) not allowed\n",
