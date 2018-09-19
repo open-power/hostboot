@@ -42,7 +42,7 @@
 static
 int get_ring_from_ring_section( void*           i_ringSection,     // Ring section ptr
                                 RingId_t        i_ringId,          // Ring ID
-                                RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
+                                RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,QME only)
                                 uint8_t&        io_instanceId,     // Instance ID
                                 RingRequest_t   i_ringRequest,     // {GET,PUT}_SINGLE_RING
                                 void**          io_ringBlockPtr,   // Output ring buffer
@@ -338,7 +338,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
 int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                       RingId_t        i_ringId,          // Ring ID
                       uint8_t         i_ddLevel,         // DD level
-                      RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
+                      RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,QME only)
                       uint8_t&        io_instanceId,     // Instance ID
                       RingRequest_t   i_ringRequest,     // {GET,PUT}_SINGLE_RING
                       void**          io_ringBlockPtr,   // Ring data buffer
@@ -421,10 +421,9 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
 
     if ( i_ringRequest == GET_SINGLE_RING ||       // All Magics support GET
-         ( i_ringRequest == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
+         ( i_ringRequest == PUT_SINGLE_RING  &&    // Can only append to SBE,QME
            ( torMagic == TOR_MAGIC_SBE ||
-             torMagic == TOR_MAGIC_CME ||
-             torMagic == TOR_MAGIC_SGPE ) ) )
+             torMagic == TOR_MAGIC_QME ) ) )
     {
         rc =  get_ring_from_ring_section( i_ringSection,
                                           i_ringId,
@@ -464,7 +463,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
                           uint8_t       i_ddLevel,         // DD level
                           RingId_t      i_ringId,          // Ring ID
-                          RingVariant_t i_ringVariant,     // Base,CC,RL (SBE/CME/SGPE only)
+                          RingVariant_t i_ringVariant,     // Base,CC,RL (SBE,QME only)
                           uint8_t       i_instanceId,      // Instance ID
                           void**        io_ringBlockPtr,   // Output ring buffer
                           uint32_t&     io_ringBlockSize,  // Size of ring data

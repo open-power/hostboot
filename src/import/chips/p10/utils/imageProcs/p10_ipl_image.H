@@ -64,8 +64,8 @@
 #define P9_XIP_MAGIC_SEEPROM ULL(0x584950205345504d)  // "XIP SEPM" also called SBE image
 #define P9_XIP_MAGIC_HW      ULL(0x5849502020204857)  // "XIP   HW"
 #define P9_XIP_MAGIC_SBE     ULL(0x5849502020534245)  // "XIP  SBE"
-#define P9_XIP_MAGIC_CME     ULL(0x5849502020434d45)  // "XIP  CME"
-#define P9_XIP_MAGIC_SGPE    ULL(0x5849502053475045)  // "XIP SGPE"
+#define P9_XIP_MAGIC_QME     ULL(0x5849502020514d45)  // "XIP  QME"
+#define P9_XIP_MAGIC_XGPE    ULL(0x5849502057475045)  // "XIP XGPE"
 #define P9_XIP_MAGIC_PGPE    ULL(0x5849502050475045)  // "XIP PGPE"
 #define P9_XIP_MAGIC_RESTORE ULL(0x5849502052455354)  // "XIP REST"
 #define P9_XIP_MAGIC_IOPPE   ULL(0x5849502049505045)  // "XIP IPPE"
@@ -1864,8 +1864,38 @@ _\s\()_section:
         .byte   (\alignment)
         .byte   0, 0, 0
     .endm
+
 #endif  // __ASSEMBLER__
+
 #ifndef __ASSEMBLER__
+
+/**************************************************************************/
+/* Hardware Image                                                         */
+/**************************************************************************/
+typedef enum
+{
+    P9_XIP_SECTION_HW_SBE       = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_HW_QME       = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_HW_XGPE      = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_HW_PGPE      = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_HW_RESTORE   = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_HW_DYNINITS  = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
+} p9_xip_section_hw_t;
+
+#define P9_XIP_SECTION_NAMES_HW(var)      \
+    P9_XIP_SECTION_NAMES(var,             \
+                         ".sbe",          \
+                         ".qme",          \
+                         ".xgpe",         \
+                         ".pgpe",         \
+                         ".core_restore", \
+                         ".ioppe",        \
+                         ".overlays",     \
+                         ".dyninits")
+
 /**************************************************************************/
 /* SBE Image                                                              */
 /**************************************************************************/
@@ -1882,6 +1912,7 @@ typedef enum
     P9_XIP_SECTION_SBE_HBBL        = P9_XIP_SECTIONS_PLUS(8),
     P9_XIP_SECTIONS_SBE            = P9_XIP_SECTIONS_PLUS(9) // # sections
 } p9_xip_section_sbe_t;
+
 #define P9_XIP_SECTION_NAMES_SBE(var)     \
     P9_XIP_SECTION_NAMES(var,             \
                          ".loader_text",  \
@@ -1893,95 +1924,80 @@ typedef enum
                          ".rings",        \
                          ".overrides",    \
                          ".hbbl")
+
 /**************************************************************************/
-/* Hardware Image                                                         */
-/**************************************************************************/
-typedef enum
-{
-    P9_XIP_SECTION_HW_SBE       = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_HW_CME       = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_HW_SGPE      = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_HW_PGPE      = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_HW_RESTORE   = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(5),
-    P9_XIP_SECTION_HW_RINGS     = P9_XIP_SECTIONS_PLUS(6),
-    P9_XIP_SECTION_HW_OVERLAYS  = P9_XIP_SECTIONS_PLUS(7),
-    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
-} p9_xip_section_hw_t;
-#define P9_XIP_SECTION_NAMES_HW(var)      \
-    P9_XIP_SECTION_NAMES(var,             \
-                         ".sbe",          \
-                         ".cme",          \
-                         ".sgpe",         \
-                         ".pgpe",         \
-                         ".core_restore", \
-                         ".ioppe",        \
-                         ".rings",        \
-                         ".overlays")
-/**************************************************************************/
-/* SGPE Image                                                             */
+/* QME Image                                                             */
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_SGPE_QPMR     = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_SGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTION_SGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
-    P9_XIP_SECTION_SGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_SGPE_RINGS    = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTIONS_SGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
-} p9_xip_section_sgpe_t;
-#define P9_XIP_SECTION_NAMES_SGPE(var)         \
+    P9_XIP_SECTION_QME_LVL1_BL   = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_QME_LVL2_BL   = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_QME_HCODE     = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_QME_RINGS     = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTIONS_QME          = P9_XIP_SECTIONS_PLUS(4) // # sections
+} p9_xip_section_qme_t;
+
+#define P9_XIP_SECTION_NAMES_QME(var)          \
     P9_XIP_SECTION_NAMES(var,                  \
-                         ".qpmr",              \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
                          ".hcode",             \
                          ".rings")
+
 /**************************************************************************/
-/* Core Restore Image                                                     */
-/**************************************************************************/
-typedef enum
-{
-    P9_XIP_SECTION_RESTORE_CPMR = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_RESTORE_SELF = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTIONS_RESTORE     = P9_XIP_SECTIONS_PLUS(2) // # sections
-} p9_xip_section_restore_t;
-#define P9_XIP_SECTION_NAMES_RESTORE(var)    \
-    P9_XIP_SECTION_NAMES(var,                \
-                         ".cpmr",            \
-                         ".self_restore")
-/**************************************************************************/
-/* CME Image                                                              */
+/* XGPE Image                                                             */
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_CME_HCODE     = P9_XIP_SECTIONS_PLUS(0),
-    P9_XIP_SECTION_CME_RINGS     = P9_XIP_SECTIONS_PLUS(1),
-    P9_XIP_SECTIONS_CME          = P9_XIP_SECTIONS_PLUS(2) // # sections
-} p9_xip_section_cme_t;
-#define P9_XIP_SECTION_NAMES_CME(var)          \
+    P9_XIP_SECTION_XGPE_XPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_XGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_XGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_XGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_XGPE_AUX_TASK = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_XGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
+} p9_xip_section_xgpe_t;
+
+#define P9_XIP_SECTION_NAMES_XGPE(var)         \
     P9_XIP_SECTION_NAMES(var,                  \
+                         ".xpmr_hdr",          \
+                         ".lvl1_bl",           \
+                         ".lvl2_bl",           \
                          ".hcode",             \
-                         ".rings")
+                         ".aux_task")
+
 /**************************************************************************/
 /* PGPE Image                                                             */
 /**************************************************************************/
 typedef enum
 {
-    P9_XIP_SECTION_PGPE_PPMR     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_PGPE_PPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
     P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
     P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
     P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTION_PGPE_AUX_TASK = P9_XIP_SECTIONS_PLUS(4),
-    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
+    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(4) // # sections
 } p9_xip_section_pgpe_t;
+
 #define P9_XIP_SECTION_NAMES_PGPE(var)         \
     P9_XIP_SECTION_NAMES(var,                  \
-                         ".ppmr_header",       \
+                         ".ppmr_hdr",          \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
-                         ".hcode",             \
-                         ".aux_task")
+                         ".hcode")
+
+/**************************************************************************/
+/* Core Restore Image                                                     */
+/**************************************************************************/
+typedef enum
+{
+    P9_XIP_SECTION_RESTORE_CPMR_HDR = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_RESTORE_SELF     = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTIONS_RESTORE         = P9_XIP_SECTIONS_PLUS(2) // # sections
+} p9_xip_section_restore_t;
+#define P9_XIP_SECTION_NAMES_RESTORE(var)    \
+    P9_XIP_SECTION_NAMES(var,                \
+                         ".cpmr_hdr",        \
+                         ".self_restore")
+
 /**************************************************************************/
 /* IOPPE Image                                                            */
 /**************************************************************************/
@@ -1992,11 +2008,15 @@ typedef enum
     P9_XIP_SECTION_IOPPE_IOO_NV   = P9_XIP_SECTIONS_PLUS(2),
     P9_XIP_SECTIONS_IOPPE         = P9_XIP_SECTIONS_PLUS(3) // # sections
 } p9_xip_section_ioppe_t;
+
 #define P9_XIP_SECTION_NAMES_IOPPE(var)        \
     P9_XIP_SECTION_NAMES(var,                  \
                          ".iof",               \
                          ".ioo_abus",          \
                          ".ioo_nv")
+
 #endif  // ifndef __ASSEMBLER__
+
 #endif  // __P10_IPL_IMAGE_H__
+
 // *INDENT-ON*

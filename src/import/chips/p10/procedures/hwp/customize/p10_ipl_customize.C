@@ -653,7 +653,7 @@ fapi_try_exit:
 //  uint32_t   i_maxRingSectionSize: Max ring section size
 //  void*      i_overlaysSection:    DD specific overlays ring section
 //  uint8_t    i_ddLevel:            DD level (to be used for TOR API level verif)
-//  uint8_t    i_sysPhase:           ={HB_SBE, RT_CME, RT_SGPE}
+//  uint8_t    i_sysPhase:           ={HB_SBE, RT_QME, RT_XGPE}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
 //  void*      i_ringBuf2:           Ring work buffer.
@@ -1015,7 +1015,7 @@ fapi_try_exit:
 //  uint32_t&  io_ringSectionSize:   Running size
 //  uint32_t   i_maxRingSectionSize: Max size
 //  void*      i_hwImage:            HW image
-//  uint8_t    i_sysPhase:           ={IPL, RT_CME, RT_SGPE}
+//  uint8_t    i_sysPhase:           ={IPL, RT_QME}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
 //  void*      i_ringBuf2:           Ring work buffer.
@@ -1089,6 +1089,10 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
         uint8_t l_chipletId;
         uint8_t l_evenOdd = 0;
 
+//
+//CMO-20190330: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
+//
+
         for (size_t iRing = 0; iRing < l_ringIdListSize; iRing++)
         {
             if ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EQ_INS &&
@@ -1117,10 +1121,10 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                     // - Fetch only EX+EQ VPD rings for SGPE.
 
                     if ( i_sysPhase == SYSPHASE_HB_SBE   ||
-                         ( i_sysPhase == SYSPHASE_RT_CME &&
+                         ( i_sysPhase == SYSPHASE_RT_QME &&
                            ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EC ||
                              l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EC ) )  ||
-                         ( i_sysPhase == SYSPHASE_RT_SGPE &&
+                         ( i_sysPhase == SYSPHASE_RT_XGPE &&
                            ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX ||
                              l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EQ ||
                              l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
@@ -1197,13 +1201,17 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
         uint8_t l_chipletId;
         int     l_id = 0;
 
+//
+//CMO-20190316: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
+//
+
         // Loop for EQ/EX/EC filling
-        for (auto eq = 0; eq < NUM_OF_QUADS; eq++)
+        for (auto eq = 0; eq < NUM_OF_QMES; eq++)
         {
             uint8_t   l_evenOdd = 0;
 
             // For EQ instances
-            if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
+            if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
             {
                 // Look for EQ instance in ring list
                 if (l_flagEQInstanceFound == false)
@@ -1226,8 +1234,8 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                     FAPI_DBG("EQ no. %02d; Even(0)/Odd(1):%d; InstanceId:0x%02x; RingName:%s ", eq, l_evenOdd, l_chipletId,
                              l_ringEQ.ringName);
 
-                    if ( ((0x0000000F << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >>
-                          ((l_chipletId - l_ringEQ.instanceIdMin)*CORES_PER_QUAD)) &
+                    if ( ((0x0000000F << ((NUM_OF_QMES - 1)*CORES_PER_QME)) >>
+                          ((l_chipletId - l_ringEQ.instanceIdMin)*CORES_PER_QME)) &
                          io_bootCoreMask )
                     {
                         // Update for ring in scan mode
@@ -1258,7 +1266,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                         if (l_ringStatusInMvpd == RING_FOUND)
                         {
                             l_instanceVpdRing.EQ |=
-                                (0x00F00000 >> (eq * CORES_PER_QUAD));
+                                (0x00F00000 >> (eq * CORES_PER_QME));
                         }
 
                         if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
@@ -1296,7 +1304,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
             // for each EQ chipletId there's two EX rings to be accommodated.
             for (auto ex = (2 * eq); ex < (2 * (eq + 1)); ex++)
             {
-                if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
+                if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
                 {
                     uint32_t   l_coreMask;
 
@@ -1335,9 +1343,9 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                             FAPI_DBG("EX no. %02d; Even(0)/Odd(1):%d; InstanceId:0x%02x; RingName:%s ",
                                      ex, l_evenOdd, l_chipletId, l_ringEX[inst].ringName);
 
-                            if ( ((l_coreMask << ((NUM_OF_QUADS - 1)*CORES_PER_QUAD)) >>
+                            if ( ((l_coreMask << ((NUM_OF_QMES - 1)*CORES_PER_QME)) >>
                                   ((l_chipletId - l_ringEX[inst].instanceIdMin)
-                                   *CORES_PER_QUAD)) & io_bootCoreMask )
+                                   *CORES_PER_QME)) & io_bootCoreMask )
                             {
                                 // Update for ring in scan mode
                                 l_ringStatusInMvpd = RING_SCAN;
@@ -1367,7 +1375,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                 if (l_ringStatusInMvpd == RING_FOUND)
                                 {
                                     l_instanceVpdRing.EX[inst] |=
-                                        (0x00C00000 >> (ex * (CORES_PER_QUAD / 2)));
+                                        (0x00C00000 >> (ex * (CORES_PER_QME / 2)));
                                 }
 
                                 if ((uint32_t)l_fapiRc == RC_XIPC_IMAGE_WOULD_OVERFLOW)
@@ -1392,10 +1400,10 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                             }
                         }
                     } // if (l_flagEXInstanceFound == true)
-                } // if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_SGPE) )
+                } // if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_XGPE) )
 
                 // For EC instances
-                if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_CME) )
+                if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_QME) )
                 {
                     l_evenOdd = 0;
 
@@ -1486,7 +1494,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                             l_chipletId++;
                         }
                     } // if (l_flagECInstanceFound == true)
-                } //if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_CME) )
+                } //if ( (i_sysPhase == SYSPHASE_HB_SBE || i_sysPhase == SYSPHASE_RT_QME) )
             } //for (auto ex = (2*eq); ex = (2*(eq+1)); ex++)
         }
     }
@@ -1555,8 +1563,12 @@ fapi_try_exit:
         FAPI_DBG("Chiplet number under process at image overflow  : %d", l_instanceVpdRing.chipletNumUnderProcess);
         FAPI_DBG("--------------------------------------------------------------");
 
+//
+//CMO-20190316: Remove all EX and even/odd support. Only process EQ (QME) and EC (Cores).
+//
+
         // Make sure EQ chiplet is captured and valid when image ran out-of-space
-        if ( l_eqNumWhenOutOfSpace < NUM_OF_QUADS )
+        if ( l_eqNumWhenOutOfSpace < NUM_OF_QMES )
         {
             // Process EQ and other chiplets in current quad
             do
@@ -1597,24 +1609,24 @@ fapi_try_exit:
                         uint32_t l_ecMask = l_instanceVpdRing.EC &
                                             (ODD_CORES_IN_EX >>
                                              (l_instanceVpdRing.chipletNumUnderProcess *
-                                              (CORES_PER_QUAD / 2)));
+                                              (CORES_PER_QME / 2)));
 
                         if (l_ecMask == 0)
                         {
                             l_activeCoreMask |=
                                 ( (ODD_CORES_IN_EX >>
                                    (l_instanceVpdRing.chipletNumUnderProcess *
-                                    (CORES_PER_QUAD / 2))) & io_bootCoreMask );
+                                    (CORES_PER_QME / 2))) & io_bootCoreMask );
                         }
                         else if (l_ecMask == (uint32_t)(ODD_CORES_IN_EX >>
                                                         (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QUAD / 2))) )
+                                                         (CORES_PER_QME / 2))) )
                         {
                             break;
                         }
                         else if (l_ecMask == (uint32_t)(HIGH_ORDER_ODD_CORE_IN_EX >>
                                                         (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QUAD / 2))) )
+                                                         (CORES_PER_QME / 2))) )
                         {
                             l_activeCoreMask |=
                                 ( (LOW_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess * 2)) &
@@ -1622,11 +1634,11 @@ fapi_try_exit:
                         }
                         else if (l_ecMask == (uint32_t)(LOW_ORDER_ODD_CORE_IN_EX >>
                                                         (l_instanceVpdRing.chipletNumUnderProcess *
-                                                         (CORES_PER_QUAD / 2))) )
+                                                         (CORES_PER_QME / 2))) )
                         {
                             l_activeCoreMask |=
                                 ( (HIGH_ORDER_ODD_CORE_IN_EX >> (l_instanceVpdRing.chipletNumUnderProcess *
-                                                                 (CORES_PER_QUAD / 2))) & io_bootCoreMask );
+                                                                 (CORES_PER_QME / 2))) & io_bootCoreMask );
                         }
                     }
                 }
@@ -1639,7 +1651,7 @@ fapi_try_exit:
                     // l_ecPos = 2 : Refer third  core in quad say EC-2 in EQ-0
                     // l_ecPos = 3 : Refer second core in quad say EC-1 in EQ-0
                     // l_ecPos = 4 : Refer first  core in quad say EC-0 in EQ-0
-                    uint8_t l_ecPos = ( (l_eqNumWhenOutOfSpace + 1) * CORES_PER_QUAD) -
+                    uint8_t l_ecPos = ( (l_eqNumWhenOutOfSpace + 1) * CORES_PER_QME) -
                                       l_instanceVpdRing.chipletNumUnderProcess;
 
                     // We have come to this point (EC chiplet) confirms that the
@@ -2424,8 +2436,7 @@ ReturnCode p10_ipl_customize (
 
             break;
 
-        case SYSPHASE_RT_CME:
-        case SYSPHASE_RT_SGPE:
+        case SYSPHASE_RT_QME:
 
             FAPI_ASSERT( io_imageSize == l_inputImageSize &&
                          io_ringSectionBufSize >= MAX_SEEPROM_IMAGE_SIZE, //Not subject to attrMaxSbeSeepromSize adjust
@@ -2437,7 +2448,7 @@ ReturnCode p10_ipl_customize (
                          set_RING_BUF_SIZE1(i_ringBufSize1).
                          set_RING_BUF_SIZE2(i_ringBufSize2).
                          set_OCCURRENCE(3),
-                         "One or more invalid input buffer sizes for RT_CME or RT_SGPE phase:\n"
+                         "One or more invalid input buffer sizes for RT_QME phase:\n"
                          "  l_inputImageSize=0x%016llx\n"
                          "  io_imageSize=0x%016llx\n"
                          "  io_ringSectionBufSize=0x%016llx\n",
@@ -2449,7 +2460,7 @@ ReturnCode p10_ipl_customize (
 
 
             //
-            // Next, get the DD level specific set of CME/SGPE rings from the HW image.
+            // Next, get the DD level specific set of QME rings from the HW image.
             //
 
             // First, determine the DD level
@@ -2464,16 +2475,8 @@ ReturnCode p10_ipl_customize (
             FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
 
             // Setup up nested section ID combination for current PPE image
-            if ( i_sysPhase == SYSPHASE_RT_CME )
-            {
-                mainSectionID = P9_XIP_SECTION_HW_CME;
-                subSectionID = P9_XIP_SECTION_CME_RINGS;
-            }
-            else
-            {
-                mainSectionID = P9_XIP_SECTION_HW_SGPE;
-                subSectionID = P9_XIP_SECTION_SGPE_RINGS;
-            }
+            mainSectionID = P9_XIP_SECTION_HW_QME;
+            subSectionID = P9_XIP_SECTION_QME_RINGS;
 
             l_rc = p9_xip_get_sub_section( io_image,
                                            mainSectionID,

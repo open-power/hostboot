@@ -28,16 +28,15 @@
 #ifndef WIN32
 #include <fapi2.H>
 
-#define NUM_OF_CORES     (uint8_t)24
-#define NUM_OF_CMES      (uint8_t)12
-#define NUM_OF_QUADS     (uint8_t) 6
-#define CORES_PER_QUAD   (NUM_OF_CORES/NUM_OF_QUADS)
+#define NUM_OF_CORES     (uint8_t)32
+#define NUM_OF_QMES      (uint8_t)8
+#define CORES_PER_QME    (NUM_OF_CORES/NUM_OF_QMES)
 
 enum SYSPHASE
 {
     SYSPHASE_HB_SBE = 0,
-    SYSPHASE_RT_CME = 1,
-    SYSPHASE_RT_SGPE = 2,
+    SYSPHASE_RT_QME = 1,
+    SYSPHASE_RT_XGPE = 2,
     NOOF_SYSPHASES = 3,
 };
 
@@ -95,7 +94,7 @@ extern "C"
 ///                                         RT_{CME,SGPE}:
 ///                                             In:  >=MAX_SBE_SEEPROM_SIZE
 ///                                             Out: Final size
-/// @param[in] i_sysPhase                => ={HB_SBE, RT_CME, RT_SGPE}
+/// @param[in] i_sysPhase                => ={HB_SBE, RT_QME, RT_XGPE}
 /// @param[in] i_modeBuild               => ={IPL, REBUILD} - Not used in P9
 /// @param[in] i_ringBuf1                => Caller supplied in-memory buffer
 ///                                         for VPD rings
