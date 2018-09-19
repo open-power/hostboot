@@ -39,6 +39,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errluserdetails.H>
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
@@ -49,6 +50,8 @@
 #include <i2c/tpmddreasoncodes.H>
 #include <i2c/i2cif.H>
 #include <secureboot/service.H>
+#include <secureboot/trustedbootif.H>
+#include <scom/centaurScomCache.H> // for TRACE_ERR_FMT, TRACE_ERR_ARGS
 #include "tpmdd.H"
 #include "errlud_i2c.H"
 
@@ -139,13 +142,13 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmPerformOp(): TPM requested not enabled!"
-                       "p/e/dA=%d/%d/0x%X, OP=%d",
-                       tpmInfo.port,
-                       tpmInfo.engine, tpmInfo.devAddr, tpmInfo.operation);
+                       "e/p/dA=%d/%d/0x%X, OP=%d",
+                       tpmInfo.engine,
+                       tpmInfo.port, tpmInfo.devAddr, tpmInfo.operation);
 
             /*@
              * @errortype
-             * @reasoncode     TPM_DEVICE_NOT_AVAILABLE
+             * @reasoncode     TPM_DISABLED_VIA_MRW
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       TPMDD_PERFORM_OP
              * @userdata1      TPM
@@ -154,7 +157,7 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            TPMDD_PERFORM_OP,
-                                           TPM_DEVICE_NOT_AVAILABLE,
+                                           TPM_DISABLED_VIA_MRW,
                                            TARGETING::get_huid(i_target),
                                            i_opType,
                                            true /*Add HB SW Callout*/ );
@@ -181,10 +184,10 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
             {
                 TRACFCOMP( g_trac_tpmdd,
                            ERR_MRK"tpmPerformOp(): Operation Overflow! "
-                           "p/e/dA=%d/%d/0x%X, OP=%d, "
+                           "e/p/dA=%d/%d/0x%X, OP=%d, "
                            "blen=%d",
-                           tpmInfo.port,
-                           tpmInfo.engine, tpmInfo.devAddr,
+                           tpmInfo.engine,
+                           tpmInfo.port, tpmInfo.devAddr,
                            tpmInfo.operation, io_buflen);
 
 
@@ -269,9 +272,9 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmPerformOp(): Invalid TPM Operation!"
-                       "p/e/dA=%d/%d/0x%X, OP=%d, Type=%d",
-                       tpmInfo.port,
-                       tpmInfo.engine, tpmInfo.devAddr,
+                       "e/p/dA=%d/%d/0x%X, OP=%d, Type=%d",
+                       tpmInfo.engine,
+                       tpmInfo.port, tpmInfo.devAddr,
                        tpmInfo.operation, i_opType);
 
             /*@
@@ -319,45 +322,55 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 //-------------------------------------------------------------------
 //tpmPresence
 //-------------------------------------------------------------------
-bool tpmPresence ( TARGETING::Target * i_target)
+
+bool tpmPresence (TARGETING::Target* i_pTpm)
 {
+    TRACFCOMP(g_trac_tpmdd, ENTER_MRK
+        "tpmPresence: Attempting to detect TPM with HUID=0x%08X.",
+        TARGETING::get_huid(i_pTpm));
 
-    TRACDCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence()");
-    TRACUCOMP(g_trac_tpmdd, ENTER_MRK"tpmPresence() : "
-              "tpm tgt=0x%X ",
-              TARGETING::get_huid(i_target));
+    assert(i_pTpm != nullptr,
+           "BUG! Caller passed in nullptr for TPM target");
 
-    errlHndl_t err = NULL;
-    bool l_present = true;
+    // Input target must have a TPM_INFO attribute (only applicable to TPM
+    // targets), enforced by call to tpmReadAttributes
+
+    errlHndl_t pError = nullptr;
+    bool present = false;
+
+    const auto forceTrace = false; // For debug
+    const auto tpmRequired = TRUSTEDBOOT::isTpmRequired();
+    const auto verbose = tpmRequired || forceTrace;
 
     tpm_info_t tpmInfo;
 
-    tpmInfo.offset = 0;
     do
     {
-
-        // Read Attributes needed to complete the operation
-        err = tpmReadAttributes( i_target,
-                                 tpmInfo,
-                                 TPM_LOCALITY_0);
-
-        if( err )
+        pError = tpmReadAttributes(i_pTpm,
+                                   tpmInfo,
+                                   TPM_LOCALITY_0);
+        if(pError)
         {
-            TRACFCOMP(g_trac_tpmdd,
-                     ERR_MRK"Error in tpmPresence::tpmReadAttributes() "
-                      "RC 0x%X", err->reasonCode());
-            l_present = false;
-            delete err;
-            err = NULL;
+            TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                "tpmPresence: Bug! Failed in call to tpmReadAttributes() for "
+                "TPM with HUID=0x%08X. "
+                TRACE_ERR_FMT,
+                get_huid(i_pTpm),
+                TRACE_ERR_ARGS(pError));
             break;
         }
 
         // Ensure the TPM is enabled
         if (!tpmInfo.tpmEnabled)
         {
-            TRACUCOMP(g_trac_tpmdd,
-                      INFO_MRK"tpmPresence : Device not enabled");
-            l_present = false;
+            // It is not an error condition for a TPM to be disabled in the
+            // object model; in that case don't complain if the TPM is not
+            // present.
+            TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                "tpmPresence: TPM with HUID=0x%08X is defined "
+                "in the object model blueprint but is flagged as "
+                "disabled/ignored.",
+                get_huid(i_pTpm));
             break;
         }
 
@@ -372,141 +385,238 @@ bool tpmPresence ( TARGETING::Target * i_target)
                 TARGETING::ATTR_SCOM_SWITCHES>();
             if(!scomSwitches.useXscom)
             {
-                TRACFCOMP(g_trac_tpmdd,
-                    INFO_MRK "tpmPresence: TPM with HUID 0x%08X not "
+                TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                    "tpmPresence: TPM with HUID=0x%08X is not "
                     "accessible, as the proc that drives it (HUID 0x%08X) "
                     "is not XSCOM accessible",
-                    get_huid(tpmInfo.tpmTarget),
+                    get_huid(i_pTpm),
                     get_huid(tpmInfo.i2cTarget));
-                l_present = false;
                 break;
             }
         }
 
         // Verify the TPM is supported by this driver by reading and
-        //  comparing the vendorid
+        // comparing the vendor ID
         uint32_t vendorId = 0;
-        size_t   vendorIdSize = 4;
-
-
-        // Set the offset for the vendor reg
+        const size_t vendorIdSize = sizeof(vendorId);
         tpmInfo.offset = TPMDD::I2C_REG_VENDOR;
 
-
-        err = tpmRead( &vendorId,
-                       vendorIdSize,
-                       tpmInfo,
-                       true /* silent */ );
-
-        if ( NULL != err )
+        pError = tpmRead(&vendorId,
+                         vendorIdSize,
+                         tpmInfo,
+                         true /* silent */ );
+        if (pError)
         {
-            TRACUCOMP(g_trac_tpmdd,
-                     ERR_MRK"tpmPresence : ReadVendorID failed!"
-                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X RC=0x%X",
-                      TARGETING::get_huid(i_target),
-                      tpmInfo.port,
-                      tpmInfo.engine,
-                      static_cast<uint64_t>(tpmInfo.devAddr),
-                      err->reasonCode()
-                      );
-            l_present = false;
-            delete err;
-            err = NULL;
+            if(verbose)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: tpmRead: Failed to read TPM vendor ID! "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X. "
+                    TRACE_ERR_FMT,
+                    TARGETING::get_huid(i_pTpm),
+                    tpmInfo.engine,
+                    tpmInfo.port,
+                    static_cast<uint64_t>(tpmInfo.devAddr),
+                    TRACE_ERR_ARGS(pError));
+            }
             break;
 
         }
-        else if ((TPMDD::TPM_VENDORID_MASK & vendorId)
-                   != TPMDD::TPM_VENDORID)
+        else if (   (TPMDD::TPM_VENDORID_MASK & vendorId)
+                 != (TPMDD::TPM_VENDORID))
         {
-            TRACUCOMP(g_trac_tpmdd,
-                     ERR_MRK"tpmPresence : ReadVendorID mismatch!"
-                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
-                      " found ID=0x%X exp ID=0x%X",
-                      TARGETING::get_huid(i_target),
-                      tpmInfo.port,
-                      tpmInfo.engine,
-                      static_cast<uint64_t>(tpmInfo.devAddr),
-                      vendorId, TPMDD::TPM_VENDORID
-                      );
-            l_present = false;
+            if(verbose)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: Sampled TPM vendor ID did not match expected "
+                    "vendor ID! "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                    "Actual vendor ID=0x%08X, expected vendor ID=0x%08X.",
+                    TARGETING::get_huid(i_pTpm),
+                    tpmInfo.engine,
+                    tpmInfo.port,
+                    static_cast<uint64_t>(tpmInfo.devAddr),
+                    vendorId,
+                    TPMDD::TPM_VENDORID);
+            }
+
+            /*@
+             * @errortype
+             * @moduleid         TPMDD_TPMPRESENCE
+             * @reasoncode       TPM_RC_UNEXPECTED_VENDOR_ID
+             * @userdata1[0:31]  Expected vendor ID
+             * @userdata1[32:63] Actual vendor ID
+             * @userdata2        TPM HUID
+             * @devdesc          Unexpected vendor ID read from TPM
+             * @custdesc         Trusted boot problem detected
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TPMDD_TPMPRESENCE,
+                TPM_RC_UNEXPECTED_VENDOR_ID,
+                TWO_UINT32_TO_UINT64(TPMDD::TPM_VENDORID,vendorId),
+                get_huid(i_pTpm),
+                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
             break;
         }
-
 
         // Verify the TPM is supported by this driver by reading and
-        //  comparing the familyid
+        // comparing the family ID
         uint8_t familyId = 0;
-        size_t  familyIdSize = 1;
-
-
-        // Set the offset for the vendor reg
+        const size_t familyIdSize = sizeof(familyId);
         tpmInfo.offset = TPMDD::I2C_REG_FAMILYID;
 
-
-        err = tpmRead( &familyId,
-                       familyIdSize,
-                       tpmInfo,
-                       true /* silent */);
-
-        if ( NULL != err )
+        pError = tpmRead(&familyId,
+                         familyIdSize,
+                         tpmInfo,
+                         true /* silent */);
+        if (pError)
         {
-            TRACUCOMP(g_trac_tpmdd,
-                     ERR_MRK"tpmPresence : ReadFamilyID failed!"
-                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X RC=0x%X",
-                      TARGETING::get_huid(i_target),
-                      tpmInfo.port,
-                      tpmInfo.engine,
-                      static_cast<uint64_t>(tpmInfo.devAddr),
-                      err->reasonCode()
-                      );
-            l_present = false;
-            delete err;
-            err = NULL;
+            if(verbose)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: tpmRead: Failed to read TPM family ID! "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X. "
+                    TRACE_ERR_FMT,
+                    TARGETING::get_huid(i_pTpm),
+                    tpmInfo.engine,
+                    tpmInfo.port,
+                    static_cast<uint64_t>(tpmInfo.devAddr),
+                    TRACE_ERR_ARGS(pError));
+            }
             break;
 
         }
-        else if ((TPMDD::TPM_FAMILYID_MASK & familyId)
-                 != TPMDD::TPM_FAMILYID)
+        else if (   (TPMDD::TPM_FAMILYID_MASK & familyId)
+                 != (TPMDD::TPM_FAMILYID))
         {
-            TRACUCOMP(g_trac_tpmdd,
-                     ERR_MRK"tpmPresence : FamilyID mismatch!"
-                      "tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
-                      " found ID=0x%X exp ID=0x%X",
-                      TARGETING::get_huid(i_target),
-                      tpmInfo.port,
-                      tpmInfo.engine,
-                      static_cast<uint64_t>(tpmInfo.devAddr),
-                      familyId, TPMDD::TPM_FAMILYID
-                      );
-            l_present = false;
+            if(verbose)
+            {
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmPresence: Sampled family ID did not match expected "
+                    "family ID! "
+                    "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                    "actual family ID=0x%02X, expected family ID=0x%02X.",
+                    TARGETING::get_huid(i_pTpm),
+                    tpmInfo.engine,
+                    tpmInfo.port,
+                    static_cast<uint64_t>(tpmInfo.devAddr),
+                    familyId,
+                    TPMDD::TPM_FAMILYID);
+            }
+
+            /*@
+             * @errortype
+             * @moduleid         TPMDD_TPMPRESENCE
+             * @reasoncode       TPM_RC_UNEXPECTED_FAMILY_ID
+             * @userdata1[24:31] Expected family ID
+             * @userdata1[56:63] Actual family ID
+             * @userdata2        TPM HUID
+             * @devdesc          Unexpected family ID read from TPM
+             * @custdesc         Trusted boot problem detected
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TPMDD_TPMPRESENCE,
+                TPM_RC_UNEXPECTED_FAMILY_ID,
+                TWO_UINT32_TO_UINT64(TPMDD::TPM_FAMILYID,familyId),
+                get_huid(i_pTpm),
+                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
             break;
         }
         else
         {
-            TRACFCOMP(g_trac_tpmdd,
-                      INFO_MRK"tpmPresence : TPM Detected!"
-                      " tpm tgt=0x%X p/e/dA=%d/%d/0x%X"
-                      " Vendor ID=0x%X, Family ID=0x%X",
-                      TARGETING::get_huid(i_target),
-                      tpmInfo.port,
-                      tpmInfo.engine,
-                      static_cast<uint64_t>(tpmInfo.devAddr),
-                      vendorId, familyId
-                      );
-            l_present = true;
+            TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                "tpmPresence: TPM Detected! "
+                "TPM HUID=0x%08X, e/p/dA=%d/%d/0x%02X, "
+                "vendor ID=0x%08X, family ID=0x%02X.",
+                TARGETING::get_huid(i_pTpm),
+                tpmInfo.engine,
+                tpmInfo.port,
+                static_cast<uint64_t>(tpmInfo.devAddr),
+                vendorId,
+                familyId);
+            present = true;
         }
-
-
-
 
     } while( 0 );
 
-    TRACDCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : presence : %d",
-              l_present);
-    TRACUCOMP(g_trac_tpmdd, EXIT_MRK"tpmPresence() : "
-              "tpm tgt=0x%X presence=%d",
-              TARGETING::get_huid(i_target), l_present);
-    return l_present;
+    if(pError)
+    {
+        // If a TPM is required to boot the system, then escalate TPM
+        // presence failure as an unrecoverable error log, and link its PLID to
+        // a new log explicitly indicating the TPM was not detected properly.
+        if(tpmRequired)
+        {
+            pError->collectTrace(TPMDD_COMP_NAME);
+            pError->collectTrace(SECURE_COMP_NAME);
+            pError->collectTrace(TRBOOT_COMP_NAME);
+            pError->collectTrace(I2C_COMP_NAME);
+
+            ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+            const auto plid = pError->plid();
+            pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            errlCommit(pError,TPMDD_COMP_ID);
+
+            /*@
+             * @errortype
+             * @moduleid   TPMDD_TPMPRESENCE
+             * @reasoncode TPM_RC_TPM_NOT_DETECTED
+             * @userdata1  TPM HUID
+             * @devdesc    The system's "TPM Required" policy is set to
+             *     "TPM Required" and a TPM that was expected to be present was
+             *     not detected properly.  The TPM in question will eventually
+             *     be flagged as TPM_UNUSABLE for redundancy calculations,
+             *     Possible causes: (1) absent or improperly seated TPM,
+             *     (2) TPM hardware failure, (3) firmware bug, (4) incorrect TPM
+             *     part, (5) I2C bus failure, (6) processor failure, (7) other
+             *     I2C device holding the I2C bus.  See earlier error logs with
+             *     same PLID for additional details.
+             * @custdesc   A trusted platform module (TPM) that was expected
+             *     to be present was not detected properly
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                TPMDD_TPMPRESENCE,
+                TPM_RC_TPM_NOT_DETECTED,
+                get_huid(i_pTpm),
+                0,
+                ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            pError->plid(plid);
+            ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+            // Hardware/Procedure callouts/trace should have been added to the
+            // original log but the main HW/SW callouts/traces are replicated here
+            // just in case.
+            pError->addHwCallout(i_pTpm,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
+
+            pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_LOW);
+
+            pError->collectTrace(TPMDD_COMP_NAME);
+            pError->collectTrace(SECURE_COMP_NAME);
+            pError->collectTrace(TRBOOT_COMP_NAME);
+            pError->collectTrace(I2C_COMP_NAME);
+
+            errlCommit(pError,TPMDD_COMP_ID);
+        }
+        else
+        {
+            delete pError;
+            pError = nullptr;
+        }
+    }
+
+    TRACFCOMP(g_trac_tpmdd, EXIT_MRK
+        "tpmPresence: TPM with HUID=0x%08X, presence=%d",
+        TARGETING::get_huid(i_pTpm), present);
+
+    return present;
 }
 
 errlHndl_t tpmPresenceDetect(DeviceFW::OperationType i_opType,
@@ -603,10 +713,10 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmRead(): I2C Read-Offset failed! "
-                              "p/e/dA=%d/%d/0x%X, OP=%d, "
+                              "e/p/dA=%d/%d/0x%X, OP=%d, "
                               "offset=0x%X, aS=%d, len=%d",
-                              i_tpmInfo.port,
-                              i_tpmInfo.engine, i_tpmInfo.devAddr,
+                              i_tpmInfo.engine,
+                              i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_tpmInfo.offset, byteAddrSize, i_buflen);
                     TRACFBIN(g_trac_tpmdd, "byteAddr[]",
@@ -630,10 +740,10 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmRead(): I2C Read failed! "
-                              "p/e/dA=%d/%d/0x%X, OP=%d, "
+                              "e/p/dA=%d/%d/0x%X, OP=%d, "
                               "len=%d",
-                              i_tpmInfo.port,
-                              i_tpmInfo.engine, i_tpmInfo.devAddr,
+                              i_tpmInfo.engine,
+                              i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
 
@@ -660,11 +770,11 @@ errlHndl_t tpmRead ( void * o_buffer,
 
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmRead(): Error! "
-                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
-                                   i_tpmInfo.port,
-                                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.port, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err_RETRY->reasonCode(),
                                    err_RETRY->eid(),
@@ -677,12 +787,12 @@ errlHndl_t tpmRead ( void * o_buffer,
                         // Add data to original error
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmRead(): Another Error! "
-                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "plid=0x%X, retry/MAX=%d/%d. "
                                    "Delete error and retry",
-                                   i_tpmInfo.port,
-                                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.port, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
                                    retry, TPM_MAX_RETRIES);
@@ -708,11 +818,11 @@ errlHndl_t tpmRead ( void * o_buffer,
                 {
                     TRACFCOMP( g_trac_tpmdd,
                                ERR_MRK"tpmRead(): No More Retries! "
-                               "p/e/dA=%d/%d/0x%X, OP=%d, "
+                               "e/p/dA=%d/%d/0x%X, OP=%d, "
                                "Error rc=0x%X, eid=%d, "
                                "retry/MAX=%d/%d. Returning Error",
-                               i_tpmInfo.port,
-                               i_tpmInfo.engine, i_tpmInfo.devAddr,
+                               i_tpmInfo.engine,
+                               i_tpmInfo.port, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
                                retry, TPM_MAX_RETRIES);
@@ -830,10 +940,10 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmWrite(): I2C Write-Offset! "
-                              "p/e/dA=%d/%d/0x%X, OP=%d, "
+                              "e/p/dA=%d/%d/0x%X, OP=%d, "
                               "offset=0x%X, aS=%d, len=%d",
-                              i_tpmInfo.port,
-                              i_tpmInfo.engine, i_tpmInfo.devAddr,
+                              i_tpmInfo.engine,
+                              i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_tpmInfo.offset, byteAddrSize, i_buflen);
                     TRACFBIN(g_trac_tpmdd, "byteAddr[]",
@@ -857,10 +967,10 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP(g_trac_tpmdd,
                               ERR_MRK"tpmWrite(): I2C Write failed! "
-                              "p/e/dA=%d/%d/0x%X, OP=%d, "
+                              "e/p/dA=%d/%d/0x%X, OP=%d, "
                               "len=%d",
-                              i_tpmInfo.port,
-                              i_tpmInfo.engine, i_tpmInfo.devAddr,
+                              i_tpmInfo.engine,
+                              i_tpmInfo.port, i_tpmInfo.devAddr,
                               i_tpmInfo.operation,
                               i_buflen);
 
@@ -887,11 +997,11 @@ errlHndl_t tpmWrite ( void * i_buffer,
 
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmWrite(): RETRY Error! "
-                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X, "
                                    "retry/MAX=%d/%d. Save error and retry",
-                                   i_tpmInfo.port,
-                                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.port, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err_RETRY->reasonCode(),
                                    err_RETRY->eid(),
@@ -904,12 +1014,12 @@ errlHndl_t tpmWrite ( void * i_buffer,
                         // Add data to original RETRY error
                         TRACFCOMP( g_trac_tpmdd,
                                    ERR_MRK"tpmWrite(): Another RETRY Error! "
-                                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                                    "rc=0x%X, eid=0x%X "
                                    "plid=0x%X, retry/MAX=%d/%d. "
                                    "Delete error and retry",
-                                   i_tpmInfo.port,
-                                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                                   i_tpmInfo.engine,
+                                   i_tpmInfo.port, i_tpmInfo.devAddr,
                                    i_tpmInfo.operation,
                                    err->reasonCode(), err->eid(), err->plid(),
                                    retry, TPM_MAX_RETRIES);
@@ -935,11 +1045,11 @@ errlHndl_t tpmWrite ( void * i_buffer,
                 {
                     TRACFCOMP( g_trac_tpmdd,
                                ERR_MRK"tpmWrite(): No More Retries! "
-                               "p/e/dA=%d/%d/0x%X, OP=%d, "
+                               "e/p/dA=%d/%d/0x%X, OP=%d, "
                                "Error rc=0x%X, eid=%d, "
                                "retry/MAX=%d/%d. Returning Error",
-                               i_tpmInfo.port,
-                               i_tpmInfo.engine, i_tpmInfo.devAddr,
+                               i_tpmInfo.engine,
+                               i_tpmInfo.port, i_tpmInfo.devAddr,
                                i_tpmInfo.operation,
                                err->reasonCode(), err->eid(),
                                retry, TPM_MAX_RETRIES);
@@ -1217,25 +1327,32 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                ( tpmData ) ) )
 
         {
-            TRACFCOMP( g_trac_tpmdd,
-                       ERR_MRK"tpmReadAttributes() - ERROR reading "
-                       "attributes for tgt=0x%X!",
-                       TARGETING::get_huid(i_target));
+            const auto type = i_target ?
+                i_target->getAttr<TARGETING::ATTR_TYPE>() : 0;
+
+            TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                "tpmReadAttributes: Failed to read TPM_INFO "
+                "attribute from target HUID=0x%08X of type=0x%08X.",
+                TARGETING::get_huid(i_target),
+                type);
 
                 /*@
                  * @errortype
-                 * @reasoncode       TPM_ATTR_INFO_NOT_FOUND
-                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid         TPMDD_READATTRIBUTES
-                 * @userdata1        HUID of target
-                 * @userdata2        0
-                 * @devdesc          TPM attribute was not found
+                 * @reasoncode TPM_ATTR_INFO_NOT_FOUND
+                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   TPMDD_READATTRIBUTES
+                 * @userdata1  HUID of target
+                 * @userdata2  Type of target
+                 * @devdesc    TPM_INFO attribute was not found for the
+                 *     requested target
+                 * @custdesc   Unexpected trusted boot related failure
                  */
                 err = new ERRORLOG::ErrlEntry(
                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               TPMDD_READATTRIBUTES,
                                               TPM_ATTR_INFO_NOT_FOUND,
-                                              TARGETING::get_huid(i_target));
+                                              TARGETING::get_huid(i_target),
+                                              type);
 
                 // Could be FSP or HB code's fault
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1365,10 +1482,10 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, %d/%d/0x%X "
+    TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, e/p/dA=%d/%d/0x%X "
               "En=%d, aS=%d, aO=%d",
               TARGETING::get_huid(i_target),
-              io_tpmInfo.port, io_tpmInfo.engine, io_tpmInfo.devAddr,
+              io_tpmInfo.engine, io_tpmInfo.port, io_tpmInfo.devAddr,
               io_tpmInfo.tpmEnabled,
               io_tpmInfo.addrSize, tpmData.byteAddrOffset);
 
@@ -1566,9 +1683,9 @@ errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
         {
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmReadSTSRegValid(): Timeout! "
-                       "p/e/dA=%d/%d/0x%X, %02X",
-                       i_tpmInfo.port,
-                       i_tpmInfo.engine, i_tpmInfo.devAddr,
+                       "e/p/dA=%d/%d/0x%X, %02X",
+                       i_tpmInfo.engine,
+                       i_tpmInfo.port, i_tpmInfo.devAddr,
                        o_stsReg.value);
 
             /*@
@@ -1676,10 +1793,10 @@ errlHndl_t tpmPollForCommandReady( const tpm_info_t & i_tpmInfo)
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmPollForCommandReady() - "
                    "Timeout polling for command ready! "
-                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                    "STS=0x%X",
-                   i_tpmInfo.port,
-                   i_tpmInfo.engine, i_tpmInfo.devAddr, i_tpmInfo.operation,
+                   i_tpmInfo.engine,
+                   i_tpmInfo.port, i_tpmInfo.devAddr, i_tpmInfo.operation,
                    stsReg.value );
 
         /*@
@@ -1768,10 +1885,10 @@ errlHndl_t tpmPollForDataAvail( const tpm_info_t & i_tpmInfo)
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmPollForDataAvail() - "
                    "Timeout polling for dataAvail! "
-                   "p/e/dA=%d/%d/0x%X, OP=%d, "
+                   "e/p/dA=%d/%d/0x%X, OP=%d, "
                    "STS=0x%X",
-                   i_tpmInfo.port,
-                   i_tpmInfo.engine, i_tpmInfo.devAddr, i_tpmInfo.operation,
+                   i_tpmInfo.engine,
+                   i_tpmInfo.port, i_tpmInfo.devAddr, i_tpmInfo.operation,
                    stsReg.value );
 
         /*@
@@ -1932,10 +2049,10 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             // TPM is not expecting more data, we overflowed
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Overflow! "
-                       "p/e/dA=%d/%d/0x%X, blen=%d, "
+                       "e/p/dA=%d/%d/0x%X, blen=%d, "
                        "clen=%d",
-                       i_tpmInfo.port,
-                       i_tpmInfo.engine, i_tpmInfo.devAddr,
+                       i_tpmInfo.engine,
+                       i_tpmInfo.port, i_tpmInfo.devAddr,
                        i_buflen, curByte);
 
             /*@
@@ -2018,10 +2135,10 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmWriteFifo(): Timeout! "
-                   "p/e/dA=%d/%d/0x%X, blen=%d, "
+                   "e/p/dA=%d/%d/0x%X, blen=%d, "
                    "clen=%d",
-                   i_tpmInfo.port,
-                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                   i_tpmInfo.engine,
+                   i_tpmInfo.port, i_tpmInfo.devAddr,
                    i_buflen, curByte);
 
         /*@
@@ -2060,10 +2177,10 @@ errlHndl_t tpmWriteFifo( const tpm_info_t & i_tpmInfo,
             // TPM is expecting more data even though we think we are done
             TRACFCOMP( g_trac_tpmdd,
                        ERR_MRK"tpmWriteFifo(): Data Underflow! "
-                       "p/e/dA=%d/%d/0x%X, blen=%d, "
+                       "e/p/dA=%d/%d/0x%X, blen=%d, "
                        "clen=%d",
-                       i_tpmInfo.port,
-                       i_tpmInfo.engine, i_tpmInfo.devAddr,
+                       i_tpmInfo.engine,
+                       i_tpmInfo.port, i_tpmInfo.devAddr,
                        i_buflen, curByte);
 
             /*@
@@ -2137,10 +2254,10 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
                 // TPM is expecting more data even though we think we are done
                 TRACFCOMP( g_trac_tpmdd,
                            ERR_MRK"tpmReadFifo(): Data Overflow! "
-                           "p/e/dA=%d/%d/0x%X, blen=%d, "
+                           "e/p/dA=%d/%d/0x%X, blen=%d, "
                            "clen=%d",
-                           i_tpmInfo.port,
-                           i_tpmInfo.engine, i_tpmInfo.devAddr,
+                           i_tpmInfo.engine,
+                           i_tpmInfo.port, i_tpmInfo.devAddr,
                            io_buflen, curByte + burstCount);
 
                 /*@
@@ -2200,10 +2317,10 @@ errlHndl_t tpmReadFifo( const tpm_info_t & i_tpmInfo,
     {
         TRACFCOMP( g_trac_tpmdd,
                    ERR_MRK"tpmReadFifo(): Timeout! "
-                   "p/e/dA=%d/%d/0x%X, blen=%d, "
+                   "e/p/dA=%d/%d/0x%X, blen=%d, "
                    "clen=%d",
-                   i_tpmInfo.port,
-                   i_tpmInfo.engine, i_tpmInfo.devAddr,
+                   i_tpmInfo.engine,
+                   i_tpmInfo.port, i_tpmInfo.devAddr,
                    io_buflen, curByte);
 
         /*@
