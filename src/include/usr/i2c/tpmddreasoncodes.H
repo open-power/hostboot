@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ enum tpmModuleId
     TPMDD_READFIFO                         = 0x0A,
     TPMDD_READSTSREGVALID                  = 0x0B,
     TPMDD_TPMPRESENCEDETECT                = 0x0C,
+    TPMDD_TPMPRESENCE                      = 0x0D,
 };
 
 /**
@@ -81,8 +82,11 @@ enum tpmReasonCode
     TPM_OVERFLOW_ERROR                   = TPMDD_COMP_ID | 0x08,
     TPM_UNDERFLOW_ERROR                  = TPMDD_COMP_ID | 0x09,
     TPM_TIMEOUT                          = TPMDD_COMP_ID | 0x0A,
-    TPM_DEVICE_NOT_AVAILABLE             = TPMDD_COMP_ID | 0x0B,
+    TPM_DISABLED_VIA_MRW                 = TPMDD_COMP_ID | 0x0B,
     TPM_BUS_SPEED_LOOKUP_FAIL            = TPMDD_COMP_ID | 0x0C,
+    TPM_RC_TPM_NOT_DETECTED              = TPMDD_COMP_ID | 0x0D,
+    TPM_RC_UNEXPECTED_VENDOR_ID          = TPMDD_COMP_ID | 0x0E,
+    TPM_RC_UNEXPECTED_FAMILY_ID          = TPMDD_COMP_ID | 0x0F,
 };
 
 };  // end TPMDD

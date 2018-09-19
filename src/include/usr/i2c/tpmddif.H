@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,19 +78,40 @@ struct tpm_info_t
     uint8_t devAddr;            ///< I2C Address
     size_t  offset;             ///< TPM Device register offset
     tpm_addr_size_t addrSize;   ///< I2C Addr size
+
+    /**
+     *  @brief Construct a default tpm_info_t
+     */
+    tpm_info_t()
+        : operation(TPM_OP_LASTOP),
+          i2cMasterPath(),
+          i2cTarget(nullptr),
+          tpmTarget(nullptr),
+          busFreq(0),
+          port(0),
+          engine(0),
+          tpmEnabled(false),
+          devAddr(0),
+          offset(0),
+          addrSize(LAST_DEVICE_TYPE)
+    {
+    }
 };
 
 /**
+ * @brief Determine if requested TPM is present and enabled in the system
  *
- * @brief Determine if targeted TPM is present and enabled in the system
+ * @par Detailed Description:
+ *     Determines if requested TPM is present and enabled in the system.  If the
+ *     "TPM Required" policy is set to "TPM Required" and a blueprint TPM (which
+ *     is specified as enabled in the object model) is not detected properly,
+ *     the function will throw error logs to help diagnose the problem.
  *
- * @param[in] i_target Target node
+ * @param[in] i_pTpm TPM target; must be of TPM type and must not be nullptr
  *
- * @param[in] i_chip Select primary vs secondary TPM
- *
- * @return true if device is present
+ * @return bool Whether device is present (true) or not (false)
  */
-bool tpmPresence ( TARGETING::Target * i_target);
+bool tpmPresence (TARGETING::Target* i_pTpm);
 
 /**
  * @brief this function will read all of the associated attributes needed
