@@ -120,11 +120,11 @@ enum TorMagicNum
 {
     TOR_MAGIC       = (uint32_t)0x544F52  ,   // "TOR"
     TOR_MAGIC_HW    = (uint32_t)0x544F5248,   // "TORH"
-    TOR_MAGIC_SBE   = (uint32_t)0x544F5242,   // "TORB"
-    TOR_MAGIC_CME   = (uint32_t)0x544F524D,   // "TORM"
-    TOR_MAGIC_SGPE  = (uint32_t)0x544F5247,   // "TORG"
-    TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
+    TOR_MAGIC_SBE   = (uint32_t)0x544F5253,   // "TORS"
+    TOR_MAGIC_QME   = (uint32_t)0x544F5251,   // "TORQ"
     TOR_MAGIC_OVLY  = (uint32_t)0x544F524C,   // "TORL"
+    TOR_MAGIC_DYN   = (uint32_t)0x544F5244,   // "TORD"
+    TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
 };
 
 //                                                                           //
@@ -140,7 +140,8 @@ enum ChipId
     CID_P9N,
     CID_P9C,
     CID_P9A,
-    NUM_CHIP_IDS = 3
+    CID_P10,
+    NUM_CHIP_IDS = 4
 };
 
 //
