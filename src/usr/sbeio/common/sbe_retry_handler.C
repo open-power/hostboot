@@ -37,6 +37,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errlreasoncodes.H>
 #include <p9_extract_sbe_rc.H>
 
 #include <fapi2/target.H>
@@ -44,6 +45,7 @@
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <errl/errludtarget.H>
 #include <util/misc.H>
 #include <ipmi/ipmiwatchdog.H>
@@ -100,12 +102,6 @@ constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS        = 2;
 // add to an errorlog but otherwise ignores
 constexpr uint8_t MAX_EXPECTED_FFDC_PACKAGES    = 2;
 
-// action_for_ffdc_rc will figure out what action we should do
-// for each p9_extract_sbe_rc return code. If the RC does not match
-// any return code from p9_extract_sbe_rc then we want to have a
-// known "no action found" value which is defined here
-constexpr uint32_t NO_ACTION_FOUND_FOR_THIS_RC  = 0xFFFF;
-
 // Set up constants that will be used for setting up the timeout for
 // reading the sbe message register
 constexpr uint64_t SBE_RETRY_TIMEOUT_HW_SEC     = 60;  // 60 seconds
@@ -128,7 +124,6 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode,
 , iv_currentSBEState(SBE_REG_RETURN::SBE_NOT_AT_RUNTIME)
 , iv_shutdownReturnCode(0)
 , iv_currentSideBootAttempts(1) // It is safe to assume that the current side has attempted to boot
-, iv_ffdcSetAction(false)
 , iv_sbeMode(i_sbeMode)
 , iv_sbeRestartMethod(SBE_RESTART_METHOD::HRESET)
 , iv_initialPowerOn(false)
@@ -207,7 +202,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             SBEIO_EXTRACT_RC_HANDLER,
                             SBEIO_SLAVE_FAILED_TO_BOOT,
-                            this->iv_ffdcSetAction,
+                            this->iv_sbeRegister.asyncFFDC,
                             TARGETING::get_huid(i_target));
 
                 l_errl->collectTrace( "ISTEPS_TRACE", 256);
@@ -226,12 +221,10 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         }
 #endif
 
-        // If iv_ffdcSetAction is true, that means that we found ffdc to parse
-        // this indicates that the SBE already determined what went wrong and
-        // reported the error via asyncFFDC so there is no need to
-        // run p9_extract_sbe_rc
-        // Also if the sbe is not booted at all, extract_rc will fail so we don't want to run it
-        if(!this->iv_ffdcSetAction && this->iv_sbeRegister.sbeBooted)
+
+        // if the sbe is not booted at all extract_rc will fail so we only
+        // will run extract RC if we know the sbe has at least tried to boot
+        if(this->iv_sbeRegister.sbeBooted)
         {
             SBE_TRACF("main_sbe_handler(): No async ffdc found and sbe says it has been booted, running run p9_sbe_extract_rc.");
             // Call the function that runs extract_rc, this needs to run to determine
@@ -241,7 +234,7 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
         // If we have determined that the sbe never booted
         // then set the current action to be "restart sbe"
         // that way we will attempt to start the sbe again
-        else if(!this->iv_sbeRegister.sbeBooted)
+        else
         {
             SBE_TRACF("main_sbe_handler(): SBE reports it was never booted, calling p9_sbe_extract_rc will fail. Setting action to be RESTART_SBE");
             this->iv_currentAction = P9_EXTRACT_SBE_RC::RESTART_SBE;
@@ -553,9 +546,6 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 }
             }
 
-            // We have performed the action, so make sure that ffdcSetAction is set back to 0
-            this->iv_ffdcSetAction = 0;
-
             // Get the sbe register  (note that if asyncFFDC bit is set in status register then
             // we will read it in this call)
             if(!this->sbe_run_extract_msg_reg(i_target))
@@ -565,19 +555,12 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                 break;
             }
 
-            // If our retry attempt fail, and we didnt see any asyncFFDC after
+            // If the currState of the SBE is not RUNTIME then we will assume
+            // our attempt to boot the SBE has failed, so run extract rc again
+            // to determine why we have failed
             if (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME)
             {
-                // Again, if ffdcSetAction is set, that means we have found FFDC
-                // already that the SBE saved away prior to failing so we don't need
-                // to run extract_rc if ffdcSetAction is true
-                if(!this->iv_ffdcSetAction)
-                {
-                    SBE_TRACF("main_sbe_handler(): Failed to reach runtime after sbe restart and no asyncFFDC found. Calling p9_sbe_extract_rc.");
-                    // Run extract rc to figure out why the sbe did not make it to
-                    // runtime state
-                    this->sbe_run_extract_rc(i_target);
-                }
+                this->sbe_run_extract_rc(i_target);
             }
 
         } while((this->iv_sbeRegister).currState != SBE_STATE_RUNTIME);
@@ -637,8 +620,8 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg(TARGETING::Target * i_target)
        (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
        this->iv_sbeRegister.asyncFFDC)
     {
-        SBE_TRACF("SUCCESS: sbe_run_extract_msg_reg completed okay for proc 0x%.8X .  "
-                    "There was asyncFFDC found though so we will run the FFDC parser",
+        SBE_TRACF("WARNING: sbe_run_extract_msg_reg completed without error for proc 0x%.8X .  "
+                    "However, there was asyncFFDC found though so we will run the FFDC parser",
                   TARGETING::get_huid(i_target));
         // The SBE has responded to an asyncronus request that hostboot
         // made with FFDC indicating an error has occurred.
@@ -669,7 +652,7 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg(TARGETING::Target * i_target)
     // No guarantees that the SBE made it to runtime
     else
     {
-        SBE_TRACF("SUCCESS: sbe_run_extract_msg_reg completed okay for proc 0x%.8X",
+        SBE_TRACF("sbe_run_extract_msg_reg completed without error for proc 0x%.8X",
                     TARGETING::get_huid(i_target));
     }
 
@@ -826,75 +809,19 @@ void SbeRetryHandler::handleFspIplTimeFail(TARGETING::Target * i_target)
 }
 #endif
 
-uint32_t SbeRetryHandler::action_for_ffdc_rc(
-                uint32_t i_rc)
-{
-    SBE_TRACF(ENTER_MRK "action_for_ffdc_rc()");
-
-    uint32_t l_action;
-
-    switch(i_rc)
-    {
-        case fapi2::RC_EXTRACT_SBE_RC_RUNNING:
-        case fapi2::RC_EXTRACT_SBE_RC_NEVER_STARTED:
-        case fapi2::RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT:
-        case fapi2::RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED:
-        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR_NONSECURE_MODE:
-
-            l_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
-
-            break;
-
-        case fapi2::RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_NONSECURE_MODE:
-
-            l_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
-
-            break;
-
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_TIMEOUT:
-        case fapi2::RC_EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL:
-        case fapi2::RC_EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL:
-        case fapi2::RC_EXTRACT_SBE_RC_UNKNOWN_ERROR:
-
-            l_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-
-            break;
-
-        case fapi2::RC_EXTRACT_SBE_RC_OTP_TIMEOUT:
-        case fapi2::RC_EXTRACT_SBE_RC_OTP_PIB_ERR:
-        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_PIB_ERR:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_SPRM_CFG_ERR:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_PIB_ERR:
-
-            l_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
-
-            break;
-
-        case fapi2::RC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL:
-        case fapi2::RC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT:
-        case fapi2::RC_EXTRACT_SBE_RC_OTP_ECC_ERR:
-
-            l_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
-
-            break;
-        default:
-
-            l_action = NO_ACTION_FOUND_FOR_THIS_RC;
-    }
-
-    SBE_TRACF(EXIT_MRK "action_for_ffdc_rc()");
-    return l_action;
-}
-
 void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 {
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
     uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
     uint32_t *l_pFifoResponse =
         reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+
+    // For OpenPower systems if a piece of HW is garded then we will
+    // need to force a reconfigure loop and avoid the rest of the
+    // sbe recovery process. On FSP systems if HW callouts are found in
+    // the FFDC, we just commit the errorlog and TI telling HWSV to look
+    // at the failure
+    bool l_reconfigRequired = false;
 
 #ifndef __HOSTBOOT_RUNTIME
     errlHndl_t l_errl = nullptr;
@@ -986,10 +913,6 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
                 // Get the RC from the FFDC package
                 uint32_t l_rc = l_ffdc_parser->getPackageRC(i);
 
-                // Determine an action for the RC
-                P9_EXTRACT_SBE_RC::RETURN_ACTION l_action =
-                            static_cast<P9_EXTRACT_SBE_RC::RETURN_ACTION>(action_for_ffdc_rc(l_rc));
-
                 //See if HWP error, create another error log with callouts
                 if (l_rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
                 {
@@ -1010,8 +933,30 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
                     uint32_t l_pos = i_target->getAttr<TARGETING::ATTR_FAPI_POS>();
                     FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, &l_sbeFfdc, l_pos);
                     errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc);
+                    // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)
                     {
+                        // On BMC systems we must do a reconfig loop if gard is found
+                        if(!INITSERVICE::spBaseServicesEnabled())
+                        {
+                            // Iterate over user details sections of the error log to check for UD
+                            // callouts from the HWPF component
+                            // NOTE: rcToErrl will make UD Callouts have ERRL_COMP_ID/ERRL_UDT_CALLOUT
+                            for(const auto l_callout : l_sbeHwpfErr->getUDSections(ERRL_COMP_ID,
+                                                                                    ERRORLOG::ERRL_UDT_CALLOUT) )
+                            {
+                              // IF the callout has a gard associated with it we need to do a reconfig loop
+                              if((reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::HW_CALLOUT &&
+                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->gardErrorType != HWAS::GARD_NULL) ||
+                                 (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::CLOCK_CALLOUT &&
+                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->clkGardErrorType != HWAS::GARD_NULL) ||
+                                 (reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->type == HWAS::PART_CALLOUT &&
+                                  reinterpret_cast<HWAS::callout_ud_t*>(l_callout)->partGardErrorType != HWAS::GARD_NULL))
+                              {
+                                  l_reconfigRequired = true;
+                              }
+                            }
+                        }
                         // Set the PLID of the error log to master PLID
                         // if the master PLID is set
                         updatePlids(l_sbeHwpfErr);
@@ -1029,26 +974,6 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
                                   SBEIO_UDT_PARAMETERS,
                                   false );
                 }
-
-                if(l_action != NO_ACTION_FOUND_FOR_THIS_RC)
-                {
-                    // Set the action associated with the RC that we found
-                    this->iv_currentAction = l_action;
-
-                    // This call will look at what action_for_ffdc_rc had set the return action to
-                    // checks on how many times we have attempted to boot this side,
-                    // and if we have already tried switching sides
-                    //
-                    //
-                    // Note this call is important, if this is not called we could end up in a
-                    // endless loop because this enforces MAX_SWITCH_SIDE_COUNT and MAX_SIDE_BOOT_ATTEMPTS
-                    this->bestEffortCheck();
-
-                    // Set the instance variable ffdcSetAction to let us
-                    // know that the current action was set from what we
-                    // found in the asyncFFDC
-                    this->iv_ffdcSetAction = true;
-                }
             }
 
             l_errl->collectTrace( SBEIO_COMP_NAME, KILOBYTE/4);
@@ -1065,6 +990,11 @@ void SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 
     free(l_pFifoResponse);
     l_pFifoResponse = nullptr;
+
+    if(l_reconfigRequired)
+    {
+        INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+    }
 
     SBE_TRACF(EXIT_MRK "sbe_get_ffdc_handler()");
 }
@@ -1102,11 +1032,6 @@ void SbeRetryHandler::sbe_run_extract_rc(TARGETING::Target * i_target)
     // associate w/ the caller's errlog via plid
     l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     this->iv_currentAction = l_ret;
-
-    // Set the instance variable ffdcSetAction to let us
-    // know that the current action was not set by what
-    // we found in asyncFFDC
-    this->iv_ffdcSetAction = false;
 
     // This call will look at what p9_extact_sbe_rc had set the return action to
     // checks on how many times we have attempted to boot this side,
