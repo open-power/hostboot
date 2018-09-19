@@ -164,15 +164,15 @@ errlHndl_t callWakeupHyp(TARGETING::Target* i_target,
         }
 
         uint32_t mode;
-        if(i_enable == ENABLE)
+        if(i_enable == WAKEUP::ENABLE)
         {
             mode = HBRT_WKUP_FORCE_AWAKE;
         }
-        else if(i_enable == DISABLE)
+        else if(i_enable == WAKEUP::DISABLE)
         {
             mode = HBRT_WKUP_CLEAR_FORCE;
         }
-        else if(i_enable == FORCE_DISABLE)
+        else if(i_enable == WAKEUP::FORCE_DISABLE)
         {
             mode = HBRT_WKUP_CLEAR_FORCE_COMPLETELY;
         }
@@ -373,13 +373,13 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
             l_spcwkupSrc = p9specialWakeup::HOST;
         }
 
-        if(i_enable==WAKEUP::DISABLE)
-        {
-            l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
-        }
-        else
+        if(i_enable==WAKEUP::ENABLE)
         {
             l_spcwkupType = p9specialWakeup::SPCWKUP_ENABLE;
+        }
+        else  // DISABLE or FORCE_DISABLE
+        {
+            l_spcwkupType = p9specialWakeup::SPCWKUP_DISABLE;
         }
 
         if(l_type == TARGETING::TYPE_EQ)
@@ -434,15 +434,15 @@ errlHndl_t callWakeupHwp(TARGETING::Target* i_target,
     // Update the counter
     if(!l_errl)
     {
-        if(i_enable == ENABLE)
+        if(i_enable == WAKEUP::ENABLE)
         {
             l_count++;
         }
-        else if(i_enable == DISABLE)
+        else if(i_enable == WAKEUP::DISABLE)
         {
             l_count--;
         }
-        else if(i_enable == FORCE_DISABLE)
+        else if(i_enable == WAKEUP::FORCE_DISABLE)
         {
             l_count = 0;
         }
