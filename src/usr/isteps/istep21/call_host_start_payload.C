@@ -60,6 +60,7 @@
 #include <sbeio/sbeioif.H>
 #include <runtime/runtime.H>
 #include <p9_stop_api.H>
+#include <kernel/memstate.H>
 #include "../hdat/hdattpmdata.H"
 #include "hdatstructs.H"
 
@@ -618,6 +619,20 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
         else
         {
             // PHYP load, do not enable ATTN
+        }
+
+        // Invalidate Hostboot load address across all (intentional) processors
+        // so that FSP will not attempt a dump when the load address in the core
+        // scratch register returns 0 (as happens during the shutdown).  The
+        // update will take effect from FSP perspective when Hostboot
+        // synchronizes its attributes down during the attribute resource
+        // provider shutdown.
+        TargetHandleList procs;
+        (void)getAllChips(procs, TYPE_PROC,false);
+        for(auto pProc : procs)
+        {
+            pProc->setAttr<TARGETING::ATTR_HB_HRMOR_BYTES>(
+                KernelMemState::HbLoadAddrRsvd::NOT_APPLICABLE);
         }
 
         // do the shutdown.

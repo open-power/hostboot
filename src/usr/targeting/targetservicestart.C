@@ -44,6 +44,7 @@
 #include <sys/mm.h>
 #include <sys/task.h>
 #include <sys/sync.h>
+#include <arch/ppc.H>
 #include <targeting/common/trace.H>
 #include <targeting/adapters/assertadapter.H>
 #include <targeting/adapters/types.H>
@@ -727,6 +728,19 @@ static void initializeAttributes(TargetService& i_targetService,
                 }
                 l_sys->setAttr<ATTR_FABRIC_PRESENT_GROUPS>(l_fabric_groups);
             }
+        }
+
+        // Set Hostboot load address across all (intentional) processors so that
+        // FSP can determine the Hostboot load address when cores are
+        // winkled (since during winkle, the core scratch register holding the
+        // Hostboot load address is cleared).
+        TargetHandleList procs;
+        const auto loadAddressBytes = cpu_spr_value(CPU_SPR_HRMOR);
+        (void)getAllChips(procs, TYPE_PROC,false);
+        for(auto pProc : procs)
+        {
+            pProc->setAttr<TARGETING::ATTR_HB_HRMOR_BYTES>(
+                loadAddressBytes);
         }
     }
     else // top level is NULL - never expected
