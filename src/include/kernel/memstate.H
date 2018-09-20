@@ -33,6 +33,15 @@
 
 namespace KernelMemState
 {
+    /**
+     *  @brief Reserved enumerated values for the ATTR_HB_LOAD_ADDRESS_BYTES
+     *      attribute
+     */
+    enum HbLoadAddrRsvd : uint64_t
+    {
+        NOT_APPLICABLE = 0xFFFFFFFFFFFFFFFFULL, ///< Ignore / not applicable
+    };
+
     /* see mmio.h for scratch reg definitions */
 
     enum MemLocation

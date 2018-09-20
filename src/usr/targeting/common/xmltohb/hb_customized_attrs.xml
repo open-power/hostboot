@@ -106,7 +106,13 @@
           <id>ATTR_FREQ_X_MHZ</id>
           <default>2000</default>
           <writeable/>
-     </attribute>
+    </attribute>
+
+    <attribute>
+          <id>ATTR_HB_HRMOR_BYTES</id>
+          <writeable/>
+          <persistency>volatile</persistency>
+    </attribute>
 
     <attribute>
           <id>ATTR_MNFG_FLAGS</id>
