@@ -41,6 +41,19 @@ const uint32_t ISTEP_MSG_SUCCESS     = 0x00F00000;
 const uint32_t ISTEP_INVALID_MESSAGE = 0x00F00000;
 
 // ------------------------------------------------------------------
+// HwSvr Msg data structure for Attn chip Id list
+//
+//@brief    structure to hold array of chip Id HUID's to inform ATTN for handling
+//          additional chips are coming online and need to be looked at for
+//          checkstop situations during the 'master proc' only mode.
+struct attn_chipid_msg
+{
+    uint16_t    size;        //!Data length in bytes
+    uint16_t    chipIdCount; //! Number of Chip ID”s in data
+    uint32_t    data;        //! Place holder for data [Array of Chip HUID List]
+} PACKED;
+
+// ------------------------------------------------------------------
 // HwSvr Msg Type RC values
 enum
 {
@@ -63,7 +76,8 @@ enum
     HWSVR_COALESCE_HOST         = 0xC2,
     HWSVR_DO_SHUTDOWN           = 0x12,
     HWSVR_PERST_ASSERT          = 0x20,
-    HWSVR_PERST_NEGATE          = 0x21
+    HWSVR_PERST_NEGATE          = 0x21,
+    HWSVR_ATTN_CHIPID_LIST      = 0x30
 };
 
 // ------------------------------------------------------------------
@@ -90,7 +104,9 @@ enum
     PERST_ASSERT            = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_PERST_ASSERT,
     PERST_NEGATE            = MBOX::FIRST_UNSECURE_MSG |
-                                HWSVR_PERST_NEGATE
+                                HWSVR_PERST_NEGATE,
+    ATTN_MONITOR_CHIPID_LIST = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_ATTN_CHIPID_LIST,
 };
 
 }   // namespace
