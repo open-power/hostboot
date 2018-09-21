@@ -830,7 +830,11 @@ void* call_host_runtime_setup (void *io_pArgs)
             uint32_t l_mdrtCount =
                 l_sys->getAttr<TARGETING::ATTR_MPIPL_HB_MDRT_COUNT>();
             //Update actual count in RUNTIME
-            RUNTIME::saveActualCount(RUNTIME::MS_DUMP_RESULTS_TBL, l_mdrtCount);
+            if(l_mdrtCount)
+            {
+                RUNTIME::saveActualCount( RUNTIME::MS_DUMP_RESULTS_TBL,
+                                          l_mdrtCount);
+            }
         }
 
         //Update the MDRT value (for MS Dump)
