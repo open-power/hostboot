@@ -29,7 +29,7 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0x00200102540D7FFF = 0x00200102540D7FFF;
+constexpr uint64_t literal_0x00210102540D7FFF = 0x00210102540D7FFF;
 constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
 constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x00DD020180000000 = 0x00DD020180000000;
@@ -61,7 +61,7 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x3011803ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 54, 0, uint64_t>(literal_0x00200102540D7FFF );
+            l_scom_buffer.insert<0, 54, 0, uint64_t>(literal_0x00210102540D7FFF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011803ull, l_scom_buffer));
         }
         {
