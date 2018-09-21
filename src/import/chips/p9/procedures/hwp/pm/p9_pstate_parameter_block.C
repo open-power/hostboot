@@ -380,7 +380,21 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         OCCPstateParmBlock l_occppb;
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock));
 
+        // QuadManagerFlags
+        QuadManagerFlags l_qm_flags;
+
         PSTATE_attribute_state l_state;
+        l_state.iv_pstates_enabled = false;
+        l_state.iv_resclk_enabled  = false;
+        l_state.iv_vdm_enabled     = false;
+        l_state.iv_ivrm_enabled    = false;
+        l_state.iv_wof_enabled     = false;
+
+        //By default first disable the PSTATE attributes
+        FAPI_TRY(p9_pstate_set_global_feature_attributes(i_target,
+                                                         l_state,
+                                                         &l_qm_flags));
+
         l_state.iv_pstates_enabled = true;
         l_state.iv_resclk_enabled  = true;
         l_state.iv_vdm_enabled     = true;
@@ -953,8 +967,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         l_occppb.wof.wof_enabled = l_state.iv_wof_enabled;
 
-        // QuadManagerFlags
-        QuadManagerFlags l_qm_flags;
         FAPI_TRY(p9_pstate_set_global_feature_attributes(i_target,
                  l_state,
                  &l_qm_flags));
