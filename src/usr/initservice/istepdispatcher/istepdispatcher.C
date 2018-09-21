@@ -2525,8 +2525,7 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
     if( (i_curIstep == SW_RECONFIG_START_STEP)
             && (i_curSubstep >= SW_RECONFIG_START_SUBSTEP ) )
     {
-        TRACDCOMP(g_trac_initsvc,
-        ENTER_INFO"checkReconfig(): SW RECONFIGURE is ON at istep %d.%d",
+        TRACDCOMP(g_trac_initsvc, "checkReconfig(): SW RECONFIGURE is ON at istep %d.%d",
            i_curIstep, i_curSubstep);
         doReconfigure = true;
         o_newIstep = SW_RECONFIG_START_STEP;
