@@ -128,7 +128,7 @@ errlHndl_t IntrRp::resetIntpForMpipl()
         if (hb_existing_image == 0)
         {
             //single node system so do nothing
-            TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            TRACDCOMP( g_trac_intr,
               "IntrRp::resetIntpForMpipl() called on a single node system, skip INTRP sync steps");
         }
         else
@@ -1313,8 +1313,8 @@ void IntrRp::msgHandler()
             case MSG_INTR_ADD_CPU_TIMEOUT:
                 {
                     PIR_t pir = msg->data[0];
-                    TRACDCOMP("IntrRp::msgHandler() CPU Timeout Message "
-                              "received for: %x", pir.word);
+                    TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() CPU Timeout Message received for: %x",
+                              pir.word);
                     size_t count = msg->data[1];
 
                     if(iv_ipisPending.count(pir))
