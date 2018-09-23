@@ -44,7 +44,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                                 RingId_t        i_ringId,          // Ring ID
                                 RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
                                 uint8_t&        io_instanceId,     // Instance ID
-                                RingBlockType_t i_ringBlockType,   // Single ring, Block
+                                RingRequest_t   i_ringRequest,     // {GET,PUT}_SINGLE_RING
                                 void**          io_ringBlockPtr,   // Output ring buffer
                                 uint32_t&       io_ringBlockSize,  // Size of ring data
                                 char*           o_ringName,        // Name of ring
@@ -214,7 +214,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                         ringOffset = *(TorRingOffset_t*)( (uint8_t*)i_ringSection + ringOffset );
                         ringOffset = be16toh(ringOffset);
 
-                        if (i_ringBlockType == GET_SINGLE_RING)
+                        if (i_ringRequest == GET_SINGLE_RING)
                         {
                             ringSize = 0;
 
@@ -283,7 +283,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                             return rc;
 
                         }
-                        else if (i_ringBlockType == PUT_SINGLE_RING)
+                        else if (i_ringRequest == PUT_SINGLE_RING)
                         {
                             if (ringOffset)
                             {
@@ -306,8 +306,8 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
                         }
                         else
                         {
-                            MY_ERR("Ring block type (i_ringBlockType=%d) is not supported\n", i_ringBlockType);
-                            return TOR_INVALID_RING_BLOCK_TYPE;
+                            MY_ERR("Ring request (i_ringRequest=%d) is not supported\n", i_ringRequest);
+                            return TOR_INVALID_RING_REQUEST;
                         }
                     }
 
@@ -338,10 +338,9 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
 int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                       RingId_t        i_ringId,          // Ring ID
                       uint8_t         i_ddLevel,         // DD level
-                      PpeType_t       i_ppeType,         // SBE,CME,SGPE
                       RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
                       uint8_t&        io_instanceId,     // Instance ID
-                      RingBlockType_t i_ringBlockType,   // GET_SINGLE_RING,GET_PPE_LEVEL_RINGS,etc
+                      RingRequest_t   i_ringRequest,     // {GET,PUT}_SINGLE_RING
                       void**          io_ringBlockPtr,   // Ring data buffer
                       uint32_t&       io_ringBlockSize,  // Size of ring data
                       char*           o_ringName,        // Ring name
@@ -350,7 +349,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     int rc = 0;
     uint32_t       torMagic;
     TorHeader_t*   torHeader;
-    uint8_t* postHeaderStart = (uint8_t*)i_ringSection + sizeof(TorHeader_t);
 
     if (i_dbgl > 1)
     {
@@ -370,12 +368,11 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                "  size:          %d\n"
                "API parms\n"
                "  i_ddLevel:     0x%x\n"
-               "  i_ppeType:     %d\n"
                "  i_ringVariant: %d\n",
                torMagic, torHeader->version, torHeader->chipId,
                torHeader->ddLevel,
                be32toh(torHeader->size),
-               i_ddLevel, i_ppeType, i_ringVariant);
+               i_ddLevel, i_ringVariant);
 
         MY_DBG("Dump of first 12 quad-word lines in ring section\n");
 
@@ -423,28 +420,17 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         return TOR_DD_LEVEL_NOT_FOUND;
     }
 
-    if ( i_ringBlockType == GET_SINGLE_RING ||       // All Magics support GET
-         ( i_ringBlockType == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
+    if ( i_ringRequest == GET_SINGLE_RING ||       // All Magics support GET
+         ( i_ringRequest == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
            ( torMagic == TOR_MAGIC_SBE ||
              torMagic == TOR_MAGIC_CME ||
              torMagic == TOR_MAGIC_SGPE ) ) )
     {
-        void* l_ringSection = i_ringSection;
-
-        if ( torMagic == TOR_MAGIC_HW )
-        {
-            // Update l_ringSection:
-            // Extract the offset to the specified ppeType's ring section TOR header and update l_ringSection
-            TorPpeBlock_t*  torPpeBlock;
-            torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
-            l_ringSection = (void*)(postHeaderStart + be32toh(torPpeBlock->offset));
-        }
-
-        rc =  get_ring_from_ring_section( l_ringSection,
+        rc =  get_ring_from_ring_section( i_ringSection,
                                           i_ringId,
                                           i_ringVariant,
                                           io_instanceId,
-                                          i_ringBlockType,
+                                          i_ringRequest,
                                           io_ringBlockPtr,
                                           io_ringBlockSize,
                                           o_ringName,
@@ -452,51 +438,12 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
         return rc;
     }
-    else if ( i_ringBlockType == GET_PPE_LEVEL_RINGS &&
-              torMagic == TOR_MAGIC_HW &&
-              (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE) )
-    {
-        TorPpeBlock_t*  torPpeBlock;
-        uint32_t ppeSize;
-
-        torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
-        ppeSize = be32toh(torPpeBlock->size);
-
-        if (io_ringBlockSize >= ppeSize)
-        {
-            memcpy( (uint8_t*)(*io_ringBlockPtr),
-                    postHeaderStart + be32toh(torPpeBlock->offset),
-                    ppeSize );
-            io_ringBlockSize = ppeSize;
-
-            return TOR_SUCCESS;
-        }
-        else if (io_ringBlockSize == 0)
-        {
-            if (i_dbgl > 0)
-            {
-                MY_DBG("io_ringBlockSize is zero. Returning required size.\n");
-            }
-
-            io_ringBlockSize =  ppeSize;
-
-            return TOR_SUCCESS;
-        }
-        else
-        {
-            MY_ERR("io_ringBlockSize is less than required size.\n");
-
-            return TOR_BUFFER_TOO_SMALL;
-        }
-    }
     else
     {
         MY_ERR("Ambiguity on input parms to tor_access_ring():\n" \
                "  Possibly invalid torMagic (=0x%08x)\n" \
-               "  Possibly incompatible ringBlockType (=%d)\n" \
-               "  Possibly unsupported ppeType (=%d)\n" \
-               "  Note that we don't care about ppeType for non-HW TOR ring sections\n",
-               i_ringBlockType, torMagic, i_ppeType);
+               "  Possibly incompatible ringRequest (=%d)\n",
+               i_ringRequest, torMagic);
 
         return TOR_AMBIGUOUS_API_PARMS;
     }
@@ -517,7 +464,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
                           uint8_t       i_ddLevel,         // DD level
                           RingId_t      i_ringId,          // Ring ID
-                          PpeType_t     i_ppeType,         // SBE, CME, SGPE
                           RingVariant_t i_ringVariant,     // Base,CC,RL (SBE/CME/SGPE only)
                           uint8_t       i_instanceId,      // Instance ID
                           void**        io_ringBlockPtr,   // Output ring buffer
@@ -536,7 +482,6 @@ int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
     rc = tor_access_ring( i_ringSection,
                           i_ringId,
                           i_ddLevel,
-                          i_ppeType,
                           i_ringVariant,
                           i_instanceId,
                           GET_SINGLE_RING,
@@ -557,74 +502,6 @@ int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
-//                            TOR GET BLOCK OF RINGS   API
-//
-///////////////////////////////////////////////////////////////////////////////////////
-int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section ptr
-                             uint8_t         i_ddLevel,         // DD level
-                             PpeType_t       i_ppeType,         // SBE,CME,SGPE
-                             void**          io_ringBlockPtr,   // Output ring buffer
-                             uint32_t&       io_ringBlockSize,  // Size of ring data
-                             uint32_t        i_dbgl )           // Debug option
-{
-    uint32_t rc = 0;
-    uint8_t      l_instanceId;
-    char i_ringName[MAX_RING_NAME_LENGTH];
-    uint32_t     torMagic;
-    ChipId_t     chipId = UNDEFINED_CHIP_ID;
-    TorHeader_t* torHeader;
-
-    if (i_dbgl > 1)
-    {
-        MY_DBG("Entering tor_get_block_of_rings()...\n");
-    }
-
-    torHeader = (TorHeader_t*)i_ringSection;
-    torMagic  = be32toh(torHeader->magic);
-    chipId    = torHeader->chipId;
-
-    if ( torMagic == TOR_MAGIC_HW )
-    {
-        if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
-        {
-            // Get specific PPE block of rings
-            rc = tor_access_ring( i_ringSection,
-                                  UNDEFINED_RING_ID,
-                                  i_ddLevel,
-                                  i_ppeType,
-                                  UNDEFINED_RING_VARIANT,
-                                  l_instanceId,
-                                  GET_PPE_LEVEL_RINGS,
-                                  io_ringBlockPtr,
-                                  io_ringBlockSize,
-                                  i_ringName,
-                                  i_dbgl );
-        }
-        else
-        {
-            MY_ERR("tor_get_block_of_rings(): Ambiguous API parameters\n");
-            return TOR_AMBIGUOUS_API_PARMS;
-        }
-    }
-    else
-    {
-        MY_ERR("tor_get_block_of_rings(): Only the P9 HW ring section is supported. However, torMagic=0x%08x and chipId=%d\n",
-               torMagic, chipId);
-        return TOR_UNSUPPORTED_RING_SECTION;
-    }
-
-    if (i_dbgl > 1)
-    {
-        MY_DBG("Exiting tor_get_block_of_rings() (ringBlockSize=%d)...\n", io_ringBlockSize);
-    }
-
-    return rc;
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-//
 //                             TOR APPEND RING   API
 //
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -634,7 +511,6 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
                       void*           i_ringBuffer,       // Ring work buffer
                       const uint32_t  i_ringBufferSize,   // Max size of ring work buffer
                       RingId_t        i_ringId,           // Ring ID
-                      PpeType_t       i_ppeType,          // SBE, CME, SGPE
                       RingVariant_t   i_ringVariant,      // Base,CC,RL
                       uint8_t         i_instanceId,       // Instance ID
                       void*           i_rs4Container,     // RS4 ring container
@@ -651,7 +527,6 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
     rc = tor_access_ring( i_ringSection,
                           i_ringId,
                           UNDEFINED_DD_LEVEL,
-                          i_ppeType,
                           i_ringVariant,
                           i_instanceId,
                           PUT_SINGLE_RING,

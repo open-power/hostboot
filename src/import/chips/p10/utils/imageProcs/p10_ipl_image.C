@@ -25,7 +25,7 @@
 
 /// \file p10_ipl_image.C
 /// \brief APIs for validating, normalizing, searching and manipulating
-/// IPL images.
+/// IPL images (formerly XIP images).
 ///
 /// The background, APIs and implementation details are documented in the
 /// document "P9-XIP Binary format" currently available at this link:
@@ -54,14 +54,9 @@
 // Local Functions
 ////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEBUG_P9_XIP_IMAGE
-
-// Debugging support, normally disabled. All of the formatted I/O you see in
-// the code is effectively under this switch.
-
 #ifdef __FAPI
 
-    #include "fapi.H"
+    #include "fapi2.H"
     #define fprintf(stream, ...) FAPI_ERR(__VA_ARGS__)
     #define printf(...) FAPI_INF(__VA_ARGS__)
     #define TRACE_NEWLINE ""
@@ -73,14 +68,8 @@
 
 #endif // __FAPI
 
-// Portable formatting of uint64_t.  The ISO C99 standard requires
-// __STDC_FORMAT_MACROS to be defined in order for PRIx64 etc. to be defined.
-
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
-
-#define F0x016llx "0x%016" PRIx64
-#define F0x012llx "0x%012" PRIx64
+#define F0x016llx "0x%016lx"
+#define F0x012llx "0x%012lx"
 
 XIP_STATIC P9_XIP_ERROR_STRINGS(p9_xip_error_strings);
 
@@ -99,55 +88,6 @@ XIP_STATIC P9_XIP_ERROR_STRINGS(p9_xip_error_strings);
         (x);                                    \
     })
 
-// Uncomment these if required for debugging, otherwise we get warnings from
-// GCC as they are not otherwise used.
-
-#if 0
-
-XIP_STATIC P9_XIP_TYPE_STRINGS(type_strings);
-
-XIP_STATIC void
-dumpToc(int index, P9XipToc* toc)
-{
-    printf("TOC entry %d @ %p\n"
-           "    iv_id       = 0x%08x\n"
-           "    iv_data     = 0x%08x\n"
-           "    iv_type     = %s\n"
-           "    iv_section  = 0x%02x\n"
-           "    iv_elements = %d\n",
-           index, toc,
-           htobe32(toc->iv_id),
-           htobe32(toc->iv_data),
-           P9_XIP_TYPE_STRING(type_strings, toc->iv_type),
-           toc->iv_section,
-           toc->iv_elements);
-}
-
-#endif
-
-#if 0
-
-XIP_STATIC void
-dumpItem(P9XipItem* item)
-{
-    printf("P9XipItem @ %p\n"
-           "    iv_toc       = %p\n"
-           "    iv_address   = " F0x016llx "\n"
-           "    iv_imageData = %p\n"
-           "    iv_id        = %s\n"
-           "    iv_type      = %s\n"
-           "    iv_elements  = %d\n",
-           item,
-           item->iv_toc,
-           item->iv_address,
-           item->iv_imageData,
-           item->iv_id,
-           P9_XIP_TYPE_STRING(type_strings, item->iv_type),
-           item->iv_elements);
-    dumpToc(-1, item->iv_toc);
-}
-
-#endif  /* 0 */
 
 XIP_STATIC void
 dumpSectionTable(const void* i_image)
@@ -175,16 +115,6 @@ dumpSectionTable(const void* i_image)
                i, section.iv_offset, section.iv_size);
     }
 }
-
-#else
-
-#define TRACE_ERROR(x) (x)
-#define TRACE_ERRORX(x, ...) (x)
-#define dumpToc(...)
-#define dumpItem(...)
-#define dumpSectionTable(...)
-
-#endif
 
 
 XIP_STATIC uint64_t
@@ -2057,12 +1987,6 @@ p9_xip_get_section(const void* i_image,
             o_hostSection->iv_size = size;
             o_hostSection->iv_alignment = 0;
             o_hostSection->iv_ddSupport = 0;
-            //@FIXME: In order to inform caller more clearly, we could do this instead
-            //        where the idea is to clear the DD support flag which no longer
-            //        applies and to clear the flag that indicates this section is no
-            //        longer the full/original XIP section.
-            //o_hostSection->iv_support = o_hostSection->iv_support & ~SECTION_ATTRIBS_DD_SUPP
-            //o_hostSection->iv_support = o_hostSection->iv_support & ~SECTION_ATTRIBS_XIP_SECTION
         }
         else
         {
@@ -2092,7 +2016,90 @@ p9_xip_get_section(const void* i_image,
         rc = P9_XIP_INVALID_ARGUMENT;
     }
 
-    return rc;
+    if (rc)
+    {
+        return TRACE_ERROR(rc);
+    }
+
+    return INFRASTRUCT_RC_SUCCESS;
+}
+
+
+int
+p9_xip_get_sub_section( const void* i_image,
+                        const int i_mainSectionID, // Section ID of the nested image
+                        const int i_subSectionID,  // Section ID of sub-section in nested image
+                        P9XipSection* o_hostSection, // The embedded DD blocks "table entry"
+                        const uint8_t i_ddLevel ) // DD level of the embedded block with the sub-section
+{
+    int rc = INFRASTRUCT_RC_SUCCESS;
+    void* l_nestedImage = NULL;
+    P9XipSection l_hostSection;
+
+    // This is the case of returning the IPL image section associated with the mainSectionID.
+    // (Note that this is not what this API is intended to do. But it's practical to support
+    // this type of usage.)
+    if (i_subSectionID == UNDEFINED_IPL_IMAGE_SID)
+    {
+        rc = p9_xip_get_section(i_image, i_mainSectionID, o_hostSection, i_ddLevel);
+
+        if (rc)
+        {
+            return TRACE_ERRORX(rc,
+                                "ERROR: xip_get_sub_section: xip_get_section failed w/rc=0x%08x"
+                                " getting mainSectionID=%d and ddLevel=0x%x\n",
+                                (uint32_t)rc, i_mainSectionID, i_ddLevel);
+        }
+
+        return INFRASTRUCT_RC_SUCCESS;
+    }
+
+    // Proceed w/case of getting the sub-section within the nested image.
+    // Note that the assumption is that nested images are DD level non-specific and that
+    // only subSectionID sections have DD level support.
+
+    // First, get the nested image's table entry and then its ptr
+    rc = p9_xip_get_section(i_image, i_mainSectionID, &l_hostSection, UNDEFINED_DD_LEVEL);
+
+    if (rc)
+    {
+        return TRACE_ERRORX(rc,
+                            "ERROR: xip_get_sub_section: xip_get_section failed w/rc=0x%08x"
+                            " getting nested image w/mainSectionID=%d\n",
+                            (uint32_t)rc, i_mainSectionID);
+    }
+
+    l_nestedImage = (void*)((uint8_t*)i_image + l_hostSection.iv_offset);
+
+    // Make sure it's a valid image
+    rc = p9_xip_validate(l_nestedImage, l_hostSection.iv_size);
+
+    if (rc)
+    {
+        return TRACE_ERROR(rc);
+    }
+
+    // Now get the embedded DD block's "table entry" within the sub-section. Or if
+    // ddLevel==UNDEFINED, then the whole image section's table entry is returned.
+    rc = p9_xip_get_section(l_nestedImage, i_subSectionID, o_hostSection, i_ddLevel);
+
+    if (rc)
+    {
+        return TRACE_ERRORX(rc,
+                            "ERROR: xip_get_sub_section: xip_get_section failed w/rc=0x%08x"
+                            " getting subSectionID=%d within nested image w/mainSectionID=%d\n",
+                            (uint32_t)rc, i_subSectionID, i_mainSectionID);
+    }
+
+    // Adjust hostSection offset to be relative to beginning of the master image, i_image
+    o_hostSection->iv_offset += l_hostSection.iv_offset;
+
+    if (rc)
+    {
+        return TRACE_ERROR(rc);
+    }
+
+    return INFRASTRUCT_RC_SUCCESS;
 }
 
 
@@ -3234,16 +3241,22 @@ p9_xip_map_toc(void* io_image,
 
 
 //
-// Inform caller if specified sectionId has DD support
+// Inform caller if specified subSectionId has DD support. Note, however that if
+// subSectionId==UNDEFINED, this API informs if mainSectionId has DD support.
 //
 int p9_xip_dd_section_support(const void* i_image,
-                              const int i_sectionId,
+                              const int i_mainSectionId,
+                              const int i_subSectionId,
                               MyBool_t* o_bDdSupport)
 {
     int rc;
     P9XipSection section;
 
-    rc = p9_xip_get_section(i_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
+    rc = p9_xip_get_sub_section(i_image,
+                                i_mainSectionId,
+                                i_subSectionId,
+                                &section,
+                                UNDEFINED_DD_LEVEL);
 
     if (!rc)
     {

@@ -30,7 +30,7 @@
 //  *HWP HWP Owner: Mike Olsen <cmolsen@us.ibm.com>
 //  *HWP HWP Backup Owner: Sumit Kumar <sumit_kumar@in.ibm.com>
 //  *HWP Team: Infrastructure
-//  *HWP Level: 3
+//  *HWP Level: 1
 //  *HWP Consumed by: HOSTBOOT, CRONUS
 //
 
@@ -304,7 +304,6 @@ fapi2::ReturnCode get_overlays_ring(
                i_overlaysSection,
                i_ddLevel,
                i_ringId,
-               UNDEFINED_PPE_TYPE,
                UNDEFINED_RING_VARIANT,
                l_instanceId,
                io_ringBuf2,  //Has RS4 Gptr overlay ring on return
@@ -880,40 +879,12 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                                   (i_ring.vpdRingClass == VPD_RING_CLASS_EX_INS ? 1 : 0)) +
                                  i_evenOdd;
 
-        PpeType_t l_ppeType;
-
-        switch (i_sysPhase)
-        {
-            case SYSPHASE_HB_SBE:
-                l_ppeType = PT_SBE;
-                break;
-
-            case SYSPHASE_RT_CME:
-                l_ppeType = PT_CME;
-                break;
-
-            case SYSPHASE_RT_SGPE:
-                l_ppeType = PT_SGPE;
-                break;
-
-            default:
-                FAPI_ASSERT( false,
-                             fapi2::XIPC_INVALID_SYSPHASE_PARM().
-                             set_CHIP_TARGET(i_procTarget).
-                             set_SYSPHASE(i_sysPhase).
-                             set_OCCURRENCE(2),
-                             "Code bug: Unsupported value of sysPhase (=%d)",
-                             i_sysPhase );
-                break;
-        } // End switch(sysPhase)
-
         l_rc = tor_append_ring(
                    i_ringSection,
                    io_ringSectionSize, // In: Exact size. Out: Updated size.
                    i_ringBuf2,
                    i_ringBufSize2,  // Max size.
                    i_ring.ringId,
-                   l_ppeType,
                    RV_BASE,         // All VPD rings are Base ringVariant
                    l_chipletTorId,  // Chiplet instance TOR Index
                    i_vpdRing );     // The VPD RS4 ring container
@@ -937,14 +908,10 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         // Update for ring not found in mvpd
         io_ringStatusInMvpd = RING_NOT_FOUND;
 
-        // No match, do nothing. Next chipletId.
-        //@TODO: Uncomment the following after PowerOn. Also, need to come
-        //       to agreement whether this should be fatal error or not.
-        //       For now, for PO, it's considered benigh and noise and is
-        //       being commented out.
-        //FAPI_INF("_fetch_and_insert_vpd_rings():"
-        //         "(ringId,chipletId)=(0x%X,0x%X) not found.",
-        //         i_ring.ringId, i_chipletId);
+        // No match, do nothing. But since rare, trace out.
+        FAPI_DBG("_fetch_and_insert_vpd_rings():"
+                 "(ringId,chipletId)=(0x%X,0x%X) not found.",
+                 i_ring.ringId, i_chipletId);
 
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
@@ -1022,10 +989,12 @@ fapi2::ReturnCode resolve_gptr_overlays(
                  fapi2::XIPC_XIP_GET_SECTION_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_XIP_RC(l_rc).
+                 set_SECTION_ID(P9_XIP_SECTION_HW_OVERLAYS).
                  set_DDLEVEL(o_ddLevel).
                  set_OCCURRENCE(2),
-                 "p9_xip_get_section() failed (2) getting .overlays section (ddLevel=0x%x) w/rc=0x%08X",
-                 o_ddLevel, (uint32_t)l_rc );
+                 "p9_xip_get_section() failed (2) w/rc=0x%08X getting .overlays"
+                 " section for ddLevel=0x%x",
+                 (uint32_t)l_rc, o_ddLevel );
 
     *o_overlaysSection = (void*)((uint8_t*)i_hwImage + l_xipSection.iv_offset);
     FAPI_DBG("GPTR support available in overlays for ddLevel=0x%x "
@@ -1806,7 +1775,11 @@ ReturnCode p10_ipl_customize (
 #endif
     int             l_rc = 0; // Non-fapi RC
 
-    P9XipSection    l_xipRingsSection;
+    int mainSectionID = UNDEFINED_IPL_IMAGE_SID; // Represents the nested PPE image
+    int subSectionID  = UNDEFINED_IPL_IMAGE_SID; // Represents .rings within nested image
+    P9XipSection    iplImgSection;
+    //Suggested replacement name:
+    //IplImgSection   iplImgSection; // Formerly: P9XipSection xipSection.
     uint32_t        l_inputImageSize;
     uint32_t        l_imageSizeWithoutRings;
     uint32_t        l_currentImageSize;
@@ -1815,11 +1788,7 @@ ReturnCode p10_ipl_customize (
     uint32_t        l_sectionOffset = 1;
     uint32_t        attrMaxSbeSeepromSize = 0;
     uint32_t        l_requestedBootCoreMask = (i_sysPhase == SYSPHASE_HB_SBE) ? io_bootCoreMask : 0x00FFFFFF;
-    void*           l_hwRingsSection;
-
-    uint8_t      attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
-    uint8_t      l_xipDdLevel = UNDEFINED_DD_LEVEL; // Used for XIP extraction
-    MyBool_t     l_bDdSupport = UNDEFINED_BOOLEAN;
+    uint8_t         attrDdLevel = UNDEFINED_DD_LEVEL; // Used for host services
 
 
     FAPI_IMP ("Entering p10_ipl_customize w/sysPhase=%d...", i_sysPhase);
@@ -2279,22 +2248,27 @@ ReturnCode p10_ipl_customize (
             FAPI_DBG("Size of image before VPD update (excl .rings): %d", l_imageSizeWithoutRings);
 
             // Get the size of our .rings section (assumption is NO DD support).
-            l_rc = p9_xip_get_section(io_ringSectionBuf, P9_XIP_SECTION_SBE_RINGS, &l_xipRingsSection);
+            l_rc = p9_xip_get_section(io_ringSectionBuf, P9_XIP_SECTION_SBE_RINGS, &iplImgSection);
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                          fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
+                         set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
                          set_DDLEVEL(UNDEFINED_DD_LEVEL).
                          set_OCCURRENCE(1),
-                         "p9_xip_get_section() failed (1) getting SBE .rings section (ddLevel=0x%x) w/rc=0x%08X",
-                         UNDEFINED_DD_LEVEL, (uint32_t)l_rc );
+                         "p9_xip_get_section() failed (1) w/rc=0x%08x getting SBE .rings"
+                         " section for ddLevel=0x%x",
+                         (uint32_t)l_rc, UNDEFINED_DD_LEVEL );
 
-            io_ringSectionBufSize = l_xipRingsSection.iv_size;
+            io_ringSectionBufSize = iplImgSection.iv_size;
 
             FAPI_ASSERT( io_ringSectionBufSize > 0,
-                         fapi2::XIPC_EMPTY_RING_SECTION().
-                         set_CHIP_TARGET(i_procTarget),
+                         fapi2::XIPC_EMPTY_IMAGE_SECTION().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_SECTION_ID(P9_XIP_SECTION_SBE_RINGS).
+                         set_DDLEVEL(UNDEFINED_DD_LEVEL).
+                         set_OCCURRENCE(1),
                          "Ring section size in SBE image is zero. No TOR. Can't append rings.");
 
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
@@ -2306,7 +2280,7 @@ ReturnCode p10_ipl_customize (
             // Move .rings to the top of ringSectionBuf (which currently holds a copy of the
             //   io_image but which can now be destroyed.)
             memcpy( io_ringSectionBuf,
-                    (void*)(((uint8_t*)io_ringSectionBuf) + l_xipRingsSection.iv_offset),
+                    (void*)((uint8_t*)io_ringSectionBuf + iplImgSection.iv_offset),
                     io_ringSectionBufSize );
 
             //----------------------------------------
@@ -2474,7 +2448,11 @@ ReturnCode p10_ipl_customize (
             l_maxRingSectionSize = io_ringSectionBufSize;
 
 
+            //
             // Next, get the DD level specific set of CME/SGPE rings from the HW image.
+            //
+
+            // First, determine the DD level
             l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
 
             FAPI_ASSERT( l_fapiRc == fapi2::FAPI2_RC_SUCCESS,
@@ -2485,75 +2463,52 @@ ReturnCode p10_ipl_customize (
 
             FAPI_DBG("attrDdLevel (for DD level .rings) = 0x%x", attrDdLevel);
 
-            // Then, determine if there's XIP level DD support in .rings ring section
-            // and fetch the DD level ring section accordingly.
-            l_rc = p9_xip_dd_section_support(io_image, P9_XIP_SECTION_HW_RINGS, &l_bDdSupport);
-
-            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
-                         fapi2::XIPC_XIP_API_MISC_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_XIP_RC(l_rc).
-                         set_OCCURRENCE(12),
-                         "p9_xip_dd_section_support() failed for .rings w/rc=0x%08x.\n",
-                         (uint32_t)l_rc );
-
-            if ( l_bDdSupport )
+            // Setup up nested section ID combination for current PPE image
+            if ( i_sysPhase == SYSPHASE_RT_CME )
             {
-                l_xipDdLevel = attrDdLevel;
+                mainSectionID = P9_XIP_SECTION_HW_CME;
+                subSectionID = P9_XIP_SECTION_CME_RINGS;
             }
             else
             {
-                l_xipDdLevel = UNDEFINED_DD_LEVEL;
+                mainSectionID = P9_XIP_SECTION_HW_SGPE;
+                subSectionID = P9_XIP_SECTION_SGPE_RINGS;
             }
 
-            l_rc = p9_xip_get_section(io_image, P9_XIP_SECTION_HW_RINGS, &l_xipRingsSection, l_xipDdLevel);
+            l_rc = p9_xip_get_sub_section( io_image,
+                                           mainSectionID,
+                                           subSectionID,
+                                           &iplImgSection,
+                                           attrDdLevel );
 
             FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                          fapi2::XIPC_XIP_GET_SECTION_ERROR().
                          set_CHIP_TARGET(i_procTarget).
                          set_XIP_RC(l_rc).
-                         set_DDLEVEL(l_xipDdLevel).
+                         set_SECTION_ID(subSectionID).
+                         set_DDLEVEL(attrDdLevel).
+                         set_OCCURRENCE(4),
+                         "p9_xip_get_sub_section() failed (4) w/rc=0x%08x in sysPhase=%d",
+                         " getting nested PPE image's .rings subSectionID=%d for"
+                         " ddLevel=0x%x",
+                         (uint32_t)l_rc, i_sysPhase, subSectionID, attrDdLevel );
+
+            FAPI_ASSERT( iplImgSection.iv_size > 0,
+                         fapi2::XIPC_EMPTY_IMAGE_SECTION().
+                         set_CHIP_TARGET(i_procTarget).
+                         set_SECTION_ID(subSectionID).
+                         set_DDLEVEL(attrDdLevel).
                          set_OCCURRENCE(3),
-                         "p9_xip_get_section() failed (3) getting HW .rings section (ddLevel=0x%x) w/rc=0x%08X",
-                         l_xipDdLevel, (uint32_t)l_rc );
+                         "p9_xip_get_sub_section() returned a ring section of zero size for"
+                         " sysPhase=%d, ddLevel=0x%x, mainSectionID=%d and subSectionID=%d."
+                         " There's no TOR. We cannot append rings.",
+                         i_sysPhase, attrDdLevel, mainSectionID, subSectionID );
 
-            FAPI_ASSERT( l_xipRingsSection.iv_size > 0,
-                         fapi2::XIPC_EMPTY_RING_SECTION().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_DDLEVEL(l_xipDdLevel),
-                         "CME or SGPE ring section size is zero (sysPhase=%d, ddLevel=0x%x). No TOR. Can't append rings.",
-                         i_sysPhase, l_xipDdLevel);
+            io_ringSectionBufSize = iplImgSection.iv_size;
 
-            l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
-
-            //------------------------------------------------------------
-            // Get the CME or SGPE block of rings from .rings in HW image
-            //------------------------------------------------------------
-            PpeType_t l_ppeType;
-
-            if ( i_sysPhase == SYSPHASE_RT_CME )
-            {
-                l_ppeType = PT_CME;
-            }
-            else
-            {
-                l_ppeType = PT_SGPE;
-            }
-
-            FAPI_DBG("Getting the Phase %d block of rings from HW image", l_ppeType);
-            l_rc = tor_get_block_of_rings( l_hwRingsSection,
-                                           attrDdLevel,
-                                           l_ppeType,
-                                           &io_ringSectionBuf,
-                                           io_ringSectionBufSize );
-
-            FAPI_ASSERT( l_rc == 0,
-                         fapi2::XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_TOR_RC(l_rc).
-                         set_SYSPHASE(i_sysPhase),
-                         "tor_get_block_of_rings() failed w/rc=0x%08X in sysPhase=%d",
-                         (uint32_t)l_rc, i_sysPhase );
+            memcpy( io_ringSectionBuf,
+                    (void*)((uint8_t*)io_image + iplImgSection.iv_offset),
+                    io_ringSectionBufSize );
 
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
 

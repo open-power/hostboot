@@ -23,7 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE = p10_ipl_image
-lib$(PROCEDURE)_COMMONFLAGS += -DDEBUG_P9_XIP_IMAGE=1
 lib$(PROCEDURE)_DEPLIBS += p10_ddco
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/common/utils/imageProcs)
 $(call BUILD_PROCEDURE)

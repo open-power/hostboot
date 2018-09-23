@@ -220,9 +220,10 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_XIP_GET_SECTION_ERROR</rc>
-    <description>p9_xip_get_section() failed getting an XIP section or a sub-section within an XIP section</description>
+    <description>p9_xip_get_section() failed getting an image section or a sub-section within an image section</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>XIP_RC</ffdc>
+    <ffdc>SECTION_ID</ffdc>
     <ffdc>DDLEVEL</ffdc>
     <ffdc>OCCURRENCE</ffdc>
     <callout>
@@ -244,10 +245,12 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_XIPC_EMPTY_RING_SECTION</rc>
-    <description>The ring section size is zero. No TOR. Can't append rings</description>
+    <rc>RC_XIPC_EMPTY_IMAGE_SECTION</rc>
+    <description>The section size is zero.</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SECTION_ID</ffdc>
     <ffdc>DDLEVEL</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
