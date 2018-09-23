@@ -31,12 +31,6 @@ namespace P9_RID
 #include <p9_infrastruct_help.H>
 
 
-// These strings must adhere precisely to the enum of PpeType.
-const char* ppeTypeName[] = { "SBE",
-                              "CME",
-                              "SGPE"
-                            };
-
 // These strings must adhere precisely to the enum of RingVariant.
 const char* ringVariantName[] = { "BASE",
                                   "CC",
