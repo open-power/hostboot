@@ -44,11 +44,10 @@
 typedef uint16_t  RingId_t;         // Type for RingID enum
 typedef uint16_t  RingClass_t;      // Type for RingClass enum vectors used in non-SBE
 typedef uint8_t   ChipletType_t;    // Type for Chiplets enum
-typedef uint8_t   PpeType_t;        // Type for PpeType enum
 typedef uint8_t   ChipId_t;         // Type for ChipId enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
-typedef uint8_t   RingBlockType_t;  // Type for RingBlockType enum, e.g. GET_SINGLE_RING
+typedef uint8_t   RingRequest_t;    // Type for RingRequest enum, e.g. GET_SINGLE_RING
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
 typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
@@ -56,11 +55,9 @@ typedef uint8_t   MyBool_t;         // false:0, true:1, undefined:UNDEFINED_BOOL
 #define  UNDEFINED_SCOM_ADDR       (uint32_t)0xffffffff
 #define  UNDEFINED_RING_CLASS      (RingClass_t)0xffff
 #define  UNDEFINED_CHIPLET_TYPE    (ChipletType_t)0xff
-#define  UNDEFINED_PPE_TYPE        (PpeType_t)0xff
 #define  UNDEFINED_CHIP_ID         (ChipId_t)0xff
 #define  INVALID_RING_TYPE         (RingType_t)0xff
 #define  UNDEFINED_RING_VARIANT    (RingVariant_t)0xff
-#define  UNDEFINED_RING_BLOCK_TYPE (RingBlockType_t)0xff;
 
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
 
@@ -93,15 +90,6 @@ typedef struct
     uint32_t  size;        // Size of ringSection.
 } TorHeader_t;
 
-//
-// Subsequent TOR fields (listed in order they appear in TOR ringSections)
-//
-typedef struct
-{
-    uint32_t offset;
-    uint32_t size;
-} TorPpeBlock_t;
-
 typedef struct
 {
     TorCpltOffset_t cmnOffset;
@@ -133,8 +121,8 @@ enum TorMagicNum
     TOR_MAGIC       = (uint32_t)0x544F52  ,   // "TOR"
     TOR_MAGIC_HW    = (uint32_t)0x544F5248,   // "TORH"
     TOR_MAGIC_SBE   = (uint32_t)0x544F5242,   // "TORB"
-    TOR_MAGIC_SGPE  = (uint32_t)0x544F5247,   // "TORG"
     TOR_MAGIC_CME   = (uint32_t)0x544F524D,   // "TORM"
+    TOR_MAGIC_SGPE  = (uint32_t)0x544F5247,   // "TORG"
     TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
     TOR_MAGIC_OVLY  = (uint32_t)0x544F524C,   // "TORL"
 };
@@ -179,17 +167,6 @@ enum RingClass
     RCLS_EKB_CMSK_RING     = 0b0000010000000010, // EKB P9 CMSK ring. Flush-scanned
 };
 
-// PPE types supported.
-// - This enum also reflects the order with which they appear in the HW image's .rings section.
-// - Do  NOT  make changes to the values or order of this enum.
-enum PpeType
-{
-    PT_SBE        = 0x00,
-    PT_CME        = 0x01,
-    PT_SGPE       = 0x02,
-    NUM_PPE_TYPES = 0x03
-};
-
 // Ring variants supported.
 // - This enum also reflects the order with which they appear in various images' .rings section.
 // - Do  NOT  make changes to the values or order of this enum.
@@ -215,14 +192,12 @@ enum RingType
     ALLRING = 2
 };
 
-enum RingBlockType
+enum RingRequest
 {
     GET_SINGLE_RING     = 0x00,
-    GET_PPE_LEVEL_RINGS = 0x01,
-    PUT_SINGLE_RING     = 0x02
+    PUT_SINGLE_RING     = 0x01
 };
 
-extern const char* ppeTypeName[];
 extern const char* ringVariantName[];
 
 
@@ -293,7 +268,7 @@ typedef struct
 #define TOR_INVALID_VARIANT                   INFRASTRUCT_NOOF_RCS + 5
 #define TOR_INVALID_RING_ID                   INFRASTRUCT_NOOF_RCS + 6
 #define TOR_INVALID_INSTANCE_ID               INFRASTRUCT_NOOF_RCS + 7
-#define TOR_INVALID_RING_BLOCK_TYPE           INFRASTRUCT_NOOF_RCS + 8
+#define TOR_INVALID_RING_REQUEST              INFRASTRUCT_NOOF_RCS + 8
 #define TOR_UNSUPPORTED_RING_SECTION          INFRASTRUCT_NOOF_RCS + 9
 #define TOR_RING_NOT_FOUND                    INFRASTRUCT_NOOF_RCS + 10 // to be phased out
 #define TOR_RING_IS_EMPTY                     INFRASTRUCT_NOOF_RCS + 10 // non-fatal replace
@@ -303,11 +278,10 @@ typedef struct
 #define TOR_SECTION_NOT_FOUND                 INFRASTRUCT_NOOF_RCS + 14
 #define TOR_DD_LEVEL_NOT_FOUND                INFRASTRUCT_NOOF_RCS + 15
 #define TOR_BUFFER_TOO_SMALL                  INFRASTRUCT_NOOF_RCS + 16
-#define TOR_TOO_MANY_DD_LEVELS                INFRASTRUCT_NOOF_RCS + 17
-#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 18
-#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_NOOF_RCS + 19
-#define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
-#define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 21
+#define TOR_OFFSET_TOO_BIG                    INFRASTRUCT_NOOF_RCS + 17
+#define TOR_NO_RINGS_FOR_VARIANT              INFRASTRUCT_NOOF_RCS + 18
+#define TOR_SCOM_ADDR_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 19
+#define TOR_RING_NAME_NOT_FOUND               INFRASTRUCT_NOOF_RCS + 20
 
 #ifndef __HOSTBOOT_MODULE // Only needed by ring_apply in EKB
 int ringid_get_raw_ring_file_path( uint32_t       i_magic,
