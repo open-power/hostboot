@@ -101,6 +101,7 @@ ErrlManager::ErrlManager() :
     if(sys)
     {
         iv_currLogId = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
+        TRACFCOMP( g_trac_errl,"Initial Error Log ID = %.8X", iv_currLogId );
 
         // set whether we want to skip certain error logs or not.
         iv_hiddenErrLogsEnable =
@@ -302,6 +303,15 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             // put out warning trace
             TRACFCOMP(g_trac_errl, ERR_MRK "commitErrLog() - NULL pointer");
             break;
+        }
+
+        // Increment our persistent counter so we don't reuse EIDs
+        //  after reboots or mpipl
+        TARGETING::Target * sys = NULL;
+        if( TARGETING::targetService().isInitialized() )
+        {
+            TARGETING::targetService().getTopLevelTarget( sys );
+            sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid()+1);
         }
 
         TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for plid=0x%X,"
