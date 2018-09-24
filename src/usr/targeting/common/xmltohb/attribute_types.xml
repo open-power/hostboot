@@ -2162,7 +2162,8 @@
 
   <attribute>
     <description>
-        Value of the next PLID that host service should send
+        Value of the next EID that host service should send.
+        (Note - EID is more accurate, PLID being kept to handle legacy code.)
     </description>
     <id>HOSTSVC_PLID</id>
     <persistency>non-volatile</persistency>
