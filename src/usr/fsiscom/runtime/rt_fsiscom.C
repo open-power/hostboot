@@ -395,7 +395,8 @@ static std::map<TARGETING::Target *, std::map<uint64_t, uint64_t>> g_scomCache;
  */
 void switchToFspScomAccess(TARGETING::TargetHandle_t i_target)
 {
-    TRACDCOMP(g_trac_fsiscom,ENTER_MRK"switchToFspScomAccess");
+    TRACFCOMP(g_trac_fsiscom,ENTER_MRK"switchToFspScomAccess : %.8X",
+              TARGETING::get_huid(i_target));
     errlHndl_t l_err = NULL;
 
     // Need to mark the target's DMI channel and all targets below it
@@ -508,7 +509,7 @@ void switchToFspScomAccess(TARGETING::TargetHandle_t i_target)
         g_scomCache[l_membuf] = l_newmap;
     }
 
-    TRACDCOMP(g_trac_fsiscom,EXIT_MRK"switchToFspScomAccess");
+    TRACFCOMP(g_trac_fsiscom,EXIT_MRK"switchToFspScomAccess");
 }
 
 

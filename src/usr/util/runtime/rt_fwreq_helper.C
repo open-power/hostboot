@@ -178,7 +178,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                  {
                     TRACFCOMP(g_trac_runtime,
                              "FSP is doing a reset/reload, "
-                             "doing a VPD write failed. "
+                             "sending a message to the FSP failed. "
                              "retry:%d/%d, rc:%d, io_type:%d, dataSize:%d, "
                              "seqnum:0x%X, msgq:0x%X, msgType:0x%X, __req:%d, "
                              "__onlyError:%d",
@@ -372,7 +372,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
             case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
                  {
                     TRACFCOMP(g_trac_runtime,
-                             ERR_MRK"Failed doing a VPD write. "
+                             ERR_MRK"Failed sending a message to the FSP. "
                              "rc:%d, io_type:%d, dataSize:%d, "
                              "seqnum:0x%X, msgq:0x%X, msgType:0x%X, __req:%d, "
                              "__onlyError:%d",
