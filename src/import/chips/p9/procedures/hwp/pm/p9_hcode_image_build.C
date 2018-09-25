@@ -58,6 +58,7 @@
 #ifdef __CRONUS_VER
     #include <string>
 #endif
+
 using namespace stopImageSection;
 
 extern "C"
@@ -141,6 +142,8 @@ enum
     SMF_SELF_REST_SIGN_OFFSET   =   0x1300,
     SMF_SELF_SIGNATURE          =   0x5f534d46,
     CORE_REST_WORDS_PER_THREAD  =  (CORE_RESTORE_SIZE_PER_THREAD >> 2),
+    TWO_MB_ALIGNMENT_CHECK      =   0x1FFFFF,
+    SMF_BIT_CHECK               =   0x0001000000000000ull,
 };
 
 /**
@@ -1355,6 +1358,7 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     FAPI_INF("  CPMR Phy Add    :   0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
     FAPI_INF("  Timebase (Hz)   :   0x%08X (%d)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_timebase_hz),
                                                   SWIZZLE_4_BYTE(pCmeHdr->g_cme_timebase_hz));
+    FAPI_INF("  UnSecure HOMER  :   0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_unsec_cpmr_PhyAddr));
     FAPI_INF("========================= CME Header End ==================================");
 
     FAPI_INF("==========================CPMR Header===========================================");
@@ -4707,6 +4711,98 @@ fapi_try_exit:
 
 //---------------------------------------------------------------------------
 
+ fapi2::ReturnCode verifySprSelfSave(  void * i_pHomer, uint8_t i_fuseMode,
+                                       P9FuncModel & i_chipFuncModel )
+{
+    #ifdef __SELF_SAVE_TEST
+    uint64_t l_pir       =   0;
+    uint32_t l_saveVect  =   0;
+    l_saveVect           =
+                            ( 0x80000000 >> BIT_POS_CIABR )  |
+                            ( 0x80000000 >> BIT_POS_DAWR  )  |
+                            ( 0x80000000 >> BIT_POS_DAWRX )  |
+                            ( 0x80000000 >> BIT_POS_HSPRG0)  |
+                            ( 0x80000000 >> BIT_POS_LDBAR )  |
+                            ( 0x80000000 >> BIT_POS_LPCR  )  |
+                            ( 0x80000000 >> BIT_POS_MSR )    |
+                            ( 0x80000000 >> BIT_POS_HID   )  |
+                            ( 0x80000000 >> BIT_POS_HMEER )  |
+                            ( 0x80000000 >> BIT_POS_PTCR  )  |
+                            ( 0x80000000 >> BIT_POS_SMFCTRL) |
+                            ( 0x80000000 >> BIT_POS_USPRG0 ) |
+                            ( 0x80000000 >> BIT_POS_USPRG1 ) |
+                            ( 0x80000000 >> BIT_POS_PMCR )   ;
+
+    StopReturnCode_t    l_rc;
+
+    FAPI_DBG( "Save Vector 0x%08x" , l_saveVect );
+
+    for( uint8_t l_corePos  = 0;  l_corePos < MAX_CORES_PER_CHIP;
+         l_corePos++ )
+    {
+        if( i_chipFuncModel.isCoreFunctional( l_corePos ) )
+        {
+            for( uint8_t l_threadPos = 0; l_threadPos < MAX_THREADS_PER_CORE;
+                 l_threadPos++ )
+            {
+                l_pir = getPirValue( l_corePos, l_threadPos, i_fuseMode );
+                l_rc  = stopImageSection::p9_stop_save_cpureg_control( i_pHomer,
+                                                                l_pir, l_saveVect );
+                FAPI_ASSERT( ( !l_rc ),
+                             fapi2::SELF_SAVE_API_FAILED()
+                             .set_PIR( l_pir )
+                             .set_STOP_API_RC( l_rc )
+                             .set_CORE_POS( l_corePos )
+                             .set_THREAD_POS( l_threadPos ),
+                             "Failed To Create SPR Self Save Entry" );
+            }
+        }
+    }
+
+   fapi_try_exit:
+    #endif
+    return fapi2::current_err;
+}
+
+//---------------------------------------------------------------------------
+
+fapi2::ReturnCode populateUnsecureHomerAddress( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t*     i_pHomer )
+{
+    uint64_t l_unsecureHomerAdd     =   0;
+    uint8_t  l_invalidAddress       =   0;
+    cmeHeader_t* pCmeHdr            =
+                (cmeHeader_t*) & i_pHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+    FAPI_DBG( ">> populateUnsecureHomerAddress" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_UNSECURE_HOMER_ADDRESS,
+                           i_procTgt,
+                           l_unsecureHomerAdd),
+             "Error from FAPI_ATTR_GET for attribute ATTR_UNSECURE_HOMER_ADDRESS");
+    FAPI_INF( "Atrribute ATTR_UNSECURE_HOMER_ADDRESS 0x%016lx", l_unsecureHomerAdd );
+
+    if( l_unsecureHomerAdd & 0x1fffff )
+    {
+        l_invalidAddress    =   1;
+    }
+    else if( (l_unsecureHomerAdd & SMF_BIT_CHECK) )
+    {
+        l_invalidAddress    =   1;
+    }
+
+    FAPI_ASSERT( ( !l_invalidAddress ),
+                 fapi2::BAD_UNSECURE_HOMER_VALUE()
+                 .set_UNSECURE_HOMER_ADDRESS( l_unsecureHomerAdd ),
+                 "Bad address for unsecure HOMER 0x%016lx", l_unsecureHomerAdd  );
+
+    pCmeHdr->g_cme_unsec_cpmr_PhyAddr   =   SWIZZLE_8_BYTE(l_unsecureHomerAdd);
+
+    fapi_try_exit:
+    FAPI_DBG( "<< populateUnsecureHomerAddress" );
+    return fapi2::current_err;
+}
+
+//--------------------------------------------------------------------------------------------------------
+
 fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                         void* const     i_pImageIn,
                                         void*           i_pHomerImage,
@@ -4883,8 +4979,12 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                   l_riskLevel, l_qpmrHdr, i_imgType ),
               "Failed To Layout Quad Rings" );
 
+    FAPI_TRY( populateUnsecureHomerAddress( i_procTgt, pChipHomer ),
+              "Failed To Populate Unsecure HOMER Region with sc2 instruction" );
+
     //Update CPMR Header with Scan Ring details
     updateCpmrCmeRegion( pChipHomer );
+
 
     //Update QPMR Header area in HOMER
     updateQpmrHeader( pChipHomer, l_qpmrHdr );
@@ -4933,6 +5033,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
 
     FAPI_TRY( addUrmorRestore( i_pHomerImage, fuseModeState, l_chipFuncModel ),
               "Failed to create URMOR restore entry" );
+
+    FAPI_TRY( verifySprSelfSave( i_pHomerImage, fuseModeState, l_chipFuncModel ),
+              "Failed to create SPR self save restore entry" );
 
 fapi_try_exit:
     FAPI_IMP("<< p9_hcode_image_build" );
