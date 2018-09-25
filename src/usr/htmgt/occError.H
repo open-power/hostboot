@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@ namespace HTMGT
     // Error Actions
     enum tmgtErrlActionsType
     {
+        TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED       = 0x10,
         TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED       = 0x20,
         TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED       = 0x40,
         TMGT_ERRL_ACTIONS_RESET_REQUIRED           = 0x80,
