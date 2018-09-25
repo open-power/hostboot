@@ -67,9 +67,9 @@ enum
     SIZE_PER_SPR_RESTORE_INST   =   ((4 * sizeof(uint8_t)) / sizeof(uint32_t)),
     MAX_THREAD_LEVEL_SPRS       =   11,
     MAX_CORE_LEVEL_SPRS         =   6,
-    MAX_SPR_BIT_POS             =   31,
+    MAX_SPR_BIT_POS             =   30,
     SPR_BIT_POS_8               =    8,
-    SPR_BIT_POS_19              =   19,
+    SPR_BIT_POS_20              =   20,
     SPR_BIT_POS_25              =   25,
     SPR_BIT_POS_27              =   27,
 };
