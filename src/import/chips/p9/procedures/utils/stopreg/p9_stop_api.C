@@ -54,26 +54,26 @@ namespace stopImageSection
 
 const StopSprReg_t g_sprRegister[] =
 {
-    { P9_STOP_SPR_CIABR,     true,  0  },
-    { P9_STOP_SPR_DAWR,      true,  1  },
-    { P9_STOP_SPR_DAWRX,     true,  2  },
-    { P9_STOP_SPR_HSPRG0,    true,  3  },
-    { P9_STOP_SPR_LDBAR,     true,  4, },
-    { P9_STOP_SPR_LPCR,      true,  5  },
-    { P9_STOP_SPR_PSSCR,     true,  6  },
-    { P9_STOP_SPR_MSR,       true,  7  },
-    { P9_STOP_SPR_HRMOR,     false, 20 },
-    { P9_STOP_SPR_HID,       false, 21 },
-    { P9_STOP_SPR_HMEER,     false, 22 },
-    { P9_STOP_SPR_PMCR,      false, 23 },
-    { P9_STOP_SPR_PTCR,      false, 24 },
-    { P9_STOP_SPR_SMFCTRL,   true,  28 },
-    { P9_STOP_SPR_USPRG0,    true,  29 },
-    { P9_STOP_SPR_USPRG1,    true,  30 },
-    { P9_STOP_SPR_URMOR,     false, 31 },
+    { P9_STOP_SPR_CIABR,     true,  0   },
+    { P9_STOP_SPR_DAWR,      true,  1   },
+    { P9_STOP_SPR_DAWRX,     true,  2   },
+    { P9_STOP_SPR_HSPRG0,    true,  3   },
+    { P9_STOP_SPR_LDBAR,     true,  4,  },
+    { P9_STOP_SPR_LPCR,      true,  5   },
+    { P9_STOP_SPR_PSSCR,     true,  6   },
+    { P9_STOP_SPR_MSR,       true,  7   },
+    { P9_STOP_SPR_HRMOR,     false, 255 },
+    { P9_STOP_SPR_HID,       false, 21  },
+    { P9_STOP_SPR_HMEER,     false, 22  },
+    { P9_STOP_SPR_PMCR,      false, 23  },
+    { P9_STOP_SPR_PTCR,      false, 24  },
+    { P9_STOP_SPR_SMFCTRL,   true,  28  },
+    { P9_STOP_SPR_USPRG0,    true,  29  },
+    { P9_STOP_SPR_USPRG1,    true,  30  },
+    { P9_STOP_SPR_URMOR,     false, 255 },
 };
 
-const uint32_t MAX_SPR_SUPPORTED =  17;
+const uint32_t MAX_SPR_SUPPORTED            =   17;
 const uint32_t LEGACY_CORE_SCOM_SUPPORTED   =   15;
 const uint32_t LEGACY_QUAD_SCOM_SUPPORTED   =   63;
 
@@ -255,7 +255,7 @@ STATIC uint32_t getOriInstruction( const uint16_t i_Rs, const uint16_t i_Ra,
  */
 STATIC uint32_t genKeyForSprLookup( const CpuReg_t i_regId )
 {
-    return getOriInstruction( 0, 0, (uint16_t) i_regId );
+    return getOriInstruction( 24, 0, (uint16_t) i_regId );
 }
 
 //-----------------------------------------------------------------------------
@@ -330,7 +330,7 @@ STATIC uint32_t getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr )
  */
 STATIC uint32_t getMfmsrInstruction( const uint16_t i_Rt )
 {
-    uint32_t mfmsrInstOpcode  = ((OPCODE_31 << 26) | (i_Rt << 21) | (MFMSR_CONST));
+    uint32_t mfmsrInstOpcode  = ((OPCODE_31 << 26) | (i_Rt << 21) | ((MFMSR_CONST)<< 1));
 
     return SWIZZLE_4_BYTE(mfmsrInstOpcode);
 }
@@ -361,14 +361,19 @@ STATIC uint32_t getRldicrInstruction( const uint16_t i_Ra, const uint16_t i_Rs,
 
 STATIC uint32_t getMfsprInstruction( const uint16_t i_Rt, const uint16_t i_sprNum )
 {
-    uint32_t mfsprInstOpcode    =   0;
-    mfsprInstOpcode =  (( OPCODE_31 << 26 ) | ( i_Rt << 21 ) | ( i_sprNum << 11 ) | ( MFSPR_CONST << 1 ));
+    uint32_t mfsprInstOpcode = 0;
+    uint32_t temp = (( i_sprNum & 0x03FF ) << 11);
+    mfsprInstOpcode = (uint8_t)i_Rt << 21;
+    mfsprInstOpcode |= (( temp  & 0x0000F800 ) << 5);
+    mfsprInstOpcode |= (( temp  & 0x001F0000 ) >> 5);
+    mfsprInstOpcode |= MFSPR_BASE_OPCODE;
+
     return SWIZZLE_4_BYTE(mfsprInstOpcode);
 }
 
 //-----------------------------------------------------------------------------
 
-STATIC uint32_t getBranchLinkRegInstruction( )
+STATIC uint32_t getBranchLinkRegInstruction(void)
 {
     uint32_t branchConstInstOpcode  =   0;
     branchConstInstOpcode   =   (( OPCODE_18 << 26 ) | ( SELF_SAVE_FUNC_ADD ) | 0x03 );
@@ -455,7 +460,7 @@ STATIC StopReturnCode_t lookUpSprInImage( uint32_t* i_pThreadSectLoc, const uint
 STATIC StopReturnCode_t updateSprEntryInImage( uint32_t* i_pSprEntryLocation,
         const CpuReg_t i_regId,
         const uint64_t i_regData,
-        const SprEntryUpdateMode i_mode
+        const enum SprEntryUpdateMode i_mode
                                              )
 {
     StopReturnCode_t l_rc = STOP_SAVE_SUCCESS;
@@ -615,14 +620,14 @@ STATIC StopReturnCode_t getSprRegIndexAdjustment( const uint32_t i_saveMaskPos, 
 
     do
     {
-        if( (( i_saveMaskPos >= SPR_BIT_POS_8 ) && ( i_saveMaskPos <= SPR_BIT_POS_19 )) ||
+        if( (( i_saveMaskPos >= SPR_BIT_POS_8 ) && ( i_saveMaskPos <= SPR_BIT_POS_20 )) ||
             (( i_saveMaskPos >= SPR_BIT_POS_25 ) && ( i_saveMaskPos <= SPR_BIT_POS_27 )) )
         {
             l_rc = STOP_SAVE_SPR_BIT_POS_RESERVE;
             break;
         }
 
-        if( (i_saveMaskPos > SPR_BIT_POS_19) && (i_saveMaskPos < SPR_BIT_POS_25 ) )
+        if( (i_saveMaskPos > SPR_BIT_POS_20) && (i_saveMaskPos < SPR_BIT_POS_25) )
         {
             *i_sprAdjIndex    =   12;
         }
@@ -1332,7 +1337,7 @@ StopReturnCode_t p9_stop_save_scom( void* const   i_pImage,
  * @param[in]   i_pSaveSprLoc       start location of save entry for a given SPR.
  * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
  */
-StopReturnCode_t lookUpSelfSaveSpr( uint32_t i_sprBitPos, uint32_t* l_pSprSaveStart,
+STATIC StopReturnCode_t lookUpSelfSaveSpr( uint32_t i_sprBitPos, uint32_t* l_pSprSaveStart,
                                     uint32_t  i_searchLength, uint32_t** i_pSaveSprLoc )
 {
     int32_t l_saveWordLength    =   (int32_t)(i_searchLength >> 2);
@@ -1363,7 +1368,7 @@ StopReturnCode_t lookUpSelfSaveSpr( uint32_t i_sprBitPos, uint32_t* l_pSprSaveSt
  * @param[in]   i_sprNum    Id of the SPR for which entry needs to be edited.
  * @return      STOP_SAVE_SUCCESS if look up succeeds, error code otherwise.
  */
-StopReturnCode_t updateSelfSaveEntry( uint32_t* i_pSaveReg, uint16_t i_sprNum )
+STATIC StopReturnCode_t updateSelfSaveEntry( uint32_t* i_pSaveReg, uint16_t i_sprNum )
 {
     StopReturnCode_t l_rc   =   STOP_SAVE_SUCCESS;
 
@@ -1411,6 +1416,7 @@ StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
     uint32_t* l_pRestoreStart       =   NULL;
     uint32_t* l_pSprSave            =   NULL;
     void* l_pTempLoc                =   NULL;
+    uint32_t * l_pTempWord          =   NULL;
     SmfHomerSection_t* l_pHomer     =   NULL;
     uint8_t l_selfRestVer           =   0;
 
@@ -1439,6 +1445,11 @@ StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
         for( l_sprIndex = 0; l_sprIndex < MAX_SPR_SUPPORTED; l_sprIndex++ )
         {
             l_sprPos    =    g_sprRegister[l_sprIndex].iv_saveMaskPos;
+
+            if( l_sprPos > MAX_SPR_BIT_POS )
+            {
+                continue;
+            }
 
             //Check if a given SPR needs to be self-saved each time on STOP entry
 
@@ -1492,6 +1503,19 @@ StopReturnCode_t p9_stop_save_cpureg_control(  void* i_pImage,
 
                 //update specific instructions of self save region to enable saving for SPR
                 l_rc    =   updateSelfSaveEntry( l_pSprSave, g_sprRegister[l_sprIndex].iv_sprId );
+
+                if( l_rc )
+                {
+                    MY_ERR( "Failed to update self save instructions for 0x%08x",
+                            (uint32_t) g_sprRegister[l_sprIndex].iv_sprId );
+                }
+
+                if( l_pTempLoc )
+                {
+                    l_pTempWord      =   (uint32_t *)l_pTempLoc;
+                    l_pTempWord++;
+                    *l_pTempWord     =   getXorInstruction( 0, 0, 0 );
+                }
 
             }// end if( i_saveRegVector..)
         }// end for
