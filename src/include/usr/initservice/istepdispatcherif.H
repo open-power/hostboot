@@ -25,6 +25,8 @@
 #ifndef __INITSERVICE_ISTEPDISPATCHERIF_H
 #define __INITSERVICE_ISTEPDISPATCHERIF_H
 
+#include <vector>
+
 namespace INITSERVICE
 {
 
@@ -69,6 +71,20 @@ void sendProgressCode(bool i_needsLock = true);
  *      log.
  */
 errlHndl_t sendIstepCompleteMsg ( void );
+
+
+/**
+ * @brief This function is to be used by external code to tell ATTN code on
+ *        the FSP to start monitoring these chips
+ *
+ * param[in] i_huid_list - HUID list of chips for ATTN to watch
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ *      log.
+ */
+errlHndl_t sendAttnMonitorChipIdMsg(
+                    const std::vector<TARGETING::ATTR_HUID_type> & i_huid_list);
+
 
 /**
  * @brief This function is to be used by external code to check whether
