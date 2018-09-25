@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,8 @@ enum    InitServiceReasonCode
     SHUTDOWN_MFG_TERM            =   INITSVC_COMP_ID | 0x14,
     //termination_rc
     SHUTDOWN_KEY_TRANSITION      =   INITSVC_COMP_ID | 0x15,
+
+    ISTEP_ATTN_MONITOR_MSG_FAILED =  INITSVC_COMP_ID | 0x16,
 };
 
 enum InitServiceUserDetailDataSubSection

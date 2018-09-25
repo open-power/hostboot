@@ -1496,6 +1496,126 @@ errlHndl_t IStepDispatcher::sendSyncPoint()
     return err;
 }
 
+errlHndl_t IStepDispatcher::sendAttnMonitorChipIdMsg(
+                    const std::vector<TARGETING::ATTR_HUID_type> & i_huid_list )
+{
+    errlHndl_t l_err = NULL;
+
+    TRACFCOMP(g_trac_initsvc,
+        ENTER_MRK"IStepDispatcher::sendAttnMonitorChipIdMsg");
+
+    if( !iv_spBaseServicesEnabled )
+    {
+        TRACFCOMP( g_trac_initsvc,
+            INFO_MRK"sendAttnMonitorChipIdMsg: The ATTN service runs on the "
+            "FSP and no FSP was found so we are skipping sending message to "
+            "ATTN service.");
+    }
+    else if (i_huid_list.empty())
+    {
+       TRACFCOMP( g_trac_initsvc, INFO_MRK"sendAttnMonitorChipIdMsg: empty huid list" );
+    }
+    else
+    {
+        INITSERVICE::attn_chipid_msg * l_data_ptr = nullptr;
+
+        msg_t * myMsg = msg_allocate();
+        myMsg->type = INITSERVICE::ATTN_MONITOR_CHIPID_LIST;
+
+        // Contains the full size of the extra_data field of myMsg
+        // extra_data includes attn_chipid_msg + list of HUIDs.
+        // attn_chipid_msg.data is the start of the huid list so
+        // need to remove that variable's size from the total
+        uint16_t l_total_size =
+            (sizeof(INITSERVICE::attn_chipid_msg) - sizeof(l_data_ptr->data)) +
+            (sizeof(TARGETING::ATTR_HUID_type) * i_huid_list.size());
+
+        myMsg->data[0] = 0;
+        myMsg->data[1] = l_total_size;
+        myMsg->extra_data = MBOX::allocate(l_total_size);
+
+        l_data_ptr = reinterpret_cast<INITSERVICE::attn_chipid_msg *>
+                        (myMsg->extra_data);
+
+        // total chip huid's in list
+        l_data_ptr->chipIdCount = i_huid_list.size();
+
+        // data length in bytes of the list (sizeof(huid) * Number of huids)
+        l_data_ptr->size = sizeof(TARGETING::ATTR_HUID_type) *
+                           i_huid_list.size();
+
+        // now fill in the list with huids
+        std::copy(i_huid_list.begin(), i_huid_list.end(), &(l_data_ptr->data));
+
+        TRACFCOMP( g_trac_initsvc,
+                  "sendAttnMonitorChipIdMsg: Sending ATTN_MONITOR_CHIPID_LIST"
+                  " (0x%.8X) msg", myMsg->type );
+        TRACFBIN(g_trac_initsvc, "msg data", myMsg->extra_data, myMsg->data[1]);
+
+        // send message to alert ATTN to start monitoring these chips
+        l_err = MBOX::sendrecv(HWSVRQ, myMsg);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_initsvc,
+                ERR_MRK"sendAttnMonitorChipIdMsg: error 0x%.8X from msg send",
+                l_err->reasonCode() );
+            l_err->collectTrace("INITSVC", 1024);
+
+            // clean up any allocated memory of failed msg
+            if((myMsg != nullptr) && (myMsg->extra_data != nullptr))
+            {
+                free( myMsg->extra_data );
+                myMsg->extra_data = nullptr;
+            }
+        }
+        else
+        {
+            // Check if msg failed at the FSP level by looking at data[0]
+            // A non-zero value implies something went wrong
+            if (myMsg->data[0] != HWSVR_MSG_SUCCESS)
+            {
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"sendAttnMonitorChipIdMsg: "
+                    "msg failed at HWSV/ATTN level, see plid %.8X",
+                    myMsg->data[0] );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_ATTN_MONITOR_MSG_FAILED
+                 * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                 * @moduleid         ISTEP_INITSVC_MOD_ID
+                 * @userdata1        PLID of failure on FSP
+                 * @userdata2        Number of huids in msg
+                 * @devdesc          sendAttnMonitorChipIdMsg failed at
+                 *                   the FSP level.  Potential checkstops
+                 *                   may not be properly handled.
+                 * @custdesc         Firmware error during boot
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                              ERRORLOG::ERRL_SEV_PREDICTIVE,
+                              ISTEP_INITSVC_MOD_ID,
+                              ISTEP_ATTN_MONITOR_MSG_FAILED,
+                              myMsg->data[0],
+                              i_huid_list.size(),
+                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_err->collectTrace("INITSVC", 1024);
+
+                // Use the same plid as the HWSV/ATTN error
+                l_err->plid(myMsg->data[0]);
+            }
+        }
+
+        // msg cleanup
+        // NOTE: extra_data is cleaned up by the receiver
+        msg_free(myMsg);
+        myMsg = nullptr;
+    }
+
+    TRACFCOMP( g_trac_initsvc,
+        EXIT_MRK"IStepDispatcher::sendAttnMonitorChipIdMsg");
+
+    return l_err;
+}
+
 // ----------------------------------------------------------------------------
 // IStepDispatcher::sendIstepCompleteMsg()
 // ----------------------------------------------------------------------------
@@ -2542,6 +2662,13 @@ void waitForSyncPoint()
 errlHndl_t sendSyncPoint()
 {
     return IStepDispatcher::getTheInstance().sendSyncPoint();
+}
+
+errlHndl_t sendAttnMonitorChipIdMsg(
+                    const std::vector<TARGETING::ATTR_HUID_type> & i_huid_list)
+{
+    return IStepDispatcher::getTheInstance().
+              sendAttnMonitorChipIdMsg(i_huid_list);
 }
 
 void sendProgressCode(bool i_needsLock)

@@ -36,6 +36,7 @@
 /******************************************************************************/
 #include <stdint.h>
 #include <time.h>
+#include <vector>
 #include <util/singleton.H>
 #include <sys/msg.h>
 #include <sys/sync.h>
@@ -253,6 +254,18 @@ public:
      *         1 indicates istep successfully incremented
      */
     int getNextIStep(uint8_t& io_istep, uint8_t& io_substep);
+
+    /**
+     * @brief Send attn_chipid_msg to alert ATTN code on the FSP to
+     *        start monitoring these chips
+     *
+     * param[in] i_huid_list - HUID list of chips for ATTN to watch
+     *
+     * @return errlHndl_t - NULL if successful,
+     *                      otherwise a pointer to the error log.
+     */
+    errlHndl_t sendAttnMonitorChipIdMsg(
+                  const std::vector<TARGETING::ATTR_HUID_type> & i_huid_list );
 
 protected:
 
