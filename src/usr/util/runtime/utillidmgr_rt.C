@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -226,7 +226,7 @@ errlHndl_t UtilLidMgr::loadLid()
             if (0 != rc)
             {
                 /*@
-                 * @errortype       ERRL_SEV_INFORMATIONAL
+                 * @errortype
                  * @moduleid        Util::UTIL_LIDMGR_RT
                  * @reasoncode      Util::UTIL_LIDMGR_RC_FAIL
                  * @userdata1       Return code from lid_load call.
@@ -234,7 +234,7 @@ errlHndl_t UtilLidMgr::loadLid()
                  * @devdesc         Unable to load LID via host interface.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    ERRORLOG::ERRL_SEV_PREDICTIVE,
                     Util::UTIL_LIDMGR_RT,
                     Util::UTIL_LIDMGR_RC_FAIL,
                     rc,
@@ -248,14 +248,14 @@ errlHndl_t UtilLidMgr::loadLid()
         if( iv_lidSize == 0 )
         {
             /*@
-             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @errortype
              * @moduleid        Util::UTIL_LIDMGR_RT
              * @reasoncode      Util::UTIL_LIDMGR_NOT_FOUND
              * @userdata1       Lid number
              * @devdesc         Unable to find Lid.
              */
             l_errl = new ERRORLOG::ErrlEntry(
-                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                             ERRORLOG::ERRL_SEV_PREDICTIVE,
                                              Util::UTIL_LIDMGR_RT,
                                              Util::UTIL_LIDMGR_NOT_FOUND,
                                              iv_lidId,
@@ -277,14 +277,14 @@ errlHndl_t UtilLidMgr::cleanup()
         if (l_rc)
         {
             /*@
-             * @errortype       ERRL_SEV_INFORMATIONAL
+             * @errortype
              * @moduleid        Util::UTIL_LIDMGR_RT
              * @reasoncode      Util::UTIL_LIDMGR_UNLOAD_RC_FAIL
              * @userdata1       Return code from lid_unload call.
              * @devdesc         Unable to unload LID via host interface.
              */
             l_err = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        ERRORLOG::ERRL_SEV_PREDICTIVE,
                         Util::UTIL_LIDMGR_RT,
                         Util::UTIL_LIDMGR_UNLOAD_RC_FAIL,
                         l_rc);
