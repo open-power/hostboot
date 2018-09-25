@@ -298,6 +298,13 @@ namespace HTMGT
                 }
             }
 
+            // Process force error log to be sent to BMC.
+            if( (l_occElog->actions & TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED ) ||
+                (l_occSrc == (OCCC_COMP_ID | 0x01 ) ) )    //GEN_CALLHOME_LOG
+            {
+                l_errlHndl->setEselCallhomeInfoEvent(true);
+            }
+
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
             char header[64];
             sprintf(header, "OCC%d ELOG: (0x%04X bytes)", iv_instance, i_length);
