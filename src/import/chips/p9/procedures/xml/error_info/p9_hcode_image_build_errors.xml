@@ -731,9 +731,35 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_URMOR_RESTORE_ENTRY_FAILED</rc>
-    <description>hcode image build procedure failed to create URMOR restore entry</description>
+    <description>hcode image build procedure failed to create URMOR restore entry. 
+       It is meant for test and debug environment.</description>
     <ffdc>PIR</ffdc>
     <ffdc>STOP_API_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SELF_SAVE_API_FAILED</rc>
+    <description>API call for creating SPR self save entry failed.
+      It is meant for test and debug environment.</description>
+    <ffdc>PIR</ffdc>
+    <ffdc>STOP_API_RC</ffdc>
+    <ffdc>CORE_POS</ffdc>
+    <ffdc>THREAD_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_BAD_UNSECURE_HOMER_VALUE</rc>
+    <description>Attribute ATTR_UNSECURE_HOMER_ADDRESS is initialized with bad value. Address
+    is either not aligned with 2MB boundary or b15 of of address value is not 0</description>
+    <ffdc>UNSECURE_HOMER_ADDRESS</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

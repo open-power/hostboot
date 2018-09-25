@@ -68,6 +68,7 @@ enum
     MFSPR_CONST         =   339,
     BLR_INST            =   0x4e800020,
     MTSPR_BASE_OPCODE   =   0x7c0003a6,
+    MFSPR_BASE_OPCODE   =   0x7c0002a6,
     ATTN_OPCODE         =   0x00000200,
     OPCODE_18           =   18,
     SELF_SAVE_FUNC_ADD  =   0x2300,

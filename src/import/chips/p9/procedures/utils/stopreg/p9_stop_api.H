@@ -148,7 +148,6 @@ typedef enum
     BIT_POS_LPCR        =   5,
     BIT_POS_PSSCR       =   6,
     BIT_POS_MSR         =   7,
-    BIT_POS_HRMOR       =   20,
     BIT_POS_HID         =   21,
     BIT_POS_HMEER       =   22,
     BIT_POS_PMCR        =   23,
@@ -156,7 +155,6 @@ typedef enum
     BIT_POS_SMFCTRL     =   28,
     BIT_POS_USPRG0      =   29,
     BIT_POS_USPRG1      =   30,
-    BIT_POS_URMOR       =   31,
 } SprBitPositionList_t;
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,10 @@ typedef struct
     uint64_t cpmrMagicWord;
     uint32_t buildDate;
     uint32_t version;
-    uint8_t  reserve1[7];
+    uint8_t  reserve1[4];
+    uint8_t  selfRestoreVer;
+    uint8_t  stopApiVer;
+    uint8_t  urmorFix;
     uint8_t  fusedModeStatus;
     uint32_t cmeImgOffset;
     uint32_t cmeImgLength;
