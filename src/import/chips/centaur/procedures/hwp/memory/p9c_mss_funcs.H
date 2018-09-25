@@ -38,6 +38,7 @@
 #include <dimmConsts.H>
 
 /// @brief Struct to contain DRAM address bits
+/// @note For DDR4, bank should be set to {BA0, BA1, BG0, BG1}
 struct access_address
 {
     uint32_t row_addr;

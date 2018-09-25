@@ -28,4 +28,6 @@ PROCEDURE=p9c_mss_row_repair
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
+lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_rowRepairFuncs
 $(call BUILD_PROCEDURE)

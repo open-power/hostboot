@@ -378,6 +378,61 @@
   </callout>
 </hwpError>
 
+<hwpError>
+  <rc>RC_CEN_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED</rc>
+  <description>Row repairs were requested but DRAM repairs are disabled in MNFG flags</description>
+  <ffdc>DIMM_TARGET</ffdc>
+  <ffdc>RANK</ffdc>
+  <callout>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_RANK_OUT_OF_BOUNDS</rc>
+  <description>Rank supplied to clear_row_repair_entry is out of bounds</description>
+  <ffdc>RANK</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_DRAM_INDEX_OUT_OF_BOUNDS</rc>
+  <description>DRAM index supplied to clear_bad_dq_for_row_repair is out of bounds</description>
+  <ffdc>DRAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS</rc>
+  <description>VPD contained out of bounds row repair entry</description>
+  <ffdc>DIMM_TARGET</ffdc>
+  <ffdc>DRAM</ffdc>
+  <ffdc>MRANK</ffdc>
+  <ffdc>SRANK</ffdc>
+  <ffdc>BANK_GROUP</ffdc>
+  <ffdc>BANK</ffdc>
+  <ffdc>ROW</ffdc>
+  <callout>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>LOW</priority>
+  </callout>
+</hwpError>
+
 
 <!-- EDIT THIS FILE DIRECTLY. THE ODS FILE METHOD IS NO LONGER VALID -->
 </hwpErrors>

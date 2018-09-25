@@ -51,6 +51,7 @@
 #include <p9c_mss_funcs.H>
 #include <p9c_mss_unmask_errors.H>
 #include <p9c_mss_draminit_mc.H>
+#include <p9c_mss_row_repair.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <dimmConsts.H>
@@ -91,6 +92,10 @@ extern "C" {
             //Step Two.2: Enable address inversion on each MBA for ALL CARDS
             FAPI_INF( "%s +++ Setting up adr inversion for port 1 +++", mss::c_str(i_target));
             FAPI_TRY(mss_enable_addr_inversion(l_mba), "---Error During ADR Inversion");
+
+            //Step Two.3: Apply row repairs on each MBA's DIMM
+            FAPI_INF( "%s +++ Applying sPPR row repairs +++", mss::c_str(i_target));
+            FAPI_TRY(p9c_mss_deploy_row_repairs(l_mba), "---Error During Row Reapirs");
 
             // Step Three: Enable Refresh
             FAPI_INF( "%s +++ Enabling Refresh +++", mss::c_str(i_target));

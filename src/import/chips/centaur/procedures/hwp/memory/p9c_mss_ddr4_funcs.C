@@ -4788,6 +4788,7 @@ fapi_try_exit:
 /// @param[in] i_delay delay associated with this instruction
 /// @param[in,out] io_instruction_number position in CCS program in which to insert MRS command (will be incremented)
 /// @return FAPI2_RC_SUCCESS iff successful
+/// @note MR should be selected using i_addr.bank with constants from dimmConsts.H
 fapi2::ReturnCode add_mrs_to_ccs_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba,
                                       const access_address i_addr,
                                       const uint32_t i_delay,
