@@ -1623,7 +1623,8 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
         // Inform the private header how many sections there are,
         // counting the PH, UH, PS, and the optionals.
-        iv_Private.iv_sctns = 3 + iv_SectionVector.size();
+        const auto startingSectionCount = iv_SectionVector.size();
+        iv_Private.iv_sctns = 3 + startingSectionCount;
 
         // Flatten the PH private header section
         char * pBuffer = static_cast<char *>(o_pBuffer);
@@ -1679,7 +1680,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
         //
         // for saving errorlogs into PNOR, i_truncate will be set to true
         // and sections which don't fit are not saved.
-        uint32_t l_sectionCount = iv_SectionVector.size();
+        size_t flattenedSections = 0;
 
         std::vector<ErrlUD*>::const_iterator it;
         for(it = iv_SectionVector.begin();
@@ -1698,8 +1699,6 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         // TODO: RTC 77560 - error if this happens during test
                         TRACFCOMP( g_trac_errl,
                                 INFO_MRK"ud.flatten error, skipping");
-                        // won't fit - don't count it.
-                        l_sectionCount--;
                         continue;
                     }
                     else
@@ -1710,6 +1709,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         break;
                     }
                 }
+                ++flattenedSections;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
@@ -1733,8 +1733,6 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         // TODO: RTC 77560 - error if this happens during test
                         TRACFCOMP( g_trac_errl,
                                 INFO_MRK"ud.flatten error, skipping");
-                        // won't fit - don't count it.
-                        l_sectionCount--;
                         continue;
                     }
                     else
@@ -1745,6 +1743,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         break;
                     }
                 }
+                ++flattenedSections;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
@@ -1771,8 +1770,6 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         // TODO: RTC 77560 - error if this happens during test
                         TRACFCOMP( g_trac_errl,
                                 INFO_MRK"ud.flatten error, skipping");
-                        // won't fit - don't count it.
-                        l_sectionCount--;
                         continue;
                     }
                     else
@@ -1783,6 +1780,7 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
                         break;
                     }
                 }
+                ++flattenedSections;
                 pBuffer += l_cb;
                 l_sizeRemaining -= l_cb;
             }
@@ -1793,12 +1791,12 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
           break;
         }
 
-        if (l_sectionCount != iv_SectionVector.size())
+        if (flattenedSections != startingSectionCount)
         {
             // some section was too big and didn't get flatten - update the
             // section count in the PH section and re-flatten it.
             // count is the PH, UH, PS, and the optionals.
-            iv_Private.iv_sctns = 3 + l_sectionCount;
+            iv_Private.iv_sctns = 3 + flattenedSections;
             // use ph size, since this is overwriting flattened data
             l_cb = iv_Private.flatten( pPHBuffer, iv_Private.flatSize() );
             if( 0 == l_cb )
