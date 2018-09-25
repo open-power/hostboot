@@ -234,16 +234,6 @@ pdwn_bad_lane(
 
     FAPI_DBG("Start, lane=%d", i_lane);
 
-    // skip if already powered down
-    FAPI_TRY(io::read(OPT_RX_LANE_ANA_PDWN, i_tgt, i_group, i_lane, l_data),
-             "Error reading OPT_RX_LANE_ANA_PDWN");
-
-    if (io::get(OPT_RX_LANE_ANA_PDWN, l_data) == 1)
-    {
-        FAPI_DBG("Skipping this lane, already powered down");
-        goto fapi_try_exit;
-    }
-
     FAPI_DBG("Marking powerdown");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_OBUS_LANE_PDWN,
                            i_tgt,
@@ -623,25 +613,22 @@ fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt)
 
         // at IPL time, power down any unneeded lanes (not physically connected or
         // unused half-link)
-        if (!l_train_for_recovery)
+        for (uint8_t ii = 0; ii < MAX_LANES; ii++)
         {
-            for (uint8_t ii = 0; ii < MAX_LANES; ii++)
+            if (((ii >= ((MAX_LANES / 2) - 1)) && (ii <= (MAX_LANES / 2))) || // unused lanes, always pdwn
+                (!l_train_for_recovery && !l_even && (ii <  ((MAX_LANES / 2) - 1))) ||                 // even link is unused
+                (!l_train_for_recovery && !l_odd  && (ii >= ((MAX_LANES / 2) + 1))))                   // odd link is unused
             {
-                if (((ii >= ((MAX_LANES / 2) - 1)) && (ii <= (MAX_LANES / 2))) || // unused lanes, always pdwn
-                    (!l_even && (ii <  ((MAX_LANES / 2) - 1))) ||                 // even link is unused
-                    (!l_odd  && (ii >= ((MAX_LANES / 2) + 1))))                   // odd link is unused
-                {
-                    FAPI_TRY(pdwn_bad_lane(i_tgt,
-                                           GRP0,
-                                           ii),
-                             "Error from pdwn_bad_lane, even, local end, lane: %d",
-                             ii);
-                    FAPI_TRY(pdwn_bad_lane(l_rem_tgt,
-                                           GRP0,
-                                           ii),
-                             "Error from pdwn_bad_lane, even, remote end, lane: %d",
-                             ii);
-                }
+                FAPI_TRY(pdwn_bad_lane(i_tgt,
+                                       GRP0,
+                                       ii),
+                         "Error from pdwn_bad_lane, even, local end, lane: %d",
+                         ii);
+                FAPI_TRY(pdwn_bad_lane(l_rem_tgt,
+                                       GRP0,
+                                       ii),
+                         "Error from pdwn_bad_lane, even, remote end, lane: %d",
+                         ii);
             }
         }
 
