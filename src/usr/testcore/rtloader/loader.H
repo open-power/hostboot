@@ -279,7 +279,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             if( addr == 0x11223344 ||
                 addr == 0x22334455 )
             {
-                rc = 4; //invalid address pib code
+                rc = HBRT_RC_PIBERR_100_INVALIDADDR;
             }
 
             return rc;

@@ -42,7 +42,7 @@ namespace SCOM
 struct RcPibErrMap
 {
     PIB::PibError        iv_Piberr;
-    HbrtRcPiberr_t       iv_Common;
+    int                  iv_Common;
     int                  iv_Opal; // note : opal values taken from opal-api.h
 };
 
@@ -94,7 +94,7 @@ const RcPibErrMap pibErrTbl[] =
  * @return      PibError,  PIB::PIB_NO_ERROR if not translatable
  *
  */
-PIB::PibError HbrtRcToPibErr( HbrtRcPiberr_t i_rc )
+PIB::PibError HbrtScomRcToPibErr( int i_rc )
 {
     int l_entryCnt = sizeof(pibErrTbl) / sizeof(RcPibErrMap);
     PIB::PibError l_rv = PIB::PIB_NO_ERROR;
@@ -163,7 +163,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                          void * io_buffer)
 {
     errlHndl_t l_err = nullptr;
-    int rc = 0;
+    int l_hostRC = 0;
 
     do
     {
@@ -183,7 +183,7 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
 
             if(i_opType == DeviceFW::READ)
             {
-                rc =
+                l_hostRC =
                     g_hostInterfaces->scom_read(proc_id,
                                                 i_scomAddr,
                                                 io_buffer
@@ -191,100 +191,100 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
             }
             else if (i_opType == DeviceFW::WRITE)
             {
-                rc =
+                l_hostRC =
                     g_hostInterfaces->scom_write(proc_id,
                                                 i_scomAddr,
                                                 io_buffer
                                                 );
             }
 
-            if(rc)
+            if(l_hostRC)
             {
                 TRACFCOMP(g_trac_scom,ERR_MRK
                     "Hypervisor scom read/write failed. "
                     "rc 0x%X target 0x%llX proc_id 0x%llX addr 0x%llX r/w %d",
-                    rc, get_huid(i_target), proc_id, i_scomAddr, i_opType);
+                    l_hostRC, get_huid(i_target), proc_id, i_scomAddr, i_opType);
+
+                // Use an unused bit in the 64-bit scom range to indicate
+                //  read/write. Cannot use bit0 since that is part of an
+                //  indirect address. Cannot use bit63 because that is a
+                //  valid part of the address.
+                uint64_t l_userdata2 = i_scomAddr;
+                if(i_opType == DeviceFW::WRITE)
+                {
+                    l_userdata2 |= 0x4000000000000000;
+                }
 
                 // convert rc to error log
                 /*@
                 * @errortype
                 * @moduleid     SCOM_RT_SEND_SCOM_TO_HYP
                 * @reasoncode   SCOM_RUNTIME_HYP_ERR
-                * @userdata1[0:31]    Hypervisor return code
-                * @userdata1[32:63]   SCOM Op Type
-                * @userdata2    SCOM address
-                * @devdesc      SCOM access error
+                * @userdata1[0:31]   Hypervisor return code
+                * @userdata2[32:63]  Chipid sent to Hyp
+                * @userdata2[0:63]   SCOM address
+                * @userdata2[1]      SCOM Op Type: 0=read, 1=write
+                * @devdesc      Error from Hypervisor attempting SCOM
                 */
                 l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                     SCOM_RT_SEND_SCOM_TO_HYP,
                                     SCOM_RUNTIME_HYP_ERR,
                                     TWO_UINT32_TO_UINT64(
-                                                    rc,
+                                                    l_hostRC,
                                                     i_opType),
-                                    i_scomAddr);
+                                    l_userdata2);
 
-                constexpr int MembufFatalError = -0x1008;
-
-                if (rc == MembufFatalError)
+                if (l_hostRC == HBRT_RC_CHANNEL_FAILURE)
                 {
+                    // Channel is dead so switch to using the FSP for
+                    //  access
                     FSISCOM::switchToFspScomAccess(i_target);
+
+                    // Callout the failing buffer chip
+                    l_err->addHwCallout(i_target,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::NO_DECONFIG,
+                                        HWAS::GARD_NULL);
                 }
-
-                // attempt to translate rc into a pib error assuming
-                //  the rc is in common format
-                HbrtRcPiberr_t l_commonRc = static_cast<HbrtRcPiberr_t>(rc);
-                PIB::PibError l_piberr = HbrtRcToPibErr( l_commonRc );
-
-                if // input was translated to a PIB error code
-                ( l_piberr != PIB::PIB_NO_ERROR )
-                {
-                    // (translation was successful)
-                    TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: PIBERR 0x%X",l_piberr);
-                }
-
-                else if // input was common format, but not a PIB error
-                ( l_commonRc == HBRT_RC_SOMEOTHERERROR )
-                {
-                    // (already translated to PIB::PIB_NO_ERROR,
-                    //   no more translation needed)
-                    TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: PIB_NO_ERROR");
-                }
-
-                else if  // legacy opal
-                ( TARGETING::is_sapphire_load() )
-                {
-                    // attempt to translate rc into a pib error assuming
-                    //  the rc is in old opal format
-                    // this preserves legacy behavior to avoid co-req/pre-req
-                    l_piberr =  OpalRcToPibErr( rc );
-                    TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: OPAL 0x%X",l_piberr);
-                }
-
-                else if  // legacy phyp
-                ( TARGETING::is_phyp_load() )
-                {
-                    // default to OFFLINE for now to trigger
-                    // the multicast workaround in scom.C
-                    l_piberr = PIB::PIB_CHIPLET_OFFLINE;
-                    TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: PIB_CHIPLET_OFFLINE");
-                }
-
                 else
                 {
-                    // our testcases respond back with the
-                    //  pib error directly
-                    if( rc > 0 )
-                    {
-                        l_piberr = static_cast<PIB::PibError>(rc);
-                        TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: RC 0x%X",l_piberr);
-                    }
-                }
+                    // attempt to translate rc into a pib error assuming
+                    //  the rc is in common format
+                    int l_commonRc = l_hostRC;
+                    PIB::PibError l_piberr = HbrtScomRcToPibErr( l_commonRc );
 
-                PIB::addFruCallouts(i_target,
-                                    l_piberr,
-                                    i_scomAddr,
-                                    l_err);
+                    if // input was translated to a PIB error code
+                        ( l_piberr != PIB::PIB_NO_ERROR )
+                    {
+                        // (translation was successful)
+                        TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: PIBERR 0x%X",l_piberr);
+                    }
+
+                    else if  // legacy opal
+                        ( TARGETING::is_sapphire_load() )
+                    {
+                        // attempt to translate rc into a pib error assuming
+                        //  the rc is in old opal format
+                        // this preserves legacy behavior to avoid co-req/pre-req
+                        l_piberr =  OpalRcToPibErr( l_hostRC );
+                        TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: OPAL 0x%X",l_piberr);
+                    }
+
+                    else if  // legacy phyp
+                        ( TARGETING::is_phyp_load() )
+                    {
+                        // default to OFFLINE for now to trigger
+                        // the multicast workaround in scom.C
+                        l_piberr = PIB::PIB_CHIPLET_OFFLINE;
+                        TRACFCOMP(g_trac_scom,ERR_MRK"RC to PIB Err: PIB_CHIPLET_OFFLINE");
+                    }
+
+                    PIB::addFruCallouts(i_target,
+                                        l_piberr,
+                                        i_scomAddr,
+                                        l_err);
+                }
 
                 // Note: no trace buffer available at runtime
             }
