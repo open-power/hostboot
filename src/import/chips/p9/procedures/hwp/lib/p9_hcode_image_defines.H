@@ -304,6 +304,7 @@ HCD_HDR_UINT16(g_cme_location_id, 0);
 HCD_HDR_UINT16(g_cme_qm_mode_flags, 0);
 HCD_HDR_UINT32(g_cme_timebase_hz, 0); //Retain next field at 8B boundary
 HCD_HDR_UINT64(g_cme_cpmr_PhyAddr, 0);
+HCD_HDR_UINT64(g_cme_unsec_cpmr_PhyAddr, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
 .endm
