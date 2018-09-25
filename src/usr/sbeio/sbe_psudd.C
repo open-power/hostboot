@@ -54,6 +54,7 @@
 #include <sys/time.h>
 #include <errl/errludprintk.H>
 #include <vfs/vfs.H> // module_is_loaded
+#include <util/misc.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -201,7 +202,7 @@ void SbePsu::msgHandler()
                     {
                         //Handle the interrupt message -- pass the PIR of the
                         // proc causing the interrupt
-                        SBE_TRACD("SbePsu::msgHandler got MSG_INTR message");
+                        SBE_TRACF("SbePsu::msgHandler got MSG_INTR message");
                         l_err = handleInterrupt(msg->data[1]);
 
                         if (l_err)
@@ -492,6 +493,7 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
     errlHndl_t errl = nullptr;
     SBE_TRACD(ENTER_MRK "SbePsu::handleInterrupt");
     bool l_responseAvailable = false;
+    bool l_simicsRunning = Util::isSimicsRunning();
 
     do
     {
@@ -525,6 +527,20 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
         if (errl)
         { break; }
 
+
+        if ( l_simicsRunning &&
+             HOST_RESPONSE_WAITING != (l_doorbellVal & HOST_RESPONSE_WAITING) )
+        {
+            // wait a second and try again
+            nanosleep(1,0);
+
+            //read the door bell again to see if the simics model caught up
+            errl = readScom(l_intrChip,PSU_HOST_DOORBELL_REG_RW,&l_doorbellVal);
+            if (errl)
+            { break; }
+
+        }
+
         if (l_doorbellVal & HOST_RESPONSE_WAITING)
         {
             //In this case the doorbell reg indicated a response is
@@ -551,6 +567,12 @@ errlHndl_t SbePsu::handleInterrupt(PIR_t i_pir)
             errl = writeScom(l_intrChip,PSU_HOST_DOORBELL_REG_AND,&l_data);
             if (errl)
             { break; }
+        }
+        else if(l_simicsRunning)
+        {
+            SBE_TRACF(ENTER_MRK "SbePsu::handleInterrupt interrupt found but no Doorbell is set 0x%llx", l_doorbellVal);
+            // If we are in simics we want to break out here
+            MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         }
 
         //Clear the rest of the PSU Scom Reg Interrupt Status register
