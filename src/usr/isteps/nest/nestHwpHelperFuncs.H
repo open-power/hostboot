@@ -75,6 +75,8 @@ enum HWP_CALL_TYPE
     P9_SYS_CHIPLET_SCOMINIT,  // Although it says chiplet, this uses proc chip
     P9_XBUS_ENABLE_RIDI,
     P9_OBUS_FIRMASK_SAVE_RESTORE, // loops on proc chip
+    P9_IO_OBUS_IMAGE_BUILD,
+    P9_IO_XBUS_IMAGE_BUILD,
 };
 
 /**
@@ -153,4 +155,3 @@ bool fapiHWPCallWrapperHandler(HWP_CALL_TYPE            i_hwpCall,
 };  // end namespace ISTEP
 
 #endif
-

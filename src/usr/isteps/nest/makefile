@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
 
@@ -82,5 +83,9 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_obus_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_npu_scom.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_npu_scominit.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
+
+# p9_io_obus_image_build & p9_io_xbus_image_build
+include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
 
 include ${ROOTPATH}/config.mk
